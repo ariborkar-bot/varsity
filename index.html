@@ -742,6 +742,15 @@ select option{background:#0B1730;color:#EAF0F8}
   .hot-card{padding:14px!important}
 }
 @media (max-width:759px){.tools .chips[aria-label="Rank by"] .chip{white-space:nowrap;font-size:.74rem!important;letter-spacing:.03em!important}}
+
+@media (max-width:759px){
+  nav.tabs.tabs-phone{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:65!important;display:flex!important;
+    background:rgba(5,12,32,.96)!important;border-top:1px solid #1D3157!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    -webkit-transform:translateZ(0);transform:translateZ(0);margin:0!important;width:auto!important;max-width:none!important}
+  nav.tabs.tabs-phone a{flex:1 1 0;min-width:0;flex-direction:column!important;gap:3px!important;padding:8px 0 6px!important;border-radius:14px;justify-content:center;align-items:center;color:#9FB2D3!important;background:none!important;border:0!important;box-shadow:none!important}
+  nav.tabs.tabs-phone a svg{width:24px!important;height:24px!important}
+  nav.tabs.tabs-phone a[aria-current="page"]{color:#FFC23D!important;background:rgba(255,194,61,.12)!important}
+}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -2228,4 +2237,13 @@ boot();
 })();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+<script>
+/* On phones the tab bar lives at the end of the page body, outside the header, so iPhone Safari always keeps it pinned to the bottom of the screen. */
+(()=>{
+  const nav=document.querySelector('nav.tabs'),home=nav&&nav.parentNode,mq=matchMedia('(max-width:759px)');
+  if(!nav)return;
+  const place=()=>{if(mq.matches){if(nav.parentNode!==document.body){document.body.appendChild(nav);nav.classList.add('tabs-phone')}}else if(nav.parentNode!==home){home.appendChild(nav);nav.classList.remove('tabs-phone')}};
+  place();(mq.addEventListener?mq.addEventListener('change',place):mq.addListener(place));
+})();
+</script>
 </body></html>
