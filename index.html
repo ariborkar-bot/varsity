@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Varsity</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="apple-mobile-web-app-title" content="Varsity"><meta name="application-name" content="Varsity"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0A1E55"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="stylesheet" href="fonts.css">
+<meta name="apple-mobile-web-app-title" content="Varsity"><meta name="application-name" content="Varsity"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0A1E55"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32-v2.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon-v2.png"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="stylesheet" href="fonts.css">
 <style>
 
 /* Layout: gradient masthead with pill tabs (bottom tab bar on phones). Podium for the top three, rows below, player avatars tinted by school, bottom-sheet player view on phones. */
@@ -828,6 +828,45 @@ select option{background:#0B1730;color:#EAF0F8}
 .br-col h4{margin:0 0 10px;font:800 .82rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:#BFD3FF}
 .br-games{display:flex;flex-direction:column;justify-content:space-around;gap:var(--gap);height:calc(100% - 30px)}
 @media (max-width:759px){.br{grid-template-columns:repeat(var(--cols),78vw);scroll-snap-type:x mandatory}.br-col{scroll-snap-align:start}.gm-grid{grid-template-columns:1fr}}
+
+/* draft room */
+.dr-top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.dr-timer{min-width:150px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.dr-timer b{font:900 2.4rem/1 var(--f-display);color:#fff;font-variant-numeric:tabular-nums}
+.dr-timer i{display:block;width:150px;height:8px;border-radius:999px;background:#13284D;overflow:hidden}.dr-timer i span{display:block;height:100%;background:linear-gradient(90deg,#2F6BFF,#FFC23D);transition:width 1s linear}
+.dr-timer.low b{color:#FF6B6B;animation:drPulse 1s ease-in-out infinite}.dr-timer.low i span{background:#FF6B6B}
+@keyframes drPulse{50%{transform:scale(1.08)}}
+.dr-needs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}.dr-needs small{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-right:4px}
+.dr-auto{display:inline-flex;gap:6px;align-items:center;margin-left:auto;font-size:.85rem;font-weight:600;color:#BFD3FF;cursor:pointer}.dr-auto input{accent-color:#FFC23D}
+.dr-snd{all:unset;cursor:pointer;font-size:.8rem;font-weight:700;color:#BFD3FF;padding:5px 10px;border-radius:999px;border:1px solid var(--line)}
+.dr-tabs,.dr-pos{margin:8px 0;flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none}.dr-tabs .chip,.dr-pos .chip{flex:none}
+.dr-best{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.dr-best li{display:grid;grid-template-columns:1.6rem 36px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--surface2);border:1px solid var(--line)}
+.dr-rk{font:900 1rem var(--f-display);color:var(--muted)}
+.dr-best .lt{display:flex;flex-direction:column;min-width:0}.dr-best .lt b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dr-best .lt i{font-style:normal;font-size:.78rem;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dr-best .pv{display:flex;flex-direction:column;align-items:flex-end}.dr-best .pv b{font:900 1.2rem/1 var(--f-display)}.dr-best .pv small{font-size:.68rem;color:var(--muted)}
+.dr-set{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:8px 0}
+.dboard{border-collapse:separate;border-spacing:4px;min-width:100%}.dboard th{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;white-space:nowrap}
+.dboard td{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:6px 8px;min-width:120px;height:52px;vertical-align:top;font-size:.8rem}
+.dboard td b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}.dboard td small{color:var(--muted);font-size:.68rem}
+.dboard td.now{border-color:#FFC23D;background:rgba(255,194,61,.1)}.dboard td.now em{color:#FFC23D;font-style:normal;font-weight:800;font-size:.72rem;text-transform:uppercase}
+.dboard td.me{box-shadow:inset 3px 0 0 #2F6BFF}
+.dr-grade{display:flex;gap:14px;align-items:center;margin:8px 0}.dr-grade>b{font:900 3rem/1 var(--f-display);color:#FFC23D;min-width:2.2ch}.dr-grade small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.lg-draft details summary{cursor:pointer;color:#BFD3FF;font-weight:700;margin-top:8px}
+/* the pick is in / on the clock */
+#dr-ann{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:radial-gradient(90% 70% at 50% 45%,rgba(16,40,110,.96),rgba(2,6,18,.97));cursor:pointer}
+#dr-ann .an{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:24px;max-width:560px}
+#dr-ann .an-k{font:800 .9rem/1 var(--f-display);letter-spacing:.24em;text-transform:uppercase;color:#FFC23D}
+#dr-ann .an-t{font:900 italic clamp(2.2rem,9vw,4.2rem)/1 var(--f-display);text-transform:uppercase;color:#fff;text-shadow:0 4px 0 #1F4FD1}
+#dr-ann .an-sub{color:#D3E0FF;font-size:1rem}
+#dr-ann .an-p{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:6px}
+#dr-ann .an-p b{font:900 clamp(1.8rem,7vw,3rem)/1 var(--f-display);text-transform:uppercase;color:#fff}
+#dr-ann .an-p span{color:#BFD3FF;display:flex;gap:8px;align-items:center}
+#dr-ann.clock .an-t{color:#FFC23D;text-shadow:0 4px 0 #7a4d00}
+@media (prefers-reduced-motion:no-preference){#dr-ann .an>*{animation:anIn .5s cubic-bezier(.2,.9,.3,1.2) both}#dr-ann .an>*:nth-child(2){animation-delay:.12s}#dr-ann .an>*:nth-child(3){animation-delay:.3s}#dr-ann .an>*:nth-child(4){animation-delay:.5s}}
+@keyframes anIn{from{opacity:0;transform:translateY(24px) scale(.9)}}
+.dr-confetti{position:fixed;top:-20px;width:10px;height:16px;z-index:160;pointer-events:none;border-radius:2px}
+@media (max-width:759px){.dr-best li{grid-template-columns:1.2rem 32px minmax(0,1fr) auto;row-gap:6px}.dr-best li .btn{grid-column:3/5;justify-self:end}.dr-auto{margin-left:0}.dr-timer{align-items:flex-start}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1165,7 +1204,12 @@ const SLOTS=[
   {k:'QB',label:'QB',elig:['QB']},{k:'RB',label:'RB',elig:['RB']},{k:'WR',label:'WR',elig:['WR']},
   {k:'TE',label:'TE',elig:['TE']},{k:'FLEX',label:'FLEX',elig:['RB','WR','TE']},{k:'DEF',label:'DEF',elig:['DEF']},{k:'K',label:'K',elig:['K']}
 ];
-const lineupOf=(gid,uid)=>((S.lineups[uid]||{}).g||{})[gid]||{};
+const lineupOf=(gid,uid)=>{
+  const own=((S.lineups[uid]||{}).g||{})[gid]||{},g=S.groups[gid],pk=g&&g.draft&&g.draft.picks;
+  if(!pk)return own;
+  const base={};for(const x of Object.values(pk))if(x&&x.uid===uid&&x.slot)base[x.slot]=x.key;
+  return Object.assign(base,own);
+};
 function slotPts(gid,uid,scope){let t=0;for(const s of slotsFor(gid)){const p=pByKey(lineupOf(gid,uid)[s.k]);if(p)t+=agg(p,scope).v}return Math.round(t*10)/10}
 function lineupProj(gid,uid){let t=0;for(const s of slotsFor(gid)){const p=pByKey(lineupOf(gid,uid)[s.k]);if(p)t+=proj(p).pts}return Math.round(t*10)/10}
 function lineupWeek(gid,uid,w){let t=0;for(const s of slotsFor(gid)){const p=pByKey(lineupOf(gid,uid)[s.k]);if(p&&p.games[w-1])t+=pts(p.games[w-1].stat)}return Math.round(t*10)/10}
@@ -1411,7 +1455,8 @@ function proj(p){
     f=Math.max(.72,Math.min(1.32,f));
   }
   const ps={};KEYS.forEach(k=>{ps[k]=st[k]*(p.pos==='DEF'||k.startsWith('x')||k.startsWith('fg')?Math.sqrt(f):f)});
-  const out={pts:info&&info.bye?0:Math.round(base*f*10)/10,n:gs.length,stat:ps,f,info,base:Math.round(base*10)/10};
+  const shrink=Math.sqrt(Math.min(1,gs.length/4));   /* one or two big games shouldn't make someone a top projection */
+  const out={pts:info&&info.bye?0:Math.round(base*f*shrink*10)/10,n:gs.length,stat:ps,f,info,base:Math.round(base*10)/10};
   return _pj[p.key]=out;
 }
 const oppName=s=>s;
@@ -1675,24 +1720,85 @@ function viewGroups(){
     <div class="lg-foot"><span class="muted">${own?'You started '+esc(g.name)+'. Deleting it removes it for every team.':'You can rejoin later with the invite code.'}</span><button class="btn sm danger" data-act="${own?'delGroup':'leaveGroup'}" data-coll="groups" data-id="${esc(g.id)}">${own?'Delete league':'Leave league'}</button></div>`;
 }
 
+/* ---------- draft room ----------
+   Pick clock, best available, a big board, team needs, autopick, and a broadcast-style "the pick is in" moment. */
+UI.dpos='ALL';UI.dtab='best';
+const DCLOCK=[[60,'1 min'],[90,'90 sec'],[120,'2 min'],[0,'No clock']];
+const ordinal=n=>n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:(n%10<4?n%10:0)]);
+function pickStart(g,di){const last=di.picks[di.picks.length-1];return last?last.at:(g.draft&&g.draft.startedAt)||NOW()}
+function clockLeft(g,di){const c=(g.draft&&g.draft.clock)||0;if(!c||di.status!=='live')return null;return Math.max(0,c-Math.floor((NOW()-pickStart(g,di))/1000))}
+function openSlots(g,uid){const ro=lineupOf(g.id,uid);return slotsOf(g).filter(s=>!pByKey(ro[s.k]))}
+function draftedSet(g){const s=new Set();Object.keys(g.members).forEach(m=>Object.values(lineupOf(g.id,m)).forEach(k=>k&&s.add(k)));return s}
+function bestAvail(g,pos,n){
+  const taken=draftedSet(g);
+  return players().filter(p=>!taken.has(p.key)&&slotsOf(g).some(s=>slotOk(s,p))&&(pos==='ALL'||posMatch(p,pos)))
+    .map(p=>({p,v:proj(p).pts||0,s:agg(p,'season').v})).sort((a,b)=>(b.v-a.v)||(b.s-a.s)).slice(0,n);
+}
+/* the best player who fits one of this team's open spots */
+function autoChoice(g,uid){
+  const open=openSlots(g,uid);if(!open.length)return null;
+  const taken=draftedSet(g);
+  let best=null;
+  for(const p of players()){if(taken.has(p.key))continue;const s=open.find(x=>slotOk(x,p));if(!s)continue;
+    const v=(proj(p).pts||0)+agg(p,'season').v/40;if(!best||v>best.v)best={p,s,v}}
+  return best;
+}
+function picksUntil(di,uid){if(di.status!=='live')return null;const n=di.order.length;for(let k=0;k<n*2+2;k++){const i=di.i+k;if(i>=di.total)return null;const r=Math.floor(i/n),j=i%n,u=r%2===0?di.order[j]:di.order[n-1-j];if(u===uid)return k}return null}
+function gradeOf(g){
+  const ids=Object.keys(g.members),sc=ids.map(u=>({u,v:lineupProj(g.id,u)})).sort((a,b)=>b.v-a.v);
+  const G=['A+','A','A-','B+','B','B-','C+','C'];
+  return Object.fromEntries(sc.map((x,i)=>[x.u,{g:G[Math.min(G.length-1,Math.round(i/(Math.max(1,sc.length-1))*(sc.length>2?5:3)))],v:x.v,rank:i+1}]));
+}
+function boardHTML(g,di){
+  const n=di.order.length,R=slotsOf(g).length;
+  let rows='';for(let r=0;r<R;r++){let cells='';for(let j=0;j<n;j++){const i=r*n+(r%2===0?j:n-1-j),x=di.picks[i],pl=x&&pByKey(x.key);
+      cells+=`<td class="${i===di.i&&di.status==='live'?'now':''} ${x&&x.uid===ME.uid?'me':''}">${pl?`<span class="pos ${pl.pos}">${pl.sub&&pl.pos==='DEF'?pl.sub:pl.pos}</span><b>${esc(pl.name)}</b><small>${esc(pl.school)}</small>`:i===di.i&&di.status==='live'?'<em>On the clock</em>':''}</td>`}
+    rows+=`<tr><th>Rd ${r+1}</th>${cells}</tr>`}
+  return `<div class="scroll"><table class="dboard"><thead><tr><th></th>${di.order.map(u=>`<th>${esc(u===ME.uid?'You':nm(u))}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
 function draftRoomHTML(g){
-  const di=draftInfo(g);if(di.status==='off'||di.status==='done')return '';
-  const ids=Object.keys(g.members),own=g.ownerId===ME.uid;
-  if(di.status==='pending'){
-    return `<section class="card lg-draft"><div class="qh"><h3>Draft room</h3><span class="pill pending">Not started</span></div>
-      <p class="muted">${slotsOf(g).length} rounds, snake order: the last pick of each round picks first in the next. The order is random when the draft starts.</p>
-      <div class="lg-order">${ids.map(u=>`<span class="lg-ch">${av(nm(u),u,26)}${esc(u===ME.uid?'You':nm(u))}</span>`).join('')}</div>
-      ${own?(ids.length<2?`<p class="hint">Invite at least one friend before you start the draft.</p>`:`<div class="btns"><button class="btn" data-act="lgDraftStart">Start the draft</button><span class="muted">Everyone in the league now gets a pick. People who join later pick from free agents.</span></div>`)
-        :`<p class="hint">Waiting for ${esc(nm(g.ownerId))} to start the draft.</p>`}</section>`;
+  const di=draftInfo(g);if(di.status==='off')return '';
+  const ids=Object.keys(g.members),own=g.ownerId===ME.uid,R=slotsOf(g).length;
+  if(di.status==='done'){
+    if(!g.draft||!g.draft.order)return '';
+    const gr=gradeOf(g),mine=gr[ME.uid];
+    return `<section class="card lg-draft done"><div class="qh"><h3>Draft recap</h3><span class="pill approved">Complete</span></div>
+      ${mine?`<div class="dr-grade"><b>${mine.g}</b><div><small>Your draft grade</small><span>${ordinal(mine.rank)} of ${ids.length} by projected points (${f1(mine.v)})</span></div></div>`:''}
+      <div class="lg-order">${Object.entries(gr).sort((a,b)=>a[1].rank-b[1].rank).map(([u,x])=>`<span class="lg-ch">${esc(u===ME.uid?'You':nm(u))} <b>${x.g}</b></span>`).join('')}</div>
+      <details><summary>See the full draft board</summary>${boardHTML(g,di)}</details></section>`;
   }
-  const me=di.uid===ME.uid,last=di.picks.slice(-6).reverse();
-  return `<section class="card lg-draft ${me?'turn':''}"><div class="qh"><h3>Draft room</h3><span class="pill live">Round ${di.round} of ${slotsOf(g).length} · Pick ${di.i+1} of ${di.total}</span></div>
-    <div class="lg-clock">${av(nm(di.uid),di.uid,48)}<div><small>On the clock</small><b>${me?'You are up!':esc(nm(di.uid))}</b><span class="muted">${me?'Tap an open spot in your lineup to draft a player.':'Your lineup fills as you draft. Picks show up here live.'}</span></div></div>
-    <div class="lg-order">${di.order.map((u,k)=>`<span class="lg-ch ${u===di.uid?'now':''}">${k+1}. ${esc(u===ME.uid?'You':nm(u))}</span>`).join('')}</div>
-    ${last.length?`<ol class="lg-picks">${last.map(x=>{const p=pByKey(x.key);return `<li><span class="muted">#${di.picks.indexOf(x)+1}</span><b>${esc(x.uid===ME.uid?'You':nm(x.uid))}</b><span>took</span>${p?`${pb(p.pos,p.sub)}<b>${esc(p.name)}</b><span class="muted">${esc(p.school)}</span>`:'a player'}</li>`}).join('')}</ol>`:''}
+  if(di.status==='pending'){
+    const c=(g.draft&&g.draft.clock)!=null?g.draft.clock:90;
+    return `<section class="card lg-draft"><div class="qh"><h3>Draft room</h3><span class="pill pending">Not started</span></div>
+      <p class="muted">${R} rounds in snake order: the last pick of a round picks first in the next. The order is random when the draft starts.</p>
+      <div class="lg-order">${ids.map(u=>`<span class="lg-ch">${av(nm(u),u,26)}${esc(u===ME.uid?'You':nm(u))}</span>`).join('')}</div>
+      ${own?(ids.length<2?`<p class="hint">Invite at least one friend before you start the draft.</p>`:`<div class="dr-set"><label class="fld"><span>Pick clock</span><select id="dclock">${DCLOCK.map(([v,l])=>`<option value="${v}" ${v===c?'selected':''}>${l}</option>`).join('')}</select></label>
+          <button class="btn" data-act="lgDraftStart">Start the draft</button></div><p class="muted">If someone’s clock runs out, Varsity picks the best player for their open spot. People who join later pick from free agents.</p>`)
+        :`<p class="hint">Waiting for ${esc(nm(g.ownerId))} to start the draft. Keep this page open: you’ll hear a sound when you’re up.</p>`}
+      ${soundToggle()}</section>`;
+  }
+  const me=di.uid===ME.uid,left=clockLeft(g,di),c=(g.draft&&g.draft.clock)||0,until=picksUntil(di,ME.uid),auto=!!(g.draft.auto&&g.draft.auto[ME.uid]);
+  const needs=openSlots(g,ME.uid);
+  const pos=UI.dpos,best=bestAvail(g,pos,12);
+  const POSF=['ALL','QB','RB','WR','TE','K','DL','LB','DB'];
+  const last=di.picks.slice(-5).reverse();
+  return `<section class="card lg-draft ${me?'turn':''}">
+    <div class="qh"><h3>Draft room</h3><span class="pill live">Round ${di.round} of ${R} · Pick ${di.i+1} of ${di.total}</span></div>
+    <div class="dr-top">
+      <div class="lg-clock">${av(nm(di.uid),di.uid,56)}<div><small>On the clock</small><b>${me?'You’re up!':esc(nm(di.uid))}</b>
+        <span class="muted">${me?'Pick from Best available or tap an open spot in your lineup.':until===null?'You’re done drafting.':until===1?'You’re up next!':`You pick in ${until} ${until===1?'pick':'picks'}.`}</span></div></div>
+      ${c?`<div class="dr-timer ${left!==null&&left<=15?'low':''}" data-clock="${c}" data-start="${pickStart(g,di)}"><b id="dr-left">${Math.floor((left||0)/60)}:${String((left||0)%60).padStart(2,'0')}</b><i><span style="width:${left===null?0:left/c*100}%"></span></i></div>`:''}
+    </div>
+    <div class="dr-needs"><small>Your open spots</small>${needs.length?needs.map(s=>`<span class="pos ${s.elig[0]==='DEF'?'DEF':s.elig.length>1?'FLEX':s.elig[0]}">${s.label}</span>`).join(''):'<span class="muted">Your roster is full</span>'}
+      <label class="dr-auto"><input type="checkbox" data-act="dAuto" ${auto?'checked':''}> Autopick for me</label>${soundToggle()}</div>
+    <div class="chips dr-tabs" role="tablist"><button class="chip" data-act="dtab" data-v="best" aria-pressed="${UI.dtab==='best'}">Best available</button><button class="chip" data-act="dtab" data-v="board" aria-pressed="${UI.dtab==='board'}">Draft board</button><button class="chip" data-act="dtab" data-v="log" aria-pressed="${UI.dtab==='log'}">Recent picks</button></div>
+    ${UI.dtab==='board'?boardHTML(g,di):UI.dtab==='log'?
+      `<ol class="lg-picks">${last.map(x=>{const pl=pByKey(x.key);return `<li><span class="muted">#${di.picks.indexOf(x)+1}</span><b>${esc(x.uid===ME.uid?'You':nm(x.uid))}</b><span>took</span>${pl?`${pb(pl.pos,pl.sub)}<b>${esc(pl.name)}</b><span class="muted">${esc(pl.school)}</span>`:'a player'}${x.auto?'<span class="muted">(autopick)</span>':''}</li>`}).join('')||'<li class="muted">No picks yet</li>'}</ol>`:
+      `<div class="chips dr-pos">${POSF.map(x=>`<button class="chip" data-act="dpos" data-v="${x}" aria-pressed="${pos===x}">${x==='ALL'?'All':x}</button>`).join('')}</div>
+       <ol class="dr-best">${best.map((x,k)=>{const fit=me&&needs.find(s=>slotOk(s,x.p));return `<li><span class="dr-rk">${k+1}</span>${av(x.p.name,x.p.school,36)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><span class="pv"><b>${f1(x.v)}</b><small>proj · ${f1(x.s)} season</small></span>${me?`<button class="btn sm" data-act="dPick" data-key="${esc(x.p.key)}" ${fit?'':'disabled title="No open spot for this position"'}>Draft</button>`:`<button class="btn sm ghost" data-act="player" data-id="${esc(x.p.key)}">View</button>`}</li>`}).join('')}</ol>`}
   </section>`;
 }
-
+function soundToggle(){const on=sndOn();return `<button class="dr-snd" data-act="dSound" aria-pressed="${on}" title="Draft sounds">${on?'🔊 Sound on':'🔇 Sound off'}</button>`}
 /* ---------- scoring rules ---------- */
 function viewScoring(){
   const item=(k,label,note)=>`<li><span>${label}${note?`<small>${note}</small>`:''}</span><b class="${PTS[k]<0?'neg':''}">${PTS[k]>0?'+':'−'}${Math.abs(PTS[k])}</b></li>`;
@@ -2501,12 +2607,12 @@ boot();
         if(mode==='draft'&&di.status==='live'){await draftPick(g,slot,k)}else await setSlot(slot,k)}});
     document.body.appendChild(pk);if(matchMedia('(pointer:fine)').matches)q.focus();
   };
-  const draftPick=async(g,slot,key)=>{
+  const draftPick=window.draftPick=async(g,slot,key,isAuto)=>{
     const fresh=S.groups[g.id]?Object.assign({id:g.id},S.groups[g.id]):g,di=draftInfo(fresh);
     if(di.status!=='live'||di.uid!==ME.uid){say('That pick is no longer yours');return}
     if(ownerOf(fresh,key,null)){say('Someone already drafted that player');return}
-    const ok=await act(()=>upsert('groups/'+g.id,{draft:{picks:{[di.i]:{uid:ME.uid,key,slot,at:NOW()}}}}));
-    if(ok){await setSlot(slot,key);const p=pByKey(key);say('You drafted '+(p?p.name:'a player'))}
+    const ok=await act(()=>upsert('groups/'+g.id,{draft:{picks:{[di.i]:Object.assign({uid:ME.uid,key,slot,at:NOW()},isAuto?{auto:true}:{})}}}));
+    if(ok){window.__draftLocal&&window.__draftLocal()}
   };
   document.addEventListener('keydown',e=>{if(pk&&e.key==='Escape')closePk()});
   document.addEventListener('click',async e=>{
@@ -2517,7 +2623,8 @@ boot();
     else if(a==='lgDraftStart'){const g=curGroup();if(!g||g.ownerId!==ME.uid)return;
       const ids=Object.keys(g.members);if(ids.length<2){say('Invite at least one friend first');return}
       const order=ids.map(u=>[Math.random(),u]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
-      await act(()=>upsert('groups/'+g.id,{draft:{status:'live',order,startedAt:NOW(),picks:{}}}),'The draft has started')}
+      const ck=$('#dclock')?+$('#dclock').value:90;
+      await act(()=>upsert('groups/'+g.id,{draft:{status:'live',order,startedAt:NOW(),clock:ck,picks:{}}}),'The draft has started')}
   });
 })();
 </script>
@@ -2615,6 +2722,76 @@ boot();
   /* 4. into the app */
   at(3750,finish);
   el.querySelector('.in-skip').addEventListener('click',finish);
+})();
+</script>
+<script>
+/* ---------- draft night: sounds, the pick announcement, the clock and autopick ---------- */
+(()=>{
+  /* sounds are made here with the Web Audio API, an original chime, not a recording */
+  let AC=null;
+  const ctx=()=>{try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(_){}return AC};
+  ['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>ctx(),{once:true,passive:true}));
+  window.sndOn=()=>{try{return localStorage.getItem('vs-snd')!=='off'}catch(_){return true}};
+  const tone=(f,t0,dur,type,vol,glide)=>{const a=ctx();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,a.currentTime+t0);if(glide)o.frequency.exponentialRampToValueAtTime(glide,a.currentTime+t0+dur);
+    g.gain.setValueAtTime(0,a.currentTime+t0);g.gain.linearRampToValueAtTime(vol,a.currentTime+t0+.02);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+t0+dur);o.connect(g);g.connect(a.destination);o.start(a.currentTime+t0);o.stop(a.currentTime+t0+dur+.05)};
+  const bell=(f,t0,v=.22)=>{tone(f,t0,1.6,'sine',v);tone(f*2.76,t0,.9,'sine',v*.35);tone(f*5.4,t0,.4,'sine',v*.15)};
+  /* "the pick is in": two deep bells and a rising brass swell */
+  window.sndPick=()=>{if(!sndOn())return;bell(392,0,.25);bell(523.25,.32,.25);[261.63,329.63,392,523.25].forEach((f,k)=>{tone(f,.62,1.3,'sawtooth',.045);tone(f*1.005,.62,1.3,'square',.02)});tone(130.8,.62,1.4,'triangle',.12)};
+  /* "you're on the clock": a quick four-note fanfare */
+  window.sndClock=()=>{if(!sndOn())return;[[392,0],[523.25,.14],[659.25,.28],[783.99,.44]].forEach(([f,t0],k)=>{tone(f,t0,k===3?1.1:.22,'sawtooth',.06);tone(f,t0,k===3?1.1:.22,'triangle',.08)});bell(1046.5,.44,.15)};
+  window.sndTick=()=>{if(!sndOn())return;tone(1200,0,.06,'square',.03)};
+
+  const ann=(cls,html,ms)=>{const old=document.getElementById('dr-ann');if(old)old.remove();const d=document.createElement('div');d.id='dr-ann';d.className=cls;d.innerHTML=`<div class="an">${html}</div>`;
+    document.body.appendChild(d);const x=()=>d.remove();d.addEventListener('click',x);setTimeout(x,ms)};
+  const confetti=()=>{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const C=['#FFC23D','#2F6BFF','#fff','#4ADE9A','#9FC4FF'];
+    for(let i=0;i<70;i++){const c=document.createElement('i');c.className='dr-confetti';c.style.left=Math.random()*100+'vw';c.style.background=C[i%C.length];document.body.appendChild(c);
+      c.animate([{transform:'translateY(0) rotate(0)'},{transform:`translate(${(Math.random()*2-1)*120}px,${innerHeight+40}px) rotate(${Math.random()*900}deg)`}],{duration:1800+Math.random()*1500,delay:Math.random()*400,easing:'cubic-bezier(.3,.6,.6,1)'}).onfinish=()=>c.remove()}};
+
+  const seen={};let busy=false;
+  function tick(){
+    const g=typeof curGroup==='function'&&curGroup();if(!g||lgMode(g)!=='draft')return;
+    const fresh=S.groups[g.id]?Object.assign({id:g.id},S.groups[g.id]):g,di=draftInfo(fresh);
+    const key=g.id,prev=seen[key];
+    const cur={n:(di.picks||[]).length,status:di.status,uid:di.uid};
+    if(prev){
+      /* a new pick: the broadcast moment */
+      if(cur.n>prev.n&&di.picks){const x=di.picks[cur.n-1],pl=pByKey(x.key),n=di.order.length,r=Math.floor((cur.n-1)/n)+1;
+        if(pl){sndPick();ann('',`<div class="an-k">The pick is in</div><div class="an-t">${esc(x.uid===ME.uid?'Your pick':nm(x.uid))}</div><div class="an-sub">Round ${r}, pick ${cur.n} overall${x.auto?' · autopick':''}</div><div class="an-p">${av(pl.name,pl.school,84)}<b>${esc(pl.name)}</b><span>${pb(pl.pos,pl.sub)}${slogo(pl.school)}${esc(pl.school)} · ${f1(agg(pl,'season').v)} pts this season</span></div>`,3200)}}
+      /* your turn */
+      if(cur.status==='live'&&cur.uid===ME.uid&&(prev.uid!==ME.uid||prev.status!=='live')){
+        setTimeout(()=>{sndClock();ann('clock',`<div class="an-k">Round ${di.round} · Pick ${di.i+1}</div><div class="an-t">You’re on the clock</div><div class="an-sub">${(fresh.draft&&fresh.draft.clock)?`You have ${fresh.draft.clock>=120?'2 minutes':fresh.draft.clock+' seconds'}.`:'Take your time.'} Tap to pick.</div>`,2600);
+          if(navigator.vibrate)try{navigator.vibrate([120,80,120])}catch(_){}
+          document.title='⏰ Your pick! · Varsity';setTimeout(()=>{document.title='Varsity'},8000)},cur.n>prev.n?3300:0)}
+      /* the draft is over */
+      if(cur.status==='done'&&prev.status==='live'){setTimeout(()=>{sndPick();confetti();ann('',`<div class="an-k">Draft complete</div><div class="an-t">That’s a wrap</div><div class="an-sub">Check your draft grade in the recap.</div>`,3000)},3400)}
+    }
+    seen[key]=cur;
+    if(di.status!=='live')return;
+    /* the clock */
+    const left=clockLeft(fresh,di),el=document.getElementById('dr-left');
+    if(el&&left!==null){el.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');const bar=el.parentNode.querySelector('i span');if(bar)bar.style.width=(left/fresh.draft.clock*100)+'%';el.parentNode.classList.toggle('low',left<=15);if(di.uid===ME.uid&&left<=10&&left>0)sndTick()}
+    /* autopick: when the clock runs out, or right away if you turned autopick on.
+       Your own app picks for you; if you're away, the league creator's app picks for you a few seconds later. */
+    const auto=fresh.draft.auto&&fresh.draft.auto[di.uid];
+    const late=left!==null&&left<=0,veryLate=left!==null&&(NOW()-pickStart(fresh,di))/1000>(fresh.draft.clock+6);
+    const mine=di.uid===ME.uid&&(auto||late),forOther=di.uid!==ME.uid&&fresh.ownerId===ME.uid&&(veryLate||(auto&&(NOW()-pickStart(fresh,di))>4000));
+    if((mine||forOther)&&!busy){const c=autoChoice(fresh,di.uid);if(!c)return;busy=true;
+      act(()=>upsert('groups/'+g.id,{draft:{picks:{[di.i]:{uid:di.uid,key:c.p.key,slot:c.s.k,at:NOW(),auto:true}}}})).finally(()=>{setTimeout(()=>{busy=false},1500)})}
+  }
+  setInterval(tick,1000);
+  window.__draftLocal=()=>setTimeout(tick,50);
+
+  document.addEventListener('click',async e=>{
+    const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
+    if(a==='dtab'){UI.dtab=t.dataset.v;render()}
+    else if(a==='dpos'){UI.dpos=t.dataset.v;render()}
+    else if(a==='dSound'){try{localStorage.setItem('vs-snd',sndOn()?'off':'on')}catch(_){}if(sndOn())sndClock();render()}
+    else if(a==='dPick'){const g=curGroup();if(!g)return;const p=pByKey(t.dataset.key);const s=openSlots(g,ME.uid).find(x=>slotOk(x,p));if(!s){say('No open spot for that position');return}t.disabled=true;await draftPick(g,s.k,p.key)}
+  });
+  document.addEventListener('change',async e=>{
+    const t=e.target;if(!t||t.dataset.act!=='dAuto')return;const g=curGroup();if(!g)return;
+    await act(()=>upsert('groups/'+g.id,{draft:{auto:{[ME.uid]:t.checked}}}),t.checked?'Autopick is on. Varsity will pick the best player for your open spots.':'Autopick is off');
+  });
 })();
 </script>
 </body></html>
