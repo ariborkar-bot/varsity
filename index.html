@@ -751,6 +751,10 @@ select option{background:#0B1730;color:#EAF0F8}
   nav.tabs.tabs-phone a svg{width:24px!important;height:24px!important}
   nav.tabs.tabs-phone a[aria-current="page"]{color:#FFC23D!important;background:rgba(255,194,61,.12)!important}
 }
+
+.nm details{border:1px solid var(--line);border-radius:14px;padding:10px 14px;background:var(--surface2)}
+.nm summary{cursor:pointer;font-weight:700;color:#BFD3FF}
+.nm-play{display:grid;grid-template-columns:1.6fr 1fr;gap:10px;margin-top:10px}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -955,6 +959,58 @@ document.addEventListener('submit',async e=>{
     else{const {error}=await SB.auth.signInWithPassword({email,password:pw});if(error)throw error;location.reload();return}
   }catch(err){const m=(err&&err.message)||'';AUTH.err=/invalid login/i.test(m)?'That email and password don’t match.':/not confirmed/i.test(m)?'Confirm your email first. Check your inbox for the link.':/already registered/i.test(m)?'That email already has an account. Sign in instead.':/password/i.test(m)&&/6/.test(m)?'Use at least 6 characters for your password.':m||'Something went wrong. Try again.'}
   AUTH.busy=false;openAuth();if($('#au-email'))$('#au-email').value=email;
+},true);
+
+/* ---------- no sign-up: a name is all it takes ----------
+   The first time someone starts or joins a league, they pick the name friends will see.
+   Behind the scenes this makes an anonymous Supabase account that stays on this device. */
+const NM={busy:false,err:''};
+function nameHTML(){
+  const pr=myProfile()||{},sch=pr.school||'',pos=pr.pos||'';
+  return `<div class="gcard nm" role="dialog" aria-modal="true" aria-labelledby="nm-t">
+    <div class="au-brand"><img src="logo.png" alt=""><span>VARSITY</span></div>
+    <h2 id="nm-t">${myProfile()?'Your profile':'What should friends call you?'}</h2>
+    <p class="muted">${myProfile()?'Change your name, or add your school to see your own MaxPreps stats on the Me tab.':'This is the name your league sees. That’s it, no email or password.'}</p>
+    <form id="nm-form" class="au-form">
+      <label class="fld"><span>Your name</span><input id="nm-name" maxlength="40" autocomplete="name" value="${esc(pr.name||'')}" placeholder="Ari B." required></label>
+      <details ${sch?'open':''}><summary>I play high school football (optional)</summary>
+        <div class="nm-play">
+          <label class="fld"><span>School</span><select id="nm-school"><option value="">Pick your school</option>${SD_SCHOOLS.map(x=>`<option ${x===sch?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
+          <label class="fld"><span>Position</span><select id="nm-pos">${POSITIONS.map(x=>`<option ${x===(pos||'RB')?'selected':''}>${x}</option>`).join('')}</select></label>
+        </div></details>
+      ${NM.err?`<p class="au-err" role="alert">${esc(NM.err)}</p>`:''}
+      <div class="btns"><button class="btn" type="submit" ${NM.busy?'disabled':''}>${NM.busy?'One moment…':myProfile()?'Save':'Let’s play'}</button><button class="btn ghost" type="button" data-nm="close">${myProfile()?'Close':'Not now'}</button></div>
+    </form>
+  </div>`;
+}
+function openName(){const g=$('#gate');g.innerHTML=nameHTML();g.hidden=false;document.body.style.overflow='hidden';const f=$('#nm-name');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-nm=close]')){NM.err='';closeGate()}});
+document.addEventListener('submit',async e=>{
+  if(e.target.id!=='nm-form')return;e.preventDefault();e.stopImmediatePropagation();
+  const name=$('#nm-name').value.trim(),school=$('#nm-school').value,pos=$('#nm-pos').value;
+  if(name.length<2){NM.err='Type at least 2 letters.';openName();return}
+  NM.busy=true;NM.err='';openName();$('#nm-name').value=name;
+  try{
+    const fresh=!ME.uid;
+    if(fresh){
+      if(!SB)throw new Error('offline');
+      const {data,error}=await SB.auth.signInAnonymously();
+      if(error)throw error;
+      ME.uid=data.user.id;ME.mode='live';
+    }
+    const prev=myProfile()||{};
+    const profile=Object.assign({},prev,{name,school:school||prev.school||'',role:school?'player':(prev.role==='player'&&!school?'fan':prev.role||'fan'),v:2,joinedAt:prev.joinedAt||NOW()});
+    if(school)profile.pos=pos;else{delete profile.pos;profile.school=''}
+    await setDoc('profiles/'+ME.uid,profile);
+    NM.busy=false;
+    if(fresh){location.reload();return}
+    closeGate();say('Saved');
+  }catch(err){
+    NM.busy=false;
+    const m=(err&&err.message)||'';
+    NM.err=/anonymous/i.test(m)?'Joining is switched off on the server right now. Ask the app owner to turn on anonymous sign-ins in Supabase.':'That didn’t save. Check your connection and try again.';
+    openName();$('#nm-name').value=name;
+  }
 },true);
 async function signOut(){try{await SB.auth.signOut()}catch(_){}try{localStorage.removeItem('gf-browse')}catch(_){}location.reload()}
 let DB=null;
@@ -1211,12 +1267,12 @@ function viewHub(){
   const pr=myProfile();
   const kind={player:'Athlete and fantasy manager',coach:'Coach or scorekeeper',fan:'Fantasy manager'};
   const head=`<div class="head"><h2>Account info</h2><p>Your account, your school and your fantasy leagues in one place.</p></div>`;
-  const acct=pr?`<section class="card"><div class="qh"><h3>Your Varsity account</h3><span class="pill approved">Consent on file</span></div>
+  const acct=pr?`<section class="card"><div class="qh"><h3>Your Varsity profile</h3></div>
       <div class="two"><div><span class="lbl">Name</span><h3>${esc(pr.name)}</h3><p class="muted">${kind[pr.role]||''}</p></div>
-      <div><span class="lbl">School</span><p class="sch">${slogo(pr.school,28)}<b>${esc(pr.school)}</b></p><p class="muted">${pr.role==='player'?esc(pr.pos)+' · stats you enter count only after an admin approves them':'No player stats for this account'}</p></div></div>
-      <div class="btns">${pr.role==='player'?'<button class="btn" data-act="toMe">Go to Me</button>':''}<button class="btn ghost" data-act="toGroups">Go to my leagues</button><button class="btn ghost" data-act="consent">Consent settings</button></div>
-      <div class="danger-row"><div><b>Delete my profile</b><p class="muted">Removes your account, your stats, your lineups and you from every league. This cannot be undone.</p></div><button class="btn danger" data-act="delProfile">Delete my profile</button></div></section>`
-    :`<section class="card"><h3>Create your account</h3><p>${ME.mode==='readonly'?'You have view-only access, so you cannot create a profile.':'Join as a player, a coach or scorekeeper, or a fan. You choose your school and agree to how your name and stats are shown.'}</p>${ME.mode==='readonly'?'':'<div class="btns"><button class="btn" data-act="consent">Join now</button></div>'}</section>`;
+      <div><span class="lbl">School</span>${pr.school?`<p class="sch">${slogo(pr.school,28)}<b>${esc(pr.school)}</b></p><p class="muted">${esc(pr.pos||'')}</p>`:'<p class="muted">Not set. Add your school to see your own stats on Me.</p>'}</div></div>
+      <div class="btns">${pr.role==='player'?'<button class="btn" data-act="toMe">Go to Me</button>':''}<button class="btn ghost" data-act="toGroups">Go to my leagues</button><button class="btn ghost" data-act="consent">Edit profile</button></div>
+      <div class="danger-row"><div><b>Delete my profile</b><p class="muted">Removes your profile, your lineups and you from every league. This cannot be undone.</p></div><button class="btn danger" data-act="delProfile">Delete my profile</button></div></section>`
+    :`<section class="card"><h3>Start playing</h3><p>Pick the name your friends will see and you’re in. No email or password.</p><div class="btns"><button class="btn" data-act="consent">Pick a name</button></div></section>`;
   return head+acct+`<section class="card"><h3>Fantasy competition</h3><p class="muted">Managers pick real athletes, then compete using the same stat records.</p><ul><li>Lineups and private leagues</li><li>Weekly head-to-head matchups</li><li>League leaderboards</li></ul><div class="btns"><button class="btn ghost" data-act="toGroups">Open my leagues</button></div></section>`;
 }
 
@@ -1523,9 +1579,8 @@ function meP(){
 }
 function viewMe(){
   const pr=myProfile();
-  const head=`<div class="head"><h2>Me</h2><p>Put in your own game stats to get your fantasy points and see where you rank at your school and across the San Diego section.</p></div>`;
-  if(!pr)return head+`<p class="empty">${ME.mode==='readonly'?'You have view-only access, so there is no profile to show.':'Join the app to get your own stats page.'}</p>${ME.mode==='readonly'?'':'<div class="btns"><button class="btn" data-act="consent">Join now</button></div>'}`;
-  if(pr.role!=='player')return head+`<p class="empty">You joined as ${pr.role==='coach'?'a coach or scorekeeper':'a fan'}, so there are no player stats for you. You can still build lineups in <a href="#groups">Leagues</a>.</p>`;
+  const head=`<div class="head"><h2>Me</h2><p>Your own MaxPreps stats, fantasy points, and where you rank at your school and across the San Diego Section.</p></div>`;
+  if(!pr||pr.role!=='player'||!pr.school)return head+`<p class="empty">Play high school football? Add your school and position to see your own MaxPreps stats and where you rank.</p><div class="btns"><button class="btn" data-act="consent">${pr?'Add my school':'Get started'}</button></div>`;
   const me=meP()||{key:ME.uid,uid:ME.uid,name:pr.name,school:pr.school,pos:pr.pos,games:Array(WEEKS).fill(null)};
   const info=myRanks(me);
   const cell=c=>`<div class="rc"><b>#${c.rank}</b><small>of ${c.of}, top ${Math.ceil(c.rank/c.of*100)}%</small></div>`;
@@ -1766,7 +1821,7 @@ function updateGate(){
   $('#g-go').disabled=!(r&&G.name.trim().length>1&&gateSchool().length>1&&G.agree);
 }
 function openGate(){
-  if(ME.mode==='guest'){openAuth();return}
+  if(ME.mode!=='demo'){openName();return}
   const g=$('#gate');
   if(myProfile())g.innerHTML=manageHTML();
   else{Object.assign(G,{role:'',name:'',school:'',other:'',pos:'RB',agree:false});g.innerHTML=gateHTML();updateGate()}
@@ -1804,8 +1859,7 @@ async function gateWithdraw(){
 const VIEWS=['hub','league','groups','me','scoring'];
 function bannerHTML(){
   const b=[];
-  if(ME.mode==='guest')b.push(`<p class="note"><span class="pill pending">Viewer</span><span>You are looking around without an account. Sign in to build lineups and play in leagues.</span><button class="btn sm" data-act="consent">Sign in</button></p>`);
-  else if(ME.mode!=='readonly'&&!myProfile()&&S.loaded.profiles)b.push(`<p class="note"><span class="pill pending">Almost there</span><span>Finish setting up your profile to make lineups and start a league.</span><button class="btn sm" data-act="consent">Finish setup</button></p>`);
+  /* no sign-up banners */
   if(ME.mode==='readonly')b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
   if(S.timeout&&!S.loaded.profiles)b.push(`<p class="note"><span class="pill pending">Slow</span><span>The league data is taking a while to load. What you see may be out of date.</span></p>`);
   const sample=!MP&&!S.settings.hideSample;
@@ -1830,11 +1884,11 @@ const typing=()=>{const a=document.activeElement;return a&&/^(INPUT|SELECT|TEXTA
 let rq=false,dirty=false,gateChecked=false;
 const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){return false}};
 /* viewers can look at everything; joining is needed to play */
-function needJoin(what){if(myProfile())return false;say('Join the app to '+what+'.');openGate();return true}
+function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
   maybeInitSeen();
-  if(!gateChecked&&S.loaded.profiles){gateChecked=true;if(!myProfile()&&ME.mode!=='readonly'&&!browsing())openGate()}
+  if(!gateChecked&&S.loaded.profiles){gateChecked=true;if(ME.mode==='demo'&&!myProfile()&&!browsing())openGate()}
   if(rq)return;rq=true;
   requestAnimationFrame(()=>{rq=false;let v=UI.view;chrome(v);if(typing()){dirty=true;return}render();if(!$('#drawer').hidden)refreshDrawer()});
 }
@@ -1978,7 +2032,7 @@ async function createGroup(coll,name,stateKey){
   if(needJoin('start a league'))return;
   const code=makeCode(name,'GRP'),now=NOW();
   let ref=null;
-  const ok=await act(async()=>{ref=await DB.collection(coll).add(Object.assign({name,code,ownerId:ME.uid,createdAt:now,members:{[ME.uid]:now}},coll==='groups'?{mode:(document.querySelector('input[name=lg-mode]:checked')||{}).value==='budget'?'budget':'draft'}:{}))},'League created. Share code '+code);
+  const ok=await act(async()=>{ref=await DB.collection(coll).add(Object.assign({name,code,ownerId:ME.uid,createdAt:now,members:{[ME.uid]:now}},coll==='groups'?{mode:(window.__pendMode||(document.querySelector('input[name=lg-mode]:checked')||{}).value)==='budget'?'budget':'draft'}:{}))},'League created. Share code '+code);
   if(ok&&ref){UI[stateKey]=ref.id;UI.member=null}
 }
 async function joinGroup(coll,code,stateKey){
@@ -1996,8 +2050,11 @@ async function joinGroup(coll,code,stateKey){
 document.addEventListener('submit',async e=>{
   e.preventDefault();
   const id=e.target.id;
-  if(id==='create-form'){const n=$('#new-name').value.trim();if(!n){say('Give your league a name first');return}UI.lgp=null;await createGroup('groups',n,'gi')}
-  else if(id==='join-form'){UI.lgp=null;await joinGroup('groups',$('#join-code').value.trim().toUpperCase(),'gi')}
+  if(id==='create-form'){const n=$('#new-name').value.trim();if(!n){say('Give your league a name first');return}
+    if(!myProfile()){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'create',n,m:(document.querySelector('input[name=lg-mode]:checked')||{}).value||'draft'}))}catch(_){}}
+    UI.lgp=null;await createGroup('groups',n,'gi')}
+  else if(id==='join-form'){const c=$('#join-code').value.trim().toUpperCase();if(!myProfile()&&c){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'join',c}))}catch(_){}}
+    UI.lgp=null;await joinGroup('groups',c,'gi')}
   else if(id==='fcreate-form'){const n=$('#fnew-name').value.trim();if(!n){say('Give your league a name first');return}await createGroup('fgroups',n,'fi')}
   else if(id==='fjoin-form')await joinGroup('fgroups',$('#fjoin-code').value.trim().toUpperCase(),'fi');
   else if(id==='me-form'){
@@ -2169,10 +2226,10 @@ boot();
     m=document.createElement('div');m.className='setm';m.setAttribute('role','menu');
     m.innerHTML='<h4>Settings</h4>'+
       '<a role="menuitem" href="#hub">Account info</a>'+
-      (joined?'<button role="menuitem" data-act="consent">Consent settings</button>':ME.mode==='guest'?'':'<button role="menuitem" data-act="consent">Finish setting up</button>')+
+      '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':'Pick a name')+'</button>'+
       '<a role="menuitem" href="#scoring">Scoring rules</a>'+
       (joined?'<hr><button role="menuitem" class="dz" data-act="delProfile">Delete my profile</button>':'')+
-      (ME.mode==='live'?'<hr><button role="menuitem" id="sm-out">Sign out'+(ME.email?' <small style="opacity:.6;margin-left:auto">'+esc(ME.email)+'</small>':'')+'</button>':ME.mode==='guest'?'<hr><button role="menuitem" data-act="consent">Sign in</button>':'');
+      '';
     document.body.appendChild(m);g.setAttribute('aria-expanded','true');
     const r=g.getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,innerWidth-r.right)+'px';
     m.addEventListener('click',e=>{if(e.target.closest('#sm-out'))signOut();setTimeout(close,0)});
@@ -2244,6 +2301,21 @@ boot();
   if(!nav)return;
   const place=()=>{if(mq.matches){if(nav.parentNode!==document.body){document.body.appendChild(nav);nav.classList.add('tabs-phone')}}else if(nav.parentNode!==home){home.appendChild(nav);nav.classList.remove('tabs-phone')}};
   place();(mq.addEventListener?mq.addEventListener('change',place):mq.addListener(place));
+})();
+</script>
+<script>
+/* finish the league someone was starting or joining before they picked a name */
+(()=>{let p=null;try{p=JSON.parse(sessionStorage.getItem('vs-pending')||'null')}catch(_){}
+  if(!p)return;
+  const t=setInterval(async()=>{
+    if(!ME.uid||!S.loaded.profiles||!S.loaded.groups)return;
+    if(!myProfile())return;
+    clearInterval(t);try{sessionStorage.removeItem('vs-pending')}catch(_){}
+    location.hash='groups';
+    if(p.k==='create'){window.__pendMode=p.m;await createGroup('groups',p.n,'gi');window.__pendMode=null}
+    else if(p.k==='join')await joinGroup('groups',p.c,'gi');
+  },400);
+  setTimeout(()=>clearInterval(t),20000);
 })();
 </script>
 </body></html>
