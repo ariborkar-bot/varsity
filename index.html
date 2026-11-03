@@ -930,7 +930,7 @@ function authHTML(){
   return `<div class="gcard au" role="dialog" aria-modal="true" aria-labelledby="au-t">
     <div class="au-brand"><img src="logo.png" alt=""><span>VARSITY</span></div>
     <h2 id="au-t">${rs?'Reset your password':up?'Create your account':'Sign in'}</h2>
-    <p class="muted">${rs?'Enter your email and we’ll send you a link to set a new password.':up?'Make an account to build lineups, start leagues and play your friends.':'Welcome back. Sign in to get to your leagues.'}</p>
+    <p class="muted">${rs?'Enter your email and we’ll send you a link to set a new password.':up?'You need an account to build lineups, start leagues and play your friends. Browsing stats is free.':'Sign in to play in your leagues. Browsing stats is free.'}</p>
     ${rs?'':`<div class="au-tabs" role="tablist"><button role="tab" aria-selected="${!up}" data-au="in">Sign in</button><button role="tab" aria-selected="${up}" data-au="up">Create account</button></div>`}
     <form id="au-form" class="au-form">
       <label class="fld"><span>Email</span><input id="au-email" type="email" autocomplete="email" required></label>
@@ -938,7 +938,7 @@ function authHTML(){
       ${AUTH.err?`<p class="au-err" role="alert">${esc(AUTH.err)}</p>`:''}${AUTH.msg?`<p class="au-ok" role="status">${esc(AUTH.msg)}</p>`:''}
       <button class="btn" type="submit" ${AUTH.busy?'disabled':''}>${AUTH.busy?'One moment…':rs?'Send reset link':up?'Create account':'Sign in'}</button>
     </form>
-    <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button>'}<button class="link" data-au="browse">Just look around</button></div>
+    <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button>'}<button class="link" data-au="browse">Keep browsing</button></div>
   </div>`;
 }
 function openAuth(){const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
@@ -970,7 +970,7 @@ function nameHTML(){
   return `<div class="gcard nm" role="dialog" aria-modal="true" aria-labelledby="nm-t">
     <div class="au-brand"><img src="logo.png" alt=""><span>VARSITY</span></div>
     <h2 id="nm-t">${myProfile()?'Your profile':'What should friends call you?'}</h2>
-    <p class="muted">${myProfile()?'Change your name, or add your school to see your own MaxPreps stats on the Me tab.':'This is the name your league sees. That’s it, no email or password.'}</p>
+    <p class="muted">${myProfile()?'Change your name, or add your school to see your own MaxPreps stats on the Me tab.':'Last step. This is the name your leagues will see.'}</p>
     <form id="nm-form" class="au-form">
       <label class="fld"><span>Your name</span><input id="nm-name" maxlength="40" autocomplete="name" value="${esc(pr.name||'')}" placeholder="Ari B." required></label>
       <details ${sch?'open':''}><summary>I play high school football (optional)</summary>
@@ -991,24 +991,18 @@ document.addEventListener('submit',async e=>{
   if(name.length<2){NM.err='Type at least 2 letters.';openName();return}
   NM.busy=true;NM.err='';openName();$('#nm-name').value=name;
   try{
-    const fresh=!ME.uid;
-    if(fresh){
-      if(!SB)throw new Error('offline');
-      const {data,error}=await SB.auth.signInAnonymously();
-      if(error)throw error;
-      ME.uid=data.user.id;ME.mode='live';
-    }
+    if(!ME.uid){NM.busy=false;openAuth();return}
+    const fresh=!myProfile();
     const prev=myProfile()||{};
     const profile=Object.assign({},prev,{name,school:school||prev.school||'',role:school?'player':(prev.role==='player'&&!school?'fan':prev.role||'fan'),v:2,joinedAt:prev.joinedAt||NOW()});
     if(school)profile.pos=pos;else{delete profile.pos;profile.school=''}
     await setDoc('profiles/'+ME.uid,profile);
     NM.busy=false;
-    if(fresh){location.reload();return}
-    closeGate();say('Saved');
+    closeGate();say(fresh?'Welcome to Varsity, '+name.split(' ')[0]:'Saved');
   }catch(err){
     NM.busy=false;
     const m=(err&&err.message)||'';
-    NM.err=/anonymous/i.test(m)?'Joining is switched off on the server right now. Ask the app owner to turn on anonymous sign-ins in Supabase.':'That didn’t save. Check your connection and try again.';
+    NM.err='That didn’t save. Check your connection and try again.';
     openName();$('#nm-name').value=name;
   }
 },true);
@@ -1272,7 +1266,7 @@ function viewHub(){
       <div><span class="lbl">School</span>${pr.school?`<p class="sch">${slogo(pr.school,28)}<b>${esc(pr.school)}</b></p><p class="muted">${esc(pr.pos||'')}</p>`:'<p class="muted">Not set. Add your school to see your own stats on Me.</p>'}</div></div>
       <div class="btns">${pr.role==='player'?'<button class="btn" data-act="toMe">Go to Me</button>':''}<button class="btn ghost" data-act="toGroups">Go to my leagues</button><button class="btn ghost" data-act="consent">Edit profile</button></div>
       <div class="danger-row"><div><b>Delete my profile</b><p class="muted">Removes your profile, your lineups and you from every league. This cannot be undone.</p></div><button class="btn danger" data-act="delProfile">Delete my profile</button></div></section>`
-    :`<section class="card"><h3>Start playing</h3><p>Pick the name your friends will see and you’re in. No email or password.</p><div class="btns"><button class="btn" data-act="consent">Pick a name</button></div></section>`;
+    :`<section class="card"><h3>${ME.mode==='guest'?'Make an account to play':'Pick your name'}</h3><p>${ME.mode==='guest'?'Anyone can browse stats. To build lineups and play in leagues, sign in or create a free account.':'Last step: choose the name your leagues will see.'}</p><div class="btns"><button class="btn" data-act="consent">${ME.mode==='guest'?'Sign in or create account':'Pick a name'}</button></div></section>`;
   return head+acct+`<section class="card"><h3>Fantasy competition</h3><p class="muted">Managers pick real athletes, then compete using the same stat records.</p><ul><li>Lineups and private leagues</li><li>Weekly head-to-head matchups</li><li>League leaderboards</li></ul><div class="btns"><button class="btn ghost" data-act="toGroups">Open my leagues</button></div></section>`;
 }
 
@@ -1580,7 +1574,7 @@ function meP(){
 function viewMe(){
   const pr=myProfile();
   const head=`<div class="head"><h2>Me</h2><p>Your own MaxPreps stats, fantasy points, and where you rank at your school and across the San Diego Section.</p></div>`;
-  if(!pr||pr.role!=='player'||!pr.school)return head+`<p class="empty">Play high school football? Add your school and position to see your own MaxPreps stats and where you rank.</p><div class="btns"><button class="btn" data-act="consent">${pr?'Add my school':'Get started'}</button></div>`;
+  if(!pr||pr.role!=='player'||!pr.school)return head+`<p class="empty">Play high school football? Add your school and position to see your own MaxPreps stats and where you rank.</p><div class="btns"><button class="btn" data-act="consent">${pr?'Add my school':ME.mode==='guest'?'Sign in to get started':'Get started'}</button></div>`;
   const me=meP()||{key:ME.uid,uid:ME.uid,name:pr.name,school:pr.school,pos:pr.pos,games:Array(WEEKS).fill(null)};
   const info=myRanks(me);
   const cell=c=>`<div class="rc"><b>#${c.rank}</b><small>of ${c.of}, top ${Math.ceil(c.rank/c.of*100)}%</small></div>`;
@@ -1821,6 +1815,7 @@ function updateGate(){
   $('#g-go').disabled=!(r&&G.name.trim().length>1&&gateSchool().length>1&&G.agree);
 }
 function openGate(){
+  if(ME.mode==='guest'){openAuth();return}
   if(ME.mode!=='demo'){openName();return}
   const g=$('#gate');
   if(myProfile())g.innerHTML=manageHTML();
@@ -1888,7 +1883,7 @@ function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
   maybeInitSeen();
-  if(!gateChecked&&S.loaded.profiles){gateChecked=true;if(ME.mode==='demo'&&!myProfile()&&!browsing())openGate()}
+  if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
   requestAnimationFrame(()=>{rq=false;let v=UI.view;chrome(v);if(typing()){dirty=true;return}render();if(!$('#drawer').hidden)refreshDrawer()});
 }
@@ -2226,10 +2221,10 @@ boot();
     m=document.createElement('div');m.className='setm';m.setAttribute('role','menu');
     m.innerHTML='<h4>Settings</h4>'+
       '<a role="menuitem" href="#hub">Account info</a>'+
-      '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':'Pick a name')+'</button>'+
+      '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':ME.mode==='guest'?'Sign in or create account':'Pick a name')+'</button>'+
       '<a role="menuitem" href="#scoring">Scoring rules</a>'+
       (joined?'<hr><button role="menuitem" class="dz" data-act="delProfile">Delete my profile</button>':'')+
-      '';
+      (ME.mode==='live'?'<hr><button role="menuitem" id="sm-out">Sign out'+(ME.email?' <small style="opacity:.6;margin-left:auto">'+esc(ME.email)+'</small>':'')+'</button>':'');
     document.body.appendChild(m);g.setAttribute('aria-expanded','true');
     const r=g.getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,innerWidth-r.right)+'px';
     m.addEventListener('click',e=>{if(e.target.closest('#sm-out'))signOut();setTimeout(close,0)});
@@ -2315,7 +2310,7 @@ boot();
     if(p.k==='create'){window.__pendMode=p.m;await createGroup('groups',p.n,'gi');window.__pendMode=null}
     else if(p.k==='join')await joinGroup('groups',p.c,'gi');
   },400);
-  setTimeout(()=>clearInterval(t),20000);
+  setTimeout(()=>clearInterval(t),300000);
 })();
 </script>
 </body></html>
