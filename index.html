@@ -775,6 +775,8 @@ select option{background:#0B1730;color:#EAF0F8}
 #intro.out{animation:inOut .55s ease-in forwards}
 @keyframes inOut{to{opacity:0;transform:scale(1.08);filter:blur(6px)}}
 #intro .in-spark{position:absolute;left:50%;top:30%;width:4px;height:4px;border-radius:50%;background:#9FC4FF;box-shadow:0 0 8px #9FC4FF;opacity:0}
+#intro .in-jewel{position:absolute;left:0;top:0;pointer-events:none;filter:drop-shadow(0 0 12px rgba(110,170,255,1)) brightness(1.35);will-change:transform,opacity}
+#intro .in-tack{opacity:0}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -807,7 +809,7 @@ select option{background:#0B1730;color:#EAF0F8}
     <div class="in-ring"></div><div class="in-gem"><img src="logo.png" alt=""></div>
     <div class="in-word"><span>V</span><span>A</span><span>R</span><span>S</span><span>I</span><span>T</span><span>Y</span></div>
     <div class="in-turf"></div>
-    <div class="in-p in-run"><svg viewBox="0 0 100 100"><g fill="#E8F0FF"><circle cx="62" cy="16" r="9"/><rect x="54" y="13" width="14" height="4" rx="2" fill="#2F6BFF"/><path d="M50 26 L68 28 L66 52 L48 52 Z"/><path d="M66 32 L80 40 L77 45 L64 39 Z"/><ellipse cx="80" cy="40" rx="6" ry="4" fill="#8B5A2B" transform="rotate(-20 80 40)"/><path d="M50 30 L36 44 L40 48 L52 38 Z"/><path d="M50 50 L40 70 L28 76 L31 82 L46 75 L56 56 Z"/><path d="M60 50 L70 68 L82 70 L82 77 L66 76 L54 56 Z"/></g></svg></div><div class="in-p in-tack"><svg viewBox="0 0 100 100"><g fill="#FFC23D"><circle cx="70" cy="34" r="9"/><rect x="72" y="31" width="12" height="4" rx="2" fill="#0A1E55"/><path d="M28 40 L64 30 L68 46 L32 54 Z"/><path d="M62 34 L86 44 L84 50 L60 42 Z"/><path d="M60 44 L84 58 L80 63 L58 50 Z"/><path d="M32 48 L16 64 L8 62 L6 68 L20 72 L38 54 Z"/><path d="M30 44 L10 46 L4 40 L0 44 L8 52 L32 52 Z"/></g></svg></div>
+    <div class="in-p in-run"><svg viewBox="0 0 100 100"><g fill="#E8F0FF"><circle cx="62" cy="16" r="9"/><rect x="54" y="13" width="14" height="4" rx="2" fill="#2F6BFF"/><path d="M50 26 L68 28 L66 52 L48 52 Z"/><path d="M66 32 L80 40 L77 45 L64 39 Z"/><ellipse cx="80" cy="40" rx="6" ry="4" fill="#8B5A2B" transform="rotate(-20 80 40)"/><path d="M50 30 L36 44 L40 48 L52 38 Z"/><path d="M50 50 L40 70 L28 76 L31 82 L46 75 L56 56 Z"/><path d="M60 50 L70 68 L82 70 L82 77 L66 76 L54 56 Z"/></g></svg></div><div class="in-p in-drun"><svg viewBox="0 0 100 100"><g fill="#FFC23D"><circle cx="62" cy="16" r="9"/><rect x="54" y="13" width="14" height="4" rx="2" fill="#0A1E55"/><path d="M50 26 L68 28 L66 52 L48 52 Z"/><path d="M66 32 L80 38 L77 43 L64 39 Z"/><path d="M50 30 L36 44 L40 48 L52 38 Z"/><path d="M50 50 L40 70 L28 76 L31 82 L46 75 L56 56 Z"/><path d="M60 50 L70 68 L82 70 L82 77 L66 76 L54 56 Z"/></g></svg></div><div class="in-p in-tack"><svg viewBox="0 0 100 100"><g fill="#FFC23D"><circle cx="70" cy="34" r="9"/><rect x="72" y="31" width="12" height="4" rx="2" fill="#0A1E55"/><path d="M28 40 L64 30 L68 46 L32 54 Z"/><path d="M62 34 L86 44 L84 50 L60 42 Z"/><path d="M60 44 L84 58 L80 63 L58 50 Z"/><path d="M32 48 L16 64 L8 62 L6 68 L20 72 L38 54 Z"/><path d="M30 44 L10 46 L4 40 L0 44 L8 52 L32 52 Z"/></g></svg></div>
     <div class="in-flash"></div><div class="in-boom">BOOM!</div>
   </div>
   <button class="in-skip" type="button">Skip</button>
@@ -2372,31 +2374,49 @@ boot();
   /* 2. VARSITY slams down letter by letter */
   letters.forEach((l,i)=>A(l,[{opacity:0,transform:'translateY(-120px) scale(1.6) rotate(-8deg)'},{opacity:1,transform:'translateY(8px) scale(.94) rotate(0)',offset:.7},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:340,delay:1000+i*110,easing:'cubic-bezier(.3,1.4,.5,1)'}));
   A(turf,[{opacity:0},{opacity:1}],{duration:300,delay:1700});
-  /* 3. ball carrier runs in, defender lays the hit stick, carrier flies through the letters */
-  const word=$$('.in-word').getBoundingClientRect(),sr=stage.getBoundingClientRect(),pw=run.clientWidth;
-  const hitX=Math.max(0,word.left-sr.left-pw*.9);
-  run.style.left='0px';tack.style.left='0px';
-  A(run,[{transform:`translateX(${-pw-40}px)`},{transform:`translateX(${hitX}px)`}],{duration:520,delay:2050,easing:'linear'});
-  A(tack,[{opacity:0,transform:`translate(${hitX-pw*.6}px,${H*.5}px) rotate(-30deg)`},{opacity:1,transform:`translate(${hitX-pw*.15}px,${H*.4}px) rotate(-30deg)`,offset:.2},{opacity:1,transform:`translate(${hitX+pw*.25}px,0px) rotate(-8deg)`}],{duration:420,delay:2150,easing:'cubic-bezier(.5,0,.9,.4)'});
+  /* 3. carrier and defender sprint at each other from opposite ends and collide past the Y.
+        A burst of V gems flies out, and the carrier is blasted back across the screen through every letter. */
+  const drun=$$('.in-drun');
+  const word=$$('.in-word').getBoundingClientRect(),sr=stage.getBoundingClientRect(),pw=run.clientWidth,vw=innerWidth;
+  const leftEdge=-sr.left-pw-20,rightEdge=vw-sr.left+20;
+  const meetX=Math.min(word.right-sr.left-pw*.35,(vw<600?W*.5:W-pw*.9));          /* where the carrier is when the hit lands */
+  [run,drun,tack].forEach(n=>{n.style.left='0px'});
+  A(run,[{transform:`translateX(${leftEdge}px)`},{transform:`translateX(${meetX}px)`}],{duration:620,delay:1950,easing:'cubic-bezier(.4,0,.9,.6)'});
+  A(drun,[{opacity:1,transform:`translateX(${rightEdge}px) scaleX(-1)`},{opacity:1,transform:`translateX(${meetX+pw*.6}px) scaleX(-1)`}],{duration:620,delay:1950,easing:'cubic-bezier(.4,0,.9,.6)'});
+  /* a little running bob for both */
+  [run,drun].forEach(n=>{const s=n.querySelector('svg');A(s,[{transform:'translateY(0)'},{transform:'translateY(-6px)'},{transform:'translateY(0)'}],{duration:160,delay:1950,iterations:4,fill:'none'})});
   at(2570,()=>{
-    const fx=hitX+pw*.85,fy=run.offsetTop+run.clientHeight*.4;
-    flash.style.left=fx+'px';flash.style.top=fy+'px';boom.style.left=fx+'px';boom.style.top=(fy-70)+'px';
-    A(flash,[{opacity:1,transform:'translate(-50%,-50%) scale(.3)'},{opacity:0,transform:'translate(-50%,-50%) scale(2.6)'}],{duration:380,easing:'ease-out'});
-    A(boom,[{opacity:0,transform:'translate(-50%,-50%) scale(.4) rotate(-12deg)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.2) rotate(-6deg)',offset:.4},{opacity:0,transform:'translate(-50%,-70%) scale(1) rotate(-6deg)'}],{duration:650,easing:'ease-out'});
-    A(stage,[{transform:'translate(0,0)'},{transform:'translate(-9px,5px)'},{transform:'translate(8px,-6px)'},{transform:'translate(-5px,3px)'},{transform:'translate(0,0)'}],{duration:280,fill:'none'});
-    if(navigator.vibrate)try{navigator.vibrate(40)}catch(_){}
-    /* the carrier is launched sideways, spinning, and slides through the word */
-    const endX=W+pw*1.5,dur=820;
-    A(run,[{transform:`translateX(${hitX}px) rotate(0)`},{transform:`translate(${hitX+W*.25}px,-30px) rotate(-70deg)`,offset:.3},{transform:`translate(${endX}px,10px) rotate(-100deg)`}],{duration:dur,easing:'cubic-bezier(.2,.7,.4,1)'});
-    A(tack,[{transform:`translate(${hitX+pw*.25}px,0px) rotate(-8deg)`},{transform:`translate(${hitX+pw*.7}px,${pw*.35}px) rotate(12deg)`}],{duration:500,easing:'ease-out'});
-    /* each letter gets knocked flying as he passes through it */
-    letters.forEach((l,i)=>{const r=l.getBoundingClientRect(),lx=r.left-sr.left,frac=Math.max(0,Math.min(1,(lx-hitX)/(endX-hitX))),t=dur*Math.pow(frac,1.6);
-      const dx=60+Math.random()*120,dy=-(80+Math.random()*160),rot=(Math.random()*2-1)*220;
-      at(t,()=>A(l,[{opacity:1,transform:'translate(0,0) rotate(0)'},{opacity:1,transform:`translate(${dx*.6}px,${dy}px) rotate(${rot*.6}deg)`,offset:.45},{opacity:0,transform:`translate(${dx}px,${H*.8}px) rotate(${rot}deg)`}],{duration:900,easing:'cubic-bezier(.3,.2,.6,1)'}))});
+    const fx=meetX+pw*.8,fy=run.offsetTop+run.clientHeight*.38;
+    /* the defender's running pose becomes the diving hit */
+    drun.style.opacity='0';
+    A(tack,[{opacity:1,transform:`translate(${meetX+pw*.55}px,0px) scaleX(-1) rotate(10deg)`},{opacity:1,transform:`translate(${meetX+pw*.15}px,${pw*.3}px) scaleX(-1) rotate(-6deg)`}],{duration:520,easing:'ease-out'});
+    flash.style.left=fx+'px';flash.style.top=fy+'px';boom.style.left=(fx+20)+'px';boom.style.top=(fy-80)+'px';
+    A(flash,[{opacity:1,transform:'translate(-50%,-50%) scale(.3)'},{opacity:0,transform:'translate(-50%,-50%) scale(3)'}],{duration:420,easing:'ease-out'});
+    A(boom,[{opacity:0,transform:'translate(-50%,-50%) scale(.4) rotate(10deg)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.25) rotate(6deg)',offset:.35},{opacity:0,transform:'translate(-50%,-80%) scale(1) rotate(6deg)'}],{duration:700,easing:'ease-out'});
+    A(stage,[{transform:'translate(0,0)'},{transform:'translate(10px,6px)'},{transform:'translate(-9px,-5px)'},{transform:'translate(6px,3px)'},{transform:'translate(0,0)'}],{duration:300,fill:'none'});
+    if(navigator.vibrate)try{navigator.vibrate([30,20,50])}catch(_){}
+    /* a burst of V gems */
+    const n=vw<600?22:30;
+    for(let i=0;i<n;i++){
+      const g=document.createElement('img');g.src='logo.png';g.alt='';g.className='in-jewel';
+      const sz=(vw<600?26:34)+Math.random()*(vw<600?34:54);g.style.width=g.style.height=sz+'px';stage.appendChild(g);
+      const ang=-Math.PI*(0.05+Math.random()*.9)+(Math.random()<.25?Math.PI*.15:0),sp=140+Math.random()*(vw<600?190:320);
+      const mx=Math.cos(ang)*sp*.6,my=Math.sin(ang)*sp*.6,ex=Math.cos(ang)*sp,ey=Math.sin(ang)*sp+H*.55,rot=(Math.random()*2-1)*540;
+      A(g,[{opacity:1,transform:`translate(${fx-sz/2}px,${fy-sz/2}px) scale(.2) rotate(0)`},
+           {opacity:1,transform:`translate(${fx-sz/2+mx}px,${fy-sz/2+my}px) scale(1) rotate(${rot*.5}deg)`,offset:.35},
+           {opacity:0,transform:`translate(${fx-sz/2+ex}px,${fy-sz/2+ey}px) scale(.8) rotate(${rot}deg)`}],
+        {duration:900+Math.random()*500,delay:Math.random()*90,easing:'cubic-bezier(.2,.6,.5,1)'});
+    }
+    /* the carrier gets hit back across the whole screen, spinning, sliding through every letter */
+    const endX=leftEdge-pw,dur=900;
+    A(run,[{transform:`translateX(${meetX}px) rotate(0)`},{transform:`translate(${meetX-(meetX-endX)*.3}px,-40px) rotate(80deg)`,offset:.3},{transform:`translate(${endX}px,6px) rotate(150deg)`}],{duration:dur,easing:'cubic-bezier(.15,.7,.4,1)'});
+    letters.forEach(l=>{const r=l.getBoundingClientRect(),lx=r.left-sr.left+r.width/2,frac=Math.max(0,Math.min(1,(meetX+pw*.5-lx)/(meetX-endX))),tt=dur*Math.pow(frac,1.7);
+      const dx=-(60+Math.random()*140),dy=-(90+Math.random()*170),rot=(Math.random()*2-1)*240;
+      at(tt,()=>A(l,[{opacity:1,transform:'translate(0,0) rotate(0)'},{opacity:1,transform:`translate(${dx*.6}px,${dy}px) rotate(${rot*.6}deg)`,offset:.45},{opacity:0,transform:`translate(${dx}px,${H*.8}px) rotate(${rot}deg)`}],{duration:950,easing:'cubic-bezier(.3,.2,.6,1)'}))});
     A(gem,[{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.25)'}],{duration:900,delay:300,easing:'ease-in'});
   });
   /* 4. into the app */
-  at(3550,finish);
+  at(3750,finish);
   el.querySelector('.in-skip').addEventListener('click',finish);
 })();
 </script>
