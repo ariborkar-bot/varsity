@@ -639,6 +639,10 @@ select option{background:#0B1730;color:#EAF0F8}
 }
 
 /* league formats */
+.ro-wrap{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}
+.ro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px}.ro-cell{display:flex;flex-direction:column;gap:4px;font:700 .8rem var(--f-display);letter-spacing:.04em}.ro-cell select{padding:8px 6px;border-radius:10px}
+.lg-form:has(input[value=budget]:checked) .ro-wrap{display:none}
+.ro-edit{margin:6px 0 10px}.ro-edit summary{cursor:pointer;font-weight:700}.ro-edit .ro-grid{margin:10px 0}
 .lg-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:4px 0 12px}
 .lg-mode{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:14px;cursor:pointer;background:var(--surface2)}
 .lg-mode input{margin-top:4px;accent-color:#FFC23D}
@@ -1200,7 +1204,28 @@ const SLOTS_DRAFT=[
   {k:'DL',label:'DL',elig:['DEF'],sub:['DL','DEF']},{k:'LB',label:'LB',elig:['DEF'],sub:['LB','DEF']},{k:'DB',label:'DB',elig:['DEF'],sub:['DB','CB','S','DEF']},
   {k:'K',label:'K',elig:['K']}];
 const slotOk=(s,p)=>!!p&&s.elig.includes(p.pos)&&(!s.sub||s.sub.includes(p.sub||p.pos));
-const slotsOf=g=>g&&g.mode!=='budget'&&g.mode?SLOTS_DRAFT:SLOTS;
+/* Snake draft rosters are customizable. Default: one of each position, with two receivers. Leagues already drafting before this existed keep the old ten spots. */
+const ROSTER_DEFAULT={QB:1,RB:1,WR:2,TE:1,DL:1,LB:1,DB:1,K:1,FLEX:0};
+const ROSTER_ORDER=['QB','RB','WR','TE','FLEX','DL','LB','DB','K'];
+const ROSTER_DEF={QB:{elig:['QB']},RB:{elig:['RB']},WR:{elig:['WR']},TE:{elig:['TE']},FLEX:{elig:['RB','WR','TE']},
+  DL:{elig:['DEF'],sub:['DL','DEF']},LB:{elig:['DEF'],sub:['LB','DEF']},DB:{elig:['DEF'],sub:['DB','CB','S','DEF']},K:{elig:['K']}};
+const ROSTER_MAX=3,ROSTER_TOTAL_MAX=14;
+function cleanRoster(r){const o={};let t=0;for(const k of ROSTER_ORDER){let n=r&&r[k]!=null?Math.floor(+r[k]):ROSTER_DEFAULT[k];if(!(n>=0))n=0;n=Math.min(n,k==='FLEX'?2:ROSTER_MAX);o[k]=n;t+=n}
+  if(t<1||t>ROSTER_TOTAL_MAX)return Object.assign({},ROSTER_DEFAULT);return o}
+const _rosterCache={};
+function slotsFromRoster(r){r=cleanRoster(r);const key=JSON.stringify(r);if(_rosterCache[key])return _rosterCache[key];
+  const out=[];for(const k of ROSTER_ORDER)for(let i=1;i<=r[k];i++)out.push(Object.assign({k:i===1?k:k+i,label:k},ROSTER_DEF[k]));
+  return _rosterCache[key]=out}
+const rosterText=r=>{r=cleanRoster(r);return ROSTER_ORDER.filter(k=>r[k]).map(k=>(r[k]>1?r[k]+' ':'')+k).join(', ')};
+const rosterCount=r=>{r=cleanRoster(r);return ROSTER_ORDER.reduce((a,k)=>a+r[k],0)};
+function rosterPickerHTML(pre,r){r=cleanRoster(r);
+  return `<div class="ro-grid" data-ro="${pre}">${ROSTER_ORDER.map(k=>`<label class="ro-cell"><span>${k}</span><select id="${pre}-${k}" aria-label="${k} spots">${Array.from({length:(k==='FLEX'?2:ROSTER_MAX)+1},(_,i)=>`<option value="${i}" ${i===r[k]?'selected':''}>${i}</option>`).join('')}</select></label>`).join('')}</div>`}
+function readRoster(pre){const r={};for(const k of ROSTER_ORDER){const e=document.getElementById(pre+'-'+k);r[k]=e?+e.value:ROSTER_DEFAULT[k]}return r}
+const slotsOf=g=>{
+  if(!g||g.mode==='budget'||!g.mode)return SLOTS;
+  if(g.roster)return slotsFromRoster(g.roster);
+  const d=g.draft;return d&&(d.order||d.picks)?SLOTS_DRAFT:slotsFromRoster(ROSTER_DEFAULT);
+};
 const slotsFor=gid=>slotsOf(S.groups[gid]);
 const SLOTS=[
   {k:'QB',label:'QB',elig:['QB']},{k:'RB',label:'RB',elig:['RB']},{k:'WR',label:'WR',elig:['WR']},
@@ -1671,14 +1696,15 @@ function viewGroups(){
   const gs=myGroups(),g=curGroup();
   const newForm=`<form class="card lg-form" id="create-form"><h3>Start a league</h3><p class="muted">Pick a format, name it, then send the invite code to your friends.</p>
       <div class="lg-modes" role="radiogroup" aria-label="League format">
-        <label class="lg-mode"><input type="radio" name="lg-mode" value="draft" checked><span><b>Snake draft</b><small>Classic fantasy football. Take turns picking 10 players: QB, 2 RB, WR, TE, FLEX, DL, LB, DB and K. Every player can be on only one team.</small></span></label>
+        <label class="lg-mode"><input type="radio" name="lg-mode" value="draft" checked><span><b>Snake draft</b><small>Classic fantasy football. Take turns picking players for each spot, and every player is on only one team. Default roster: one each of QB, RB, TE, DL, LB, DB and K, plus 2 WR. You can change it below.</small></span></label>
         <label class="lg-mode"><input type="radio" name="lg-mode" value="budget"><span><b>Budget</b><small>Like Premier League fantasy. Build the best team for ${money(CAP)}, and friends can pick the same players.</small></span></label>
       </div>
+      <div class="ro-wrap card-sub"><b>Roster spots</b><small class="muted">Snake draft only. How many of each position every team drafts. Default is one each, with 2 WR.</small>${rosterPickerHTML('ro-new',ROSTER_DEFAULT)}</div>
       <div class="lg-row"><input id="new-name" maxlength="32" placeholder="League name, like Friday Night Crew" autocomplete="off" aria-label="League name"><button class="btn" type="submit">Create</button></div></form>`;
   const joinForm=`<form class="card lg-form" id="join-form"><h3>Join a league</h3><p class="muted">Paste the invite code a friend sent you.</p>
       <div class="lg-row"><input id="join-code" maxlength="12" placeholder="Invite code, like FNL-7Q2K" autocomplete="off" aria-label="Invite code"><button class="btn" type="submit">Join</button></div></form>`;
   if(!g)return `<div class="head"><h2>My leagues</h2><p>Draft a lineup of seven real players, face a friend every week, and climb your league’s standings.</p></div>
-    <div class="lg-steps"><div><b>1</b><span>Start a league or join one with a code</span></div><div><b>2</b><span>Draft 10 spots (QB, 2 RB, WR, TE, FLEX, DL, LB, DB, K), or build 7 spots on a budget</span></div><div><b>3</b><span>Each week the higher lineup total wins</span></div></div>
+    <div class="lg-steps"><div><b>1</b><span>Start a league or join one with a code</span></div><div><b>2</b><span>Draft a roster (by default one of each position and 2 WR, and you can change it), or build 7 spots on a budget</span></div><div><b>3</b><span>Each week the higher lineup total wins</span></div></div>
     <div class="two">${newForm}${joinForm}</div>`;
   const ids=Object.keys(g.members),cw=CURW(),mem=UI.member&&g.members[UI.member]?UI.member:ME.uid;
   const st=standingsOf(g),myI=st.findIndex(x=>x.uid===ME.uid),me=st[myI];
@@ -1772,6 +1798,8 @@ function draftRoomHTML(g){
   if(di.status==='pending'){
     const c=(g.draft&&g.draft.clock)!=null?g.draft.clock:90;
     return `<section class="card lg-draft"><div class="qh"><h3>Draft room</h3><span class="pill pending">Not started</span></div>
+      <p class="muted"><b>Roster:</b> ${esc(rosterText(g.roster||ROSTER_DEFAULT))}</p>
+      ${own?`<details class="ro-edit"><summary>Change roster spots</summary>${rosterPickerHTML('ro-edit',g.roster||ROSTER_DEFAULT)}<button class="btn ghost" data-act="lgRoster">Save roster</button></details>`:''}
       <p class="muted">${R} rounds in snake order: the last pick of a round picks first in the next. The order is random when the draft starts.</p>
       <div class="lg-order">${ids.map(u=>`<span class="lg-ch">${av(nm(u),u,26)}${esc(u===ME.uid?'You':nm(u))}</span>`).join('')}</div>
       ${own?(ids.length<2?`<p class="hint">Invite at least one friend before you start the draft.</p>`:`<div class="dr-set"><label class="fld"><span>Pick clock</span><select id="dclock">${DCLOCK.map(([v,l])=>`<option value="${v}" ${v===c?'selected':''}>${l}</option>`).join('')}</select></label>
@@ -1818,7 +1846,7 @@ function viewScoring(){
       ${item('xpm','Extra point made')}${item('xpMiss','Extra point missed')}${item('fgm','Field goal made')}${item('fgMiss','Field goal missed')}<li><span>Punting, by the game's average punt<small>Under 30 yds: 0 · 30–39.9 yds: 1 per punt · 40–49.9 yds: 2.5 per punt · 50+ yds: 3.25 per punt</small></span><b>tiers</b></li>${item('in20','Punt inside the 20')}${item('retTD','Kick or punt return touchdown')}
     </ul></section>
     <section class="card"><h3>Lineups and matchups</h3>
-      <p><b>Snake draft leagues:</b> 10 spots. QB, 2 RB, WR, TE, FLEX (any RB, WR or TE), DL, LB, DB and K.</p><p><b>Budget leagues:</b> 7 spots. QB, RB, WR, TE, FLEX, DEF (any defender) and K, for $70.0M.</p>
+      <p><b>Snake draft leagues:</b> by default one each of QB, RB, TE, DL, LB, DB and K, plus 2 WR. The league owner can change how many of each position (and add FLEX, any RB, WR or TE) before the draft starts.</p><p><b>Budget leagues:</b> 7 spots. QB, RB, WR, TE, FLEX, DEF (any defender) and K, for $70.0M.</p>
       <p>In a league, you face one other member each week and the higher lineup total wins.</p>
       <p class="muted">Example: a QB with 250 passing yards, 3 passing TD, 1 INT and 30 rushing yards scores 10 + 12 − 2 + 3 = 23 points.</p></section>
     <section class="card"><h3>Approval</h3>
@@ -2368,7 +2396,7 @@ async function createGroup(coll,name,stateKey){
   if(needJoin('start a league'))return;
   const code=makeCode(name,'GRP'),now=NOW();
   let ref=null;
-  const ok=await act(async()=>{ref=await DB.collection(coll).add(Object.assign({name,code,ownerId:ME.uid,createdAt:now,members:{[ME.uid]:now}},coll==='groups'?{mode:(window.__pendMode||(document.querySelector('input[name=lg-mode]:checked')||{}).value)==='budget'?'budget':'draft'}:{}))},'League created. Share code '+code);
+  const ok=await act(async()=>{ref=await DB.collection(coll).add(Object.assign({name,code,ownerId:ME.uid,createdAt:now,members:{[ME.uid]:now}},coll==='groups'?(()=>{const md=(window.__pendMode||(document.querySelector('input[name=lg-mode]:checked')||{}).value)==='budget'?'budget':'draft';return md==='budget'?{mode:md}:{mode:md,roster:cleanRoster(window.__pendRoster||readRoster('ro-new'))}})():{}))},'League created. Share code '+code);
   if(ok&&ref){UI[stateKey]=ref.id;UI.member=null}
 }
 async function joinGroup(coll,code,stateKey){
@@ -2387,7 +2415,7 @@ document.addEventListener('submit',async e=>{
   e.preventDefault();
   const id=e.target.id;
   if(id==='create-form'){const n=$('#new-name').value.trim();if(!n){say('Give your league a name first');return}
-    if(!myProfile()){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'create',n,m:(document.querySelector('input[name=lg-mode]:checked')||{}).value||'draft'}))}catch(_){}}
+    if(!myProfile()){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'create',n,m:(document.querySelector('input[name=lg-mode]:checked')||{}).value||'draft',r:readRoster('ro-new')}))}catch(_){}}
     UI.lgp=null;await createGroup('groups',n,'gi')}
   else if(id==='join-form'){const c=$('#join-code').value.trim().toUpperCase();if(!myProfile()&&c){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'join',c}))}catch(_){}}
     UI.lgp=null;await joinGroup('groups',c,'gi')}
@@ -2622,11 +2650,15 @@ boot();
     if(a==='lgPanel'){UI.lgp=UI.lgp===t.dataset.v?null:t.dataset.v;render();const f=document.querySelector(UI.lgp==='new'?'#new-name':'#join-code');if(f)f.focus()}
     else if(a==='lgPick'){if(typeof needJoin==='function'&&needJoin('build a lineup'))return;openPk(t.dataset.slot)}
     else if(a==='lgClear'){await setSlot(t.dataset.slot,null)}
+    else if(a==='lgRoster'){const g=curGroup();if(!g||g.ownerId!==ME.uid)return;
+      const d=g.draft;if(d&&(d.order||d.status==='live'||d.status==='done')){say('The roster is locked once the draft starts');return}
+      const r=readRoster('ro-edit'),n=rosterCount(r);if(n<1||n>ROSTER_TOTAL_MAX){say('Pick between 1 and '+ROSTER_TOTAL_MAX+' spots');return}
+      await act(()=>upsert('groups/'+g.id,{roster:cleanRoster(r)}),'Roster saved: '+rosterText(r))}
     else if(a==='lgDraftStart'){const g=curGroup();if(!g||g.ownerId!==ME.uid)return;
       const ids=Object.keys(g.members);if(ids.length<2){say('Invite at least one friend first');return}
       const order=ids.map(u=>[Math.random(),u]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
       const ck=$('#dclock')?+$('#dclock').value:90;
-      await act(()=>upsert('groups/'+g.id,{draft:{status:'live',order,startedAt:NOW(),clock:ck,picks:{}}}),'The draft has started')}
+      await act(()=>upsert('groups/'+g.id,{roster:cleanRoster(g.roster||ROSTER_DEFAULT),draft:{status:'live',order,startedAt:NOW(),clock:ck,picks:{}}}),'The draft has started')}
   });
 })();
 </script>
@@ -2649,7 +2681,7 @@ boot();
     if(!myProfile())return;
     clearInterval(t);try{sessionStorage.removeItem('vs-pending')}catch(_){}
     location.hash='groups';
-    if(p.k==='create'){window.__pendMode=p.m;await createGroup('groups',p.n,'gi');window.__pendMode=null}
+    if(p.k==='create'){window.__pendMode=p.m;window.__pendRoster=p.r;await createGroup('groups',p.n,'gi');window.__pendMode=null;window.__pendRoster=null}
     else if(p.k==='join')await joinGroup('groups',p.c,'gi');
   },400);
   setTimeout(()=>clearInterval(t),300000);
