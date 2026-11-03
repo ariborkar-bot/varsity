@@ -955,7 +955,11 @@ document.addEventListener('submit',async e=>{
   try{
     if(AUTH.mode==='reset'){const {error}=await SB.auth.resetPasswordForEmail(email,{redirectTo:SITE_URL});if(error)throw error;AUTH.msg='Check your email for the reset link.'}
     else if(AUTH.mode==='up'){const {data,error}=await SB.auth.signUp({email,password:pw,options:{emailRedirectTo:SITE_URL}});if(error)throw error;
-      if(data.session){location.reload();return}AUTH.msg='Almost done. Open the link we just emailed you to confirm your account, then come back here.';AUTH.mode='in'}
+      if(data.session){location.reload();return}
+      /* no email step: sign straight in with the password they just chose */
+      const r=await SB.auth.signInWithPassword({email,password:pw});
+      if(!r.error){location.reload();return}
+      AUTH.msg='Your account is made. Email confirmation is still switched on in Supabase, so open the link we emailed you, then sign in here.';AUTH.mode='in'}
     else{const {error}=await SB.auth.signInWithPassword({email,password:pw});if(error)throw error;location.reload();return}
   }catch(err){const m=(err&&err.message)||'';AUTH.err=/invalid login/i.test(m)?'That email and password don’t match.':/not confirmed/i.test(m)?'Confirm your email first. Check your inbox for the link.':/already registered/i.test(m)?'That email already has an account. Sign in instead.':/password/i.test(m)&&/6/.test(m)?'Use at least 6 characters for your password.':m||'Something went wrong. Try again.'}
   AUTH.busy=false;openAuth();if($('#au-email'))$('#au-email').value=email;
