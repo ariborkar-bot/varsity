@@ -1,7 +1,7 @@
 /* Varsity service worker: lets the app open from the home screen, and offline.
    The page is always fetched fresh when there is a connection, so updates show up right away;
    the saved copy is only used offline. League data from Supabase is never cached. */
-const CACHE = 'varsity-v12';
+const CACHE = 'varsity-v13';
 const SHELL = ['./', 'manifest.webmanifest', 'logo.png', 'logos.js', 'fonts.css', 'icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/apple-touch-icon-v2.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
