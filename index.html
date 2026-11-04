@@ -1938,7 +1938,6 @@ function viewGroups(){
   const joinForm=`<form class="card lg-form" id="join-form"><h3>Join a league</h3><p class="muted">Paste the invite code a friend sent you.</p>
       <div class="lg-row"><input id="join-code" maxlength="12" placeholder="Invite code, like FNL-7Q2K" autocomplete="off" aria-label="Invite code"><button class="btn" type="submit">Join</button></div></form>`;
   if(!g)return `<div class="head"><h2>My leagues</h2><p>Draft a lineup of seven real players, face a friend every week, and climb your league’s standings.</p></div>
-    <div class="lg-steps"><div><b>1</b><span>Start a league or join one with a code</span></div><div><b>2</b><span>Draft a roster (by default one of each position and 2 WR, and you can change it), or build 7 spots on a budget</span></div><div><b>3</b><span>Each week the higher lineup total wins</span></div></div>
     <div class="two">${newForm}${joinForm}</div>`;
   const ids=Object.keys(g.members),cw=CURW(),mem=UI.member&&g.members[UI.member]?UI.member:ME.uid;
   const st=standingsOf(g),myI=st.findIndex(x=>x.uid===ME.uid),me=st[myI];
