@@ -1015,23 +1015,23 @@ select option{background:#0B1730;color:#EAF0F8}
 @media (min-width:760px){.tabs a:not([aria-current="page"]){background:rgba(4,22,10,.72)!important;border:1px solid rgba(255,255,255,.28)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
 .mast-tick{margin-bottom:30px!important;background:rgba(4,22,10,.6)!important;border-block:1px solid rgba(255,255,255,.45)!important;box-shadow:0 6px 16px rgba(2,18,7,.4)!important;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .gm-tabs{margin:2px 0 14px}.gm-tabs .chip{flex:1 1 0;min-width:0}
-.pk-bank{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.pk-n{font:800 2.6rem/1 var(--f-display);color:#FFC23D;letter-spacing:.02em}
-.pk-row{display:flex;align-items:stretch;gap:8px}.pk-at{align-self:center;color:var(--muted);font-size:.8rem}
-.pk-t{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:inherit;cursor:pointer;font:inherit}
-.pk-t b{font-size:.88rem;text-align:center;line-height:1.15}.pk-t small{color:var(--muted);font-size:.72rem}
-.pk-t .pk-o{font:800 1.15rem/1 var(--f-display);color:#FFC23D}
-.pk-t.on{border-color:#FFC23D;background:rgba(255,194,61,.12);box-shadow:0 0 0 2px rgba(255,194,61,.25)}
-.pk-t.saved::after{content:"Your pick";font-size:.65rem;font-weight:800;color:#06174A;background:#FFC23D;border-radius:999px;padding:2px 8px}
-.pk-t:disabled{opacity:.7;cursor:default}
-.pk-stk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
-.pk-go{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}.pk-go span{margin-right:auto}
-.pk-h{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
-.pk-h.won b:last-child{color:#4ADE80}.pk-h.lost b:last-child{color:#F87171}
+.bt-bank{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.bt-n{font:800 2.6rem/1 var(--f-display);color:#FFC23D;letter-spacing:.02em}
+.bt-row{display:flex;align-items:stretch;gap:8px}.bt-at{align-self:center;color:var(--muted);font-size:.8rem}
+.bt-t{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:inherit;cursor:pointer;font:inherit}
+.bt-t b{font-size:.88rem;text-align:center;line-height:1.15}.bt-t small{color:var(--muted);font-size:.72rem}
+.bt-t .bt-o{font:800 1.15rem/1 var(--f-display);color:#FFC23D}
+.bt-t.on{border-color:#FFC23D;background:rgba(255,194,61,.12);box-shadow:0 0 0 2px rgba(255,194,61,.25)}
+.bt-t.saved::after{content:"Your pick";font-size:.65rem;font-weight:800;color:#06174A;background:#FFC23D;border-radius:999px;padding:2px 8px}
+.bt-t:disabled{opacity:.7;cursor:default}
+.bt-stk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.bt-go{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}.bt-go span{margin-right:auto}
+.bt-h{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.bt-h.won b:last-child{color:#4ADE80}.bt-h.lost b:last-child{color:#F87171}
 .h-sec{font:800 1.5rem var(--f-display);letter-spacing:.03em;text-transform:uppercase;margin:0}
 .gm-divs{margin-bottom:10px}
-.pk-all{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-color:rgba(255,194,61,.5)}
-.pk-all .pk-go{margin:0}
+.bt-all{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-color:rgba(255,194,61,.5)}
+.bt-all .bt-go{margin:0}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1900,11 +1900,11 @@ function picksHTML(){
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(betResult(b,gm[id])==='open'?+b.stake||0:0),0);
   const avail=Math.round((bal-0)*100)/100;
-  const bankCard=`<section class="card pk-bank"><div><span class="lbl">Your tokens</span><div class="pk-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
   const card=g=>{
     const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today,ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
-      return `<button class="pk-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="pk-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small></button>`};
+      return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small></button>`};
     const od=side?o[side]:0,room=avail+(b?+b.stake:0);
     let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to make picks.</p>';
@@ -1912,20 +1912,20 @@ function picksHTML(){
     else if(locked)foot=b?`<p class="muted">Locked: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Picks are closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room).concat(room>0&&![5,10,25,50].includes(Math.floor(room))?[Math.floor(room)]:[]);
-      foot=`<div class="pk-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
-      <div class="pk-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span><button class="btn sm" data-act="pkPlace" data-g="${esc(id)}" ${room<1?'disabled':''}>${b?'Update pick':'Lock in pick'}</button>${b?`<button class="btn sm ghost" data-act="pkDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
+      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
+      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span><button class="btn sm" data-act="pkPlace" data-g="${esc(id)}" ${room<1?'disabled':''}>${b?'Update pick':'Lock in pick'}</button>${b?`<button class="btn sm ghost" data-act="pkDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a team to pick the winner.</p>';
-    return `<article class="gm pk-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="pk-row">${btn('a',g.a)}<span class="pk-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
+    return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
   /* history and the board */
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:betResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
-  const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="pk-h ${x.res}"><span><b>${esc(x.b.s==='h'?x.g.h:x.g.a)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
+  const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(x.b.s==='h'?x.g.h:x.g.a)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t).slice(0,20);
-  const boardCard=board.length?`<section class="card"><div class="qh"><h3>Token leaders</h3></div>${board.map((x,i)=>`<div class="pk-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${tk(x.t)}</b></div>`).join('')}</section>`:'';
+  const boardCard=board.length?`<section class="card"><div class="qh"><h3>Token leaders</h3></div>${board.map((x,i)=>`<div class="bt-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${tk(x.t)}</b></div>`).join('')}</section>`:'';
   /* lock in everything at once */
   const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
-  const allBar=staged.length?`<section class="card pk-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one above.`}</div></div><div class="pk-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
+  const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one above.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
   return bankCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} picks</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')+allBar:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
 }
 /* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
