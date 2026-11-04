@@ -1831,7 +1831,7 @@ function standingsHTML(gs,school){
 function picksHTML(){
   const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10);
   const open=gs.filter(g=>!gDone(g)),nextW=open.length?Math.min(...open.map(g=>g.w)):null;
-  const list=open.filter(g=>g.w===nextW).sort((a,b)=>(a.d<b.d?-1:a.d>b.d?1:0)||(a.dv||'').localeCompare(b.dv||'')||a.h.localeCompare(b.h));
+  const list=open.slice().sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||(a.dv||'').localeCompare(b.dv||'')||a.h.localeCompare(b.h));
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',mine=betsOf(ME.uid),gm=gameMap();
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(betResult(b,gm[id])==='open'?+b.stake||0:0),0);
@@ -1857,7 +1857,7 @@ function picksHTML(){
   const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="pk-h ${x.res}"><span><b>${esc(x.b.s==='h'?x.g.h:x.g.a)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t).slice(0,20);
   const boardCard=board.length?`<section class="card"><div class="qh"><h3>Token leaders</h3></div>${board.map((x,i)=>`<div class="pk-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${tk(x.t)}</b></div>`).join('')}</section>`:'';
-  return bankCard+(list.length?`<div class="qh"><h3>Week ${nextW} picks</h3><span class="muted">${list.length} games, odds set by Varsity</span></div><div class="gm-grid">${list.map(card).join('')}</div>`:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
+  return bankCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} picks</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
 }
 function viewGames(){
   const head=`<div class="head"><h2>Games</h2><p>${UI.gtab==='picks'?'Pick the winners of the upcoming games and grow your tokens.':'Every San Diego Section matchup by week, past scores, and the playoff brackets for each division.'}</p></div>`;
