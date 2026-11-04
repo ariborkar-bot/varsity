@@ -961,6 +961,9 @@ select option{background:#0B1730;color:#EAF0F8}
 @keyframes rnS{0%,42%{transform:perspective(220px) rotateY(0)}49%{transform:perspective(220px) rotateY(720deg) translateX(0)}50%,100%{transform:perspective(220px) rotateY(720deg)}}
 @media (max-width:759px){.mast-run{bottom:calc(8px + 28px)}.rn-s{width:38px;height:42px}.mast-yards{font-size:.8rem}}
 @media (prefers-reduced-motion:reduce){.mast-run{display:none}}
+
+#va-bar{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:60;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 10px 16px;border-radius:16px;color:#06174A;font:600 .88rem/1.2 var(--f-body);background:linear-gradient(180deg,#FFE08A,#FFC21A);border:1px solid rgba(255,255,255,.7);box-shadow:0 10px 30px rgba(3,12,50,.5),inset 0 1px 0 rgba(255,255,255,.7)}
+#va-bar button{font:800 .8rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;border-radius:999px;border:0;background:#06174A;color:#fff;cursor:pointer}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1279,8 +1282,9 @@ document.addEventListener('submit',async e=>{
     openName();$('#nm-name').value=name;
   }
 },true);
-async function signOut(){try{await SB.auth.signOut()}catch(_){}try{localStorage.removeItem('gf-browse')}catch(_){}location.reload()}
+async function signOut(){try{await SB.auth.signOut()}catch(_){}try{localStorage.removeItem('gf-browse');sessionStorage.removeItem('varsity-viewas')}catch(_){}location.reload()}
 let DB=null;
+let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',q:'',gi:null,fi:null,member:null,mw:null,tw:null,
@@ -2362,8 +2366,8 @@ async function adLoad(){
 }
 const adWhen=t=>t?new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'never';
 function viewAdmin(){
-  if(!ME.uid||ME.mode!=='live')return `<div class="head"><h2>Admin</h2><p>Sign in, then use Settings → Admin sign in.</p></div>`;
-  if(!ME.admin)return `<div class="head"><h2>Admin</h2><p>Enter your admin account and PIN to unlock the admin tools.</p></div>
+  if(!ME.uid||ME.mode!=='live')return `<div class="head"><h2>Admin systems</h2><p>Sign in, then use Settings → Admin sign in.</p></div>`;
+  if(!ME.admin)return `<div class="head"><h2>Admin systems</h2><p>Enter your admin account and PIN to unlock the admin tools.</p></div>
     <section class="card"><form id="ad-unlock" class="au-form"><label class="fld"><span>Admin PIN</span><input id="ad-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="## - ## - ####" required></label><p class="au-err" id="ad-err" role="alert" hidden></p><button class="btn" type="submit">Continue</button></form></section>`;
   if(AD.rows===null)adLoad();
   const rows=(AD.rows||[]).map(r=>({...r,p:S.profiles[r.uid]||null}));
@@ -2375,9 +2379,10 @@ function viewAdmin(){
     return `<section class="card"><div class="qh"><h3>${esc(p.name||'No profile yet')}${sel.is_admin?' <span class="ad-tag">Admin</span>':''}</h3><button class="btn sm ghost" data-ad="close">Close</button></div>
     <div class="ad-grid"><div><small>Email</small>${esc(sel.email||'none')}</div><div><small>Role</small>${esc(p.role||'none')}</div><div><small>School</small>${esc(p.school||'none')}</div><div><small>Position</small>${esc(p.pos||'none')}</div>
     <div><small>Joined</small>${adWhen(sel.created_at)}</div><div><small>Last sign in</small>${adWhen(sel.last_sign_in_at)}</div><div><small>Email confirmed</small>${sel.confirmed?'Yes':'No'}</div><div><small>Leagues</small>${lg.length?esc(lg.map(x=>x.name||'League').join(', ')):'none'}</div><div><small>Stat weeks entered</small>${lines}</div></div>
+    ${sel.uid!==(VA?VA.real:ME.uid)?`<div class="btns"><button class="btn sm" data-ad="viewas" data-id="${esc(sel.uid)}">View the app as ${esc(p.name||'this person')}</button></div><p class="muted">Opens the whole app exactly as they see it. It is view only, so nothing is changed on their account.</p>`:''}
     ${sel.p&&!sel.is_admin?`<div class="btns"><label class="fld" style="max-width:220px"><span>School</span><input id="ad-school" value="${esc(p.school||'')}"></label><button class="btn sm" data-ad="saveSchool" data-id="${esc(sel.uid)}">Save school</button></div>`:''}
     ${sel.is_admin||sel.uid===ME.uid?'':`<div class="btns"><button class="btn sm ghost" data-ad="remove" data-id="${esc(sel.uid)}">Remove this member</button></div><p class="muted">Removing deletes their profile, stats, lineups and login. It cannot be undone.</p>`}</section>`})():'';
-  return `<div class="head"><h2>Admin</h2><p>Everyone with an account, and the controls for the site. Only the two admin accounts can see this.</p></div>
+  return `<div class="head"><h2>Admin systems</h2><p>Everyone with an account, the controls for the site, and view-as for any account. Only the two admin accounts can see this.</p></div>
   <div class="btns"><a class="btn sm" href="#desk">Stat desk and approvals</a><button class="btn sm ghost" data-ad="lock">Lock admin</button><button class="btn sm ghost" data-ad="reload">Refresh</button></div>
   ${detail}
   <section class="card"><div class="qh"><h3>Accounts (${rows.length})</h3><label class="fld" style="max-width:260px"><input id="ad-q" type="search" placeholder="Search name, email, school" value="${esc(AD.q)}"></label></div>
@@ -2398,6 +2403,7 @@ document.addEventListener('click',async e=>{
   const t=e.target.closest&&e.target.closest('[data-ad]');if(!t||!ME.admin)return;
   const a=t.dataset.ad,id=t.dataset.id;
   if(a==='open'){AD.sel=id;render();window.scrollTo(0,0)}
+  else if(a==='viewas'){const r=(AD.rows||[]).find(x=>x.uid===id),p=S.profiles[id];try{sessionStorage.setItem('varsity-viewas',JSON.stringify({uid:id,name:(p&&p.name)||(r&&r.email)||'this member'}))}catch(_){say('Could not start view-as.');return}location.hash='#league';location.reload()}
   else if(a==='close'){AD.sel=null;render()}
   else if(a==='reload'){AD.rows=null;render()}
   else if(a==='lock'){try{await SB.rpc('admin_lock')}catch(_){}ME.admin=false;AD.rows=null;AD.sel=null;render()}
@@ -2412,7 +2418,7 @@ const viewOK=v=>VIEWS.includes(v)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk
 function bannerHTML(){
   const b=[];
   /* no sign-up banners */
-  if(ME.mode==='readonly')b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
+  if(ME.mode==='readonly'&&!VA)b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
   if(S.timeout&&!S.loaded.profiles)b.push(`<p class="note"><span class="pill pending">Slow</span><span>The league data is taking a while to load. What you see may be out of date.</span></p>`);
   const sample=!MP&&!S.settings.hideSample;
   b.push(`<p class="note">${MP?`<span class="pill approved">Box scores</span><span>${MP.players.length.toLocaleString()} San Diego Section players from ${MP.games} box scores, through ${esc(MP.through)}.</span>`:''}${sample?'<span class="pill pending">Sample</span><span>Sample players are made-up placeholders so the boards are never empty. Real players appear as they join.</span>':''}<a class="btn sm ghost" href="#scoring">Scoring rules</a>${ME.mode==='readonly'?'':'<button class="btn sm ghost" data-act="consent">Consent settings</button>'}</p>`);
@@ -2434,9 +2440,16 @@ function updateTicker(){
   const h=list.map(item).join('');
   el.innerHTML=`<div class="mt-track" style="--tk:${Math.max(40,list.length*6)}s">${h}${h}</div>`;
 }
+function updateVA(){
+  let b=document.getElementById('va-bar');
+  if(!VA){if(b)b.remove();return}
+  if(!b){b=document.createElement('div');b.id='va-bar';document.body.appendChild(b)}
+  b.innerHTML='<span><b>Viewing as '+esc(VA.name)+'</b> · view only</span><button type="button" id="va-exit">Exit</button>';
+}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#va-exit')){try{sessionStorage.removeItem('varsity-viewas')}catch(_){}location.hash='#admin';location.reload()}});
 function chrome(v){
   document.body.dataset.view=v;
-  updateTicker();
+  updateTicker();updateVA();
 
   document.querySelectorAll('.tabs a').forEach(a=>{a.removeAttribute('aria-current');if(a.getAttribute('href')==='#'+v)a.setAttribute('aria-current','page')});
   
@@ -2738,7 +2751,8 @@ async function boot(){
     let session=null;try{session=(await SB.auth.getSession()).data.session}catch(_){}
     if(session){ME.uid=session.user.id;ME.email=session.user.email;ME.mode='live';try{const a=await SB.rpc('is_admin_account');ME.adminAcct=!!a.data;if(ME.adminAcct){const {data}=await SB.rpc('is_admin');ME.admin=!!data}}catch(_){}}
     else{ME.uid=null;ME.mode='guest';ME.admin=false}
-    SB.auth.onAuthStateChange((ev,s)=>{if((ev==='SIGNED_IN'&&s&&s.user.id!==ME.uid)||(ev==='SIGNED_OUT'&&ME.uid))location.reload();if(ev==='PASSWORD_RECOVERY')setTimeout(newPassword,300)});
+    try{const v=JSON.parse(sessionStorage.getItem('varsity-viewas')||'null');if(v&&v.uid&&ME.admin&&ME.mode==='live'&&v.uid!==ME.uid){VA={uid:v.uid,name:v.name||'this member',real:ME.uid};ME.uid=v.uid;ME.mode='readonly'}else sessionStorage.removeItem('varsity-viewas')}catch(_){}
+    SB.auth.onAuthStateChange((ev,s)=>{if((ev==='SIGNED_IN'&&s&&s.user.id!==(VA?VA.real:ME.uid))||(ev==='SIGNED_OUT'&&ME.uid))location.reload();if(ev==='PASSWORD_RECOVERY')setTimeout(newPassword,300)});
   }else{
     DB=memDb();ME.uid='me';ME.admin=true;ME.mode='demo';
     try{const p=JSON.parse(localStorage.getItem('gsd-demo-profile')||'null');if(p)await DB.doc('profiles/me').set(p)}catch(_){}
@@ -2829,7 +2843,7 @@ boot();
       '<a role="menuitem" href="#hub">Account info</a>'+
       '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':ME.mode==='guest'?'Sign in or create account':'Pick a name')+'</button>'+
       '<a role="menuitem" href="#scoring">Scoring rules</a>'+
-      (ME.admin?'<a role="menuitem" href="#admin">Admin area</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
+      (ME.admin?'<a role="menuitem" href="#admin">Admin systems</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
       (joined?'<hr><button role="menuitem" class="dz" data-act="delProfile">Delete my profile</button>':'')+
       (ME.mode==='live'?'<hr><button role="menuitem" id="sm-out">Sign out'+(ME.email?' <small style="opacity:.6;margin-left:auto">'+esc(ME.email)+'</small>':'')+'</button>':'');
     document.body.appendChild(m);g.setAttribute('aria-expanded','true');
