@@ -1027,6 +1027,8 @@ select option{background:#0B1730;color:#EAF0F8}
 .pk-go{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}.pk-go span{margin-right:auto}
 .pk-h{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .pk-h.won b:last-child{color:#4ADE80}.pk-h.lost b:last-child{color:#F87171}
+.h-sec{font:800 1.5rem var(--f-display);letter-spacing:.03em;text-transform:uppercase;margin:0}
+.gm-divs{margin-bottom:10px}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1043,7 +1045,6 @@ select option{background:#0B1730;color:#EAF0F8}
       <a href="#groups"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.4c2.2.7 3.5 2.6 3.5 5.6"/></svg><span>Leagues</span></a>
       <a href="#me"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Me</span></a>
       <a href="#games"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h4M7 17h7"/></svg><span>Games</span></a>
-      <a href="#hub" class="tab-acct"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.3"/><path d="M5.5 16.5c.6-1.8 2-2.7 3.5-2.7s2.9.9 3.5 2.7M14.5 10h4M14.5 13.5h3"/></svg><span>Account<span class="dsk"> info</span></span></a>
     </nav>
   </div>
   <div class="mast-yards" aria-hidden="true"><i class="t" style="left:14%">10</i><i class="b" style="left:14%">10</i><i class="t" style="left:23%">20</i><i class="b" style="left:23%">20</i><i class="t" style="left:32%">30</i><i class="b" style="left:32%">30</i><i class="t" style="left:41%">40</i><i class="b" style="left:41%">40</i><i class="t" style="left:50%">50</i><i class="b" style="left:50%">50</i><i class="t" style="left:59%">40</i><i class="b" style="left:59%">40</i><i class="t" style="left:68%">30</i><i class="b" style="left:68%">30</i><i class="t" style="left:77%">20</i><i class="b" style="left:77%">20</i><i class="t" style="left:86%">10</i><i class="b" style="left:86%">10</i></div>
@@ -1913,20 +1914,20 @@ function picksHTML(){
   return bankCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} picks</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
 }
 function viewGames(){
-  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.',po:'The playoff bracket for every division.',stand:'Records for every San Diego Section team.'})[UI.gtab]||'Every San Diego Section matchup by week and past scores.'}</p></div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['stand','Standings'],['po','Playoffs'],['picks','Picks']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${(UI.gtab||'sched')===v}">${l}</button>`).join('')}</div>`;
-  return head+tabs+(UI.gtab==='picks'?picksHTML():UI.gtab==='po'?playoffsHTML():UI.gtab==='stand'?standTab():viewSched(''));
+  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.'})[UI.gtab]||'Every San Diego Section matchup by week, the playoff bracket for every division, and team standings.'}</p></div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['picks','Picks']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${(UI.gtab||'sched')===v}">${l}</button>`).join('')}</div>`;
+  return head+tabs+(UI.gtab==='picks'?picksHTML():viewSched('')+`<div class="qh" style="margin-top:26px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()+`<div class="qh" style="margin-top:26px"><h2 class="h-sec">Standings</h2></div>`+(standingsHTML((GAMES&&GAMES.games)||[],UI.gschool)||'<p class="empty">No results yet.</p>'));
 }
 
 /* ---------- player hub ---------- */
 function viewHub(){
   const pr=myProfile();
   const kind={player:'Athlete and fantasy manager',coach:'Coach or scorekeeper',fan:'Fantasy manager'};
-  const head=`<div class="head"><h2>Account info</h2><p>Your account, your school and your fantasy leagues in one place.</p></div>`;
+  const head=`<div class="head"><h2>Me</h2><p>Your account and school, then your own stats and where you rank.</p></div>`;
   const acct=pr?`<section class="card"><div class="qh"><h3>Your Varsity profile</h3></div>
       <div class="two"><div><span class="lbl">Name</span><h3>${esc(pr.name)}</h3><p class="muted">${kind[pr.role]||''}</p></div>
       <div><span class="lbl">School</span>${pr.school?`<p class="sch">${slogo(pr.school,28)}<b>${esc(pr.school)}</b></p><p class="muted">${esc((POS_ALL.find(x=>x[0]===(pr.posLabel||pr.pos))||[0,pr.posLabel||pr.pos||''])[1])}</p>`:'<p class="muted">Not set. Add your school to see your own stats on Me.</p>'}</div></div>
-      <div class="btns">${pr.role==='player'?'<button class="btn" data-act="toMe">Go to Me</button>':''}<button class="btn ghost" data-act="toGroups">Go to my leagues</button><button class="btn ghost" data-act="consent">Edit profile</button></div>
+      <div class="btns"><button class="btn ghost" data-act="toGroups">Go to my leagues</button><button class="btn ghost" data-act="consent">Edit profile</button></div>
       <div class="danger-row"><div><b>Delete my profile</b><p class="muted">Removes your profile, your lineups and you from every league. This cannot be undone.</p></div><button class="btn danger" data-act="delProfile">Delete my profile</button></div></section>`
     :`<section class="card"><h3>${ME.mode==='guest'?'Make an account to play':'Pick your name'}</h3><p>${ME.mode==='guest'?'Anyone can browse stats. To build lineups and play in leagues, sign in or create a free account.':'Last step: choose the name your leagues will see.'}</p><div class="btns"><button class="btn" data-act="consent">${ME.mode==='guest'?'Sign in or create account':'Pick a name'}</button></div></section>`;
   return head+acct+`<section class="card"><h3>Fantasy competition</h3><p class="muted">Managers pick real athletes, then compete using the same stat records.</p><ul><li>Lineups and private leagues</li><li>Weekly head-to-head matchups</li><li>League leaderboards</li></ul><div class="btns"><button class="btn ghost" data-act="toGroups">Open my leagues</button></div></section>`;
@@ -2301,9 +2302,10 @@ function meP(){
   const mp=c.find(p=>p.pos===pr.pos)||c[0];
   return mp||players().find(p=>p.uid===ME.uid)||null;
 }
+function viewMeAll(){return viewHub()+viewMe()}
 function viewMe(){
   const pr=myProfile();
-  const head=`<div class="head"><h2>Me</h2><p>Your own stats, fantasy points, and where you rank at your school and across the San Diego Section.</p></div>`;
+  const head=`<div class="head" style="margin-top:26px"><h2>My stats</h2><p>Your own stats, fantasy points, and where you rank at your school and across the San Diego Section.</p></div>`;
   if(pr&&pr.role==='player'&&pr.school&&!FIELDS[pr.pos])return head+`<p class="empty">Box scores don’t track stats for ${esc((POS_ALL.find(x=>x[0]===pr.posLabel)||[0,'your position'])[1].toLowerCase())} players, so there’s no fantasy stat line for you. You can still build lineups and play in leagues.</p><div class="btns"><button class="btn ghost" data-act="consent">Edit profile</button></div>`;
   if(!pr||pr.role!=='player'||!pr.school)return head+`<p class="empty">Play high school football? Add your school and position to see your own stats and where you rank.</p><div class="btns"><button class="btn" data-act="consent">${pr?'Add my school':ME.mode==='guest'?'Sign in to get started':'Get started'}</button></div>`;
   const me=meP()||{key:ME.uid,uid:ME.uid,name:pr.name,school:pr.school,pos:pr.pos,games:Array(WEEKS).fill(null)};
@@ -2649,7 +2651,7 @@ document.addEventListener('click',async e=>{
 });
 
 /* ---------- render ---------- */
-const VIEWS=['hub','league','groups','games','me','scoring','admin','desk'];
+const VIEWS=['league','groups','games','me','scoring','admin','desk'];
 const viewOK=v=>VIEWS.includes(v)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
 function bannerHTML(){
   const b=[];
@@ -2694,7 +2696,7 @@ function chrome(v){
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
 }
 function render(){
-  const V={hub:viewHub,league:viewLeague,groups:viewGroups,games:viewGames,me:viewMe,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
+  const V={league:viewLeague,groups:viewGroups,games:viewGames,me:viewMeAll,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
   let v=UI.view;
   $('#main').innerHTML=V[v]();
   chrome(v);
@@ -2713,7 +2715,7 @@ function touch(){
 }
 document.addEventListener('focusout',()=>{if(dirty)setTimeout(()=>{if(!typing()){dirty=false;render()}},60)});
 function route(){
-  const v=location.hash.slice(1);
+  let v=location.hash.slice(1);if(v==='hub')v='me';
   UI.view=viewOK(v)?v:'league';
   closePlayer();closeNotes();render();window.scrollTo(0,0);
 }
@@ -2972,7 +2974,7 @@ document.addEventListener('click',e=>{
       const ok=await act(deleteProfile);
       if(!ok)return;
       if(ME.mode==='demo'){try{localStorage.removeItem('gsd-demo-profile')}catch(_){}}
-      UI.gi=null;UI.fi=null;seenInit=false;say('Your profile was deleted');location.hash='#hub';openGate();
+      UI.gi=null;UI.fi=null;seenInit=false;say('Your profile was deleted');location.hash='#me';openGate();
     });
   }else if(a==='delGroup'||a==='leaveGroup'){
     const coll=t.dataset.coll,g=(coll==='groups'?S.groups:S.fgroups)[t.dataset.id];if(!g)return;
@@ -3139,7 +3141,7 @@ boot();
     const joined=typeof myProfile==='function'&&!!myProfile();
     m=document.createElement('div');m.className='setm';m.setAttribute('role','menu');
     m.innerHTML='<h4>Settings</h4>'+
-      '<a role="menuitem" href="#hub">Account info</a>'+
+      '<a role="menuitem" href="#me">Me and account</a>'+
       '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':ME.mode==='guest'?'Sign in or create account':'Pick a name')+'</button>'+
       '<a role="menuitem" href="#scoring">Scoring rules</a>'+
       (ME.admin?'<a role="menuitem" href="#admin">Admin systems</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
