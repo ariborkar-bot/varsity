@@ -1,7 +1,7 @@
 /* Varsity service worker: lets the app open from the home screen, and offline.
    The page is always fetched fresh when there is a connection, so updates show up right away;
    the saved copy is only used offline. League data from Supabase is never cached. */
-const CACHE = 'varsity-v60';
+const CACHE = 'varsity-v61';
 const SHELL = ['./', 'manifest.webmanifest', 'logo.png', 'logos.js', 'games.js', 'fonts.css', 'icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/apple-touch-icon-v2.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -15,6 +15,10 @@ self.addEventListener('fetch', e => {
   if (req.mode === 'navigate' || (same && url.pathname.endsWith('/index.html'))) {
     e.respondWith(fetch(req, { cache: 'no-cache' }).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put('./', copy)); return r; })
       .catch(() => caches.match('./')));
+    return;
+  }
+  if (same && url.pathname.endsWith('/games.js')) {            // schedule data: always try the network first so new games show up right away
+    e.respondWith(fetch(req, { cache: 'no-cache' }).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return r; }).catch(() => caches.match(req)));
     return;
   }
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
