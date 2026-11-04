@@ -1060,6 +1060,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .bt-h{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .bt-h.won b:last-child{color:#4ADE80}.bt-h.lost b:last-child{color:#F87171}
 .bt-h.won,.bt-h.lost,.bt-h.push{border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;align-items:center}
+.bt-g.res-won{border:2px solid #4ADE80!important;background:rgba(74,222,128,.07)}.bt-g.res-lost{border:2px solid #F87171!important;background:rgba(248,113,113,.07)}.bt-fin{margin:8px 0 0;font-size:.85rem}.bt-fin.won b{color:#4ADE80}.bt-fin.lost b{color:#F87171}
 .bt-h.won{border-color:#4ADE80;background:rgba(74,222,128,.08)}.bt-h.lost{border-color:#F87171;background:rgba(248,113,113,.08)}
 .h-sec{font:800 1.5rem var(--f-display);letter-spacing:.03em;text-transform:uppercase;margin:0}
 .gm-divs{margin-bottom:10px}
@@ -2083,27 +2084,29 @@ function recordCard(results){
 function picksHTML(){
   const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10);
   const open=gs.filter(g=>!gDone(g)),nextW=open.length?Math.min(...open.map(g=>g.w)):null;
-  const list=open.slice().sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||(a.dv||'').localeCompare(b.dv||'')||a.h.localeCompare(b.h));
+  const mine0=ME.uid?betsOf(ME.uid):{};
+  const list=gs.filter(g=>!gDone(g)||mine0[gid(g)]).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||(a.dv||'').localeCompare(b.dv||'')||a.h.localeCompare(b.h));
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',mine=betsOf(ME.uid),gm=gameMap();
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(betResult(b,gm[id])==='open'?+b.stake||0:0),0);
   const avail=Math.round((bal-0)*100)/100;
   const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
   const card=g=>{
-    const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today,ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
+    const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
       return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small></button>`};
     const od=side?o[side]:0,room=avail+(b?+b.stake:0);
     let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play Pick ’em.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'';
+    else if(gDone(g)&&b)foot=`<p class="bt-fin ${res}"><b>${res==='won'?'Correct':res==='lost'?'Wrong':'Push'}</b> · Final ${esc(g.a)} ${g.as}, ${esc(g.h)} ${g.hs} · ${res==='won'?'+'+tk(b.stake*(b.odds-1)):res==='push'?'stake back':'-'+tk(b.stake)}</p>`
     else if(locked)foot=b?`<p class="muted">Locked: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Pick ’em is closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room).concat(room>0&&![5,10,25,50].includes(Math.floor(room))?[Math.floor(room)]:[]);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pk" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span><button class="btn sm" data-act="pkPlace" data-g="${esc(id)}" ${room<1?'disabled':''}>${b?'Update pick':'Lock in pick'}</button>${b?`<button class="btn sm ghost" data-act="pkDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a team to pick the winner.</p>';
-    return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
+    return `<article class="gm bt-g ${res==='won'||res==='lost'?'res-'+res:''}"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
   /* history and the board */
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:betResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
   const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(x.b.s==='h'?x.g.h:x.g.a)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
@@ -2155,32 +2158,33 @@ function atsResult(b,g){
 }
 function spreadHTML(){
   const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10),gm=gameMap();
-  const open=gs.filter(g=>!gDone(g)).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||a.h.localeCompare(b.h));
-  const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',mine=atsOf(ME.uid);
+  const mine=atsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const open=gs.filter(g=>!gDone(g)||mine[gid(g)]).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||a.h.localeCompare(b.h));
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(atsResult(b,gm[id])==='open'?+b.stake||0:0),0);
   const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
   const nm2=(x,g)=>x.s==='h'?g.h:g.a,lnTxt=x=>fmtLine(x.s==='h'?+x.line:-x.line);
   const card=g=>{
-    const id=gid(g),L=spreadFor(g),b=mine[id],locked=g.d<=today,ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
+    const id=gid(g),L=spreadFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
     const btn=(sd,n)=>{const ln=sd==='h'?L:-L,lk=b&&b.s===sd&&ui.s===undefined?(sd==='h'?+b.line:-b.line):ln;
       return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="atSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${fmtLine(lk)}</span><small>pays ${ATS_PAY.toFixed(2)}x</small></button>`};
     const room=bal+(b?+b.stake:0);let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'';
+    else if(gDone(g)&&b)foot=`<p class="bt-fin ${res}"><b>${res==='won'?'Correct':res==='lost'?'Wrong':'Push'}</b> · Final ${esc(g.a)} ${g.as}, ${esc(g.h)} ${g.hs} · ${res==='won'?'+'+tk(b.stake*(b.odds-1)):res==='push'?'stake back':'-'+tk(b.stake)}</p>`
     else if(locked)foot=b?`<p class="muted">Locked: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="atStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="at" data-g="${esc(id)}" data-o="${ATS_PAY}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*ATS_PAY)}</b></span><button class="btn sm" data-act="atPlace" data-g="${esc(id)}" ${room<1?'disabled':''}>${b?'Update pick':'Lock in pick'}</button>${b?`<button class="btn sm ghost" data-act="atDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a side to take the points.</p>';
-    return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
+    return `<article class="gm bt-g ${res==='won'||res==='lost'?'res-'+res:''}"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:atsResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
   const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(nm2(x.b,x.g))} ${lnTxt(x.b)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(atsOf(u)).length).map(u=>{const r=Object.entries(atsOf(u)).map(([id,b])=>atsResult(b,gm[id]));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w).slice(0,20);
   const boardCard=board.length?`<section class="card"><div class="qh"><h3>Best against the spread</h3></div>${board.map((x,i)=>`<div class="bt-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.w}-${x.l}</b></div>`).join('')}</section>`:'';
   const stakeOf=g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
-  const staged=can?open.filter(g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
+  const staged=can?open.filter(g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-bal;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(bal)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one below.`}</div></div><div class="bt-go"><button class="btn" data-act="atAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="atClear">Clear</button></div></section>`:'';
   const nextW=open.length?open[0].w:null;
