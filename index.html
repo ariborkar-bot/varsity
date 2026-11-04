@@ -927,12 +927,40 @@ select option{background:#0B1730;color:#EAF0F8}
   linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0) 40%,rgba(2,8,35,.28)),
   linear-gradient(105deg,#06174A 0%,#0E2F8C 34%,#1D5BD8 66%,#52B6F4 100%)!important}
 .mast .mast-in{position:relative}
-.mast::before{background:
-   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='980' height='100' viewBox='0 0 980 100'%3E%3Cg fill='rgba%28255,255,255,.22%29' font-family='Impact,Arial Black,sans-serif' font-size='20' font-weight='900'%3E%3Ctext x='70' y='19' text-anchor='middle'%3E1 0%3C/text%3E%3Ctext x='210' y='19' text-anchor='middle'%3E2 0%3C/text%3E%3Ctext x='350' y='19' text-anchor='middle'%3E3 0%3C/text%3E%3Ctext x='490' y='19' text-anchor='middle'%3E4 0%3C/text%3E%3Ctext x='630' y='19' text-anchor='middle'%3E5 0%3C/text%3E%3Ctext x='770' y='19' text-anchor='middle'%3E4 0%3C/text%3E%3Ctext x='910' y='19' text-anchor='middle'%3E3 0%3C/text%3E%3C/g%3E%3C/svg%3E") 0 4px/980px 100px repeat-x,
+/*FIELDBG*/.mast::before{background:
    linear-gradient(90deg,rgba(255,255,255,.55) 0 2px,transparent 2px 11px) 0 24%/100% 7px no-repeat,
    linear-gradient(90deg,rgba(255,255,255,.55) 0 2px,transparent 2px 11px) 0 76%/100% 7px no-repeat,
    linear-gradient(90deg,rgba(255,255,255,.14) 0 5%,transparent 5% 95%,rgba(255,255,255,.14) 95% 100%),
    repeating-linear-gradient(90deg,rgba(255,255,255,.2) 0 2px,transparent 2px 64px)!important}
+
+/* real football field markings: end zones, 5-yard lines, 1-yard hashes, sidelines, yard numbers */
+.mast::before{background:
+   linear-gradient(90deg,rgba(255,255,255,.16) 0 5%,transparent 5% 95%,rgba(255,255,255,.16) 95% 100%),
+   linear-gradient(rgba(255,255,255,.5),rgba(255,255,255,.5)) 0 0/100% 3px no-repeat,
+   linear-gradient(rgba(255,255,255,.5),rgba(255,255,255,.5)) 0 100%/100% 3px no-repeat,
+   repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 2px,transparent 2px 9%) 5% 0/100% 100% repeat-x,
+   repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 2px,transparent 2px 9%) 9.5% 0/100% 14px repeat-x,
+   repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 2px,transparent 2px 9%) 9.5% 100%/100% 14px repeat-x,
+   repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 1px,transparent 1px .9%) 5% 31%/90% 8px no-repeat,
+   repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 1px,transparent 1px .9%) 5% 69%/90% 8px no-repeat!important}
+.mast-yards{position:absolute;inset:0;z-index:-1;pointer-events:none;font:900 1.05rem/1 var(--f-display);letter-spacing:.08em;color:rgba(255,255,255,.34)}
+.mast-yards i{position:absolute;font-style:normal;transform:translateX(-50%)}
+.mast-yards i.t{top:8px}.mast-yards i.b{bottom:8px;transform:translateX(-50%) rotate(180deg)}
+.mast-run{position:absolute;left:0;bottom:calc(12px + 30px);z-index:3;width:100%;height:0;pointer-events:none}
+.rn-x{position:absolute;left:0;bottom:0;animation:rnX 12s linear infinite}
+.rn-y{animation:rnY 12s linear infinite}
+.rn-s{width:44px;height:48px;transform-origin:50% 60%;animation:rnS 12s linear infinite;filter:drop-shadow(0 4px 6px rgba(3,12,50,.55))}
+.rn-s svg{width:100%;height:100%;overflow:visible}
+.rn-lg1,.rn-lg2{transform-origin:22px 28px;animation:rnLeg .34s ease-in-out infinite alternate}
+.rn-lg2{animation-direction:alternate-reverse}
+.rn-ar{transform-origin:24px 19px;animation:rnLeg .34s ease-in-out infinite alternate-reverse}
+@keyframes rnLeg{from{transform:rotate(-38deg)}to{transform:rotate(38deg)}}
+@keyframes rnX{0%{transform:translateX(-70px)}100%{transform:translateX(calc(100vw + 40px))}}
+/* two hurdles, one back-flip-free spin move, one juke */
+@keyframes rnY{0%,16%{transform:translateY(0)}20%{transform:translateY(-26px)}24%,40%{transform:translateY(0)}44%{transform:translateY(-8px)}48%,62%{transform:translateY(0)}66%{transform:translateY(-30px)}70%,84%{transform:translateY(0)}88%{transform:translateY(-22px)}92%,100%{transform:translateY(0)}}
+@keyframes rnS{0%,42%{transform:perspective(220px) rotateY(0)}49%{transform:perspective(220px) rotateY(720deg) translateX(0)}50%,100%{transform:perspective(220px) rotateY(720deg)}}
+@media (max-width:759px){.mast-run{bottom:calc(8px + 28px)}.rn-s{width:38px;height:42px}.mast-yards{font-size:.8rem}}
+@media (prefers-reduced-motion:reduce){.mast-run{display:none}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -952,6 +980,8 @@ select option{background:#0B1730;color:#EAF0F8}
       <a href="#hub" class="tab-acct"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.3"/><path d="M5.5 16.5c.6-1.8 2-2.7 3.5-2.7s2.9.9 3.5 2.7M14.5 10h4M14.5 13.5h3"/></svg><span>Account<span class="dsk"> info</span></span></a>
     </nav>
   </div>
+  <div class="mast-yards" aria-hidden="true"><i class="t" style="left:14%">10</i><i class="b" style="left:14%">10</i><i class="t" style="left:23%">20</i><i class="b" style="left:23%">20</i><i class="t" style="left:32%">30</i><i class="b" style="left:32%">30</i><i class="t" style="left:41%">40</i><i class="b" style="left:41%">40</i><i class="t" style="left:50%">50</i><i class="b" style="left:50%">50</i><i class="t" style="left:59%">40</i><i class="b" style="left:59%">40</i><i class="t" style="left:68%">30</i><i class="b" style="left:68%">30</i><i class="t" style="left:77%">20</i><i class="b" style="left:77%">20</i><i class="t" style="left:86%">10</i><i class="b" style="left:86%">10</i></div>
+  <div class="mast-run" aria-hidden="true"><div class="rn-x"><div class="rn-y"><div class="rn-s"><svg viewBox="0 0 44 48"><g class="rn-lg2"><path d="M22 28 L22 44 L29 44" fill="none" stroke="#0A1E66" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><g class="rn-lg1"><path d="M22 28 L22 44 L29 44" fill="none" stroke="#14338F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="14" y="14" width="16" height="17" rx="6" fill="#FFC21A" stroke="#fff" stroke-width="1.5"/><text x="22" y="26" text-anchor="middle" font-size="9" font-weight="900" font-family="Arial Black,Impact,sans-serif" fill="#06174A">V</text><g class="rn-ar"><path d="M24 19 L34 23" stroke="#FFC21A" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="37" cy="24" rx="5" ry="3" fill="#8B4A1B" transform="rotate(20 37 24)"/></g><circle cx="23" cy="9" r="8" fill="#fff" stroke="#9FD0FF" stroke-width="1.5"/><path d="M26 6 h6 M26 10 h6" stroke="#06174A" stroke-width="1.6" stroke-linecap="round"/><path d="M15 9a8 8 0 0 1 8-8" stroke="#FFC21A" stroke-width="2.5" fill="none"/></svg></div></div></div></div>
   <div class="mast-tick" id="mast-tick" aria-label="Top player stat lines"></div>
 </header>
 <main class="wrap">
