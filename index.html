@@ -142,23 +142,23 @@ input[type=number]{width:100%}
 .sim-heads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .sim-ch{display:flex;align-items:center;justify-content:center;padding:9px;border-radius:12px;font:900 .85rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase}
 .sim-ch.off{background:rgba(47,107,255,.18);color:#9DB8FF;border:1px solid rgba(47,107,255,.5)}.sim-ch.def{background:rgba(244,63,94,.16);color:#FFA3B3;border:1px solid rgba(244,63,94,.5)}
-.sim-board{container-type:inline-size;position:relative;margin-top:10px;width:100%;aspect-ratio:9/15;border-radius:18px;overflow:hidden;border:1px solid #1d5c35;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 10%),linear-gradient(180deg,#1a6b3a,#134f2b)}
+.sim-board{container-type:inline-size;position:relative;margin-top:10px;width:100%;aspect-ratio:9/16.5;border-radius:18px;overflow:hidden;border:1px solid #1d5c35;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 10%),linear-gradient(180deg,#1a6b3a,#134f2b)}
 .sb-los{position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed rgba(255,214,102,.75)}
 .sb-slot{position:absolute;transform:translate(-50%,-50%);z-index:1}
 .sb-card{position:relative;box-sizing:border-box;width:52px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px 5px!important;border-radius:12px!important;border:1px solid color-mix(in srgb,var(--pc) 70%,#000)!important;border-top:4px solid var(--pc)!important;background:linear-gradient(170deg,color-mix(in srgb,var(--pc) 18%,#0f2147),#0a1630)!important;box-shadow:0 6px 14px rgba(0,0,0,.45)!important;text-align:center}
 .sb-card .sim-pos{font-size:.66rem;padding:3px 5px;border-radius:6px;gap:3px}.sb-card .sim-pos i{display:none}
 .sb-card .av{width:26px!important;height:26px!important;font-size:.55rem!important}
 .sb-nm{font-size:.54rem;line-height:1.1;display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sb-nm .n-l,.sb-sc{display:none}
-.sb-pts b{display:block;font:900 .85rem/1 var(--f-display)}.sb-pts small{display:block;color:var(--muted);font-size:.48rem;white-space:nowrap}.sb-pts em{display:none;font-style:normal}
+.sb-pts b{display:block;font:900 .85rem/1 var(--f-display)}.sb-pts small{display:block;color:var(--muted);font-size:.48rem;white-space:nowrap}.sb-pts em{display:none;font-style:normal}.sb-pts u{display:block;text-decoration:none;font:800 .5rem/1 var(--f-body);color:#FFD27A;letter-spacing:.08em;margin-top:1px}
 .sb-rs{border:0;border-radius:999px;background:linear-gradient(180deg,#FFC23D,#FF9F1C);color:#1a1200;font:900 .8rem/1 var(--f-display);min-width:22px;height:20px;padding:0 5px;cursor:pointer}.sb-rs span{display:none}.sb-rs.off{background:var(--surface2);color:var(--muted);opacity:.6;cursor:default}
 @container (max-width:340px){.sb-card{width:44px}.sb-nm{font-size:.5rem}.sb-pts small{display:none}.sb-card .av{width:22px!important;height:22px!important;font-size:.5rem!important}.sb-card .sim-pos{font-size:.6rem;padding:2px 4px}}
-@container (min-width:500px) and (max-width:799px){.sim-board{aspect-ratio:1/1.05}.sb-card{width:60px}.sb-nm{font-size:.6rem}.sb-pts small{font-size:.54rem}}
-@container (min-width:800px){
- .sim-board{aspect-ratio:16/10}
+@container (min-width:500px) and (max-width:899px){.sim-board{aspect-ratio:1/1.05}.sb-card{width:60px}.sb-nm{font-size:.6rem}.sb-pts small{font-size:.54rem}}
+@container (min-width:900px){
+ .sim-board{aspect-ratio:16/13}
  .sb-card{width:128px;gap:4px;padding:8px 6px 9px!important}.sb-card .sim-pos{font-size:.95rem;padding:4px 10px}.sb-card .sim-pos i{display:inline}
  .sb-card .av{width:44px!important;height:44px!important;font-size:.9rem!important}
  .sb-nm{font-size:.82rem}.sb-nm .n-s{display:none}.sb-nm .n-l{display:inline}.sb-sc{display:block;font-size:.66rem;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
- .sb-pts b{font-size:1.2rem}.sb-pts small{font-size:.66rem}.sb-pts em{display:inline}.sb-rs{height:28px;font-size:.78rem;padding:0 12px}.sb-rs span{display:inline}
+ .sb-pts b{font-size:1.3rem}.sb-pts u{font-size:.62rem}.sb-pts small{font-size:.68rem}.sb-pts em{display:inline}.sb-rs{height:28px;font-size:.78rem;padding:0 12px}.sb-rs span{display:inline}
 }
 .sim-res{display:grid!important;grid-template-columns:auto 1fr;gap:6px 16px;align-items:center}.sim-res>*:nth-child(n+3){grid-column:1/-1}.sim-gr{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;font:900 2.6rem/1 var(--f-display);color:#1a1200;background:linear-gradient(135deg,#FFC23D,#FF9F1C)}.sim-opt summary{cursor:pointer;color:var(--muted);font-weight:700;margin:6px 0}
 .fc-top{width:100%;display:flex;justify-content:space-between;align-items:center}.fc-pos{font:900 .9rem/1 var(--f-display);color:#FFD27A;letter-spacing:.05em}
@@ -2324,10 +2324,10 @@ const SIM_RESPINS=5;
 const SIM_SLOTS=[
   {k:'QB',label:'QB',elig:['QB']},{k:'RB',label:'RB',elig:['RB']},{k:'WR1',label:'WR',elig:['WR']},{k:'WR2',label:'WR',elig:['WR']},
   {k:'TE',label:'TE',elig:['TE']},{k:'FLEX',label:'FLEX',elig:['RB','WR','TE']},
-  {k:'DB1',label:'DB',elig:['DEF'],sub:['DB']},{k:'DB2',label:'DB',elig:['DEF'],sub:['DB']},
-  {k:'LB1',label:'LB',elig:['DEF'],sub:['LB']},{k:'LB2',label:'LB',elig:['DEF'],sub:['LB']},
-  {k:'DL1',label:'DL',elig:['DEF'],sub:['DL']},{k:'DL2',label:'DL',elig:['DEF'],sub:['DL']}];
-const SIM_POS={RB:[9,50],QB:[25,50],WR1:[41,11],TE:[41,37],FLEX:[41,63],WR2:[41,89],DL1:[59,38],DL2:[59,62],LB1:[75,27],LB2:[75,73],DB1:[91,11],DB2:[91,89]};
+  ...[1,2,3,4].map(n=>({k:'DB'+n,label:'DB',elig:['DEF'],sub:['DB']})),
+  ...[1,2,3].map(n=>({k:'LB'+n,label:'LB',elig:['DEF'],sub:['LB']})),
+  ...[1,2,3,4].map(n=>({k:'DL'+n,label:'DL',elig:['DEF'],sub:['DL']}))];
+const SIM_POS={RB:[9,50],QB:[25,50],WR1:[41,11],TE:[41,37],FLEX:[41,63],WR2:[41,89],DL1:[59,14],DL2:[59,38],DL3:[59,62],DL4:[59,86],LB1:[75,24],LB2:[75,50],LB3:[75,76],DB1:[91,11],DB2:[91,37],DB3:[91,63],DB4:[91,89]};
 const SIM_COL={QB:'#E65B28',RB:'#079B82',WR:'#2868E8',TE:'#9655D8',FLEX:'#E8A317',DB:'#22A6D9',LB:'#E0455B',DL:'#7FB432'};
 const simKey=p=>((p.name||'')+'|'+(p.school||'')).toLowerCase();
 const simTot=p=>agg(p,'season').v;
@@ -2336,7 +2336,7 @@ const simPool=(slot,ex)=>players().filter(p=>p.mp&&!ex.has(simKey(p))&&slotOk(sl
 function simBest(){
   const by=(pos,sub)=>{const seen=new Set();return players().filter(p=>p.mp&&p.pos===pos&&(!sub||p.sub===sub)&&agg(p,'season').n>=2).sort((a,b)=>simTot(b)-simTot(a)).filter(p=>{const k=simKey(p);if(seen.has(k))return false;seen.add(k);return true})};
   const QB=by('QB'),RB=by('RB'),WR=by('WR'),TE=by('TE'),DB=by('DEF','DB'),LB=by('DEF','LB'),DL=by('DEF','DL');
-  const pick=[['QB',QB[0]],['RB',RB[0]],['WR',WR[0]],['WR',WR[1]],['TE',TE[0]],['DB',DB[0]],['DB',DB[1]],['LB',LB[0]],['LB',LB[1]],['DL',DL[0]],['DL',DL[1]]];
+  const pick=[['QB',QB[0]],['RB',RB[0]],['WR',WR[0]],['WR',WR[1]],['TE',TE[0]],...[0,1,2,3].map(n=>['DB',DB[n]]),...[0,1,2].map(n=>['LB',LB[n]]),...[0,1,2,3].map(n=>['DL',DL[n]])];
   const fx=[RB[1],WR[2],TE[1]].filter(Boolean).sort((a,b)=>simTot(b)-simTot(a))[0];
   pick.splice(5,0,['FLEX',fx]);
   const list=pick.filter(x=>x[1]).map(([l,p])=>({l,p}));
@@ -2347,7 +2347,7 @@ function simStart(){
   for(const sl of SIM_SLOTS){const pool=simPool(sl,ex);if(!pool.length){say('Not enough players to build a team yet');return}
     const p=pool[fcRnd(pool.length)];ex.add(simKey(p));c.push(p.key)}
   UI.sim={c,left:SIM_RESPINS,done:false,seen:[...ex],flip:'deal',res:null};render();
-  setTimeout(()=>{if(UI.sim&&UI.sim.flip==='deal'){UI.sim.flip=null;render()}},2600);
+  setTimeout(()=>{if(UI.sim&&UI.sim.flip==='deal'){UI.sim.flip=null;render()}},3600);
 }
 function simRespin(i){
   const m=UI.sim;if(!m||m.done||m.left<1||m.flip==='deal'||(m.flip&&m.flip.i!=null))return;
@@ -2368,16 +2368,16 @@ async function simFinish(){
 }
 function viewSim(){
   const m=UI.sim,my=(ME.uid&&(S.picks[ME.uid]||{}).sim)||{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>Simulate</h2><p>Draw a full team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
+  const head=`<div class="head"><h2>Simulate</h2><p>Draw a full 17-player team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
   const myBest=my.best?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best team</small><b>${f1(my.best)}</b></div><div><small>Teams built</small><b>${my.runs||1}</b></div></div>`:'';
   const rows=Object.keys(S.picks).map(u=>({u,b:+((S.picks[u]||{}).sim||{}).best||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
   const board=mgBoard('Best simulated teams',rows);
-  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 12 spots: 1 QB, 1 RB, 2 WR, 1 TE, 1 FLEX (RB, WR or TE), 2 DB, 2 LB and 2 DL. Everyone is drawn at random from the app, and you have ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div></section>${board}`;
+  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 17 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 4 DL, 3 LB and 4 DB on defense. Everyone is drawn at random from the app, and you have ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div></section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
   const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
     return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
-      <div class="sb-pts"><b>${f1(a.v)}</b><small>${f1(a.n?a.v/a.n:0)} ppg<em> · ${a.n} gp</em></small></div>
+      <div class="sb-pts"><b>${f1(a.n?a.v/a.n:0)}<u>PPG</u></b><small>${f1(a.v)} pts<em> · ${a.n} gp</em></small></div>
       ${m.done?'':`<button class="sb-rs ${m.left>0&&!busy?'':'off'}" data-act="simRespin" data-i="${i}" ${m.left>0&&!busy?'':'disabled'} aria-label="Respin ${sl.label}">↻<span> Respin</span></button>`}</div></div>`};
   const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins left</small><b>${m.left}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
   let res='';
