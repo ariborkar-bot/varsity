@@ -1165,6 +1165,19 @@ select option{background:#0B1730;color:#EAF0F8}
 /* the logo and name in the header link to the Stats page */
 .mast a.brand{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
 .mast a.brand:focus-visible{outline:2px solid #FFC23D;outline-offset:4px;border-radius:12px}
+
+/* notification settings */
+.nt-set{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.nt-set li{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}
+.nt-set li>span{display:grid;gap:3px}
+.nt-set small{font-size:.82rem;line-height:1.35}
+.nt-sw{position:relative;flex:none;width:50px;height:30px;border-radius:999px;border:1px solid #2A4472;background:#13284D;cursor:pointer;padding:0;transition:background .18s,border-color .18s}
+.nt-sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#BFD3FF;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .18s}
+.nt-sw[aria-checked="true"]{background:linear-gradient(135deg,#1F4FD1,#2F6BFF);border-color:#4B86FF}
+.nt-sw[aria-checked="true"] i{transform:translateX(20px);background:#FFC23D}
+.nt-sw:focus-visible{outline:2px solid #FFC23D;outline-offset:3px}
+.nt-sw .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.nt-foot{margin-top:12px}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1786,17 +1799,17 @@ function computeNotes(){
   const notes=[],at=seen.at||0;
   const ve=(S.verified[ME.uid]||{}).weeks||{};
   for(const [w,e] of Object.entries(ve)){
-    if((e.at||0)>at)notes.push({t:e.at,k:e.status==='approved'?'ok':'rejected',text:e.status==='approved'?`Week ${w} stat line verified: ${f1(pts(e.stat))} points.`:`Week ${w} stat line was not approved. Check the numbers and enter it again.`});
+    if((e.at||0)>at)notes.push({c:'verified',t:e.at,k:e.status==='approved'?'ok':'rejected',text:e.status==='approved'?`Week ${w} stat line verified: ${f1(pts(e.stat))} points.`:`Week ${w} stat line was not approved. Check the numbers and enter it again.`});
   }
   const ranks=fgRanks();
   for(const g of myFGroups()){
     const old=(seen.ranks||{})[g.id],cur=ranks[g.id];
-    if(old&&cur&&old!==cur)notes.push({t:NOW(),k:cur<old?'up':'dn',text:cur<old?`You moved up to #${cur} in ${g.name}.`:`You dropped to #${cur} in ${g.name}.`});
+    if(old&&cur&&old!==cur)notes.push({c:'ranks',t:NOW(),k:cur<old?'up':'dn',text:cur<old?`You moved up to #${cur} in ${g.name}.`:`You dropped to #${cur} in ${g.name}.`});
   }
   for(const g of [...myGroups(),...myFGroups()]){
     const old=(seen.members||{})[g.id];
     if(!old)continue;
-    Object.keys(g.members).filter(u=>!old.includes(u)).forEach(u=>notes.push({t:g.members[u]||NOW(),k:'join',text:`${nm(u)} joined ${g.name}.`}));
+    Object.keys(g.members).filter(u=>!old.includes(u)).forEach(u=>notes.push({c:'members',t:g.members[u]||NOW(),k:'join',text:`${nm(u)} joined ${g.name}.`}));
   }
   const cw=CURW();
   for(const g of myGroups()){
@@ -1806,7 +1819,7 @@ function computeNotes(){
       const opp=pr[0]===ME.uid?pr[1]:pr[0];
       if(!opp)continue;
       const a=lineupWeek(g.id,ME.uid,w),b=lineupWeek(g.id,opp,w);
-      notes.push({t:NOW(),k:a>b?'up':a<b?'dn':'join',text:`Week ${w} in ${g.name}: ${a>b?'you beat':a<b?'you lost to':'you tied with'} ${nm(opp)}, ${f1(a)} to ${f1(b)}.`});
+      notes.push({c:'results',t:NOW(),k:a>b?'up':a<b?'dn':'join',text:`Week ${w} in ${g.name}: ${a>b?'you beat':a<b?'you lost to':'you tied with'} ${nm(opp)}, ${f1(a)} to ${f1(b)}.`});
     }
   }
   return notes.sort((x,y)=>y.t-x.t);
@@ -3147,16 +3160,34 @@ function closePlayer(){const d=$('#drawer');d.hidden=true;d.innerHTML='';delete 
 function refreshDrawer(){const d=$('#drawer');if(!d.hidden&&d.dataset.id){const p=pByKey(d.dataset.id);if(p){d.innerHTML=drawerHTML(p);const c=$('#dclose');if(c)c.focus()}else closePlayer()}}
 
 /* ---------- notifications ---------- */
+/* notification preferences, saved on this device. Sound is shared with the draft sounds switch. */
+const NT_KINDS=[
+  ['results','Matchup results','How your fantasy matchup in each group finished.'],
+  ['ranks','Group rankings','When you move up or down in a friends group.'],
+  ['members','New members','When someone joins a group you are in.'],
+  ['verified','Stat line checks','When an admin approves or rejects a stat line you entered.'],
+  ['sound','Draft sounds','The chime when a pick is in and when you are on the clock.']
+];
+function ntPrefs(){let o={};try{o=JSON.parse(localStorage.getItem('vs-notif')||'{}')}catch(_){}
+  const p={};NT_KINDS.forEach(([k])=>{p[k]=k==='sound'?(typeof sndOn==='function'?sndOn():true):o[k]!==false});return p}
+function ntSave(p){const o={};NT_KINDS.forEach(([k])=>{if(k!=='sound')o[k]=!!p[k]});try{localStorage.setItem('vs-notif',JSON.stringify(o));localStorage.setItem('vs-snd',p.sound?'on':'off')}catch(_){}}
+function ntSettingsHTML(){const p=ntPrefs();
+  return `<div class="dh"><h2>Notification settings</h2><button class="btn ghost sm" data-act="ntBack">Back</button></div>
+    <p class="muted">Varsity shows these when you open the app. It cannot send alerts to your phone while closed.</p>
+    <ul class="nt-set">${NT_KINDS.map(([k,label,hint])=>`<li><span><b>${esc(label)}</b><small class="muted">${esc(hint)}</small></span><button class="nt-sw" role="switch" aria-checked="${p[k]}" data-act="ntToggle" data-v="${k}"><i></i><span class="sr">${esc(label)}</span></button></li>`).join('')}</ul>
+    <p class="muted nt-foot">Changes apply to this device only.</p>`}
 function openNotes(){
-  const n=computeNotes(),d=$('#notif');
+  const d=$('#notif');
+  if(UI.notifView==='settings'){d.innerHTML=`<aside class="dp narrow" role="dialog" aria-modal="true" aria-label="Notification settings">${ntSettingsHTML()}</aside>`;d.hidden=false;const b=d.querySelector('[data-act="ntBack"]');if(b)b.focus();return}
+  const p=ntPrefs(),n=computeNotes().filter(x=>!x.c||p[x.c]!==false);
   d.innerHTML=`<aside class="dp narrow" role="dialog" aria-modal="true" aria-label="Notifications">
-    <div class="dh"><h2>Notifications</h2><button class="btn ghost sm" data-act="closeNotes" id="nclose">Close</button></div>
-    ${n.length?`<ul class="nt">${n.map(x=>`<li><span class="ic ${x.k}">${x.k==='up'||x.k==='ok'?'▲':x.k==='dn'||x.k==='rejected'?'▼':'+'}</span><span>${esc(x.text)}</span></li>`).join('')}</ul><button class="btn" data-act="markRead">Mark all as read</button>`:`<p class="muted">You are all caught up. You will see verified stat lines, rank changes in friend groups, new members and weekly matchup results here.</p>`}
+    <div class="dh"><h2>Notifications</h2><div class="btns" style="margin:0"><button class="btn ghost sm" data-act="ntSettings">Settings</button><button class="btn ghost sm" data-act="closeNotes" id="nclose">Close</button></div></div>
+    ${n.length?`<ul class="nt">${n.map(x=>`<li><span class="ic ${x.k}">${x.k==='up'||x.k==='ok'?'▲':x.k==='dn'||x.k==='rejected'?'▼':'+'}</span><span>${esc(x.text)}</span></li>`).join('')}</ul><button class="btn" data-act="markRead">Mark all as read</button>`:'<p class="empty">Nothing new since you last looked.</p>'}
     <p class="muted">These show when you open the app. The app cannot send alerts to your phone.</p>
   </aside>`;
   d.hidden=false;const c=$('#nclose');if(c)c.focus();
 }
-function closeNotes(){const d=$('#notif');d.hidden=true;d.innerHTML=''}
+function closeNotes(){UI.notifView=null;const d=$('#notif');d.hidden=true;d.innerHTML=''}
 function writeSeen(){
   if(!ME.uid||ME.mode==='readonly')return Promise.resolve();
   return setDoc('data/users/'+ME.uid+'/seen',{at:NOW(),ranks:fgRanks(),members:memberSets(),week:CURW()});
@@ -3447,7 +3478,10 @@ document.addEventListener('click',async e=>{
   if(a==='player')openPlayer(id);
   else if(a==='close')closePlayer();
   else if(a==='closeNotes')closeNotes();
-  else if(a==='bell')openNotes();
+  else if(a==='bell'){UI.notifView=null;openNotes()}
+  else if(a==='ntSettings'){UI.notifView='settings';openNotes()}
+  else if(a==='ntBack'){UI.notifView=null;openNotes()}
+  else if(a==='ntToggle'){const k=t.dataset.v,p=ntPrefs();p[k]=!p[k];ntSave(p);openNotes()}
   else if(a==='markRead'){await act(writeSeen);closeNotes()}
   else if(a==='consent')openGate();
   else if(a==='pos'){UI.pos=t.dataset.v;UI.more=false;render()}
@@ -3889,6 +3923,7 @@ boot();
       '<a role="menuitem" href="#me">Me and account</a>'+
       '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':ME.mode==='guest'?'Sign in or create account':'Pick a name')+'</button>'+
       '<a role="menuitem" href="#scoring">Scoring rules</a>'+
+      '<button role="menuitem" data-act="ntSettings">Notification settings</button>'+
       (ME.admin?'<a role="menuitem" href="#admin">Admin systems</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
       (joined?'<hr><button role="menuitem" class="dz" data-act="delProfile">Delete my profile</button>':'')+
       (ME.mode==='live'?'<hr><button role="menuitem" id="sm-out">Sign out'+(ME.email?' <small style="opacity:.6;margin-left:auto">'+esc(ME.email)+'</small>':'')+'</button>':'');
