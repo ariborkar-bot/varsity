@@ -2295,11 +2295,21 @@ function refreshChat(){
   const atEnd=el.scrollHeight-el.scrollTop-el.clientHeight<40;
   el.innerHTML=chatLogHTML(g);if(atEnd)el.scrollTop=el.scrollHeight;
 }
+/* sent with a button and the Enter key, not a form, because some embedded views block form submission */
+async function sendChat(){
+  const g=curGroup(),el=document.getElementById('chat-in');if(!g||!el)return;
+  const txt=el.value.trim().slice(0,CHAT_MAX);if(!txt)return;
+  if(!g.members[ME.uid]){say('Join the league to chat');return}
+  const mid='m'+NOW()+Math.random().toString(36).slice(2,5);
+  UI.chatDraft='';el.value='';
+  await act(()=>upsert('groups/'+g.id,{chat:{[mid]:{u:ME.uid,t:txt,at:NOW()}}}));
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.target&&e.target.id==='chat-in'){e.preventDefault();sendChat()}});
 function chatHTML(g){
   if(ME.mode==='guest'||!g.members[ME.uid])return '';
   return `<section class="card ch-card"><div class="qh"><h3>League chat</h3><span class="muted">${Object.keys(g.members).length} ${Object.keys(g.members).length===1?'member':'members'}</span></div>
     <ul class="ch-log" id="chat-log" aria-live="polite">${chatLogHTML(g)}</ul>
-    ${ME.mode==='readonly'?'':`<form class="ch-form" id="chat-form" autocomplete="off"><input id="chat-in" maxlength="${CHAT_MAX}" placeholder="Message your league" aria-label="Message your league" value="${esc(UI.chatDraft||'')}"><button class="btn" type="submit">Send</button></form>`}
+    ${ME.mode==='readonly'?'':`<div class="ch-form" id="chat-form"><input id="chat-in" maxlength="${CHAT_MAX}" placeholder="Message your league" aria-label="Message your league" autocomplete="off" enterkeyhint="send" value="${esc(UI.chatDraft||'')}"><button class="btn" type="button" data-act="chatSend">Send</button></div>`}
     ${Object.keys(g.chat||{}).length>CHAT_SHOW?`<p class="muted">Showing the latest ${CHAT_SHOW} messages.</p>`:''}</section>`;
 }
 function matchupsHTML(g){
@@ -3173,11 +3183,6 @@ async function joinGroup(coll,code,stateKey){
 document.addEventListener('submit',async e=>{
   e.preventDefault();
   const id=e.target.id;
-  if(id==='chat-form'){const g=curGroup(),txt=$('#chat-in').value.trim().slice(0,CHAT_MAX);if(!g||!txt)return;
-    if(!g.members[ME.uid]){say('Join the league to chat');return}
-    const mid='m'+NOW()+Math.random().toString(36).slice(2,5);
-    UI.chatDraft='';$('#chat-in').value='';
-    await act(()=>upsert('groups/'+g.id,{chat:{[mid]:{u:ME.uid,t:txt,at:NOW()}}}));return}
   if(id==='create-form'){const n=$('#new-name').value.trim();if(!n){say('Give your league a name first');return}
     if(!myProfile()){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'create',n,m:(document.querySelector('input[name=lg-mode]:checked')||{}).value||'draft',r:readRoster('ro-new')}))}catch(_){}}
     UI.lgp=null;await createGroup('groups',n,'gi')}
@@ -3573,6 +3578,7 @@ boot();
         const ro=lineupOf(g.id,ME.uid),patch={};slotsOf(g).forEach(x=>{const p=pByKey(ro[x.k]);if(p&&!(!x.bench&&statsIn(p)))patch[x.k]=null});
         if(Object.keys(patch).length)await saveLineup(g,patch,'Team cleared')})}
     else if(a==='lgSub')openSub(t.dataset.slot)
+    else if(a==='chatSend')sendChat();
     else if(a==='chatDel'){const g=curGroup(),m=g&&(g.chat||{})[t.dataset.id];if(m&&m.u===ME.uid)await act(()=>upsert('groups/'+g.id,{chat:{[t.dataset.id]:null}}),'Message deleted')}
     else if(a==='trNew')openTrade()
     else if(a==='trAccept')tradeAct(t.dataset.id,'accept')
