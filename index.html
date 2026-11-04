@@ -105,6 +105,13 @@ input[type=number]{width:100%}
 .ch-h{display:flex;gap:8px;align-items:baseline}.ch-h b{font-size:.85rem}.ch-m p{margin:2px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}
 .ch-x{margin-left:auto;background:none;border:0;color:var(--muted);font:inherit;font-size:.75rem;cursor:pointer;padding:0}.ch-x:hover{color:var(--neg)}
 .ch-form{display:flex;gap:8px}.ch-form input{flex:1;min-width:0}
+.fc-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}.fc-bar>div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}.fc-bar small{display:block;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}.fc-bar b{font:900 1.5rem/1.1 var(--f-display)}
+.fc-hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.fc-card{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:12px 10px 14px;border-radius:18px;border:1px solid #2A4472;background:linear-gradient(160deg,#10224a,#0a1630);box-shadow:0 8px 20px rgba(0,0,0,.3)}.fc-card.in{border-color:#FFC23D}
+.fc-top{width:100%;display:flex;justify-content:space-between;align-items:center}.fc-pos{font:900 .9rem/1 var(--f-display);color:#FFD27A;letter-spacing:.05em}
+.fc-nm{font-size:.98rem;line-height:1.15}.fc-sc{color:var(--muted);display:flex;align-items:center;gap:4px;justify-content:center;font-size:.75rem}
+.fc-pts b{display:block;font:900 1.6rem/1 var(--f-display)}.fc-pts small{color:var(--muted);font-size:.7rem}
+.fc-deal{text-align:center;padding:18px 0 6px}.fc-board{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}.fc-board li{display:flex;gap:10px;align-items:center;padding:8px 6px;border-top:1px solid var(--line)}.fc-board li.me{background:color-mix(in srgb,#2F6BFF 16%,transparent);border-radius:10px}.fc-board .who{flex:1;min-width:0;display:flex;flex-direction:column}.fc-board .who small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fc-board .pt{text-align:right}.fc-board .pt b{display:block}.fc-gap{justify-content:center;color:var(--muted)}
 .tr-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}.tr-list li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}.tr-b{display:flex;gap:6px;align-items:center}.tr-done{margin-top:14px}
 .tr-form{min-height:0;display:flex;flex-direction:column;gap:12px;padding:4px 2px 2px;overflow-y:auto}.tr-col{display:flex;flex-direction:column;gap:6px}.tr-pl{display:flex;gap:10px;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer}.tr-pl.lk{opacity:.5;cursor:not-allowed}.tr-pl input{flex:none;width:18px;height:18px}.tr-form .fld select{width:100%}.tr-err{color:var(--neg);min-height:1.2em;font-size:.88rem;margin:0}
 .side-sw{margin:10px 0}.side-sw small{display:block;color:var(--muted);margin-bottom:6px}
@@ -1963,6 +1970,62 @@ function standTab(){
   const gs=(GAMES&&GAMES.games)||[],schools=[...new Set(gs.flatMap(g=>[g.h,g.a]))].filter(n=>SD_SCHOOLS.includes(n)).sort();
   return `<div class="tools"><label class="fld"><span>School</span><select data-act="gschool"><option value="ALL">All schools</option>${schools.map(x=>`<option ${UI.gschool===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label></div>`+(standingsHTML(gs,UI.gschool)||'<p class="empty">No results yet.</p>');
 }
+/* ---------- 5 Card Draw: a game for the whole app ----------
+   Every week each player is dealt 5 random players from the app and gets 3 redraws. A redraw swaps one card for a new random player,
+   so using all three leaves you with 3 new players and 2 of the originals. Your hand scores the week's fantasy points from those 5 players.
+   Everyone in the app is on one leaderboard. A card whose game already has stats in is locked, and new cards only come from players who have not played yet this week.
+   A hand lives on the player's own picks document (picks/<uid>.fc[week] = {h: the 5 players, r: redraws used, d: players swapped out}). */
+const FC_SIZE=5,FC_REDRAWS=3;
+const fcDoc=u=>(S.picks[u]||{}).fc||{};
+const fcHand=(u,w)=>fcDoc(u)[w]||null;
+const fcKeep=()=>{const f=fcDoc(ME.uid);return Object.keys(f).length?{fc:f}:{}};   /* keeps a hand when a Pick 'em save rewrites the document */
+function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
+const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
+const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
+/* anyone with a game on record and no stats in yet this week, and a team that is not on a bye */
+const fcPool=ex=>players().filter(p=>p.mp&&!ex.has(p.key)&&!statsIn(p)&&agg(p,'season').n>0&&!(oppInfo(p.school)||{}).bye);
+const fcDraw=(pool,n)=>{const out=[],a=pool.slice();while(out.length<n&&a.length){out.push(a.splice(fcRnd(a.length),1)[0].key)}return out};
+let _fcBusy=false;
+async function fcDeal(){
+  if(_fcBusy||ME.mode==='guest'||ME.mode==='readonly'||!ME.uid)return;
+  const w=CURW();if(fcHand(ME.uid,w))return;_fcBusy=true;
+  try{const hand=fcDraw(fcPool(new Set()),FC_SIZE);if(hand.length<FC_SIZE){say('Not enough players to deal a hand yet');return}
+    await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:{h:hand,r:0,d:[],at:NOW()}}}),'Your hand is dealt')}
+  finally{_fcBusy=false}
+}
+async function fcRedraw(i){
+  if(_fcBusy||!ME.uid)return;const w=CURW(),hd=fcHand(ME.uid,w);if(!hd)return;
+  if((hd.r||0)>=FC_REDRAWS){say('You are out of redraws this week');return}
+  const old=pByKey(hd.h[i]);if(!old)return;if((hd.rd||[]).includes(i)){say('That card is already a redraw. Each redraw swaps a different original card');return}
+  if(statsIn(old)){say(old.name+' already has stats this week, so that card is locked');return}
+  _fcBusy=true;
+  try{const seen=new Set([...hd.h,...(hd.d||[])]),nk=fcDraw(fcPool(seen),1)[0];if(!nk){say('No new players to draw right now');return}
+    const nh=hd.h.slice();nh[i]=nk;
+    await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:{h:nh,r:(hd.r||0)+1,d:[...(hd.d||[]),hd.h[i]],rd:[...(hd.rd||[]),i]}}}),'Redrawn: '+pByKey(nk).name)}
+  finally{_fcBusy=false}
+}
+function fcHTML(){
+  const cw=CURW(),w=UI.fcw&&UI.fcw<=cw?UI.fcw:cw,mine=ME.uid&&ME.mode!=='guest'?fcHand(ME.uid,w):null,can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const used=mine?(mine.r||0):0,left=FC_REDRAWS-used;
+  const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=p.games[w-1],lk=w===cw&&statsIn(p),rdn=(mine.rd||[]).includes(i);
+    return `<div class="fc-card ${x?'in':''}"><div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}<b class="fc-nm">${esc(p.name)}</b><small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
+      <div class="fc-pts"><b>${x?f1(pts(x.stat)):'—'}</b><small>${x?'week '+w+' pts':'waiting on game'}</small></div>
+      ${w===cw&&can?`<button class="btn sm ${left>0&&!lk&&!rdn?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!rdn?'':'disabled'}>${lk?'Locked':rdn?'New card':'Redraw'}</button>`:''}</div>`}).join(''):'';
+  const wk=[...new Set([cw,...Object.keys(fcDoc(ME.uid||'')).map(Number)])].filter(n=>n<=cw).sort((a,b)=>b-a);
+  const all=Object.keys(S.picks).filter(u=>fcHand(u,w)).map(u=>({u,t:fcScore(u,w),s:fcSeason(u)}));
+  const byS=UI.fcb==='season',rows=all.sort((a,b)=>(byS?b.s-a.s:b.t-a.t)||(b.t-a.t)).map((x,i)=>Object.assign(x,{r:i+1}));
+  const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
+  const lrow=x=>`<li class="${x.u===ME.uid?'me':''}"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w).h||[]).map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':'week '+w}</small></span></li>`;
+  return `<section class="card fc-hero"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">Week ${cw}</span></div>
+    <p class="muted">Every week you are dealt 5 random players from the app and get 3 redraws. A redraw swaps one of your original cards for a new player, and a new card can’t be redrawn, so all three redraws leave you with 3 new players and 2 of the originals. Your hand scores the week’s fantasy points from those 5. Everyone in Varsity is on the same leaderboard.</p>
+    ${wk.length>1?`<div class="chips" role="group" aria-label="Week">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">Week ${n}</button>`).join('')}</div>`:''}
+    ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b></div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand">${cards}</div>`
+      :w!==cw?'<p class="hint">You had no hand that week.</p>'
+      :can?`<div class="fc-deal"><p>You have not been dealt a hand for week ${cw} yet. Once dealt, your 5 cards are yours for the week.</p><button class="btn" data-act="fcDeal">Deal me in</button></div>`
+      :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
+    <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS}">Week ${w}</button><button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
+    ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
+}
 function picksHTML(){
   const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10);
   const open=gs.filter(g=>!gDone(g)),nextW=open.length?Math.min(...open.map(g=>g.w)):null;
@@ -2020,10 +2083,11 @@ function anticipatedHTML(){
 }
 function viewGames(){
   const T=UI.gtab||'sched';
-  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.',stand:'Records and playoff seeds for every San Diego Section team.'})[T]||'The most anticipated games and every game by week, with the standings beside them, plus the playoff bracket.'}</p></div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['stand','Standings'],['picks',"Pick 'em"]].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
+  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.',stand:'Records and playoff seeds for every San Diego Section team.',draw:'Get dealt 5 random players each week, redraw up to 3, and see where your hand ranks across the whole app.'})[T]||'The most anticipated games and every game by week, with the standings beside them, plus the playoff bracket.'}</p></div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['stand','Standings'],['picks',"Pick 'em"],['draw','5 Card Draw']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
   const gs=(GAMES&&GAMES.games)||[];
   if(T==='picks')return head+tabs+picksHTML();
+  if(T==='draw')return head+tabs+fcHTML();
   if(T==='stand')return head+tabs+standingsHTML(gs,UI.gschool);
   return head+tabs+`<div class="qh"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()+`<div class="gm-split" style="margin-top:28px"><div class="gm-half">${anticipatedHTML()}<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>${viewSched('')}</div><div class="gm-half gm-side"><div class="qh"><h2 class="h-sec">Standings</h2></div>${standingsHTML(gs,UI.gschool)}</div></div>`;
 }
@@ -3069,20 +3133,20 @@ document.addEventListener('click',async e=>{
   else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
   else if(a==='pkSide'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}
   else if(a==='pkStake'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{stake:+t.dataset.v});render()}
-  else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb}),'Pick removed');render()}
+  else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick removed');render()}
   else if(a==='pkClear'){UI.pk={};render()}
   else if(a==='pkAll'){const today=new Date().toISOString().slice(0,10),gm=gameMap(),cur=betsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pk).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||10);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;nb[id]={s:u.s,stake,odds:oddsFor(g)[u.s],w:g.w,at:NOW()}});
     if(!n){say('Pick a team first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
-    if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb}),n+(n===1?' pick':' picks')+' locked in')){UI.pk={};render()}}
+    if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),n+(n===1?' pick':' picks')+' locked in')){UI.pk={};render()}}
   else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('Pick ’em is closed for that game.');return}
     const cur=betsOf(ME.uid),old=cur[id],ui=UI.pk[id]||{},s=ui.s||(old&&old.s);if(!s){say('Tap a team first.');return}
     const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||10,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}
     const o=oddsFor(g),nb={...cur,[id]:{s,stake,odds:o[s],w:g.w,at:NOW()}};
-    if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb}),'Pick locked in: '+(s==='h'?g.h:g.a)+' for '+stake+' tokens')){delete UI.pk[id];render()}}
+    if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick locked in: '+(s==='h'?g.h:g.a)+' for '+stake+' tokens')){delete UI.pk[id];render()}}
     else if(a==='copy')copyText(t.dataset.code,'Invite code copied','#code');
   else if(a==='fcopy')copyText(t.dataset.code,'Invite code copied','#fcode');
   else if(a==='copyFriends'){
@@ -3658,6 +3722,10 @@ boot();
     else if(a==='lgSub')openSub(t.dataset.slot)
     else if(a==='chatSend')sendChat();
     else if(a==='chatDel'){const g=curGroup(),m=g&&(g.chat||{})[t.dataset.id];if(m&&m.u===ME.uid)await act(()=>upsert('groups/'+g.id,{chat:{[t.dataset.id]:null}}),'Message deleted')}
+    else if(a==='fcDeal')fcDeal()
+    else if(a==='fcRedraw')fcRedraw(+t.dataset.i)
+    else if(a==='fcWeek'){UI.fcw=+t.dataset.v;render()}
+    else if(a==='fcBoard'){UI.fcb=t.dataset.v;render()}
     else if(a==='trNew')openTrade()
     else if(a==='trAccept')tradeAct(t.dataset.id,'accept')
     else if(a==='trDecline')tradeAct(t.dataset.id,'decline')
