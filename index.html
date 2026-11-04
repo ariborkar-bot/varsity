@@ -2224,7 +2224,7 @@ function viewHub(){
       <div class="btns"><button class="btn ghost" data-act="toGroups">Go to my leagues</button><button class="btn ghost" data-act="consent">Edit profile</button></div>
       <div class="danger-row"><div><b>Delete my profile</b><p class="muted">Removes your profile, your lineups and you from every league. This cannot be undone.</p></div><button class="btn danger" data-act="delProfile">Delete my profile</button></div></section>`
     :`<section class="card"><h3>${ME.mode==='guest'?'Make an account to play':'Pick your name'}</h3><p>${ME.mode==='guest'?'Anyone can browse stats. To build lineups and play in leagues, sign in or create a free account.':'Last step: choose the name your leagues will see.'}</p><div class="btns"><button class="btn" data-act="consent">${ME.mode==='guest'?'Sign in or create account':'Pick a name'}</button></div></section>`;
-  return head+acct+`<section class="card"><h3>Fantasy competition</h3><p class="muted">Managers pick real athletes, then compete using the same stat records.</p><ul><li>Lineups and private leagues</li><li>Weekly head-to-head matchups</li><li>League leaderboards</li></ul><div class="btns"><button class="btn ghost" data-act="toGroups">Open my leagues</button></div></section>`;
+  return head+acct;
 }
 
 /* ---------- league ---------- */
