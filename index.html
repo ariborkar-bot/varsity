@@ -100,6 +100,8 @@ input[type=number]{width:100%}
 .avl{position:absolute;right:-4px;bottom:-4px;width:46%;height:46%;border-radius:50%;background:#f2f4f7;padding:1px;object-fit:contain;box-shadow:0 0 0 2px var(--surface,#15263A),0 1px 3px rgba(0,0,0,.35)}
 .slogo{display:inline-block;vertical-align:-4px;margin-right:5px;border-radius:50%;background:#f2f4f7;padding:1px;object-fit:contain}
 .sch{display:flex;align-items:center;gap:8px}.sch .slogo{margin:0}
+.tr-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}.tr-list li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}.tr-b{display:flex;gap:6px;align-items:center}.tr-done{margin-top:14px}
+.tr-form{display:flex;flex-direction:column;gap:12px;padding:4px 2px 2px}.tr-form .fld select{width:100%}.tr-err{color:var(--neg);min-height:1.2em;font-size:.88rem;margin:0}
 .side-sw{margin:10px 0}.side-sw small{display:block;color:var(--muted);margin-bottom:6px}
 .gr{background:color-mix(in srgb,var(--muted) 16%,transparent);color:var(--muted);font:800 .66rem/1 var(--f-body);padding:3px 6px;border-radius:999px;letter-spacing:.04em;margin-right:4px}
 .pos{--c:var(--muted);background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c);font:800 .68rem/1 var(--f-body);padding:3px 7px;border-radius:999px;letter-spacing:.04em}
@@ -1497,11 +1499,25 @@ const SLOTS=[
   {k:'QB',label:'QB',elig:['QB']},{k:'RB',label:'RB',elig:['RB']},{k:'WR',label:'WR',elig:['WR']},
   {k:'TE',label:'TE',elig:['TE']},{k:'FLEX',label:'FLEX',elig:['RB','WR','TE']},{k:'DEF',label:'DEF',elig:['DEF']},{k:'K',label:'K',elig:['K']}
 ];
-const lineupOf=(gid,uid)=>{
+/* Accepted trades (groups/<id>.trades) are laid over each team's saved lineup, so both sides change at once and nobody has to be online.
+   A trade only swaps the spot it was made for, and only if that spot still holds the player who was traded, so later changes always win.
+   It counts from the week it was accepted. */
+function applyTrades(g,uid,r,w){
+  const T=g&&g.trades;if(!T)return r;
+  const list=Object.values(T).filter(t=>t&&t.status==='accepted'&&(w==null||(t.w||0)<=w)).sort((a,b)=>(a.at||0)-(b.at||0));
+  if(!list.length)return r;
+  const o=Object.assign({},r);
+  for(const t of list){
+    if(t.from===uid&&o[t.fs]===t.give)o[t.fs]=t.want;
+    else if(t.to===uid&&o[t.ts]===t.want)o[t.ts]=t.give;
+  }
+  return o;
+}
+const lineupOf=(gid,uid,w)=>{
   const own=((S.lineups[uid]||{}).g||{})[gid]||{},g=S.groups[gid],pk=g&&g.draft&&g.draft.picks;
-  if(!pk)return own;
+  if(!pk)return applyTrades(g,uid,own,w);
   const base={};for(const x of Object.values(pk))if(x&&x.uid===uid&&x.slot)base[x.slot]=x.key;
-  return Object.assign(base,own);
+  return applyTrades(g,uid,Object.assign(base,own),w);
 };
 /* ---- weekly lineups ----
    Each week is its own matchup: only that week's game for whoever was starting counts, and it starts at 0 until stats come in.
@@ -1510,9 +1526,9 @@ const lineupOf=(gid,uid)=>{
 const lineupHist=(gid,uid)=>((S.lineups[uid]||{}).lh||{})[gid]||null;
 function lineupAt(gid,uid,w){
   const cur=lineupOf(gid,uid);if(w>=CURW())return cur;
-  const h=lineupHist(gid,uid);if(!h)return cur;
+  const h=lineupHist(gid,uid);if(!h)return lineupOf(gid,uid,w);
   let best=-1;for(const k of Object.keys(h)){const n=+k;if(n<=w&&n>best)best=n}
-  return best<0?cur:h[best];
+  return best<0?lineupOf(gid,uid,w):applyTrades(S.groups[gid],uid,h[best],w);
 }
 /* a player whose stat line for the current week is in is locked (cannot be swapped, subbed or dropped) until the next week */
 const statsIn=p=>!!(p&&p.games&&p.games[CURW()-1]);
@@ -2230,6 +2246,36 @@ function lineupHTML(g,uid){
   return bar+`<div class="lg-lhead"><span class="muted">${filled} of ${ST.length} starting spots filled</span><span class="lg-total"><small>Week ${w} total</small><b>${f1(total)}</b></span></div><p class="muted lg-wknote">${past?'The lineup you started in week '+w+'. Finished weeks never change.':'Your lineup total is just this week’s game. It starts at 0 and fills in as stats come in, then resets for next week’s matchup. A player whose stats are in is locked until next week.'}</p>${startHTML}`
     +(BNS.length?`<div class="lg-bench-h"><h4>Bench</h4><small class="muted">${bfilled} of ${BNS.length} filled. Bench players do not score${canEdit?'. Tap Sub in to move one into a matching starting spot.':'.'}</small></div><ol class="lg-cards lg-bench">${bench}</ol>`:'');
 }
+/* ---------- trades: swap one player for one player after the draft ---------- */
+const tradesOn=g=>lgMode(g)==='draft'&&draftInfo(g).status==='done';
+function tradeSlotOf(g,uid,key){return slotsOf(g).find(s=>lineupOf(g.id,uid)[s.k]===key)||null}
+/* why a pending trade cannot go through right now, or '' if it can */
+function tradeProblem(g,t){
+  if(!tradesOn(g))return 'Trades open once the draft is done';
+  const fa=pByKey(t.give),fb=pByKey(t.want);if(!fa||!fb)return 'A player in this trade is gone';
+  const sa=slotsOf(g).find(s=>s.k===t.fs),sb=slotsOf(g).find(s=>s.k===t.ts);
+  if(!sa||!sb||lineupOf(g.id,t.from)[t.fs]!==t.give)return fa.name+' is no longer on '+nm(t.from)+'’s team in that spot';
+  if(lineupOf(g.id,t.to)[t.ts]!==t.want)return fb.name+' is no longer on '+nm(t.to)+'’s team in that spot';
+  if(statsIn(fa))return LOCK_MSG(fa);if(statsIn(fb))return LOCK_MSG(fb);
+  if(!slotOk(sa,fb)||!slotOk(sb,fa))return 'The players do not fit each other’s spots';
+  return '';
+}
+function tradesHTML(g){
+  if(!tradesOn(g)||ME.mode==='guest')return '';
+  const T=Object.values(g.trades||{}).filter(Boolean).sort((a,b)=>(b.at||0)-(a.at||0));
+  const pn=k=>{const p=pByKey(k);return p?`<b>${esc(p.name)}</b> <small class="muted">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</small>`:'a player'};
+  const line=t=>`${esc(t.from===ME.uid?'You':nm(t.from))} ${t.from===ME.uid?'send':'sends'} ${pn(t.give)} for ${esc(t.to===ME.uid?'your':nm(t.to)+'’s')} ${pn(t.want)}`;
+  const inc=T.filter(t=>t.status==='pending'&&t.to===ME.uid),out=T.filter(t=>t.status==='pending'&&t.from===ME.uid),done=T.filter(t=>t.status==='accepted').slice(0,4);
+  const row=(t,btns)=>`<li><span>${line(t)}</span><span class="tr-b">${btns}</span></li>`;
+  const body=[
+    ...inc.map(t=>row(t,`<button class="btn sm" data-act="trAccept" data-id="${esc(t.id)}">Accept</button><button class="btn sm ghost" data-act="trDecline" data-id="${esc(t.id)}">Decline</button>`)),
+    ...out.map(t=>row(t,`<span class="muted">Waiting for ${esc(nm(t.to))}</span><button class="btn sm ghost" data-act="trCancel" data-id="${esc(t.id)}">Cancel</button>`))
+  ].join('');
+  return `<section class="card tr-card"><div class="qh"><h3>Trades</h3><button class="btn sm" data-act="trNew" ${Object.keys(g.members).length<2?'disabled':''}>Propose a trade</button></div>
+    <p class="muted">Swap one of your players for one of another team’s players. They have to accept, and it counts from this week. Players who already have stats this week are locked.</p>
+    ${body?`<ul class="tr-list">${body}</ul>`:'<p class="hint">No trades waiting.</p>'}
+    ${done.length?`<div class="tr-done"><small class="muted">Recent trades</small><ul class="tr-list">${done.map(t=>`<li><span>${line(t)}</span></li>`).join('')}</ul></div>`:''}</section>`;
+}
 function matchupsHTML(g){
   const ids=Object.keys(g.members).sort(),cw=CURW();
   if(ids.length<2)return '';
@@ -2297,6 +2343,7 @@ function viewGroups(){
         <div class="tools bare">${scopeSel('scope2')}</div>${lineupHTML(g,mem)}</section>
       ${standings}
     </div>
+    ${tradesHTML(g)}
     ${matchupsHTML(g)}
     <div class="lg-foot"><span class="muted">${own?'You started '+esc(g.name)+'. Deleting it removes it for every team.':'You can rejoin later with the invite code.'}</span><button class="btn sm danger" data-act="${own?'delGroup':'leaveGroup'}" data-coll="groups" data-id="${esc(g.id)}">${own?'Delete league':'Leave league'}</button></div>`;
 }
@@ -3423,6 +3470,49 @@ boot();
     });
     document.body.appendChild(sk);
   };
+  const openTrade=()=>{
+    const g=curGroup();if(!g||!tradesOn(g))return;
+    const others=Object.keys(g.members).filter(u=>u!==ME.uid);if(!others.length){say('You need another team in the league');return}
+    const SL=slotsOf(g),st={to:others[0],mine:'',theirs:''};
+    const opts=(u,except)=>SL.map(s=>({s,p:pByKey(lineupOf(g.id,u)[s.k])})).filter(o=>o.p&&!statsIn(o.p)&&(!except||(slotOk(o.s,except.p)&&slotOk(except.s,o.p))));
+    const draw=()=>{
+      closeSk();
+      const mine=opts(ME.uid),a=mine.find(o=>o.s.k===st.mine);if(!a)st.mine=mine[0]?mine[0].s.k:'';
+      const mm=mine.find(o=>o.s.k===st.mine),theirs=opts(st.to,mm);
+      if(!theirs.find(o=>o.s.k===st.theirs))st.theirs=theirs[0]?theirs[0].s.k:'';
+      const op=(o,sel)=>`<option value="${o.s.k}" ${sel===o.s.k?'selected':''}>${esc(o.p.name)} · ${o.p.pos==='DEF'?esc(o.p.sub||'DEF'):o.p.pos} · ${esc(o.s.label)}${o.s.bench?' (bench)':''}</option>`;
+      sk=document.createElement('div');sk.className='pk-bg';
+      sk.innerHTML=`<div class="pk" role="dialog" aria-modal="true" aria-label="Propose a trade"><div class="pk-h"><h3>Propose a trade</h3><button class="lg-x" data-pk="close" aria-label="Close">✕</button></div>
+        <div class="tr-form">
+          <label class="fld"><span>Trade with</span><select data-tr="to">${others.map(u=>`<option value="${esc(u)}" ${u===st.to?'selected':''}>${esc(nm(u))}</option>`).join('')}</select></label>
+          <label class="fld"><span>You send</span><select data-tr="mine">${mine.map(o=>op(o,st.mine)).join('')||'<option value="">No one you can trade right now</option>'}</select></label>
+          <label class="fld"><span>You get</span><select data-tr="theirs">${theirs.map(o=>op(o,st.theirs)).join('')||'<option value="">No player fits this swap</option>'}</select></label>
+          <p class="tr-err" id="tr-err"></p>
+          <button class="btn" data-tr="send" ${mm&&theirs.length?'':'disabled'}>Send trade offer</button>
+        </div></div>`;
+      sk.addEventListener('click',async e=>{
+        if(e.target===sk||e.target.closest('[data-pk=close]')){closeSk();return}
+        if(!e.target.closest('[data-tr=send]'))return;
+        const gg=curGroup(),give=lineupOf(gg.id,ME.uid)[st.mine],want=lineupOf(gg.id,st.to)[st.theirs];
+        const t={id:'t'+NOW(),from:ME.uid,to:st.to,give,want,fs:st.mine,ts:st.theirs,status:'pending',at:NOW()};
+        const why=give&&want?tradeProblem(gg,t):'Pick a player on each side';
+        if(why){const el=document.getElementById('tr-err');if(el)el.textContent=why;return}
+        closeSk();await act(()=>upsert('groups/'+gg.id,{trades:{[t.id]:t}}),'Trade offer sent to '+nm(st.to));
+      });
+      sk.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.tr;if(!k)return;st[k]=e.target.value;draw()});
+      document.body.appendChild(sk);
+    };
+    draw();
+  };
+  const tradeAct=async(id,kind)=>{
+    const g=curGroup();if(!g)return;const t=(g.trades||{})[id];if(!t||t.status!=='pending'){say('That trade is no longer open');return}
+    if(kind==='accept'){
+      if(t.to!==ME.uid)return;
+      const why=tradeProblem(g,t);if(why){say(why);return}
+      await act(()=>upsert('groups/'+g.id,{trades:{[id]:{status:'accepted',w:CURW(),at:NOW()}}}),'Trade done. It counts from week '+CURW());return}
+    if(kind==='decline'&&t.to===ME.uid)await act(()=>upsert('groups/'+g.id,{trades:{[id]:{status:'declined'}}}),'Trade declined');
+    if(kind==='cancel'&&t.from===ME.uid)await act(()=>upsert('groups/'+g.id,{trades:{[id]:{status:'cancelled'}}}),'Trade offer cancelled');
+  };
   const draftPick=window.draftPick=async(g,slot,key,isAuto)=>{
     const fresh=S.groups[g.id]?Object.assign({id:g.id},S.groups[g.id]):g,di=draftInfo(fresh);
     if(di.status!=='live'||di.uid!==ME.uid){say('That pick is no longer yours');return}
@@ -3449,6 +3539,10 @@ boot();
         const ro=lineupOf(g.id,ME.uid),patch={};slotsOf(g).forEach(x=>{const p=pByKey(ro[x.k]);if(p&&!(!x.bench&&statsIn(p)))patch[x.k]=null});
         if(Object.keys(patch).length)await saveLineup(g,patch,'Team cleared')})}
     else if(a==='lgSub')openSub(t.dataset.slot)
+    else if(a==='trNew')openTrade()
+    else if(a==='trAccept')tradeAct(t.dataset.id,'accept')
+    else if(a==='trDecline')tradeAct(t.dataset.id,'decline')
+    else if(a==='trCancel')tradeAct(t.dataset.id,'cancel')
     else if(a==='lgRoster'){const g=curGroup();if(!g||g.ownerId!==ME.uid)return;
       const d=g.draft;if(d&&(d.order||d.status==='live'||d.status==='done')){say('The roster is locked once the draft starts');return}
       const r=readRoster('ro-edit'),n=rosterCount(r);if(n<1||n>ROSTER_TOTAL_MAX){say('Pick between 1 and '+ROSTER_TOTAL_MAX+' spots');return}
