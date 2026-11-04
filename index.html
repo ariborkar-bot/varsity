@@ -100,6 +100,11 @@ input[type=number]{width:100%}
 .avl{position:absolute;right:-4px;bottom:-4px;width:46%;height:46%;border-radius:50%;background:#f2f4f7;padding:1px;object-fit:contain;box-shadow:0 0 0 2px var(--surface,#15263A),0 1px 3px rgba(0,0,0,.35)}
 .slogo{display:inline-block;vertical-align:-4px;margin-right:5px;border-radius:50%;background:#f2f4f7;padding:1px;object-fit:contain}
 .sch{display:flex;align-items:center;gap:8px}.sch .slogo{margin:0}
+.ch-log{list-style:none;margin:10px 0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto}
+.ch-m{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 12px;max-width:88%;align-self:flex-start}.ch-m.me{align-self:flex-end;background:color-mix(in srgb,#2F6BFF 18%,var(--surface))}
+.ch-h{display:flex;gap:8px;align-items:baseline}.ch-h b{font-size:.85rem}.ch-m p{margin:2px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}
+.ch-x{margin-left:auto;background:none;border:0;color:var(--muted);font:inherit;font-size:.75rem;cursor:pointer;padding:0}.ch-x:hover{color:var(--neg)}
+.ch-form{display:flex;gap:8px}.ch-form input{flex:1;min-width:0}
 .tr-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}.tr-list li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}.tr-b{display:flex;gap:6px;align-items:center}.tr-done{margin-top:14px}
 .tr-form{display:flex;flex-direction:column;gap:12px;padding:4px 2px 2px}.tr-form .fld select{width:100%}.tr-err{color:var(--neg);min-height:1.2em;font-size:.88rem;margin:0}
 .side-sw{margin:10px 0}.side-sw small{display:block;color:var(--muted);margin-bottom:6px}
@@ -2276,6 +2281,27 @@ function tradesHTML(g){
     ${body?`<ul class="tr-list">${body}</ul>`:'<p class="hint">No trades waiting.</p>'}
     ${done.length?`<div class="tr-done"><small class="muted">Recent trades</small><ul class="tr-list">${done.map(t=>`<li><span>${line(t)}</span></li>`).join('')}</ul></div>`:''}</section>`;
 }
+/* ---------- league chat: messages live on the league itself (groups/<id>.chat), so every member sees them ---------- */
+const CHAT_MAX=300,CHAT_SHOW=50;
+function chatLogHTML(g){
+  const msgs=Object.entries(g.chat||{}).map(([id,m])=>m&&m.t?Object.assign({id},m):null).filter(Boolean).sort((a,b)=>(a.at||0)-(b.at||0)).slice(-CHAT_SHOW);
+  const when=at=>{try{return new Date(at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}catch(_){return ''}};
+  const row=m=>`<li class="ch-m ${m.u===ME.uid?'me':''}"><div class="ch-h"><b>${esc(m.u===ME.uid?'You':nm(m.u))}</b><small class="muted">${esc(when(m.at))}</small>${m.u===ME.uid&&ME.mode!=='readonly'?`<button class="ch-x" data-act="chatDel" data-id="${esc(m.id)}" aria-label="Delete message">Delete</button>`:''}</div><p>${esc(m.t)}</p></li>`;
+  return msgs.map(row).join('')||'<li class="hint">No messages yet. Say hi to your league.</li>';
+}
+/* new messages show up even while you are typing in the chat box: only the message list is redrawn, never the box */
+function refreshChat(){
+  const g=curGroup(),el=document.getElementById('chat-log');if(!g||!el)return;
+  const atEnd=el.scrollHeight-el.scrollTop-el.clientHeight<40;
+  el.innerHTML=chatLogHTML(g);if(atEnd)el.scrollTop=el.scrollHeight;
+}
+function chatHTML(g){
+  if(ME.mode==='guest'||!g.members[ME.uid])return '';
+  return `<section class="card ch-card"><div class="qh"><h3>League chat</h3><span class="muted">${Object.keys(g.members).length} ${Object.keys(g.members).length===1?'member':'members'}</span></div>
+    <ul class="ch-log" id="chat-log" aria-live="polite">${chatLogHTML(g)}</ul>
+    ${ME.mode==='readonly'?'':`<form class="ch-form" id="chat-form" autocomplete="off"><input id="chat-in" maxlength="${CHAT_MAX}" placeholder="Message your league" aria-label="Message your league" value="${esc(UI.chatDraft||'')}"><button class="btn" type="submit">Send</button></form>`}
+    ${Object.keys(g.chat||{}).length>CHAT_SHOW?`<p class="muted">Showing the latest ${CHAT_SHOW} messages.</p>`:''}</section>`;
+}
 function matchupsHTML(g){
   const ids=Object.keys(g.members).sort(),cw=CURW();
   if(ids.length<2)return '';
@@ -2344,6 +2370,7 @@ function viewGroups(){
       ${standings}
     </div>
     ${tradesHTML(g)}
+    ${chatHTML(g)}
     ${matchupsHTML(g)}
     <div class="lg-foot"><span class="muted">${own?'You started '+esc(g.name)+'. Deleting it removes it for every team.':'You can rejoin later with the invite code.'}</span><button class="btn sm danger" data-act="${own?'delGroup':'leaveGroup'}" data-coll="groups" data-id="${esc(g.id)}">${own?'Delete league':'Leave league'}</button></div>`;
 }
@@ -2930,6 +2957,7 @@ function render(){
   const V={team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,me:viewMeAll,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
   let v=UI.view;
   $('#main').innerHTML=V[v]();
+  const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
   chrome(v);
 }
 const typing=()=>{const a=document.activeElement;return a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)&&($('#main').contains(a))};
@@ -2942,7 +2970,7 @@ function touch(){
   maybeInitSeen();
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
-  requestAnimationFrame(()=>{rq=false;let v=UI.view;chrome(v);if(typing()){dirty=true;return}render();if(!$('#drawer').hidden)refreshDrawer()});
+  requestAnimationFrame(()=>{rq=false;let v=UI.view;chrome(v);if(typing()){if(document.activeElement.id==='chat-in')refreshChat();dirty=true;return}render();if(!$('#drawer').hidden)refreshDrawer()});
 }
 document.addEventListener('focusout',()=>{if(dirty)setTimeout(()=>{if(!typing()){dirty=false;render()}},60)});
 function route(){
@@ -3117,7 +3145,8 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('input',e=>{
   const t=e.target;
-  if(t.id==='q'){UI.q=t.value;UI.more=false;$('#lb-list').innerHTML=listHTML();const hs=$('#hot-slot');if(hs)hs.hidden=!!UI.q.trim()}
+  if(t.id==='chat-in'){UI.chatDraft=t.value}
+  else if(t.id==='q'){UI.q=t.value;UI.more=false;$('#lb-list').innerHTML=listHTML();const hs=$('#hot-slot');if(hs)hs.hidden=!!UI.q.trim()}
   else if(t.dataset&&t.dataset.act==='fld'){UI.entry.vals[t.dataset.k]=Math.max(0,parseInt(t.value,10)||0)}
   else if(t.dataset&&t.dataset.act==='mfld'){UI.meEntry.vals[t.dataset.k]=Math.max(0,parseInt(t.value,10)||0)}
 });
@@ -3144,6 +3173,11 @@ async function joinGroup(coll,code,stateKey){
 document.addEventListener('submit',async e=>{
   e.preventDefault();
   const id=e.target.id;
+  if(id==='chat-form'){const g=curGroup(),txt=$('#chat-in').value.trim().slice(0,CHAT_MAX);if(!g||!txt)return;
+    if(!g.members[ME.uid]){say('Join the league to chat');return}
+    const mid='m'+NOW()+Math.random().toString(36).slice(2,5);
+    UI.chatDraft='';$('#chat-in').value='';
+    await act(()=>upsert('groups/'+g.id,{chat:{[mid]:{u:ME.uid,t:txt,at:NOW()}}}));return}
   if(id==='create-form'){const n=$('#new-name').value.trim();if(!n){say('Give your league a name first');return}
     if(!myProfile()){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'create',n,m:(document.querySelector('input[name=lg-mode]:checked')||{}).value||'draft',r:readRoster('ro-new')}))}catch(_){}}
     UI.lgp=null;await createGroup('groups',n,'gi')}
@@ -3539,6 +3573,7 @@ boot();
         const ro=lineupOf(g.id,ME.uid),patch={};slotsOf(g).forEach(x=>{const p=pByKey(ro[x.k]);if(p&&!(!x.bench&&statsIn(p)))patch[x.k]=null});
         if(Object.keys(patch).length)await saveLineup(g,patch,'Team cleared')})}
     else if(a==='lgSub')openSub(t.dataset.slot)
+    else if(a==='chatDel'){const g=curGroup(),m=g&&(g.chat||{})[t.dataset.id];if(m&&m.u===ME.uid)await act(()=>upsert('groups/'+g.id,{chat:{[t.dataset.id]:null}}),'Message deleted')}
     else if(a==='trNew')openTrade()
     else if(a==='trAccept')tradeAct(t.dataset.id,'accept')
     else if(a==='trDecline')tradeAct(t.dataset.id,'decline')
