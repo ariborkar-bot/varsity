@@ -1846,7 +1846,7 @@ function projTag(p){
 
 
 /* ---------- games: weekly matchups, past weeks and playoff brackets ---------- */
-UI.gw=null;UI.gschool='ALL';UI.gdiv=null;UI.gtab='sched';UI.pk={};
+UI.gw=null;UI.gschool='ALL';UI.gdiv=null;UI.gtab='sched';UI.pk={};UI.at={};
 const tlk=n=>n&&SD_SCHOOLS.includes(n)?`<button class="tlk" data-act="team" data-t="${esc(n)}">${esc(n)}</button>`:esc(n||'TBD');
 function gameCard(g,opts={}){
   const done=g.hs!=null&&g.as!=null,hw=done&&g.hs>g.as,aw=done&&g.as>g.hs;
@@ -1937,6 +1937,7 @@ function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push
 function bank(u){
   const gm=gameMap();let t=TOK0;
   Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
+  Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   return Math.round(t*100)/100;
 }
 const tk=n=>(Math.round(n*10)/10).toLocaleString()+' tokens';
@@ -2018,7 +2019,7 @@ const FC_SIZE=5,FC_REDRAWS=3;
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid);return Object.keys(f).length?{fc:f}:{}};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid);if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -2125,11 +2126,57 @@ function anticipatedHTML(){
     ${n<list.length?`<div class="btns" style="justify-content:center;margin-top:14px"><button class="btn ghost" data-act="gmore">Load more matchups (${Math.min(5,list.length-n)} more)</button></div>`:''}`;
 }
 /* ---------- minigames: Pick 'em and 5 Card Draw ---------- */
+
+/* ---- Against the spread ---- */
+const ATS_PAY=1.91,ATS_K=3;
+const atsOf=u=>((S.picks[u]||{}).ats)||{};
+function spreadFor(g){
+  const R=ridgeRatings(),raw=(R.r[g.h]||0)-(R.r[g.a]||0)+R.H;
+  let L=-ATS_K*raw;L=Math.max(-35,Math.min(35,L));
+  L=Math.round(L-.5)+.5;
+  return L;
+}
+const fmtLine=x=>(x>0?'+':x<0?'−':'')+Math.abs(x).toFixed(1);
+function atsResult(b,g){
+  if(!g||!gDone(g))return 'open';
+  const d=(g.hs-g.as)+(+b.line);
+  if(d===0)return 'push';
+  return (b.s==='h'?d>0:d<0)?'won':'lost';
+}
+function spreadHTML(){
+  const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10),gm=gameMap();
+  const open=gs.filter(g=>!gDone(g)).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||a.h.localeCompare(b.h));
+  const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',mine=atsOf(ME.uid);
+  const bal=ME.uid?bank(ME.uid):TOK0;
+  const staked=Object.entries(mine).reduce((a,[id,b])=>a+(atsResult(b,gm[id])==='open'?+b.stake||0:0),0);
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
+  const nm2=(x,g)=>x.s==='h'?g.h:g.a,lnTxt=x=>fmtLine(x.s==='h'?+x.line:-x.line);
+  const card=g=>{
+    const id=gid(g),L=spreadFor(g),b=mine[id],locked=g.d<=today,ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
+    const btn=(sd,n)=>{const ln=sd==='h'?L:-L,lk=b&&b.s===sd&&ui.s===undefined?(sd==='h'?+b.line:-b.line):ln;
+      return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="atSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${fmtLine(lk)}</span><small>pays ${ATS_PAY.toFixed(2)}x</small></button>`};
+    const room=bal+(b?+b.stake:0);let foot='';
+    if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
+    else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'';
+    else if(locked)foot=b?`<p class="muted">Locked: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
+    else if(side){
+      const chips=[5,10,25,50].filter(v=>v<=room);
+      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="atStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
+      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*ATS_PAY)}</b></span><button class="btn sm" data-act="atPlace" data-g="${esc(id)}" ${room<1?'disabled':''}>${b?'Update pick':'Lock in pick'}</button>${b?`<button class="btn sm ghost" data-act="atDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
+    else foot=b?`<p class="muted">Your pick: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a side to take the points.</p>';
+    return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
+  const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:atsResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
+  const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(nm2(x.b,x.g))} ${lnTxt(x.b)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
+  const board=Object.keys(S.picks).filter(u=>Object.keys(atsOf(u)).length).map(u=>{const r=Object.entries(atsOf(u)).map(([id,b])=>atsResult(b,gm[id]));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w).slice(0,20);
+  const boardCard=board.length?`<section class="card"><div class="qh"><h3>Best against the spread</h3></div>${board.map((x,i)=>`<div class="bt-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.w}-${x.l}</b></div>`).join('')}</section>`:'';
+  const nextW=open.length?open[0].w:null;
+  return bankCard+(open.length?[...new Set(open.map(g=>g.w))].map(w=>{const L=open.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} spreads</h3><span class="muted">${L.length} games${w===nextW?', lines set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games yet. New spreads show up as matchups are set.</p>')+histCard+boardCard;
+}
 function viewMini(){
-  const T=['picks','draw'].includes(UI.mtab)?UI.mtab:'picks';
-  const head=`<div class="head"><h2>Minigames</h2><p>${T==='draw'?'Get dealt 5 random players each week, redraw up to 3, and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks',"Pick 'em"],['draw','5 Card Draw']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
-  return head+tabs+(T==='draw'?fcHTML():picksHTML());
+  const T=['picks','draw','spread'].includes(UI.mtab)?UI.mtab:'picks';
+  const head=`<div class="head"><h2>Minigames</h2><p>${T==='spread'?'Pick a side against the point spread. Lines come from team ratings, so either side is about a coin flip.':T==='draw'?'Get dealt 5 random players each week, redraw up to 3, and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks',"Pick 'em"],['spread','Against the spread'],['draw','5 Card Draw']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
+  return head+tabs+(T==='draw'?fcHTML():T==='spread'?spreadHTML():picksHTML());
 }
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
@@ -3225,6 +3272,15 @@ document.addEventListener('click',async e=>{
   else if(a==='tback'){if(history.length>1)history.back();else location.hash='#games'}
   else if(a==='gmore'){UI.gmore=(UI.gmore||5)+5;render()}
   else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
+  else if(a==='atSide'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{s:t.dataset.s});render()}
+  else if(a==='atStake'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{stake:+t.dataset.v});render()}
+  else if(a==='atDrop'){const id=t.dataset.g,nb={...atsOf(ME.uid)};delete nb[id];delete UI.at[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Pick removed');render()}
+  else if(a==='atPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('That game is closed.');return}
+    const cur=atsOf(ME.uid),old=cur[id],ui=UI.at[id]||{},sd=ui.s||(old&&old.s);if(!sd){say('Tap a side first.');return}
+    const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||10,Math.floor(room));
+    if(stake<1){say('Not enough tokens.');return}
+    const line=(old&&old.s===sd&&ui.s===undefined)?+old.line:spreadFor(g),nb={...cur,[id]:{s:sd,stake,line,odds:ATS_PAY,w:g.w,at:NOW()}};
+    if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Locked in: '+(sd==='h'?g.h:g.a)+' '+fmtLine(sd==='h'?line:-line))){delete UI.at[id];render()}}
   else if(a==='pkSide'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}
   else if(a==='pkStake'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{stake:+t.dataset.v});render()}
   else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick removed');render()}
