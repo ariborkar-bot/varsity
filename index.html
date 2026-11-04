@@ -1373,7 +1373,12 @@ function agg(p,scope){
   const s=sum(g.map(x=>x.stat));
   return{n:g.length,s,v:Math.round(g.reduce((a,x)=>a+pts(x.stat),0)*10)/10,unv:g.some(x=>x.ver==='self'),ver:g.length>0&&g.every(x=>x.ver==='verified')};
 }
-const metric=a=>UI.rank==='proj'?(a.pj||0):UI.rank==='pg'?(a.n?a.v/a.n:0):a.v;
+const metric=a=>a.v;
+/* "Previous" ranks everyone by their most recent game instead of their running total (it ignores the scoring period) */
+function lastAgg(p){let i=p.games.length-1;while(i>=0&&!p.games[i])i--;
+  if(i<0)return{n:0,s:sum([]),v:0,unv:false,ver:false,w:0};
+  const x=p.games[i];return{n:1,s:sum([x.stat]),v:Math.round(pts(x.stat)*10)/10,unv:x.ver==='self',ver:x.ver==='verified',w:i+1}}
+const aggR=p=>UI.rank==='prev'?lastAgg(p):agg(p,UI.scope);
 function trend(p){
   const g=p.games.map((x,i)=>x?{w:i+1,v:pts(x.stat)}:null).filter(Boolean);
   if(g.length<3)return null;
@@ -1627,8 +1632,8 @@ function computeNotes(){
 function myRanks(me){
   const a=agg(me,UI.scope);
   if(!a.n)return null;
-  const val=metric(a);
-  const pool=players().map(p=>({p,a:agg(p,UI.scope)})).filter(x=>x.a.n>0);
+  const val=metric(aggR(me));
+  const pool=players().map(p=>({p,a:aggR(p)})).filter(x=>x.a.n>0);
   const calc=l=>({rank:1+l.filter(x=>x.p.key!==me.key&&metric(x.a)>val).length,of:l.length});
   return{a,val,pool,
     school:{all:calc(pool.filter(x=>x.p.school===me.school)),pos:calc(pool.filter(x=>x.p.school===me.school&&x.p.pos===me.pos))},
@@ -1644,10 +1649,10 @@ async function act(fn,ok){
   try{await fn();if(ok)say(ok);return true}
   catch(e){say(e&&e.code==='invalid_argument'?'You do not have permission to do that.':'That did not save. Try again.');return false}
 }
-const bigV=a=>f1(UI.rank==='proj'?(a.pj||0):UI.rank==='pg'&&UI.scope==='season'?(a.n?a.v/a.n:0):a.v);
-const subV=a=>UI.rank==='proj'?`proj wk ${nextWeek()}`:UI.scope!=='season'?'this week':(UI.rank==='pg'?`${f1(a.v)} total · ${a.n} gm`:`${f1(a.n?a.v/a.n:0)} per game`);
-const scopeSel=id=>`<label class="fld"><span>Scoring period</span><select id="${id}" data-act="scope">${['season',...Array.from({length:WEEKS},(_,i)=>i+1)].map(v=>`<option value="${v}" ${String(UI.scope)===String(v)?'selected':''}>${v==='season'?'Season total':'Week '+v+(v===CURW()?' (current)':'')}</option>`).join('')}</select></label>`;
-const rankSw=()=>`<div class="fld"><span>Rank by</span><div class="chips" role="group" aria-label="Rank by">${[['total','Total'],['pg','Per game'],['proj','Projected']].map(([v,l])=>`<button class="chip" data-act="rank" data-v="${v}" aria-pressed="${UI.rank===v}">${l}</button>`).join('')}</div></div>`;
+const bigV=a=>f1(a.v);
+const subV=a=>UI.rank==='prev'?(a.w?`week ${a.w} game`:'no games'):UI.scope!=='season'?'this week':`${f1(a.n?a.v/a.n:0)} per game`;
+const scopeSel=(id,off)=>`<label class="fld"><span>Scoring period</span><select id="${id}" data-act="scope" ${off?'disabled title="Previous ranks by each player’s last game"':''}>${['season',...Array.from({length:WEEKS},(_,i)=>i+1)].map(v=>`<option value="${v}" ${String(UI.scope)===String(v)?'selected':''}>${v==='season'?'Season total':'Week '+v+(v===CURW()?' (current)':'')}</option>`).join('')}</select></label>`;
+const rankSw=()=>`<div class="fld"><span>Rank by</span><div class="chips" role="group" aria-label="Rank by">${[['total','Total'],['prev','Previous']].map(([v,l])=>`<button class="chip" data-act="rank" data-v="${v}" aria-pressed="${UI.rank===v}">${l}</button>`).join('')}</div></div>`;
 const vtag=(p,a)=>p.mp?(p.tw?'<span class="vt tw">'+(p.pos==='DEF'?'2-way · D':'2-way · O')+'</span>':'')+'<span class="vt mp">Verified</span>':p.sample?'':(a.unv?'<span class="vt un">unverified</span>':(a.ver?'<span class="vt ok">verified</span>':''));
 const trTag=p=>{if(UI.scope!=='season')return'';const t=trend(p);return t?`<em class="tr ${t.d>=0?'up':'dn'}" title="Last game compared with the earlier average">${t.d>=0?'▲':'▼'} ${f1(Math.abs(t.d))}</em>`:''};
 
@@ -1784,18 +1789,18 @@ function leagueRows(){
   const q=UI.q.trim().toLowerCase();
   /* rank everyone under the position and school filters first, so a name search keeps each player's real rank */
   const all=players().filter(p=>posMatch(p,UI.pos)&&(UI.school==='ALL'||p.school===UI.school))
-    .map(p=>{const a=agg(p,UI.scope);if(UI.rank==='proj')a.pj=proj(p).pts;return{p,a}}).filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a));
+    .map(p=>({p,a:aggR(p)})).filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a));
   all.forEach((x,i)=>x.rank=i+1);
   return q?all.filter(x=>x.p.name.toLowerCase().includes(q)):all;
 }
 function podiumHTML(rows){
-  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span>${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='pg'&&UI.scope==='season'?'pts per game':'fantasy pts'}</small></button>`}).join('')}</div>`;
+  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span>${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='prev'?'last game pts':'fantasy pts'}</small></button>`}).join('')}</div>`;
 }
 function rowHTML(x,rank){
   return `<button class="row" data-act="player" data-id="${esc(x.p.key)}">
     <span class="rk">${rank}</span>${av(x.p.name,x.p.school,40)}
     <span class="who"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span>
-    <span class="ln">${UI.rank==='proj'?projLine(x.p)+' '+projTag(x.p):line(x.p.pos,x.a.s)}</span>
+    <span class="ln">${line(x.p.pos,x.a.s)}</span>
     <span class="pt"><b>${bigV(x.a)}</b><small>${subV(x.a)} ${trTag(x.p)}</small></span></button>`;
 }
 function leadersHTML(rows){
@@ -1809,7 +1814,7 @@ function listHTML(){
   const vis=UI.more?rows:rows.slice(0,10);
   const top=!UI.q.trim()&&vis.length>=3,rest=top?vis.slice(3):vis;
   const more=rows.length>10?`<div class="btns" style="justify-content:center"><button class="btn ghost" data-act="more">${UI.more?'Show less':'Show more ('+(rows.length-10)+' more)'}</button></div>`:'';
-  return leadersHTML(rows)+(top?podiumHTML(vis):'')+(rest.length?`<div class="board"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">${UI.rank==='pg'&&UI.scope==='season'?'Pts per game':'Fantasy pts'}</span></div>${rest.map(x=>rowHTML(x,x.rank)).join('')}</div>`:'')+more;
+  return leadersHTML(rows)+(top?podiumHTML(vis):'')+(rest.length?`<div class="board"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">${UI.rank==='prev'?'Last game pts':'Fantasy pts'}</span></div>${rest.map(x=>rowHTML(x,x.rank)).join('')}</div>`:'')+more;
 }
 function hotHTML(){
   if(UI.scope!=='season'||UI.pos!=='ALL'||UI.q||UI.school!=='ALL')return'';
@@ -1824,7 +1829,7 @@ function viewLeague(){
   return `<div class="head"><h2>Top performers</h2><p>Every San Diego Section player, ranked by fantasy points. Tap a player to see every game and their projection.</p></div>
   <div class="tools">
     <div class="chips" role="group" aria-label="Position">${FILTERS.map(x=>`<button class="chip" data-act="pos" data-v="${x}" aria-pressed="${UI.pos===x}">${FLABEL[x]||x}</button>`).join('')}</div>
-    ${scopeSel('scope1')}${rankSw()}
+    ${scopeSel('scope1',UI.rank==='prev')}${rankSw()}
     <label class="fld"><span>School</span><select id="school" data-act="school"><option value="ALL">All schools</option>${schools.map(s=>`<option ${UI.school===s?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
     <label class="fld grow"><span>Search</span><input id="q" type="search" placeholder="Player name" value="${esc(UI.q)}"></label>
   </div>
@@ -2107,8 +2112,8 @@ function friendsHTML(){
   const per=UI.scope==='season'?'Season total':'Week '+UI.scope;
   let msg;
   if(mi<0)msg='You will appear in the standings once you have approved games.';
-  else if(mi===0)msg=ranked.length>1?`You lead by ${f1(metric(ranked[0].a)-metric(ranked[1].a))} ${UI.rank==='pg'?'points per game':'points'}.`:'You are the only one with games so far.';
-  else msg=`You are #${mi+1} of ${ranked.length}, ${f1(metric(ranked[mi-1].a)-metric(ranked[mi].a))} ${UI.rank==='pg'?'points per game':'points'} behind ${esc(ranked[mi-1].name)}.`;
+  else if(mi===0)msg=ranked.length>1?`You lead by ${f1(metric(ranked[0].a)-metric(ranked[1].a))} points.`:'You are the only one with games so far.';
+  else msg=`You are #${mi+1} of ${ranked.length}, ${f1(metric(ranked[mi-1].a)-metric(ranked[mi].a))} points behind ${esc(ranked[mi-1].name)}.`;
   let k=0;
   const list=rows.map(r=>{
     const rank=r.a.n>0?++k:'–';
@@ -2124,7 +2129,7 @@ function friendsHTML(){
       <p>Send this code to friends. They paste it under “Join a friend group” and show up on the board once they enter a game.</p>
       <button class="btn" data-act="fcopy" data-code="${esc(g.code)}">Copy code</button>
     </div>
-    <section class="card"><div class="qh"><h3>${esc(g.name)}</h3><button class="btn sm ghost" data-act="copyFriends">Copy standings</button></div><p class="muted">${per}, ranked by ${UI.rank==='pg'?'points per game':'total points'}. ${msg}</p><div class="board">${list}</div></section>
+    <section class="card"><div class="qh"><h3>${esc(g.name)}</h3><button class="btn sm ghost" data-act="copyFriends">Copy standings</button></div><p class="muted">${per}, ranked by total points. ${msg}</p><div class="board">${list}</div></section>
     ${groupDanger('fgroups',g,'friend group')}
     ${forms}</div>`;
 }
@@ -2166,7 +2171,7 @@ function viewMe(){
     const brow=(x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who"><b>${esc(x.p.name)}${x.p.key===me.key?' (you)':''}</b><i>${pb(x.p.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(x.p.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b><small>${subV(x.a)}</small></span></div>`;
     const schPos=info.pool.filter(x=>x.p.school===me.school&&x.p.pos===me.pos),secPos=info.pool.filter(x=>x.p.pos===me.pos);
     const sl=[...schPos].sort((p,q)=>metric(q.a)-metric(p.a)),si=sl.findIndex(x=>x.p.key===me.key);
-    const unit=UI.rank==='pg'?'points per game':'points';
+    const unit=UI.rank==='prev'?'points in their last game':'points';
     const sgap=sl.length<2?`You are the only ${me.pos} at ${esc(me.school)} with approved games.`:si===0?`You lead the ${me.pos}s at ${esc(me.school)} by ${f1(info.val-metric(sl[1].a))} ${unit}.`:`${f1(metric(sl[si-1].a)-info.val)} ${unit} behind ${esc(sl[si-1].p.name)}, the next ${me.pos} up.`;
     schoolBoard=`<section class="card"><h3>${me.pos}s at ${esc(me.school)}</h3><p class="muted">${sgap}</p><div class="board">${sl.map(brow).join('')}</div></section>`;
     const SHORT={rec:'Rec',recYd:'Rec yd',recTD:'Rec TD',rushYd:'Rush yd',rushTD:'Rush TD',passYd:'Pass yd',passTD:'Pass TD',int:'INT',fumLost:'Fum',retTD:'Ret TD',tkl:'Tkl',sack:'Sack',dInt:'INT',ff:'FF',fr:'FR',dTD:'D TD'};
@@ -2192,7 +2197,7 @@ function viewMe(){
       </tbody></table></div></section>`;
     const list=info.pool.filter(x=>x.p.pos===me.pos).sort((a,b)=>metric(b.a)-metric(a.a));
     const idx=list.findIndex(x=>x.p.key===me.key),start=Math.max(0,Math.min(idx-2,list.length-5));
-    const gap=idx===0?`You lead the section among ${me.pos}s.`:`${f1(metric(list[idx-1].a)-info.val)} ${UI.rank==='pg'?'points per game':'points'} behind ${esc(list[idx-1].p.name)}, the next spot up.`;
+    const gap=idx===0?`You lead the section among ${me.pos}s.`:`${f1(metric(list[idx-1].a)-info.val)} points behind ${esc(list[idx-1].p.name)}, the next spot up.`;
     near=`<section class="card"><h3>Around you in the San Diego section</h3><p class="muted">${me.pos}s only. ${gap}</p><div class="board">${list.slice(start,start+5).map((x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${start+i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who"><b>${esc(x.p.name)}</b><i>${pb(me.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(me.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b></span></div>`).join('')}</div></section>`;
   }else ranks=`<p class="hint">No approved games for this period yet. Your rank and breakdown appear as soon as games are posted.</p>`;
   const wk=UI.meEntry.week;
@@ -2204,7 +2209,7 @@ function viewMe(){
         <label class="fld"><span>School</span><select id="me-school" data-act="meSchool">${(SD_SCHOOLS.includes(pr.school)?SD_SCHOOLS:[...SD_SCHOOLS,pr.school]).map(s=>`<option ${s===pr.school?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
         <label class="fld"><span>Position</span><select id="me-pos" data-act="mePos">${POSITIONS.map(x=>`<option ${x===pr.pos?'selected':''}>${x}</option>`).join('')}</select></label>
       </div>
-      <div class="tools bare">${scopeSel('scope3')}${rankSw()}</div>
+      <div class="tools bare">${scopeSel('scope3',UI.rank==='prev')}${rankSw()}</div>
       ${info?`<div class="big"><div><span class="lbl">${UI.scope==='season'?'Season pts':'Week pts'}</span><b>${f1(info.a.v)}</b></div><div><span class="lbl">Games</span><b>${info.a.n}</b></div><div><span class="lbl">Per game</span><b>${f1(info.a.v/info.a.n)}</b></div></div>`:''}
     </section>
     <section class="card"><h3>How you compare</h3>${ranks}</section>
@@ -2611,7 +2616,7 @@ document.addEventListener('click',async e=>{
   else if(a==='copyFriends'){
     const g=curFGroup();if(!g)return;
     const rows=friendRows(g,UI.scope).filter(r=>r.a.n>0);
-    copyText(`${g.name} on Varsity (${UI.scope==='season'?'season':'week '+UI.scope})\n`+rows.map((r,i)=>`${i+1}. ${r.name}: ${bigV(r.a)}${UI.rank==='pg'&&UI.scope==='season'?' per game':''}`).join('\n'),'Standings copied');
+    copyText(`${g.name} on Varsity (${UI.scope==='season'?'season':'week '+UI.scope})\n`+rows.map((r,i)=>`${i+1}. ${r.name}: ${bigV(r.a)}`).join('\n'),'Standings copied');
   }
   else if(a==='copyRank'){const me=meP(),info=me&&myRanks(me);if(info)copyText(rankText(info,me),'Copied. Paste it anywhere.')}
   else if(a==='share'){
