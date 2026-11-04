@@ -1185,6 +1185,32 @@ select option{background:#0B1730;color:#EAF0F8}
 .pod .top10{position:absolute;top:8px;right:8px}
 /* the position row wraps instead of sliding sideways on phones */
 .tools .chips[aria-label="Position"]{flex-wrap:wrap!important;overflow:visible!important;margin:0!important;padding:0!important;width:auto!important}
+
+/* compare players: stadium-lit cards, a ring that sweeps in when a player lands in a slot */
+.cmp-card{position:relative;overflow:hidden;background:radial-gradient(120% 80% at 50% -10%,rgba(47,107,255,.22),transparent 60%),var(--surface)}
+.cmp-card::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 58px,rgba(150,195,255,.035) 58px 60px);pointer-events:none}
+.cmp-top{position:relative;z-index:1}
+.cmp-pl{overflow:hidden;background:linear-gradient(170deg,rgba(47,107,255,.14),rgba(5,12,26,.2) 70%),var(--surface2)!important;border-color:#2A4472!important;transition:transform .25s,box-shadow .25s}
+.cmp-pl:not(.empty):hover{transform:translateY(-2px)}
+.cmp-pl.ahead{background:linear-gradient(170deg,rgba(255,194,61,.2),rgba(5,12,26,.2) 70%),var(--surface2)!important}
+.cmp-ring{position:absolute;left:50%;top:44px;width:86px;height:86px;margin:-43px 0 0 -43px;border-radius:50%;border:2px solid var(--ac,#2F6BFF);opacity:0;pointer-events:none}
+.cmp-in .cmp-ring{animation:cmpRing .9s .05s ease-out}
+.cmp-in{animation:cmpDrop .6s cubic-bezier(.2,.9,.25,1.15) both}
+.cmp-in .cmp-av{animation:cmpPop .7s .15s cubic-bezier(.2,1.4,.4,1) both}
+.cmp-in::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 65%);transform:translateX(-120%);animation:cmpSweep .9s .1s ease-out forwards;pointer-events:none}
+.cmp-out{animation:cmpPulse .6s ease-out}
+.cmp-pl.empty{border:1px dashed rgba(120,170,255,.45)!important;background:repeating-linear-gradient(135deg,rgba(47,107,255,.06) 0 10px,transparent 10px 20px),var(--surface)!important}
+.cmp-vs{position:relative;width:46px;height:46px;background:none!important;box-shadow:none!important;color:#FFC23D}
+.cmp-vs b{position:relative;z-index:1;font:900 italic 1.15rem/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em;text-shadow:0 2px 0 #7a4d00}
+.cmp-vs::before{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(255,194,61,.5);transition:all .3s}
+.cmp-vs.live::before{background:radial-gradient(circle,rgba(255,194,61,.25),transparent 70%);border-color:#FFC23D;animation:cmpBeat 1.6s ease-in-out infinite}
+@keyframes cmpDrop{0%{opacity:0;transform:translateY(-22px) scale(.9) rotateX(-22deg)}60%{opacity:1;transform:translateY(4px) scale(1.02) rotateX(3deg)}100%{transform:none}}
+@keyframes cmpPop{0%{transform:scale(.4);filter:brightness(1.8)}100%{transform:scale(1);filter:none}}
+@keyframes cmpRing{0%{opacity:.95;transform:scale(.6)}100%{opacity:0;transform:scale(2.4)}}
+@keyframes cmpSweep{to{transform:translateX(120%)}}
+@keyframes cmpPulse{0%{box-shadow:0 0 0 0 rgba(47,107,255,.5)}100%{box-shadow:0 0 0 14px rgba(47,107,255,0)}}
+@keyframes cmpBeat{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}
+@media (prefers-reduced-motion:reduce){.cmp-in,.cmp-in .cmp-av,.cmp-in::after,.cmp-in .cmp-ring,.cmp-out,.cmp-vs.live::before{animation:none!important}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -2498,8 +2524,8 @@ function compareHTML(){
   const P=UI.cmp.map(k=>k?pByKey(k):null),both=P[0]&&P[1];
   let lead=-1,wins=[0,0];
   const slot=s=>{const p=P[s];return p
-    ?`<div class="cmp-pl ${both&&lead===s?'ahead':''}">${both&&lead===s?'<span class="cmp-crown">Leads</span>':''}<div class="cmp-av">${av(p.name,p.school,64)}</div><b>${esc(p.name)}</b><div class="cmp-sub">${pb(p.pos,p.sub)}${gtag(p)}</div><small class="muted">${slogo(p.school)}${esc(p.school)}</small><button class="btn sm ghost" data-act="cmpClear" data-s="${s}">Change</button></div>`
-    :`<div class="cmp-pl empty"><label class="fld"><span>Player ${s+1}</span><input id="cmp-q${s}" type="search" placeholder="Search a player or school" autocomplete="off"></label><ul class="cmp-res" id="cmp-r${s}"></ul></div>`};
+    ?`<div class="cmp-pl ${both&&lead===s?'ahead':''} ${UI.cmpNew===s?'cmp-in':''}" style="--ac:${s?'#FF9F1C':'#2F6BFF'}">${both&&lead===s?'<span class="cmp-crown">Leads</span>':''}<span class="cmp-ring"></span><div class="cmp-av">${av(p.name,p.school,64)}</div><b>${esc(p.name)}</b><div class="cmp-sub">${pb(p.pos,p.sub)}${gtag(p)}</div><small class="muted">${slogo(p.school)}${esc(p.school)}</small><button class="btn sm ghost" data-act="cmpClear" data-s="${s}">Change</button></div>`
+    :`<div class="cmp-pl empty ${UI.cmpNew===s?'cmp-out':''}"><label class="fld"><span>Player ${s+1}</span><input id="cmp-q${s}" type="search" placeholder="Search a player or school" autocomplete="off"></label><ul class="cmp-res" id="cmp-r${s}"></ul></div>`};
   let body='';
   if(both){
     const all=players().filter(p=>p.mp).map(p=>({p,v:agg(p,'season').v})).filter(x=>agg(x.p,'season').n>0).sort((a,b)=>b.v-a.v);
@@ -2525,7 +2551,7 @@ function compareHTML(){
   }
   return `<section class="card cmp-card" id="compare"><div class="qh"><h3>Compare players</h3>${P[0]||P[1]?'<button class="btn sm ghost" data-act="cmpReset">Clear</button>':''}</div>
     <p class="muted">Pick any two players to see their season side by side. The higher number in each row is highlighted.</p>
-    <div class="cmp-top">${slot(0)}<span class="cmp-vs">VS</span>${slot(1)}</div>${body}</section>`;
+    <div class="cmp-top">${slot(0)}<span class="cmp-vs ${both?'live':''}"><b>VS</b></span>${slot(1)}</div>${body}</section>`;
 }
 
 /* ---------- lineup groups with weekly matchups ---------- */
@@ -3504,7 +3530,7 @@ document.addEventListener('click',async e=>{
   else if(a==='gweek'){UI.gw=t.dataset.w==='P'?'P':+t.dataset.w;render()}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
-  else if(a==='cmpPick'){UI.cmp[+t.dataset.s]=t.dataset.id;render();const c=document.getElementById('compare');if(c)c.scrollIntoView({block:'center'})}
+  else if(a==='cmpPick'){UI.cmp[+t.dataset.s]=t.dataset.id;UI.cmpNew=+t.dataset.s;render();setTimeout(()=>{UI.cmpNew=null},1400);const c=document.getElementById('compare');if(c)c.scrollIntoView({block:'center'})}
   else if(a==='cmpClear'){UI.cmp[+t.dataset.s]=null;render()}
   else if(a==='cmpReset'){UI.cmp=[null,null];render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
@@ -3868,7 +3894,8 @@ boot();
   const paint=()=>[...pop.querySelectorAll('li')].forEach((li,i)=>{li.classList.toggle('act',i===act);if(i===act)li.scrollIntoView({block:'nearest'})});
   const pick=o=>{const c=cur;closePop();if(!c)return;const s=c.s;c.picked=true;c.inp.value=isDef(o)?'':o.textContent;
     if(s.value!==o.value){s.value=o.value;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}))}};
-  const show=c=>{const q=c.inp.value.trim().toLowerCase();
+  const show=c=>{const cur0=c.s.options[c.s.selectedIndex],sameAsPicked=!!cur0&&c.inp.value.trim().toLowerCase()===cur0.textContent.trim().toLowerCase();
+    const q=sameAsPicked?'':c.inp.value.trim().toLowerCase();
     if(c.inp.disabled){closePop();return}
     cur=c;list=[...c.s.options].filter(o=>!o.disabled&&(!q||o.textContent.toLowerCase().includes(q))).slice(0,q?40:200);
     if(!pop){pop=document.createElement('div');pop.className='dd sdd';document.body.appendChild(pop)}
