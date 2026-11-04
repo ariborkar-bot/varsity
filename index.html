@@ -142,24 +142,24 @@ input[type=number]{width:100%}
 .sim-heads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .sim-ch{display:flex;align-items:center;justify-content:center;padding:9px;border-radius:12px;font:900 .85rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase}
 .sim-ch.off{background:rgba(47,107,255,.18);color:#9DB8FF;border:1px solid rgba(47,107,255,.5)}.sim-ch.def{background:rgba(244,63,94,.16);color:#FFA3B3;border:1px solid rgba(244,63,94,.5)}
-.sim-board{container-type:inline-size;position:relative;margin-top:10px;width:100%;aspect-ratio:9/16.5;border-radius:18px;overflow:hidden;border:1px solid #1d5c35;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 10%),linear-gradient(180deg,#1a6b3a,#134f2b)}
-.sb-los{position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed rgba(255,214,102,.75)}
-.sb-slot{position:absolute;transform:translate(-50%,-50%);z-index:1}
-.sb-card{position:relative;box-sizing:border-box;width:52px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px 5px!important;border-radius:12px!important;border:1px solid color-mix(in srgb,var(--pc) 70%,#000)!important;border-top:4px solid var(--pc)!important;background:linear-gradient(170deg,color-mix(in srgb,var(--pc) 18%,#0f2147),#0a1630)!important;box-shadow:0 6px 14px rgba(0,0,0,.45)!important;text-align:center}
-.sb-card .sim-pos{font-size:.66rem;padding:3px 5px;border-radius:6px;gap:3px}.sb-card .sim-pos i{display:none}
-.sb-card .av{width:26px!important;height:26px!important;font-size:.55rem!important}
-.sb-nm{font-size:.54rem;line-height:1.1;display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sb-nm .n-l,.sb-sc{display:none}
-.sb-pts b{display:block;font:900 .85rem/1 var(--f-display)}.sb-pts small{display:block;color:var(--muted);font-size:.48rem;white-space:nowrap}.sb-pts em{display:none;font-style:normal}.sb-pts u{display:block;text-decoration:none;font:800 .5rem/1 var(--f-body);color:#FFD27A;letter-spacing:.08em;margin-top:1px}
-.sb-rs{border:0;border-radius:999px;background:linear-gradient(180deg,#FFC23D,#FF9F1C);color:#1a1200;font:900 .8rem/1 var(--f-display);min-width:22px;height:20px;padding:0 5px;cursor:pointer}.sb-rs span{display:none}.sb-rs.off{background:var(--surface2);color:var(--muted);opacity:.6;cursor:default}
-@container (max-width:340px){.sb-card{width:44px}.sb-nm{font-size:.5rem}.sb-pts small{display:none}.sb-card .av{width:22px!important;height:22px!important;font-size:.5rem!important}.sb-card .sim-pos{font-size:.6rem;padding:2px 4px}}
-@container (min-width:500px) and (max-width:899px){.sim-board{aspect-ratio:1/1.05}.sb-card{width:60px}.sb-nm{font-size:.6rem}.sb-pts small{font-size:.54rem}}
-@container (min-width:900px){
- .sim-board{aspect-ratio:16/13}
- .sb-card{width:128px;gap:4px;padding:8px 6px 9px!important}.sb-card .sim-pos{font-size:.95rem;padding:4px 10px}.sb-card .sim-pos i{display:inline}
- .sb-card .av{width:44px!important;height:44px!important;font-size:.9rem!important}
- .sb-nm{font-size:.82rem}.sb-nm .n-s{display:none}.sb-nm .n-l{display:inline}.sb-sc{display:block;font-size:.66rem;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
- .sb-pts b{font-size:1.3rem}.sb-pts u{font-size:.62rem}.sb-pts small{font-size:.68rem}.sb-pts em{display:inline}.sb-rs{height:28px;font-size:.78rem;padding:0 12px}.sb-rs span{display:inline}
-}
+.sim-heads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.sim-ch{cursor:pointer;flex-direction:column;gap:5px;transition:background .2s,opacity .2s,box-shadow .2s,transform .2s}
+.sim-ch small{font:700 .66rem/1 var(--f-body);letter-spacing:.04em;text-transform:none;opacity:.85}
+.sim-ch[aria-selected="false"]{opacity:.55}
+.sim-ch:focus-visible{outline:2px solid #FFC23D;outline-offset:2px}
+.sim-ch.off[aria-selected="true"]{background:rgba(47,107,255,.34);border-color:#4B86FF;color:#fff;box-shadow:0 8px 22px -10px rgba(47,107,255,.8)}
+.sim-ch.def[aria-selected="true"]{background:rgba(244,63,94,.3);border-color:#FF6B86;color:#fff;box-shadow:0 8px 22px -10px rgba(244,63,94,.8)}
+.sim-board{container-type:inline-size;position:relative;margin:10px auto 0;width:100%;max-width:560px;aspect-ratio:400/520;border-radius:18px;overflow:hidden;border:1px solid #1d5c35;background:#175a2d;box-shadow:0 16px 36px -16px rgba(0,0,0,.75)}
+.sb-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sb-slot{position:absolute;transform:translate(-50%,-50%);z-index:2}
+.sb-card{position:relative;box-sizing:border-box;width:max(56px,17.8cqw);min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:.5cqw;padding:.6cqw .5cqw 1cqw!important;border-radius:2.6cqw!important;border:1px solid color-mix(in srgb,var(--pc) 70%,#000)!important;border-top:.9cqw solid var(--pc)!important;background:linear-gradient(170deg,color-mix(in srgb,var(--pc) 22%,#0f2147),#0a1630)!important;box-shadow:0 .9cqw 2.4cqw rgba(0,0,0,.55)!important;text-align:center}
+.sb-card .sim-pos{font-size:max(.6rem,2.9cqw);padding:.7cqw 1.3cqw;border-radius:1.4cqw;gap:3px}.sb-card .sim-pos i{display:none}
+.sb-card .av{width:max(22px,6.6cqw)!important;height:max(22px,6.6cqw)!important;font-size:max(.52rem,2.2cqw)!important}
+.sb-nm{font-size:max(.5rem,2.6cqw);line-height:1.1;display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sb-nm .n-l,.sb-sc{display:none}
+.sb-pts b{display:block;font:900 max(.8rem,3.9cqw)/1 var(--f-display)}.sb-pts small{display:none;color:var(--muted);font-size:max(.46rem,2cqw);white-space:nowrap}.sb-pts em{display:none;font-style:normal}.sb-pts u{display:block;text-decoration:none;font:800 max(.48rem,1.9cqw)/1 var(--f-body);color:#FFD27A;letter-spacing:.08em;margin-top:1px}
+.sb-rs{border:0;border-radius:999px;background:linear-gradient(180deg,#FFC23D,#FF9F1C);color:#1a1200;font:900 max(.76rem,3.1cqw)/1 var(--f-display);min-width:max(22px,5.6cqw);height:max(19px,5cqw);padding:0 1.2cqw;cursor:pointer}.sb-rs span{display:none}.sb-rs.off{background:var(--surface2);color:var(--muted);opacity:.6;cursor:default}
+@container (min-width:480px){.sb-nm .n-s{display:none}.sb-nm .n-l{display:inline}.sb-pts small{display:block;font-size:.58rem}.sb-pts em{display:inline}.sb-rs span{display:inline}.sb-rs{padding:0 12px}}
+
 .sim-res{display:grid!important;grid-template-columns:auto 1fr;gap:6px 16px;align-items:center}.sim-res>*:nth-child(n+3){grid-column:1/-1}.sim-gr{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;font:900 2.6rem/1 var(--f-display);color:#1a1200;background:linear-gradient(135deg,#FFC23D,#FF9F1C)}.sim-opt summary{cursor:pointer;color:var(--muted);font-weight:700;margin:6px 0}
 .fc-top{width:100%;display:flex;justify-content:space-between;align-items:center}.fc-pos{font:900 .9rem/1 var(--f-display);color:#FFD27A;letter-spacing:.05em}
 .fc-nm{font-size:.98rem;line-height:1.15}.fc-sc{color:var(--muted);display:flex;align-items:center;gap:4px;justify-content:center;font-size:.75rem}
@@ -1195,12 +1195,11 @@ select option{background:#0B1730;color:#EAF0F8}
 .nt-sw .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .nt-foot{margin-top:12px}
 
-/* TOP 10 tag: a small navy pill with gold lettering in the heavy condensed italic of the VARSITY wordmark.
-   Rows show it right after the player's name; the podium shows it under the name. */
-.top10{display:inline-flex;align-items:center;flex:none;font:800 italic .62rem/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#FFC23D;background:#0A1E55;border:1px solid rgba(255,194,61,.6);padding:3px 6px 2px 7px;border-radius:5px;white-space:nowrap}
-.who .nm{display:flex;align-items:center;gap:8px;min-width:0}
-.who .nm b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal}
-.pod .top10{margin-top:-2px}
+/* TOP 10 tag: a small navy pill with gold lettering, pinned to the top right corner of each row and podium card */
+.top10{flex:none;display:inline-flex;align-items:center;font:800 italic .6rem/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#FFC23D;background:#0A1E55;border:1px solid rgba(255,194,61,.6);padding:3px 6px 2px 7px;border-radius:5px;white-space:nowrap;pointer-events:none}
+.who .nm{display:flex;align-items:center;gap:7px;min-width:0}.who .nm b{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.row,.pod{position:relative}
+.pod .top10{position:absolute;top:8px;right:10px;z-index:2}
 /* the position row wraps instead of sliding sideways on phones */
 .tools .chips[aria-label="Position"]{flex-wrap:wrap!important;overflow:visible!important;margin:0!important;padding:0!important;width:auto!important}
 
@@ -1249,6 +1248,43 @@ select option{background:#0B1730;color:#EAF0F8}
 }
 .cmp-pl .cmp-crown{top:8px;transform:none}
 .setm .setv{padding:4px 12px 2px;font:600 .74rem/1.2 var(--f-body);color:#6F83A3;letter-spacing:.04em}
+
+/* compare: a spin on the pick, then a head-to-head stage with both players side by side and the numbers below */
+.cmp-reelwin{height:100px;width:100%;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent)}
+.cmp-reel{display:flex;flex-direction:column;animation:cmpReel 1.2s cubic-bezier(.1,.75,.12,1) forwards;filter:blur(.4px)}
+.cmp-ri{height:100px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center}
+.cmp-ri b{font-size:.78rem;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes cmpReel{0%{transform:translateY(0)}100%{transform:translateY(calc((1 - var(--n)) * 100px))}}
+.cmp-pl.cmp-spin{align-items:center;border-color:var(--ac)!important;box-shadow:0 0 0 1px var(--ac),0 0 28px -4px var(--ac)}
+.cmp-stage{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.cmp-stage .cmp-vs{position:absolute;left:50%;top:62px;transform:translate(-50%,-50%);z-index:4;background:#0A1E55!important;border-radius:50%;box-shadow:0 0 0 4px rgba(10,30,85,.9),0 0 24px rgba(255,194,61,.45)!important}
+.cmp-f{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;min-width:0;padding:34px 8px 12px;border-radius:20px;border:1px solid color-mix(in srgb,var(--ac) 55%,#2A4472);
+  background:radial-gradient(90% 60% at 50% 0,color-mix(in srgb,var(--ac) 30%,transparent),transparent 70%),linear-gradient(175deg,#12295a,#08122a);transition:transform .25s,box-shadow .25s}
+.cmp-f::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 14px,rgba(255,255,255,.025) 14px 16px);pointer-events:none}
+.cmp-f.ahead{border-color:#FFC23D;box-shadow:0 0 0 1px rgba(255,194,61,.4),0 14px 34px -10px rgba(255,170,30,.4)}
+.cmp-f.ahead::after{content:"";position:absolute;left:-30%;right:-30%;top:-40%;height:70%;background:radial-gradient(closest-side,rgba(255,194,61,.28),transparent);pointer-events:none}
+.cmp-f .cmp-crown{position:absolute;top:9px;left:50%;transform:translateX(-50%)}
+.cmp-fav{width:100%;min-height:90px;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.cmp-fav .cmp-av{padding:4px}
+.cmp-fm{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;max-width:100%;position:relative;z-index:1}
+.cmp-fn{font:800 1.08rem/1.1 var(--f-display,inherit);overflow-wrap:normal;word-break:normal}
+.cmp-fs{display:flex;gap:4px;align-items:center;justify-content:center;flex-wrap:wrap}
+.cmp-big{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;position:relative;z-index:1}
+.cmp-big>div{padding:7px 2px;border-radius:12px;background:rgba(5,12,26,.55);border:1px solid rgba(120,170,255,.18)}
+.cmp-big b{display:block;font:900 1.45rem/1 'Barlow Condensed','Arial Narrow',sans-serif;color:#fff}
+.cmp-f.ahead .cmp-big b{color:#FFC23D}
+.cmp-big small{display:block;margin-top:3px;font:700 .6rem/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cmp-f.spinning .cmp-fm,.cmp-f.spinning .cmp-big,.cmp-f.spinning>.btn{opacity:0}
+.cmp-body.wait{opacity:0;transform:translateY(10px);pointer-events:none}
+.cmp-body.show{animation:cmpBodyIn .6s .1s ease-out both}
+@keyframes cmpBodyIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.cmp-body.show .cmp-bar .l i{transform-origin:right;animation:cmpGrow .9s .35s cubic-bezier(.2,.8,.2,1) both}
+.cmp-body.show .cmp-bar .r i{transform-origin:left;animation:cmpGrow .9s .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cmpGrow{from{transform:scaleX(0)}to{transform:none}}
+.cmp-body{margin-top:14px}
+.cmp-f.cmp-in .cmp-big b{animation:cmpPop .7s .2s cubic-bezier(.2,1.4,.4,1) both}
+@media (max-width:420px){.cmp-fn{font-size:.98rem}.cmp-big b{font-size:1.25rem}.cmp-f{padding:34px 6px 10px}}
+@media (prefers-reduced-motion:reduce){.cmp-reel{animation:none;transform:translateY(calc((1 - var(--n)) * 100px))}.cmp-body.show,.cmp-body.show .cmp-bar i,.cmp-f.cmp-in .cmp-big b{animation:none!important}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1586,7 +1622,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v136 · Nov 4';
+const APP_BUILD='v137 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2327,7 +2363,11 @@ const SIM_SLOTS=[
   ...[1,2,3,4].map(n=>({k:'DB'+n,label:'DB',elig:['DEF'],sub:['DB']})),
   ...[1,2,3].map(n=>({k:'LB'+n,label:'LB',elig:['DEF'],sub:['LB']})),
   ...[1,2,3,4].map(n=>({k:'DL'+n,label:'DL',elig:['DEF'],sub:['DL']}))];
-const SIM_POS={RB:[9,50],QB:[25,50],WR1:[41,11],TE:[41,37],FLEX:[41,63],WR2:[41,89],DL1:[59,14],DL2:[59,38],DL3:[59,62],DL4:[59,86],LB1:[75,24],LB2:[75,50],LB3:[75,76],DB1:[91,11],DB2:[91,37],DB3:[91,63],DB4:[91,89]};
+const SIM_POS_OLD={RB:[9,50],QB:[25,50],WR1:[41,11],TE:[41,37],FLEX:[41,63],WR2:[41,89],DL1:[59,14],DL2:[59,38],DL3:[59,62],DL4:[59,86],LB1:[75,24],LB2:[75,50],LB3:[75,76],DB1:[91,11],DB2:[91,37],DB3:[91,63],DB4:[91,89]};
+/* formation spots, as [left %, top %] on the field. Offense and defense each get a full field of their own. */
+const SIM_POS={WR1:[11,40],TE:[72,40],WR2:[90,40],FLEX:[31,58],QB:[50,68],RB:[50,89],
+  DL1:[14,60],DL2:[38,60],DL3:[62,60],DL4:[86,60],LB1:[25,36],LB2:[50,36],LB3:[75,36],DB1:[11,11],DB2:[37,11],DB3:[63,11],DB4:[89,11]};
+const SIM_UNIT=k=>['QB','RB','WR1','WR2','TE','FLEX'].includes(k)?'off':'def';
 const SIM_COL={QB:'#E65B28',RB:'#079B82',WR:'#2868E8',TE:'#9655D8',FLEX:'#E8A317',DB:'#22A6D9',LB:'#E0455B',DL:'#7FB432'};
 const simKey=p=>((p.name||'')+'|'+(p.school||'')).toLowerCase();
 const simTot=p=>agg(p,'season').v;
@@ -2366,6 +2406,37 @@ async function simFinish(){
     const old=(S.picks[ME.uid]||{}).sim||{};
     await act(()=>upsert('picks/'+ME.uid,{sim:{best:Math.max(+old.best||0,Math.round(total*10)/10),runs:(+old.runs||0)+1,last:Math.round(total*10)/10,max:Math.round(max*10)/10,at:NOW()}}),'Team saved');render()}
 }
+/* the field: end zone with the Varsity wordmark and goal posts, mowed stripes, yard lines, hash marks, yard numbers with arrows,
+   the line of scrimmage, the first-down line, and the opposite unit shown as faint markers */
+function simField(tab){
+  const W=400,H=520,Y0=56,YD=11,los=Math.round(H*(tab==='off'?.46:.62)),fd=los-110;
+  const F="font-family=\"'Barlow Condensed','Arial Narrow',sans-serif\"";
+  let g=`<defs><linearGradient id="sfEz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12307c"/><stop offset="1" stop-color="#0b2057"/></linearGradient>
+    <pattern id="sfHatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="14" fill="#fff" fill-opacity=".05"/></pattern>
+    <radialGradient id="sfVig" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient>
+    <linearGradient id="sfLight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <filter id="sfGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .5 0"/></filter>
+    <filter id="sfGlow" x="-10%" y="-400%" width="120%" height="900%"><feGaussianBlur stdDeviation="3"/></filter></defs>
+    <rect width="${W}" height="${H}" fill="#175a2d"/>`;
+  for(let k=0;k<9;k++)g+=`<rect x="0" y="${Y0+k*55}" width="${W}" height="55" fill="${k%2?'#16572b':'#1c6c37'}"/>`;
+  g+=`<rect x="0" y="0" width="14" height="${H}" fill="#000" fill-opacity=".28"/><rect x="386" y="0" width="14" height="${H}" fill="#000" fill-opacity=".28"/>`;
+  g+=`<rect x="14" y="0" width="372" height="${Y0}" fill="url(#sfEz)"/><rect x="14" y="0" width="372" height="${Y0}" fill="url(#sfHatch)"/>`;
+  g+=`<text x="200" y="39" text-anchor="middle" ${F} font-weight="900" font-style="italic" font-size="32" letter-spacing="9" fill="#fff" fill-opacity=".92" stroke="#2F6BFF" stroke-width="1.2" paint-order="stroke">VARSITY</text>`;
+  g+=`<image href="logo.png" x="24" y="10" width="36" height="36" opacity=".95"/><image href="logo.png" x="340" y="10" width="36" height="36" opacity=".95"/>`;
+  g+=`<path d="M178 11V3M222 11V3M178 11H222M200 11V20" stroke="#FFD23D" stroke-width="3" stroke-linecap="round" fill="none"/>`;
+  for(let k=1;k<=8;k++){const y=Y0+k*55,ten=k%2===0;g+=`<line x1="14" x2="386" y1="${y}" y2="${y}" stroke="#fff" stroke-opacity="${ten?.85:.6}" stroke-width="${ten?2.4:1.8}"/>`}
+  for(let yd=1;yd<=41;yd++){if(yd%5===0)continue;const y=Y0+yd*YD;g+=`<path d="M14 ${y}h8M378 ${y}h8M168 ${y}h10M222 ${y}h10" stroke="#fff" stroke-opacity=".5" stroke-width="1.3"/>`}
+  [[10,166],[20,276],[30,386],[40,496]].forEach(([n,y])=>{
+    g+=`<g fill="#fff" fill-opacity=".78" ${F} font-weight="900" font-size="26" text-anchor="middle"><text transform="translate(58 ${y}) rotate(90)" dominant-baseline="middle">${n}</text><text transform="translate(342 ${y}) rotate(-90)" dominant-baseline="middle">${n}</text><path d="M58 ${y-30}l-6 10h12z"/><path d="M342 ${y-30}l-6 10h12z"/></g>`});
+  g+=`<line x1="14" x2="386" y1="56" y2="56" stroke="#fff" stroke-width="3.4"/><line x1="14" x2="14" y1="0" y2="${H}" stroke="#fff" stroke-width="3.4"/><line x1="386" x2="386" y1="0" y2="${H}" stroke="#fff" stroke-width="3.4"/><line x1="14" x2="386" y1="1.5" y2="1.5" stroke="#fff" stroke-width="3"/>`;
+  g+=`<rect x="14" y="${los-1.5}" width="372" height="3" fill="#4B86FF" filter="url(#sfGlow)"/><rect x="14" y="${los-1.5}" width="372" height="3" fill="#8DB4FF"/><rect x="18" y="${los-9}" width="36" height="18" rx="9" fill="#2F6BFF"/><text x="36" y="${los+4}" text-anchor="middle" ${F} font-weight="800" font-size="12" letter-spacing="1.5" fill="#fff">LOS</text>`;
+  if(tab==='off')g+=`<rect x="14" y="${fd-1.5}" width="372" height="3" fill="#FFD23D" filter="url(#sfGlow)"/><rect x="14" y="${fd-1.5}" width="372" height="3" fill="#FFD23D"/><rect x="346" y="${fd-9}" width="36" height="18" rx="9" fill="#FFD23D"/><text x="364" y="${fd+4}" text-anchor="middle" ${F} font-weight="800" font-size="12" letter-spacing="1.5" fill="#241a00">1ST</text>`;
+  const dot=(x,y,t,c)=>`<circle cx="${x}" cy="${y}" r="9.5" fill="${c}" fill-opacity=".16" stroke="${c}" stroke-opacity=".7" stroke-width="1.4" stroke-dasharray="3 2.4"/><text x="${x}" y="${y+3.6}" text-anchor="middle" ${F} font-weight="800" font-size="10" fill="#fff" fill-opacity=".8">${t}</text>`;
+  if(tab==='off'){[160,180,200,220,240].forEach(x=>g+=dot(x,los+11,'OL','#fff'))}
+  else{[160,180,200,220,240].forEach(x=>g+=dot(x,los+36,'OL','#FF9DB0'));g+=dot(200,los+78,'QB','#FF9DB0')+dot(200,los+118,'RB','#FF9DB0')+dot(48,los+36,'WR','#FF9DB0')+dot(352,los+36,'WR','#FF9DB0')+dot(272,los+36,'TE','#FF9DB0')}
+  g+=`<rect width="${W}" height="${H}" fill="url(#sfLight)"/><rect width="${W}" height="${H}" filter="url(#sfGrain)" opacity=".30" style="mix-blend-mode:multiply"/><rect width="${W}" height="${H}" fill="url(#sfVig)"/>`;
+  return `<svg class="sb-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${g}</svg>`;
+}
 function viewSim(){
   const m=UI.sim,my=(ME.uid&&(S.picks[ME.uid]||{}).sim)||{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const head=`<div class="head"><h2>Simulate</h2><p>Draw a full 17-player team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
@@ -2375,7 +2446,8 @@ function viewSim(){
   if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 17 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 4 DL, 3 LB and 4 DB on defense. Everyone is drawn at random from the app, and you have ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div></section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
-  const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
+  const tab=UI.simTab==='def'?'def':'off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
+  const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p||SIM_UNIT(sl.k)!==tab)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
     return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
       <div class="sb-pts"><b>${f1(a.n?a.v/a.n:0)}<u>PPG</u></b><small>${f1(a.v)} pts<em> · ${a.n} gp</em></small></div>
       ${m.done?'':`<button class="sb-rs ${m.left>0&&!busy?'':'off'}" data-act="simRespin" data-i="${i}" ${m.left>0&&!busy?'':'disabled'} aria-label="Respin ${sl.label}">↻<span> Respin</span></button>`}</div></div>`};
@@ -2386,7 +2458,7 @@ function viewSim(){
       <details class="sim-opt"><summary>See the best possible team</summary>${r.best.list.map(x=>`<div class="bt-r"><b>${x.l} · ${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><b class="d">${f1(simTot(x.p))}</b></div>`).join('')}</details>
       <div class="btns"><button class="btn" data-act="simStart">Build another team</button></div></section>`}
   const act2=m.done?'':`<div class="bt-go" style="margin-top:14px"><button class="btn" data-act="simFinish" ${busy?'disabled':''}>Finish team</button><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left>0?`You have ${m.left} ${m.left===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Finish your team when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
-  return head+res+`<section class="card fc-hero">${bar}<div class="sim-heads"><div class="sim-ch off">Offense</div><div class="sim-ch def">Defense</div></div><div class="sim-board"><i class="sb-los"></i>${m.c.map(card).join('')}</div>${act2}</section>${board}`;
+  return head+res+`<section class="card fc-hero">${bar}<div class="sim-heads" role="tablist" aria-label="Unit">${[['off','Offense'],['def','Defense']].map(([u,l])=>`<button type="button" role="tab" class="sim-ch ${u}" aria-selected="${tab===u}" data-act="simTab" data-v="${u}">${l}<small>${unitN(u)} spots · ${f1(unitTot(u))} pts</small></button>`).join('')}</div><div class="sim-board sim-${tab}">${simField(tab)}${m.c.map(card).join('')}</div>${act2}</section>${board}`;
 }
 /* ---------- minigames: Pick 'em and 5 Card Draw ---------- */
 
@@ -2505,7 +2577,7 @@ function leagueRows(){
   return q?all.filter(x=>x.p.name.toLowerCase().includes(q)):all;
 }
 function podiumHTML(rows){
-  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span>${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><em class="top10">TOP 10</em><span class="ps">${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='prev'?'last game pts':'fantasy pts'}</small></button>`}).join('')}</div>`;
+  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span><em class="top10">TOP 10</em>${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='prev'?'last game pts':'fantasy pts'}</small></button>`}).join('')}</div>`;
 }
 function rowHTML(x,rank){
   return `<button class="row" data-act="player" data-id="${esc(x.p.key)}">
@@ -2562,10 +2634,15 @@ const cmpResHTML=(s,list)=>list.map(x=>`<li><button type="button" data-act="cmpP
 function compareHTML(){
   const P=UI.cmp.map(k=>k?pByKey(k):null),both=P[0]&&P[1];
   let lead=-1,wins=[0,0];
-  const slot=s=>{const p=P[s];return p
+  const spinNow=s=>UI.cmpNew===s&&UI.cmpPh==='spin';
+  const reelHTML=p=>{const items=[...(UI.cmpReel||[]).map(k=>pByKey(k)).filter(Boolean),p];
+    return `<div class="cmp-reelwin"><div class="cmp-reel" style="--n:${items.length}">${items.map(q=>`<div class="cmp-ri">${av(q.name,q.school,58)}<b>${esc(q.name)}</b></div>`).join('')}</div></div>`};
+  const slot=s=>{const p=P[s];return p&&spinNow(s)
+    ?`<div class="cmp-pl cmp-spin" style="--ac:${s?'#FF9F1C':'#2F6BFF'}">${reelHTML(p)}<small class="muted">Picking a player…</small></div>`
+    :p
     ?`<div class="cmp-pl ${both&&lead===s?'ahead':''} ${UI.cmpNew===s?'cmp-in':''}" style="--ac:${s?'#FF9F1C':'#2F6BFF'}">${both&&lead===s?'<span class="cmp-crown">Leads</span>':''}<span class="cmp-ring"></span><div class="cmp-av">${av(p.name,p.school,64)}</div><b>${esc(p.name)}</b><div class="cmp-sub">${pb(p.pos,p.sub)}${gtag(p)}</div><small class="muted">${slogo(p.school)}${esc(p.school)}</small><button class="btn sm ghost" data-act="cmpClear" data-s="${s}">Change</button></div>`
     :`<div class="cmp-pl empty ${UI.cmpNew===s?'cmp-out':''}"><label class="fld"><span>Player ${s+1}</span><input id="cmp-q${s}" type="search" placeholder="Search a player or school" autocomplete="off"></label><ul class="cmp-res" id="cmp-r${s}"></ul></div>`};
-  let body='';
+  let body='',stage='';
   if(both){
     const all=players().filter(p=>p.mp).map(p=>({p,v:agg(p,'season').v})).filter(x=>agg(x.p,'season').n>0).sort((a,b)=>b.v-a.v);
     const rk=p=>{const i=all.findIndex(x=>x.p.key===p.key),pos=all.filter(x=>x.p.pos===p.pos),j=pos.findIndex(x=>x.p.key===p.key);return{all:i<0?null:i+1,pos:j<0?null:j+1,np:pos.length}};
@@ -2586,11 +2663,19 @@ function compareHTML(){
     const wk=wks.map(w=>row('Week '+w,P[0].games[w-1]?pts(P[0].games[w-1].stat):null,P[1].games[w-1]?pts(P[1].games[w-1].stat):null,v=>v==null?'-':f1(v),false,false,false)).join('');
     const tot=wins[0]+wins[1];lead=wins[0]!==wins[1]?(wins[0]>wins[1]?0:1):(A[0].v===A[1].v?-1:A[0].v>A[1].v?0:1);
     const sum=tot?`<div class="cmp-sum"><b>${wins[0]}</b><span>${wins[0]===wins[1]?'Dead even across '+tot+' categories':esc((wins[0]>wins[1]?P[0]:P[1]).name.split(' ')[0])+' wins more categories'}</span><b>${wins[1]}</b></div>`:'';
-    body=`${sum}<div class="cmp-rows">${rows}</div>${stats?`<h4 class="cmp-h">Season stats</h4><div class="cmp-rows">${stats}</div>`:''}${wk?`<h4 class="cmp-h">Points by week</h4><div class="cmp-rows">${wk}</div>`:''}`;
+    const fighter=s=>{const p=P[s],a=A[s],g=a.n?a.v/a.n:0,sp=spinNow(s);
+      return `<div class="cmp-f ${lead===s?'ahead':''} ${UI.cmpNew===s&&UI.cmpPh==='land'?'cmp-in':''} ${sp?'spinning':''}" style="--ac:${s?'#FF9F1C':'#2F6BFF'}">${lead===s&&!sp?'<span class="cmp-crown">Leads</span>':''}<span class="cmp-ring"></span>
+        <div class="cmp-fav">${sp?reelHTML(p):`<div class="cmp-av">${av(p.name,p.school,76)}</div>`}</div>
+        <div class="cmp-fm"><b class="cmp-fn">${esc(p.name)}</b><div class="cmp-sub">${pb(p.pos,p.sub)}${gtag(p)}</div><small class="muted cmp-fs">${slogo(p.school)}${esc(p.school)}</small></div>
+        <div class="cmp-big"><div><b>${f1(a.v)}</b><small>Fantasy pts</small></div><div><b>${f1(g)}</b><small>Per game</small></div></div>
+        <button class="btn sm ghost" data-act="cmpClear" data-s="${s}">Change</button></div>`};
+    stage=`<div class="cmp-stage">${fighter(0)}<span class="cmp-vs live"><b>VS</b></span>${fighter(1)}</div>`;
+    const wait=spinNow(0)||spinNow(1);
+    body=`<div class="cmp-body ${wait?'wait':'show'}">${sum}<div class="cmp-rows">${rows}</div>${stats?`<h4 class="cmp-h">Season stats</h4><div class="cmp-rows">${stats}</div>`:''}${wk?`<h4 class="cmp-h">Points by week</h4><div class="cmp-rows">${wk}</div>`:''}</div>`;
   }
   return `<section class="card cmp-card" id="compare"><div class="qh"><h3>Compare players</h3>${P[0]||P[1]?'<button class="btn sm ghost" data-act="cmpReset">Clear</button>':''}</div>
     <p class="muted">Pick any two players to see their season side by side. The higher number in each row is highlighted.</p>
-    <div class="cmp-top">${slot(0)}<span class="cmp-vs ${both?'live':''}"><b>VS</b></span>${slot(1)}</div>${body}</section>`;
+    ${both?stage:`<div class="cmp-top">${slot(0)}<span class="cmp-vs"><b>VS</b></span>${slot(1)}</div>`}${body}</section>`;
 }
 
 /* ---------- lineup groups with weekly matchups ---------- */
@@ -3569,7 +3654,11 @@ document.addEventListener('click',async e=>{
   else if(a==='gweek'){UI.gw=t.dataset.w==='P'?'P':+t.dataset.w;render()}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
-  else if(a==='cmpPick'){UI.cmp[+t.dataset.s]=t.dataset.id;UI.cmpNew=+t.dataset.s;render();setTimeout(()=>{UI.cmpNew=null},1400);const c=document.getElementById('compare');if(c)c.scrollIntoView({block:'center'})}
+  else if(a==='cmpPick'){const sd=+t.dataset.s,pl=players().filter(x=>x.mp&&x.key!==t.dataset.id);
+    UI.cmp[sd]=t.dataset.id;UI.cmpNew=sd;UI.cmpPh='spin';
+    UI.cmpReel=Array.from({length:9},()=>pl[Math.floor(Math.random()*pl.length)]).filter(Boolean).map(x=>x.key);
+    render();const c=document.getElementById('compare');if(c)c.scrollIntoView({block:'center'});
+    setTimeout(()=>{if(UI.cmpNew===sd){UI.cmpPh='land';render();setTimeout(()=>{if(UI.cmpNew===sd){UI.cmpNew=null;UI.cmpPh=null}},1300)}},1250)}
   else if(a==='cmpClear'){UI.cmp[+t.dataset.s]=null;render()}
   else if(a==='cmpReset'){UI.cmp=[null,null];render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
@@ -4203,6 +4292,7 @@ boot();
     else if(a==='fcRedraw')fcRedraw(+t.dataset.i)
     else if(a==='simStart')simStart()
     else if(a==='simRespin')simRespin(+t.dataset.i)
+    else if(a==='simTab'){UI.simTab=t.dataset.v==='def'?'def':'off';render()}
     else if(a==='simFinish')simFinish()
     else if(a==='simReset'){UI.sim=null;render()}
     else if(a==='fcLock')fcLock()
