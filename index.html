@@ -1453,7 +1453,7 @@ const OPP=(()=>{
     if(!next[g.a])next[g.a]={opp:g.h,date:fmtDate(g.d),home:false};
   });
   /* a team with no game left this season is out: no projection */
-  Object.keys(teams).forEach(n=>{if(!next[n])next[n]=null});
+  if(Object.keys(next).length)Object.keys(teams).forEach(n=>{if(!next[n])next[n]=null});   /* only once upcoming games are listed */
   return{teams,avg,next:new Proxy(next,{get:(o,k)=>k in o?o[k]:undefined})};
 })();
 function fmtDate(d){if(!d)return'';const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
