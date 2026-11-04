@@ -86,7 +86,7 @@ select:hover,input:hover{border-color:var(--muted)}
 input[type=number]{width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .mg-head{display:flex!important;align-items:flex-start;justify-content:space-between;gap:12px}.mg-head>div:first-child{min-width:0}.tok-box{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface2);margin-top:4px}.tok-box small{font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.tok-box b{font:800 1.4rem/1.1 var(--f-head,inherit);color:#F2C230}
-.bt-board .bt-h.me{font-weight:700}.bt-gap{text-align:center;padding:2px 0}
+.bt-board .bt-h.me{font-weight:700}.bt-more{margin-top:10px;width:100%}.bt-gap{text-align:center;padding:2px 0}
 .bt-rec{display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:14px 8px}.bt-rc{flex:1;display:flex;flex-direction:column;gap:2px}.bt-rc b{font:800 1.5rem/1.1 var(--f-head,inherit)}.bt-rc small{color:var(--muted);font-size:.74rem}
 .bt-amt{width:92px;min-height:42px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);color:inherit;padding:8px 14px;font:700 .9rem var(--f-body,inherit);text-align:center}.bt-amt:focus{outline:2px solid var(--gold,#F2C230)}
 .chip{background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:42px;font-weight:600;font-size:.9rem}
@@ -2081,8 +2081,8 @@ function fcHTML(){
 }
 function mgBoard(title,rows){
   if(!rows.length)return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div><p class="muted">No one is on the board yet. Lock in a pick to be first.</p></section>`;
-  const top=rows.slice(0,5),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>`<div class="bt-h ${x.u===ME.uid?'me':''}"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.v}</b></div>`;
-  return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${meI>=5?`<div class="bt-gap muted">···</div>${line(rows[meI],meI)}`:''}</section>`;
+  const more=!!UI.mgMore,top=more?rows:rows.slice(0,5),line=(x,i)=>`<div class="bt-h ${x.u===ME.uid?'me':''}"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.v}</b></div>`;
+  return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${rows.length>5?`<button class="btn sm ghost bt-more" data-act="mgMore">${more?'Show less':'Show more ('+(rows.length-5)+')'}</button>`:''}</section>`;
 }
 function recordCard(results){
   const n=results.length,w=results.filter(x=>x==='won').length,l=results.filter(x=>x==='lost').length,dec=w+l,pct=dec?Math.round(w/dec*100):null,open=results.filter(x=>x==='open').length;
@@ -3308,6 +3308,7 @@ document.addEventListener('click',async e=>{
   else if(a==='tback'){if(history.length>1)history.back();else location.hash='#games'}
   else if(a==='gmore'){UI.gmore=(UI.gmore||5)+5;render()}
   else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
+  else if(a==='mgMore'){UI.mgMore=!UI.mgMore;render()}
   else if(a==='atClear'){UI.at={};render()}
   else if(a==='atAll'){const today=new Date().toISOString().slice(0,10),gm=gameMap(),cur=atsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.at).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
