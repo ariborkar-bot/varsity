@@ -889,6 +889,41 @@ select option{background:#0B1730;color:#EAF0F8}
 @keyframes anIn{from{opacity:0;transform:translateY(24px) scale(.9)}}
 .dr-confetti{position:fixed;top:-20px;width:10px;height:16px;z-index:160;pointer-events:none;border-radius:2px}
 @media (max-width:759px){.dr-best li{grid-template-columns:1.2rem 32px minmax(0,1fr) auto;row-gap:6px}.dr-best li .btn{grid-column:3/5;justify-self:end}.dr-auto{margin-left:0}.dr-timer{align-items:flex-start}}
+
+/* header: a navy, royal and sky blue field with a glass stat ticker running through the middle */
+.mast{background:
+  linear-gradient(90deg,rgba(2,8,35,.55),rgba(2,8,35,0) 28%,rgba(2,8,35,0) 72%,rgba(2,8,35,.5)),
+  linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0) 40%,rgba(2,8,35,.28)),
+  linear-gradient(105deg,#06174A 0%,#0E2F8C 34%,#1D5BD8 66%,#52B6F4 100%)!important;
+  position:relative;overflow:hidden;isolation:isolate;box-shadow:0 10px 30px rgba(3,12,50,.55)!important;border-bottom:1px solid rgba(160,200,255,.25)!important}
+.mast::before{content:""!important;display:block!important;position:absolute;inset:0;z-index:-2;pointer-events:none;animation:none!important;
+  background:
+   linear-gradient(90deg,rgba(255,255,255,.55) 0 2px,transparent 2px 11px) 0 24%/100% 7px no-repeat,
+   linear-gradient(90deg,rgba(255,255,255,.55) 0 2px,transparent 2px 11px) 0 76%/100% 7px no-repeat,
+   repeating-linear-gradient(90deg,rgba(255,255,255,.2) 0 2px,transparent 2px 64px)!important}
+.mast::after{content:""!important;display:block!important;position:absolute;top:-30%;bottom:-30%;width:38%;left:-45%;z-index:-1;pointer-events:none;
+  background:linear-gradient(100deg,transparent 0,rgba(255,255,255,.0) 20%,rgba(255,255,255,.28) 50%,rgba(255,255,255,0) 80%,transparent 100%);
+  transform:skewX(-18deg);animation:mastShine 7s ease-in-out infinite!important}
+@keyframes mastShine{0%,12%{left:-45%}55%,100%{left:120%}}
+.mast .wk,.mast .bell{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.08))!important;border:1px solid rgba(200,225,255,.45)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 14px rgba(3,12,50,.35)!important;-webkit-backdrop-filter:blur(8px) saturate(1.4);backdrop-filter:blur(8px) saturate(1.4)}
+@media (min-width:760px){.tabs a:not([aria-current="page"]){background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.05))!important;border:1px solid rgba(200,225,255,.3)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}}
+.mast-tick{position:relative;z-index:1;margin:2px 0 12px;height:38px;overflow:hidden;display:flex;align-items:center;
+  background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.08) 48%,rgba(255,255,255,.14));
+  border-block:1px solid rgba(215,235,255,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(3,12,50,.25),0 6px 18px rgba(3,12,50,.35);
+  -webkit-backdrop-filter:blur(10px) saturate(1.5);backdrop-filter:blur(10px) saturate(1.5);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.mast-tick:empty{display:none}
+.mast-tick::after{content:"";position:absolute;top:0;bottom:0;width:90px;left:-120px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:tickShine 5s ease-in-out infinite;pointer-events:none}
+@keyframes tickShine{0%,20%{left:-120px}70%,100%{left:105%}}
+.mt-track{display:flex;flex:none;gap:0;white-space:nowrap;animation:tickRun var(--tk,70s) linear infinite;will-change:transform}
+.mast-tick:hover .mt-track{animation-play-state:paused}
+@keyframes tickRun{to{transform:translateX(-50%)}}
+.mt-i{display:inline-flex;align-items:center;gap:8px;padding:0 22px;font:700 .82rem/1 var(--f-body);color:#fff;text-shadow:0 1px 3px rgba(3,12,50,.5)}
+.mt-i b{font:800 .95rem/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase}
+.mt-i em{font-style:normal;color:#FFD66B;font-weight:800}.mt-i small{color:#D5E7FF;font-size:.78rem;font-weight:600}
+.mt-i::after{content:"";width:6px;height:6px;margin-left:14px;border-radius:50%;background:rgba(255,255,255,.7);box-shadow:0 0 8px rgba(255,255,255,.8)}
+@media (max-width:759px){.mast-tick{margin:0 0 8px;height:34px}.mt-i{font-size:.76rem;padding:0 16px}}
+@media (prefers-reduced-motion:reduce){.mast::after,.mast-tick::after,.mt-track{animation:none!important}.mt-track{overflow-x:auto}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -909,6 +944,7 @@ select option{background:#0B1730;color:#EAF0F8}
       <a href="#hub" class="tab-acct"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.3"/><path d="M5.5 16.5c.6-1.8 2-2.7 3.5-2.7s2.9.9 3.5 2.7M14.5 10h4M14.5 13.5h3"/></svg><span>Account<span class="dsk"> info</span></span></a>
     </nav>
   </div>
+  <div class="mast-tick" id="mast-tick" aria-label="Top player stat lines"></div>
 </header>
 <main class="wrap">
   <div id="banner" class="banner"></div>
@@ -2361,8 +2397,25 @@ function bannerHTML(){
   b.push(`<p class="note">${MP?`<span class="pill approved">MaxPreps</span><span>${MP.players.length.toLocaleString()} San Diego Section players from ${MP.games} MaxPreps box scores, through ${esc(MP.through)}.</span>`:''}${sample?'<span class="pill pending">Sample</span><span>Sample players are made-up placeholders so the boards are never empty. Real players appear as they join.</span>':''}<a class="btn sm ghost" href="#scoring">Scoring rules</a>${ME.mode==='readonly'?'':'<button class="btn sm ghost" data-act="consent">Consent settings</button>'}</p>`);
   return b.join('');
 }
+/* header ticker: the season's top stat lines, scrolling through the middle of the field */
+let _tickRev=-1;
+function tickLine(p,a){const x=a.s||{},n=v=>Math.round(v||0).toLocaleString(),pos=p.pos;
+  if(pos==='QB')return `${n(x.passYd)} pass yds · ${n((x.passTD||0)+(x.rushTD||0))} TD`;
+  if(pos==='RB')return `${n(x.rushYd)} rush yds · ${n((x.rushTD||0)+(x.recTD||0))} TD`;
+  if(pos==='WR'||pos==='TE')return `${n(x.rec)} rec · ${n(x.recYd)} yds · ${n(x.recTD)} TD`;
+  if(pos==='K')return `${n(x.fgm)} FG · ${n(x.xpm)} XP`;
+  return `${n(x.tkl)} tkl · ${n(x.sack)} sacks${x.dInt?' · '+n(x.dInt)+' INT':''}`}
+function updateTicker(){
+  const el=document.getElementById('mast-tick');if(!el||_tickRev===_rev)return;_tickRev=_rev;
+  let list=[];try{list=players().map(p=>({p,a:agg(p,'season')})).filter(x=>x.a.n>0&&!x.p.sample).sort((a,b)=>b.a.v-a.a.v).slice(0,16)}catch(_){}
+  if(!list.length){el.innerHTML='';return}
+  const item=x=>`<span class="mt-i"><b>${esc(x.p.name)}</b><small>${esc(x.p.school)} · ${esc(x.p.pos)}</small><em>${f1(x.a.v)} pts</em><small>${esc(tickLine(x.p,x.a))}</small></span>`;
+  const h=list.map(item).join('');
+  el.innerHTML=`<div class="mt-track" style="--tk:${Math.max(40,list.length*6)}s">${h}${h}</div>`;
+}
 function chrome(v){
   document.body.dataset.view=v;
+  updateTicker();
   const ta=$('#tab-admin');if(ta)ta.hidden=!ME.admin;
   document.querySelectorAll('.tabs a').forEach(a=>{a.removeAttribute('aria-current');if(a.getAttribute('href')==='#'+v)a.setAttribute('aria-current','page')});
   
