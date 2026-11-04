@@ -1978,6 +1978,7 @@ function standTab(){
 const FC_SIZE=5,FC_REDRAWS=3;
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
+function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
 const fcKeep=()=>{const f=fcDoc(ME.uid);return Object.keys(f).length?{fc:f}:{}};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
@@ -1990,8 +1991,9 @@ async function fcDeal(){
   if(_fcBusy||ME.mode==='guest'||ME.mode==='readonly'||!ME.uid)return;
   const w=CURW();if(fcHand(ME.uid,w))return;_fcBusy=true;
   try{const hand=fcDraw(fcPool(new Set()),FC_SIZE);if(hand.length<FC_SIZE){say('Not enough players to deal a hand yet');return}
-    await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:{h:hand,r:0,d:[],at:NOW()}}}),'Your hand is dealt')}
-  finally{_fcBusy=false}
+    const nx={h:hand,r:0,d:[],rd:[],at:NOW()};fcSet(w,nx);
+    if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Your hand is dealt')){const f={...fcDoc(ME.uid)};delete f[w];S.picks[ME.uid].fc=f}}
+  finally{_fcBusy=false;render()}
 }
 async function fcRedraw(i){
   if(_fcBusy||!ME.uid)return;const w=CURW(),hd=fcHand(ME.uid,w);if(!hd)return;
@@ -2001,8 +2003,11 @@ async function fcRedraw(i){
   _fcBusy=true;
   try{const seen=new Set([...hd.h,...(hd.d||[])]),nk=fcDraw(fcPool(seen),1)[0];if(!nk){say('No new players to draw right now');return}
     const nh=hd.h.slice();nh[i]=nk;
-    await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:{h:nh,r:(hd.r||0)+1,d:[...(hd.d||[]),hd.h[i]],rd:[...(hd.rd||[]),i]}}}),'Redrawn: '+pByKey(nk).name)}
-  finally{_fcBusy=false}
+    const nx={...hd,h:nh,r:(hd.r||0)+1,d:[...(hd.d||[]),hd.h[i]],rd:[...(hd.rd||[]),i]};
+    fcSet(w,nx);   /* show the new card and lock its spot right away, before the save comes back */
+    const ok=await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Redrawn: '+pByKey(nk).name);
+    if(!ok){fcSet(w,hd)}}
+  finally{_fcBusy=false;render()}
 }
 function fcHTML(){
   const cw=CURW(),w=UI.fcw&&UI.fcw<=cw?UI.fcw:cw,mine=ME.uid&&ME.mode!=='guest'?fcHand(ME.uid,w):null,can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
