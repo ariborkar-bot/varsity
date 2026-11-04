@@ -1801,7 +1801,7 @@ function leagueRows(){
   return q?all.filter(x=>x.p.name.toLowerCase().includes(q)):all;
 }
 function podiumHTML(rows){
-  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span>${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='prev'?'last game pts':'fantasy pts'}</small></button>`}).join('')}</div>`;
+  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span>${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='prev'?'last game pts':'fantasy pts'}</small></button>`}).join('')}</div>`;
 }
 function rowHTML(x,rank){
   return `<button class="row" data-act="player" data-id="${esc(x.p.key)}">
@@ -1828,7 +1828,7 @@ function hotHTML(){
   const ts=players().map(p=>({p,t:trend(p)})).filter(x=>x.t);
   const up=[...ts].filter(x=>x.t.d>0).sort((a,b)=>b.t.d-a.t.d).slice(0,3),dn=[...ts].filter(x=>x.t.d<0).sort((a,b)=>a.t.d-b.t.d).slice(0,3);
   if(!up.length&&!dn.length)return'';
-  const col=(title,list,cls)=>`<div class="hotc"><h3>${title}</h3>${list.map(x=>`<button class="hotr" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,32)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><em class="tr ${cls}">${cls==='up'?'▲':'▼'} ${f1(Math.abs(x.t.d))}</em></button>`).join('')||'<span class="muted">Nobody yet</span>'}</div>`;
+  const col=(title,list,cls)=>`<div class="hotc"><h3>${title}</h3>${list.map(x=>`<button class="hotr" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,32)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><em class="tr ${cls}">${cls==='up'?'▲':'▼'} ${f1(Math.abs(x.t.d))}</em></button>`).join('')||'<span class="muted">Nobody yet</span>'}</div>`;
   return `<section class="card hot-card"><div class="qh"><h3>Hot this week</h3><span class="pill approved">Recent form</span></div><div class="hot">${col('Hot right now',up,'up')}${col('Cooling off',dn,'dn')}</div></section>`;
 }
 function viewLeague(){
