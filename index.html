@@ -1874,7 +1874,7 @@ function standingsHTML(gs,school){
   const t={};
   gs.filter(gDone).forEach(g=>{[[g.h,g.hs,g.as],[g.a,g.as,g.hs]].forEach(([n,f,a])=>{if(!SD_SCHOOLS.includes(n))return;const x=t[n]=t[n]||{n,w:0,l:0,t:0,pf:0,pa:0};x.pf+=f;x.pa+=a;if(f>a)x.w++;else if(f<a)x.l++;else x.t++})});
   /* section (playoff division) and seed for every team in a known bracket */
-  const dv={};PO_DEFS.forEach(d=>d.rounds[0].games.forEach(([p,q])=>[p,q].forEach(z=>{if(z.n&&!z.bye)dv[z.n]={div:d.div,seed:z.s}})));
+  const dv={};PO_DEFS.forEach(d=>d.rounds.forEach(r=>r.games.forEach(([p,q])=>[p,q].forEach(z=>{if(z.n&&!z.from)dv[z.n]={div:d.div,seed:z.s}}))));
   const OTHER='Division not set yet',divs=PO_DEFS.map(d=>d.div).concat([OTHER]);
   const sec=UI.gsec||'ALL';
   let rows=Object.values(t).map(x=>Object.assign(x,{div:(dv[x.n]||{}).div||OTHER,seed:(dv[x.n]||{}).seed}));
@@ -1889,11 +1889,11 @@ function standingsHTML(gs,school){
 /* ---------- playoff brackets: seeded pairings, with winners moving ahead as final scores come in ---------- */
 const PO_DATES={r1:'2026-11-06',r2:'2026-11-13',r3:'2026-11-20',r4:'2026-11-27'};
 const PO_DEFS=(()=>{
-  const T=(n,s)=>({n,s}),W=(r,g)=>({from:[r,g]}),B=s=>({n:'Seed '+s,s,bye:1});
+  const T=(n,s)=>({n,s}),W=(r,g)=>({from:[r,g]}),B=(n,s)=>({n,s,bye:1});
   /* 12-team: seeds 1-4 have byes. Round 1 is 8v9, 5v12, 7v10, 6v11. */
-  const twelve=(dv,r1)=>({div:dv,rounds:[
+  const twelve=(dv,r1,by)=>({div:dv,rounds:[
     {name:'Round 1',d:PO_DATES.r1,games:r1},
-    {name:'Quarterfinals',d:PO_DATES.r2,games:[[B(1),W(0,0)],[B(4),W(0,1)],[B(2),W(0,2)],[B(3),W(0,3)]]},
+    {name:'Quarterfinals',d:PO_DATES.r2,games:[[B(by[0],1),W(0,0)],[B(by[3],4),W(0,1)],[B(by[1],2),W(0,2)],[B(by[2],3),W(0,3)]]},
     {name:'Semifinals',d:PO_DATES.r3,games:[[W(1,0),W(1,1)],[W(1,2),W(1,3)]]},
     {name:'Championship',d:PO_DATES.r4,games:[[W(2,0),W(2,1)]]}]});
   const r1=(a,b,c,d)=>[a,b,c,d];
@@ -1903,9 +1903,9 @@ const PO_DEFS=(()=>{
     {div:'Division I',rounds:[{name:'Quarterfinals',d:PO_DATES.r2,games:[[T('Helix',1),T('Torrey Pines',8)],[T('Granite Hills',4),T('San Marcos',5)],[T('La Costa Canyon',2),T('Rancho Bernardo',7)],[T('Oceanside',3),T('Lincoln',6)]]},
       {name:'Semifinals',d:PO_DATES.r3,games:[[W(0,0),W(0,1)],[W(0,2),W(0,3)]]},
       {name:'Championship',d:PO_DATES.r4,games:[[W(1,0),W(1,1)]]}]},
-    twelve('Division II',[[T('Holtville',8),T('Ramona',9)],[T('Mater Dei Catholic',5),T('Mount Miguel',12)],[T('Imperial',7),T('Patrick Henry',10)],[T('El Camino',6),T('Grossmont',11)]]),
-    twelve('Division III',[[T('Christian High',8),T('Valhalla',9)],[T('La Jolla',5),T('Central Union',12)],[T('Madison',7),T('Mira Mesa',10)],[T('Eastlake',6),T('Scripps Ranch',11)]]),
-    twelve('Division IV',[[T('El Capitan',8),T('Santana',9)],[T('Mission Bay',5),T('Army and Navy Academy',12)],[T('West Hills',7),T('Rancho Buena Vista',10)],[T('Westview',6),T('Brawley',11)]]),
+    twelve('Division II',[[T('Holtville',8),T('Ramona',9)],[T('Mater Dei Catholic',5),T('Mount Miguel',12)],[T('Imperial',7),T('Patrick Henry',10)],[T('El Camino',6),T('Grossmont',11)]],['Poway','Del Norte','St. Augustine','Point Loma']),
+    twelve('Division III',[[T('Christian High',8),T('Valhalla',9)],[T('La Jolla',5),T('Central Union',12)],[T('Madison',7),T('Mira Mesa',10)],[T('Eastlake',6),T('Scripps Ranch',11)]],['Steele Canyon','San Diego High','San Pasqual','University City']),
+    twelve('Division IV',[[T('El Capitan',8),T('Santana',9)],[T('Mission Bay',5),T('Army and Navy Academy',12)],[T('West Hills',7),T('Rancho Buena Vista',10)],[T('Westview',6),T('Brawley',11)]],['Valley Center','Maranatha Christian','Otay Ranch',"Bishop's"]),
     {div:'Division V',rounds:[{name:'Round 1',d:PO_DATES.r1,games:[[T('Morse',1),T('Monte Vista',16)],[T('Coronado',8),T('Southwest San Diego',9)],[T('La Jolla Country Day',4),T('Classical Academy',13)],[T('Bonita Vista',5),T('Olympian',12)],[T('Mount Carmel',6),T('Hilltop',11)],[T('Fallbrook',3),T('Mar Vista',14)],[T('Chula Vista',7),T('Coastal Academy',10)],[T('Hoover',2),T('Canyon Hills',15)]]},
       {name:'Round 2',d:PO_DATES.r2,games:[[W(0,0),W(0,1)],[W(0,2),W(0,3)],[W(0,4),W(0,5)],[W(0,6),W(0,7)]]},
       {name:'Semifinals',d:PO_DATES.r3,games:[[W(1,0),W(1,1)],[W(1,2),W(1,3)]]},
@@ -1916,14 +1916,14 @@ const PO_DEFS=(()=>{
   ];
 })();
 function buildBrackets(){
-  const gs=((GAMES&&GAMES.games)||[]).filter(gDone);
+  const gs=((GAMES&&GAMES.games)||[]).filter(g=>gDone(g)&&g.d>=PO_DATES.r1);
   const res=(x,y)=>gs.find(g=>(g.h===x&&g.a===y)||(g.h===y&&g.a===x));
   return PO_DEFS.map(df=>{
     const out=[];
     df.rounds.forEach((r,ri)=>{out.push({name:r.name,games:r.games.map(([p,q])=>{
       const side=z=>z.from?(()=>{const g=out[z.from[0]].games[z.from[1]];return g.win?{n:g.win,s:g.winS}:{n:null,s:null,tbd:1}})():z;
       const A=side(p),B=side(q);let hs=null,as=null,win=null,winS=null;
-      if(A.n&&B.n&&!A.bye&&!B.bye){const g=res(A.n,B.n);if(g){const ah=g.h===A.n;hs=ah?g.hs:g.as;as=ah?g.as:g.hs;if(hs!==as){win=(hs>as)?A.n:B.n;winS=(hs>as)?A.s:B.s}}}
+      if(A.n&&B.n){const g=res(A.n,B.n);if(g){const ah=g.h===A.n;hs=ah?g.hs:g.as;as=ah?g.as:g.hs;if(hs!==as){win=(hs>as)?A.n:B.n;winS=(hs>as)?A.s:B.s}}}
       return {w:0,d:r.d,k:'P',a:A.n,h:B.n,sa:A.s,sh:B.s,hs,as,win,winS,r:A.bye&&!A.n?'':''}
     })})});
     /* byes: seed placeholders have no real name; show them as the seed */
@@ -1933,7 +1933,7 @@ function buildBrackets(){
 function playoffsHTML(){
   const brs=buildBrackets(),d=brs.find(b=>b.div===UI.gdiv)||brs[0];
   return `<div class="chips gm-divs" role="group" aria-label="Division">${brs.map(b=>`<button class="chip" data-act="gdiv" data-v="${esc(b.div)}" aria-pressed="${b===d}">${esc(b.div)}</button>`).join('')}</div>
-    <section class="card"><div class="qh"><h3>${esc(d.div)}</h3><span class="muted">CIF San Diego Section playoffs</span></div>${bracketHTML(d)}<p class="muted" style="margin-top:10px">Higher seed hosts. Winners move ahead as final scores come in. Seeds 1 to 4 in the 12-team divisions have a first-round bye.</p></section>`;
+    <section class="card"><div class="qh"><h3>${esc(d.div)}</h3><span class="muted">CIF San Diego Section playoffs</span></div>${bracketHTML(d)}<p class="muted" style="margin-top:10px">Higher seed hosts. Winners move ahead as final scores come in. The top 4 seeds in the 12-team divisions (II, III, IV) have a first-round bye.</p></section>`;
 }
 function standTab(){
   const gs=(GAMES&&GAMES.games)||[],schools=[...new Set(gs.flatMap(g=>[g.h,g.a]))].filter(n=>SD_SCHOOLS.includes(n)).sort();
@@ -2013,7 +2013,7 @@ function viewTeam(){
   if(!name||!SD_SCHOOLS.includes(name)&&!gs.length)return `<div class="head"><h2>Team</h2></div><p class="empty">We could not find that team.</p>${back}`;
   let w=0,l=0,t=0,pf=0,pa=0;
   gs.filter(gDone).forEach(g=>{const f=g.h===name?g.hs:g.as,a=g.h===name?g.as:g.hs;pf+=f;pa+=a;if(f>a)w++;else if(f<a)l++;else t++});
-  let div='',seed='';PO_DEFS.forEach(d=>d.rounds[0].games.forEach(([p,q])=>[p,q].forEach(z=>{if(z.n===name&&!z.bye){div=d.div;seed=z.s}})));
+  let div='',seed='';PO_DEFS.forEach(d=>d.rounds.forEach(r=>r.games.forEach(([p,q])=>[p,q].forEach(z=>{if(z.n===name&&!z.from){div=d.div;seed=z.s}}))));
   const T=UI.ttab||'sched';
   const hero=`<section class="card tm-hero"><span class="tm-logo">${slogo(name,64)||av(name,name,64)}</span><div><h2>${esc(name)}</h2><p class="muted">${gs.some(gDone)?`${w}-${l}${t?'-'+t:''} · ${pf} points for, ${pa} against`:'No games played yet'}${div?` · ${esc(div)}${seed?' · seed '+seed:''}`:''}</p></div>${back}</section>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Team sections">${[['sched','Schedule'],['roster','Roster']].map(([v,lb])=>`<button class="chip" data-act="ttab" data-v="${v}" aria-pressed="${T===v}">${lb}</button>`).join('')}</div>`;
