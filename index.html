@@ -990,6 +990,9 @@ select option{background:#0B1730;color:#EAF0F8}
   .mast-run{bottom:calc(8px + 26px)}
 }
 @media (max-width:759px){.mast-tick{margin:0 0 6px!important}.mast-run{bottom:calc(6px + 26px)}}
+
+.sch-in{width:100%}
+.dd.sdd{min-width:240px}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -2838,6 +2841,53 @@ boot();
     if(s&&s.tagName==='SELECT'&&!s.multiple&&(e.key==='Enter'||e.key===' '||(e.altKey&&e.key==='ArrowDown'))){e.preventDefault();open(s)}},true);
   addEventListener('resize',close);addEventListener('scroll',e=>{if(dd&&!dd.contains(e.target))place()},true);
   new MutationObserver(()=>{if(sel&&!sel.isConnected)close()}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+<script>
+/* School and team pickers are search boxes: type a few letters and matching schools pop up. No long dropdown lists. */
+(()=>{
+  const SEL='#nm-school,#me-school,#g-school,#school,select[data-act="gschool"]';
+  let pop=null,cur=null,list=[],act=0;
+  const isDef=o=>!o||o.value===''||o.value==='ALL';
+  const closePop=()=>{if(pop){pop.remove();pop=null}cur=null;list=[]};
+  const place=()=>{if(!pop||!cur)return;const r=cur.inp.getBoundingClientRect(),vw=innerWidth,vh=innerHeight,w=Math.min(Math.max(r.width,240),vw-16),below=vh-r.bottom-12,above=r.top-12,up=below<200&&above>below;
+    pop.style.width=w+'px';pop.style.left=Math.max(8,Math.min(r.left,vw-w-8))+'px';pop.style.maxHeight=Math.max(140,Math.min(320,up?above:below))+'px';
+    if(up){pop.style.top='';pop.style.bottom=(vh-r.top+6)+'px'}else{pop.style.bottom='';pop.style.top=(r.bottom+6)+'px'}};
+  const paint=()=>[...pop.querySelectorAll('li')].forEach((li,i)=>{li.classList.toggle('act',i===act);if(i===act)li.scrollIntoView({block:'nearest'})});
+  const pick=o=>{const c=cur;closePop();if(!c)return;const s=c.s;c.picked=true;c.inp.value=isDef(o)?'':o.textContent;
+    if(s.value!==o.value){s.value=o.value;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}))}};
+  const show=c=>{const q=c.inp.value.trim().toLowerCase();
+    if(!q){closePop();return}
+    cur=c;list=[...c.s.options].filter(o=>!isDef(o)&&o.textContent.toLowerCase().includes(q)).slice(0,40);
+    if(!pop){pop=document.createElement('div');pop.className='dd sdd';document.body.appendChild(pop)}
+    pop.innerHTML='';const ul=document.createElement('ul');ul.setAttribute('role','listbox');pop.appendChild(ul);
+    if(!list.length){const n=document.createElement('div');n.className='dd-none';n.textContent='No schools match';pop.appendChild(n)}
+    list.forEach((o,i)=>{const li=document.createElement('li');li.setAttribute('role','option');li.textContent=o.textContent;
+      li.addEventListener('mousedown',e=>e.preventDefault());li.addEventListener('click',()=>pick(o));
+      li.addEventListener('mousemove',()=>{act=i;[...ul.children].forEach((x,k)=>x.classList.toggle('act',k===i))});ul.appendChild(li)});
+    act=0;place();if(list.length)paint()};
+  function enhance(s){
+    if(s.dataset.sx)return;s.dataset.sx='1';
+    const o=s.options[s.selectedIndex],inp=document.createElement('input');
+    inp.type='search';inp.className='sch-in';inp.autocomplete='off';inp.spellcheck=false;inp.setAttribute('aria-label','Search schools');
+    inp.value=isDef(o)?'':(o?o.textContent:'');inp.placeholder=isDef(o)&&o?o.textContent+' – type to search':'Search schools';
+    s.style.display='none';s.after(inp);const c={s,inp,picked:false};
+    inp.addEventListener('input',()=>show(c));
+    inp.addEventListener('focus',()=>{inp.select()});
+    inp.addEventListener('keydown',e=>{if(!pop||cur!==c)return;
+      if(e.key==='ArrowDown'){e.preventDefault();act=Math.min(list.length-1,act+1);paint()}
+      else if(e.key==='ArrowUp'){e.preventDefault();act=Math.max(0,act-1);paint()}
+      else if(e.key==='Enter'){e.preventDefault();if(list[act])pick(list[act])}
+      else if(e.key==='Escape'){e.preventDefault();closePop()}});
+    inp.addEventListener('blur',()=>setTimeout(()=>{if(cur===c)closePop();if(c.picked||!c.s.isConnected)return;
+      const o2=c.s.options[c.s.selectedIndex],t=inp.value.trim().toLowerCase();
+      if(!t){const d=[...c.s.options].find(isDef);if(d&&c.s.value!==d.value){c.s.value=d.value;c.s.dispatchEvent(new Event('input',{bubbles:true}));c.s.dispatchEvent(new Event('change',{bubbles:true}))}else inp.value=''}
+      else inp.value=isDef(o2)?'':o2.textContent},160));
+  }
+  const scan=()=>document.querySelectorAll(SEL).forEach(enhance);
+  new MutationObserver(()=>{scan();if(cur&&!cur.inp.isConnected)closePop()}).observe(document.body,{childList:true,subtree:true});
+  scan();
+  addEventListener('resize',closePop);addEventListener('scroll',e=>{if(pop&&!pop.contains(e.target))place()},true);
 })();
 </script>
 <script>
