@@ -86,7 +86,9 @@ select:hover,input:hover{border-color:var(--muted)}
 input[type=number]{width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .mg-head{display:flex!important;align-items:flex-start;justify-content:space-between;gap:12px}.mg-head>div:first-child{min-width:0}.tok-box{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface2);margin-top:4px}.tok-box small{font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.tok-box b{font:800 1.4rem/1.1 var(--f-head,inherit);color:#F2C230}
-.bt-board .bt-h.me{font-weight:700}.bt-more{margin-top:10px;width:100%}.bt-gap{text-align:center;padding:2px 0}
+.bt-board .bt-h.me{font-weight:700}.bt-r{display:flex;align-items:center;gap:8px;padding:6px 10px;margin:5px 0;border:1px solid var(--line);border-radius:10px;font-size:.88rem}.bt-r b:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bt-r .d{min-width:44px;text-align:right}.bt-r.won{border-color:#4ADE80}.bt-r.won .d{color:#4ADE80}.bt-r.lost{border-color:#F87171}.bt-r.lost .d{color:#F87171}
+.bt-board .bt-h{padding:3px 0!important;min-height:0!important;line-height:1.2;align-items:center}.bt-board .rk{font-size:.95rem!important;margin-right:4px}.bt-board .qh{margin-bottom:2px}
+.bt-more{margin-top:10px;width:100%}.bt-gap{text-align:center;padding:2px 0}
 .bt-rec{display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:14px 8px}.bt-rc{flex:1;display:flex;flex-direction:column;gap:2px}.bt-rc b{font:800 1.5rem/1.1 var(--f-head,inherit)}.bt-rc small{color:var(--muted);font-size:.74rem}
 .bt-amt{width:92px;min-height:42px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);color:inherit;padding:8px 14px;font:700 .9rem var(--f-body,inherit);text-align:center}.bt-amt:focus{outline:2px solid var(--gold,#F2C230)}
 .chip{background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:42px;font-weight:600;font-size:.9rem}
@@ -2081,8 +2083,15 @@ function fcHTML(){
 }
 function mgBoard(title,rows){
   if(!rows.length)return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div><p class="muted">No one is on the board yet. Lock in a pick to be first.</p></section>`;
-  const more=!!UI.mgMore,top=more?rows:rows.slice(0,5),line=(x,i)=>`<div class="bt-h ${x.u===ME.uid?'me':''}"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.v}</b></div>`;
-  return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${rows.length>5?`<button class="btn sm ghost bt-more" data-act="mgMore">${more?'Show less':'Show more ('+(rows.length-5)+')'}</button>`:''}</section>`;
+  const more=!!UI.mgMore,top=more?rows:rows.slice(0,3),line=(x,i)=>`<div class="bt-h ${x.u===ME.uid?'me':''}"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.v}</b></div>`;
+  return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${rows.length>3?`<button class="btn sm ghost bt-more" data-act="mgMore">${more?'Show less':'Show more ('+(rows.length-3)+')'}</button>`:''}</section>`;
+}
+const n1=v=>Math.round(v*10)/10;
+function resCard(hist,label){
+  if(!hist.length)return '';
+  const more=!!UI.mgRes,L=more?hist:hist.slice(0,5);
+  return `<section class="card bt-res"><div class="qh"><h3>Your results</h3></div>${L.map(x=>{const ps=x.b.s==='h'?x.g.hs:x.g.as,os=x.b.s==='h'?x.g.as:x.g.hs;
+    return `<div class="bt-r ${x.res}"><b>${label(x)}</b><small class="muted">${ps}-${os}</small><b class="d">${x.res==='won'?'+'+n1(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+n1(x.b.stake)}</b></div>`}).join('')}${hist.length>5?`<button class="btn sm ghost bt-more" data-act="mgRes">${more?'Show less':'Show all ('+hist.length+')'}</button>`:''}</section>`;
 }
 function recordCard(results){
   const n=results.length,w=results.filter(x=>x==='won').length,l=results.filter(x=>x==='lost').length,dec=w+l,pct=dec?Math.round(w/dec*100):null,open=results.filter(x=>x==='open').length;
@@ -2116,14 +2125,14 @@ function picksHTML(){
     return `<article class="gm bt-g ${res==='won'||res==='lost'?'res-'+res:''}"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
   /* history and the board */
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:betResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
-  const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(x.b.s==='h'?x.g.h:x.g.a)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
+  const histCard=resCard(hist,x=>esc(x.b.s==='h'?x.g.h:x.g.a));
   /* the picks you have locked in that are still waiting on a final score */
   const openBets=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id]})).filter(x=>x.g&&!gDone(x.g)).sort((a,b)=>a.g.d<b.g.d?-1:a.g.d>b.g.d?1:0);
   const myCard=openBets.length?`<section class="card bt-mine"><div class="qh"><h3>Your picks</h3><span class="muted">${openBets.length} locked in · ${tk(openBets.reduce((t,x)=>t+(+x.b.stake||0),0))} wagered</span></div>${openBets.map(x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
     return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)}</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${x.g.d<=today?' · locked':''}</small></span></span><span class="bt-pay"><b>${tk(x.b.stake*x.b.odds)}</b><small class="muted">${tk(x.b.stake)} at ${(+x.b.odds).toFixed(2)}x</small></span></div>`}).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t);
   if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid)){board.push({u:ME.uid,t:bank(ME.uid)});board.sort((a,b)=>b.t-a.t)}
-  const boardCard=mgBoard('Token leaders',board.map(x=>({u:x.u,v:tk(x.t)})));
+  const boardCard=mgBoard('Token leaders',board.map(x=>({u:x.u,v:n1(x.t)})));
   /* lock in everything at once */
   const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
@@ -2188,7 +2197,7 @@ function spreadHTML(){
     else foot=b?`<p class="muted">Your pick: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a side to take the points.</p>';
     return `<article class="gm bt-g ${res==='won'||res==='lost'?'res-'+res:''}"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:atsResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
-  const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(nm2(x.b,x.g))} ${lnTxt(x.b)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
+  const histCard=resCard(hist,x=>esc(nm2(x.b,x.g))+' '+lnTxt(x.b));
   const board=Object.keys(S.picks).filter(u=>Object.keys(atsOf(u)).length).map(u=>{const r=Object.entries(atsOf(u)).map(([id,b])=>atsResult(b,gm[id]));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w);
   if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid))board.push({u:ME.uid,w:0,l:0});
   const boardCard=mgBoard('Best against the spread',board.map(x=>({u:x.u,v:x.w+'-'+x.l})));
@@ -3308,6 +3317,7 @@ document.addEventListener('click',async e=>{
   else if(a==='tback'){if(history.length>1)history.back();else location.hash='#games'}
   else if(a==='gmore'){UI.gmore=(UI.gmore||5)+5;render()}
   else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
+  else if(a==='mgRes'){UI.mgRes=!UI.mgRes;render()}
   else if(a==='mgMore'){UI.mgMore=!UI.mgMore;render()}
   else if(a==='atClear'){UI.at={};render()}
   else if(a==='atAll'){const today=new Date().toISOString().slice(0,10),gm=gameMap(),cur=atsOf(ME.uid),nb={...cur};let n=0,need=0;
