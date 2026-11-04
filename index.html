@@ -2110,7 +2110,7 @@ function picksHTML(){
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one above.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
-  return bankCard+myCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')+allBar:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
+  return bankCard+myCard+allBar+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
 }
 /* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
 function anticipated(){
@@ -2171,8 +2171,12 @@ function spreadHTML(){
   const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(nm2(x.b,x.g))} ${lnTxt(x.b)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(atsOf(u)).length).map(u=>{const r=Object.entries(atsOf(u)).map(([id,b])=>atsResult(b,gm[id]));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w).slice(0,20);
   const boardCard=board.length?`<section class="card"><div class="qh"><h3>Best against the spread</h3></div>${board.map((x,i)=>`<div class="bt-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.w}-${x.l}</b></div>`).join('')}</section>`:'';
+  const stakeOf=g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
+  const staged=can?open.filter(g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
+  const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-bal;
+  const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(bal)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one below.`}</div></div><div class="bt-go"><button class="btn" data-act="atAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="atClear">Clear</button></div></section>`:'';
   const nextW=open.length?open[0].w:null;
-  return bankCard+(open.length?[...new Set(open.map(g=>g.w))].map(w=>{const L=open.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} spreads</h3><span class="muted">${L.length} games${w===nextW?', lines set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games yet. New spreads show up as matchups are set.</p>')+histCard+boardCard;
+  return bankCard+allBar+(open.length?[...new Set(open.map(g=>g.w))].map(w=>{const L=open.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} spreads</h3><span class="muted">${L.length} games${w===nextW?', lines set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games yet. New spreads show up as matchups are set.</p>')+histCard+boardCard;
 }
 function viewMini(){
   const T=['picks','draw','spread'].includes(UI.mtab)?UI.mtab:'picks';
@@ -3274,6 +3278,14 @@ document.addEventListener('click',async e=>{
   else if(a==='tback'){if(history.length>1)history.back();else location.hash='#games'}
   else if(a==='gmore'){UI.gmore=(UI.gmore||5)+5;render()}
   else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
+  else if(a==='atClear'){UI.at={};render()}
+  else if(a==='atAll'){const today=new Date().toISOString().slice(0,10),gm=gameMap(),cur=atsOf(ME.uid),nb={...cur};let n=0,need=0;
+    Object.entries(UI.at).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
+      const stake=Math.floor(u.stake||(old&&old.stake)||10);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
+      const line=(old&&old.s===u.s)?+old.line:spreadFor(g);nb[id]={s:u.s,stake,line,odds:ATS_PAY,w:g.w,at:NOW()}});
+    if(!n){say('Pick a side first.');return}
+    if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
+    if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),n+(n===1?' pick':' picks')+' locked in')){UI.at={};render()}}
   else if(a==='atSide'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{s:t.dataset.s});render()}
   else if(a==='atStake'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{stake:+t.dataset.v});render()}
   else if(a==='atDrop'){const id=t.dataset.g,nb={...atsOf(ME.uid)};delete nb[id];delete UI.at[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Pick removed');render()}
