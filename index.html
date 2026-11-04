@@ -122,19 +122,20 @@ input[type=number]{width:100%}
 .fc-dr{position:absolute;left:0;right:0;bottom:12px;text-align:center;font:800 .68rem/1 var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:#C9B6FF;animation:fcBlink 1s steps(2) infinite}
 .fc-sp{position:absolute;width:6px;height:6px;border-radius:50%;background:#FFE08A;box-shadow:0 0 8px #FFD27A;opacity:0;animation:fcTw 1.2s ease-in-out infinite}
 .fc-sp.s1{left:14%;top:18%}.fc-sp.s2{right:16%;top:26%;animation-delay:.2s}.fc-sp.s3{left:24%;bottom:30%;animation-delay:.45s}.fc-sp.s4{right:22%;bottom:24%;animation-delay:.7s}.fc-sp.s5{left:50%;top:10%;animation-delay:.9s}.fc-sp.s6{right:10%;top:56%;animation-delay:.3s}
-.fc-reveal{animation:fcReveal .5s ease-out both}
 .fc-back{animation:fcGlow 1.5s ease-in-out infinite!important}.fc-back .fc-dr,.fc-back .fc-sp{display:none}
-.fc-turn{animation:fcTurn .17s ease-in forwards!important}
-.fc-dealt{animation-duration:.5s!important}
-@keyframes fcTurn{from{transform:perspective(700px) rotateY(0)}to{transform:perspective(700px) rotateY(90deg)}}
+.fc-flip{animation:fcFlip .7s both}
+.fc-flip>*:not(.fc-cover){animation:fcShow .7s both;animation-delay:inherit}
+.fc-cover{position:absolute;inset:-1px;z-index:3;border-radius:inherit;border:1px solid #9B6BFF;background:radial-gradient(circle at 50% 40%,#2c1b63 0%,#0d0a26 75%);display:grid;place-items:center;font:900 4.2rem/1 var(--f-display);color:#FFD27A;text-shadow:0 0 14px #9B6BFF,0 0 34px #6A3DFF;animation:fcCover .7s both;animation-delay:inherit}
+@keyframes fcFlip{0%{transform:perspective(700px) rotateY(0);animation-timing-function:ease-in}50%{transform:perspective(700px) rotateY(90deg)}50.01%{transform:perspective(700px) rotateY(-90deg);animation-timing-function:ease-out}100%{transform:perspective(700px) rotateY(0)}}
+@keyframes fcShow{0%,49.9%{visibility:hidden}50%,100%{visibility:visible}}
+@keyframes fcCover{0%,49.9%{visibility:visible}50%,100%{visibility:hidden}}
 @keyframes fcShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-3px) rotate(-1.5deg)}75%{transform:translateX(3px) rotate(1.5deg)}}
 @keyframes fcGlow{0%,100%{box-shadow:0 0 14px rgba(155,107,255,.4)}50%{box-shadow:0 0 34px rgba(155,107,255,.95),0 0 60px rgba(255,194,61,.25)}}
 @keyframes fcPulse{0%,100%{transform:scale(.9);opacity:.75}50%{transform:scale(1.18);opacity:1}}
 @keyframes fcSweep{to{transform:translateX(120%)}}
 @keyframes fcBlink{50%{opacity:.35}}
 @keyframes fcTw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1.5)}}
-@keyframes fcReveal{from{transform:perspective(700px) rotateY(90deg)}to{transform:perspective(700px) rotateY(0)}}
-@media (prefers-reduced-motion:reduce){.fc-turn,.fc-back,.fc-dealt,.fc-mys,.fc-mq,.fc-mys::after,.fc-sp,.fc-dr,.fc-reveal{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.fc-back,.fc-mys,.fc-mq,.fc-mys::after,.fc-sp,.fc-dr,.fc-flip,.fc-flip>*{animation:none!important}.fc-cover{display:none}}
 .fc-ppg{display:flex;align-items:baseline;gap:4px;justify-content:center;flex-wrap:wrap;font:700 .78rem/1.2 var(--f-body);color:#9FB4E0;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.06)}.fc-ppg b{font:900 1rem/1 var(--f-display);color:#FFD27A}.fc-ppg small{color:var(--muted);font-size:.68rem}
 .fc-top{width:100%;display:flex;justify-content:space-between;align-items:center}.fc-pos{font:900 .9rem/1 var(--f-display);color:#FFD27A;letter-spacing:.05em}
 .fc-nm{font-size:.98rem;line-height:1.15}.fc-sc{color:var(--muted);display:flex;align-items:center;gap:4px;justify-content:center;font-size:.75rem}
@@ -2068,8 +2069,8 @@ async function fcDeal(){
     const t0=Date.now(),st=hand.map(()=>'back');UI.fcDeal={w,st};render();   /* five face-down cards, then they flip one by one */
     if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Your hand is dealt')){const f={...fcDoc(ME.uid)};delete f[w];S.picks[ME.uid].fc=f;UI.fcDeal=null}
     else{const sl=ms=>new Promise(r=>setTimeout(r,ms));await sl(Math.max(0,1100-(Date.now()-t0)));
-      for(let i=0;i<st.length;i++){st[i]='turn';render();await sl(170);st[i]='face';render();await sl(110)}
-      await sl(700);UI.fcDeal=null}}
+      st.fill('flip');render();   /* one smooth flip per card, staggered left to right */
+      await sl(700+130*st.length);UI.fcDeal=null}}
   finally{_fcBusy=false;render()}
 }
 async function fcRedraw(i){
@@ -2093,8 +2094,8 @@ function fcHTML(){
   const used=mine?(mine.r||0):0,left=FC_REDRAWS-used;
   const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=p.games[w-1],lk=w===cw&&statsIn(p);
     const an=UI.fcAnim&&UI.fcAnim.w===w&&UI.fcAnim.i===i?UI.fcAnim:null,dl=UI.fcDeal&&UI.fcDeal.w===w?UI.fcDeal.st[i]:null;
-    const mode=dl?{back:'fc-mys fc-back',turn:'fc-mys fc-back fc-turn',face:'fc-reveal fc-dealt'}[dl]:an?(an.rev?'fc-reveal':'fc-mys'):'';
-    return `<div class="fc-card ${x?'in':''} ${mode}">${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}<b class="fc-nm">${esc(p.name)}</b><small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
+    const mode=dl?{back:'fc-mys fc-back',flip:'fc-flip'}[dl]:an?(an.rev?'fc-flip':'fc-mys'):'',fdel=dl==='flip'?i*.13:0;
+    return `<div class="fc-card ${x?'in':''} ${mode}" ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}<b class="fc-nm">${esc(p.name)}</b><small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
       <div class="fc-ppg">${(()=>{const a=agg(p,'season');return a.n?`<b>${f1(a.v/a.n)}</b> PPG<small>${a.n} ${a.n===1?'game':'games'}</small>`:'<small>No games yet</small>'})()}</div>
       <div class="fc-pts"><b>${x?f1(pts(x.stat)):'—'}</b><small>${x?'week '+w+' pts':'waiting on game'}</small></div>
       ${w===cw&&can?`<button class="btn sm ${left>0&&!lk?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!UI.fcAnim?'':'disabled'}>${lk?'Locked':'Redraw'}</button>`:''}</div>`}).join(''):'';
