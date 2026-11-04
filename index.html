@@ -2110,7 +2110,7 @@ function picksHTML(){
   const avail=Math.round((bal-0)*100)/100;
   const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
   const card=g=>{
-    const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
+    const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
       return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small></button>`};
     const od=side?o[side]:0,room=avail+(b?+b.stake:0);
@@ -2137,7 +2137,7 @@ function picksHTML(){
   const boardCard=mgBoard('Token leaders',board.map(x=>({u:x.u,v:n1(x.t)})));
   /* lock in everything at once */
   const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
-  const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
+  const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||5)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Hit the button to save your picks.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>${staged.length===1?'Lock in pick':'Lock in all '+staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
   return boardCard+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+myCard+allBar+(list.length?wkOrder(list).map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard;
@@ -2184,7 +2184,7 @@ function spreadHTML(){
   const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
   const nm2=(x,g)=>x.s==='h'?g.h:g.a,lnTxt=x=>fmtLine(x.s==='h'?+x.line:-x.line);
   const card=g=>{
-    const id=gid(g),L=spreadFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
+    const id=gid(g),L=spreadFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const ln=sd==='h'?L:-L,lk=b&&b.s===sd&&ui.s===undefined?(sd==='h'?+b.line:-b.line):ln;
       return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="atSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${fmtLine(lk)}</span><small>pays ${ATS_PAY.toFixed(2)}x</small></button>`};
     const room=bal+(b?+b.stake:0);let foot='';
@@ -2203,7 +2203,7 @@ function spreadHTML(){
   const board=Object.keys(S.picks).filter(u=>Object.keys(atsOf(u)).length).map(u=>{const r=Object.entries(atsOf(u)).map(([id,b])=>atsResult(b,gm[id]));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w);
   if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid))board.push({u:ME.uid,w:0,l:0});
   const boardCard=mgBoard('Best against the spread',board.map(x=>({u:x.u,v:x.w+'-'+x.l})));
-  const stakeOf=g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
+  const stakeOf=g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||5)};
   const staged=can?open.filter(g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-bal;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(bal)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Hit the button to save your picks.`}</div></div><div class="bt-go"><button class="btn" data-act="atAll" ${over>0?'disabled':''}>${staged.length===1?'Lock in pick':'Lock in all '+staged.length}</button><button class="btn ghost" data-act="atClear">Clear</button></div></section>`:'';
@@ -3324,7 +3324,7 @@ document.addEventListener('click',async e=>{
   else if(a==='atClear'){UI.at={};render()}
   else if(a==='atAll'){const today=new Date().toISOString().slice(0,10),gm=gameMap(),cur=atsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.at).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
-      const stake=Math.floor(u.stake||(old&&old.stake)||10);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
+      const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
       const line=(old&&old.s===u.s)?+old.line:spreadFor(g);nb[id]={s:u.s,stake,line,odds:ATS_PAY,w:g.w,at:NOW()}});
     if(!n){say('Pick a side first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
@@ -3334,7 +3334,7 @@ document.addEventListener('click',async e=>{
   else if(a==='atDrop'){const id=t.dataset.g,nb={...atsOf(ME.uid)};delete nb[id];delete UI.at[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Pick removed');render()}
   else if(a==='atPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('That game is closed.');return}
     const cur=atsOf(ME.uid),old=cur[id],ui=UI.at[id]||{},sd=ui.s||(old&&old.s);if(!sd){say('Tap a side first.');return}
-    const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||10,Math.floor(room));
+    const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||5,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}
     const line=(old&&old.s===sd&&ui.s===undefined)?+old.line:spreadFor(g),nb={...cur,[id]:{s:sd,stake,line,odds:ATS_PAY,w:g.w,at:NOW()}};
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Locked in: '+(sd==='h'?g.h:g.a)+' '+fmtLine(sd==='h'?line:-line))){delete UI.at[id];render()}}
@@ -3344,13 +3344,13 @@ document.addEventListener('click',async e=>{
   else if(a==='pkClear'){UI.pk={};render()}
   else if(a==='pkAll'){const today=new Date().toISOString().slice(0,10),gm=gameMap(),cur=betsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pk).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
-      const stake=Math.floor(u.stake||(old&&old.stake)||10);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;nb[id]={s:u.s,stake,odds:oddsFor(g)[u.s],w:g.w,at:NOW()}});
+      const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;nb[id]={s:u.s,stake,odds:oddsFor(g)[u.s],w:g.w,at:NOW()}});
     if(!n){say('Pick a team first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),n+(n===1?' pick':' picks')+' locked in')){UI.pk={};render()}}
   else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('Pick ’em is closed for that game.');return}
     const cur=betsOf(ME.uid),old=cur[id],ui=UI.pk[id]||{},s=ui.s||(old&&old.s);if(!s){say('Tap a team first.');return}
-    const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||10,Math.floor(room));
+    const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||5,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}
     const o=oddsFor(g),nb={...cur,[id]:{s,stake,odds:o[s],w:g.w,at:NOW()}};
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick locked in: '+(s==='h'?g.h:g.a)+' for '+stake+' tokens')){delete UI.pk[id];render()}}
