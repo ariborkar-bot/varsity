@@ -2093,6 +2093,8 @@ function resCard(hist,label){
   return `<section class="card bt-res"><div class="qh"><h3>Your results</h3></div>${L.map(x=>{const ps=x.b.s==='h'?x.g.hs:x.g.as,os=x.b.s==='h'?x.g.as:x.g.hs;
     return `<div class="bt-r ${x.res}"><b>${label(x)}</b><small class="muted">${ps}-${os}</small><b class="d">${x.res==='won'?'+'+n1(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+n1(x.b.stake)}</b></div>`}).join('')}${hist.length>5?`<button class="btn sm ghost bt-more" data-act="mgRes">${more?'Show less':'Show all ('+hist.length+')'}</button>`:''}</section>`;
 }
+/* weeks with games still to play first (soonest first), then finished weeks (latest first) */
+function wkOrder(arr){const ws=[...new Set(arr.map(g=>g.w))],done=w=>arr.filter(g=>g.w===w).every(gDone);return [...ws.filter(w=>!done(w)).sort((a,b)=>a-b),...ws.filter(done).sort((a,b)=>b-a)]}
 function recordCard(results){
   const n=results.length,w=results.filter(x=>x==='won').length,l=results.filter(x=>x==='lost').length,dec=w+l,pct=dec?Math.round(w/dec*100):null,open=results.filter(x=>x==='open').length;
   return `<section class="card bt-rec"><div class="bt-rc"><b>${n}</b><small>${n===1?'game':'games'} predicted</small></div><div class="bt-rc"><b>${w}-${l}</b><small>${dec?'right-wrong':'no results yet'}</small></div><div class="bt-rc"><b>${pct===null?'-':pct+'%'}</b><small>correct${open?`, ${open} still open`:''}</small></div></section>`;
@@ -2138,7 +2140,7 @@ function picksHTML(){
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one above.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
-  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+myCard+allBar+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard;
+  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+myCard+allBar+(list.length?wkOrder(list).map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} ${L.every(gDone)?'finished':'pick ’em'}</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard;
 }
 /* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
 function anticipated(){
@@ -2206,7 +2208,7 @@ function spreadHTML(){
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-bal;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(bal)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one below.`}</div></div><div class="bt-go"><button class="btn" data-act="atAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="atClear">Clear</button></div></section>`:'';
   const nextW=open.length?open[0].w:null;
-  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>atsResult(b,gm[id])))+allBar+(open.length?[...new Set(open.map(g=>g.w))].map(w=>{const L=open.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} spreads</h3><span class="muted">${L.length} games${w===nextW?', lines set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games yet. New spreads show up as matchups are set.</p>')+histCard;
+  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>atsResult(b,gm[id])))+allBar+(open.length?wkOrder(open).map(w=>{const L=open.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} ${L.every(gDone)?'finished':'spreads'}</h3><span class="muted">${L.length} games${w===nextW?', lines set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games yet. New spreads show up as matchups are set.</p>')+histCard;
 }
 function viewMini(){
   const T=['picks','draw','spread'].includes(UI.mtab)?UI.mtab:'picks';
