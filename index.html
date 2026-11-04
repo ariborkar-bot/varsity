@@ -1285,6 +1285,13 @@ select option{background:#0B1730;color:#EAF0F8}
 .cmp-f.cmp-in .cmp-big b{animation:cmpPop .7s .2s cubic-bezier(.2,1.4,.4,1) both}
 @media (max-width:420px){.cmp-fn{font-size:.98rem}.cmp-big b{font-size:1.25rem}.cmp-f{padding:34px 6px 10px}}
 @media (prefers-reduced-motion:reduce){.cmp-reel{animation:none;transform:translateY(calc((1 - var(--n)) * 100px))}.cmp-body.show,.cmp-body.show .cmp-bar i,.cmp-f.cmp-in .cmp-big b{animation:none!important}}
+
+/* TOP 10 follows the player: beside the name wherever it appears */
+.nmt{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-width:0;vertical-align:middle}
+.nmt>b,.nmt>h2{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.top10.sm{position:absolute;top:2.5px;right:3px;z-index:3;font-size:max(.4rem,1.9cqw);padding:2px 3px 1px 4px;border-radius:3px;letter-spacing:.08em}
+.sb-card .top10.sm{top:.5cqw;right:.6cqw}
+.dh h2 .nmt{gap:8px}.dh h2 .top10{font-size:.68rem}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1417,6 +1424,11 @@ const GRL=['','Fr','So','Jr','Sr'],GRN=['','Freshmen','Sophomores','Juniors','Se
 const _gk=(n,s)=>String(n||'').trim().toLowerCase()+'|'+String(s||'').trim().toLowerCase();
 const _gm={};if(MP)MP.players.forEach(p=>{if(p.g)_gm[_gk(p.n,p.s)]=p.g});
 const classOf=(n,s)=>_gm[_gk(n,s)]||0;
+/* TOP 10: the ten highest season fantasy scorers in the app. The tag follows each of them wherever their name appears. */
+let T10S=null;
+const isT10=p=>{if(!p||!p.key)return false;if(!T10S){try{T10S=new Set(players().filter(x=>x.mp).map(x=>({k:x.key,v:agg(x,'season')})).filter(x=>x.v.n>0).sort((a,b)=>b.v.v-a.v.v).slice(0,10).map(x=>x.k))}catch(_){T10S=new Set()}}return T10S.has(p.key)};
+const T10=p=>isT10(p)?'<em class="top10">TOP 10</em>':'';
+const T10W=(p,h)=>isT10(p)?`<span class="nmt">${h}<em class="top10">TOP 10</em></span>`:h;
 const gtag=p=>p&&p.gr?`<span class="gr">${GRL[p.gr]}</span>`:'';
 const mpP=MP?MP.players.map(p=>({key:'mp'+p.id,gr:p.g||0,name:p.n,school:p.s,pos:p.p,sub:['CB','S'].includes(p.u)?'DB':(p.u||p.p),mp:true,tw:!!p.tw,sample:false,
   games:Array.from({length:WEEKS},(_,i)=>{const l=p.w[i+1];return l?{stat:Object.fromEntries(KEYS.map((k,j)=>[k,l[j]||0])),ver:'maxpreps'}:null})})):[];
@@ -1622,7 +1634,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v139 · Nov 4';
+const APP_BUILD='v140 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2260,7 +2272,7 @@ function fcHTML(){
   const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=p.games[w-1],lk=w===cw&&statsIn(p);
     const an=UI.fcAnim&&UI.fcAnim.w===w&&UI.fcAnim.i===i?UI.fcAnim:null,dl=UI.fcDeal&&UI.fcDeal.w===w?UI.fcDeal.st[i]:null;
     const mode=dl?{back:'fc-mys fc-back',flip:'fc-flip'}[dl]:an?(an.rev?'fc-flip':'fc-mys'):'',fdel=dl==='flip'?i*.13:0;
-    return `<div class="fc-card ${x?'in':''} ${mode}" ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}<b class="fc-nm">${esc(p.name)}</b><small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
+    return `<div class="fc-card ${x?'in':''} ${mode}" ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}${T10W(p,`<b class="fc-nm">${esc(p.name)}</b>`)}<small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
       <div class="fc-ppg">${(()=>{const a=agg(p,'season');return a.n?`<b>${f1(a.v/a.n)}</b> PPG<small>${a.n} ${a.n===1?'game':'games'}</small>`:'<small>No games yet</small>'})()}</div>
       <div class="fc-pts"><b>${x?f1(pts(x.stat)):'—'}</b><small>${x?'week '+w+' pts':'waiting on game'}</small></div>
       ${w===cw&&can?`<button class="btn sm ${left>0&&!lk&&!lkd?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!lkd&&!UI.fcAnim?'':'disabled'}>${lk?'Locked':'Redraw'}</button>`:''}</div>`}).join(''):'';
@@ -2365,7 +2377,7 @@ const SIM_SLOTS=[
   ...[1,2,3,4].map(n=>({k:'DL'+n,label:'DL',elig:['DEF'],sub:['DL']}))];
 const SIM_POS_OLD={RB:[9,50],QB:[25,50],WR1:[41,11],TE:[41,37],FLEX:[41,63],WR2:[41,89],DL1:[59,14],DL2:[59,38],DL3:[59,62],DL4:[59,86],LB1:[75,24],LB2:[75,50],LB3:[75,76],DB1:[91,11],DB2:[91,37],DB3:[91,63],DB4:[91,89]};
 /* formation spots, as [left %, top %] on the field. Offense and defense each get a full field of their own. */
-const SIM_POS={WR1:[11,40],TE:[72,40],WR2:[90,40],FLEX:[31,58],QB:[50,68],RB:[50,89],
+const SIM_POS={WR1:[11,40],TE:[72,40],WR2:[90,40],FLEX:[30,57],QB:[50,64],RB:[50,87],
   DL1:[14,60],DL2:[38,60],DL3:[62,60],DL4:[86,60],LB1:[25,36],LB2:[50,36],LB3:[75,36],DB1:[11,11],DB2:[37,11],DB3:[63,11],DB4:[89,11]};
 const SIM_UNIT=k=>['QB','RB','WR1','WR2','TE','FLEX'].includes(k)?'off':'def';
 const SIM_COL={QB:'#E65B28',RB:'#079B82',WR:'#2868E8',TE:'#9655D8',FLEX:'#E8A317',DB:'#22A6D9',LB:'#E0455B',DL:'#7FB432'};
@@ -2448,7 +2460,7 @@ function viewSim(){
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
   const tab=UI.simTab==='def'?'def':'off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
   const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p||SIM_UNIT(sl.k)!==tab)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
-    return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
+    return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}${T10(p).replace('class="top10"','class="top10 sm"')}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
       <div class="sb-pts"><b>${f1(a.n?a.v/a.n:0)}<u>PPG</u></b><small>${f1(a.v)} pts<em> · ${a.n} gp</em></small></div>
       ${m.done?'':`<button class="sb-rs ${m.left>0&&!busy?'':'off'}" data-act="simRespin" data-i="${i}" ${m.left>0&&!busy?'':'disabled'} aria-label="Respin ${sl.label}">↻<span> Respin</span></button>`}</div></div>`};
   const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins left</small><b>${m.left}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
@@ -2546,7 +2558,7 @@ function viewTeam(){
   if(T==='roster'){
     const ps=players().filter(p=>p.school===name&&!p.sample).map(p=>({p,a:agg(p,'season')})).sort((x,y)=>y.a.v-x.a.v);
     const ORD=['QB','RB','WR','TE','DEF','K'],NAMES={QB:'Quarterbacks',RB:'Running backs',WR:'Receivers',TE:'Tight ends',DEF:'Defense',K:'Kickers'};
-    body=ps.length?ORD.map(pos=>{const L=ps.filter(x=>x.p.pos===pos);return L.length?`<section class="card"><div class="qh"><h3>${NAMES[pos]}</h3><span class="muted">${L.length}</span></div>${L.map(x=>`<button class="tm-row" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,36)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}</i></span><span class="tm-pts"><b>${f1(x.a.v)}</b><small>${x.a.n} ${x.a.n===1?'game':'games'}</small></span></button>`).join('')}</section>`:''}).join(''):'<p class="empty">No player stats for this team yet.</p>';
+    body=ps.length?ORD.map(pos=>{const L=ps.filter(x=>x.p.pos===pos);return L.length?`<section class="card"><div class="qh"><h3>${NAMES[pos]}</h3><span class="muted">${L.length}</span></div>${L.map(x=>`<button class="tm-row" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,36)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}</i></span><span class="tm-pts"><b>${f1(x.a.v)}</b><small>${x.a.n} ${x.a.n===1?'game':'games'}</small></span></button>`).join('')}</section>`:''}).join(''):'<p class="empty">No player stats for this team yet.</p>';
   }else{
     body=gs.length?`<div class="gm-grid">${gs.map(g=>`<div>${gameCard(g,{})}<div class="tm-wk muted">Week ${g.w}${gDone(g)?' · '+(((g.h===name?g.hs:g.as)>(g.h===name?g.as:g.hs))?'Win':((g.h===name?g.hs:g.as)<(g.h===name?g.as:g.hs))?'Loss':'Tie'):''}</div></div>`).join('')}</div>`:'<p class="empty">No games on the schedule.</p>';
   }
@@ -2577,18 +2589,18 @@ function leagueRows(){
   return q?all.filter(x=>x.p.name.toLowerCase().includes(q)):all;
 }
 function podiumHTML(rows){
-  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span><em class="top10">TOP 10</em>${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='prev'?'last game pts':'fantasy pts'}</small></button>`}).join('')}</div>`;
+  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span>${T10(x.p)}${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='prev'?'last game pts':'fantasy pts'}</small></button>`}).join('')}</div>`;
 }
 function rowHTML(x,rank){
   return `<button class="row" data-act="player" data-id="${esc(x.p.key)}">
     <span class="rk">${rank}</span>${av(x.p.name,x.p.school,40)}
-    <span class="who"><span class="nm"><b>${esc(x.p.name)}</b>${rank<=10?'<em class="top10">TOP 10</em>':''}</span><i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span>
+    <span class="who"><span class="nm"><b>${esc(x.p.name)}</b>${T10(x.p)}</span><i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span>
     <span class="ln">${line(x.p.pos,x.a.s)}</span>
     <span class="pt"><b>${bigV(x.a)}</b><small>${subV(x.a)} ${trTag(x.p)}</small></span></button>`;
 }
 function leadersHTML(rows){
   if(UI.pos!=='ALL'||UI.q||UI.school!=='ALL')return'';
-  const out=['QB','RB','WR','TE','K','DL','LB','DB'].map(pos=>{const r=rows.find(x=>posMatch(x.p,pos));return r?`<button class="lead" data-act="pos" data-v="${pos}">${pb(['DL','LB','DB'].includes(pos)?'DEF':pos,pos)}<b>${esc(r.p.name)}</b><span class="pv2">${bigV(r.a)}</span></button>`:''}).join('');
+  const out=['QB','RB','WR','TE','K','DL','LB','DB'].map(pos=>{const r=rows.find(x=>posMatch(x.p,pos));return r?`<button class="lead" data-act="pos" data-v="${pos}">${pb(['DL','LB','DB'].includes(pos)?'DEF':pos,pos)}${T10W(r.p,`<b>${esc(r.p.name)}</b>`)}<span class="pv2">${bigV(r.a)}</span></button>`:''}).join('');
   return out?`<div class="leads" aria-label="Leader at each position">${out}</div>`:'';
 }
 function listHTML(){
@@ -2604,7 +2616,7 @@ function hotHTML(){
   const ts=players().map(p=>({p,t:trend(p)})).filter(x=>x.t);
   const up=[...ts].filter(x=>x.t.d>0).sort((a,b)=>b.t.d-a.t.d).slice(0,3),dn=[...ts].filter(x=>x.t.d<0).sort((a,b)=>a.t.d-b.t.d).slice(0,3);
   if(!up.length)return'';
-  const col=(title,list,cls)=>`<div class="hotc"><h3>${title}</h3>${list.map(x=>`<button class="hotr" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,32)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><em class="tr ${cls}">${cls==='up'?'▲':'▼'} ${f1(Math.abs(x.t.d))}</em></button>`).join('')||'<span class="muted">Nobody yet</span>'}</div>`;
+  const col=(title,list,cls)=>`<div class="hotc"><h3>${title}</h3>${list.map(x=>`<button class="hotr" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,32)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><em class="tr ${cls}">${cls==='up'?'▲':'▼'} ${f1(Math.abs(x.t.d))}</em></button>`).join('')||'<span class="muted">Nobody yet</span>'}</div>`;
   return `<section class="card hot-card"><div class="qh"><h3>Hot this week</h3><span class="pill approved">Recent form</span></div><div class="hot">${col('Hot right now',up,'up')}</div></section>`;
 }
 function viewLeague(){
@@ -2630,7 +2642,7 @@ function cmpSearch(q){
   return players().filter(p=>p.mp&&(p.name.toLowerCase().includes(q)||p.school.toLowerCase().includes(q))).map(p=>({p,v:agg(p,'season').v}))
     .sort((a,b)=>b.v-a.v).slice(0,8);
 }
-const cmpResHTML=(s,list)=>list.map(x=>`<li><button type="button" data-act="cmpPick" data-s="${s}" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,30)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${esc(x.p.school)}</span></i></span><span class="pv"><b>${f1(x.v)}</b><small>pts</small></span></button></li>`).join('')||'<li class="hint">No players found</li>';
+const cmpResHTML=(s,list)=>list.map(x=>`<li><button type="button" data-act="cmpPick" data-s="${s}" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,30)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${esc(x.p.school)}</span></i></span><span class="pv"><b>${f1(x.v)}</b><small>pts</small></span></button></li>`).join('')||'<li class="hint">No players found</li>';
 function compareHTML(){
   const P=UI.cmp.map(k=>k?pByKey(k):null),both=P[0]&&P[1];
   let lead=-1,wins=[0,0];
@@ -2640,7 +2652,7 @@ function compareHTML(){
   const slot=s=>{const p=P[s];return p&&spinNow(s)
     ?`<div class="cmp-pl cmp-spin" style="--ac:${s?'#FF9F1C':'#2F6BFF'}">${reelHTML(p)}<small class="muted">Picking a player…</small></div>`
     :p
-    ?`<div class="cmp-pl ${both&&lead===s?'ahead':''} ${UI.cmpNew===s?'cmp-in':''}" style="--ac:${s?'#FF9F1C':'#2F6BFF'}">${both&&lead===s?'<span class="cmp-crown">Leads</span>':''}<span class="cmp-ring"></span><div class="cmp-av">${av(p.name,p.school,64)}</div><b>${esc(p.name)}</b><div class="cmp-sub">${pb(p.pos,p.sub)}${gtag(p)}</div><small class="muted">${slogo(p.school)}${esc(p.school)}</small><button class="btn sm ghost" data-act="cmpClear" data-s="${s}">Change</button></div>`
+    ?`<div class="cmp-pl ${both&&lead===s?'ahead':''} ${UI.cmpNew===s?'cmp-in':''}" style="--ac:${s?'#FF9F1C':'#2F6BFF'}">${both&&lead===s?'<span class="cmp-crown">Leads</span>':''}<span class="cmp-ring"></span><div class="cmp-av">${av(p.name,p.school,64)}</div>${T10W(p,`<b>${esc(p.name)}</b>`)}<div class="cmp-sub">${pb(p.pos,p.sub)}${gtag(p)}</div><small class="muted">${slogo(p.school)}${esc(p.school)}</small><button class="btn sm ghost" data-act="cmpClear" data-s="${s}">Change</button></div>`
     :`<div class="cmp-pl empty ${UI.cmpNew===s?'cmp-out':''}"><label class="fld"><span>Player ${s+1}</span><input id="cmp-q${s}" type="search" placeholder="Search a player or school" autocomplete="off"></label><ul class="cmp-res" id="cmp-r${s}"></ul></div>`};
   let body='',stage='';
   if(both){
@@ -2666,7 +2678,7 @@ function compareHTML(){
     const fighter=s=>{const p=P[s],a=A[s],g=a.n?a.v/a.n:0,sp=spinNow(s);
       return `<div class="cmp-f ${lead===s?'ahead':''} ${UI.cmpNew===s&&UI.cmpPh==='land'?'cmp-in':''} ${sp?'spinning':''}" style="--ac:${s?'#FF9F1C':'#2F6BFF'}">${lead===s&&!sp?'<span class="cmp-crown">Leads</span>':''}<span class="cmp-ring"></span>
         <div class="cmp-fav">${sp?reelHTML(p):`<div class="cmp-av">${av(p.name,p.school,76)}</div>`}</div>
-        <div class="cmp-fm"><b class="cmp-fn">${esc(p.name)}</b><div class="cmp-sub">${pb(p.pos,p.sub)}${gtag(p)}</div><small class="muted cmp-fs">${slogo(p.school)}${esc(p.school)}</small></div>
+        <div class="cmp-fm">${T10W(p,`<b class="cmp-fn">${esc(p.name)}</b>`)}<div class="cmp-sub">${pb(p.pos,p.sub)}${gtag(p)}</div><small class="muted cmp-fs">${slogo(p.school)}${esc(p.school)}</small></div>
         <div class="cmp-big"><div><b>${f1(a.v)}</b><small>Fantasy pts</small></div><div><b>${f1(g)}</b><small>Per game</small></div></div>
         <button class="btn sm ghost" data-act="cmpClear" data-s="${s}">Change</button></div>`};
     stage=`<div class="cmp-stage">${fighter(0)}<span class="cmp-vs live"><b>VS</b></span>${fighter(1)}</div>`;
@@ -2790,12 +2802,12 @@ function lineupHTML(g,uid){
     const acts=canEdit?(lk&&!s.bench?`<span class="lg-acts">${lockTag}</span>`:`<span class="lg-acts">${BNS.length?(lk?lockTag:`<button class="btn sm" data-act="lgSub" data-slot="${s.k}">${s.bench?'Sub in':'Sub out'}</button>`):''}<button class="btn sm ghost" data-act="lgPick" data-slot="${s.k}">Swap</button><button class="lg-x" data-act="lgClear" data-slot="${s.k}" aria-label="Remove ${esc(p.name)}">✕</button></span>`):'';
     if(mode==='budget'){const pr=priceOf(p),a2=agg(p,'season'),per=a2.n?a2.v/a2.n/pr:0;
       return `<li class="lg-card bd-c">${tag}
-      <button class="lg-who" data-act="player" data-id="${esc(p.key)}">${av(p.name,p.school,40)}<span class="lt"><b>${esc(p.name)}</b><i>${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}</span></i></span></button>
+      <button class="lg-who" data-act="player" data-id="${esc(p.key)}">${av(p.name,p.school,40)}<span class="lt">${T10W(p,`<b>${esc(p.name)}</b>`)}<i>${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}</span></i></span></button>
       <span class="bd-r"><b>${money(pr)}</b><small>${gm?'wk '+w+': '+f1(wp)+' pts':'no game yet'}</small></span>
       <div class="bd-m"><span>proj <b>${f1(proj(p).pts)}</b></span><span>season <b>${f1(a2.v)}</b></span>${per?`<span><b>${per.toFixed(2)}</b> per $M</span>`:''}</div>
       ${acts}</li>`}
     return `<li class="lg-card">${tag}
-      <button class="lg-who" data-act="player" data-id="${esc(p.key)}">${av(p.name,p.school,42)}<span class="lt"><b>${esc(p.name)}</b><i>${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}</span></i></span></button>
+      <button class="lg-who" data-act="player" data-id="${esc(p.key)}">${av(p.name,p.school,42)}<span class="lt">${T10W(p,`<b>${esc(p.name)}</b>`)}<i>${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}</span></i></span></button>
       <span class="lg-pts"><b>${f1(wp)}</b><small>${mode==='budget'?'<em class="lg-price">'+money(priceOf(p))+'</em> ':''}<em class="lg-pj">proj ${f1(proj(p).pts)}</em> · wk ${w}${gm?'':' · no game yet'} · season ${f1(agg(p,'season').v)}</small></span>
       ${canEdit?(lk&&!s.bench?`<span class="lg-acts">${lockTag}</span>`:`<span class="lg-acts">${BNS.length?(lk?lockTag:`<button class="btn sm" data-act="lgSub" data-slot="${s.k}">${s.bench?'Sub in':'Sub out'}</button>`):''}<button class="btn sm ghost" data-act="lgPick" data-slot="${s.k}">Swap</button><button class="lg-x" data-act="lgClear" data-slot="${s.k}" aria-label="Remove ${esc(p.name)}">✕</button></span>`):''}
     </li>`;
@@ -2852,7 +2864,7 @@ function tradeProblem(g,t,dropsTo){
   if(dropsTo&&!planSide(g,t.to,want,give,dropsTo))return nm(t.to)+'’s team can no longer make this trade work';
   return '';
 }
-const trNames=ks=>trArr(ks).map(k=>{const p=pByKey(k);return p?`<b>${esc(p.name)}</b> <small class="muted">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</small>`:'a player'}).join(', ');
+const trNames=ks=>trArr(ks).map(k=>{const p=pByKey(k);return p?`${T10W(p,`<b>${esc(p.name)}</b>`)} <small class="muted">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</small>`:'a player'}).join(', ');
 function tradesHTML(g){
   if(!tradesOn(g)||ME.mode==='guest')return '';
   const T=Object.values(g.trades||{}).filter(Boolean).sort((a,b)=>(b.at||0)-(a.at||0));
@@ -3006,7 +3018,7 @@ function gradeOf(g){
 function boardHTML(g,di){
   const n=di.order.length,R=slotsOf(g).length;
   let rows='';for(let r=0;r<R;r++){let cells='';for(let j=0;j<n;j++){const i=r*n+(r%2===0?j:n-1-j),x=di.picks[i],pl=x&&pByKey(x.key);
-      cells+=`<td class="${i===di.i&&di.status==='live'?'now':''} ${x&&x.uid===ME.uid?'me':''}">${pl?`<span class="pos ${pl.pos}">${pl.sub&&pl.pos==='DEF'?pl.sub:pl.pos}</span><b>${esc(pl.name)}</b><small>${esc(pl.school)}</small>`:i===di.i&&di.status==='live'?'<em>On the clock</em>':''}</td>`}
+      cells+=`<td class="${i===di.i&&di.status==='live'?'now':''} ${x&&x.uid===ME.uid?'me':''}">${pl?`<span class="pos ${pl.pos}">${pl.sub&&pl.pos==='DEF'?pl.sub:pl.pos}</span>${T10W(pl,`<b>${esc(pl.name)}</b>`)}<small>${esc(pl.school)}</small>`:i===di.i&&di.status==='live'?'<em>On the clock</em>':''}</td>`}
     rows+=`<tr><th>Rd ${r+1}</th>${cells}</tr>`}
   return `<div class="scroll"><table class="dboard"><thead><tr><th></th>${di.order.map(u=>`<th>${esc(u===ME.uid?'You':nm(u))}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
@@ -3049,9 +3061,9 @@ function draftRoomHTML(g){
       <label class="dr-auto"><input type="checkbox" data-act="dAuto" ${auto?'checked':''}> Autopick for me</label>${soundToggle()}</div>
     <div class="chips dr-tabs" role="tablist"><button class="chip" data-act="dtab" data-v="best" aria-pressed="${UI.dtab==='best'}">Best available</button><button class="chip" data-act="dtab" data-v="board" aria-pressed="${UI.dtab==='board'}">Draft board</button><button class="chip" data-act="dtab" data-v="log" aria-pressed="${UI.dtab==='log'}">Recent picks</button></div>
     ${UI.dtab==='board'?boardHTML(g,di):UI.dtab==='log'?
-      `<ol class="lg-picks">${last.map(x=>{const pl=pByKey(x.key);return `<li><span class="muted">#${di.picks.indexOf(x)+1}</span><b>${esc(x.uid===ME.uid?'You':nm(x.uid))}</b><span>took</span>${pl?`${pb(pl.pos,pl.sub)}<b>${esc(pl.name)}</b><span class="muted">${esc(pl.school)}</span>`:'a player'}${x.auto?'<span class="muted">(autopick)</span>':''}</li>`}).join('')||'<li class="muted">No picks yet</li>'}</ol>`:
+      `<ol class="lg-picks">${last.map(x=>{const pl=pByKey(x.key);return `<li><span class="muted">#${di.picks.indexOf(x)+1}</span><b>${esc(x.uid===ME.uid?'You':nm(x.uid))}</b><span>took</span>${pl?`${pb(pl.pos,pl.sub)}${T10W(pl,`<b>${esc(pl.name)}</b>`)}<span class="muted">${esc(pl.school)}</span>`:'a player'}${x.auto?'<span class="muted">(autopick)</span>':''}</li>`}).join('')||'<li class="muted">No picks yet</li>'}</ol>`:
       `<div class="chips dr-pos">${POSF.map(x=>`<button class="chip" data-act="dpos" data-v="${x}" aria-pressed="${pos===x}">${x==='ALL'?'All':x}</button>`).join('')}</div>
-       <ol class="dr-best">${best.map((x,k)=>{const fit=me&&needs.find(s=>slotOk(s,x.p));return `<li><span class="dr-rk">${k+1}</span>${av(x.p.name,x.p.school,36)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><span class="pv"><b>${f1(x.v)}</b><small>proj · ${f1(x.s)} season</small></span>${me?`<button class="btn sm" data-act="dPick" data-key="${esc(x.p.key)}" ${fit?'':'disabled title="No open spot for this position"'}>Draft</button>`:`<button class="btn sm ghost" data-act="player" data-id="${esc(x.p.key)}">View</button>`}</li>`}).join('')}</ol>`}
+       <ol class="dr-best">${best.map((x,k)=>{const fit=me&&needs.find(s=>slotOk(s,x.p));return `<li><span class="dr-rk">${k+1}</span>${av(x.p.name,x.p.school,36)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><span class="pv"><b>${f1(x.v)}</b><small>proj · ${f1(x.s)} season</small></span>${me?`<button class="btn sm" data-act="dPick" data-key="${esc(x.p.key)}" ${fit?'':'disabled title="No open spot for this position"'}>Draft</button>`:`<button class="btn sm ghost" data-act="player" data-id="${esc(x.p.key)}">View</button>`}</li>`}).join('')}</ol>`}
   </section>`;
 }
 function soundToggle(){const on=sndOn();return `<button class="dr-snd" data-act="dSound" aria-pressed="${on}" title="Draft sounds">${on?'🔊 Sound on':'🔇 Sound off'}</button>`}
@@ -3201,7 +3213,7 @@ function viewMe(){
     const list=info.pool.filter(x=>x.p.pos===me.pos).sort((a,b)=>metric(b.a)-metric(a.a));
     const idx=list.findIndex(x=>x.p.key===me.key),start=Math.max(0,Math.min(idx-2,list.length-5));
     const gap=idx===0?`You lead the section among ${me.pos}s.`:`${f1(metric(list[idx-1].a)-info.val)} points behind ${esc(list[idx-1].p.name)}, the next spot up.`;
-    near=`<section class="card"><h3>Around you in the San Diego section</h3><p class="muted">${me.pos}s only. ${gap}</p><div class="board">${list.slice(start,start+5).map((x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${start+i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who"><b>${esc(x.p.name)}</b><i>${pb(me.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(me.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b></span></div>`).join('')}</div></section>`;
+    near=`<section class="card"><h3>Around you in the San Diego section</h3><p class="muted">${me.pos}s only. ${gap}</p><div class="board">${list.slice(start,start+5).map((x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${start+i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(me.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(me.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b></span></div>`).join('')}</div></section>`;
   }else ranks=`<p class="hint">No approved games for this period yet. Your rank and breakdown appear as soon as games are posted.</p>`;
   const wk=UI.meEntry.week;
   return head+`
@@ -3232,7 +3244,7 @@ function entryFields(){
 }
 function pendHTML(it){
   const p=pByKey(it.uid);if(!p)return'';
-  return `<li class="qi"><div class="qw">${av(p.name,p.school,40)}<div class="who"><b>${esc(p.name)}</b><i>${pb(p.pos)}<span>${esc(p.school)} · Week ${it.week}</span></i><span class="ln">${line(p.pos,it.stat)}</span></div></div>
+  return `<li class="qi"><div class="qw">${av(p.name,p.school,40)}<div class="who">${T10W(p,`<b>${esc(p.name)}</b>`)}<i>${pb(p.pos)}<span>${esc(p.school)} · Week ${it.week}</span></i><span class="ln">${line(p.pos,it.stat)}</span></div></div>
     <div class="acts"><button class="btn sm" data-act="approve" data-id="${esc(it.id)}">Approve</button><button class="btn sm ghost" data-act="reject" data-id="${esc(it.id)}">Reject</button></div>
     <div class="meta"><span class="pill pending">pending</span><span>+${f1(pts(it.stat))} pts</span><span>${esc(it.source)}</span>${hasApproved(it.uid,it.week)?'<span class="vt un">replaces a verified line</span>':''}</div></li>`;
 }
@@ -3300,7 +3312,7 @@ function drawerHTML(p){
     ?`<tr><td>Wk ${w}</td><td>${line(p.pos,g.stat)}</td><td class="n">${f1(pts(g.stat))}</td></tr>`
     :`<tr class="dim"><td>Wk ${w}</td><td>${w>=cw?'Not reported yet':'No game'}</td><td class="n">—</td></tr>`).join('');
   return `<aside class="dp" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
-    <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${esc(p.name)}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${gs.length} games</span></div></div></div><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div>
+    <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${gs.length} games</span></div></div></div><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div>
     <div class="big"><div><span class="lbl">Season pts</span><b>${f1(total)}</b></div><div><span class="lbl">Per game</span><b>${f1(avg)}</b></div><div><span class="lbl">Best week</span><b>${f1(best)}</b></div></div>
     ${projCard(p)}
     ${weekChart(p)}
@@ -3563,7 +3575,7 @@ function updateTicker(){
   const el=document.getElementById('mast-tick');if(!el||_tickRev===_rev)return;_tickRev=_rev;
   let list=[];try{list=players().map(p=>({p,a:agg(p,'season')})).filter(x=>x.a.n>0&&!x.p.sample).sort((a,b)=>b.a.v-a.a.v).slice(0,16)}catch(_){}
   if(!list.length){el.innerHTML='';return}
-  const item=x=>`<span class="mt-i"><b>${esc(x.p.name)}</b><small>${esc(x.p.school)} · ${esc(x.p.pos)}</small><em>${f1(x.a.v)} pts</em><small>${esc(tickLine(x.p,x.a))}</small></span>`;
+  const item=x=>`<span class="mt-i">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<small>${esc(x.p.school)} · ${esc(x.p.pos)}</small><em>${f1(x.a.v)} pts</em><small>${esc(tickLine(x.p,x.a))}</small></span>`;
   const h=list.map(item).join('');
   el.innerHTML=`<div class="mt-track" style="--tk:${Math.max(40,list.length*6)}s">${h}${h}</div>`;
 }
@@ -3585,6 +3597,7 @@ function chrome(v){
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
 }
 function render(){
+  T10S=null;
   const V={team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
   let v=UI.view;
   $('#main').innerHTML=V[v]();
@@ -4138,7 +4151,7 @@ boot();
         const why=o?' · on '+esc(nm(o))+'’s team':dup?' · already in your lineup':broke?' · over by '+money(x.c-left):lkd?' · stats already in this week':'';
         const big=sort==='proj'?f1(x.pj):sort==='val'?x.val.toFixed(2):sort==='price'?money(x.c):f1(x.a.v);
         const cap=sort==='proj'?'proj':sort==='val'?'pts per $M':sort==='price'?'price':'season';
-        return `<li><button data-key="${esc(x.p.key)}" ${o||dup||broke||lkd?'disabled':''}>${av(x.p.name,x.p.school,38)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${why}</i></span><span class="pv"><b>${big}</b><small>${cap}</small></span><span class="pm">${mode==='budget'?'<span class="bd-pill">'+money(x.c)+'</span>':''}<span>${f1(x.a.v)} pts</span><span>${x.a.n?f1(x.gm)+'/gm':'no games'}</span><span>proj ${f1(x.pj)}</span>${mode==='budget'&&x.a.n?'<span>'+x.val.toFixed(2)+' per $M</span>':''}</span></button></li>`}).join(''):'<li class="muted" style="padding:14px">No players match.</li>'};
+        return `<li><button data-key="${esc(x.p.key)}" ${o||dup||broke||lkd?'disabled':''}>${av(x.p.name,x.p.school,38)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${why}</i></span><span class="pv"><b>${big}</b><small>${cap}</small></span><span class="pm">${mode==='budget'?'<span class="bd-pill">'+money(x.c)+'</span>':''}<span>${f1(x.a.v)} pts</span><span>${x.a.n?f1(x.gm)+'/gm':'no games'}</span><span>proj ${f1(x.pj)}</span>${mode==='budget'&&x.a.n?'<span>'+x.val.toFixed(2)+' per $M</span>':''}</span></button></li>`}).join(''):'<li class="muted" style="padding:14px">No players match.</li>'};
     draw();q.addEventListener('input',draw);
     pk.addEventListener('click',e=>{const sb=e.target.closest('[data-sort]'),ab=e.target.closest('[data-aff]');
       if(sb){sort=sb.dataset.sort;pk.querySelectorAll('[data-sort]').forEach(x=>x.setAttribute('aria-pressed',String(x===sb)));draw();e.stopPropagation()}
@@ -4159,7 +4172,7 @@ boot();
     if(!opts.length){say(from.bench?'No starting spot fits '+fp.name:'No bench player fits this spot');return}
     closeSk();
     const title=from.bench?'Sub in '+fp.name:'Sub out '+fp.name;
-    const row=o=>`<li><button data-sub="${o.s.k}"><span class="lg-slot">${o.s.label}</span><span class="lt">${o.p?`<b>${esc(o.p.name)}</b><i>${pb(o.p.pos,o.p.sub)}<span>${esc(o.p.school)}</span></i>`:`<b class="muted">Empty ${from.bench?'starting':'bench'} spot</b>`}</span><span class="pv"><b>${o.p?f1(agg(o.p,'season').v):'-'}</b><small>season pts</small></span></button></li>`;
+    const row=o=>`<li><button data-sub="${o.s.k}"><span class="lg-slot">${o.s.label}</span><span class="lt">${o.p?`${T10W(o.p,`<b>${esc(o.p.name)}</b>`)}<i>${pb(o.p.pos,o.p.sub)}<span>${esc(o.p.school)}</span></i>`:`<b class="muted">Empty ${from.bench?'starting':'bench'} spot</b>`}</span><span class="pv"><b>${o.p?f1(agg(o.p,'season').v):'-'}</b><small>season pts</small></span></button></li>`;
     sk=document.createElement('div');sk.className='pk-bg';
     sk.innerHTML=`<div class="pk" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="pk-h"><h3>${esc(title)}</h3><button class="lg-x" data-pk="close" aria-label="Close">✕</button></div><p class="pk-sum">${from.bench?'Choose the starting spot to move them into.':'Choose who takes this spot from the bench.'} The two players trade places, so nobody is dropped.</p><ul>${opts.map(row).join('')}</ul></div>`;
     sk.addEventListener('click',async e=>{
@@ -4175,7 +4188,7 @@ boot();
   const trList=(g,uid,name,sel,skip)=>{
     const ro=lineupOf(g.id,uid);
     const rows=slotsOf(g).map(s=>({s,p:pByKey(ro[s.k])})).filter(o=>o.p&&!(skip&&skip.has(o.p.key)));
-    return rows.map(o=>{const lk=statsIn(o.p);return `<label class="tr-pl ${lk?'lk':''}"><input type="checkbox" data-tr="${name}" value="${esc(o.p.key)}" ${sel.has(o.p.key)?'checked':''} ${lk?'disabled':''}><span><b>${esc(o.p.name)}</b> <small class="muted">${o.p.pos==='DEF'?esc(o.p.sub||'DEF'):o.p.pos} · ${esc(o.s.label)}${o.s.bench?' (bench)':''}${lk?' · locked, has stats this week':''}</small></span></label>`}).join('')||'<p class="hint">No players</p>';
+    return rows.map(o=>{const lk=statsIn(o.p);return `<label class="tr-pl ${lk?'lk':''}"><input type="checkbox" data-tr="${name}" value="${esc(o.p.key)}" ${sel.has(o.p.key)?'checked':''} ${lk?'disabled':''}><span>${T10W(o.p,`<b>${esc(o.p.name)}</b>`)} <small class="muted">${o.p.pos==='DEF'?esc(o.p.sub||'DEF'):o.p.pos} · ${esc(o.s.label)}${o.s.bench?' (bench)':''}${lk?' · locked, has stats this week':''}</small></span></label>`}).join('')||'<p class="hint">No players</p>';
   };
   const openTrade=()=>{
     const g=curGroup();if(!g||!tradesOn(g))return;
