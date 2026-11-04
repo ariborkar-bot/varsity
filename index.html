@@ -85,6 +85,7 @@ select,input{background:var(--surface);border:1px solid var(--line);border-radiu
 select:hover,input:hover{border-color:var(--muted)}
 input[type=number]{width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.bt-amt{width:92px;min-height:42px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);color:inherit;padding:8px 14px;font:700 .9rem var(--f-body,inherit);text-align:center}.bt-amt:focus{outline:2px solid var(--gold,#F2C230)}
 .chip{background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:42px;font-weight:600;font-size:.9rem}
 .chip:hover{border-color:var(--muted)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -2092,7 +2093,7 @@ function picksHTML(){
     else if(locked)foot=b?`<p class="muted">Locked: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Pick ’em is closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room).concat(room>0&&![5,10,25,50].includes(Math.floor(room))?[Math.floor(room)]:[]);
-      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
+      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pk" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span><button class="btn sm" data-act="pkPlace" data-g="${esc(id)}" ${room<1?'disabled':''}>${b?'Update pick':'Lock in pick'}</button>${b?`<button class="btn sm ghost" data-act="pkDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a team to pick the winner.</p>';
     return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
@@ -2163,7 +2164,7 @@ function spreadHTML(){
     else if(locked)foot=b?`<p class="muted">Locked: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room);
-      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="atStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
+      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="atStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="at" data-g="${esc(id)}" data-o="${ATS_PAY}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*ATS_PAY)}</b></span><button class="btn sm" data-act="atPlace" data-g="${esc(id)}" ${room<1?'disabled':''}>${b?'Update pick':'Lock in pick'}</button>${b?`<button class="btn sm ghost" data-act="atDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a side to take the points.</p>';
     return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
@@ -3143,6 +3144,14 @@ document.addEventListener('submit',async e=>{
   catch(_){er.textContent='Could not check the PIN. Try again.';er.hidden=false}
   btn.disabled=false;
 });
+document.addEventListener('input',e=>{const t=e.target;if(!t.classList||!t.classList.contains('bt-amt'))return;
+  const room=+t.dataset.room||0;let v=Math.floor(+t.value);if(!(v>=1))v=0;const st=Math.min(v,room),B=t.dataset.k==='at'?UI.at:UI.pk,id=t.dataset.g;
+  B[id]=Object.assign({},B[id],{stake:v||undefined});
+  const w=t.closest('article').querySelector('.bt-go b');if(w)w.textContent=tk(st*(+t.dataset.o));
+  t.closest('.bt-stk').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(+c.dataset.v===v)))});
+document.addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('bt-amt'))return;
+  const room=+t.dataset.room||0,B=t.dataset.k==='at'?UI.at:UI.pk,id=t.dataset.g;let v=Math.floor(+t.value);if(!(v>=1))v=1;if(v>room)v=Math.max(1,room);
+  B[id]=Object.assign({},B[id],{stake:v});render()});
 document.addEventListener('input',e=>{if(e.target.id==='ad-q'){AD.q=e.target.value;const pos=e.target.selectionStart;render();const f=$('#ad-q');if(f){f.focus();try{f.setSelectionRange(pos,pos)}catch(_){}}}});
 document.addEventListener('click',async e=>{
   const t=e.target.closest&&e.target.closest('[data-ad]');if(!t||!ME.admin)return;
