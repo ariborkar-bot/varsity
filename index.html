@@ -2258,9 +2258,9 @@ function cardBlob(info,me){
     x.font=F(500,30,body);x.fillStyle='rgba(255,255,255,.85)';x.fillText('San Diego high school fantasy football',72,168);
     x.fillStyle='#fff';x.font=F(800,76,body);x.fillText(me.name.slice(0,26),72,330);
     x.font=F(500,38,body);x.fillStyle='rgba(255,255,255,.9)';x.fillText(`${me.school} · ${me.pos}`,72,384);
-    x.fillStyle='#FFC21A';x.font=F(800,380,disp);x.fillText('#'+info.section.all.rank,66,720);
-    x.fillStyle='#fff';x.font=F(600,48,body);x.fillText(`of ${info.section.all.of} in the San Diego section`,72,790);
-    const cols=[[f1(info.a.v),UI.scope==='season'?'Season points':'Week points'],[f1(info.a.v/info.a.n),'Per game'],['#'+info.school.all.rank+' of '+info.school.all.of,'At '+me.school.slice(0,18)]];
+    x.fillStyle='#FFC21A';x.font=F(800,380,disp);x.fillText('#'+info.section.pos.rank,66,720);
+    x.fillStyle='#fff';x.font=F(600,48,body);x.fillText(`of ${info.section.pos.of} ${me.pos}s in the San Diego section`,72,790);
+    const cols=[[f1(info.a.v),UI.scope==='season'?'Season points':'Week points'],[f1(info.a.v/info.a.n),'Per game'],['#'+info.school.pos.rank+' of '+info.school.pos.of,me.pos+'s at '+me.school.slice(0,16)]];
     cols.forEach((cc,i)=>{const cx=72+i*320;x.fillStyle='#fff';x.font=F(800,64,disp);x.fillText(cc[0],cx,930);x.fillStyle='rgba(255,255,255,.8)';x.font=F(500,28,body);x.fillText(cc[1],cx,972)});
     x.fillStyle='rgba(255,255,255,.7)';x.font=F(500,24,body);x.fillText('Approved stats only',72,1030);
     c.toBlob(b=>res(b),'image/png');
