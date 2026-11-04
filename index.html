@@ -1227,6 +1227,25 @@ select option{background:#0B1730;color:#EAF0F8}
 @keyframes cmpPulse{0%{box-shadow:0 0 0 0 rgba(47,107,255,.5)}100%{box-shadow:0 0 0 14px rgba(47,107,255,0)}}
 @keyframes cmpBeat{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}
 @media (prefers-reduced-motion:reduce){.cmp-in,.cmp-in .cmp-av,.cmp-in::after,.cmp-in .cmp-ring,.cmp-out,.cmp-vs.live::before{animation:none!important}}
+
+/* compare players on phones: each slot is a full-width row, so names have room and never stack letter by letter */
+@media (max-width:599px){
+  .cmp-top{grid-template-columns:1fr!important;gap:10px!important}
+  .cmp-vs{justify-self:center;width:34px;height:34px;margin:-4px 0}
+  .cmp-vs b{font-size:.95rem}
+  .cmp-pl:not(.empty){display:grid!important;grid-template-columns:auto 1fr auto;grid-template-areas:"av nm btn" "av sub btn" "av tm btn";align-items:center;text-align:left;gap:2px 12px;padding:12px 12px}
+  .cmp-pl:not(.empty) .cmp-av{grid-area:av;margin:0}
+  .cmp-pl:not(.empty) .cmp-av .av{width:52px!important;height:52px!important;font-size:.95rem}
+  .cmp-pl:not(.empty)>b{grid-area:nm;overflow-wrap:normal;word-break:normal;font-size:1.02rem;align-self:end}
+  .cmp-pl:not(.empty)>.cmp-sub{grid-area:sub;justify-content:flex-start;align-self:start}
+  .cmp-pl:not(.empty)>small{grid-area:tm;justify-self:start;align-self:start;display:flex;gap:4px;align-items:center;min-width:0}
+  .cmp-pl:not(.empty)>.btn{grid-area:btn;justify-self:end;align-self:center}
+  .cmp-pl:not(.empty) .cmp-crown{top:8px;left:auto;right:10px;transform:none}
+  .cmp-ring{display:none}
+  .cmp-pl.empty{padding:12px}
+  .cmp-pl.empty .fld input{font-size:16px}
+}
+.cmp-pl .cmp-crown{top:8px;transform:none}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
