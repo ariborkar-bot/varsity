@@ -598,6 +598,8 @@ select option{background:#0B1730;color:#EAF0F8}
 .lg-vs.wait{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
 .lg-code{font-family:var(--f-display);letter-spacing:.12em;color:var(--accent)}
 .lg-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+.lg-lock{font:700 .74rem/1 var(--f-body);letter-spacing:.03em;padding:8px 12px;border-radius:999px;border:1px dashed var(--line);color:var(--muted);background:var(--surface);white-space:nowrap}
+.lg-wknote{margin:0 0 10px;font-size:.84rem}
 .lg-bench-h{display:flex;flex-direction:column;gap:2px;margin:18px 0 8px}.lg-bench-h h4{margin:0;font:800 .9rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:#BFD3FF}
 .lg-bench .lg-card{opacity:.92;border-style:dashed}
 .pk li button .lg-slot{min-width:44px}
@@ -1419,9 +1421,37 @@ const lineupOf=(gid,uid)=>{
   const base={};for(const x of Object.values(pk))if(x&&x.uid===uid&&x.slot)base[x.slot]=x.key;
   return Object.assign(base,own);
 };
-function slotPts(gid,uid,scope){let t=0;for(const s of slotsFor(gid)){const p=pByKey(lineupOf(gid,uid)[s.k]);if(p)t+=agg(p,scope).v}return Math.round(t*10)/10}
+/* ---- weekly lineups ----
+   Each week is its own matchup: only that week's game for whoever was starting counts, and it starts at 0 until stats come in.
+   Weeks that are over are frozen from history (lineups/<uid>.lh[<league>][<week>] = the lineup after a change made that week,
+   key 0 = what it was before the first change). The current and later weeks use the live lineup. */
+const lineupHist=(gid,uid)=>((S.lineups[uid]||{}).lh||{})[gid]||null;
+function lineupAt(gid,uid,w){
+  const cur=lineupOf(gid,uid);if(w>=CURW())return cur;
+  const h=lineupHist(gid,uid);if(!h)return cur;
+  let best=-1;for(const k of Object.keys(h)){const n=+k;if(n<=w&&n>best)best=n}
+  return best<0?cur:h[best];
+}
+/* a player whose stat line for the current week is in is locked (cannot be swapped, subbed or dropped) until the next week */
+const statsIn=p=>!!(p&&p.games&&p.games[CURW()-1]);
+const LOCK_MSG=p=>p.name+' already has stats this week, so they are locked until next week';
+/* every lineup change also records the resulting lineup for the current week, so past weeks never change */
+async function saveLineup(g,patch,msg){
+  const cur=lineupOf(g.id,ME.uid),next=Object.assign({},cur,patch),SL=slotsOf(g),snap={},lh={};
+  SL.forEach(s=>{snap[s.k]=next[s.k]||null});
+  if(!lineupHist(g.id,ME.uid)){const b={};SL.forEach(s=>{b[s.k]=cur[s.k]||null});lh['0']=b}
+  lh[String(CURW())]=snap;
+  return act(()=>upsert('lineups/'+ME.uid,{g:{[g.id]:patch},lh:{[g.id]:lh}}),msg);
+}
+/* season total = the weekly scores added up from the week the league started; a number scores just that week */
+const k_in=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+function slotPts(gid,uid,scope){
+  if(scope!=='season')return lineupWeek(gid,uid,scope);
+  const sw=startWeek(S.groups[gid]),cw=CURW();let t=0;for(let w=sw;w<=cw;w++)t+=lineupWeek(gid,uid,w);
+  return Math.round(t*10)/10;
+}
 function lineupProj(gid,uid){let t=0;for(const s of slotsFor(gid)){const p=pByKey(lineupOf(gid,uid)[s.k]);if(p)t+=proj(p).pts}return Math.round(t*10)/10}
-function lineupWeek(gid,uid,w){let t=0;for(const s of slotsFor(gid)){const p=pByKey(lineupOf(gid,uid)[s.k]);if(p&&p.games[w-1])t+=pts(p.games[w-1].stat)}return Math.round(t*10)/10}
+function lineupWeek(gid,uid,w){const ro=lineupAt(gid,uid,w);let t=0;for(const s of slotsFor(gid)){const p=pByKey(ro[s.k]);if(p&&p.games[w-1])t+=pts(p.games[w-1].stat)}return Math.round(t*10)/10}
 
 /* round-robin: everyone plays someone each week (circle method) */
 function pairings(ids,w){
@@ -1835,29 +1865,29 @@ function draftInfo(g){
 }
 function ownerOf(g,key,except){for(const m of Object.keys(g.members)){if(m===except)continue;if(Object.values(lineupOf(g.id,m)).includes(key))return m}return null}
 function lineupHTML(g,uid){
-  const ro=lineupOf(g.id,uid),mine=uid===ME.uid&&ME.mode!=='readonly',cw=CURW();
+  const cw=CURW(),w=UI.scope==='season'?cw:UI.scope,past=w<cw;   /* the lineup page shows one week at a time: this week, or a finished one */
+  const ro=past?lineupAt(g.id,uid,w):lineupOf(g.id,uid),mine=uid===ME.uid&&ME.mode!=='readonly';
   const mode=lgMode(g),di=draftInfo(g),myTurn=di.status==='live'&&di.uid===ME.uid;
-  const canEdit=mine&&(mode==='budget'||di.status==='done'),canAdd=canEdit||(mine&&myTurn);
+  const canEdit=mine&&!past&&(mode==='budget'||di.status==='done'),canAdd=canEdit||(mine&&!past&&myTurn);
   let total=0;
-  const scopeLbl=UI.scope==='season'?'season':'wk '+UI.scope;
   const SL=slotsOf(g),ST=SL.filter(s=>!s.bench),BNS=SL.filter(s=>s.bench);
   const card=s=>{
-    const p=pByKey(ro[s.k]),a=p?agg(p,UI.scope):null;if(a&&!s.bench)total+=a.v;   /* bench players never count */
+    const p=pByKey(ro[s.k]),gm=p&&p.games[w-1],wp=gm?pts(gm.stat):0;if(!s.bench)total+=wp;   /* only this week's game, and bench players never count */
     const tag=`<span class="lg-slot">${s.label}</span>`;
     const what=s.bench?'a bench player':s.k==='FLEX'?'a RB, WR or TE':s.k==='DEF'?'a defender':s.k==='K'?'a kicker':s.k==='DL'?'a defensive lineman':s.k==='LB'?'a linebacker':s.k==='DB'?'a defensive back':'a '+s.label;
     if(!p)return `<li class="lg-card empty">${tag}${canAdd?`<button class="lg-add" data-act="lgPick" data-slot="${s.k}"><span>+</span> ${myTurn?'Draft':'Add'} ${what}</button>`:`<span class="muted">${mine&&mode==='draft'&&di.status!=='done'?(di.status==='live'?'Fill this spot on your draft turn':'Fills during the draft'):'Empty'}</span>`}</li>`;
-    const lg=p.games.map(x=>x?pts(x.stat):null).filter(v=>v!=null),last=lg.length?lg[lg.length-1]:null;
+    const lk=canEdit&&statsIn(p),lockTag='<span class="lg-lock" title="Stats are in for this week, so this player is locked until next week">Locked this week</span>';
     return `<li class="lg-card">${tag}
       <button class="lg-who" data-act="player" data-id="${esc(p.key)}">${av(p.name,p.school,42)}<span class="lt"><b>${esc(p.name)}</b><i>${pb(p.pos,p.sub)}<span>${slogo(p.school)}${esc(p.school)}</span></i></span></button>
-      <span class="lg-pts"><b>${a&&a.n?f1(a.v):'0.0'}</b><small>${mode==='budget'?'<em class="lg-price">'+money(priceOf(p))+'</em> ':''}<em class="lg-pj">proj ${f1(proj(p).pts)}</em> · ${scopeLbl}${last!=null&&UI.scope==='season'?' · last '+f1(last):''}</small></span>
-      ${canEdit?`<span class="lg-acts">${BNS.length?`<button class="btn sm" data-act="lgSub" data-slot="${s.k}">${s.bench?'Sub in':'Sub out'}</button>`:''}<button class="btn sm ghost" data-act="lgPick" data-slot="${s.k}">Swap</button><button class="lg-x" data-act="lgClear" data-slot="${s.k}" aria-label="Remove ${esc(p.name)}">✕</button></span>`:''}
+      <span class="lg-pts"><b>${f1(wp)}</b><small>${mode==='budget'?'<em class="lg-price">'+money(priceOf(p))+'</em> ':''}<em class="lg-pj">proj ${f1(proj(p).pts)}</em> · wk ${w}${gm?'':' · no game yet'} · season ${f1(agg(p,'season').v)}</small></span>
+      ${canEdit?(lk&&!s.bench?`<span class="lg-acts">${lockTag}</span>`:`<span class="lg-acts">${BNS.length?(lk?lockTag:`<button class="btn sm" data-act="lgSub" data-slot="${s.k}">${s.bench?'Sub in':'Sub out'}</button>`):''}<button class="btn sm ghost" data-act="lgPick" data-slot="${s.k}">Swap</button><button class="lg-x" data-act="lgClear" data-slot="${s.k}" aria-label="Remove ${esc(p.name)}">✕</button></span>`):''}
     </li>`;
   };
   const cards=ST.map(card).join(''),bench=BNS.map(card).join('');
   const filled=ST.filter(s=>pByKey(ro[s.k])).length,bfilled=BNS.filter(s=>pByKey(ro[s.k])).length;
   const sp=mode==='budget'?spent(g,uid):0;
   const bar=mode==='budget'?`<div class="lg-budget"><div class="lg-bt"><span>Spent <b>${money(sp)}</b> of ${money(CAP)}</span><span class="${CAP-sp<0?'neg':''}"><b>${money(CAP-sp)}</b> left</span></div><div class="lg-bar"><i style="width:${Math.min(100,sp/CAP*100)}%"></i></div></div>`:'';
-  return bar+`<div class="lg-lhead"><span class="muted">${filled} of ${ST.length} starting spots filled</span><span class="lg-total"><small>Lineup total</small><b>${f1(total)}</b></span></div><ol class="lg-cards">${cards}</ol>`
+  return bar+`<div class="lg-lhead"><span class="muted">${filled} of ${ST.length} starting spots filled</span><span class="lg-total"><small>Week ${w} total</small><b>${f1(total)}</b></span></div><p class="muted lg-wknote">${past?'The lineup you started in week '+w+'. Finished weeks never change.':'Your lineup total is just this week’s game. It starts at 0 and fills in as stats come in, then resets for next week’s matchup. A player whose stats are in is locked until next week.'}</p><ol class="lg-cards">${cards}</ol>`
     +(BNS.length?`<div class="lg-bench-h"><h4>Bench</h4><small class="muted">${bfilled} of ${BNS.length} filled. Bench players do not score${canEdit?'. Tap Sub in to move one into a matching starting spot.':'.'}</small></div><ol class="lg-cards lg-bench">${bench}</ol>`:'');
 }
 function matchupsHTML(g){
@@ -2609,14 +2639,19 @@ document.addEventListener('click',async e=>{
   else if(a==='add'){
     if(needJoin('build a lineup'))return;
     const p=pByKey(id),g=curGroup();if(!p||!g)return;
-    const ro=lineupOf(g.id,ME.uid),elig=slotsOf(g).filter(s=>slotOk(s,p)),target=elig.find(s=>!pByKey(ro[s.k]))||elig[0];if(!target)return;
+    const ro=lineupOf(g.id,ME.uid),live=draftInfo(g).status==='live';
+    /* a starting spot is off limits if the player coming in, or the one going out, already has stats this week */
+    const okSlot=s=>live||s.bench||(!statsIn(p)&&!statsIn(pByKey(ro[s.k])));
+    const elig=slotsOf(g).filter(s=>slotOk(s,p)&&okSlot(s)),target=elig.find(s=>!pByKey(ro[s.k]))||elig[0];
+    if(!target){if(slotsOf(g).some(s=>slotOk(s,p)))say(statsIn(p)?p.name+' already has stats this week, so they cannot join your starting lineup until next week':'Your starters at that position are locked until next week');return}
     const old=pByKey(ro[target.k]);
-    await act(()=>upsert('lineups/'+ME.uid,{g:{[g.id]:{[target.k]:p.key}}}),p.name+' added at '+target.label+(old?', replacing '+old.name:''));
+    await saveLineup(g,{[target.k]:p.key},p.name+' added at '+target.label+(old?', replacing '+old.name:''));
   }
   else if(a==='drop'){
     const g=curGroup();if(!g)return;const ro=lineupOf(g.id,ME.uid),patch={};
     Object.keys(ro).forEach(k=>{if(ro[k]===id)patch[k]=null});
-    await act(()=>upsert('lineups/'+ME.uid,{g:{[g.id]:patch}}),'Removed from your lineup');
+    const dp=pByKey(id);if(dp&&statsIn(dp)&&slotsOf(g).some(s=>!s.bench&&k_in(patch,s.k))){say(LOCK_MSG(dp));return}
+    await saveLineup(g,patch,'Removed from your lineup');
   }
   else if(a==='csvTemplate'){
     if(!DL){say('Saving files is not available here.');return}
@@ -2641,7 +2676,7 @@ document.addEventListener('change',async e=>{
   else if(a==='school'){UI.school=t.value;UI.more=false;$('#lb-list').innerHTML=listHTML()}
   else if(a==='slot'){
     const g=curGroup();if(!g)return;
-    await act(()=>upsert('lineups/'+ME.uid,{g:{[g.id]:{[t.dataset.slot]:t.value||null}}}));
+    await saveLineup(g,{[t.dataset.slot]:t.value||null});
   }
   else if(a==='entryPlayer'){UI.entry.pid=t.value;UI.entry.vals={};$('#entry-fields').innerHTML=entryFields()}
   else if(a==='entryWeek'){UI.entry.week=+t.value}
@@ -2955,13 +2990,17 @@ boot();
 (()=>{
   let pk=null;
   const closePk=()=>{if(pk){pk.remove();pk=null}};
-  const setSlot=async(slot,key)=>{const g=curGroup();if(!g)return;await act(()=>upsert('lineups/'+ME.uid,{g:{[g.id]:{[slot]:key||null}}}))};
+  const setSlot=async(slot,key)=>{const g=curGroup();if(!g)return;
+    const s=slotsOf(g).find(x=>x.k===slot),cur=pByKey(lineupOf(g.id,ME.uid)[slot]);
+    if(s&&!s.bench&&statsIn(cur)){say(LOCK_MSG(cur));return}   /* a starter with stats in is locked */
+    await saveLineup(g,{[slot]:key||null})};
   const openPk=slot=>{
     const g=curGroup();if(!g)return;const s=slotsOf(g).find(x=>x.k===slot);if(!s)return;
     const mode=lgMode(g),di=draftInfo(g);
     if(mode==='draft'&&di.status==='pending'){say('The draft has not started yet');return}
     if(mode==='draft'&&di.status==='live'&&di.uid!==ME.uid){say('Wait for your turn to draft');return}
     const mine=lineupOf(g.id,ME.uid),cur=pByKey(mine[slot]);
+    if(di.status!=='live'&&!s.bench&&statsIn(cur)){say(LOCK_MSG(cur));return}
     const inMine=new Set(Object.entries(mine).filter(([k])=>k!==slot).map(([,v])=>v));
     const openOthers=slotsOf(g).filter(x=>x.k!==slot&&!pByKey(mine[x.k])).length;   /* keep $4.0M (the cheapest price) for every other empty spot */
     const left=mode==='budget'?CAP-spent(g,ME.uid)+(cur?priceOf(cur):0)-4*openOthers:Infinity;
@@ -2975,9 +3014,9 @@ boot();
     const draw=()=>{const v=q.value.trim().toLowerCase();
       const rows=all.filter(x=>!v||x.p.name.toLowerCase().includes(v)||x.p.school.toLowerCase().includes(v)).slice(0,80);
       ul.innerHTML=rows.length?rows.map(x=>{
-        const o=mode==='draft'?ownerOf(g,x.p.key,ME.uid):null,dup=inMine.has(x.p.key),broke=mode==='budget'&&x.c>left;
-        const why=o?' · on '+esc(nm(o))+'’s team':dup?' · already in your lineup':broke?' · over budget':'';
-        return `<li><button data-key="${esc(x.p.key)}" ${o||dup||broke?'disabled':''}>${av(x.p.name,x.p.school,38)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${why}</i></span><span class="pv"><b>${f1(x.a.v)}</b><small>${mode==='budget'?'<span class="pc">'+money(x.c)+'</span> · ':''}${x.a.n?f1(x.a.v/x.a.n)+'/gm · proj '+f1(proj(x.p).pts):'no games'}</small></span></button></li>`}).join(''):'<li class="muted" style="padding:14px">No players match.</li>'};
+        const o=mode==='draft'?ownerOf(g,x.p.key,ME.uid):null,dup=inMine.has(x.p.key),broke=mode==='budget'&&x.c>left,lkd=di.status!=='live'&&!s.bench&&statsIn(x.p);
+        const why=o?' · on '+esc(nm(o))+'’s team':dup?' · already in your lineup':broke?' · over budget':lkd?' · stats already in this week':'';
+        return `<li><button data-key="${esc(x.p.key)}" ${o||dup||broke||lkd?'disabled':''}>${av(x.p.name,x.p.school,38)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${why}</i></span><span class="pv"><b>${f1(x.a.v)}</b><small>${mode==='budget'?'<span class="pc">'+money(x.c)+'</span> · ':''}${x.a.n?f1(x.a.v/x.a.n)+'/gm · proj '+f1(proj(x.p).pts):'no games'}</small></span></button></li>`}).join(''):'<li class="muted" style="padding:14px">No players match.</li>'};
     draw();q.addEventListener('input',draw);
     pk.addEventListener('click',async e=>{if(e.target===pk||e.target.closest('[data-pk=close]')){closePk();return}
       const b=e.target.closest('button[data-key]');if(b&&!b.disabled){const k=b.dataset.key;closePk();
@@ -2989,8 +3028,9 @@ boot();
   const openSub=slot=>{
     const g=curGroup();if(!g)return;const SL=slotsOf(g),from=SL.find(x=>x.k===slot);if(!from)return;
     const ro=lineupOf(g.id,ME.uid),fp=pByKey(ro[from.k]);if(!fp)return;
+    if(statsIn(fp)){say(LOCK_MSG(fp));return}
     const opts=SL.filter(x=>!!x.bench!==!!from.bench).map(x=>({s:x,p:pByKey(ro[x.k])}))
-      .filter(o=>slotOk(o.s,fp)&&(!o.p||slotOk(from,o.p)));   /* both players have to fit their new spot */
+      .filter(o=>slotOk(o.s,fp)&&(!o.p||(slotOk(from,o.p)&&!statsIn(o.p))));   /* both players have to fit their new spot, and neither can have stats in this week */
     if(!opts.length){say(from.bench?'No starting spot fits '+fp.name:'No bench player fits this spot');return}
     closeSk();
     const title=from.bench?'Sub in '+fp.name:'Sub out '+fp.name;
@@ -3001,7 +3041,7 @@ boot();
       if(e.target===sk||e.target.closest('[data-pk=close]')){closeSk();return}
       const b=e.target.closest('button[data-sub]');if(!b)return;
       const o=opts.find(x=>x.s.k===b.dataset.sub);if(!o)return;closeSk();
-      await act(()=>upsert('lineups/'+ME.uid,{g:{[g.id]:{[from.k]:o.p?o.p.key:null,[o.s.k]:fp.key}}}),
+      await saveLineup(g,{[from.k]:o.p?o.p.key:null,[o.s.k]:fp.key},
         from.bench?fp.name+' moved into '+o.s.label:fp.name+' moved to the bench');
     });
     document.body.appendChild(sk);
