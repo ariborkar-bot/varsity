@@ -1161,13 +1161,17 @@ select option{background:#0B1730;color:#EAF0F8}
 .tm-row{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:10px 4px;border-top:1px solid var(--line)}.tm-row:hover{background:var(--surface2)}.tm-row .lt{display:flex;flex-direction:column;gap:4px;min-width:0}.tm-row .lt b{white-space:normal;line-height:1.15}.tm-row .lt i{font-style:normal;display:flex;gap:6px;align-items:center}
 .tm-pts{display:flex;flex-direction:column;align-items:flex-end}.tm-pts b{font:900 1.3rem/1 var(--f-display)}.tm-pts small{color:var(--muted);font-size:.72rem}
 .tm-wk{font-size:.74rem;margin:4px 4px 0}
+
+/* the logo and name in the header link to the Stats page */
+.mast a.brand{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.mast a.brand:focus-visible{outline:2px solid #FFC23D;outline-offset:4px;border-radius:12px}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
-    <div class="brand">
+    <a class="brand" href="#league" aria-label="Varsity, go to Stats">
       <span class="logo" aria-hidden="true"><img src="logo.png" alt=""></span>
       <div><h1>Varsity</h1><p>High school fantasy football</p></div>
-    </div>
+    </a>
     <div class="mast-r">
       <div class="wk"><span class="live"></span><span id="wk">Week 10</span></div>
       <button class="bell" id="gear" aria-label="Settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
