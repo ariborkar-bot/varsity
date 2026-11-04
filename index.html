@@ -106,7 +106,7 @@ input[type=number]{width:100%}
 .ch-x{margin-left:auto;background:none;border:0;color:var(--muted);font:inherit;font-size:.75rem;cursor:pointer;padding:0}.ch-x:hover{color:var(--neg)}
 .ch-form{display:flex;gap:8px}.ch-form input{flex:1;min-width:0}
 .tr-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}.tr-list li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}.tr-b{display:flex;gap:6px;align-items:center}.tr-done{margin-top:14px}
-.tr-form{display:flex;flex-direction:column;gap:12px;padding:4px 2px 2px}.tr-form .fld select{width:100%}.tr-err{color:var(--neg);min-height:1.2em;font-size:.88rem;margin:0}
+.tr-form{min-height:0;display:flex;flex-direction:column;gap:12px;padding:4px 2px 2px;overflow-y:auto}.tr-col{display:flex;flex-direction:column;gap:6px}.tr-pl{display:flex;gap:10px;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer}.tr-pl.lk{opacity:.5;cursor:not-allowed}.tr-pl input{flex:none;width:18px;height:18px}.tr-form .fld select{width:100%}.tr-err{color:var(--neg);min-height:1.2em;font-size:.88rem;margin:0}
 .side-sw{margin:10px 0}.side-sw small{display:block;color:var(--muted);margin-bottom:6px}
 .gr{background:color-mix(in srgb,var(--muted) 16%,transparent);color:var(--muted);font:800 .66rem/1 var(--f-body);padding:3px 6px;border-radius:999px;letter-spacing:.04em;margin-right:4px}
 .pos{--c:var(--muted);background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c);font:800 .68rem/1 var(--f-body);padding:3px 7px;border-radius:999px;letter-spacing:.04em}
@@ -1505,7 +1505,8 @@ const SLOTS=[
   {k:'TE',label:'TE',elig:['TE']},{k:'FLEX',label:'FLEX',elig:['RB','WR','TE']},{k:'DEF',label:'DEF',elig:['DEF']},{k:'K',label:'K',elig:['K']}
 ];
 /* Accepted trades (groups/<id>.trades) are laid over each team's saved lineup, so both sides change at once and nobody has to be online.
-   A trade only swaps the spot it was made for, and only if that spot still holds the player who was traded, so later changes always win.
+   An accepted trade stores, for each team, the spots it changes: spot, who was there (o), who is there after (n, empty = open spot).
+   A change only applies if that spot still holds who it held at the time, so any later edit to a lineup always wins.
    It counts from the week it was accepted. */
 function applyTrades(g,uid,r,w){
   const T=g&&g.trades;if(!T)return r;
@@ -1513,8 +1514,10 @@ function applyTrades(g,uid,r,w){
   if(!list.length)return r;
   const o=Object.assign({},r);
   for(const t of list){
-    if(t.from===uid&&o[t.fs]===t.give)o[t.fs]=t.want;
-    else if(t.to===uid&&o[t.ts]===t.want)o[t.ts]=t.give;
+    if(!t.fc&&t.fs){   /* trades made when they were one for one */
+      if(t.from===uid&&o[t.fs]===t.give)o[t.fs]=t.want;else if(t.to===uid&&o[t.ts]===t.want)o[t.ts]=t.give;continue}
+    const ch=t.from===uid?t.fc:t.to===uid?t.tc:null;
+    if(ch)for(const c of ch)if((o[c.s]||'')===(c.o||''))o[c.s]=c.n||null;
   }
   return o;
 }
@@ -2251,25 +2254,54 @@ function lineupHTML(g,uid){
   return bar+`<div class="lg-lhead"><span class="muted">${filled} of ${ST.length} starting spots filled</span><span class="lg-total"><small>Week ${w} total</small><b>${f1(total)}</b></span></div><p class="muted lg-wknote">${past?'The lineup you started in week '+w+'. Finished weeks never change.':'Your lineup total is just this week’s game. It starts at 0 and fills in as stats come in, then resets for next week’s matchup. A player whose stats are in is locked until next week.'}</p>${startHTML}`
     +(BNS.length?`<div class="lg-bench-h"><h4>Bench</h4><small class="muted">${bfilled} of ${BNS.length} filled. Bench players do not score${canEdit?'. Tap Sub in to move one into a matching starting spot.':'.'}</small></div><ol class="lg-cards lg-bench">${bench}</ol>`:'');
 }
-/* ---------- trades: swap one player for one player after the draft ---------- */
+/* ---------- trades: swap any number of players for any number, after the draft ----------
+   A team that gets more players than it sends has to drop players to make room. Dropped players go back to free agency. */
 const tradesOn=g=>lgMode(g)==='draft'&&draftInfo(g).status==='done';
-function tradeSlotOf(g,uid,key){return slotsOf(g).find(s=>lineupOf(g.id,uid)[s.k]===key)||null}
-/* why a pending trade cannot go through right now, or '' if it can */
-function tradeProblem(g,t){
+const trArr=v=>Array.isArray(v)?v:(v?[v]:[]);
+/* where a team's players would sit after a trade: matches each incoming player to a spot that is open, being vacated or being dropped.
+   returns the spot changes, or null if somebody has nowhere to go */
+function planSide(g,uid,out,inc,drops){
+  const SL=slotsOf(g),ro=lineupOf(g.id,uid),mine=new Set(Object.values(ro).filter(Boolean));
+  const outS=new Set(out),dropS=new Set(drops);
+  if(out.some(k=>!mine.has(k))||drops.some(k=>!mine.has(k)||outS.has(k)))return null;
+  const free=SL.filter(s=>!ro[s.k]||outS.has(ro[s.k])||dropS.has(ro[s.k]));
+  /* spots being vacated by the traded players come first, then open ones, drops last, so drops are only used when needed */
+  const rank=s=>outS.has(ro[s.k])?0:!ro[s.k]?1:2;free.sort((a,b)=>rank(a)-rank(b));
+  const pl=inc.map(pByKey);if(pl.some(p=>!p))return null;
+  const owner={};   /* spot key -> index of incoming player */
+  const tryP=(i,seen)=>{for(const s of free){if(seen.has(s.k)||!slotOk(s,pl[i]))continue;seen.add(s.k);if(owner[s.k]===undefined||tryP(owner[s.k],seen)){owner[s.k]=i;return true}}return false};
+  for(let i=0;i<pl.length;i++)if(!tryP(i,new Set()))return null;
+  const ch=[];
+  for(const s of SL){
+    const old=ro[s.k]||'';let nw=old;
+    if(owner[s.k]!==undefined)nw=inc[owner[s.k]];else if(outS.has(old)||dropS.has(old))nw='';
+    if(nw!==old)ch.push({s:s.k,o:old,n:nw});
+  }
+  return ch;
+}
+/* how many players a team has to drop to take these in, going by open spots only (fit can still ask for more) */
+function dropsNeeded(g,uid,out,inc){
+  const ro=lineupOf(g.id,uid),SL=slotsOf(g),outS=new Set(out);
+  const free=SL.filter(s=>!ro[s.k]||outS.has(ro[s.k])).length;
+  return Math.max(0,inc.length-free);
+}
+const trLocked=ks=>ks.map(pByKey).find(p=>p&&statsIn(p));
+/* why a pending trade cannot go through right now, or '' if it can. dropsTo: who the accepting team drops */
+function tradeProblem(g,t,dropsTo){
   if(!tradesOn(g))return 'Trades open once the draft is done';
-  const fa=pByKey(t.give),fb=pByKey(t.want);if(!fa||!fb)return 'A player in this trade is gone';
-  const sa=slotsOf(g).find(s=>s.k===t.fs),sb=slotsOf(g).find(s=>s.k===t.ts);
-  if(!sa||!sb||lineupOf(g.id,t.from)[t.fs]!==t.give)return fa.name+' is no longer on '+nm(t.from)+'’s team in that spot';
-  if(lineupOf(g.id,t.to)[t.ts]!==t.want)return fb.name+' is no longer on '+nm(t.to)+'’s team in that spot';
-  if(statsIn(fa))return LOCK_MSG(fa);if(statsIn(fb))return LOCK_MSG(fb);
-  if(!slotOk(sa,fb)||!slotOk(sb,fa))return 'The players do not fit each other’s spots';
+  const give=trArr(t.give),want=trArr(t.want),fd=trArr(t.fdrop);
+  if(!give.length||!want.length)return 'A trade needs players on both sides';
+  const lk=trLocked([...give,...want,...fd,...(dropsTo||[])]);if(lk)return LOCK_MSG(lk);
+  if(!planSide(g,t.from,give,want,fd))return nm(t.from)+'’s team can no longer make this trade work';
+  if(dropsTo&&!planSide(g,t.to,want,give,dropsTo))return nm(t.to)+'’s team can no longer make this trade work';
   return '';
 }
+const trNames=ks=>trArr(ks).map(k=>{const p=pByKey(k);return p?`<b>${esc(p.name)}</b> <small class="muted">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</small>`:'a player'}).join(', ');
 function tradesHTML(g){
   if(!tradesOn(g)||ME.mode==='guest')return '';
   const T=Object.values(g.trades||{}).filter(Boolean).sort((a,b)=>(b.at||0)-(a.at||0));
-  const pn=k=>{const p=pByKey(k);return p?`<b>${esc(p.name)}</b> <small class="muted">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</small>`:'a player'};
-  const line=t=>`${esc(t.from===ME.uid?'You':nm(t.from))} ${t.from===ME.uid?'send':'sends'} ${pn(t.give)} for ${esc(t.to===ME.uid?'your':nm(t.to)+'’s')} ${pn(t.want)}`;
+  const who=(u,y,o)=>u===ME.uid?y:o;
+  const line=t=>`${esc(who(t.from,'You',nm(t.from)))} ${t.from===ME.uid?'send':'sends'} ${trNames(t.give)} for ${esc(who(t.to,'your',nm(t.to)+'’s'))} ${trNames(t.want)}${trArr(t.fdrop).length?` <small class="muted">(${esc(who(t.from,'You',nm(t.from)))} ${t.from===ME.uid?'drop':'drops'}: ${trNames(t.fdrop).replace(/<[^>]+>/g,'')})</small>`:''}${trArr(t.td).length?` <small class="muted">(${esc(who(t.to,'You',nm(t.to)))} ${t.to===ME.uid?'drop':'drops'}: ${trNames(t.td).replace(/<[^>]+>/g,'')})</small>`:''}`;
   const inc=T.filter(t=>t.status==='pending'&&t.to===ME.uid),out=T.filter(t=>t.status==='pending'&&t.from===ME.uid),done=T.filter(t=>t.status==='accepted').slice(0,4);
   const row=(t,btns)=>`<li><span>${line(t)}</span><span class="tr-b">${btns}</span></li>`;
   const body=[
@@ -2277,7 +2309,7 @@ function tradesHTML(g){
     ...out.map(t=>row(t,`<span class="muted">Waiting for ${esc(nm(t.to))}</span><button class="btn sm ghost" data-act="trCancel" data-id="${esc(t.id)}">Cancel</button>`))
   ].join('');
   return `<section class="card tr-card"><div class="qh"><h3>Trades</h3><button class="btn sm" data-act="trNew" ${Object.keys(g.members).length<2?'disabled':''}>Propose a trade</button></div>
-    <p class="muted">Swap one of your players for one of another team’s players. They have to accept, and it counts from this week. Players who already have stats this week are locked.</p>
+    <p class="muted">Trade any number of players for any number. A team that gets more players than it sends has to drop players to make room, and dropped players go back to free agency. They have to accept, and it counts from this week. Players who already have stats this week are locked.</p>
     ${body?`<ul class="tr-list">${body}</ul>`:'<p class="hint">No trades waiting.</p>'}
     ${done.length?`<div class="tr-done"><small class="muted">Recent trades</small><ul class="tr-list">${done.map(t=>`<li><span>${line(t)}</span></li>`).join('')}</ul></div>`:''}</section>`;
 }
@@ -3509,46 +3541,92 @@ boot();
     });
     document.body.appendChild(sk);
   };
+  /* checklist of a team's players for the trade windows */
+  const trList=(g,uid,name,sel,skip)=>{
+    const ro=lineupOf(g.id,uid);
+    const rows=slotsOf(g).map(s=>({s,p:pByKey(ro[s.k])})).filter(o=>o.p&&!(skip&&skip.has(o.p.key)));
+    return rows.map(o=>{const lk=statsIn(o.p);return `<label class="tr-pl ${lk?'lk':''}"><input type="checkbox" data-tr="${name}" value="${esc(o.p.key)}" ${sel.has(o.p.key)?'checked':''} ${lk?'disabled':''}><span><b>${esc(o.p.name)}</b> <small class="muted">${o.p.pos==='DEF'?esc(o.p.sub||'DEF'):o.p.pos} · ${esc(o.s.label)}${o.s.bench?' (bench)':''}${lk?' · locked, has stats this week':''}</small></span></label>`}).join('')||'<p class="hint">No players</p>';
+  };
   const openTrade=()=>{
     const g=curGroup();if(!g||!tradesOn(g))return;
     const others=Object.keys(g.members).filter(u=>u!==ME.uid);if(!others.length){say('You need another team in the league');return}
-    const SL=slotsOf(g),st={to:others[0],mine:'',theirs:''};
-    const opts=(u,except)=>SL.map(s=>({s,p:pByKey(lineupOf(g.id,u)[s.k])})).filter(o=>o.p&&!statsIn(o.p)&&(!except||(slotOk(o.s,except.p)&&slotOk(except.s,o.p))));
+    const st={to:others[0],give:new Set(),want:new Set(),drop:new Set()};
     const draw=()=>{
-      closeSk();
-      const mine=opts(ME.uid),a=mine.find(o=>o.s.k===st.mine);if(!a)st.mine=mine[0]?mine[0].s.k:'';
-      const mm=mine.find(o=>o.s.k===st.mine),theirs=opts(st.to,mm);
-      if(!theirs.find(o=>o.s.k===st.theirs))st.theirs=theirs[0]?theirs[0].s.k:'';
-      const op=(o,sel)=>`<option value="${o.s.k}" ${sel===o.s.k?'selected':''}>${esc(o.p.name)} · ${o.p.pos==='DEF'?esc(o.p.sub||'DEF'):o.p.pos} · ${esc(o.s.label)}${o.s.bench?' (bench)':''}</option>`;
+      const old=sk&&sk.querySelector('.tr-form'),top=old?old.scrollTop:0;closeSk();
+      const give=[...st.give],want=[...st.want],need=dropsNeeded(g,ME.uid,give,want);
+      st.drop=new Set([...st.drop].filter(k=>!st.give.has(k)));
+      const drop=[...st.drop];
+      let msg='',ok=false;
+      if(!give.length||!want.length)msg='Pick at least one player on each side.';
+      else if(drop.length<need)msg=`You get ${want.length} and send ${give.length}, so drop ${need-drop.length} more player${need-drop.length===1?'':'s'} to make room.`;
+      else if(!planSide(g,ME.uid,give,want,drop))msg='Those players do not fit your open spots. Try dropping someone at a matching position.';
+      else{ok=true;const tn=dropsNeeded(g,st.to,want,give);msg=tn>0?`${nm(st.to)} would have to drop ${tn} player${tn===1?'':'s'} to make room, and they choose who.`:''}
       sk=document.createElement('div');sk.className='pk-bg';
       sk.innerHTML=`<div class="pk" role="dialog" aria-modal="true" aria-label="Propose a trade"><div class="pk-h"><h3>Propose a trade</h3><button class="lg-x" data-pk="close" aria-label="Close">✕</button></div>
         <div class="tr-form">
           <label class="fld"><span>Trade with</span><select data-tr="to">${others.map(u=>`<option value="${esc(u)}" ${u===st.to?'selected':''}>${esc(nm(u))}</option>`).join('')}</select></label>
-          <label class="fld"><span>You send</span><select data-tr="mine">${mine.map(o=>op(o,st.mine)).join('')||'<option value="">No one you can trade right now</option>'}</select></label>
-          <label class="fld"><span>You get</span><select data-tr="theirs">${theirs.map(o=>op(o,st.theirs)).join('')||'<option value="">No player fits this swap</option>'}</select></label>
-          <p class="tr-err" id="tr-err"></p>
-          <button class="btn" data-tr="send" ${mm&&theirs.length?'':'disabled'}>Send trade offer</button>
+          <div class="tr-col"><b>You send (${give.length})</b>${trList(g,ME.uid,'give',st.give)}</div>
+          <div class="tr-col"><b>You get from ${esc(nm(st.to))} (${want.length})</b>${trList(g,st.to,'want',st.want)}</div>
+          ${need>0||drop.length?`<div class="tr-col"><b>You drop (${drop.length} of ${need} needed)</b><small class="muted">Dropped players go back to free agency.</small>${trList(g,ME.uid,'drop',st.drop,st.give)}</div>`:''}
+          <p class="tr-err" id="tr-err">${esc(msg)}</p>
+          <button class="btn" data-tr="send" ${ok?'':'disabled'}>Send trade offer</button>
         </div></div>`;
       sk.addEventListener('click',async e=>{
         if(e.target===sk||e.target.closest('[data-pk=close]')){closeSk();return}
         if(!e.target.closest('[data-tr=send]'))return;
-        const gg=curGroup(),give=lineupOf(gg.id,ME.uid)[st.mine],want=lineupOf(gg.id,st.to)[st.theirs];
-        const t={id:'t'+NOW(),from:ME.uid,to:st.to,give,want,fs:st.mine,ts:st.theirs,status:'pending',at:NOW()};
-        const why=give&&want?tradeProblem(gg,t):'Pick a player on each side';
+        const gg=curGroup(),t={id:'t'+NOW(),from:ME.uid,to:st.to,give:[...st.give],want:[...st.want],fdrop:[...st.drop],status:'pending',at:NOW()};
+        const why=tradeProblem(gg,t);
         if(why){const el=document.getElementById('tr-err');if(el)el.textContent=why;return}
         closeSk();await act(()=>upsert('groups/'+gg.id,{trades:{[t.id]:t}}),'Trade offer sent to '+nm(st.to));
       });
-      sk.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.tr;if(!k)return;st[k]=e.target.value;draw()});
-      document.body.appendChild(sk);
+      sk.addEventListener('change',e=>{
+        const k=e.target.dataset&&e.target.dataset.tr;if(!k)return;
+        if(k==='to'){st.to=e.target.value;st.want=new Set()}
+        else{const S=st[k];e.target.checked?S.add(e.target.value):S.delete(e.target.value)}
+        draw();
+      });
+      document.body.appendChild(sk);const nf=sk.querySelector('.tr-form');if(nf)nf.scrollTop=top;
     };
     draw();
+  };
+  /* the team accepting picks who to drop if the trade leaves it with too many players */
+  const openTradeDrops=(g,t,need)=>{
+    const give=trArr(t.give),want=trArr(t.want),sel=new Set();closeSk();
+    const draw=()=>{
+      const old=sk&&sk.querySelector('.tr-form'),top=old?old.scrollTop:0;closeSk();
+      const drop=[...sel];let msg='',ok=false;
+      if(drop.length<need)msg=`Choose ${need-drop.length} more player${need-drop.length===1?'':'s'} to drop.`;
+      else{const why=tradeProblem(g,t,drop);if(why)msg=why;else ok=true}
+      sk=document.createElement('div');sk.className='pk-bg';
+      sk.innerHTML=`<div class="pk" role="dialog" aria-modal="true" aria-label="Choose who to drop"><div class="pk-h"><h3>Make room for the trade</h3><button class="lg-x" data-pk="close" aria-label="Close">✕</button></div>
+        <div class="tr-form"><p class="pk-sum">You get ${trNames(give)} and send ${trNames(want)}. Your roster is over by ${need}, so drop ${need} player${need===1?'':'s'}. They go back to free agency.</p>
+          <div class="tr-col"><b>You drop (${drop.length} of ${need})</b>${trList(g,ME.uid,'drop',sel,new Set(want))}</div>
+          <p class="tr-err" id="tr-err">${esc(msg)}</p><button class="btn" data-tr="go" ${ok?'':'disabled'}>Accept trade</button></div></div>`;
+      sk.addEventListener('click',async e=>{
+        if(e.target===sk||e.target.closest('[data-pk=close]')){closeSk();return}
+        if(e.target.closest('[data-tr=go]')){closeSk();finishAccept(t.id,[...sel])}
+      });
+      sk.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.tr;if(k!=='drop')return;e.target.checked?sel.add(e.target.value):sel.delete(e.target.value);draw()});
+      document.body.appendChild(sk);const nf=sk.querySelector('.tr-form');if(nf)nf.scrollTop=top;
+    };
+    draw();
+  };
+  const finishAccept=async(id,dropsTo)=>{
+    const g=curGroup();if(!g)return;const t=(g.trades||{})[id];if(!t||t.status!=='pending'){say('That trade is no longer open');return}
+    const why=tradeProblem(g,t,dropsTo);if(why){say(why);return}
+    const give=trArr(t.give),want=trArr(t.want);
+    const fc=planSide(g,t.from,give,want,trArr(t.fdrop)),tc=planSide(g,t.to,want,give,dropsTo);
+    await act(()=>upsert('groups/'+g.id,{trades:{[id]:{status:'accepted',w:CURW(),at:NOW(),fc,tc,td:dropsTo}}}),'Trade done. It counts from week '+CURW());
   };
   const tradeAct=async(id,kind)=>{
     const g=curGroup();if(!g)return;const t=(g.trades||{})[id];if(!t||t.status!=='pending'){say('That trade is no longer open');return}
     if(kind==='accept'){
       if(t.to!==ME.uid)return;
-      const why=tradeProblem(g,t);if(why){say(why);return}
-      await act(()=>upsert('groups/'+g.id,{trades:{[id]:{status:'accepted',w:CURW(),at:NOW()}}}),'Trade done. It counts from week '+CURW());return}
+      const give=trArr(t.give),want=trArr(t.want),need=dropsNeeded(g,ME.uid,want,give);
+      if(need>0||planSide(g,t.to,want,give,[])===null){
+        const why=tradeProblem(g,t,null);if(why){say(why);return}
+        openTradeDrops(g,t,Math.max(need,1));return}
+      return finishAccept(id,[])}
     if(kind==='decline'&&t.to===ME.uid)await act(()=>upsert('groups/'+g.id,{trades:{[id]:{status:'declined'}}}),'Trade declined');
     if(kind==='cancel'&&t.from===ME.uid)await act(()=>upsert('groups/'+g.id,{trades:{[id]:{status:'cancelled'}}}),'Trade offer cancelled');
   };
