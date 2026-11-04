@@ -1825,10 +1825,17 @@ const tk=n=>(Math.round(n*10)/10).toLocaleString()+' tokens';
 function standingsHTML(gs,school){
   const t={};
   gs.filter(gDone).forEach(g=>{[[g.h,g.hs,g.as],[g.a,g.as,g.hs]].forEach(([n,f,a])=>{if(!SD_SCHOOLS.includes(n))return;const x=t[n]=t[n]||{n,w:0,l:0,t:0,pf:0,pa:0};x.pf+=f;x.pa+=a;if(f>a)x.w++;else if(f<a)x.l++;else x.t++})});
-  let rows=Object.values(t).sort((a,b)=>(b.w/(b.w+b.l+b.t||1))-(a.w/(a.w+a.l+a.t||1))||(b.pf-b.pa)-(a.pf-a.pa)||a.n.localeCompare(b.n));
+  /* section (playoff division) and seed for every team in a known bracket */
+  const dv={};PO_DEFS.forEach(d=>d.rounds[0].games.forEach(([p,q])=>[p,q].forEach(z=>{if(z.n&&!z.bye)dv[z.n]={div:d.div,seed:z.s}})));
+  const OTHER='Division not set yet',divs=PO_DEFS.map(d=>d.div).concat([OTHER]);
+  const sec=UI.gsec||'ALL';
+  let rows=Object.values(t).map(x=>Object.assign(x,{div:(dv[x.n]||{}).div||OTHER,seed:(dv[x.n]||{}).seed}));
   if(school!=='ALL')rows=rows.filter(x=>x.n===school);
-  if(!rows.length)return'';
-  return `<section class="card"><div class="qh"><h3>Standings</h3><span class="muted">Record, then points for and against</span></div><div class="scroll"><table><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td class="rk">${i+1}</td><td><span class="sch">${slogo(x.n,22)}<b>${esc(x.n)}</b></span></td><td>${x.w}-${x.l}${x.t?'-'+x.t:''}</td><td>${x.pf}</td><td>${x.pa}</td></tr>`).join('')}</tbody></table></div></section>`;
+  const cmp=(a,b)=>(b.w/(b.w+b.l+b.t||1))-(a.w/(a.w+a.l+a.t||1))||(b.pf-b.pa)-(a.pf-a.pa)||a.n.localeCompare(b.n);
+  const chips=`<div class="chips gm-divs" role="group" aria-label="Section">${['ALL',...divs].map(d=>`<button class="chip" data-act="gsec" data-v="${esc(d)}" aria-pressed="${sec===d}">${d==='ALL'?'All sections':esc(d)}</button>`).join('')}</div>`;
+  const tbl=(name,list)=>list.length?`<section class="card"><div class="qh"><h3>${esc(name)}</h3><span class="muted">${list.length} ${list.length===1?'team':'teams'}</span></div><div class="scroll"><table><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th></tr></thead><tbody>${list.sort(cmp).map((x,i)=>`<tr><td class="rk">${i+1}</td><td><span class="sch">${slogo(x.n,22)}<b>${x.seed?`<small class="gm-seed">${x.seed}</small>`:''}${esc(x.n)}</b></span></td><td>${x.w}-${x.l}${x.t?'-'+x.t:''}</td><td>${x.pf}</td><td>${x.pa}</td></tr>`).join('')}</tbody></table></div></section>`:'';
+  const body=(sec==='ALL'?divs:[sec]).map(d=>tbl(d,rows.filter(x=>x.div===d))).join('');
+  return chips+(body||'<p class="empty">No results yet.</p>');
 }
 
 /* ---------- playoff brackets: seeded pairings, with winners moving ahead as final scores come in ---------- */
@@ -1923,7 +1930,7 @@ function picksHTML(){
 function viewGames(){
   const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.'})[UI.gtab]||'Every San Diego Section matchup by week, the playoff bracket for every division, and team standings.'}</p></div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['picks','Picks']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${(UI.gtab||'sched')===v}">${l}</button>`).join('')}</div>`;
-  return head+tabs+(UI.gtab==='picks'?picksHTML():viewSched('')+`<div class="qh" style="margin-top:26px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()+`<div class="qh" style="margin-top:26px"><h2 class="h-sec">Standings</h2></div>`+(standingsHTML((GAMES&&GAMES.games)||[],UI.gschool)||'<p class="empty">No results yet.</p>'));
+  return head+tabs+(UI.gtab==='picks'?picksHTML():viewSched('')+`<div class="qh" style="margin-top:26px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()+`<div class="qh" style="margin-top:26px"><h2 class="h-sec">Standings</h2></div>`+standingsHTML((GAMES&&GAMES.games)||[],UI.gschool));
 }
 
 /* ---------- player hub ---------- */
@@ -2767,6 +2774,7 @@ document.addEventListener('click',async e=>{
   else if(a==='gweek'){UI.gw=t.dataset.w==='P'?'P':+t.dataset.w;render()}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
+  else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
   else if(a==='pkSide'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}
   else if(a==='pkStake'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{stake:+t.dataset.v});render()}
   else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb}),'Pick removed');render()}
