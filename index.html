@@ -137,13 +137,29 @@ input[type=number]{width:100%}
 @keyframes fcTw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1.5)}}
 @media (prefers-reduced-motion:reduce){.fc-back,.fc-mys,.fc-mq,.fc-mys::after,.fc-sp,.fc-dr,.fc-flip,.fc-flip>*{animation:none!important}.fc-cover{display:none}}
 .fc-ppg{display:flex;align-items:baseline;gap:4px;justify-content:center;flex-wrap:wrap;font:700 .78rem/1.2 var(--f-body);color:#9FB4E0;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.06)}.fc-ppg b{font:900 1rem/1 var(--f-display);color:#FFD27A}.fc-ppg small{color:var(--muted);font-size:.68rem}
-.sim-field{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;align-items:start}.sim-col{display:flex;flex-direction:column;gap:10px;min-width:0}
 .sim-ch{display:flex;align-items:center;justify-content:center;padding:9px;border-radius:12px;font:900 .85rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase}
-.sim-col.off .sim-ch{background:rgba(47,107,255,.18);color:#9DB8FF;border:1px solid rgba(47,107,255,.5)}.sim-col.def .sim-ch{background:rgba(244,63,94,.16);color:#FFA3B3;border:1px solid rgba(244,63,94,.5)}
-.sim-card{padding:10px 8px 12px!important;gap:5px!important;border-left:5px solid var(--pc,#2A4472)!important;background:linear-gradient(160deg,color-mix(in srgb,var(--pc) 16%,#10224a),#0a1630)!important}
-.sim-top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:6px}
 .sim-pos{display:inline-flex;align-items:center;gap:6px;font:900 1.15rem/1 var(--f-display);letter-spacing:.06em;padding:6px 12px;border-radius:10px;background:var(--pc);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}.sim-pos i{font:800 .62rem/1 var(--f-body);font-style:normal;background:rgba(0,0,0,.28);padding:2px 5px;border-radius:6px;letter-spacing:.04em}
-.sim-card .fc-nm{font-size:.9rem}.sim-card .fc-pts b{font-size:1.3rem}.sim-card .fc-ppg{font-size:.7rem;padding:2px 8px}
+.sim-heads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.sim-ch{display:flex;align-items:center;justify-content:center;padding:9px;border-radius:12px;font:900 .85rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase}
+.sim-ch.off{background:rgba(47,107,255,.18);color:#9DB8FF;border:1px solid rgba(47,107,255,.5)}.sim-ch.def{background:rgba(244,63,94,.16);color:#FFA3B3;border:1px solid rgba(244,63,94,.5)}
+.sim-board{container-type:inline-size;position:relative;margin-top:10px;width:100%;aspect-ratio:9/15;border-radius:18px;overflow:hidden;border:1px solid #1d5c35;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 10%),linear-gradient(180deg,#1a6b3a,#134f2b)}
+.sb-los{position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed rgba(255,214,102,.75)}
+.sb-slot{position:absolute;transform:translate(-50%,-50%);z-index:1}
+.sb-card{position:relative;box-sizing:border-box;width:52px;min-width:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px 5px!important;border-radius:12px!important;border:1px solid color-mix(in srgb,var(--pc) 70%,#000)!important;border-top:4px solid var(--pc)!important;background:linear-gradient(170deg,color-mix(in srgb,var(--pc) 18%,#0f2147),#0a1630)!important;box-shadow:0 6px 14px rgba(0,0,0,.45)!important;text-align:center}
+.sb-card .sim-pos{font-size:.66rem;padding:3px 5px;border-radius:6px;gap:3px}.sb-card .sim-pos i{display:none}
+.sb-card .av{width:26px!important;height:26px!important;font-size:.55rem!important}
+.sb-nm{font-size:.54rem;line-height:1.1;display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sb-nm .n-l,.sb-sc{display:none}
+.sb-pts b{display:block;font:900 .85rem/1 var(--f-display)}.sb-pts small{display:block;color:var(--muted);font-size:.48rem;white-space:nowrap}.sb-pts em{display:none;font-style:normal}
+.sb-rs{border:0;border-radius:999px;background:linear-gradient(180deg,#FFC23D,#FF9F1C);color:#1a1200;font:900 .8rem/1 var(--f-display);min-width:22px;height:20px;padding:0 5px;cursor:pointer}.sb-rs span{display:none}.sb-rs.off{background:var(--surface2);color:var(--muted);opacity:.6;cursor:default}
+@container (max-width:340px){.sb-card{width:44px}.sb-nm{font-size:.5rem}.sb-pts small{display:none}.sb-card .av{width:22px!important;height:22px!important;font-size:.5rem!important}.sb-card .sim-pos{font-size:.6rem;padding:2px 4px}}
+@container (min-width:500px) and (max-width:799px){.sim-board{aspect-ratio:1/1.05}.sb-card{width:60px}.sb-nm{font-size:.6rem}.sb-pts small{font-size:.54rem}}
+@container (min-width:800px){
+ .sim-board{aspect-ratio:16/10}
+ .sb-card{width:128px;gap:4px;padding:8px 6px 9px!important}.sb-card .sim-pos{font-size:.95rem;padding:4px 10px}.sb-card .sim-pos i{display:inline}
+ .sb-card .av{width:44px!important;height:44px!important;font-size:.9rem!important}
+ .sb-nm{font-size:.82rem}.sb-nm .n-s{display:none}.sb-nm .n-l{display:inline}.sb-sc{display:block;font-size:.66rem;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .sb-pts b{font-size:1.2rem}.sb-pts small{font-size:.66rem}.sb-pts em{display:inline}.sb-rs{height:28px;font-size:.78rem;padding:0 12px}.sb-rs span{display:inline}
+}
 .sim-res{display:grid!important;grid-template-columns:auto 1fr;gap:6px 16px;align-items:center}.sim-res>*:nth-child(n+3){grid-column:1/-1}.sim-gr{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;font:900 2.6rem/1 var(--f-display);color:#1a1200;background:linear-gradient(135deg,#FFC23D,#FF9F1C)}.sim-opt summary{cursor:pointer;color:var(--muted);font-weight:700;margin:6px 0}
 .fc-top{width:100%;display:flex;justify-content:space-between;align-items:center}.fc-pos{font:900 .9rem/1 var(--f-display);color:#FFD27A;letter-spacing:.05em}
 .fc-nm{font-size:.98rem;line-height:1.15}.fc-sc{color:var(--muted);display:flex;align-items:center;gap:4px;justify-content:center;font-size:.75rem}
@@ -2288,6 +2304,7 @@ const SIM_SLOTS=[
   {k:'DB1',label:'DB',elig:['DEF'],sub:['DB']},{k:'DB2',label:'DB',elig:['DEF'],sub:['DB']},
   {k:'LB1',label:'LB',elig:['DEF'],sub:['LB']},{k:'LB2',label:'LB',elig:['DEF'],sub:['LB']},
   {k:'DL1',label:'DL',elig:['DEF'],sub:['DL']},{k:'DL2',label:'DL',elig:['DEF'],sub:['DL']}];
+const SIM_POS={RB:[9,50],QB:[25,50],WR1:[41,11],TE:[41,37],FLEX:[41,63],WR2:[41,89],DL1:[59,38],DL2:[59,62],LB1:[75,27],LB2:[75,73],DB1:[91,11],DB2:[91,89]};
 const SIM_COL={QB:'#E65B28',RB:'#079B82',WR:'#2868E8',TE:'#9655D8',FLEX:'#E8A317',DB:'#22A6D9',LB:'#E0455B',DL:'#7FB432'};
 const simKey=p=>((p.name||'')+'|'+(p.school||'')).toLowerCase();
 const simTot=p=>agg(p,'season').v;
@@ -2335,11 +2352,10 @@ function viewSim(){
   if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 12 spots: 1 QB, 1 RB, 2 WR, 1 TE, 1 FLEX (RB, WR or TE), 2 DB, 2 LB and 2 DL. Everyone is drawn at random from the app, and you have ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div></section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
-  const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null);
-    return `<div class="fc-card sim-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}<div class="sim-top"><span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${gtag(p)}</div>${av(p.name,p.school,46)}<b class="fc-nm">${esc(p.name)}</b><small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
-      <div class="fc-ppg"><b>${f1(a.n?a.v/a.n:0)}</b> PPG<small>${a.n} ${a.n===1?'game':'games'}</small></div>
-      <div class="fc-pts"><b>${f1(a.v)}</b><small>season pts</small></div>
-      ${m.done?'':`<button class="btn sm ${m.left>0&&!busy?'':'ghost'}" data-act="simRespin" data-i="${i}" ${m.left>0&&!busy?'':'disabled'}>Respin</button>`}</div>`};
+  const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
+    return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
+      <div class="sb-pts"><b>${f1(a.v)}</b><small>${f1(a.n?a.v/a.n:0)} ppg<em> · ${a.n} gp</em></small></div>
+      ${m.done?'':`<button class="sb-rs ${m.left>0&&!busy?'':'off'}" data-act="simRespin" data-i="${i}" ${m.left>0&&!busy?'':'disabled'} aria-label="Respin ${sl.label}">↻<span> Respin</span></button>`}</div></div>`};
   const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins left</small><b>${m.left}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
   let res='';
   if(m.done&&m.res){const r=m.res,pc=Math.round(r.pct*100),bt=Math.round(r.beat*100),gr=bt>=98?'S':bt>=90?'A':bt>=70?'B':bt>=40?'C':'D';
@@ -2347,7 +2363,7 @@ function viewSim(){
       <details class="sim-opt"><summary>See the best possible team</summary>${r.best.list.map(x=>`<div class="bt-r"><b>${x.l} · ${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><b class="d">${f1(simTot(x.p))}</b></div>`).join('')}</details>
       <div class="btns"><button class="btn" data-act="simStart">Build another team</button></div></section>`}
   const act2=m.done?'':`<div class="bt-go" style="margin-top:14px"><button class="btn" data-act="simFinish" ${busy?'disabled':''}>Finish team</button><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left>0?`You have ${m.left} ${m.left===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Finish your team when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
-  return head+res+`<section class="card fc-hero">${bar}<div class="sim-field"><div class="sim-col off"><div class="sim-ch">Offense</div>${m.c.map((k,i)=>i<6?card(k,i):'').join('')}</div><div class="sim-col def"><div class="sim-ch">Defense</div>${m.c.map((k,i)=>i>=6?card(k,i):'').join('')}</div></div>${act2}</section>${board}`;
+  return head+res+`<section class="card fc-hero">${bar}<div class="sim-heads"><div class="sim-ch off">Offense</div><div class="sim-ch def">Defense</div></div><div class="sim-board"><i class="sb-los"></i>${m.c.map(card).join('')}</div>${act2}</section>${board}`;
 }
 /* ---------- minigames: Pick 'em and 5 Card Draw ---------- */
 
