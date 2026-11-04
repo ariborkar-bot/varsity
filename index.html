@@ -558,6 +558,7 @@ select{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:40px
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23FFC23D' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"),linear-gradient(180deg,#10203F,#0B1730)!important;
   background-repeat:no-repeat!important;background-position:right 14px center,0 0!important}
 select:hover{border-color:#3D7BFF!important}
+select:not([multiple]):not([size]){pointer-events:none}
 select:focus-visible,select.dd-open{outline:none;border-color:#FFC23D!important;box-shadow:0 0 0 3px rgba(255,194,61,.22)}
 select option{background:#0B1730;color:#EAF0F8}
 .dd{position:fixed;z-index:9999;background:#0B1730;border:1px solid #2A4472;border-radius:14px;box-shadow:0 18px 48px -12px rgba(0,0,0,.75),0 0 0 1px rgba(255,194,61,.08);
@@ -3716,13 +3717,14 @@ boot();
     else if(e.key==='ArrowUp'){e.preventDefault();act=vv[Math.max(0,p-1)]??act;paint()}
     else if(e.key==='Enter'){e.preventDefault();pick(act)}
     else if(e.key==='Escape'||e.key==='Tab'){if(e.key==='Escape')e.preventDefault();const s=sel;close();if(s&&e.key==='Escape')s.focus()}};
-  document.addEventListener('mousedown',e=>{const s=e.target.closest&&e.target.closest('select');
-    if(s&&!s.multiple&&!(s.size>1)&&e.button===0){e.preventDefault();if(sel===s){close();return}s.focus({preventScroll:true});open(s);return}
-    if(dd&&!dd.contains(e.target))close()},true);
-  document.addEventListener('touchstart',e=>{if(dd&&!dd.contains(e.target)&&!(e.target.closest&&e.target.closest('select')))close()},{passive:true,capture:true});
-  /* phones: a tap would otherwise bring up the system picker, so open the themed panel instead */
-  document.addEventListener('touchend',e=>{const s=e.target.closest&&e.target.closest('select');
-    if(s&&!s.multiple&&!(s.size>1)&&!s.disabled){e.preventDefault();if(sel===s){close();return}s.focus({preventScroll:true});open(s)}},{passive:false,capture:true});
+  /* The native <select> never gets a pointer press at all (CSS turns its pointer events off), so the system picker cannot open
+     on top of the themed one. Presses land on whatever is behind it; we find the select under the finger and open the themed panel. */
+  const hit=(x,y,t)=>[...document.querySelectorAll('select')].find(s=>{if(s.multiple||s.size>1||!s.offsetParent)return false;const r=s.getBoundingClientRect();
+    return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom&&(t===s||t.contains(s)||(t.closest&&t.closest('label')&&t.closest('label').contains(s)))});
+  let was=null;
+  document.addEventListener('pointerdown',e=>{const h=hit(e.clientX,e.clientY,e.target);was=h&&sel===h?h:null;if(dd&&!dd.contains(e.target)&&!h)close()},true);
+  document.addEventListener('click',e=>{if(dd&&dd.contains(e.target))return;const h=hit(e.clientX,e.clientY,e.target);if(!h||h.disabled)return;
+    e.preventDefault();e.stopPropagation();if(was===h){close();was=null;return}h.focus({preventScroll:true});open(h)},true);
   document.addEventListener('keydown',e=>{const s=e.target;
     if(dd&&(s===sel||dd.contains(s))){key(e);return}
     if(s&&s.tagName==='SELECT'&&!s.multiple&&(e.key==='Enter'||e.key===' '||(e.altKey&&e.key==='ArrowDown'))){e.preventDefault();open(s)}},true);
