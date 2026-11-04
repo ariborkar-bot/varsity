@@ -350,11 +350,6 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .csvp th{position:sticky;top:0;background:var(--surface2)}
 .ck{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
 .ck input{margin:3px 0 0;padding:0;border:0;min-height:0;width:18px;height:18px;accent-color:var(--ink);flex:none}
-#cardview{position:fixed;inset:0;z-index:9000;background:rgba(4,10,24,.94);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
-.cv-in{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%}
-.cv-in img{display:block;width:auto;height:auto;max-width:min(92vw,560px);max-height:68vh;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.5);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
-.cv-hint{margin:0;color:#BFD3FF;font-size:.9rem;text-align:center}
-.cv-btns{justify-content:center}
 .btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .sec{font-size:.8rem;color:var(--muted);font-weight:600}
 [hidden]{display:none!important}
@@ -2228,23 +2223,6 @@ function cardBlob(info,me){
   });
 }
 
-/* shows the finished rank card as a picture the person can press-and-hold to save to Photos (or share), instead of downloading a file */
-function showCardImage(blob){
-  const old=document.getElementById('cardview');if(old)old.remove();
-  const url=URL.createObjectURL(blob);
-  let file=null;try{file=new File([blob],'varsity-rank.png',{type:'image/png'})}catch(_){}
-  const canShare=!!(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}));
-  const touch=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
-  const o=document.createElement('div');o.id='cardview';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Your rank card');
-  o.innerHTML=`<div class="cv-in"><img src="${url}" alt="Your Varsity rank card"><p class="cv-hint">${touch?'Press and hold the picture, then tap Save to Photos.':'Right-click the picture to save or copy it.'}</p><div class="btns cv-btns">${canShare?'<button class="btn" id="cv-share">Share / Save to Photos</button>':''}<button class="btn ghost" id="cv-x">Close</button></div></div>`;
-  const key=e=>{if(e.key==='Escape')close()};
-  function close(){o.remove();URL.revokeObjectURL(url);document.removeEventListener('keydown',key)}
-  o.addEventListener('click',e=>{if(e.target===o)close()});
-  o.querySelector('#cv-x').onclick=close;
-  const sb=o.querySelector('#cv-share');if(sb)sb.onclick=async()=>{try{await navigator.share({files:[file],title:'My Varsity rank'})}catch(_){}};
-  document.addEventListener('keydown',key);document.body.appendChild(o);o.querySelector('#cv-x').focus();
-}
-
 /* ---------- consent and join ---------- */
 const ROLES={
   player:{t:'A player',s:'My own stats are ranked in the league.',c:'I agree that Varsity may show my name, school, position and game stats to everyone in the app, and use them to calculate fantasy points. If I am under 18, my parent or guardian has agreed too.'},
@@ -2496,8 +2474,18 @@ document.addEventListener('click',async e=>{
   else if(a==='copyRank'){const me=meP(),info=me&&myRanks(me);if(info)copyText(rankText(info,me),'Copied. Paste it anywhere.')}
   else if(a==='share'){
     const me=meP(),info=me&&myRanks(me);if(!info)return;
-    try{const blob=await cardBlob(info,me);if(!blob)throw new Error('no image');showCardImage(blob)}
-    catch(err){say('Could not make the card. Try Copy as text.')}
+    try{
+      const blob=await cardBlob(info,me);if(!blob)throw new Error('no image');
+      let file=null;try{file=new File([blob],'varsity-rank.png',{type:'image/png'})}catch(_){}
+      /* phones: the share sheet has "Save Image", which puts the picture straight into Photos */
+      if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file]});return}
+        catch(err){if(err&&err.name==='AbortError')return}
+      }
+      /* computers (and anything that cannot share files): save the PNG to the device */
+      if(DL){await DL.save({filename:'varsity-rank.png',data:blob});say('Rank card saved to your device')}
+      else copyText(rankText(info,me),'Saving images is not available here, so your rank was copied as text.');
+    }catch(err){if(!(err&&err.code==='declined'))say('Could not save the card. Try Copy as text.')}
   }
   else if(a==='meDel'){
     const w=t.dataset.w,cur=((S.games[ME.uid]||{}).weeks)||{},next={...cur};delete next[w];
