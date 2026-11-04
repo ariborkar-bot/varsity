@@ -1907,9 +1907,9 @@ function picksHTML(){
       return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small></button>`};
     const od=side?o[side]:0,room=avail+(b?+b.stake:0);
     let foot='';
-    if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to make picks.</p>';
+    if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play Pick ’em.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'';
-    else if(locked)foot=b?`<p class="muted">Locked: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Picks are closed for this game.</p>';
+    else if(locked)foot=b?`<p class="muted">Locked: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Pick ’em is closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room).concat(room>0&&![5,10,25,50].includes(Math.floor(room))?[Math.floor(room)]:[]);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
@@ -1926,7 +1926,7 @@ function picksHTML(){
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one above.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
-  return bankCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} picks</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')+allBar:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
+  return bankCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')+allBar:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
 }
 /* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
 function anticipated(){
@@ -1945,7 +1945,7 @@ function anticipatedHTML(){
 }
 function viewGames(){
   const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.'})[UI.gtab]||'The most anticipated games, team standings, the playoff brackets and every game by week.'}</p></div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['picks','Picks']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${(UI.gtab||'sched')===v}">${l}</button>`).join('')}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['picks',"Pick 'em"]].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${(UI.gtab||'sched')===v}">${l}</button>`).join('')}</div>`;
   if(UI.gtab==='picks')return head+tabs+picksHTML();
   const gs=(GAMES&&GAMES.games)||[];
   return head+tabs+anticipatedHTML()
@@ -2814,7 +2814,7 @@ document.addEventListener('click',async e=>{
     if(!n){say('Pick a team first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb}),n+(n===1?' pick':' picks')+' locked in')){UI.pk={};render()}}
-  else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('Picks are closed for that game.');return}
+  else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('Pick ’em is closed for that game.');return}
     const cur=betsOf(ME.uid),old=cur[id],ui=UI.pk[id]||{},s=ui.s||(old&&old.s);if(!s){say('Tap a team first.');return}
     const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||10,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}
