@@ -137,6 +137,13 @@ input[type=number]{width:100%}
 @keyframes fcTw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1.5)}}
 @media (prefers-reduced-motion:reduce){.fc-back,.fc-mys,.fc-mq,.fc-mys::after,.fc-sp,.fc-dr,.fc-flip,.fc-flip>*{animation:none!important}.fc-cover{display:none}}
 .fc-ppg{display:flex;align-items:baseline;gap:4px;justify-content:center;flex-wrap:wrap;font:700 .78rem/1.2 var(--f-body);color:#9FB4E0;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.06)}.fc-ppg b{font:900 1rem/1 var(--f-display);color:#FFD27A}.fc-ppg small{color:var(--muted);font-size:.68rem}
+.sim-field{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;align-items:start}.sim-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.sim-ch{display:flex;align-items:center;justify-content:center;padding:9px;border-radius:12px;font:900 .85rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase}
+.sim-col.off .sim-ch{background:rgba(47,107,255,.18);color:#9DB8FF;border:1px solid rgba(47,107,255,.5)}.sim-col.def .sim-ch{background:rgba(244,63,94,.16);color:#FFA3B3;border:1px solid rgba(244,63,94,.5)}
+.sim-card{padding:10px 8px 12px!important;gap:5px!important;border-left:5px solid var(--pc,#2A4472)!important;background:linear-gradient(160deg,color-mix(in srgb,var(--pc) 16%,#10224a),#0a1630)!important}
+.sim-top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.sim-pos{display:inline-flex;align-items:center;gap:6px;font:900 1.15rem/1 var(--f-display);letter-spacing:.06em;padding:6px 12px;border-radius:10px;background:var(--pc);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}.sim-pos i{font:800 .62rem/1 var(--f-body);font-style:normal;background:rgba(0,0,0,.28);padding:2px 5px;border-radius:6px;letter-spacing:.04em}
+.sim-card .fc-nm{font-size:.9rem}.sim-card .fc-pts b{font-size:1.3rem}.sim-card .fc-ppg{font-size:.7rem;padding:2px 8px}
 .sim-res{display:grid!important;grid-template-columns:auto 1fr;gap:6px 16px;align-items:center}.sim-res>*:nth-child(n+3){grid-column:1/-1}.sim-gr{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;font:900 2.6rem/1 var(--f-display);color:#1a1200;background:linear-gradient(135deg,#FFC23D,#FF9F1C)}.sim-opt summary{cursor:pointer;color:var(--muted);font-weight:700;margin:6px 0}
 .fc-top{width:100%;display:flex;justify-content:space-between;align-items:center}.fc-pos{font:900 .9rem/1 var(--f-display);color:#FFD27A;letter-spacing:.05em}
 .fc-nm{font-size:.98rem;line-height:1.15}.fc-sc{color:var(--muted);display:flex;align-items:center;gap:4px;justify-content:center;font-size:.75rem}
@@ -2231,6 +2238,7 @@ const SIM_SLOTS=[
   {k:'DB1',label:'DB',elig:['DEF'],sub:['DB']},{k:'DB2',label:'DB',elig:['DEF'],sub:['DB']},
   {k:'LB1',label:'LB',elig:['DEF'],sub:['LB']},{k:'LB2',label:'LB',elig:['DEF'],sub:['LB']},
   {k:'DL1',label:'DL',elig:['DEF'],sub:['DL']},{k:'DL2',label:'DL',elig:['DEF'],sub:['DL']}];
+const SIM_COL={QB:'#E65B28',RB:'#079B82',WR:'#2868E8',TE:'#9655D8',FLEX:'#E8A317',DB:'#22A6D9',LB:'#E0455B',DL:'#7FB432'};
 const simKey=p=>((p.name||'')+'|'+(p.school||'')).toLowerCase();
 const simTot=p=>agg(p,'season').v;
 const simPool=(slot,ex)=>players().filter(p=>p.mp&&!ex.has(simKey(p))&&slotOk(slot,p)&&agg(p,'season').n>=2);
@@ -2278,8 +2286,8 @@ function viewSim(){
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
   const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null);
-    return `<div class="fc-card ${fl?'fc-flip':''}" ${fl?`style="animation-delay:${fl.d}s"`:''}>${fl?'<div class="fc-cover">?</div>':''}<div class="fc-top"><span class="fc-pos">${sl.label}</span>${gtag(p)}</div>${av(p.name,p.school,56)}<b class="fc-nm">${esc(p.name)}</b><small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
-      ${sl.label==='FLEX'?`<span class="pos ${p.pos}">${p.pos}</span>`:''}<div class="fc-ppg"><b>${f1(a.n?a.v/a.n:0)}</b> PPG<small>${a.n} ${a.n===1?'game':'games'}</small></div>
+    return `<div class="fc-card sim-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}<div class="sim-top"><span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${gtag(p)}</div>${av(p.name,p.school,46)}<b class="fc-nm">${esc(p.name)}</b><small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
+      <div class="fc-ppg"><b>${f1(a.n?a.v/a.n:0)}</b> PPG<small>${a.n} ${a.n===1?'game':'games'}</small></div>
       <div class="fc-pts"><b>${f1(a.v)}</b><small>season pts</small></div>
       ${m.done?'':`<button class="btn sm ${m.left>0&&!busy?'':'ghost'}" data-act="simRespin" data-i="${i}" ${m.left>0&&!busy?'':'disabled'}>Respin</button>`}</div>`};
   const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins left</small><b>${m.left}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
@@ -2289,7 +2297,7 @@ function viewSim(){
       <details class="sim-opt"><summary>See the best possible team</summary>${r.best.list.map(x=>`<div class="bt-r"><b>${x.l} · ${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><b class="d">${f1(simTot(x.p))}</b></div>`).join('')}</details>
       <div class="btns"><button class="btn" data-act="simStart">Build another team</button></div></section>`}
   const act2=m.done?'':`<div class="bt-go" style="margin-top:14px"><button class="btn" data-act="simFinish" ${busy?'disabled':''}>Finish team</button><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left>0?`You have ${m.left} ${m.left===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Finish your team when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
-  return head+res+`<section class="card fc-hero">${bar}<div class="fc-hand">${m.c.map(card).join('')}</div>${act2}</section>${board}`;
+  return head+res+`<section class="card fc-hero">${bar}<div class="sim-field"><div class="sim-col off"><div class="sim-ch">Offense</div>${m.c.map((k,i)=>i<6?card(k,i):'').join('')}</div><div class="sim-col def"><div class="sim-ch">Defense</div>${m.c.map((k,i)=>i>=6?card(k,i):'').join('')}</div></div>${act2}</section>${board}`;
 }
 /* ---------- minigames: Pick 'em and 5 Card Draw ---------- */
 
