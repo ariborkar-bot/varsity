@@ -85,6 +85,8 @@ select,input{background:var(--surface);border:1px solid var(--line);border-radiu
 select:hover,input:hover{border-color:var(--muted)}
 input[type=number]{width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.mg-head{display:flex!important;align-items:flex-start;justify-content:space-between;gap:12px}.mg-head>div:first-child{min-width:0}.tok-box{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface2);margin-top:4px}.tok-box small{font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.tok-box b{font:800 1.4rem/1.1 var(--f-head,inherit);color:#F2C230}
+.bt-board .bt-h.me{font-weight:700}.bt-gap{text-align:center;padding:2px 0}
 .bt-rec{display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;padding:14px 8px}.bt-rc{flex:1;display:flex;flex-direction:column;gap:2px}.bt-rc b{font:800 1.5rem/1.1 var(--f-head,inherit)}.bt-rc small{color:var(--muted);font-size:.74rem}
 .bt-amt{width:92px;min-height:42px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);color:inherit;padding:8px 14px;font:700 .9rem var(--f-body,inherit);text-align:center}.bt-amt:focus{outline:2px solid var(--gold,#F2C230)}
 .chip{background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:42px;font-weight:600;font-size:.9rem}
@@ -2077,6 +2079,11 @@ function fcHTML(){
     <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS}">Week ${w}</button><button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
 }
+function mgBoard(title,rows){
+  if(!rows.length)return '';
+  const top=rows.slice(0,5),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>`<div class="bt-h ${x.u===ME.uid?'me':''}"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.v}</b></div>`;
+  return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${meI>=5?`<div class="bt-gap muted">···</div>${line(rows[meI],meI)}`:''}</section>`;
+}
 function recordCard(results){
   const n=results.length,w=results.filter(x=>x==='won').length,l=results.filter(x=>x==='lost').length,dec=w+l,pct=dec?Math.round(w/dec*100):null,open=results.filter(x=>x==='open').length;
   return `<section class="card bt-rec"><div class="bt-rc"><b>${n}</b><small>${n===1?'game':'games'} predicted</small></div><div class="bt-rc"><b>${w}-${l}</b><small>${dec?'right-wrong':'no results yet'}</small></div><div class="bt-rc"><b>${pct===null?'-':pct+'%'}</b><small>correct${open?`, ${open} still open`:''}</small></div></section>`;
@@ -2114,14 +2121,14 @@ function picksHTML(){
   const openBets=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id]})).filter(x=>x.g&&!gDone(x.g)).sort((a,b)=>a.g.d<b.g.d?-1:a.g.d>b.g.d?1:0);
   const myCard=openBets.length?`<section class="card bt-mine"><div class="qh"><h3>Your picks</h3><span class="muted">${openBets.length} locked in · ${tk(openBets.reduce((t,x)=>t+(+x.b.stake||0),0))} wagered</span></div>${openBets.map(x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
     return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)}</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${x.g.d<=today?' · locked':''}</small></span></span><span class="bt-pay"><b>${tk(x.b.stake*x.b.odds)}</b><small class="muted">${tk(x.b.stake)} at ${(+x.b.odds).toFixed(2)}x</small></span></div>`}).join('')}</section>`:'';
-  const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t).slice(0,20);
-  const boardCard=board.length?`<section class="card"><div class="qh"><h3>Token leaders</h3></div>${board.map((x,i)=>`<div class="bt-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${tk(x.t)}</b></div>`).join('')}</section>`:'';
+  const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t);
+  const boardCard=mgBoard('Token leaders',board.map(x=>({u:x.u,v:tk(x.t)})));
   /* lock in everything at once */
   const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one above.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
-  return bankCard+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+myCard+allBar+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
+  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+myCard+allBar+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard;
 }
 /* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
 function anticipated(){
@@ -2181,18 +2188,19 @@ function spreadHTML(){
     return `<article class="gm bt-g ${res==='won'||res==='lost'?'res-'+res:''}"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:atsResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
   const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(nm2(x.b,x.g))} ${lnTxt(x.b)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
-  const board=Object.keys(S.picks).filter(u=>Object.keys(atsOf(u)).length).map(u=>{const r=Object.entries(atsOf(u)).map(([id,b])=>atsResult(b,gm[id]));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w).slice(0,20);
-  const boardCard=board.length?`<section class="card"><div class="qh"><h3>Best against the spread</h3></div>${board.map((x,i)=>`<div class="bt-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.w}-${x.l}</b></div>`).join('')}</section>`:'';
+  const board=Object.keys(S.picks).filter(u=>Object.keys(atsOf(u)).length).map(u=>{const r=Object.entries(atsOf(u)).map(([id,b])=>atsResult(b,gm[id]));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w);
+  const boardCard=mgBoard('Best against the spread',board.map(x=>({u:x.u,v:x.w+'-'+x.l})));
   const stakeOf=g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
   const staged=can?open.filter(g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-bal;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(bal)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one below.`}</div></div><div class="bt-go"><button class="btn" data-act="atAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="atClear">Clear</button></div></section>`:'';
   const nextW=open.length?open[0].w:null;
-  return bankCard+recordCard(Object.entries(mine).map(([id,b])=>atsResult(b,gm[id])))+allBar+(open.length?[...new Set(open.map(g=>g.w))].map(w=>{const L=open.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} spreads</h3><span class="muted">${L.length} games${w===nextW?', lines set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games yet. New spreads show up as matchups are set.</p>')+histCard+boardCard;
+  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>atsResult(b,gm[id])))+allBar+(open.length?[...new Set(open.map(g=>g.w))].map(w=>{const L=open.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} spreads</h3><span class="muted">${L.length} games${w===nextW?', lines set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):'<p class="empty">No upcoming games yet. New spreads show up as matchups are set.</p>')+histCard;
 }
 function viewMini(){
   const T=['picks','draw','spread'].includes(UI.mtab)?UI.mtab:'picks';
-  const head=`<div class="head"><h2>Minigames</h2><p>${T==='spread'?'Pick a side against the point spread. Lines come from team ratings, so either side is about a coin flip.':T==='draw'?'Get dealt 5 random players each week, redraw up to 3, and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>`;
+  const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-box" title="Tokens are shared by Pick ’em and Against the spread"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}</b></div>`:'';
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='spread'?'Pick a side against the point spread. Lines come from team ratings, so either side is about a coin flip.':T==='draw'?'Get dealt 5 random players each week, redraw up to 3, and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks',"Pick 'em"],['spread','Against the spread'],['draw','5 Card Draw']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
   return head+tabs+(T==='draw'?fcHTML():T==='spread'?spreadHTML():picksHTML());
 }
