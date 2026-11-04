@@ -975,6 +975,21 @@ select option{background:#0B1730;color:#EAF0F8}
   box-shadow:0 10px 30px rgba(2,30,12,.55)!important;border-bottom:1px solid rgba(190,255,205,.25)!important}
 .mast .wk,.mast .bell{border-color:rgba(210,255,220,.45)!important}
 .mast-tick{border-block-color:rgba(220,255,230,.5)}
+
+/* one banner, always on top: Varsity, Week, settings, with the stat line along its bottom edge */
+.mast{position:sticky!important;top:0;z-index:50}
+.mast .brand p{display:none}
+@media (min-width:760px){
+  .mast-in{flex-wrap:nowrap!important;gap:18px!important;padding-block:12px 8px!important;align-items:center}
+  .mast-in .brand{order:1;flex:none}
+  .mast-in .tabs{order:2;width:auto!important;flex:1 1 auto;justify-content:center;margin:0!important;padding:0!important;overflow:visible}
+  .mast-in .tabs a.tab-acct{margin-left:0!important}
+  .mast-in .mast-r{order:3;flex:none;margin:0!important}
+  .mast-yards i.t{top:6px}
+  .mast-tick{margin:0 0 8px!important;height:34px}
+  .mast-run{bottom:calc(8px + 26px)}
+}
+@media (max-width:759px){.mast-tick{margin:0 0 6px!important}.mast-run{bottom:calc(6px + 26px)}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -995,7 +1010,6 @@ select option{background:#0B1730;color:#EAF0F8}
     </nav>
   </div>
   <div class="mast-yards" aria-hidden="true"><i class="t" style="left:14%">10</i><i class="b" style="left:14%">10</i><i class="t" style="left:23%">20</i><i class="b" style="left:23%">20</i><i class="t" style="left:32%">30</i><i class="b" style="left:32%">30</i><i class="t" style="left:41%">40</i><i class="b" style="left:41%">40</i><i class="t" style="left:50%">50</i><i class="b" style="left:50%">50</i><i class="t" style="left:59%">40</i><i class="b" style="left:59%">40</i><i class="t" style="left:68%">30</i><i class="b" style="left:68%">30</i><i class="t" style="left:77%">20</i><i class="b" style="left:77%">20</i><i class="t" style="left:86%">10</i><i class="b" style="left:86%">10</i></div>
-  <div class="mast-run" aria-hidden="true"><div class="rn-x"><div class="rn-y"><div class="rn-s"><svg viewBox="0 0 44 48"><g class="rn-lg2"><path d="M22 28 L22 44 L29 44" fill="none" stroke="#0A1E66" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><g class="rn-lg1"><path d="M22 28 L22 44 L29 44" fill="none" stroke="#14338F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="14" y="14" width="16" height="17" rx="6" fill="#FFC21A" stroke="#fff" stroke-width="1.5"/><text x="22" y="26" text-anchor="middle" font-size="9" font-weight="900" font-family="Arial Black,Impact,sans-serif" fill="#06174A">V</text><g class="rn-ar"><path d="M24 19 L34 23" stroke="#FFC21A" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="37" cy="24" rx="5" ry="3" fill="#8B4A1B" transform="rotate(20 37 24)"/></g><circle cx="23" cy="9" r="8" fill="#fff" stroke="#9FD0FF" stroke-width="1.5"/><path d="M26 6 h6 M26 10 h6" stroke="#06174A" stroke-width="1.6" stroke-linecap="round"/><path d="M15 9a8 8 0 0 1 8-8" stroke="#FFC21A" stroke-width="2.5" fill="none"/></svg></div></div></div></div>
   <div class="mast-tick" id="mast-tick" aria-label="Top player stat lines"></div>
 </header>
 <main class="wrap">
