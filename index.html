@@ -1997,12 +1997,11 @@ function anticipatedHTML(){
 function viewGames(){
   const T=UI.gtab||'sched';
   const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.',stand:'Records and playoff seeds for every San Diego Section team.'})[T]||'The most anticipated games and every game by week, with the standings beside them, plus the playoff bracket.'}</p></div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['stand','Standings'],['picks','Picks']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['stand','Standings'],['picks',"Pick 'em"]].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
   const gs=(GAMES&&GAMES.games)||[];
   if(T==='picks')return head+tabs+picksHTML();
   if(T==='stand')return head+tabs+standingsHTML(gs,UI.gschool);
-  return head+tabs+`<div class="gm-split"><div class="gm-half">${anticipatedHTML()}<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>${viewSched('')}</div><div class="gm-half gm-side"><div class="qh"><h2 class="h-sec">Standings</h2></div>${standingsHTML(gs,UI.gschool)}</div></div>`
-    +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML();
+  return head+tabs+`<div class="qh"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()+`<div class="gm-split" style="margin-top:28px"><div class="gm-half">${anticipatedHTML()}<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>${viewSched('')}</div><div class="gm-half gm-side"><div class="qh"><h2 class="h-sec">Standings</h2></div>${standingsHTML(gs,UI.gschool)}</div></div>`;
 }
 
 
