@@ -824,8 +824,8 @@ select option{background:#0B1730;color:#EAF0F8}
 .gm-h{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
 .gm-k{background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:2px 7px}.gm-k.p{background:#FFC23D;color:#1B1600;border-color:#FFC23D}
 .gm-t{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:center}
-.gm-t b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gm-t .gm-s{font:900 1.35rem/1 var(--f-display);min-width:2ch;text-align:right}
+.gm-t b{grid-column:2;font-weight:700;font-size:.92rem;line-height:1.12;letter-spacing:-.01em;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;min-width:0}
+.gm-t .gm-s{grid-column:3;font:900 1.35rem/1 var(--f-display);min-width:2ch;text-align:right}
 .gm-t.win b,.gm-t.win .gm-s{color:#fff}.gm-t.lose b,.gm-t.lose .gm-s{color:var(--muted)}
 .gm-seed{font:800 .62rem var(--f-body);color:var(--muted);margin-right:5px}
 .gm-f{font-size:.72rem;color:var(--muted)}
