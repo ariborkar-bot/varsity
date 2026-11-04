@@ -1,7 +1,7 @@
 {
   "name": "Varsity",
   "short_name": "Varsity",
-  "description": "San Diego high school fantasy football, scored from MaxPreps box scores. Snake draft or budget leagues against your friends.",
+  "description": "San Diego high school fantasy football, scored from box scores. Snake draft or budget leagues against your friends.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
