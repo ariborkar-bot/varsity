@@ -2080,7 +2080,7 @@ function fcHTML(){
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
 }
 function mgBoard(title,rows){
-  if(!rows.length)return '';
+  if(!rows.length)return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div><p class="muted">No one is on the board yet. Lock in a pick to be first.</p></section>`;
   const top=rows.slice(0,5),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>`<div class="bt-h ${x.u===ME.uid?'me':''}"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.v}</b></div>`;
   return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${meI>=5?`<div class="bt-gap muted">···</div>${line(rows[meI],meI)}`:''}</section>`;
 }
@@ -2122,6 +2122,7 @@ function picksHTML(){
   const myCard=openBets.length?`<section class="card bt-mine"><div class="qh"><h3>Your picks</h3><span class="muted">${openBets.length} locked in · ${tk(openBets.reduce((t,x)=>t+(+x.b.stake||0),0))} wagered</span></div>${openBets.map(x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
     return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)}</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${x.g.d<=today?' · locked':''}</small></span></span><span class="bt-pay"><b>${tk(x.b.stake*x.b.odds)}</b><small class="muted">${tk(x.b.stake)} at ${(+x.b.odds).toFixed(2)}x</small></span></div>`}).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t);
+  if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid)){board.push({u:ME.uid,t:bank(ME.uid)});board.sort((a,b)=>b.t-a.t)}
   const boardCard=mgBoard('Token leaders',board.map(x=>({u:x.u,v:tk(x.t)})));
   /* lock in everything at once */
   const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
@@ -2189,6 +2190,7 @@ function spreadHTML(){
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:atsResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
   const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(nm2(x.b,x.g))} ${lnTxt(x.b)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(atsOf(u)).length).map(u=>{const r=Object.entries(atsOf(u)).map(([id,b])=>atsResult(b,gm[id]));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w);
+  if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid))board.push({u:ME.uid,w:0,l:0});
   const boardCard=mgBoard('Best against the spread',board.map(x=>({u:x.u,v:x.w+'-'+x.l})));
   const stakeOf=g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
   const staged=can?open.filter(g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
