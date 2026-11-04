@@ -1014,6 +1014,20 @@ select option{background:#0B1730;color:#EAF0F8}
 .mast .wk,.mast .bell{background:rgba(4,22,10,.78)!important;border:1px solid rgba(255,255,255,.3)!important;box-shadow:0 4px 12px rgba(2,18,7,.35)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 @media (min-width:760px){.tabs a:not([aria-current="page"]){background:rgba(4,22,10,.72)!important;border:1px solid rgba(255,255,255,.28)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
 .mast-tick{margin-bottom:30px!important;background:rgba(4,22,10,.6)!important;border-block:1px solid rgba(255,255,255,.45)!important;box-shadow:0 6px 16px rgba(2,18,7,.4)!important;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.gm-tabs{margin:2px 0 14px}.gm-tabs .chip{flex:1 1 0;min-width:0}
+.pk-bank{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.pk-n{font:800 2.6rem/1 var(--f-display);color:#FFC23D;letter-spacing:.02em}
+.pk-row{display:flex;align-items:stretch;gap:8px}.pk-at{align-self:center;color:var(--muted);font-size:.8rem}
+.pk-t{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:inherit;cursor:pointer;font:inherit}
+.pk-t b{font-size:.88rem;text-align:center;line-height:1.15}.pk-t small{color:var(--muted);font-size:.72rem}
+.pk-t .pk-o{font:800 1.15rem/1 var(--f-display);color:#FFC23D}
+.pk-t.on{border-color:#FFC23D;background:rgba(255,194,61,.12);box-shadow:0 0 0 2px rgba(255,194,61,.25)}
+.pk-t.saved::after{content:"Your pick";font-size:.65rem;font-weight:800;color:#06174A;background:#FFC23D;border-radius:999px;padding:2px 8px}
+.pk-t:disabled{opacity:.7;cursor:default}
+.pk-stk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pk-go{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}.pk-go span{margin-right:auto}
+.pk-h{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.pk-h.won b:last-child{color:#4ADE80}.pk-h.lost b:last-child{color:#F87171}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1341,7 +1355,7 @@ async function signOut(){try{await SB.auth.signOut()}catch(_){}try{localStorage.
 let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
-const S={profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
+const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -1736,7 +1750,7 @@ function projTag(p){
 
 
 /* ---------- games: weekly matchups, past weeks and playoff brackets ---------- */
-UI.gw=null;UI.gschool='ALL';UI.gdiv=null;
+UI.gw=null;UI.gschool='ALL';UI.gdiv=null;UI.gtab='sched';UI.pk={};
 function gameCard(g,opts={}){
   const done=g.hs!=null&&g.as!=null,hw=done&&g.hs>g.as,aw=done&&g.as>g.hs;
   const side=(n,s,win,seed)=>`<div class="gm-t ${win?'win':''} ${done&&!win?'lose':''}">${slogo(n,26)}<b>${seed?`<small class="gm-seed">${seed}</small>`:''}${esc(n||'TBD')}</b><span class="gm-s">${done?s:''}</span></div>`;
@@ -1750,8 +1764,7 @@ function gameCard(g,opts={}){
 function bracketHTML(b){
   return `<div class="br" style="--cols:${b.rounds.length}">${b.rounds.map((r,ri)=>`<div class="br-col"><h4>${esc(r.name)}</h4><div class="br-games" style="--gap:${Math.pow(2,ri)*10}px">${r.games.map(g=>gameCard(g)).join('')}</div></div>`).join('')}</div>`;
 }
-function viewGames(){
-  const head=`<div class="head"><h2>Games</h2><p>Every San Diego Section matchup by week, past scores, and the playoff brackets for each division.</p></div>`;
+function viewSched(head){
   if(!GAMES||!GAMES.games||!GAMES.games.length)return head+`<p class="empty">The schedule and scores are being loaded. Check back soon.</p>`;
   const gs=GAMES.games,weeks=[...new Set(gs.map(g=>g.w))].sort((a,b)=>a-b);
   const today=new Date().toISOString().slice(0,10);
@@ -1774,7 +1787,82 @@ function viewGames(){
   return head+`<div class="tools">${tabs}
       <label class="fld"><span>School</span><select data-act="gschool"><option value="ALL">All schools</option>${schools.map(s=>`<option ${UI.gschool===s?'selected':''}>${esc(s)}</option>`).join('')}</select></label></div>
     <div class="qh"><h3>Week ${w}</h3><span class="muted">${list.length} ${list.length===1?'game':'games'}${played?` · ${played} final`:''}</span></div>
-    ${list.length?`<div class="gm-grid">${list.map(g=>gameCard(g,{mine:mine&&(g.h===mine||g.a===mine)})).join('')}</div>`:'<p class="empty">No games this week.</p>'}`;
+    ${list.length?`<div class="gm-grid">${list.map(g=>gameCard(g,{mine:mine&&(g.h===mine||g.a===mine)})).join('')}</div>`:'<p class="empty">No games this week.</p>'}${standingsHTML(gs,UI.gschool)}`;
+}
+
+
+/* ---------- games: schedule and standings, and picks ---------- */
+const gid=g=>g.w+'|'+g.h+'|'+g.a;
+const gDone=g=>g.hs!=null&&g.as!=null;
+const TOK0=100;
+/* odds: an Elo rating for every team from this season's finals, home field to the higher seed, and a 7% house cut */
+let _rt=null,_rtN=-1;
+function ratings(){
+  const gs=(GAMES&&GAMES.games)||[];if(_rt&&_rtN===gs.length)return _rt;
+  const r={},R=n=>r[n]===undefined?1500:r[n];
+  gs.filter(gDone).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0).forEach(g=>{
+    const rh=R(g.h),ra=R(g.a),e=1/(1+Math.pow(10,(ra-rh)/400)),sc=g.hs>g.as?1:g.hs<g.as?0:.5,m=Math.abs(g.hs-g.as),k=26*Math.min(2.6,1+Math.log(m+1)/2.2);
+    r[g.h]=rh+k*(sc-e);r[g.a]=ra+k*((1-sc)-(1-e))});
+  _rt=r;_rtN=gs.length;return r;
+}
+function oddsFor(g){
+  const r=ratings(),rh=r[g.h]===undefined?1500:r[g.h],ra=r[g.a]===undefined?1500:r[g.a];
+  const ph=Math.min(.94,Math.max(.06,1/(1+Math.pow(10,(ra-rh-45)/400))));
+  const dec=p=>Math.round(Math.min(12,Math.max(1.05,.93/p))*100)/100;
+  return {ph,h:dec(ph),a:dec(1-ph)};
+}
+const betsOf=u=>((S.picks[u]||{}).bets)||{};
+const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g});return m};
+function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
+function bank(u){
+  const gm=gameMap();let t=TOK0;
+  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
+  return Math.round(t*100)/100;
+}
+const tk=n=>(Math.round(n*10)/10).toLocaleString()+' tokens';
+function standingsHTML(gs,school){
+  const t={};
+  gs.filter(gDone).forEach(g=>{[[g.h,g.hs,g.as],[g.a,g.as,g.hs]].forEach(([n,f,a])=>{if(!SD_SCHOOLS.includes(n))return;const x=t[n]=t[n]||{n,w:0,l:0,t:0,pf:0,pa:0};x.pf+=f;x.pa+=a;if(f>a)x.w++;else if(f<a)x.l++;else x.t++})});
+  let rows=Object.values(t).sort((a,b)=>(b.w/(b.w+b.l+b.t||1))-(a.w/(a.w+a.l+a.t||1))||(b.pf-b.pa)-(a.pf-a.pa)||a.n.localeCompare(b.n));
+  if(school!=='ALL')rows=rows.filter(x=>x.n===school);
+  if(!rows.length)return'';
+  return `<section class="card"><div class="qh"><h3>Standings</h3><span class="muted">Record, then points for and against</span></div><div class="scroll"><table><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td class="rk">${i+1}</td><td><span class="sch">${slogo(x.n,22)}<b>${esc(x.n)}</b></span></td><td>${x.w}-${x.l}${x.t?'-'+x.t:''}</td><td>${x.pf}</td><td>${x.pa}</td></tr>`).join('')}</tbody></table></div></section>`;
+}
+function picksHTML(){
+  const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10);
+  const open=gs.filter(g=>!gDone(g)),nextW=open.length?Math.min(...open.map(g=>g.w)):null;
+  const list=open.filter(g=>g.w===nextW).sort((a,b)=>(a.d<b.d?-1:a.d>b.d?1:0)||(a.dv||'').localeCompare(b.dv||'')||a.h.localeCompare(b.h));
+  const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',mine=betsOf(ME.uid),gm=gameMap();
+  const bal=ME.uid?bank(ME.uid):TOK0;
+  const staked=Object.entries(mine).reduce((a,[id,b])=>a+(betResult(b,gm[id])==='open'?+b.stake||0:0),0);
+  const avail=Math.round((bal-0)*100)/100;
+  const bankCard=`<section class="card pk-bank"><div><span class="lbl">Your tokens</span><div class="pk-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
+  const card=g=>{
+    const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today,ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||10;
+    const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
+      return `<button class="pk-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="pk-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small></button>`};
+    const od=side?o[side]:0,room=avail+(b?+b.stake:0);
+    let foot='';
+    if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to make picks.</p>';
+    else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'';
+    else if(locked)foot=b?`<p class="muted">Locked: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Picks are closed for this game.</p>';
+    else if(side){
+      const chips=[5,10,25,50].filter(v=>v<=room).concat(room>0&&![5,10,25,50].includes(Math.floor(room))?[Math.floor(room)]:[]);
+      foot=`<div class="pk-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
+      <div class="pk-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span><button class="btn sm" data-act="pkPlace" data-g="${esc(id)}" ${room<1?'disabled':''}>${b?'Update pick':'Lock in pick'}</button>${b?`<button class="btn sm ghost" data-act="pkDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
+    else foot=b?`<p class="muted">Your pick: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a team to pick the winner.</p>';
+    return `<article class="gm pk-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="pk-row">${btn('a',g.a)}<span class="pk-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
+  /* history and the board */
+  const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:betResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
+  const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="pk-h ${x.res}"><span><b>${esc(x.b.s==='h'?x.g.h:x.g.a)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
+  const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t).slice(0,20);
+  const boardCard=board.length?`<section class="card"><div class="qh"><h3>Token leaders</h3></div>${board.map((x,i)=>`<div class="pk-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${tk(x.t)}</b></div>`).join('')}</section>`:'';
+  return bankCard+(list.length?`<div class="qh"><h3>Week ${nextW} picks</h3><span class="muted">${list.length} games, odds set by Varsity</span></div><div class="gm-grid">${list.map(card).join('')}</div>`:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
+}
+function viewGames(){
+  const head=`<div class="head"><h2>Games</h2><p>${UI.gtab==='picks'?'Pick the winners of the upcoming games and grow your tokens.':'Every San Diego Section matchup by week, past scores, and the playoff brackets for each division.'}</p></div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections"><button class="chip" data-act="gtab" data-v="sched" aria-pressed="${UI.gtab!=='picks'}">Schedule / Standings</button><button class="chip" data-act="gtab" data-v="picks" aria-pressed="${UI.gtab==='picks'}">Picks</button></div>`;
+  return head+tabs+(UI.gtab==='picks'?picksHTML():viewSched(''));
 }
 
 /* ---------- player hub ---------- */
@@ -2618,6 +2706,16 @@ document.addEventListener('click',async e=>{
   else if(a==='mweek'){UI.mw=+t.dataset.w;render()}
   else if(a==='gweek'){UI.gw=t.dataset.w==='P'?'P':+t.dataset.w;render()}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
+  else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
+  else if(a==='pkSide'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}
+  else if(a==='pkStake'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{stake:+t.dataset.v});render()}
+  else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb}),'Pick removed');render()}
+  else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('Picks are closed for that game.');return}
+    const cur=betsOf(ME.uid),old=cur[id],ui=UI.pk[id]||{},s=ui.s||(old&&old.s);if(!s){say('Tap a team first.');return}
+    const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||10,Math.floor(room));
+    if(stake<1){say('Not enough tokens.');return}
+    const o=oddsFor(g),nb={...cur,[id]:{s,stake,odds:o[s],w:g.w,at:NOW()}};
+    if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb}),'Pick locked in: '+(s==='h'?g.h:g.a)+' for '+stake+' tokens')){delete UI.pk[id];render()}}
     else if(a==='copy')copyText(t.dataset.code,'Invite code copied','#code');
   else if(a==='fcopy')copyText(t.dataset.code,'Invite code copied','#fcode');
   else if(a==='copyFriends'){
@@ -2838,7 +2936,7 @@ document.addEventListener('click',e=>{
 
 /* ---------- start ---------- */
 function subscribe(){
-  const cols={profiles:'profiles',games:'games',verified:'verified',queue:'queue',groups:'groups',fgroups:'fgroups',lineups:'lineups'};
+  const cols={profiles:'profiles',games:'games',verified:'verified',queue:'queue',groups:'groups',fgroups:'fgroups',lineups:'lineups',picks:'picks'};
   Object.entries(cols).forEach(([k,path])=>DB.collection(path).onSnapshot(snap=>{
     const o={};snap.docs.forEach(d=>{o[d.id]=Object.assign({},d.data(),{id:d.id})});
     S[k]=o;S.loaded[k]=true;touch();
