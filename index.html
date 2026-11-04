@@ -1065,22 +1065,25 @@ function supaDb(sb){
   return{doc,collection:col};
 }
 /* sign in / create account screen */
-const AUTH={mode:'in',busy:false,msg:'',err:''};
+const AUTH={mode:'in',busy:false,msg:'',err:'',step:1,pin:''};
 function authHTML(){
-  if(AUTH.mode==='admin'){const live=ME.mode==='live'&&ME.uid;
+  if(AUTH.mode==='admin'){const live=ME.mode==='live'&&ME.uid,two=AUTH.step===2;
     return `<div class="gcard au" role="dialog" aria-modal="true" aria-labelledby="au-t">
     <div class="au-brand"><img src="logo.png" alt=""><span>VARSITY</span></div>
     <h2 id="au-t">Admin sign in</h2>
-    <p class="muted">For the two Varsity admin accounts only. Use your admin email and password, then pick your admin account and enter the PIN.</p>
+    ${two?`<p class="muted">PIN accepted. Which admin are you signing in as?</p>
+    <div class="au-form">${ADMIN_NAMES.map(n=>`<button class="btn" type="button" data-adpick="${n}" ${AUTH.busy?'disabled':''}>${n}</button>`).join('')}
+      ${AUTH.err?`<p class="au-err" role="alert">${esc(AUTH.err)}</p>`:''}</div>
+    <div class="au-links"><button class="link" data-au="browse">Cancel</button></div>`
+    :`<p class="muted">For Varsity admins. Sign in to your Varsity account, enter the admin PIN, then choose which admin you are.</p>
     <form id="au-admin" class="au-form">
-      ${live?`<p class="muted">Signed in as ${esc(ME.email||'')}.</p>`:`<label class="fld"><span>Admin email</span><input id="aa-email" type="email" autocomplete="email" required></label>
+      ${live?`<p class="muted">Signed in as ${esc(ME.email||'')}.</p>`:`<label class="fld"><span>Your email</span><input id="aa-email" type="email" autocomplete="email" required></label>
       <label class="fld"><span>Password</span><input id="aa-pass" type="password" autocomplete="current-password" required></label>`}
-      <label class="fld"><span>Admin account</span><select id="aa-name">${ADMIN_NAMES.map(n=>`<option>${n}</option>`).join('')}</select></label>
       <label class="fld"><span>Admin PIN</span><input id="aa-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="## - ## - ####" required></label>
       ${AUTH.err?`<p class="au-err" role="alert">${esc(AUTH.err)}</p>`:''}${AUTH.msg?`<p class="au-ok" role="status">${esc(AUTH.msg)}</p>`:''}
-      <button class="btn" type="submit" ${AUTH.busy?'disabled':''}>${AUTH.busy?'One moment…':'Sign in as admin'}</button>
+      <button class="btn" type="submit" ${AUTH.busy?'disabled':''}>${AUTH.busy?'One moment…':'Continue'}</button>
     </form>
-    <div class="au-links"><button class="link" data-au="up">Create admin account</button><button class="link" data-au="in">Back to sign in</button></div>
+    <div class="au-links"><button class="link" data-au="up">Create account</button><button class="link" data-au="browse">Cancel</button></div>`}
   </div>`}
   const up=AUTH.mode==='up',rs=AUTH.mode==='reset';
   return `<div class="gcard au" role="dialog" aria-modal="true" aria-labelledby="au-t">
@@ -1094,7 +1097,7 @@ function authHTML(){
       ${AUTH.err?`<p class="au-err" role="alert">${esc(AUTH.err)}</p>`:''}${AUTH.msg?`<p class="au-ok" role="status">${esc(AUTH.msg)}</p>`:''}
       <button class="btn" type="submit" ${AUTH.busy?'disabled':''}>${AUTH.busy?'One moment…':rs?'Send reset link':up?'Create account':'Sign in'}</button>
     </form>
-    <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button>'}<button class="link" data-au="admin">Admin sign in</button><button class="link" data-au="browse">Keep browsing</button></div>
+    <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button>'}<button class="link" data-au="browse">Keep browsing</button></div>
   </div>`;
 }
 function openAuth(){const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
@@ -1106,18 +1109,28 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='au-admin')return;e.preventDefault();e.stopImmediatePropagation();
-  const name=$('#aa-name').value,pin=$('#aa-pin').value,em=$('#aa-email')?$('#aa-email').value.trim():'',pw=$('#aa-pass')?$('#aa-pass').value:'';
+  const pin=$('#aa-pin').value,em=$('#aa-email')?$('#aa-email').value.trim():'',pw=$('#aa-pass')?$('#aa-pass').value:'';
   AUTH.busy=true;AUTH.err='';AUTH.msg='';
+  const wasIn=ME.mode==='live'&&ME.uid;
   try{
-    if(!(ME.mode==='live'&&ME.uid)){const {error}=await SB.auth.signInWithPassword({email:em,password:pw});if(error)throw error}
-    const {data,error}=await SB.rpc('admin_unlock',{p_username:name,p_pin:pin});if(error)throw error;
-    if(data==='ok'){location.hash='#admin';location.reload();return}
-    /* not an admin or wrong PIN: do not leave a stranger signed in through this door */
-    if(!(ME.mode==='live'&&ME.uid)){try{await SB.auth.signOut()}catch(_){}}
-    AUTH.err=data==='locked'?'Too many wrong tries. Wait 15 minutes and try again.':data==='denied'?'That account is not an admin.':'Wrong account or PIN.';
+    if(!wasIn){const {error}=await SB.auth.signInWithPassword({email:em,password:pw});if(error)throw error}
+    const {data,error}=await SB.rpc('admin_verify_pin',{p_pin:pin});if(error)throw error;
+    if(data==='ok'){AUTH.pin=pin;AUTH.step=2;AUTH.wasIn=wasIn}
+    else{
+      if(!wasIn){try{await SB.auth.signOut()}catch(_){}}
+      AUTH.err=data==='locked'?'Too many wrong tries. Wait 15 minutes and try again.':data==='denied'?'That account is not an admin.':'Wrong PIN.'}
   }catch(err){const m=(err&&err.message)||'';AUTH.err=/invalid login/i.test(m)?'That email and password don’t match.':/not confirmed/i.test(m)?'Confirm your email first. Check your inbox for the link.':'Could not sign in. Try again.'}
   AUTH.busy=false;openAuth();if($('#aa-email'))$('#aa-email').value=em;
 },true);
+document.addEventListener('click',async e=>{
+  const b=e.target.closest&&e.target.closest('[data-adpick]');if(!b)return;
+  AUTH.busy=true;AUTH.err='';
+  try{const {data,error}=await SB.rpc('admin_unlock',{p_username:b.dataset.adpick,p_pin:AUTH.pin});if(error)throw error;
+    if(data==='ok'){AUTH.pin='';location.hash='#admin';location.reload();return}
+    AUTH.err='That did not work. Start again.';AUTH.step=1}
+  catch(_){AUTH.err='Could not sign in. Try again.';AUTH.step=1}
+  AUTH.busy=false;openAuth();
+});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='au-form')return;e.preventDefault();e.stopImmediatePropagation();
   const email=$('#au-email').value.trim(),pw=$('#au-pass')?$('#au-pass').value:'';
@@ -2263,9 +2276,9 @@ async function adLoad(){
 }
 const adWhen=t=>t?new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'never';
 function viewAdmin(){
-  if(!ME.adminAcct)return `<div class="head"><h2>Admin</h2><p>This area is only for Varsity admins.</p></div>`;
+  if(!ME.uid||ME.mode!=='live')return `<div class="head"><h2>Admin</h2><p>Sign in, then use Settings → Admin sign in.</p></div>`;
   if(!ME.admin)return `<div class="head"><h2>Admin</h2><p>Enter your admin account and PIN to unlock the admin tools.</p></div>
-    <section class="card"><form id="ad-unlock" class="au-form">${adUnlockFields()}<p class="au-err" id="ad-err" role="alert" hidden></p><button class="btn" type="submit">Unlock admin</button></form></section>`;
+    <section class="card"><form id="ad-unlock" class="au-form"><label class="fld"><span>Admin PIN</span><input id="ad-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="## - ## - ####" required></label><p class="au-err" id="ad-err" role="alert" hidden></p><button class="btn" type="submit">Continue</button></form></section>`;
   if(AD.rows===null)adLoad();
   const rows=(AD.rows||[]).map(r=>({...r,p:S.profiles[r.uid]||null}));
   const q=AD.q.trim().toLowerCase();
@@ -2288,9 +2301,9 @@ function viewAdmin(){
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='ad-unlock')return;e.preventDefault();
   const er=$('#ad-err'),btn=e.target.querySelector('button');btn.disabled=true;
-  try{const {data,error}=await SB.rpc('admin_unlock',{p_username:$('#ad-name').value,p_pin:$('#ad-pin').value});if(error)throw error;
-    if(data==='ok'){ME.admin=true;AD.rows=null;render();return}
-    er.textContent=data==='locked'?'Too many wrong tries. Wait 15 minutes and try again.':data==='denied'?'This account is not an admin.':'Wrong account or PIN.';er.hidden=false}
+  try{const pin=$('#ad-pin').value;const {data,error}=await SB.rpc('admin_verify_pin',{p_pin:pin});if(error)throw error;
+    if(data==='ok'){AUTH.pin=pin;AUTH.step=2;AUTH.mode='admin';openAuth();btn.disabled=false;return}
+    er.textContent=data==='locked'?'Too many wrong tries. Wait 15 minutes and try again.':data==='denied'?'This account is not an admin.':'Wrong PIN.';er.hidden=false}
   catch(_){er.textContent='Could not check the PIN. Try again.';er.hidden=false}
   btn.disabled=false;
 });
@@ -2309,7 +2322,7 @@ document.addEventListener('click',async e=>{
 
 /* ---------- render ---------- */
 const VIEWS=['hub','league','groups','games','me','scoring','admin','desk'];
-const viewOK=v=>VIEWS.includes(v)&&(v!=='admin'||ME.adminAcct)&&(v!=='desk'||canDesk());
+const viewOK=v=>VIEWS.includes(v)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
 function bannerHTML(){
   const b=[];
   /* no sign-up banners */
@@ -2321,7 +2334,7 @@ function bannerHTML(){
 }
 function chrome(v){
   document.body.dataset.view=v;
-  const ta=$('#tab-admin');if(ta)ta.hidden=!ME.adminAcct;
+  const ta=$('#tab-admin');if(ta)ta.hidden=!ME.admin;
   document.querySelectorAll('.tabs a').forEach(a=>{a.removeAttribute('aria-current');if(a.getAttribute('href')==='#'+v)a.setAttribute('aria-current','page')});
   
   const n=computeNotes().length,bc=$('#bcount');if(bc){bc.textContent=n;bc.hidden=!n}
@@ -2666,6 +2679,9 @@ boot();
     if(s&&!s.multiple&&!(s.size>1)&&e.button===0){e.preventDefault();if(sel===s){close();return}s.focus({preventScroll:true});open(s);return}
     if(dd&&!dd.contains(e.target))close()},true);
   document.addEventListener('touchstart',e=>{if(dd&&!dd.contains(e.target)&&!(e.target.closest&&e.target.closest('select')))close()},{passive:true,capture:true});
+  /* phones: a tap would otherwise bring up the system picker, so open the themed panel instead */
+  document.addEventListener('touchend',e=>{const s=e.target.closest&&e.target.closest('select');
+    if(s&&!s.multiple&&!(s.size>1)&&!s.disabled){e.preventDefault();if(sel===s){close();return}s.focus({preventScroll:true});open(s)}},{passive:false,capture:true});
   document.addEventListener('keydown',e=>{const s=e.target;
     if(dd&&(s===sel||dd.contains(s))){key(e);return}
     if(s&&s.tagName==='SELECT'&&!s.multiple&&(e.key==='Enter'||e.key===' '||(e.altKey&&e.key==='ArrowDown'))){e.preventDefault();open(s)}},true);
@@ -2685,11 +2701,12 @@ boot();
       '<a role="menuitem" href="#hub">Account info</a>'+
       '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':ME.mode==='guest'?'Sign in or create account':'Pick a name')+'</button>'+
       '<a role="menuitem" href="#scoring">Scoring rules</a>'+
+      (ME.admin?'<a role="menuitem" href="#admin">Admin area</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
       (joined?'<hr><button role="menuitem" class="dz" data-act="delProfile">Delete my profile</button>':'')+
       (ME.mode==='live'?'<hr><button role="menuitem" id="sm-out">Sign out'+(ME.email?' <small style="opacity:.6;margin-left:auto">'+esc(ME.email)+'</small>':'')+'</button>':'');
     document.body.appendChild(m);g.setAttribute('aria-expanded','true');
     const r=g.getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,innerWidth-r.right)+'px';
-    m.addEventListener('click',e=>{if(e.target.closest('#sm-out'))signOut();setTimeout(close,0)});
+    m.addEventListener('click',e=>{if(e.target.closest('#sm-out'))signOut();if(e.target.closest('#sm-admin')){AUTH.mode='admin';AUTH.step=1;AUTH.pin='';AUTH.err='';AUTH.msg='';openAuth()}setTimeout(close,0)});
     const f=m.querySelector('a,button');if(f)f.focus();});
   document.addEventListener('click',e=>{if(m&&!m.contains(e.target)&&e.target!==g)close()});
   document.addEventListener('keydown',e=>{if(m&&e.key==='Escape'){close();g.focus()}});
