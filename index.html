@@ -423,6 +423,7 @@ body{background:radial-gradient(ellipse at 12% 0%,rgba(41,125,221,.10),transpare
 .row:not(.hd):nth-child(even){background:color-mix(in srgb,var(--surface2) 62%,var(--surface))}
 .row:not(.hd):hover{background:var(--tint)}
 .rk{color:color-mix(in srgb,var(--muted) 75%,#2C83BC)}
+.pos.BN{--c:#8A97AD}
 .pos.QB{--c:#E65B28}.pos.RB{--c:#079B82}.pos.WR{--c:#2868E8}.pos.TE{--c:#9655D8}.pos.DEF{--c:#66758C}.pos.K{--c:#F2C230}
 .note{border-color:color-mix(in srgb,var(--line) 70%,#63A9D8);background:linear-gradient(100deg,var(--surface2),color-mix(in srgb,#159AA6 6%,var(--surface2)))}
 @media (prefers-reduced-motion:no-preference){
@@ -597,6 +598,9 @@ select option{background:#0B1730;color:#EAF0F8}
 .lg-vs.wait{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
 .lg-code{font-family:var(--f-display);letter-spacing:.12em;color:var(--accent)}
 .lg-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+.lg-bench-h{display:flex;flex-direction:column;gap:2px;margin:18px 0 8px}.lg-bench-h h4{margin:0;font:800 .9rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:#BFD3FF}
+.lg-bench .lg-card{opacity:.92;border-style:dashed}
+.pk li button .lg-slot{min-width:44px}
 .lg-lhead{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 0 10px}
 .lg-total{display:flex;flex-direction:column;align-items:flex-end}.lg-total small{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
 .lg-total b{font:900 2rem/1 var(--f-display);color:var(--accent)}
@@ -1377,28 +1381,34 @@ const SLOTS_DRAFT=[
   {k:'K',label:'K',elig:['K']}];
 const slotOk=(s,p)=>!!p&&s.elig.includes(p.pos)&&(!s.sub||s.sub.includes(p.sub||p.pos));
 /* Snake draft rosters are customizable. Default: one of each position, with two receivers. Leagues already drafting before this existed keep the old ten spots. */
-const ROSTER_DEFAULT={QB:1,RB:1,WR:2,TE:1,DL:1,LB:1,DB:1,K:1,FLEX:0};
-const ROSTER_ORDER=['QB','RB','WR','TE','FLEX','DL','LB','DB','K'];
+/* New snake drafts: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K plus 3 bench spots. Bench players are drafted and can be swapped into a starting spot, but never count toward the lineup total. */
+const ROSTER_DEFAULT={QB:1,RB:2,WR:2,TE:1,FLEX:1,DL:1,LB:1,DB:1,K:1,BN:3};
+/* a league that saved a roster before bench spots existed keeps exactly what it had: missing counts fall back to these, not to the new default */
+const ROSTER_LEGACY={QB:1,RB:1,WR:2,TE:1,DL:1,LB:1,DB:1,K:1,FLEX:0,BN:0};
+const ROSTER_ORDER=['QB','RB','WR','TE','FLEX','DL','LB','DB','K','BN'];
 const ROSTER_DEF={QB:{elig:['QB']},RB:{elig:['RB']},WR:{elig:['WR']},TE:{elig:['TE']},FLEX:{elig:['RB','WR','TE']},
-  DL:{elig:['DEF'],sub:['DL','DEF']},LB:{elig:['DEF'],sub:['LB','DEF']},DB:{elig:['DEF'],sub:['DB','CB','S','DEF']},K:{elig:['K']}};
-const ROSTER_MAX=3,ROSTER_TOTAL_MAX=14;
-function cleanRoster(r){const o={};let t=0;for(const k of ROSTER_ORDER){let n=r&&r[k]!=null?Math.floor(+r[k]):ROSTER_DEFAULT[k];if(!(n>=0))n=0;n=Math.min(n,k==='FLEX'?2:ROSTER_MAX);o[k]=n;t+=n}
+  DL:{elig:['DEF'],sub:['DL','DEF']},LB:{elig:['DEF'],sub:['LB','DEF']},DB:{elig:['DEF'],sub:['DB','CB','S','DEF']},K:{elig:['K']},
+  BN:{elig:['QB','RB','WR','TE','DEF','K'],bench:true}};
+const ROSTER_MAX=3,ROSTER_TOTAL_MAX=14,ROSTER_BENCH_MAX=5;   /* TOTAL_MAX counts starting spots only */
+function cleanRoster(r){const base=r?ROSTER_LEGACY:ROSTER_DEFAULT,o={};let t=0;for(const k of ROSTER_ORDER){let n=r&&r[k]!=null?Math.floor(+r[k]):base[k];if(!(n>=0))n=0;n=Math.min(n,k==='FLEX'?2:k==='BN'?ROSTER_BENCH_MAX:ROSTER_MAX);o[k]=n;if(k!=='BN')t+=n}
   if(t<1||t>ROSTER_TOTAL_MAX)return Object.assign({},ROSTER_DEFAULT);return o}
 const _rosterCache={};
 function slotsFromRoster(r){r=cleanRoster(r);const key=JSON.stringify(r);if(_rosterCache[key])return _rosterCache[key];
   const out=[];for(const k of ROSTER_ORDER)for(let i=1;i<=r[k];i++)out.push(Object.assign({k:i===1?k:k+i,label:k},ROSTER_DEF[k]));
   return _rosterCache[key]=out}
-const rosterText=r=>{r=cleanRoster(r);return ROSTER_ORDER.filter(k=>r[k]).map(k=>(r[k]>1?r[k]+' ':'')+k).join(', ')};
-const rosterCount=r=>{r=cleanRoster(r);return ROSTER_ORDER.reduce((a,k)=>a+r[k],0)};
+const rosterText=r=>{r=cleanRoster(r);return ROSTER_ORDER.filter(k=>r[k]).map(k=>k==='BN'?r[k]+' bench':(r[k]>1?r[k]+' ':'')+k).join(', ')};
+/* starting spots only: the bench does not count toward the lineup */
+const rosterCount=r=>{r=cleanRoster(r);return ROSTER_ORDER.reduce((a,k)=>k==='BN'?a:a+r[k],0)};
 function rosterPickerHTML(pre,r){r=cleanRoster(r);
-  return `<div class="ro-grid" data-ro="${pre}">${ROSTER_ORDER.map(k=>`<label class="ro-cell"><span>${k}</span><select id="${pre}-${k}" aria-label="${k} spots">${Array.from({length:(k==='FLEX'?2:ROSTER_MAX)+1},(_,i)=>`<option value="${i}" ${i===r[k]?'selected':''}>${i}</option>`).join('')}</select></label>`).join('')}</div>`}
+  return `<div class="ro-grid" data-ro="${pre}">${ROSTER_ORDER.map(k=>`<label class="ro-cell"><span>${k==='BN'?'Bench':k}</span><select id="${pre}-${k}" aria-label="${k==='BN'?'Bench':k} spots">${Array.from({length:(k==='FLEX'?2:k==='BN'?ROSTER_BENCH_MAX:ROSTER_MAX)+1},(_,i)=>`<option value="${i}" ${i===r[k]?'selected':''}>${i}</option>`).join('')}</select></label>`).join('')}</div>`}
 function readRoster(pre){const r={};for(const k of ROSTER_ORDER){const e=document.getElementById(pre+'-'+k);r[k]=e?+e.value:ROSTER_DEFAULT[k]}return r}
 const slotsOf=g=>{
   if(!g||g.mode==='budget'||!g.mode)return SLOTS;
   if(g.roster)return slotsFromRoster(g.roster);
   const d=g.draft;return d&&(d.order||d.picks)?SLOTS_DRAFT:slotsFromRoster(ROSTER_DEFAULT);
 };
-const slotsFor=gid=>slotsOf(S.groups[gid]);
+/* slots that score: the bench is left out */
+const slotsFor=gid=>slotsOf(S.groups[gid]).filter(s=>!s.bench);
 const SLOTS=[
   {k:'QB',label:'QB',elig:['QB']},{k:'RB',label:'RB',elig:['RB']},{k:'WR',label:'WR',elig:['WR']},
   {k:'TE',label:'TE',elig:['TE']},{k:'FLEX',label:'FLEX',elig:['RB','WR','TE']},{k:'DEF',label:'DEF',elig:['DEF']},{k:'K',label:'K',elig:['K']}
@@ -1830,23 +1840,25 @@ function lineupHTML(g,uid){
   const canEdit=mine&&(mode==='budget'||di.status==='done'),canAdd=canEdit||(mine&&myTurn);
   let total=0;
   const scopeLbl=UI.scope==='season'?'season':'wk '+UI.scope;
-  const SL=slotsOf(g);
-  const cards=SL.map(s=>{
-    const p=pByKey(ro[s.k]),a=p?agg(p,UI.scope):null;if(a)total+=a.v;
+  const SL=slotsOf(g),ST=SL.filter(s=>!s.bench),BNS=SL.filter(s=>s.bench);
+  const card=s=>{
+    const p=pByKey(ro[s.k]),a=p?agg(p,UI.scope):null;if(a&&!s.bench)total+=a.v;   /* bench players never count */
     const tag=`<span class="lg-slot">${s.label}</span>`;
-    const what=s.k==='FLEX'?'a RB, WR or TE':s.k==='DEF'?'a defender':s.k==='K'?'a kicker':s.k==='DL'?'a defensive lineman':s.k==='LB'?'a linebacker':s.k==='DB'?'a defensive back':'a '+s.label;
+    const what=s.bench?'a bench player':s.k==='FLEX'?'a RB, WR or TE':s.k==='DEF'?'a defender':s.k==='K'?'a kicker':s.k==='DL'?'a defensive lineman':s.k==='LB'?'a linebacker':s.k==='DB'?'a defensive back':'a '+s.label;
     if(!p)return `<li class="lg-card empty">${tag}${canAdd?`<button class="lg-add" data-act="lgPick" data-slot="${s.k}"><span>+</span> ${myTurn?'Draft':'Add'} ${what}</button>`:`<span class="muted">${mine&&mode==='draft'&&di.status!=='done'?(di.status==='live'?'Fill this spot on your draft turn':'Fills during the draft'):'Empty'}</span>`}</li>`;
     const lg=p.games.map(x=>x?pts(x.stat):null).filter(v=>v!=null),last=lg.length?lg[lg.length-1]:null;
     return `<li class="lg-card">${tag}
       <button class="lg-who" data-act="player" data-id="${esc(p.key)}">${av(p.name,p.school,42)}<span class="lt"><b>${esc(p.name)}</b><i>${pb(p.pos,p.sub)}<span>${slogo(p.school)}${esc(p.school)}</span></i></span></button>
       <span class="lg-pts"><b>${a&&a.n?f1(a.v):'0.0'}</b><small>${mode==='budget'?'<em class="lg-price">'+money(priceOf(p))+'</em> ':''}<em class="lg-pj">proj ${f1(proj(p).pts)}</em> · ${scopeLbl}${last!=null&&UI.scope==='season'?' · last '+f1(last):''}</small></span>
-      ${canEdit?`<span class="lg-acts"><button class="btn sm ghost" data-act="lgPick" data-slot="${s.k}">Swap</button><button class="lg-x" data-act="lgClear" data-slot="${s.k}" aria-label="Remove ${esc(p.name)}">✕</button></span>`:''}
+      ${canEdit?`<span class="lg-acts">${BNS.length?`<button class="btn sm" data-act="lgSub" data-slot="${s.k}">${s.bench?'Sub in':'Sub out'}</button>`:''}<button class="btn sm ghost" data-act="lgPick" data-slot="${s.k}">Swap</button><button class="lg-x" data-act="lgClear" data-slot="${s.k}" aria-label="Remove ${esc(p.name)}">✕</button></span>`:''}
     </li>`;
-  }).join('');
-  const filled=SL.filter(s=>pByKey(ro[s.k])).length;
+  };
+  const cards=ST.map(card).join(''),bench=BNS.map(card).join('');
+  const filled=ST.filter(s=>pByKey(ro[s.k])).length,bfilled=BNS.filter(s=>pByKey(ro[s.k])).length;
   const sp=mode==='budget'?spent(g,uid):0;
   const bar=mode==='budget'?`<div class="lg-budget"><div class="lg-bt"><span>Spent <b>${money(sp)}</b> of ${money(CAP)}</span><span class="${CAP-sp<0?'neg':''}"><b>${money(CAP-sp)}</b> left</span></div><div class="lg-bar"><i style="width:${Math.min(100,sp/CAP*100)}%"></i></div></div>`:'';
-  return bar+`<div class="lg-lhead"><span class="muted">${filled} of ${SL.length} spots filled</span><span class="lg-total"><small>Lineup total</small><b>${f1(total)}</b></span></div><ol class="lg-cards">${cards}</ol>`;
+  return bar+`<div class="lg-lhead"><span class="muted">${filled} of ${ST.length} starting spots filled</span><span class="lg-total"><small>Lineup total</small><b>${f1(total)}</b></span></div><ol class="lg-cards">${cards}</ol>`
+    +(BNS.length?`<div class="lg-bench-h"><h4>Bench</h4><small class="muted">${bfilled} of ${BNS.length} filled. Bench players do not score${canEdit?'. Tap Sub in to move one into a matching starting spot.':'.'}</small></div><ol class="lg-cards lg-bench">${bench}</ol>`:'');
 }
 function matchupsHTML(g){
   const ids=Object.keys(g.members).sort(),cw=CURW();
@@ -1871,7 +1883,7 @@ function viewGroups(){
         <label class="lg-mode"><input type="radio" name="lg-mode" value="draft" checked><span><b>Snake draft</b><small>Classic fantasy football. Take turns picking players for each spot, and every player is on only one team. Default roster: one each of QB, RB, TE, DL, LB, DB and K, plus 2 WR. You can change it below.</small></span></label>
         <label class="lg-mode"><input type="radio" name="lg-mode" value="budget"><span><b>Budget</b><small>Like Premier League fantasy. Build the best team for ${money(CAP)}, and friends can pick the same players.</small></span></label>
       </div>
-      <div class="ro-wrap card-sub"><b>Roster spots</b><small class="muted">Snake draft only. How many of each position every team drafts. Default is one each, with 2 WR.</small>${rosterPickerHTML('ro-new',ROSTER_DEFAULT)}</div>
+      <div class="ro-wrap card-sub"><b>Roster spots</b><small class="muted">Snake draft only. How many of each position every team drafts. Default: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots. Bench players do not score; swap them into a starting spot any time after the draft.</small>${rosterPickerHTML('ro-new',ROSTER_DEFAULT)}</div>
       <div class="lg-row"><input id="new-name" maxlength="32" placeholder="League name, like Friday Night Crew" autocomplete="off" aria-label="League name"><button class="btn" type="submit">Create</button></div></form>`;
   const joinForm=`<form class="card lg-form" id="join-form"><h3>Join a league</h3><p class="muted">Paste the invite code a friend sent you.</p>
       <div class="lg-row"><input id="join-code" maxlength="12" placeholder="Invite code, like FNL-7Q2K" autocomplete="off" aria-label="Invite code"><button class="btn" type="submit">Join</button></div></form>`;
@@ -1936,7 +1948,8 @@ function bestAvail(g,pos,n){
 }
 /* the best player who fits one of this team's open spots */
 function autoChoice(g,uid){
-  const open=openSlots(g,uid);if(!open.length)return null;
+  const all=openSlots(g,uid);if(!all.length)return null;
+  const open=all.some(s=>!s.bench)?all.filter(s=>!s.bench):all;   /* fill the starting spots first, bench last */
   const taken=draftedSet(g);
   let best=null;
   for(const p of players()){if(taken.has(p.key))continue;const s=open.find(x=>slotOk(x,p));if(!s)continue;
@@ -1991,7 +2004,7 @@ function draftRoomHTML(g){
         <span class="muted">${me?'Pick from Best available or tap an open spot in your lineup.':until===null?'You’re done drafting.':until===1?'You’re up next!':`You pick in ${until} ${until===1?'pick':'picks'}.`}</span></div></div>
       ${c?`<div class="dr-timer ${left!==null&&left<=15?'low':''}" data-clock="${c}" data-start="${pickStart(g,di)}"><b id="dr-left">${Math.floor((left||0)/60)}:${String((left||0)%60).padStart(2,'0')}</b><i><span style="width:${left===null?0:left/c*100}%"></span></i></div>`:''}
     </div>
-    <div class="dr-needs"><small>Your open spots</small>${needs.length?needs.map(s=>`<span class="pos ${s.elig[0]==='DEF'?'DEF':s.elig.length>1?'FLEX':s.elig[0]}">${s.label}</span>`).join(''):'<span class="muted">Your roster is full</span>'}
+    <div class="dr-needs"><small>Your open spots</small>${needs.length?needs.map(s=>`<span class="pos ${s.bench?'BN':s.elig[0]==='DEF'?'DEF':s.elig.length>1?'FLEX':s.elig[0]}">${s.label}</span>`).join(''):'<span class="muted">Your roster is full</span>'}
       <label class="dr-auto"><input type="checkbox" data-act="dAuto" ${auto?'checked':''}> Autopick for me</label>${soundToggle()}</div>
     <div class="chips dr-tabs" role="tablist"><button class="chip" data-act="dtab" data-v="best" aria-pressed="${UI.dtab==='best'}">Best available</button><button class="chip" data-act="dtab" data-v="board" aria-pressed="${UI.dtab==='board'}">Draft board</button><button class="chip" data-act="dtab" data-v="log" aria-pressed="${UI.dtab==='log'}">Recent picks</button></div>
     ${UI.dtab==='board'?boardHTML(g,di):UI.dtab==='log'?
@@ -2018,7 +2031,7 @@ function viewScoring(){
       ${item('xpm','Extra point made')}${item('xpMiss','Extra point missed')}${item('fgm','Field goal made')}${item('fgMiss','Field goal missed')}<li><span>Punting, by the game's average punt<small>Under 30 yds: 0 · 30–39.9 yds: 1 per punt · 40–49.9 yds: 2.5 per punt · 50+ yds: 3.25 per punt</small></span><b>tiers</b></li>${item('in20','Punt inside the 20')}${item('retTD','Kick or punt return touchdown')}
     </ul></section>
     <section class="card"><h3>Lineups and matchups</h3>
-      <p><b>Snake draft leagues:</b> by default one each of QB, RB, TE, DL, LB, DB and K, plus 2 WR. The league owner can change how many of each position (and add FLEX, any RB, WR or TE) before the draft starts.</p><p><b>Budget leagues:</b> 7 spots. QB, RB, WR, TE, FLEX, DEF (any defender) and K, for $70.0M.</p>
+      <p><b>Snake draft leagues:</b> by default 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX (any RB, WR or TE), 1 DL, 1 LB, 1 DB and 1 K, plus 3 bench spots. Bench players do not count toward your lineup total, but you can swap one into a matching starting spot at any time after the draft. The league owner can change how many of each before the draft starts.</p><p><b>Budget leagues:</b> 7 spots. QB, RB, WR, TE, FLEX, DEF (any defender) and K, for $70.0M.</p>
       <p>In a league, you face one other member each week and the higher lineup total wins.</p>
       <p class="muted">Example: a QB with 250 passing yards, 3 passing TD, 1 INT and 30 rushing yards scores 10 + 12 − 2 + 3 = 23 points.</p></section>
     <section class="card"><h3>Approval</h3>
@@ -2954,7 +2967,7 @@ boot();
     const left=mode==='budget'?CAP-spent(g,ME.uid)+(cur?priceOf(cur):0)-4*openOthers:Infinity;
     const all=players().filter(p=>slotOk(s,p)).map(p=>({p,a:agg(p,'season'),c:mode==='budget'?priceOf(p):0})).sort((x,y)=>y.a.v-x.a.v);
     pk=document.createElement('div');pk.className='pk-bg';
-    const title=(di.status==='live'?'Draft your ':'Pick your ')+(s.k==='FLEX'?'FLEX (RB, WR or TE)':s.k==='DEF'?'defender':s.k==='K'?'kicker':s.k==='DL'?'defensive lineman':s.k==='LB'?'linebacker':s.k==='DB'?'defensive back':s.label);
+    const title=(di.status==='live'?'Draft your ':'Pick your ')+(s.bench?'bench player':s.k==='FLEX'?'FLEX (RB, WR or TE)':s.k==='DEF'?'defender':s.k==='K'?'kicker':s.k==='DL'?'defensive lineman':s.k==='LB'?'linebacker':s.k==='DB'?'defensive back':s.label);
     pk.innerHTML=`<div class="pk" role="dialog" aria-modal="true" aria-label="${title}"><div class="pk-h"><h3>${title}</h3><button class="lg-x" data-pk="close" aria-label="Close">✕</button></div>
       ${mode==='budget'?`<p class="pk-sum">You can spend up to <b>${money(left)}</b> on this spot.${openOthers?' That keeps '+money(4*openOthers)+' for your '+openOthers+' other empty '+(openOthers===1?'spot':'spots')+'.':''}${cur?' It includes the '+money(priceOf(cur))+' back from '+esc(cur.name)+'.':''}</p>`:''}
       <div class="pk-tools"><input type="search" placeholder="Search players or schools" aria-label="Search players"></div><ul></ul></div>`;
@@ -2971,6 +2984,28 @@ boot();
         if(mode==='draft'&&di.status==='live'){await draftPick(g,slot,k)}else await setSlot(slot,k)}});
     document.body.appendChild(pk);if(matchMedia('(pointer:fine)').matches)q.focus();
   };
+  /* swap two of your own players between a starting spot and a bench spot */
+  let sk=null;const closeSk=()=>{if(sk){sk.remove();sk=null}};
+  const openSub=slot=>{
+    const g=curGroup();if(!g)return;const SL=slotsOf(g),from=SL.find(x=>x.k===slot);if(!from)return;
+    const ro=lineupOf(g.id,ME.uid),fp=pByKey(ro[from.k]);if(!fp)return;
+    const opts=SL.filter(x=>!!x.bench!==!!from.bench).map(x=>({s:x,p:pByKey(ro[x.k])}))
+      .filter(o=>slotOk(o.s,fp)&&(!o.p||slotOk(from,o.p)));   /* both players have to fit their new spot */
+    if(!opts.length){say(from.bench?'No starting spot fits '+fp.name:'No bench player fits this spot');return}
+    closeSk();
+    const title=from.bench?'Sub in '+fp.name:'Sub out '+fp.name;
+    const row=o=>`<li><button data-sub="${o.s.k}"><span class="lg-slot">${o.s.label}</span><span class="lt">${o.p?`<b>${esc(o.p.name)}</b><i>${pb(o.p.pos,o.p.sub)}<span>${esc(o.p.school)}</span></i>`:`<b class="muted">Empty ${from.bench?'starting':'bench'} spot</b>`}</span><span class="pv"><b>${o.p?f1(agg(o.p,'season').v):'-'}</b><small>season pts</small></span></button></li>`;
+    sk=document.createElement('div');sk.className='pk-bg';
+    sk.innerHTML=`<div class="pk" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="pk-h"><h3>${esc(title)}</h3><button class="lg-x" data-pk="close" aria-label="Close">✕</button></div><p class="pk-sum">${from.bench?'Choose the starting spot to move them into.':'Choose who takes this spot from the bench.'} The two players trade places, so nobody is dropped.</p><ul>${opts.map(row).join('')}</ul></div>`;
+    sk.addEventListener('click',async e=>{
+      if(e.target===sk||e.target.closest('[data-pk=close]')){closeSk();return}
+      const b=e.target.closest('button[data-sub]');if(!b)return;
+      const o=opts.find(x=>x.s.k===b.dataset.sub);if(!o)return;closeSk();
+      await act(()=>upsert('lineups/'+ME.uid,{g:{[g.id]:{[from.k]:o.p?o.p.key:null,[o.s.k]:fp.key}}}),
+        from.bench?fp.name+' moved into '+o.s.label:fp.name+' moved to the bench');
+    });
+    document.body.appendChild(sk);
+  };
   const draftPick=window.draftPick=async(g,slot,key,isAuto)=>{
     const fresh=S.groups[g.id]?Object.assign({id:g.id},S.groups[g.id]):g,di=draftInfo(fresh);
     if(di.status!=='live'||di.uid!==ME.uid){say('That pick is no longer yours');return}
@@ -2978,12 +3013,13 @@ boot();
     const ok=await act(()=>upsert('groups/'+g.id,{draft:{picks:{[di.i]:Object.assign({uid:ME.uid,key,slot,at:NOW()},isAuto?{auto:true}:{})}}}));
     if(ok){window.__draftLocal&&window.__draftLocal()}
   };
-  document.addEventListener('keydown',e=>{if(pk&&e.key==='Escape')closePk()});
+  document.addEventListener('keydown',e=>{if(pk&&e.key==='Escape')closePk();if(sk&&e.key==='Escape')closeSk()});
   document.addEventListener('click',async e=>{
     const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
     if(a==='lgPanel'){UI.lgp=UI.lgp===t.dataset.v?null:t.dataset.v;render();const f=document.querySelector(UI.lgp==='new'?'#new-name':'#join-code');if(f)f.focus()}
     else if(a==='lgPick'){if(typeof needJoin==='function'&&needJoin('build a lineup'))return;openPk(t.dataset.slot)}
     else if(a==='lgClear'){await setSlot(t.dataset.slot,null)}
+    else if(a==='lgSub')openSub(t.dataset.slot)
     else if(a==='lgRoster'){const g=curGroup();if(!g||g.ownerId!==ME.uid)return;
       const d=g.draft;if(d&&(d.order||d.status==='live'||d.status==='done')){say('The roster is locked once the draft starts');return}
       const r=readRoster('ro-edit'),n=rosterCount(r);if(n<1||n>ROSTER_TOTAL_MAX){say('Pick between 1 and '+ROSTER_TOTAL_MAX+' spots');return}
