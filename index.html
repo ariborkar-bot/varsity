@@ -1032,6 +1032,46 @@ select option{background:#0B1730;color:#EAF0F8}
 .gm-divs{margin-bottom:10px}
 .bt-all{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-color:rgba(255,194,61,.5)}
 .bt-all .bt-go{margin:0}
+
+/* budget team builder */
+.bd-card{display:flex;flex-direction:column;gap:12px;padding:16px;margin:4px 0 14px;border-radius:18px;border:1px solid rgba(255,194,61,.4);background:linear-gradient(160deg,#10285F,#0B1A40);box-shadow:0 14px 34px -18px rgba(0,0,0,.7)}
+.bd-card.over{border-color:var(--neg)}
+.bd-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.bd-big small,.bd-stats small,.bd-pkinfo small{display:block;color:#9FB6E6;font:700 .7rem var(--f-body);letter-spacing:.09em;text-transform:uppercase}
+.bd-big b{font:900 2.7rem/1 var(--f-display);color:#FFC23D;letter-spacing:.01em}.bd-card.over .bd-big b{color:var(--neg)}
+.bd-side{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:.84rem;color:#BFD0F2}.bd-side b{color:#fff}
+.bd-bar{height:12px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+.bd-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2F6BFF,#8FD0FF 60%,#FFC23D);transition:width .35s}
+.bd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bd-stats>div{padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(160,190,255,.16)}
+.bd-stats b{font:900 1.2rem/1.2 var(--f-display)}
+.bd-warn{margin:0;padding:8px 12px;border-radius:10px;background:rgba(255,120,120,.12);border:1px solid rgba(255,120,120,.4);font-size:.84rem;color:#FFB4B4}
+.bd-btns{display:flex;flex-wrap:wrap;gap:8px}.bd-note{margin:0;font-size:.78rem}
+.bd-gh{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 8px}
+.bd-gh h4{margin:0;font:800 .92rem var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:#BFD3FF}.bd-gh small{color:var(--muted);font-weight:700}
+.lg-card .lg-price,.bd-pill{display:inline-block;font:800 .74rem/1 var(--f-body);font-style:normal;color:#1B1600;background:#FFC23D;padding:4px 8px;border-radius:999px}
+.lg-add .bd-up{margin-left:auto;font-style:normal;font-weight:700;font-size:.78rem;color:#9FB6E6;background:rgba(255,255,255,.07);padding:5px 10px;border-radius:999px}
+.lg-card.empty .lg-add{width:100%}
+.bd-pkinfo{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;padding:0 18px 10px}
+.bd-pkinfo>div{padding:9px 11px;border-radius:12px;background:#10244F;border:1px solid #22406F}.bd-pkinfo b{font:900 1.25rem/1.2 var(--f-display);color:#FFC23D}
+.bd-sort{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 18px 8px}.bd-sort .chip{padding:7px 12px;min-height:0;font-size:.8rem}
+.pk li button{grid-template-columns:auto minmax(0,1fr) auto}
+.pk li button .pm{grid-column:2/4;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:.74rem;color:var(--muted)}
+.pk li button .pm .bd-pill{font-size:.72rem}
+.pk .pv b{font-size:1.25rem}
+.bt-pk{display:flex;align-items:center;gap:10px;min-width:0}.bt-pk>span{display:flex;flex-direction:column;min-width:0}.bt-pk small{font-size:.76rem}
+.bt-pay{display:flex;flex-direction:column;align-items:flex-end;text-align:right;white-space:nowrap}.bt-pay b{color:#4ADE80}.bt-pay small{font-size:.74rem}
+.bt-mine .bt-h:first-of-type{border-top:0}
+.bd-c{grid-template-columns:44px minmax(0,1fr) auto!important;grid-template-areas:"slot who r" "slot m m" "slot acts acts";gap:8px 10px!important;align-items:center}
+.bd-c .lg-slot{grid-area:slot;align-self:start}.bd-c .lg-who{grid-area:who}.bd-c .bd-r{grid-area:r}.bd-c .bd-m{grid-area:m}.bd-c .lg-acts{grid-area:acts!important;grid-column:auto!important;justify-content:flex-end}
+.bd-c .lg-who .lt b{white-space:normal;line-height:1.15;font-size:.98rem}.bd-c .lg-who .lt i{flex-wrap:wrap;row-gap:3px}
+.bd-r{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.bd-r b{font:900 1.35rem/1 var(--f-display);color:#FFC23D}.bd-r small{color:var(--muted);font-size:.72rem;white-space:nowrap}
+.bd-m{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--muted)}.bd-m b{color:var(--ink)}
+.bd-c .lg-slot{min-width:40px}
+.gm-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+.gm-half{min-width:0}.gm-split .gm-grid{grid-template-columns:1fr}
+.gm-side .scroll{max-height:70vh;overflow:auto}
+@media (max-width:899px){.gm-split{grid-template-columns:1fr}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1919,6 +1959,10 @@ function picksHTML(){
   /* history and the board */
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:betResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
   const histCard=hist.length?`<section class="card"><div class="qh"><h3>Your results</h3></div>${hist.map(x=>`<div class="bt-h ${x.res}"><span><b>${esc(x.b.s==='h'?x.g.h:x.g.a)}</b> <small class="muted">${esc(x.g.a)} ${x.g.as}, ${esc(x.g.h)} ${x.g.hs}</small></span><b>${x.res==='won'?'+'+tk(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+tk(x.b.stake)}</b></div>`).join('')}</section>`:'';
+  /* the picks you have locked in that are still waiting on a final score */
+  const openBets=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id]})).filter(x=>x.g&&!gDone(x.g)).sort((a,b)=>a.g.d<b.g.d?-1:a.g.d>b.g.d?1:0);
+  const myCard=openBets.length?`<section class="card bt-mine"><div class="qh"><h3>Your picks</h3><span class="muted">${openBets.length} locked in · ${tk(openBets.reduce((t,x)=>t+(+x.b.stake||0),0))} wagered</span></div>${openBets.map(x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
+    return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)}</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${x.g.d<=today?' · locked':''}</small></span></span><span class="bt-pay"><b>${tk(x.b.stake*x.b.odds)}</b><small class="muted">${tk(x.b.stake)} at ${(+x.b.odds).toFixed(2)}x</small></span></div>`}).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t).slice(0,20);
   const boardCard=board.length?`<section class="card"><div class="qh"><h3>Token leaders</h3></div>${board.map((x,i)=>`<div class="bt-h"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${tk(x.t)}</b></div>`).join('')}</section>`:'';
   /* lock in everything at once */
@@ -1926,7 +1970,7 @@ function picksHTML(){
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||10)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one above.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
-  return bankCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')+allBar:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
+  return bankCard+myCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')+allBar:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
 }
 /* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
 function anticipated(){
@@ -1944,14 +1988,14 @@ function anticipatedHTML(){
     ${n<list.length?`<div class="btns" style="justify-content:center;margin-top:14px"><button class="btn ghost" data-act="gmore">Load more matchups (${Math.min(5,list.length-n)} more)</button></div>`:''}`;
 }
 function viewGames(){
-  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.'})[UI.gtab]||'The most anticipated games, team standings, the playoff brackets and every game by week.'}</p></div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['picks',"Pick 'em"]].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${(UI.gtab||'sched')===v}">${l}</button>`).join('')}</div>`;
-  if(UI.gtab==='picks')return head+tabs+picksHTML();
+  const T=UI.gtab||'sched';
+  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.',stand:'Records and playoff seeds for every San Diego Section team.'})[T]||'The most anticipated games and every game by week, with the standings beside them, plus the playoff bracket.'}</p></div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['stand','Standings'],['picks','Picks']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
   const gs=(GAMES&&GAMES.games)||[];
-  return head+tabs+anticipatedHTML()
-    +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">Standings</h2></div>`+standingsHTML(gs,UI.gschool)
-    +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()
-    +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>`+viewSched('');
+  if(T==='picks')return head+tabs+picksHTML();
+  if(T==='stand')return head+tabs+standingsHTML(gs,UI.gschool);
+  return head+tabs+`<div class="gm-split"><div class="gm-half">${anticipatedHTML()}<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>${viewSched('')}</div><div class="gm-half gm-side"><div class="qh"><h2 class="h-sec">Standings</h2></div>${standingsHTML(gs,UI.gschool)}</div></div>`
+    +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML();
 }
 
 /* ---------- player hub ---------- */
@@ -2051,6 +2095,64 @@ function priceOf(p){
 }
 const money=v=>'$'+(Math.round(v*10)/10).toFixed(1)+'M';
 function spent(g,uid){let t=0;for(const s of slotsOf(g)){const p=pByKey(lineupOf(g.id,uid)[s.k]);if(p)t+=priceOf(p)}return Math.round(t*10)/10}
+
+/* ---------- budget team builder ---------- */
+const BD_MIN=4;
+function budgetFor(g,uid,slot){   /* the most you can spend on one spot and still afford the cheapest player for every other empty spot */
+  const ro=lineupOf(g.id,uid),cur=pByKey(ro[slot]);
+  const open=slotsOf(g).filter(s=>s.k!==slot&&!pByKey(ro[s.k])).length;
+  return Math.round((capOf(g)-spent(g,uid)+(cur?priceOf(cur):0)-BD_MIN*open)*10)/10;
+}
+function budgetCard(g,uid,canEdit,ro){
+  const SL=slotsOf(g),cap=capOf(g),sp=spent(g,uid),left=Math.round((cap-sp)*10)/10;
+  const open=SL.filter(s=>!pByKey(ro[s.k])).length,filled=SL.length-open;
+  let pj=0;SL.forEach(s=>{const p=pByKey(ro[s.k]);if(p&&!s.bench)pj+=proj(p).pts});
+  const avg=open?Math.max(0,left/open):0,pct=Math.min(100,sp/cap*100),over=left<0;
+  const warn=open&&left<BD_MIN*open?`Not enough left to fill every spot. The cheapest player costs ${money(BD_MIN)}.`:'';
+  const locked=SL.some(s=>{const p=pByKey(ro[s.k]);return p&&!s.bench&&statsIn(p)});
+  return `<section class="bd-card ${over?'over':''}">
+    <div class="bd-top"><div class="bd-big"><small>Left to spend</small><b>${money(left)}</b></div>
+      <div class="bd-side"><span><b>${filled} of ${SL.length}</b> spots filled</span>${open?`<span><b>${money(avg)}</b> average per open spot</span>`:'<span>Team complete</span>'}</div></div>
+    <div class="bd-bar"><i style="width:${pct}%"></i></div>
+    <div class="bd-stats"><div><small>Spent</small><b>${money(sp)}</b></div><div><small>Budget</small><b>${money(cap)}</b></div><div><small>Projected week</small><b>${f1(pj)}</b></div></div>
+    ${warn?`<p class="bd-warn">${warn}</p>`:''}
+    ${canEdit?`<div class="bd-btns">${open&&filled?`<button class="btn sm" data-act="budFill">Fill empty spots</button>`:''}<button class="btn sm ${open&&filled?'ghost':''}" data-act="budBest">${filled?'Rebuild best team':'Build my best team'}</button>${filled?`<button class="btn sm ghost" data-act="budClear">Clear all</button>`:''}</div>${locked?'<p class="muted bd-note">Players whose stats are in this week stay put.</p>':''}`:''}
+  </section>`;
+}
+/* the best team the budget allows: start everyone at the cheapest price, then keep making the upgrade that adds the most projected points per dollar */
+function autoBuild(g,uid,rebuild){
+  const SL=slotsOf(g),ro=lineupOf(g.id,uid),cap=capOf(g),asg={},used=new Set();
+  SL.forEach(s=>{const p=pByKey(ro[s.k]);if(p&&(!rebuild||(!s.bench&&statsIn(p)))){asg[s.k]=p;used.add(p.key)}});
+  const fixed=new Set(Object.keys(asg)),todo=SL.filter(s=>!fixed.has(s.k));
+  const val=p=>proj(p).pts+agg(p,'season').v*.002,pool=players(),cand={};
+  todo.forEach(s=>{cand[s.k]=pool.filter(p=>slotOk(s,p)&&!(s.bench&&false)).map(p=>({p,c:priceOf(p),v:s.bench?0:val(p)}))});
+  let money=cap-Object.values(asg).reduce((a,p)=>a+priceOf(p),0);
+  for(const s of todo){
+    const c=cand[s.k].filter(x=>!used.has(x.p.key)).sort((a,b)=>a.c-b.c||b.v-a.v);
+    if(!c.length)continue;
+    const pick=c.filter(x=>x.c===c[0].c).sort((a,b)=>b.v-a.v)[0];
+    asg[s.k]=pick.p;used.add(pick.p.key);money-=pick.c;
+  }
+  if(money<-1e-9)return null;
+  for(let it=0;it<300;it++){
+    let best=null;
+    for(const s of todo){
+      if(s.bench||!asg[s.k])continue;
+      const cur=asg[s.k],cc=priceOf(cur),cv=val(cur);
+      for(const x of cand[s.k]){
+        if(used.has(x.p.key))continue;
+        const dc=x.c-cc,dv=x.v-cv;
+        if(dv<=1e-4||dc>money+1e-9)continue;
+        const r=dc<=0?1e9+dv:dv/dc;
+        if(!best||r>best.r)best={s,x,dc,r};
+      }
+    }
+    if(!best)break;
+    used.delete(asg[best.s.k].key);asg[best.s.k]=best.x.p;used.add(best.x.p.key);money-=best.dc;
+  }
+  const patch={};todo.forEach(s=>{patch[s.k]=asg[s.k]?asg[s.k].key:null});
+  return {patch,left:Math.round(money*10)/10};
+}
 function draftInfo(g){
   const d=g.draft||{};
   if(lgMode(g)!=='draft')return{status:'off'};
@@ -2073,8 +2175,15 @@ function lineupHTML(g,uid){
     const p=pByKey(ro[s.k]),gm=p&&p.games[w-1],wp=gm?pts(gm.stat):0;if(!s.bench)total+=wp;   /* only this week's game, and bench players never count */
     const tag=`<span class="lg-slot">${s.label}</span>`;
     const what=s.bench?'a bench player':s.k==='FLEX'?'a RB, WR or TE':s.k==='DEF'?'a defender':s.k==='K'?'a kicker':s.k==='DL'?'a defensive lineman':s.k==='LB'?'a linebacker':s.k==='DB'?'a defensive back':'a '+s.label;
-    if(!p)return `<li class="lg-card empty">${tag}${canAdd?`<button class="lg-add" data-act="lgPick" data-slot="${s.k}"><span>+</span> ${myTurn?'Draft':'Add'} ${what}</button>`:`<span class="muted">${mine&&mode==='draft'&&di.status!=='done'?(di.status==='live'?'Fill this spot on your draft turn':'Fills during the draft'):'Empty'}</span>`}</li>`;
+    if(!p)return `<li class="lg-card empty">${tag}${canAdd?`<button class="lg-add" data-act="lgPick" data-slot="${s.k}"><span>+</span> ${myTurn?'Draft':'Add'} ${what}${mode==='budget'?`<em class="bd-up">up to ${money(Math.max(0,budgetFor(g,uid,s.k)))}</em>`:''}</button>`:`<span class="muted">${mine&&mode==='draft'&&di.status!=='done'?(di.status==='live'?'Fill this spot on your draft turn':'Fills during the draft'):'Empty'}</span>`}</li>`;
     const lk=canEdit&&statsIn(p),lockTag='<span class="lg-lock" title="Stats are in for this week, so this player is locked until next week">Locked this week</span>';
+    const acts=canEdit?(lk&&!s.bench?`<span class="lg-acts">${lockTag}</span>`:`<span class="lg-acts">${BNS.length?(lk?lockTag:`<button class="btn sm" data-act="lgSub" data-slot="${s.k}">${s.bench?'Sub in':'Sub out'}</button>`):''}<button class="btn sm ghost" data-act="lgPick" data-slot="${s.k}">Swap</button><button class="lg-x" data-act="lgClear" data-slot="${s.k}" aria-label="Remove ${esc(p.name)}">✕</button></span>`):'';
+    if(mode==='budget'){const pr=priceOf(p),a2=agg(p,'season'),per=a2.n?a2.v/a2.n/pr:0;
+      return `<li class="lg-card bd-c">${tag}
+      <button class="lg-who" data-act="player" data-id="${esc(p.key)}">${av(p.name,p.school,40)}<span class="lt"><b>${esc(p.name)}</b><i>${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}</span></i></span></button>
+      <span class="bd-r"><b>${money(pr)}</b><small>${gm?'wk '+w+': '+f1(wp)+' pts':'no game yet'}</small></span>
+      <div class="bd-m"><span>proj <b>${f1(proj(p).pts)}</b></span><span>season <b>${f1(a2.v)}</b></span>${per?`<span><b>${per.toFixed(2)}</b> per $M</span>`:''}</div>
+      ${acts}</li>`}
     return `<li class="lg-card">${tag}
       <button class="lg-who" data-act="player" data-id="${esc(p.key)}">${av(p.name,p.school,42)}<span class="lt"><b>${esc(p.name)}</b><i>${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}</span></i></span></button>
       <span class="lg-pts"><b>${f1(wp)}</b><small>${mode==='budget'?'<em class="lg-price">'+money(priceOf(p))+'</em> ':''}<em class="lg-pj">proj ${f1(proj(p).pts)}</em> · wk ${w}${gm?'':' · no game yet'} · season ${f1(agg(p,'season').v)}</small></span>
@@ -2084,8 +2193,11 @@ function lineupHTML(g,uid){
   const cards=ST.map(card).join(''),bench=BNS.map(card).join('');
   const filled=ST.filter(s=>pByKey(ro[s.k])).length,bfilled=BNS.filter(s=>pByKey(ro[s.k])).length;
   const sp=mode==='budget'?spent(g,uid):0;
-  const bar=mode==='budget'?`<div class="lg-budget"><div class="lg-bt"><span>Spent <b>${money(sp)}</b> of ${money(capOf(g))}</span><span class="${capOf(g)-sp<0?'neg':''}"><b>${money(capOf(g)-sp)}</b> left</span></div><div class="lg-bar"><i style="width:${Math.min(100,sp/capOf(g)*100)}%"></i></div></div>`:'';
-  return bar+`<div class="lg-lhead"><span class="muted">${filled} of ${ST.length} starting spots filled</span><span class="lg-total"><small>Week ${w} total</small><b>${f1(total)}</b></span></div><p class="muted lg-wknote">${past?'The lineup you started in week '+w+'. Finished weeks never change.':'Your lineup total is just this week’s game. It starts at 0 and fills in as stats come in, then resets for next week’s matchup. A player whose stats are in is locked until next week.'}</p><ol class="lg-cards">${cards}</ol>`
+  const bar=mode==='budget'?budgetCard(g,uid,canEdit&&!past,lineupOf(g.id,uid)):'';
+  const offS=s=>s.elig.some(e=>['QB','RB','WR','TE'].includes(e)),defS=s=>s.elig.includes('DEF');
+  const grp=(t,list)=>list.length?`<div class="bd-gh"><h4>${t}</h4><small>${list.filter(s=>pByKey(ro[s.k])).length} of ${list.length}</small></div><ol class="lg-cards bud">${list.map(card).join('')}</ol>`:'';
+  const startHTML=mode==='budget'?grp('Offense',ST.filter(offS))+grp('Defense',ST.filter(defS))+grp('Kicker',ST.filter(s=>!offS(s)&&!defS(s))):`<ol class="lg-cards">${cards}</ol>`;
+  return bar+`<div class="lg-lhead"><span class="muted">${filled} of ${ST.length} starting spots filled</span><span class="lg-total"><small>Week ${w} total</small><b>${f1(total)}</b></span></div><p class="muted lg-wknote">${past?'The lineup you started in week '+w+'. Finished weeks never change.':'Your lineup total is just this week’s game. It starts at 0 and fills in as stats come in, then resets for next week’s matchup. A player whose stats are in is locked until next week.'}</p>${startHTML}`
     +(BNS.length?`<div class="lg-bench-h"><h4>Bench</h4><small class="muted">${bfilled} of ${BNS.length} filled. Bench players do not score${canEdit?'. Tap Sub in to move one into a matching starting spot.':'.'}</small></div><ol class="lg-cards lg-bench">${bench}</ol>`:'');
 }
 function matchupsHTML(g){
@@ -3225,22 +3337,30 @@ boot();
     const mine=lineupOf(g.id,ME.uid),cur=pByKey(mine[slot]);
     if(di.status!=='live'&&!s.bench&&statsIn(cur)){say(LOCK_MSG(cur));return}
     const inMine=new Set(Object.entries(mine).filter(([k])=>k!==slot).map(([,v])=>v));
-    const openOthers=slotsOf(g).filter(x=>x.k!==slot&&!pByKey(mine[x.k])).length;   /* keep $4.0M (the cheapest price) for every other empty spot */
-    const left=mode==='budget'?capOf(g)-spent(g,ME.uid)+(cur?priceOf(cur):0)-4*openOthers:Infinity;
-    const all=players().filter(p=>slotOk(s,p)).map(p=>({p,a:agg(p,'season'),c:mode==='budget'?priceOf(p):0})).sort((x,y)=>y.a.v-x.a.v);
+    const left=mode==='budget'?budgetFor(g,ME.uid,slot):Infinity,totalLeft=mode==='budget'?Math.round((capOf(g)-spent(g,ME.uid))*10)/10:0;
+    const all=players().filter(p=>slotOk(s,p)).map(p=>{const a=agg(p,'season'),c=mode==='budget'?priceOf(p):0,pj=proj(p).pts,gm=a.n?a.v/a.n:0;return{p,a,c,pj,gm,val:c?gm/c:0}});
+    let sort='pts',aff=false;
+    const SORTS=[['pts','Points'],['proj','Projected']].concat(mode==='budget'?[['val','Best value'],['price','Price']]:[]);
     pk=document.createElement('div');pk.className='pk-bg';
     const title=(di.status==='live'?'Draft your ':'Pick your ')+(s.bench?'bench player':s.k==='FLEX'?'FLEX (RB, WR or TE)':s.k==='DEF'?'defender':s.k==='K'?'kicker':s.k==='DL'?'defensive lineman':s.k==='LB'?'linebacker':s.k==='DB'?'defensive back':s.label);
     pk.innerHTML=`<div class="pk" role="dialog" aria-modal="true" aria-label="${title}"><div class="pk-h"><h3>${title}</h3><button class="lg-x" data-pk="close" aria-label="Close">✕</button></div>
-      ${mode==='budget'?`<p class="pk-sum">You can spend up to <b>${money(left)}</b> on this spot.${openOthers?' That keeps '+money(4*openOthers)+' for your '+openOthers+' other empty '+(openOthers===1?'spot':'spots')+'.':''}${cur?' It includes the '+money(priceOf(cur))+' back from '+esc(cur.name)+'.':''}</p>`:''}
-      <div class="pk-tools"><input type="search" placeholder="Search players or schools" aria-label="Search players"></div><ul></ul></div>`;
+      ${mode==='budget'?`<div class="bd-pkinfo"><div><small>Spend up to</small><b>${money(Math.max(0,left))}</b></div><div><small>Total left</small><b>${money(totalLeft)}</b></div>${cur?`<div><small>Back from ${esc(cur.name.split(' ')[0])}</small><b>${money(priceOf(cur))}</b></div>`:''}</div>`:''}
+      <div class="pk-tools"><input type="search" placeholder="Search players or schools" aria-label="Search players"></div>
+      <div class="bd-sort chips" role="group" aria-label="Sort by"><span class="muted">Sort</span>${SORTS.map(([k,l])=>`<button class="chip" data-sort="${k}" aria-pressed="${k===sort}">${l}</button>`).join('')}${mode==='budget'?`<button class="chip" data-aff="1" aria-pressed="false">Can afford</button>`:''}</div><ul></ul></div>`;
     const ul=pk.querySelector('ul'),q=pk.querySelector('input');
     const draw=()=>{const v=q.value.trim().toLowerCase();
-      const rows=all.filter(x=>!v||x.p.name.toLowerCase().includes(v)||x.p.school.toLowerCase().includes(v)).slice(0,80);
+      let rows=all.filter(x=>(!v||x.p.name.toLowerCase().includes(v)||x.p.school.toLowerCase().includes(v))&&(!aff||x.c<=left));
+      rows=rows.sort((x,y)=>sort==='proj'?y.pj-x.pj:sort==='val'?y.val-x.val:sort==='price'?x.c-y.c||y.a.v-x.a.v:y.a.v-x.a.v).slice(0,80);
       ul.innerHTML=rows.length?rows.map(x=>{
         const o=mode==='draft'?ownerOf(g,x.p.key,ME.uid):null,dup=inMine.has(x.p.key),broke=mode==='budget'&&x.c>left,lkd=di.status!=='live'&&!s.bench&&statsIn(x.p);
-        const why=o?' · on '+esc(nm(o))+'’s team':dup?' · already in your lineup':broke?' · over budget':lkd?' · stats already in this week':'';
-        return `<li><button data-key="${esc(x.p.key)}" ${o||dup||broke||lkd?'disabled':''}>${av(x.p.name,x.p.school,38)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${why}</i></span><span class="pv"><b>${f1(x.a.v)}</b><small>${mode==='budget'?'<span class="pc">'+money(x.c)+'</span> · ':''}${x.a.n?f1(x.a.v/x.a.n)+'/gm · proj '+f1(proj(x.p).pts):'no games'}</small></span></button></li>`}).join(''):'<li class="muted" style="padding:14px">No players match.</li>'};
+        const why=o?' · on '+esc(nm(o))+'’s team':dup?' · already in your lineup':broke?' · over by '+money(x.c-left):lkd?' · stats already in this week':'';
+        const big=sort==='proj'?f1(x.pj):sort==='val'?x.val.toFixed(2):sort==='price'?money(x.c):f1(x.a.v);
+        const cap=sort==='proj'?'proj':sort==='val'?'pts per $M':sort==='price'?'price':'season';
+        return `<li><button data-key="${esc(x.p.key)}" ${o||dup||broke||lkd?'disabled':''}>${av(x.p.name,x.p.school,38)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${why}</i></span><span class="pv"><b>${big}</b><small>${cap}</small></span><span class="pm">${mode==='budget'?'<span class="bd-pill">'+money(x.c)+'</span>':''}<span>${f1(x.a.v)} pts</span><span>${x.a.n?f1(x.gm)+'/gm':'no games'}</span><span>proj ${f1(x.pj)}</span>${mode==='budget'&&x.a.n?'<span>'+x.val.toFixed(2)+' per $M</span>':''}</span></button></li>`}).join(''):'<li class="muted" style="padding:14px">No players match.</li>'};
     draw();q.addEventListener('input',draw);
+    pk.addEventListener('click',e=>{const sb=e.target.closest('[data-sort]'),ab=e.target.closest('[data-aff]');
+      if(sb){sort=sb.dataset.sort;pk.querySelectorAll('[data-sort]').forEach(x=>x.setAttribute('aria-pressed',String(x===sb)));draw();e.stopPropagation()}
+      else if(ab){aff=!aff;ab.setAttribute('aria-pressed',String(aff));draw();e.stopPropagation()}});
     pk.addEventListener('click',async e=>{if(e.target===pk||e.target.closest('[data-pk=close]')){closePk();return}
       const b=e.target.closest('button[data-key]');if(b&&!b.disabled){const k=b.dataset.key;closePk();
         if(mode==='draft'&&di.status==='live'){await draftPick(g,slot,k)}else await setSlot(slot,k)}});
@@ -3282,6 +3402,18 @@ boot();
     if(a==='lgPanel'){UI.lgp=UI.lgp===t.dataset.v?null:t.dataset.v;render();const f=document.querySelector(UI.lgp==='new'?'#new-name':'#join-code');if(f)f.focus()}
     else if(a==='lgPick'){if(typeof needJoin==='function'&&needJoin('build a lineup'))return;openPk(t.dataset.slot)}
     else if(a==='lgClear'){await setSlot(t.dataset.slot,null)}
+    else if(a==='budFill'||a==='budBest'){const g=curGroup();if(!g)return;
+      const go=async()=>{const r=autoBuild(g,ME.uid,a==='budBest');
+        if(!r){say('The budget is too small to fill every spot.');return}
+        const changed=Object.entries(r.patch).filter(([k,v])=>v!==(lineupOf(g.id,ME.uid)[k]||null));
+        if(!changed.length){say('That is already the best team your budget allows.');return}
+        await saveLineup(g,r.patch,'Built your team with '+money(r.left)+' left to spend')};
+      const filled=slotsOf(g).some(x=>pByKey(lineupOf(g.id,ME.uid)[x.k]));
+      if(a==='budBest'&&filled)confirmBox('Rebuild your team?','This swaps your current players for the highest-scoring team the budget allows. Players whose stats are in this week stay put.','Rebuild',go);else go()}
+    else if(a==='budClear'){const g=curGroup();if(!g)return;
+      confirmBox('Clear your whole team?','Every player goes back in the pool and you get all of your budget back. Players whose stats are in this week stay put.','Clear all',async()=>{
+        const ro=lineupOf(g.id,ME.uid),patch={};slotsOf(g).forEach(x=>{const p=pByKey(ro[x.k]);if(p&&!(!x.bench&&statsIn(p)))patch[x.k]=null});
+        if(Object.keys(patch).length)await saveLineup(g,patch,'Team cleared')})}
     else if(a==='lgSub')openSub(t.dataset.slot)
     else if(a==='lgRoster'){const g=curGroup();if(!g||g.ownerId!==ME.uid)return;
       const d=g.draft;if(d&&(d.order||d.status==='live'||d.status==='done')){say('The roster is locked once the draft starts');return}
