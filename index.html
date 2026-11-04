@@ -3521,10 +3521,13 @@ document.addEventListener('click',e=>{
 });
 
 /* ---------- start ---------- */
+/* position overrides for signed-up players too, so a profile created as WR reads as QB everywhere */
+function fixProfilePos(p){if(p&&p.role==='player'&&String(p.name||'').trim().toLowerCase()==='amaree maye'&&p.school==='Bishop\'s'){p.pos='QB';p.posLabel='QB'}}
 function subscribe(){
   const cols={profiles:'profiles',games:'games',verified:'verified',queue:'queue',groups:'groups',fgroups:'fgroups',lineups:'lineups',picks:'picks'};
   Object.entries(cols).forEach(([k,path])=>DB.collection(path).onSnapshot(snap=>{
     const o={};snap.docs.forEach(d=>{o[d.id]=Object.assign({},d.data(),{id:d.id})});
+    if(k==='profiles')Object.values(o).forEach(fixProfilePos);
     S[k]=o;S.loaded[k]=true;touch();
   },err=>{S.err[k]=err&&err.code;S.loaded[k]=true;touch()}));
   DB.doc('config/settings').onSnapshot(s=>{S.settings=s.exists?s.data():{};S.loaded.settings=true;touch()},()=>{S.loaded.settings=true;touch()});
