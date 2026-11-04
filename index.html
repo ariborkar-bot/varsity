@@ -1072,6 +1072,12 @@ select option{background:#0B1730;color:#EAF0F8}
 .gm-half{min-width:0}.gm-split .gm-grid{grid-template-columns:1fr}
 .gm-side .scroll{max-height:70vh;overflow:auto}
 @media (max-width:899px){.gm-split{grid-template-columns:1fr}}
+.tlk{all:unset;cursor:pointer;border-radius:4px}.tlk:hover,.tlk:focus-visible{text-decoration:underline;text-decoration-color:#FFC23D;text-underline-offset:3px}
+.tm-hero{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.tm-hero h2{margin:0;font-size:2rem}.tm-hero .btn{margin-left:auto}
+.tm-logo img{width:64px;height:64px;object-fit:contain}
+.tm-row{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:10px 4px;border-top:1px solid var(--line)}.tm-row:hover{background:var(--surface2)}.tm-row .lt{display:flex;flex-direction:column;gap:4px;min-width:0}.tm-row .lt b{white-space:normal;line-height:1.15}.tm-row .lt i{font-style:normal;display:flex;gap:6px;align-items:center}
+.tm-pts{display:flex;flex-direction:column;align-items:flex-end}.tm-pts b{font:900 1.3rem/1 var(--f-display)}.tm-pts small{color:var(--muted);font-size:.72rem}
+.tm-wk{font-size:.74rem;margin:4px 4px 0}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1794,9 +1800,10 @@ function projTag(p){
 
 /* ---------- games: weekly matchups, past weeks and playoff brackets ---------- */
 UI.gw=null;UI.gschool='ALL';UI.gdiv=null;UI.gtab='sched';UI.pk={};
+const tlk=n=>n&&SD_SCHOOLS.includes(n)?`<button class="tlk" data-act="team" data-t="${esc(n)}">${esc(n)}</button>`:esc(n||'TBD');
 function gameCard(g,opts={}){
   const done=g.hs!=null&&g.as!=null,hw=done&&g.hs>g.as,aw=done&&g.as>g.hs;
-  const side=(n,s,win,seed)=>`<div class="gm-t ${win?'win':''} ${done&&!win?'lose':''}">${slogo(n,26)}<b>${seed?`<small class="gm-seed">${seed}</small>`:''}${esc(n||'TBD')}</b><span class="gm-s">${done?s:''}</span></div>`;
+  const side=(n,s,win,seed)=>`<div class="gm-t ${win?'win':''} ${done&&!win?'lose':''}">${slogo(n,26)}<b>${seed?`<small class="gm-seed">${seed}</small>`:''}${tlk(n)}</b><span class="gm-s">${done?s:''}</span></div>`;
   const tag=g.k==='P'?'<span class="gm-k p">Playoffs</span>':g.k==='L'?'<span class="gm-k">League</span>':'';
   return `<article class="gm ${opts.mine?'mine':''}">
     <div class="gm-h"><span>${done?'Final':esc(fmtDate(g.d)+(g.time?' · '+g.time:''))}</span>${tag}</div>
@@ -1874,7 +1881,7 @@ function standingsHTML(gs,school){
   if(school!=='ALL')rows=rows.filter(x=>x.n===school);
   const cmp=(a,b)=>(b.w/(b.w+b.l+b.t||1))-(a.w/(a.w+a.l+a.t||1))||(b.pf-b.pa)-(a.pf-a.pa)||a.n.localeCompare(b.n);
   const chips=`<div class="chips gm-divs" role="group" aria-label="Section">${['ALL',...divs].map(d=>`<button class="chip" data-act="gsec" data-v="${esc(d)}" aria-pressed="${sec===d}">${d==='ALL'?'All sections':esc(d)}</button>`).join('')}</div>`;
-  const tbl=(name,list)=>list.length?`<section class="card"><div class="qh"><h3>${esc(name)}</h3><span class="muted">${list.length} ${list.length===1?'team':'teams'}${list.every(x=>x.seed)?' · # is the playoff seed':''}</span></div><div class="scroll"><table><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th></tr></thead><tbody>${(list.every(x=>x.seed)?list.sort((a,b)=>a.seed-b.seed):list.sort(cmp)).map((x,i)=>`<tr><td class="rk">${x.seed||i+1}</td><td><span class="sch">${slogo(x.n,22)}<b>${esc(x.n)}</b></span></td><td>${x.w}-${x.l}${x.t?'-'+x.t:''}</td><td>${x.pf}</td><td>${x.pa}</td></tr>`).join('')}</tbody></table></div></section>`:'';
+  const tbl=(name,list)=>list.length?`<section class="card"><div class="qh"><h3>${esc(name)}</h3><span class="muted">${list.length} ${list.length===1?'team':'teams'}${list.every(x=>x.seed)?' · # is the playoff seed':''}</span></div><div class="scroll"><table><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th></tr></thead><tbody>${(list.every(x=>x.seed)?list.sort((a,b)=>a.seed-b.seed):list.sort(cmp)).map((x,i)=>`<tr><td class="rk">${x.seed||i+1}</td><td><span class="sch">${slogo(x.n,22)}<b>${tlk(x.n)}</b></span></td><td>${x.w}-${x.l}${x.t?'-'+x.t:''}</td><td>${x.pf}</td><td>${x.pa}</td></tr>`).join('')}</tbody></table></div></section>`:'';
   const body=(sec==='ALL'?divs:[sec]).map(d=>tbl(d,rows.filter(x=>x.div===d))).join('');
   return chips+(body||'<p class="empty">No results yet.</p>');
 }
@@ -1996,6 +2003,30 @@ function viewGames(){
   if(T==='stand')return head+tabs+standingsHTML(gs,UI.gschool);
   return head+tabs+`<div class="gm-split"><div class="gm-half">${anticipatedHTML()}<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>${viewSched('')}</div><div class="gm-half gm-side"><div class="qh"><h2 class="h-sec">Standings</h2></div>${standingsHTML(gs,UI.gschool)}</div></div>`
     +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML();
+}
+
+
+/* ---------- a team's page: schedule and roster ---------- */
+UI.ttab='sched';
+function viewTeam(){
+  const name=UI.team,gs=((GAMES&&GAMES.games)||[]).filter(g=>g.h===name||g.a===name).sort((a,b)=>a.w-b.w||(a.d<b.d?-1:1));
+  const back=`<button class="btn sm ghost" data-act="tback">← Back</button>`;
+  if(!name||!SD_SCHOOLS.includes(name)&&!gs.length)return `<div class="head"><h2>Team</h2></div><p class="empty">We could not find that team.</p>${back}`;
+  let w=0,l=0,t=0,pf=0,pa=0;
+  gs.filter(gDone).forEach(g=>{const f=g.h===name?g.hs:g.as,a=g.h===name?g.as:g.hs;pf+=f;pa+=a;if(f>a)w++;else if(f<a)l++;else t++});
+  let div='',seed='';PO_DEFS.forEach(d=>d.rounds[0].games.forEach(([p,q])=>[p,q].forEach(z=>{if(z.n===name&&!z.bye){div=d.div;seed=z.s}})));
+  const T=UI.ttab||'sched';
+  const hero=`<section class="card tm-hero"><span class="tm-logo">${slogo(name,64)||av(name,name,64)}</span><div><h2>${esc(name)}</h2><p class="muted">${gs.some(gDone)?`${w}-${l}${t?'-'+t:''} · ${pf} points for, ${pa} against`:'No games played yet'}${div?` · ${esc(div)}${seed?' · seed '+seed:''}`:''}</p></div>${back}</section>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Team sections">${[['sched','Schedule'],['roster','Roster']].map(([v,lb])=>`<button class="chip" data-act="ttab" data-v="${v}" aria-pressed="${T===v}">${lb}</button>`).join('')}</div>`;
+  let body='';
+  if(T==='roster'){
+    const ps=players().filter(p=>p.school===name&&!p.sample).map(p=>({p,a:agg(p,'season')})).sort((x,y)=>y.a.v-x.a.v);
+    const ORD=['QB','RB','WR','TE','DEF','K'],NAMES={QB:'Quarterbacks',RB:'Running backs',WR:'Receivers',TE:'Tight ends',DEF:'Defense',K:'Kickers'};
+    body=ps.length?ORD.map(pos=>{const L=ps.filter(x=>x.p.pos===pos);return L.length?`<section class="card"><div class="qh"><h3>${NAMES[pos]}</h3><span class="muted">${L.length}</span></div>${L.map(x=>`<button class="tm-row" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,36)}<span class="lt"><b>${esc(x.p.name)}</b><i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}</i></span><span class="tm-pts"><b>${f1(x.a.v)}</b><small>${x.a.n} ${x.a.n===1?'game':'games'}</small></span></button>`).join('')}</section>`:''}).join(''):'<p class="empty">No player stats for this team yet.</p>';
+  }else{
+    body=gs.length?`<div class="gm-grid">${gs.map(g=>`<div>${gameCard(g,{})}<div class="tm-wk muted">Week ${g.w}${gDone(g)?' · '+(((g.h===name?g.hs:g.as)>(g.h===name?g.as:g.hs))?'Win':((g.h===name?g.hs:g.as)<(g.h===name?g.as:g.hs))?'Loss':'Tie'):''}</div></div>`).join('')}</div>`:'<p class="empty">No games on the schedule.</p>';
+  }
+  return hero+tabs+body;
 }
 
 /* ---------- player hub ---------- */
@@ -2805,8 +2836,8 @@ document.addEventListener('click',async e=>{
 });
 
 /* ---------- render ---------- */
-const VIEWS=['league','groups','games','me','scoring','admin','desk'];
-const viewOK=v=>VIEWS.includes(v)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
+const VIEWS=['team','league','groups','games','me','scoring','admin','desk'];
+const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
 function bannerHTML(){
   const b=[];
   /* no sign-up banners */
@@ -2843,14 +2874,14 @@ function chrome(v){
   document.body.dataset.view=v;
   updateTicker();updateVA();
 
-  document.querySelectorAll('.tabs a').forEach(a=>{a.removeAttribute('aria-current');if(a.getAttribute('href')==='#'+v)a.setAttribute('aria-current','page')});
+  document.querySelectorAll('.tabs a').forEach(a=>{a.removeAttribute('aria-current');if(a.getAttribute('href')==='#'+(v==='team'?'games':v))a.setAttribute('aria-current','page')});
   
   const n=computeNotes().length,bc=$('#bcount');if(bc){bc.textContent=n;bc.hidden=!n}
   const wk=$('#wk');if(wk)wk.textContent='Week '+CURW();
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
 }
 function render(){
-  const V={league:viewLeague,groups:viewGroups,games:viewGames,me:viewMeAll,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
+  const V={team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,me:viewMeAll,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
   let v=UI.view;
   $('#main').innerHTML=V[v]();
   chrome(v);
@@ -2870,6 +2901,7 @@ function touch(){
 document.addEventListener('focusout',()=>{if(dirty)setTimeout(()=>{if(!typing()){dirty=false;render()}},60)});
 function route(){
   let v=location.hash.slice(1);if(v==='hub')v='me';
+  if(v.startsWith('team/')){try{UI.team=decodeURIComponent(v.slice(5))}catch(_){UI.team=''}v='team'}
   UI.view=viewOK(v)?v:'league';
   closePlayer();closeNotes();render();window.scrollTo(0,0);
 }
@@ -2914,6 +2946,9 @@ document.addEventListener('click',async e=>{
   else if(a==='gweek'){UI.gw=t.dataset.w==='P'?'P':+t.dataset.w;render()}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
+  else if(a==='team'){UI.ttab='sched';location.hash='#team/'+encodeURIComponent(t.dataset.t)}
+  else if(a==='ttab'){UI.ttab=t.dataset.v;render()}
+  else if(a==='tback'){if(history.length>1)history.back();else location.hash='#games'}
   else if(a==='gmore'){UI.gmore=(UI.gmore||5)+5;render()}
   else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
   else if(a==='pkSide'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}
