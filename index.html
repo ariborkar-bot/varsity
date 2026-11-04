@@ -2068,7 +2068,11 @@ function standTab(){
    so using all three leaves you with 3 new players and 2 of the originals. Your hand scores the week's fantasy points from those 5 players.
    Everyone in the app is on one leaderboard. A card whose game already has stats in is locked, and new cards only come from players who have not played yet this week.
    A hand lives on the player's own picks document (picks/<uid>.fc[week] = {h: the 5 players, r: redraws used, d: players swapped out}). */
-const FC_SIZE=5,FC_REDRAWS=3;
+const FC_SIZE=5,FC_REDRAWS=3,FC_BANK_MAX=6;
+/* Redraws you do not use are saved for the next week (up to FC_BANK_MAX saved). Week w gives you 3 new ones plus whatever you saved. */
+function fcBank(u,w){let bank=0;for(const v of Object.keys(fcDoc(u)).map(Number).filter(n=>n<w).sort((a,b)=>a-b)){const h=fcHand(u,v);bank=Math.min(FC_BANK_MAX,Math.max(0,FC_REDRAWS+bank-(h.r||0)))}return bank}
+const fcAllow=(u,w)=>FC_REDRAWS+fcBank(u,w);
+const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||0:0))};
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
@@ -2092,9 +2096,16 @@ async function fcDeal(){
       await sl(700+130*st.length);UI.fcDeal=null}}
   finally{_fcBusy=false;render()}
 }
+function fcLock(){
+  const w=CURW(),hd=fcHand(ME.uid,w);if(!hd||hd.lk)return;const left=fcLeft(ME.uid,w),keep=Math.min(FC_BANK_MAX,left);
+  confirmBox('Lock in your hand?',`Your 5 cards are final for week ${w}, so no more redraws this week. ${keep?`You keep ${keep} unused ${keep===1?'redraw':'redraws'} for next week.`:'You have no redraws left to save.'}`,'Lock in',async()=>{
+    const nx={...hd,lk:1,lat:NOW()};fcSet(w,nx);
+    if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Hand locked in'))fcSet(w,hd);render()})
+}
 async function fcRedraw(i){
   if(_fcBusy||!ME.uid)return;const w=CURW(),hd=fcHand(ME.uid,w);if(!hd)return;
-  if((hd.r||0)>=FC_REDRAWS){say('You are out of redraws this week');return}
+  if(hd.lk){say('Your hand is locked in for the week');return}
+  if(fcLeft(ME.uid,w)<=0){say('You are out of redraws this week');return}
   const old=pByKey(hd.h[i]);if(!old)return;if(statsIn(old)){say(old.name+' already has stats this week, so that card is locked');return}
   _fcBusy=true;
   try{const seen=new Set([...hd.h,...(hd.d||[])]),nk=fcDraw(fcPool(seen),1)[0];if(!nk){say('No new players to draw right now');return}
@@ -2110,23 +2121,23 @@ async function fcRedraw(i){
 }
 function fcHTML(){
   const cw=CURW(),w=UI.fcw&&UI.fcw<=cw?UI.fcw:cw,mine=ME.uid&&ME.mode!=='guest'?fcHand(ME.uid,w):null,can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const used=mine?(mine.r||0):0,left=FC_REDRAWS-used;
+  const left=mine?fcLeft(ME.uid,w):0,bank=mine?fcBank(ME.uid,w):0,lkd=!!(mine&&mine.lk);
   const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=p.games[w-1],lk=w===cw&&statsIn(p);
     const an=UI.fcAnim&&UI.fcAnim.w===w&&UI.fcAnim.i===i?UI.fcAnim:null,dl=UI.fcDeal&&UI.fcDeal.w===w?UI.fcDeal.st[i]:null;
     const mode=dl?{back:'fc-mys fc-back',flip:'fc-flip'}[dl]:an?(an.rev?'fc-flip':'fc-mys'):'',fdel=dl==='flip'?i*.13:0;
     return `<div class="fc-card ${x?'in':''} ${mode}" ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}<b class="fc-nm">${esc(p.name)}</b><small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
       <div class="fc-ppg">${(()=>{const a=agg(p,'season');return a.n?`<b>${f1(a.v/a.n)}</b> PPG<small>${a.n} ${a.n===1?'game':'games'}</small>`:'<small>No games yet</small>'})()}</div>
       <div class="fc-pts"><b>${x?f1(pts(x.stat)):'—'}</b><small>${x?'week '+w+' pts':'waiting on game'}</small></div>
-      ${w===cw&&can?`<button class="btn sm ${left>0&&!lk?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!UI.fcAnim?'':'disabled'}>${lk?'Locked':'Redraw'}</button>`:''}</div>`}).join(''):'';
+      ${w===cw&&can?`<button class="btn sm ${left>0&&!lk&&!lkd?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!lkd&&!UI.fcAnim?'':'disabled'}>${lk?'Locked':'Redraw'}</button>`:''}</div>`}).join(''):'';
   const wk=[...new Set([cw,...Object.keys(fcDoc(ME.uid||'')).map(Number)])].filter(n=>n<=cw).sort((a,b)=>b-a);
   const all=Object.keys(S.picks).filter(u=>fcHand(u,w)).map(u=>({u,t:fcScore(u,w),s:fcSeason(u)}));
   const byS=UI.fcb==='season',rows=all.sort((a,b)=>(byS?b.s-a.s:b.t-a.t)||(b.t-a.t)).map((x,i)=>Object.assign(x,{r:i+1}));
   const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
   const lrow=x=>`<li class="${x.u===ME.uid?'me':''}"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w).h||[]).map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':'week '+w}</small></span></li>`;
   return `<section class="card fc-hero"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">Week ${cw}</span></div>
-    <p class="muted">Every week you are dealt 5 random players from the app and get 3 redraws. A redraw swaps one card for a new player. You can redraw any card, even the same spot up to 3 times, until your redraws run out. Your hand scores the week’s fantasy points from those 5. Everyone in Varsity is on the same leaderboard.</p>
+    <p class="muted">Every week you are dealt 5 random players from the app and get 3 redraws. A redraw swaps one card for a new player. You do not have to use them: lock in your hand whenever you like, and any unused redraws are saved for next week (you can hold up to ${FC_BANK_MAX} saved). Your hand scores the week’s fantasy points from those 5. Everyone in Varsity is on the same leaderboard.</p>
     ${wk.length>1?`<div class="chips" role="group" aria-label="Week">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">Week ${n}</button>`).join('')}</div>`:''}
-    ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b></div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand">${cards}</div>`
+    ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&bank?`<small>${bank} saved from before</small>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand">${cards}</div>${w===cw&&can?(lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> ${left?`${Math.min(FC_BANK_MAX,left)} unused ${left===1?'redraw is':'redraws are'} saved for next week.`:'No redraws left to save.'}</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand${left?` · save ${Math.min(FC_BANK_MAX,left)} ${left===1?'redraw':'redraws'}`:''}</button></div>`):''}`
       :w!==cw?'<p class="hint">You had no hand that week.</p>'
       :can?`<div class="fc-deal"><p>You have not been dealt a hand for week ${cw} yet. Once dealt, your 5 cards are yours for the week.</p><button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
@@ -3987,6 +3998,7 @@ boot();
     else if(a==='chatDel'){const g=curGroup(),m=g&&(g.chat||{})[t.dataset.id];if(m&&m.u===ME.uid)await act(()=>upsert('groups/'+g.id,{chat:{[t.dataset.id]:null}}),'Message deleted')}
     else if(a==='fcDeal')fcDeal()
     else if(a==='fcRedraw')fcRedraw(+t.dataset.i)
+    else if(a==='fcLock')fcLock()
     else if(a==='fcWeek'){UI.fcw=+t.dataset.v;render()}
     else if(a==='fcBoard'){UI.fcb=t.dataset.v;render()}
     else if(a==='trNew')openTrade()
