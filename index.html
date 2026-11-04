@@ -1293,12 +1293,14 @@ select option{background:#0B1730;color:#EAF0F8}
 .sb-card .top10.sm{top:.5cqw;right:.6cqw}
 .dh h2 .nmt{gap:8px}.dh h2 .top10{font-size:.68rem}
 
-/* Simulate: each player is stamped onto the field, with an impact ring */
-.sb-slot.stamp>.sb-card{animation:sbStamp .55s var(--d,0s) cubic-bezier(.3,0,.2,1) both}
-.sb-slot.stamp::before{content:"";position:absolute;left:50%;top:50%;width:70%;aspect-ratio:1;margin:-35% 0 0 -35%;border-radius:50%;border:2px solid rgba(255,214,120,.9);opacity:0;pointer-events:none;z-index:0;animation:sbRing .6s calc(var(--d,0s) + .26s) ease-out both}
-@keyframes sbStamp{0%{opacity:0;transform:scale(2.7) rotate(-7deg);filter:brightness(1.6)}45%{opacity:1;transform:scale(2.7) rotate(-7deg)}70%{transform:scale(.92) rotate(1deg);box-shadow:0 0 0 2px #FFC23D,0 0 26px rgba(255,194,61,.7)}86%{transform:scale(1.03)}100%{transform:none;filter:none}}
-@keyframes sbRing{0%{opacity:.9;transform:scale(.5)}100%{opacity:0;transform:scale(2.6)}}
-@media (prefers-reduced-motion:reduce){.sb-slot.stamp>.sb-card,.sb-slot.stamp::before{animation:none!important}}
+
+/* compare: the picked player is stamped into place, with an impact ring and flash */
+.cmp-in{animation:cmpStamp .6s cubic-bezier(.3,0,.2,1) both!important}
+.cmp-in .cmp-av{animation:none!important}
+.cmp-in .cmp-ring{display:block;top:50%;left:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-width:3px;border-color:#FFD27A;animation:cmpRing .7s .3s ease-out both!important}
+.cmp-in::after{animation:cmpSweep .8s .4s ease-out forwards!important}
+@keyframes cmpStamp{0%{opacity:0;transform:scale(2.6) rotate(-6deg);filter:brightness(1.7)}40%{opacity:1;transform:scale(2.6) rotate(-6deg)}68%{transform:scale(.93) rotate(.8deg);box-shadow:0 0 0 2px #FFC23D,0 0 30px rgba(255,194,61,.65)}84%{transform:scale(1.025)}100%{transform:none;filter:none}}
+.cmp-body.show{animation-delay:.45s}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1641,7 +1643,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v141 · Nov 4';
+const APP_BUILD='v142 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2467,7 +2469,7 @@ function viewSim(){
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
   const tab=UI.simTab==='def'?'def':'off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
   const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p||SIM_UNIT(sl.k)!==tab)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
-    return `<div class="sb-slot ${fl?'stamp':''}" style="left:${pos[0]}%;top:${pos[1]}%;${fl?`--d:${fl.d}s`:''}"><div class="fc-card sb-card">${T10(p).replace('class="top10"','class="top10 sm"')}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
+    return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}${T10(p).replace('class="top10"','class="top10 sm"')}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
       <div class="sb-pts"><b>${f1(a.n?a.v/a.n:0)}<u>PPG</u></b><small>${f1(a.v)} pts<em> · ${a.n} gp</em></small></div>
       ${m.done?'':`<button class="sb-rs ${m.left>0&&!busy?'':'off'}" data-act="simRespin" data-i="${i}" ${m.left>0&&!busy?'':'disabled'} aria-label="Respin ${sl.label}">↻<span> Respin</span></button>`}</div></div>`};
   const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins left</small><b>${m.left}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
@@ -3675,10 +3677,10 @@ document.addEventListener('click',async e=>{
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
   else if(a==='cmpPick'){const sd=+t.dataset.s,pl=players().filter(x=>x.mp&&x.key!==t.dataset.id);
-    UI.cmp[sd]=t.dataset.id;UI.cmpNew=sd;UI.cmpPh='spin';
+    UI.cmp[sd]=t.dataset.id;UI.cmpNew=sd;UI.cmpPh='land';
     UI.cmpReel=Array.from({length:9},()=>pl[Math.floor(Math.random()*pl.length)]).filter(Boolean).map(x=>x.key);
     render();const c=document.getElementById('compare');if(c)c.scrollIntoView({block:'center'});
-    setTimeout(()=>{if(UI.cmpNew===sd){UI.cmpPh='land';render();setTimeout(()=>{if(UI.cmpNew===sd){UI.cmpNew=null;UI.cmpPh=null}},1300)}},1250)}
+    setTimeout(()=>{if(UI.cmpNew===sd){UI.cmpNew=null;UI.cmpPh=null}},1500)}
   else if(a==='cmpClear'){UI.cmp[+t.dataset.s]=null;render()}
   else if(a==='cmpReset'){UI.cmp=[null,null];render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
