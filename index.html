@@ -100,6 +100,7 @@ input[type=number]{width:100%}
 .avl{position:absolute;right:-4px;bottom:-4px;width:46%;height:46%;border-radius:50%;background:#f2f4f7;padding:1px;object-fit:contain;box-shadow:0 0 0 2px var(--surface,#15263A),0 1px 3px rgba(0,0,0,.35)}
 .slogo{display:inline-block;vertical-align:-4px;margin-right:5px;border-radius:50%;background:#f2f4f7;padding:1px;object-fit:contain}
 .sch{display:flex;align-items:center;gap:8px}.sch .slogo{margin:0}
+.side-sw{margin:10px 0}.side-sw small{display:block;color:var(--muted);margin-bottom:6px}
 .gr{background:color-mix(in srgb,var(--muted) 16%,transparent);color:var(--muted);font:800 .66rem/1 var(--f-body);padding:3px 6px;border-radius:999px;letter-spacing:.04em;margin-right:4px}
 .pos{--c:var(--muted);background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c);font:800 .68rem/1 var(--f-body);padding:3px 7px;border-radius:999px;letter-spacing:.04em}
 .pos.QB{--c:var(--qb)} .pos.RB{--c:var(--rb)} .pos.WR{--c:var(--wr)} .pos.TE{--c:var(--te)} .pos.DEF{--c:var(--df)} .pos.K{--c:#F2C230}
@@ -2328,12 +2329,18 @@ function myGamesHTML(me){
   }
   return items.length?`<ul class="gl">${items.join('')}</ul>`:'<p class="hint">No games yet.</p>';
 }
+/* a two-way player claims both of their profiles (offense and defense). Each keeps its own stats and its own rankings. */
+function meSides(){
+  const pr=myProfile();if(!pr)return[];
+  const nm0=String(pr.name).trim().toLowerCase();
+  return players().filter(p=>p.mp&&p.school===pr.school&&p.name.toLowerCase()===nm0);
+}
 function meP(){
   const pr=myProfile();if(!pr)return null;
   /* a profile that matches a box-score player by name and school is that player; two-way players have one entry per side, so prefer the chosen position */
   const nm0=String(pr.name).trim().toLowerCase();
-  const c=players().filter(p=>p.mp&&p.school===pr.school&&p.name.toLowerCase()===nm0);
-  const mp=c.find(p=>p.pos===pr.pos)||c[0];
+  const c=meSides();
+  const mp=c.find(p=>p.key===UI.meSide)||c.find(p=>p.pos===pr.pos)||c[0];
   return mp||players().find(p=>p.uid===ME.uid)||null;
 }
 function viewMeAll(){return viewHub()+viewMe()}
@@ -2391,6 +2398,7 @@ function viewMe(){
         <label class="fld"><span>School</span><select id="me-school" data-act="meSchool">${(SD_SCHOOLS.includes(pr.school)?SD_SCHOOLS:[...SD_SCHOOLS,pr.school]).map(s=>`<option ${s===pr.school?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
         <label class="fld"><span>Position</span><select id="me-pos" data-act="mePos">${POSITIONS.map(x=>`<option ${x===pr.pos?'selected':''}>${x}</option>`).join('')}</select></label>
       </div>
+      ${meSides().length>1?`<div class="side-sw"><small>You play both ways. Pick which profile to view. Each one has its own stats and rankings.</small><div class="chips" role="group" aria-label="Profile">${meSides().map(p=>`<button class="chip" data-act="meSide" data-v="${esc(p.key)}" aria-pressed="${me.key===p.key}">${esc(p.pos==='DEF'?(p.sub||'DEF'):p.pos)}</button>`).join('')}</div></div>`:''}
       <div class="tools bare">${scopeSel('scope3',UI.rank==='prev')}${rankSw()}</div>
       ${info?`<div class="big"><div><span class="lbl">${UI.scope==='season'?'Season pts':'Week pts'}</span><b>${f1(info.a.v)}</b></div><div><span class="lbl">Games</span><b>${info.a.n}</b></div><div><span class="lbl">Per game</span><b>${f1(info.a.v/info.a.n)}</b></div></div>`:''}
     </section>
@@ -2820,6 +2828,7 @@ document.addEventListener('click',async e=>{
     copyText(`${g.name} on Varsity (${UI.scope==='season'?'season':'week '+UI.scope})\n`+rows.map((r,i)=>`${i+1}. ${r.name}: ${bigV(r.a)}`).join('\n'),'Standings copied');
   }
   else if(a==='copyRank'){const me=meP(),info=me&&myRanks(me);if(info)copyText(rankText(info,me),'Copied. Paste it anywhere.')}
+  else if(a==='meSide'){UI.meSide=t.dataset.v;render()}
   else if(a==='share'){
     const me=meP(),info=me&&myRanks(me);if(!info)return;
     try{
