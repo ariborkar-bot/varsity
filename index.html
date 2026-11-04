@@ -1927,10 +1927,30 @@ function picksHTML(){
   const allBar=staged.length?`<section class="card pk-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Lock them all in at once, or lock games in one by one above.`}</div></div><div class="pk-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>Lock in all ${staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
   return bankCard+(list.length?[...new Set(list.map(g=>g.w))].map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} picks</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')+allBar:'<p class="empty">No upcoming games to pick yet. New matchups show up here as they are set.</p>')+histCard+boardCard;
 }
+/* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
+function anticipated(){
+  const gs=((GAMES&&GAMES.games)||[]),r=ratings(),R=n=>r[n]===undefined?1500:r[n];
+  const score=g=>(R(g.h)+R(g.a))/2-Math.abs(R(g.h)-R(g.a))*.4;
+  const up=gs.filter(g=>!gDone(g)).sort((a,b)=>score(b)-score(a));
+  return up;
+}
+function anticipatedHTML(){
+  const list=anticipated(),n=Math.min(list.length,UI.gmore||5);
+  if(!list.length)return'<p class="empty">No upcoming games yet. New matchups show up here as they are set.</p>';
+  const card=(g,i)=>{const o=oddsFor(g);return gameCard(Object.assign({},g,{r:`${g.a} ${Math.round((1-o.ph)*100)}% · ${g.h} ${Math.round(o.ph*100)}% to win`}),{})};
+  return `<div class="qh"><h2 class="h-sec">Most anticipated</h2><span class="muted">Top ${n} of ${list.length} upcoming games</span></div>
+    <div class="gm-grid">${list.slice(0,n).map(card).join('')}</div>
+    ${n<list.length?`<div class="btns" style="justify-content:center;margin-top:14px"><button class="btn ghost" data-act="gmore">Load more matchups (${Math.min(5,list.length-n)} more)</button></div>`:''}`;
+}
 function viewGames(){
-  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.'})[UI.gtab]||'Every San Diego Section matchup by week, the playoff bracket for every division, and team standings.'}</p></div>`;
+  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.'})[UI.gtab]||'The most anticipated games, team standings, the playoff brackets and every game by week.'}</p></div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['picks','Picks']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${(UI.gtab||'sched')===v}">${l}</button>`).join('')}</div>`;
-  return head+tabs+(UI.gtab==='picks'?picksHTML():viewSched('')+`<div class="qh" style="margin-top:26px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()+`<div class="qh" style="margin-top:26px"><h2 class="h-sec">Standings</h2></div>`+standingsHTML((GAMES&&GAMES.games)||[],UI.gschool));
+  if(UI.gtab==='picks')return head+tabs+picksHTML();
+  const gs=(GAMES&&GAMES.games)||[];
+  return head+tabs+anticipatedHTML()
+    +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">Standings</h2></div>`+standingsHTML(gs,UI.gschool)
+    +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()
+    +`<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>`+viewSched('');
 }
 
 /* ---------- player hub ---------- */
@@ -2774,6 +2794,7 @@ document.addEventListener('click',async e=>{
   else if(a==='gweek'){UI.gw=t.dataset.w==='P'?'P':+t.dataset.w;render()}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
+  else if(a==='gmore'){UI.gmore=(UI.gmore||5)+5;render()}
   else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
   else if(a==='pkSide'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}
   else if(a==='pkStake'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{stake:+t.dataset.v});render()}
