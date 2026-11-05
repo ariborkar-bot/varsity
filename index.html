@@ -1447,6 +1447,23 @@ select option{background:#0B1730;color:#EAF0F8}
 .pod .top10+.top10{top:-9px;right:auto;left:50%;transform:translateX(-50%)}
 .top10.sm+.top10.sm{top:calc(4px + max(.4rem,1.9cqw) + 4px)}
 .nmt{flex-wrap:wrap;row-gap:3px}.nmt .top10{flex:none}.nmt>b,.nmt>h2{flex:0 1 auto;min-width:min(5.5em,100%)}
+
+/* shine: a light streak runs across gold and silver tags, medals and rows; rims glow */
+@keyframes pwGlint{0%,55%{background-position:-160% 0,0 0}100%{background-position:260% 0,0 0}}
+.top10.potw,.pw-tag.gold{background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.95) 50%,transparent 65%) -160% 0/60% 100% no-repeat,linear-gradient(100deg,#FFD15A,#FFF1B8 45%,#F5B300);animation:pwGlint 2.8s ease-in-out infinite}
+.top10.potw.s{background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,1) 50%,transparent 65%) -160% 0/60% 100% no-repeat,linear-gradient(100deg,#B9C4D2,#F7F9FC 45%,#8E9BAD);animation-delay:.6s}
+.gold .pw-k{background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.95) 50%,transparent 65%) -160% 0/70% 100% no-repeat,linear-gradient(135deg,#FFF0B0,#F5B300 55%,#B97800);animation:pwGlint 2.8s ease-in-out .3s infinite}
+.silver .pw-k{background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,1) 50%,transparent 65%) -160% 0/70% 100% no-repeat,linear-gradient(135deg,#FFFFFF,#AEB9C8 55%,#7D8A9C);animation:pwGlint 2.8s ease-in-out .9s infinite}
+.pw-r.gold{background:linear-gradient(105deg,transparent 40%,rgba(255,236,170,.22) 50%,transparent 60%) -160% 0/50% 100% no-repeat,linear-gradient(90deg,rgba(255,194,61,.24),rgba(255,194,61,.04) 70%);animation:pwGlint 4s ease-in-out .5s infinite}
+.pw-r.silver{background:linear-gradient(105deg,transparent 40%,rgba(230,238,250,.14) 50%,transparent 60%) -160% 0/50% 100% no-repeat,linear-gradient(90deg,rgba(200,214,232,.1),transparent 70%);animation:pwGlint 4s ease-in-out 1.2s infinite}
+.gold .pw-pt{background:linear-gradient(180deg,#FFF6CF,#FFC23D 55%,#E39B00);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 8px rgba(255,194,61,.55))}
+.pw-card::after{background:linear-gradient(100deg,transparent,rgba(255,236,170,.16),transparent)}
+@keyframes rimG{0%,100%{box-shadow:0 0 0 2px #0A1426,0 0 0 4px #F5B300,0 0 10px 1px rgba(255,194,61,.45)}50%{box-shadow:0 0 0 2px #0A1426,0 0 0 4px #FFE58A,0 0 20px 5px rgba(255,194,61,.8)}}
+@keyframes rimS{0%,100%{box-shadow:0 0 0 2px #0A1426,0 0 0 4px #AEB9C8,0 0 8px 1px rgba(210,222,238,.3)}50%{box-shadow:0 0 0 2px #0A1426,0 0 0 4px #FFFFFF,0 0 16px 4px rgba(225,235,250,.6)}}
+.av.rim-g{animation:rimG 2.4s ease-in-out infinite}.av.rim-s{animation:rimS 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.top10.potw,.pw-tag.gold,.pw-k,.pw-r,.av.rim-g,.av.rim-s{animation:none!important}}
+/* phones: the bottom tab bar tucks away while scrolling down and comes back on the way up */
+@media (max-width:759px){.tabs{transition:transform .22s ease}html.navhide .tabs{transform:translateY(110%)}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1807,7 +1824,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v191 · Nov 5';
+const APP_BUILD='v192 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3183,7 +3200,7 @@ function hotHTML(){
     <span class="pw-k">${k}</span>${av(x.p.name,x.p.school,k===1?46:38)}
     <span class="pw-who"><span class="pw-nm"><b>${esc(x.p.name)}</b><em class="top10 potw${k>1?' s':''}">POTW</em>${isT10(x.p)?'<em class="top10">TOP 10</em>':''}</span><small>${esc(x.p.school)} · ${esc(sl(g&&g.stat))}</small></span>
     <span class="pw-pt">${f1(x.v)}<i>pts</i></span></button>`};
-  return `<section class="card pw-card"><div class="pw-h"><h3><span class="pw-bolt" aria-hidden="true">⚡</span>Players of the Week</h3><span class="pw-wk">Week ${wt.w}</span></div>${pd.map((x,i)=>row(x,i+1)).join('')}</section>`;
+  return `<section class="card pw-card"><div class="pw-h"><h3>Players of the Week</h3><span class="pw-wk">Week ${wt.w}</span></div>${pd.map((x,i)=>row(x,i+1)).join('')}</section>`;
 }
 function viewLeague(){
   const schools=[...new Set(players().map(p=>p.school))].filter(Boolean).sort();
@@ -4719,6 +4736,12 @@ function sportCut(href,label,opt){
  requestAnimationFrame(loop);setTimeout(fin,END+800);
 }
 
+/* bottom tab bar: hide on scroll down, show on scroll up or near the top/bottom of the page */
+(()=>{let last=scrollY,tk=false,hid=false;const set=h=>{if(h!==hid){hid=h;document.documentElement.classList.toggle('navhide',h)}};
+  const f=()=>{tk=false;const y=scrollY,d=y-last;if(Math.abs(d)<6)return;const atEnd=innerHeight+y>=document.documentElement.scrollHeight-4;
+    set(d>0&&y>90&&!atEnd);last=y};
+  addEventListener('scroll',()=>{if(!tk){tk=true;requestAnimationFrame(f)}},{passive:true});
+  addEventListener('hashchange',()=>{set(false);last=scrollY})})();
 route();
 boot();
 
