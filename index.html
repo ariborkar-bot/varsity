@@ -1361,6 +1361,10 @@ select option{background:#0B1730;color:#EAF0F8}
 .pp-m{font:700 .78rem/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:#FFC23D;margin:4px 0 8px}
 .pp-stat{font-size:.74rem;margin:8px 0 2px}.pp-stat b{color:var(--ink,#fff)}
 .pp .bt-t{padding:10px 6px}
+
+.mk-row{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.mk-lb{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.mk-lb small{display:block;font-size:.76rem}
+.mk-rec{list-style:none;margin:10px 0 0;padding:0;font-size:.8rem;color:var(--muted)}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1703,8 +1707,8 @@ async function signOut(){try{await SB.auth.signOut()}catch(_){}try{localStorage.
 let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
-const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v182 · Nov 4';
+const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
+const APP_BUILD='v183 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2768,12 +2772,140 @@ function propsHTML(){
   return boardCard+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+allBar+body+histCard;
 }
 
+/* ---- Mock drafts: practice against AI teams, or join other people's mock draft ---- */
+S.mocks=S.mocks||{};
+const AI_NAMES=['Blitz Bot','Coach Algo','Auto Al','Pixel Pete','Neural Nate','Sir Sacks-a-Lot','Captain Cache','Deep Dive Dan','Turbo Tom','Quantum Quinn','Byte Bryant'];
+UI.mk={set:{size:8,rounds:10,level:'normal',clock:45},id:null,loc:null,tab:'best',pos:'ALL',busy:''};
+const mkMe=()=>ME.uid||'me';
+const mkSlots=m=>slotsFromRoster(ROSTER_DEFAULT).filter(s=>m.rounds>=13||!s.bench);
+const mkGet=()=>UI.mk.id==='local'?UI.mk.loc:(UI.mk.id&&S.mocks[UI.mk.id]?Object.assign({id:UI.mk.id},S.mocks[UI.mk.id]):null);
+const mkName=(t,m)=>t.startsWith('ai')?AI_NAMES[(+t.slice(2)-1)%AI_NAMES.length]+' (AI)':t===mkMe()?'You':nm(t);
+function mkInfo(m){
+  const order=m.order||[],picks=Object.keys(m.picks||{}).map(Number).sort((a,b)=>a-b).map(i=>m.picks[i]),n=order.length,total=n*mkSlots(m).length,i=picks.length;
+  if(m.status!=='live')return{status:m.status||'lobby',order,picks,total,i};
+  if(!n||i>=total)return{status:'done',order,picks,total,i};
+  const r=Math.floor(i/n),j=i%n;
+  return{status:'live',order,picks,total,i,round:r+1,t:r%2===0?order[j]:order[n-1-j]};
+}
+const mkTaken=m=>new Set(Object.values(m.picks||{}).map(x=>x.key));
+function mkRoster(m,t){
+  const slots=mkSlots(m),used={};
+  Object.keys(m.picks||{}).map(Number).sort((a,b)=>a-b).map(i=>m.picks[i]).filter(x=>x.t===t).forEach(x=>{const p=pByKey(x.key);if(!p)return;
+    const s=slots.find(s=>!used[s.k]&&!s.bench&&slotOk(s,p))||slots.find(s=>!used[s.k]&&s.bench&&slotOk(s,p));if(s)used[s.k]=x.key});
+  return{used,open:slots.filter(s=>!used[s.k]),slots};
+}
+let _mkP=null;
+function mkPool(){
+  if(_mkP&&_mkP.rev===_rev)return _mkP.list;
+  const list=players().filter(p=>p.mp).map(p=>{const a=agg(p,'season'),per=a.n?a.v/a.n:0;return{p,v:per*(.5+.5*Math.min(a.n,8)/8),s:a.v}}).filter(x=>x.s>0).sort((a,b)=>b.v-a.v);
+  _mkP={rev:_rev,list};return list;
+}
+function _rng(str){let h=2166136261;for(let k=0;k<str.length;k++){h^=str.charCodeAt(k);h=Math.imul(h,16777619)}return()=>{h+=0x6D2B79F5;let t=Math.imul(h^h>>>15,1|h);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+/* the AI (and autopick) choice: deterministic for a given draft state so every screen agrees on it */
+function mkChoice(m,t,i,level){
+  const taken=mkTaken(m),ro=mkRoster(m,t),R=mkSlots(m).length,rnd=Math.floor(i/m.order.length)+1;
+  let c=mkPool().filter(x=>!taken.has(x.p.key)&&ro.open.some(s=>slotOk(s,x.p)));
+  const st=ro.open.filter(s=>!s.bench);if(st.length){const a=c.filter(x=>st.some(s=>slotOk(s,x.p)));if(a.length)c=a}
+  if(rnd<R-2){const a=c.filter(x=>x.p.pos!=='K');if(a.length)c=a}
+  if(!c.length)return null;
+  const r=_rng(m.id+'|'+i)();
+  if(level==='best')return c[0].p.key;
+  if(level==='easy')return c[Math.floor(r*Math.min(12,c.length))].p.key;
+  const w=level==='hard'?[.8,.2]:[.6,.25,.15];let k=0,acc=0;for(;k<w.length-1;k++){acc+=w[k];if(r<acc)break}
+  return c[Math.min(k,c.length-1)].p.key;
+}
+async function mkWrite(m,i,pk){
+  if(m.local){m.picks[i]=pk;render();return}
+  const d=S.mocks[m.id];if(d){d.picks=d.picks||{};d.picks[i]=pk;render()}
+  try{await upsert('mocks/'+m.id,{picks:{[i]:pk}})}catch(_){say('That pick did not save. Try again.')}
+}
+function mkTick(){
+  if(location.hash!=='#minigames'||UI.mtab!=='mock')return;
+  const m=mkGet();if(!m||m.status!=='live')return;
+  const di=mkInfo(m);if(di.status!=='live')return;
+  const picks=di.picks,last=picks.length?picks[picks.length-1].at:(m.startedAt||NOW()),el=NOW()-last,cl=m.clock||0;
+  const left=cl?Math.max(0,cl-Math.floor(el/1000)):null,e=document.getElementById('mk-left');
+  if(e&&left!==null){e.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');const tm=e.closest('.dr-timer');if(tm)tm.classList.toggle('low',left<=10)}
+  const bot=di.t.startsWith('ai'),key=m.id+'|'+di.i;
+  if(UI.mk.busy===key)return;
+  if((bot&&el>=900)||(!bot&&cl&&el>=cl*1000+(m.local?0:1500))){
+    const k=mkChoice(m,di.t,di.i,bot?m.level:'best');if(!k)return;
+    UI.mk.busy=key;mkWrite(m,di.i,{t:di.t,key:k,at:NOW(),...(bot?{}:{auto:true})}).finally(()=>{UI.mk.busy=''});
+  }
+}
+setInterval(mkTick,500);
+function mkSetChips(){
+  const s=UI.mk.set,row=(f,lab,opts)=>`<div class="mk-row"><small class="muted">${lab}</small><div class="chips">${opts.map(([v,l])=>`<button class="chip" data-act="mkSet" data-f="${f}" data-v="${v}" aria-pressed="${s[f]===v}">${l}</button>`).join('')}</div></div>`;
+  return row('size','Teams',[4,6,8,10,12].map(v=>[v,v]))+row('rounds','Rounds',[[10,'10 · starters'],[13,'13 · with bench']])+row('level','AI skill',[['easy','Easy'],['normal','Normal'],['hard','Hard']])+row('clock','Pick clock',[[30,'30 sec'],[45,'45 sec'],[90,'90 sec'],[0,'None']]);
+}
+function mkHome(){
+  const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',now=NOW(),day=864e5;
+  const all=Object.entries(S.mocks).map(([id,m])=>Object.assign({id},m)).filter(m=>m.createdAt>now-day);
+  const open=all.filter(m=>m.status==='lobby'&&!(m.members||{})[mkMe()]);
+  const mine=all.filter(m=>(m.members||{})[mkMe()]&&m.status!=='cancelled').sort((a,b)=>b.createdAt-a.createdAt);
+  const row=(m,btn)=>`<div class="mk-lb"><div><b>${esc(m.name)}</b><small class="muted">${Object.keys(m.members||{}).length} of ${m.size} seats · ${m.rounds} rounds · ${m.clock?m.clock+' sec clock':'no clock'} · AI fills the rest</small></div>${btn}</div>`;
+  const lob=UI.mk.loc&&UI.mk.loc.status==='live'?`<div class="mk-lb"><div><b>Draft vs AI in progress</b><small class="muted">${UI.mk.loc.size} teams</small></div><button class="btn sm" data-act="mkOpen" data-id="local">Resume</button></div>`:'';
+  return `<section class="card"><div class="qh"><h3>Mock draft settings</h3></div>${mkSetChips()}
+    <div class="bt-go"><button class="btn" data-act="mkSolo">Draft against AI</button>${can?`<button class="btn ghost" data-act="mkLobby">Open a lobby for others</button>`:''}</div>
+    <p class="muted">Snake order, random draw. Mock drafts use the real 2026 season stats and don’t affect your leagues or tokens.${can?'':' Sign in to draft with other people.'}</p></section>
+    ${lob||mine.length?`<section class="card"><div class="qh"><h3>Your mock drafts</h3></div>${lob}${mine.slice(0,6).map(m=>row(m,`<button class="btn sm" data-act="mkOpen" data-id="${esc(m.id)}">${m.status==='done'?'Recap':m.status==='live'?'Resume':'Open lobby'}</button>`)).join('')}</section>`:''}
+    <section class="card"><div class="qh"><h3>Join a mock draft</h3></div>${open.length?open.map(m=>row(m,`<button class="btn sm" data-act="mkJoin" data-id="${esc(m.id)}" ${can&&Object.keys(m.members||{}).length<m.size?'':'disabled'}>Join</button>`)).join(''):'<p class="muted">No open lobbies right now. Open one and others can join with a tap.</p>'}</section>`;
+}
+function mkBoard(m,di){
+  const n=di.order.length,R=mkSlots(m).length;let rows='';
+  for(let r=0;r<R;r++){let c='';for(let j=0;j<n;j++){const i=r*n+(r%2===0?j:n-1-j),x=di.picks[i],pl=x&&pByKey(x.key);
+    c+=`<td class="${i===di.i&&di.status==='live'?'now':''} ${x&&x.t===mkMe()?'me':''}">${pl?`<span class="pos ${pl.pos}">${pl.sub&&pl.pos==='DEF'?pl.sub:pl.pos}</span><b>${esc(pl.name)}</b><small>${esc(pl.school)}</small>`:i===di.i&&di.status==='live'?'<span class="muted">on the clock</span>':''}</td>`}
+    rows+=`<tr><th>Rd ${r+1}</th>${c}</tr>`}
+  return `<div class="scroll"><table class="dboard"><thead><tr><th></th>${di.order.map(t=>`<th>${esc(mkName(t,m))}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function mkTeamHTML(m,t){
+  const ro=mkRoster(m,t);
+  return `<ol class="lg-cards">${ro.slots.map(s=>{const p=pByKey(ro.used[s.k]);return p?`<li class="lg-card"><span class="lg-slot">${s.label}</span><span class="lg-who">${av(p.name,p.school,36)}<span class="lt"><b>${esc(p.name)}</b><i>${pb(p.pos,p.sub)}<span>${esc(p.school)}</span></i></span></span></li>`:`<li class="lg-card empty"><span class="lg-slot">${s.label}</span><span class="muted">open</span></li>`}).join('')}</ol>`;
+}
+function mkRoomHTML(m){
+  const di=mkInfo(m),back=`<button class="btn sm ghost" data-act="mkBack">← Mock drafts</button>`,hum=Object.keys(m.members||{});
+  if(di.status==='lobby'){
+    const own=m.ownerId===mkMe(),im=!!(m.members||{})[mkMe()],can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+    return `<section class="card"><div class="qh"><h3>${esc(m.name)}</h3><span class="pill pending">Lobby</span></div>
+      <p class="muted">${hum.length} of ${m.size} seats taken. ${m.size-hum.length} AI ${m.size-hum.length===1?'team fills':'teams fill'} the rest when the draft starts. ${m.rounds} rounds, ${m.clock?m.clock+' sec clock':'no clock'}.</p>
+      <div class="lg-order">${hum.map(u=>`<span class="lg-ch">${av(nm(u),u,26)}${esc(u===mkMe()?'You':nm(u))}</span>`).join('')}</div>
+      <div class="bt-go">${own?`<button class="btn" data-act="mkStart">Start the draft</button><button class="btn ghost" data-act="mkCancel">Cancel lobby</button>`:im?`<span class="hint">Waiting for ${esc(nm(m.ownerId))} to start. Keep this page open.</span>`:`<button class="btn" data-act="mkJoin" data-id="${esc(m.id)}" ${can&&hum.length<m.size?'':'disabled'}>Join</button>`}${back}</div></section>`;
+  }
+  if(di.status==='done'){
+    const sc=di.order.map(t=>{const ro=mkRoster(m,t);return{t,v:Object.entries(ro.used).filter(([k])=>!(ro.slots.find(s=>s.k===k)||{}).bench).reduce((a,[,key])=>{const x=mkPool().find(y=>y.p.key===key);return a+(x?x.v:0)},0)}}).sort((a,b)=>b.v-a.v);
+    const G=['A+','A','A-','B+','B','B-','C+','C'],n=sc.length,grade=i=>G[Math.min(G.length-1,Math.round(i/Math.max(1,n-1)*(n>2?5:3)))],mi=sc.findIndex(x=>x.t===mkMe());
+    return `<section class="card lg-draft done"><div class="qh"><h3>Mock draft recap</h3><span class="pill approved">Complete</span></div>
+      ${mi>=0?`<div class="dr-grade"><b>${grade(mi)}</b><div><small>Your draft grade</small><span>${ordinal(mi+1)} of ${n} by projected points</span></div></div>`:''}
+      <div class="lg-order">${sc.map((x,i)=>`<span class="lg-ch">${esc(mkName(x.t,m))} <b>${grade(i)}</b></span>`).join('')}</div>
+      <div class="bt-go">${m.local?`<button class="btn" data-act="mkAgain">Draft again</button>`:''}${back}</div>
+      <h4>Your team</h4>${mkTeamHTML(m,mkMe())}<details><summary>See the full draft board</summary>${mkBoard(m,di)}</details></section>`;
+  }
+  const me=di.t===mkMe(),ro=mkRoster(m,mkMe()),cl=m.clock||0,last=di.picks.length?di.picks[di.picks.length-1].at:(m.startedAt||NOW()),left=cl?Math.max(0,cl-Math.floor((NOW()-last)/1000)):null;
+  const myI=(()=>{const n=di.order.length;for(let k=1;k<n*2+2;k++){const i=di.i+k;if(i>=di.total)return null;const r=Math.floor(i/n),j=i%n;if((r%2===0?di.order[j]:di.order[n-1-j])===mkMe())return k}return null})();
+  const taken=mkTaken(m),POSF=['ALL','QB','RB','WR','TE','K','DL','LB','DB'],pos=UI.mk.pos,tab=UI.mk.tab;
+  const best=mkPool().filter(x=>!taken.has(x.p.key)&&posMatch(x.p,pos)&&ro.open.some(s=>slotOk(s,x.p))).slice(0,15);
+  const rec=di.picks.slice(-4).reverse().map(x=>{const pl=pByKey(x.key);return pl?`<li><b>${esc(mkName(x.t,m))}</b> took ${pb(pl.pos,pl.sub)} <b>${esc(pl.name)}</b>${x.auto?' <small class="muted">(auto)</small>':''}</li>`:''}).join('');
+  return `<section class="card lg-draft ${me?'turn':''}"><div class="qh"><h3>${esc(m.name||'Mock draft')}</h3><span class="pill live">Round ${di.round} of ${mkSlots(m).length} · Pick ${di.i+1} of ${di.total}</span></div>
+    <div class="dr-top"><div class="lg-clock">${av(mkName(di.t,m),di.t,56)}<div><small>On the clock</small><b>${me?'You’re up!':esc(mkName(di.t,m))}</b><span class="muted">${me?'Pick a player below.':myI===null?'You’re done drafting.':myI===1?'You’re up next!':`You pick in ${myI-1} ${myI-1===1?'pick':'picks'}.`}</span></div></div>
+      ${cl?`<div class="dr-timer ${left!==null&&left<=10?'low':''}"><b id="mk-left">${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</b></div>`:''}</div>
+    <div class="dr-needs"><small>Your open spots</small>${ro.open.length?ro.open.map(s=>`<span class="pos ${s.bench?'BN':s.elig[0]==='DEF'?'DEF':s.elig.length>1?'FLEX':s.elig[0]}">${s.label}</span>`).join(''):'<span class="muted">Your roster is full</span>'}</div>
+    <div class="chips dr-tabs" role="tablist">${[['best','Best available'],['board','Draft board'],['team','My team']].map(([v,l])=>`<button class="chip" data-act="mkTab" data-v="${v}" aria-pressed="${tab===v}">${l}</button>`).join('')}</div>
+    ${tab==='board'?mkBoard(m,di):tab==='team'?mkTeamHTML(m,mkMe()):`<div class="chips dr-pos">${POSF.map(x=>`<button class="chip" data-act="mkPos" data-v="${x}" aria-pressed="${pos===x}">${x==='ALL'?'All':x}</button>`).join('')}</div>
+      <ol class="dr-best">${best.map((x,k)=>`<li><span class="dr-rk">${k+1}</span>${av(x.p.name,x.p.school,36)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><span class="muted">${f1(x.s)} pts</span>${me?`<button class="btn sm" data-act="mkPick" data-key="${esc(x.p.key)}">Draft</button>`:''}</li>`).join('')||'<li class="muted">No one left at that position.</li>'}</ol><ul class="mk-rec">${rec}</ul>`}
+    <div class="bt-go">${back}</div></section>`;
+}
+function mockHTML(){
+  const m=mkGet();
+  if(UI.mk.id&&!m){UI.mk.id=null}
+  return m?mkRoomHTML(m):mkHome();
+}
+
 function viewMini(){
-  const T=UI.mtab==='spread'?'props':['picks','draw','props'].includes(UI.mtab)?UI.mtab:'picks';
+  const T=UI.mtab==='spread'?'props':['picks','draw','props','mock'].includes(UI.mtab)?UI.mtab:'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-box" title="Tokens are shared by Pick ’em and Over / Under"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}</b></div>`:'';
-  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='props'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks',"Pick 'em"],['props','Over / Under'],['draw','5 Card Draw']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
-  return head+tabs+(T==='draw'?fcHTML():T==='props'?propsHTML():picksHTML());
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':T==='props'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks',"Pick 'em"],['props','Over / Under'],['draw','5 Card Draw'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
+  return head+tabs+(T==='draw'?fcHTML():T==='mock'?mockHTML():T==='props'?propsHTML():picksHTML());
 }
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
@@ -3951,6 +4083,26 @@ document.addEventListener('click',async e=>{
   else if(a==='ppSide'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{s:t.dataset.s});render()}
   else if(a==='ppStake'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{stake:+t.dataset.v});render()}
   else if(a==='ppClear'){UI.pp={};render()}
+  else if(a==='mkSet'){const f=t.dataset.f;UI.mk.set[f]=f==='level'?t.dataset.v:+t.dataset.v;render()}
+  else if(a==='mkSolo'||a==='mkAgain'){const S0=a==='mkAgain'?UI.mk.loc:UI.mk.set,n=S0.size,teams=[mkMe(),...Array.from({length:n-1},(_,i)=>'ai'+(i+1))];
+    for(let i=teams.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[teams[i],teams[j]]=[teams[j],teams[i]]}
+    UI.mk.loc={id:'local-'+NOW(),local:true,name:'Mock draft vs AI',ownerId:mkMe(),status:'live',size:n,rounds:S0.rounds,level:S0.level,clock:S0.clock,order:teams,picks:{},startedAt:NOW()};UI.mk.id='local';UI.mk.tab='best';UI.mk.pos='ALL';render()}
+  else if(a==='mkLobby'){if(needJoin('open a mock draft'))return;const q=UI.mk.set;
+    try{const ref=await DB.collection('mocks').add({name:nm(ME.uid)+'’s mock draft',ownerId:ME.uid,createdAt:NOW(),status:'lobby',size:q.size,rounds:q.rounds,level:q.level,clock:q.clock,members:{[ME.uid]:NOW()},picks:{}});UI.mk.id=ref.id;UI.mk.tab='best';render()}
+    catch(e){say(e&&e.code==='invalid_argument'?'Drafting with other people is not switched on yet. Draft against AI for now.':'Could not open a lobby. Try again.')}}
+  else if(a==='mkJoin'){if(needJoin('join a mock draft'))return;const id=t.dataset.id,d=S.mocks[id];if(!d||Object.keys(d.members||{}).length>=d.size){say('That lobby is full.');return}
+    try{await upsert('mocks/'+id,{members:{[ME.uid]:NOW()}});UI.mk.id=id;render()}catch(_){say('Could not join. Try again.')}}
+  else if(a==='mkOpen'){UI.mk.id=t.dataset.id;UI.mk.tab='best';render()}
+  else if(a==='mkStart'){const m=mkGet();if(!m)return;const hum=Object.keys(m.members||{}),teams=[...hum,...Array.from({length:Math.max(0,m.size-hum.length)},(_,i)=>'ai'+(i+1))];
+    for(let i=teams.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[teams[i],teams[j]]=[teams[j],teams[i]]}
+    try{await upsert('mocks/'+m.id,{status:'live',order:teams,startedAt:NOW(),picks:{}});render()}catch(_){say('Could not start. Try again.')}}
+  else if(a==='mkCancel'){const m=mkGet();if(!m)return;try{await upsert('mocks/'+m.id,{status:'cancelled'});UI.mk.id=null;render()}catch(_){say('Could not cancel. Try again.')}}
+  else if(a==='mkBack'){UI.mk.id=null;render()}
+  else if(a==='mkTab'){UI.mk.tab=t.dataset.v;render()}
+  else if(a==='mkPos'){UI.mk.pos=t.dataset.v;render()}
+  else if(a==='mkPick'){const m=mkGet();if(!m)return;const di=mkInfo(m);if(di.status!=='live'||di.t!==mkMe()){say('It is not your pick.');return}
+    const p=pByKey(t.dataset.key);if(!p||mkTaken(m).has(p.key)||!mkRoster(m,mkMe()).open.some(s=>slotOk(s,p))){say('That player is not available for your roster.');return}
+    await mkWrite(m,di.i,{t:mkMe(),key:p.key,at:NOW()})}
   else if(a==='ppDrop'){const id=t.dataset.id,nb={...propsOf(ME.uid)};delete nb[id];delete UI.pp[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:nb}),'Pick removed');if(!Object.keys(nb).length)S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{props:{}});render()}
   else if(a==='ppAll'){const today=new Date().toISOString().slice(0,10),pm=propMap(),cur=propsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pp).forEach(([id,u])=>{const x=pm[id],old=cur[id];if(!x||!u||!u.s||x.game.d<=today)return;
@@ -4217,7 +4369,7 @@ document.addEventListener('click',e=>{
 /* position overrides for signed-up players too, so a profile created as WR reads as QB everywhere */
 function fixProfilePos(p){if(p&&p.role==='player'&&String(p.name||'').trim().toLowerCase()==='amaree maye'&&p.school==='Bishop\'s'){p.pos='QB';p.posLabel='QB'}}
 function subscribe(){
-  const cols={profiles:'profiles',games:'games',verified:'verified',queue:'queue',groups:'groups',fgroups:'fgroups',lineups:'lineups',picks:'picks'};
+  const cols={profiles:'profiles',games:'games',verified:'verified',queue:'queue',groups:'groups',fgroups:'fgroups',lineups:'lineups',picks:'picks',mocks:'mocks'};
   Object.entries(cols).forEach(([k,path])=>DB.collection(path).onSnapshot(snap=>{
     const o={};snap.docs.forEach(d=>{o[d.id]=Object.assign({},d.data(),{id:d.id})});
     if(k==='profiles')Object.values(o).forEach(fixProfilePos);
