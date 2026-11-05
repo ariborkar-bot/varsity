@@ -193,6 +193,27 @@ def rep(s, a, b, count=1):
     return s.replace(a, b)
 
 
+def gameify(s):
+    """Basketball has no one-game-a-week rhythm, so the visible word "week" becomes "game".
+    Only display wording is touched: identifiers such as weeks, .week and set-week stay as they are."""
+    R = [
+        (r"\bBye week\b", "No game"),
+        (r"every game by week", "every game in date order"),
+        (r"\bWk\b", "Game"),
+        (r"\bwk (?=\$\{|'\s*\+)", "game "),
+        (r"just this week(?:’|')s game", "just this game"),
+        (r"\bweek-by-week\b", "game-by-game"),
+        (r"\bweekly (scores|matchups)\b", r"game \1"),
+        (r"\bWeek\b", "Game"),
+        (r"\bweek(?=\s+\$\{|\s*'\s*\+)", "game"),
+        (r"\b((?i:this|next|each|every|that|the|a|per|last|in|from|until|for|of|by|up until|into|current)|Best|Projected|Current) week\b", r"\1 game"),
+        (r"\bweek(?=[’'](?:s)\b)", "game"),
+        (r"\b(finished|Finished|past|later|recent|Stat) weeks\b", lambda m: m.group(1) + " games"),
+    ]
+    for pat, rp in R:
+        s = re.sub(pat, rp, s)
+    return s
+
 def transform(s, mp, games, seeds, teams, prior):
     # --- identity ---------------------------------------------------------------------------------------------
     s = rep(s, '<title>Varsity</title>', '<title>Varsity Basketball</title>')
@@ -348,7 +369,7 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     # --- look: hardwood instead of grass ------------------------------------------------------------------------
     k = s.rindex('</style>', 0, s.index('<header class="mast">'))
     s = s[:k] + '</style><style id="bb-theme">' + BB_CSS.replace('__COURT__', COURT_URI) + s[k:]
-    return s
+    return gameify(s)
 
 
 COURT_JS = r"""function simField(tab){
