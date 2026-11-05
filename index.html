@@ -1,4 +1,9 @@
-<!doctype html><html><head><meta charset=utf8><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!doctype html><html><head><meta charset=utf8><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.sport-sw{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(3,12,32,.72);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
+.sport-opt{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;color:#cfe0ff;font:800 .72rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;min-height:32px}
+.sport-opt i{font-style:normal;font-size:1rem;line-height:1}
+.sport-opt.on{background:linear-gradient(180deg,#FFC23D,#FF9F1C);color:#1a1200}
+@media (max-width:520px){.sport-opt span{display:none}.sport-opt{padding:6px 9px}}
+</style>
 <title>Varsity</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-title" content="Varsity"><meta name="application-name" content="Varsity"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0A1E55"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32-v2.png"><link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-v2.png"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="stylesheet" href="fonts.css">
@@ -1328,6 +1333,7 @@ select option{background:#0B1730;color:#EAF0F8}
       <div><h1>Varsity</h1><p>High school fantasy football</p></div>
     </a>
     <div class="mast-r">
+      <div class="sport-sw" role="group" aria-label="Sport"><a class="sport-opt on" href="index.html" title="Football" aria-label="Football"><i aria-hidden="true">🏈</i><span>Football</span></a><a class="sport-opt" href="basketball.html" title="Basketball" aria-label="Basketball"><i aria-hidden="true">🏀</i><span>Basketball</span></a></div>
       <div class="wk"><span class="live"></span><span id="wk">Week 10</span></div>
       <button class="bell" id="gear" aria-label="Settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
@@ -4173,6 +4179,7 @@ boot();
   document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',reset,{passive:true});
 })();
 
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.sport-opt');if(!a||a.classList.contains('on'))return;e.preventDefault();location.href=a.getAttribute('href')+location.hash});
 /* gear button: a small settings menu that reuses the app's own actions */
 (()=>{
   const g=document.getElementById('gear');let m=null;
