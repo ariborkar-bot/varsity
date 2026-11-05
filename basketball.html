@@ -1704,7 +1704,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v173 · Nov 4';
+const APP_BUILD='v174 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2256,12 +2256,12 @@ function standTab(){
   return `<div class="tools"><label class="fld"><span>School</span><select data-act="gschool"><option value="ALL">All schools</option>${schools.map(x=>`<option ${UI.gschool===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label></div>`+(standingsHTML(gs,UI.gschool)||'<p class="empty">No results yet.</p>');
 }
 /* ---------- 5 Card Draw: a game for the whole app ----------
-   Every game each player is dealt 5 random players from the app and gets 3 redraws. A redraw swaps one card for a new random player,
-   so using all three leaves you with 3 new players and 2 of the originals. Your hand scores the game's fantasy points from those 5 players.
+   Every game each player is dealt 5 random players from the app and gets FC_REDRAWS (5) redraws. A redraw swaps one card for a new random player,
+   so using all five leaves you with up to 5 new players and 2 of the originals. Your hand scores the game's fantasy points from those 5 players.
    Everyone in the app is on one leaderboard. A card whose game already has stats in is locked, and new cards only come from players who have not played yet this game.
    A hand lives on the player's own picks document (picks/<uid>.fc[week] = {h: the 5 players, r: redraws used, d: players swapped out}). */
-const FC_SIZE=5,FC_REDRAWS=3,FC_BANK_MAX=6;
-/* Redraws you do not use are saved for the next game (up to FC_BANK_MAX saved). Game w gives you 3 new ones plus whatever you saved. */
+const FC_SIZE=5,FC_REDRAWS=5,FC_BANK_MAX=6;
+/* Redraws you do not use are saved for the next game (up to FC_BANK_MAX saved). Game w gives you FC_REDRAWS new ones plus whatever you saved. */
 function fcBank(u,w){let bank=0;for(const v of Object.keys(fcDoc(u)).map(Number).filter(n=>n<w).sort((a,b)=>a-b)){const h=fcHand(u,v);bank=Math.min(FC_BANK_MAX,Math.max(0,FC_REDRAWS+bank-(h.r||0)))}return bank}
 const fcAllow=(u,w)=>FC_REDRAWS+fcBank(u,w);
 const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||0:0))};
@@ -2327,7 +2327,7 @@ function fcHTML(){
   const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
   const lrow=x=>`<li class="${x.u===ME.uid?'me':''}"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w).h||[]).map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':'game '+w}</small></span></li>`;
   return `<section class="card fc-hero"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">Game ${cw}</span></div>
-    <p class="muted">Every game you are dealt 5 random players from the app and get 3 redraws. A redraw swaps one card for a new player. You do not have to use them: lock in your hand whenever you like, and any unused redraws are saved for next game (you can hold up to ${FC_BANK_MAX} saved). Your hand scores the game’s fantasy points from those 5. Everyone in Varsity is on the same leaderboard.</p>
+    <p class="muted">Every game you are dealt 5 random players from the app and get ${FC_REDRAWS} redraws. A redraw swaps one card for a new player. You do not have to use them: lock in your hand whenever you like, and any unused redraws are saved for next game (you can hold up to ${FC_BANK_MAX} saved). Your hand scores the game’s fantasy points from those 5. Everyone in Varsity is on the same leaderboard.</p>
     ${wk.length>1?`<div class="chips" role="group" aria-label="Game">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">Game ${n}</button>`).join('')}</div>`:''}
     ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&bank?`<small>${bank} saved from before</small>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand">${cards}</div>${w===cw&&can?(lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> ${left?`${Math.min(FC_BANK_MAX,left)} unused ${left===1?'redraw is':'redraws are'} saved for next game.`:'No redraws left to save.'}</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand${left?` · save ${Math.min(FC_BANK_MAX,left)} ${left===1?'redraw':'redraws'}`:''}</button></div>`):''}`
       :w!==cw?'<p class="hint">You had no hand that game.</p>'
@@ -2613,13 +2613,13 @@ function spreadHTML(){
 function viewMini(){
   const T=['picks','draw','spread'].includes(UI.mtab)?UI.mtab:'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-box" title="Tokens are shared by Pick ’em and Against the spread"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}</b></div>`:'';
-  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='spread'?'Pick a side against the point spread. Lines come from team ratings, so either side is about a coin flip.':T==='draw'?'Get dealt 5 random players each game, redraw up to 3, and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='spread'?'Pick a side against the point spread. Lines come from team ratings, so either side is about a coin flip.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks',"Pick 'em"],['spread','Against the spread'],['draw','5 Card Draw']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
   return head+tabs+(T==='draw'?fcHTML():T==='spread'?spreadHTML():picksHTML());
 }
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
-  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.',stand:'Records and playoff seeds for every San Diego Section team.',draw:'Get dealt 5 random players each game, redraw up to 3, and see where your hand ranks across the whole app.'})[T]||'The most anticipated games and every game in date order, with the standings beside them, plus the playoff bracket.'}</p></div>`;
+  const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of the upcoming games and grow your tokens.',stand:'Records and playoff seeds for every San Diego Section team.',draw:'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.'})[T]||'The most anticipated games and every game in date order, with the standings beside them, plus the playoff bracket.'}</p></div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['stand','Standings']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
   const gs=(GAMES&&GAMES.games)||[];
   if(T==='stand')return head+tabs+standingsHTML(gs,UI.gschool);
