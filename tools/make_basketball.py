@@ -379,19 +379,21 @@ COURT_JS = r"""function simField(tab){
     <linearGradient id="scLight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
     <rect width="${W}" height="${H}" fill="${wood[0]}"/>`;
   for(let k=0;k<13;k++)g+=`<rect x="${k*32}" y="0" width="16" height="${H}" fill="${wood[k%2]}"/><rect x="${k*32+16}" y="0" width="16" height="${H}" fill="#b87a3a"/>`;
-  const L="#fff6e6";
+  const L="#fff6e6",GOLD="#FFC23D";
+  /* Varsity-branded floor: navy out-of-bounds frame with gold trim, blue painted lane, gold three-point line, the V gem at the center circle */
+  g+=`<path d="M0 0H${W}V${H}H0Z M26 26V${H-26}H374V26Z" fill="#061a4d" fill-rule="evenodd"/><rect x="21" y="21" width="358" height="${H-42}" fill="none" stroke="${GOLD}" stroke-width="2.2" stroke-opacity=".9"/>`;
   if(tab==='off'){
     g+=`<rect x="26" y="26" width="348" height="${H-52}" fill="none" stroke="${L}" stroke-width="3.2"/>`;
-    g+=`<path d="M82 26V250H318V26" fill="#1d4fd0" fill-opacity=".38" stroke="${L}" stroke-width="3.2"/>`;
-    g+=`<circle cx="200" cy="250" r="62" fill="none" stroke="${L}" stroke-width="3.2" stroke-dasharray="9 7"/><path d="M138 250A62 62 0 0 0 262 250" fill="none" stroke="${L}" stroke-width="3.2"/>`;
-    g+=`<path d="M50 26V132A150 150 0 0 0 350 132V26" fill="none" stroke="${L}" stroke-width="3.2"/>`;
+    g+=`<path d="M82 26V250H318V26" fill="#1F4FD1" fill-opacity=".78" stroke="${L}" stroke-width="3.2"/>`;
+    g+=`<circle cx="200" cy="250" r="62" fill="#0B2A74" fill-opacity=".9" stroke="${GOLD}" stroke-width="3.4"/><image href="logo.png" x="150" y="200" width="100" height="100"/>`;
+    g+=`<path d="M50 26V132A150 150 0 0 0 350 132V26" fill="none" stroke="${GOLD}" stroke-width="3.4"/>`;
     g+=`<path d="M170 58h60" stroke="#fff" stroke-width="5" stroke-linecap="round"/><circle cx="200" cy="72" r="11" fill="none" stroke="#ff7a1a" stroke-width="4"/>`;
     g+=`<path d="M160 200h-12M160 168h-12M160 136h-12M240 200h12M240 168h12M240 136h12" stroke="${L}" stroke-width="3"/>`;
-    g+=`<text x="200" y="${H-64}" text-anchor="middle" ${F} font-weight="900" font-style="italic" font-size="30" letter-spacing="8" fill="#fff" fill-opacity=".3">VARSITY</text>`;
+    g+=`<text x="200" y="${H-64}" text-anchor="middle" ${F} font-weight="900" font-style="italic" font-size="30" letter-spacing="8" fill="${GOLD}" fill-opacity=".55">VARSITY</text>`;
   }else{
     g+=`<rect x="26" y="26" width="348" height="${H-52}" fill="none" stroke="${L}" stroke-width="3.2"/>`;
-    g+=`<rect x="26" y="26" width="348" height="46" fill="#1d4fd0" fill-opacity=".5"/><text x="200" y="58" text-anchor="middle" ${F} font-weight="900" font-style="italic" font-size="26" letter-spacing="9" fill="#fff" fill-opacity=".85">THE BENCH</text>`;
-    g+=`<circle cx="200" cy="${H-26}" r="70" fill="none" stroke="${L}" stroke-width="3.2"/>`;
+    g+=`<rect x="26" y="26" width="348" height="46" fill="#1F4FD1" fill-opacity=".8"/><text x="200" y="58" text-anchor="middle" ${F} font-weight="900" font-style="italic" font-size="26" letter-spacing="9" fill="#fff" fill-opacity=".85">THE BENCH</text>`;
+    g+=`<circle cx="200" cy="${H-26}" r="70" fill="#0B2A74" fill-opacity=".9" stroke="${GOLD}" stroke-width="3.4"/><image href="logo.png" x="160" y="${H-82}" width="80" height="80"/>`;
     g+=`<text x="200" y="${H-46}" text-anchor="middle" ${F} font-weight="900" font-style="italic" font-size="30" letter-spacing="8" fill="#fff" fill-opacity=".3">VARSITY</text>`;
   }
   g+=`<rect width="${W}" height="${H}" fill="url(#scLight)"/><rect width="${W}" height="${H}" fill="url(#scVig)"/>`;
@@ -411,23 +413,29 @@ BB_CSS = r"""
 def _court_uri():
     """One full high-school court (84 x 50 ft, NFHS markings) as a tile. Units are tenths of a foot."""
     import urllib.parse
-    L, W = '#fff6e6', 6                      # line colour and stroke width (exaggerated so it reads at banner size)
+    import base64, io
+    from PIL import Image
+    im = Image.open(os.path.join(ROOT, 'logo.png')).convert('RGBA').resize((160, 160), Image.LANCZOS)
+    buf = io.BytesIO(); im.save(buf, 'PNG', optimize=True)
+    gem = 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
+    L, W, GOLD = '#fff6e6', 6, '#FFC23D'     # line colour and stroke width (exaggerated so it reads at banner size)
     floor = ''.join('<rect x="-20" y="%d" width="880" height="25" fill="%s"/>' % (-20 + k * 25, '#c98a45' if k % 2 else '#bd7d3c') for k in range(22))
-    oob = '<path d="M-20 -20H860V520H-20Z M0 0V500H840V0Z" fill="#6b3f17" fill-opacity=".55" fill-rule="evenodd"/>'
+    oob = '<path d="M-20 -20H860V520H-20Z M0 0V500H840V0Z" fill="#061a4d" fill-opacity=".9" fill-rule="evenodd"/>'
     # left half (baseline at x=0, rim centre at x=53, y=250); mirrored for the right half
     half = (
-        '<rect x="0" y="190" width="190" height="120" fill="#1d4fd0" fill-opacity=".5"/>'                      # painted lane (12 ft wide, 19 ft long)
+        '<rect x="0" y="190" width="190" height="120" fill="#1F4FD1" fill-opacity=".8"/>'                      # painted lane (12 ft wide, 19 ft long)
         '<path d="M0 190H190V310H0" fill="none" stroke="%(L)s" stroke-width="%(W)s"/>'                          # lane lines + free-throw line
-        '<path d="M190 190A60 60 0 0 1 190 310" fill="#1d4fd0" fill-opacity=".5" stroke="%(L)s" stroke-width="%(W)s"/>'  # free-throw circle, solid half
+        '<path d="M190 190A60 60 0 0 1 190 310" fill="#1F4FD1" fill-opacity=".8" stroke="%(L)s" stroke-width="%(W)s"/>'  # free-throw circle, solid half
         '<path d="M190 190A60 60 0 0 0 190 310" fill="none" stroke="%(L)s" stroke-width="%(W)s" stroke-dasharray="11 9"/>'  # dashed half
-        '<path d="M0 52.5H53A197.5 197.5 0 0 1 53 447.5H0" fill="none" stroke="%(L)s" stroke-width="%(W)s"/>'    # three-point line, 19 ft 9 in
+        '<path d="M0 52.5H53A197.5 197.5 0 0 1 53 447.5H0" fill="none" stroke="%(G)s" stroke-width="%(W)s"/>'    # three-point line, 19 ft 9 in, in gold
         '<path d="M40 215V285" stroke="#fff" stroke-width="9" stroke-linecap="round"/>'                          # backboard
         '<path d="M40 250H44" stroke="#ff7a1a" stroke-width="5"/><circle cx="53" cy="250" r="9" fill="none" stroke="#ff7a1a" stroke-width="5"/>'  # rim
         '<path d="M60 180v-10M60 320v10M100 190v-10M100 310v10M140 190v-10M140 310v10" stroke="%(L)s" stroke-width="%(W)s"/>'  # lane hash marks
-    ) % {'L': L, 'W': W}
+    ) % {'L': L, 'W': W, 'G': GOLD}
     mid = ('<path d="M420 0V500" stroke="%(L)s" stroke-width="%(W)s"/>'
-           '<circle cx="420" cy="250" r="60" fill="#1d4fd0" fill-opacity=".4" stroke="%(L)s" stroke-width="%(W)s"/>') % {'L': L, 'W': W}
-    border = '<rect x="0" y="0" width="840" height="500" fill="none" stroke="%s" stroke-width="%d"/>' % (L, W)
+           '<circle cx="420" cy="250" r="64" fill="#0B2A74" fill-opacity=".95" stroke="%(G)s" stroke-width="%(W)s"/>'
+           '<image href="%(gem)s" x="352" y="182" width="136" height="136"/>') % {'L': L, 'W': W, 'G': GOLD, 'gem': gem}
+    border = '<rect x="0" y="0" width="840" height="500" fill="none" stroke="%s" stroke-width="%d"/><rect x="-10" y="-10" width="860" height="520" fill="none" stroke="%s" stroke-width="3"/>' % (L, W, GOLD)
     svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="880" height="540" viewBox="-20 -20 880 540">' + floor + oob + border + half +
            '<g transform="translate(840 0) scale(-1 1)">' + half + '</g>' + mid + '</svg>')
     return 'data:image/svg+xml,' + urllib.parse.quote(svg, safe='')
