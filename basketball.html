@@ -1470,7 +1470,6 @@ select option{background:#0B1730;color:#EAF0F8}
 @media (max-width:759px){.st-grid{grid-template-columns:minmax(0,1fr)!important}}
 html,body{overflow-x:clip;max-width:100%}
 @supports not (overflow:clip){html,body{overflow-x:hidden}}
-<<<<<<< Updated upstream
 /* phones: the Simulate field uses the card's full width, and on small phones the player cards shrink a little so they never cover each other */
 @media (max-width:480px){.fc-hero .sim-board{width:calc(100% + 28px);max-width:none;margin-left:-14px;margin-right:-14px;border-radius:12px}}
 /* phones: records like 6-0 and short headers never break across lines, and a long school name moves to its own line instead of being cut off */
@@ -1498,7 +1497,6 @@ html,body{overflow-x:clip;max-width:100%}
   .lg-who .nmt{flex-wrap:wrap;row-gap:4px}
   .lg-who .nmt>b,.lg-who .lt b{overflow:visible;white-space:normal;line-height:1.15}
 }
-=======
 
 .st-seg{margin:6px 0 14px}
 .sx-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
@@ -1563,7 +1561,6 @@ button.sx-li:hover{background:rgba(255,255,255,.04)}
 .sx-bg{max-width:none}
 
 @media (min-width:760px){.sx-val{width:min(340px,38%)}.sx-li{padding:9px 10px}}
->>>>>>> Stashed changes
 </style><style id="bb-theme">
 .bb-pre{display:flex;flex-direction:column;gap:4px;margin:12px 0;border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 0 0,rgba(255,194,61,.14),transparent 60%),var(--card,#132235)}
 .bb-pre b{font:800 1.15rem/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#FFC23D}.bb-pre span{opacity:.8}
@@ -1935,7 +1932,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v195 · Nov 5';
+const APP_BUILD='v196 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
