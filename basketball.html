@@ -1704,7 +1704,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v172 · Nov 4';
+const APP_BUILD='v173 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4062,9 +4062,34 @@ async function boot(){
 async function newPassword(){const p=prompt('Choose a new password (at least 6 characters)');if(!p)return;const {error}=await SB.auth.updateUser({password:p});say(error?'Could not change the password: '+error.message:'Password updated')}
 
 /* ---------- rewarded sponsor spot: watch a sponsor for a few seconds, then collect tokens ---------- */
-function adPlay(){
+/* One place that pays out: used by both the sponsor card and the native rewarded video. */
+async function adGrant(){
+  if(!adLeft(ME.uid))return false;
+  const a=adOf(ME.uid),day=adDay(),nx={d:day,n:(a.d===day?+a.n||0:0)+1,t:(+a.t||0)+ADS.reward};
+  const ok=await act(()=>upsert('picks/'+ME.uid,{ad:nx}),'+'+ADS.reward+' tokens');
+  if(ok)S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{ad:nx});
+  return !!ok}
+/* Native app only (Capacitor + AdMob): real rewarded video. Test unit ids ship by default; put your own in ADMOB below.
+   Teen-safe: ads are tagged under-age-of-consent and capped at Teen content. Returns true if it handled the tap. */
+const ADMOB={android:'ca-app-pub-3940256099942544/5224354917',ios:'ca-app-pub-3940256099942544/1712485313',test:true};
+let _amInit=null;
+async function adNative(){
+  const C=window.Capacitor,am=C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.AdMob;if(!am)return false;
+  try{
+    if(!_amInit)_amInit=am.initialize({initializeForTesting:ADMOB.test,tagForUnderAgeOfConsent:true,tagForChildDirectedTreatment:false,maxAdContentRating:'Teen'});
+    await _amInit;
+    let rewarded=false;const h=await am.addListener('onRewardedVideoAdReward',()=>{rewarded=true});
+    try{await am.prepareRewardVideoAd({adId:C.getPlatform()==='ios'?ADMOB.ios:ADMOB.android,isTesting:ADMOB.test});
+        await am.showRewardVideoAd()}finally{try{h.remove()}catch(_){}}
+    if(rewarded){if(await adGrant())render()}
+    else say('Watch the full video to earn tokens.');
+    return true}
+  catch(e){return false}   /* no fill or plugin error: fall back to the sponsor card */
+}
+async function adPlay(){
   if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||document.getElementById('adov'))return;
   if(!adLeft(ME.uid)){say('You have used today’s sponsor spots. Back tomorrow.');return}
+  if(await adNative())return;
   const sp=ADS.sponsors[Math.floor(Math.random()*ADS.sponsors.length)]||ADS.sponsors[0];
   const o=document.createElement('div');o.id='adov';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Sponsor');
   o.innerHTML=`<div class="adc"><span class="adt">Sponsored</span>
@@ -4081,10 +4106,7 @@ function adPlay(){
   o.querySelector('.adx').onclick=close;
   go.onclick=async()=>{if(!done||go.dataset.b)return;go.dataset.b='1';
     if(!adLeft(ME.uid)){close();return}
-    const a=adOf(ME.uid),day=adDay(),nx={d:day,n:(a.d===day?+a.n||0:0)+1,t:(+a.t||0)+ADS.reward};
-    const ok=await act(()=>upsert('picks/'+ME.uid,{ad:nx}),'+'+ADS.reward+' tokens');
-    if(ok){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{ad:nx})}
-    close();if(ok)render()};
+    const ok=await adGrant();close();if(ok)render()};
   go.focus&&0;
 }
 

@@ -1,0 +1,7 @@
+{
+  "appId": "com.varsityfantasy.app",
+  "appName": "Varsity",
+  "webDir": "www",
+  "backgroundColor": "#061a4d",
+  "ios": { "contentInset": "always" }
+}
