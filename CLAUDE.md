@@ -27,7 +27,7 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - 11 small schools now have empty rosters (all seniors); 24 have fewer than 5 players.
 
 ## Daily score update
-- A Claude scheduled task ("Varsity daily scores", 5:41 am Pacific every day) is set up but PAUSED: the owner does not want daily updates yet; only turn it back on when the owner asks. When on, it finds final scores in news scoreboards (High School On SI, local papers) and adds them with `tools/add_scores.py`. It does not scrape MaxPreps: from the cloud MaxPreps pages come back about a year stale, and automated scraping breaks their terms.
+- A Claude scheduled task ("Varsity daily scores", 5:41 am Pacific every day) is ON (re-created Nov 5 2026 at the owner's request). it finds final scores in news scoreboards (High School On SI, local papers) and adds them with `tools/add_scores.py`. It does not scrape MaxPreps: from the cloud MaxPreps pages come back about a year stale, and automated scraping breaks their terms.
 - `tools/add_scores.py` (read its docstring): input lines `fb|YYYY-MM-DD|home|hs|away|as|source`; fills scores for scheduled games, adds unscheduled games that involve a San Diego Section school, reports CONFLICT/SKIPPED and never guesses. `--pending` lists played games with no score, `--names fb|bb` lists team names, `--dry-run` previews. Other spellings go in `tools/data/team_aliases.txt`.
 - Football scores live in `games.js`; basketball scores are a trailing `64-58` (home first) on a line of `tools/data/bb_2627_games.txt`, read by `load_games()` and passed through to `basketball.html`.
 - Player stats are not updated automatically (news sources rarely publish full box scores). The owner is asking MaxPreps/PlayOn for a data license and ScoreStream for an API quote; the owner wants to expand the app to the whole U.S. The app is free, with no purchases and no gambling.
@@ -43,8 +43,10 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - Football `games.js` is missing many weeks 1-11 results (most teams show 6-9 games, not 10). Cloud search could only find 2 more; the rest needs SI or MaxPreps pages read through the owner's Chrome.
 
 ## Open items and ideas
-- Database rules: only `tools/sql/mocks_policies.sql` is in the repo. Its "update mock" policy lets any signed-in user change any mock draft. Policies for the rest of `public.docs` and the `merge_doc` / admin RPCs are unverified (need the Supabase dashboard).
-- Supabase: basketball uses `bb_`-prefixed collections. Row-level security for them is unverified.
+- Database rules: only `tools/sql/mocks_policies.sql` is in the repo. Its "update mock" policy lets any signed-in user change any mock draft. (`merge_doc` runs as the caller, so table policies apply.)
+- Supabase (Nov 5 2026, migration `league_security_and_account_delete`, copy in tools/sql/): only a league's owner/members/admins can update it; joining by code goes through the `join_league` RPC; `bb_` collections have the same rules as football; `delete_my_account()` RPC backs Settings → Delete my account. Multiplayer mock drafts still need tools/sql/mocks_policies.sql.
+- Privacy policy page is `#privacy` (viewPrivacy). It has a `[contact email]` placeholder the owner must fill in.
+- Navigation: 5 bottom tabs (Simulate lives in Minigames). Minigames = Predict (Game winners / Player over-under), 5 Card Draw, Mock Draft, Simulate. Page descriptions sit behind an "i" button (infoIcons). Scoring rules live in each league's League settings. Player of the Week podium + POTW tag, Game of the Week, player Share card (playerCardBlob), token "+" opens Get tokens (watch a sponsor). The owner asked for a pay-for-tokens option; it was NOT built (free/no-purchases promise, minors, Apple in-app purchase rules) pending the owner's confirmation.
 - Home/away follows MaxPreps entry order and is unverified.
 - Bishop's and 38 other schools have no stats on MaxPreps.
 

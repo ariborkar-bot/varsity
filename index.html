@@ -1,6 +1,6 @@
-<!doctype html><html><head><meta charset=utf8><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script>try{if(sessionStorage.getItem('vsCut')){sessionStorage.removeItem('vsCut');document.documentElement.classList.add('cutin')}}catch(e){}</script><link rel="preload" href="logo.png" as="image"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.sport-sw{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(3,12,32,.72);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
+<!doctype html><html><head><meta charset=utf8><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script>try{if(sessionStorage.getItem('vsCut')){sessionStorage.removeItem('vsCut');var d=document.documentElement;d.classList.add('cutin');setTimeout(function(){d.classList.remove('cutin')},700)}}catch(e){}</script><link rel="preload" href="logo.png" as="image"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.sport-sw{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(3,12,32,.72);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
 .sport-opt{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;color:#cfe0ff;font:800 .72rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;min-height:32px}
-.sport-opt i{font-style:normal;line-height:1;display:grid}.sport-opt svg{width:19px;height:19px;display:block;transition:transform .25s}.sport-opt:hover svg{transform:rotate(-14deg) scale(1.12)}.sport-opt.on svg{animation:sportpop .7s cubic-bezier(.2,1.7,.4,1);filter:drop-shadow(0 0 4px rgba(255,255,255,.5))}@keyframes sportpop{from{transform:scale(.4) rotate(-120deg)}to{transform:none}}html.cutin::after{content:'';position:fixed;inset:0;z-index:99999;background:#fff;pointer-events:none;animation:cutout .6s .12s ease-out forwards}@keyframes cutout{to{opacity:0;visibility:hidden}}
+.sport-opt i{font-style:normal;line-height:1;display:grid}.sport-opt svg{width:19px;height:19px;display:block;transition:transform .25s}.sport-opt:hover svg{transform:rotate(-14deg) scale(1.12)}.sport-opt.on svg{animation:sportpop .7s cubic-bezier(.2,1.7,.4,1);filter:drop-shadow(0 0 4px rgba(255,255,255,.5))}@keyframes sportpop{from{transform:scale(.4) rotate(-120deg)}to{transform:none}}html.cutin,html.cutin body{background:#050b1e}html.cutin::after{content:'';position:fixed;inset:0;z-index:99999;background:#050b1e;pointer-events:none;animation:cutout .32s .05s ease-out forwards}@keyframes cutout{to{opacity:0;visibility:hidden}}
 .sport-opt.on{background:linear-gradient(180deg,#FFC23D,#FF9F1C);color:#1a1200}
 @media (max-width:520px){.sport-opt span{display:none}.sport-opt{padding:6px 9px}}
 </style>
@@ -1384,6 +1384,46 @@ select option{background:#0B1730;color:#EAF0F8}
   .mast-mini .bell{width:44px;height:44px}
 }
 @media (max-width:759px) and (prefers-reduced-motion:reduce){.mast-mini{transition:none}}
+.pv ul{margin:6px 0 0 18px;display:grid;gap:6px}.pv p{margin:4px 0 0}
+
+.ib{display:inline-grid;place-items:center;width:22px;height:22px;margin-left:10px;border-radius:50%;border:1.5px solid currentColor;background:none;color:var(--muted,#8aa0b8);font:700 13px/1 Georgia,serif;font-style:italic;vertical-align:middle;cursor:pointer;opacity:.85}
+.ib[aria-expanded=true]{color:#FFC23D;opacity:1}
+.ib-pop{margin:8px 0 2px;padding:12px 14px;border-radius:12px;background:var(--card,#132235);border:1px solid var(--line,#22344B);font-size:.9rem;line-height:1.45;color:var(--muted,#9fb0c3);max-width:640px}
+.pr-seg{display:flex;gap:6px;margin:10px 0 4px;padding:4px;border-radius:12px;background:var(--card,#132235);border:1px solid var(--line,#22344B);width:max-content;max-width:100%}
+.pr-seg button{border:0;background:none;color:inherit;font:700 .85rem/1 inherit;padding:9px 14px;border-radius:9px;cursor:pointer;opacity:.75}
+.pr-seg button[aria-pressed=true]{background:#2F6BFF;color:#fff;opacity:1}
+.ls-card .ls-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line,#22344B)}
+.ls-card .ls-row span{color:var(--muted,#9fb0c3)}
+.ls-sc{margin-top:12px}.ls-sc summary{cursor:pointer;font-weight:700;padding:8px 0}
+
+.top10.potw{color:#0B1626;background:linear-gradient(90deg,#FFC23D,#FFE08A);border-color:transparent}
+.potw{margin:-2px 0 16px;padding:14px 12px 12px;border-radius:16px;background:radial-gradient(120% 90% at 50% 0%,rgba(255,194,61,.18),transparent 70%);border:1px solid rgba(255,194,61,.35)}
+.potw-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.potw-h span{font:800 italic 1.05rem/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#FFC23D}.potw-h small{opacity:.7}
+.potw-pod{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:end}
+.potw-s{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 0;border:0;border-radius:12px 12px 0 0;background:rgba(255,255,255,.05);color:inherit;cursor:pointer;text-align:center;min-width:0}
+.potw-s b{font-size:.82rem;line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.potw-s small{font-size:.68rem;opacity:.7;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.potw-v{font:800 1.25rem/1 'Barlow Condensed','Arial Narrow',sans-serif;color:#fff}
+.potw-st{display:block;width:100%;margin-top:6px;padding:6px 0;border-radius:8px 8px 0 0;font:800 1.1rem/1 'Barlow Condensed',sans-serif;font-style:normal;background:rgba(255,255,255,.08)}
+.potw-s.p1{padding-top:14px;background:rgba(255,194,61,.12)}.potw-s.p1 .potw-v{color:#FFC23D;font-size:1.5rem}.potw-s.p1 .potw-st{background:#FFC23D;color:#0B1626;padding:12px 0}
+.potw-s.p2 .potw-st{padding:8px 0}.potw-cr{position:absolute;top:-10px;color:#FFC23D;font-size:1.1rem;text-shadow:0 0 10px rgba(255,194,61,.7)}
+.gotw{border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 50% 0%,rgba(255,194,61,.12),transparent 65%),var(--card,#132235)}
+.gotw-row{display:flex;align-items:center;justify-content:space-around;gap:10px;margin:14px 0 12px}
+.gotw-t{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;flex:1;min-width:0}.gotw-t b{font-size:1rem}.gotw-t span{font:800 1.4rem/1 'Barlow Condensed',sans-serif;opacity:.75}
+.gotw-t.fav span{color:#FFC23D;opacity:1}.gotw-at{opacity:.6;font-weight:700}
+.gotw-bar{height:8px;border-radius:99px;background:#FFC23D;overflow:hidden;margin-bottom:10px}.gotw-bar i{display:block;height:100%;background:#2F6BFF}
+
+.dh-btns{display:flex;gap:8px;align-items:center}
+
+.tok-box{cursor:pointer;font:inherit;color:inherit}
+.tok-plus{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:8px;border-radius:50%;background:#FFC23D;color:#0B1626;font:800 15px/1 system-ui;vertical-align:3px}
+.tok-sheet h2{margin:0 0 6px}
+.tok-bal{display:flex;align-items:baseline;gap:8px;margin:4px 0 14px}.tok-bal b{font:800 2.4rem/1 'Barlow Condensed',sans-serif;color:#FFC23D}
+.tok-opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;border-radius:14px;border:1px solid var(--line,#22344B);background:var(--surface2,#16253A);color:inherit;cursor:pointer;margin-bottom:10px}
+.tok-opt:disabled{opacity:.5;cursor:default}
+.tok-opt b{display:block}.tok-opt small{display:block;opacity:.75;margin-top:3px}
+.tok-ic{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#2F6BFF;color:#fff;flex:none}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1401,7 +1441,6 @@ select option{background:#0B1730;color:#EAF0F8}
       <a href="#league"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span>Stats</span></a>
       <a href="#groups"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.4c2.2.7 3.5 2.6 3.5 5.6"/></svg><span>Leagues</span></a>
       <a href="#minigames"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="6.5" cy="12" rx="4" ry="1.8"/><path d="M2.5 12v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3M2.5 15v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3M2.5 18v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3"/><ellipse cx="17" cy="5.5" rx="4" ry="1.8"/><path d="M13 5.5v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3M13 8.5v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3M13 11.5v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3M13 14.5v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3M13 17.5v3c0 1 1.8 1.8 4 1.8s4-.8 4-1.8v-3"/></svg><span>Minigames</span></a>
-      <a href="#simulate"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><circle cx="8.5" cy="8.5" r="1"/><circle cx="15.5" cy="8.5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="8.5" cy="15.5" r="1"/><circle cx="15.5" cy="15.5" r="1"/></svg><span>Simulate</span></a>
       <a href="#games"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h4M7 17h7"/></svg><span>Games</span></a>
     </nav>
   </div>
@@ -1526,8 +1565,14 @@ const classOf=(n,s)=>_gm[_gk(n,s)]||0;
 /* TOP 10: the ten highest season fantasy scorers in the app. The tag follows each of them wherever their name appears. */
 let T10S=null;
 const isT10=p=>{if(!p||!p.key)return false;if(!T10S){try{T10S=new Set(players().filter(x=>x.mp).map(x=>({k:x.key,v:agg(x,'season')})).filter(x=>x.v.n>0).sort((a,b)=>b.v.v-a.v.v).slice(0,10).map(x=>x.k))}catch(_){T10S=new Set()}}return T10S.has(p.key)};
-const T10=p=>isT10(p)?'<em class="top10">TOP 10</em>':'';
-const T10W=(p,h)=>isT10(p)?`<span class="nmt">${h}<em class="top10">TOP 10</em></span>`:h;
+/* Player of the Week: the top fantasy scorer of the latest week that has box scores. Gets his own tag, like TOP 10. */
+let POTW_C=null;
+function weekTop(){if(POTW_C)return POTW_C;POTW_C={w:0,list:[]};try{const ps=players().filter(x=>x.mp);let w=0;ps.forEach(p=>p.games.forEach((g,i)=>{if(g&&g.stat&&i+1>w)w=i+1}));
+  if(w){POTW_C={w,list:ps.map(p=>{const g=p.games[w-1];return g&&g.stat?{p,v:pts(g.stat)}:null}).filter(Boolean).sort((a,b)=>b.v-a.v).slice(0,3)}}}catch(_){}return POTW_C}
+const isPOTW=p=>{const t=weekTop().list[0];return !!(p&&t&&t.p.key===p.key)};
+const POTWT=p=>isPOTW(p)?'<em class="top10 potw">POTW</em>':'';
+const T10=p=>(isT10(p)?'<em class="top10">TOP 10</em>':'')+POTWT(p);
+const T10W=(p,h)=>isT10(p)||isPOTW(p)?`<span class="nmt">${h}${isT10(p)?'<em class="top10">TOP 10</em>':''}${POTWT(p)}</span>`:h;
 const gtag=p=>p&&p.gr?`<span class="gr">${GRL[p.gr]}</span>`:'';
 const mpP=MP?MP.players.map(p=>({key:'mp'+p.id,gr:p.g||0,name:p.n,school:p.s,pos:p.p,sub:['CB','S'].includes(p.u)?'DB':(p.u||p.p),mp:true,tw:!!p.tw,sample:false,
   games:Array.from({length:WEEKS},(_,i)=>{const l=p.w[i+1];return l?{stat:Object.fromEntries(KEYS.map((k,j)=>[k,l[j]||0])),ver:'maxpreps'}:null})})):[];
@@ -1737,7 +1782,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v187 · Nov 5';
+const APP_BUILD='v188 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2439,7 +2484,7 @@ function picksHTML(){
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(betResult(b,gm[id])==='open'?+b.stake||0:0),0);
   const avail=Math.round((bal-0)*100)/100;
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div>${adBtn()}</section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
   const card=g=>{
     const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
@@ -2481,6 +2526,17 @@ function anticipated(){
   return up;
 }
 function anticipatedHTML(){
+  const list=anticipated();
+  if(!list.length)return'<p class="empty">No upcoming games yet. New matchups show up here as they are set.</p>';
+  const g=list[0],o=oddsFor(g),pa=Math.round((1-o.ph)*100),ph=100-pa;
+  const side=(n,p,fav)=>`<div class="gotw-t ${fav?'fav':''}">${slogo(n,58)}<b>${tlk(n)}</b><span>${p}%</span></div>`;
+  return `<div class="qh"><h2 class="h-sec">Game of the Week</h2></div>
+    <section class="card gotw"><div class="gm-h"><span>${esc(fmtDate(g.d)+(g.time?' · '+g.time:''))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:g.k==='P'?'<span class="gm-k p">Playoffs</span>':''}</div>
+      <div class="gotw-row">${side(g.a,pa,pa>ph)}<span class="gotw-at">at</span>${side(g.h,ph,ph>=pa)}</div>
+      <div class="gotw-bar" aria-label="Win chances"><i style="width:${pa}%"></i></div>
+      <p class="muted">The closest, highest-rated matchup on the schedule, by Varsity’s team ratings.</p></section>`;
+}
+function anticipatedHTML_old(){
   const list=anticipated(),n=Math.min(list.length,UI.gmore||5);
   if(!list.length)return'<p class="empty">No upcoming games yet. New matchups show up here as they are set.</p>';
   const card=(g,i)=>{const o=oddsFor(g);return gameCard(Object.assign({},g,{r:`${g.a} ${Math.round((1-o.ph)*100)}% · ${g.h} ${Math.round(o.ph*100)}% to win`}),{})};
@@ -2666,7 +2722,7 @@ function spreadHTML(){
   const open=gs.filter(g=>!gDone(g)||mine[gid(g)]).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||a.h.localeCompare(b.h));
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(atsResult(b,gm[id])==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div>${adBtn()}</section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
   const nm2=(x,g)=>x.s==='h'?g.h:g.a,lnTxt=x=>fmtLine(x.s==='h'?+x.line:-x.line);
   const card=g=>{
     const id=gid(g),L=spreadFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
@@ -2771,7 +2827,7 @@ function propsHTML(){
   const gm=gameMap(),today=new Date().toISOString().slice(0,10),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
   const staked=Object.values(mine).reduce((a,b)=>a+(propResult(b,gm)==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, your tokens come back.</div>${adBtn()}</section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, your tokens come back.</div></section>`;
   const mkChips=`<div class="chips bf-mk" role="group" aria-label="Stat type">${['ALL',...PP_GROUPS].map(v=>`<button class="chip" data-act="ppM" data-v="${v}" aria-pressed="${UI.pm===v}">${v==='ALL'?'All stats':v}</button>`).join('')}</div>`;
   const all=propCands().filter(x=>bfOK(x.game)&&(UI.pm==='ALL'||PP_MK[x.m].g===UI.pm));
   const shown=all.slice(0,UI.ppN);
@@ -2937,12 +2993,82 @@ function mockHTML(){
   return m?mkRoomHTML(m):mkHome();
 }
 
+/* ---------- privacy policy ---------- */
+function viewPrivacy(){
+  const sec=(h,b)=>`<section class="card pv"><h3>${h}</h3>${b}</section>`;
+  return `<div class="head"><h2>Privacy policy</h2><p>Last updated November 5, 2026.</p></div>`+
+  sec('Who we are','<p>Varsity is a free fantasy sports app for San Diego Section high school football and basketball. It has no purchases and no cash prizes. Tokens in the app have no cash value.</p>')+
+  sec('What we collect from you','<ul><li><b>Account:</b> your email address and a password (stored by our sign-in provider, Supabase, never in plain text).</li><li><b>Profile:</b> the display name you pick, and if you choose to add them, your school, position and grade.</li><li><b>What you do in the app:</b> leagues you create or join, draft picks, lineups, trades, league chat messages, predictions and token balances.</li><li><b>Device storage:</b> small settings saved in your browser (for example, which sport you last viewed). We do not use advertising trackers.</li></ul>')+
+  sec('Player stats','<p>Player names, schools, positions, grades and game statistics come from publicly reported high school box scores. If you are a player, or a parent or guardian of one, and want a name or stat line removed, contact us and we will remove it.</p>')+
+  sec('How we use it','<p>Only to run the app: to sign you in, show your leagues and standings, score games and keep leaderboards. We do not sell or rent your information, and we do not share it with advertisers.</p>')+
+  sec('Who can see what','<p>Your display name, your leagues’ rosters, standings and chat are visible to the other members of those leagues. Leaderboards show display names. Your email address is never shown to other users.</p>')+
+  sec('Where it is stored','<p>Data is stored with Supabase, our database and sign-in provider, in the United States, and protected by access rules so each person can only change their own data and the leagues they belong to.</p>')+
+  sec('Deleting your account','<p>You can delete your account at any time from Settings → <b>Delete my account</b>. This permanently removes your login, profile, picks, lineups and league memberships. Leagues you created pass to another member, or are removed if you were the only one.</p>')+
+  sec('Children','<p>Varsity is meant for high school students, parents, coaches and fans aged 13 and older. We do not knowingly collect information from children under 13. If you believe a child under 13 has created an account, contact us and we will delete it.</p>')+
+  sec('Changes and contact','<p>If this policy changes, we will update the date at the top. Questions or removal requests: <b>[contact email]</b>.</p>');
+}
+/* the description under each page title lives behind a small "i" button */
+function infoIcons(){
+  document.querySelectorAll('#main .head:not(.sub)').forEach(h=>{
+    const h2=h.querySelector('h2'),p=h.querySelector(':scope > p, :scope > div > p');
+    if(!h2||!p||h2.querySelector('.ib'))return;
+    const pop=document.createElement('div');pop.className='ib-pop';pop.hidden=true;pop.innerHTML=p.innerHTML;p.replaceWith(pop);
+    h2.insertAdjacentHTML('beforeend','<button class="ib" type="button" data-act="info" aria-label="About this page" aria-expanded="false">i</button>');
+  });
+}
+/* league settings: everything about how this league plays, in one place inside the league */
+function lgSettingsHTML(g){
+  const bud=lgMode(g)==='budget',di=draftInfo(g),clk=(g.draft&&g.draft.clock)||0;
+  const row=(k,v)=>`<div class="ls-row"><span>${k}</span><b>${v}</b></div>`;
+  const sc=viewScoring().replace(/^<div class="head">[\s\S]*?<\/div>/,'');
+  return `<section class="card ls-card"><div class="qh"><h3>League settings</h3><button class="btn sm ghost" data-act="lgSet">Close</button></div>
+    ${row('League type',bud?'Budget · '+money(capOf(g))+' salary cap':'Snake draft')}
+    ${row('Roster',esc(rosterText(g.roster||ROSTER_DEFAULT)))}
+    ${bud?'':row('Draft',di.status==='done'?'Complete':di.status==='live'?'Live now':'Not started')+(clk?row('Pick clock',clk>=60&&clk%60===0?clk/60+' min':clk+' sec'):'')}
+    ${row('Teams',Object.keys(g.members).filter(u=>g.members[u]).length)}
+    ${row('Commissioner',esc(nm(g.ownerId))+(g.ownerId===ME.uid?' (you)':''))}
+    <details class="ls-sc"><summary>Scoring rules</summary>${sc}</details></section>`;
+}
+/* a 1080x1920 story card for any player: name, school, season fantasy points, rank and stat line */
+async function playerCardBlob(p){
+  const W=1080,H=1920,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  try{await document.fonts.ready}catch(_){}
+  const F=(w,sz,it)=>`${it?'italic ':''}${w} ${sz}px 'Barlow Condensed','Arial Narrow',sans-serif`,B=(w,sz)=>`${w} ${sz}px Jost,system-ui,sans-serif`;
+  let gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#0B1A33');gr.addColorStop(1,'#050B16');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  let rg=g.createRadialGradient(W*.85,0,0,W*.85,0,W);rg.addColorStop(0,'rgba(47,107,255,.45)');rg.addColorStop(1,'rgba(47,107,255,0)');g.fillStyle=rg;g.fillRect(0,0,W,H);
+  g.strokeStyle='rgba(255,255,255,.05)';g.lineWidth=3;for(let x=90;x<W;x+=150){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}
+  g.fillStyle='#fff';g.font=F(900,74,1);g.textBaseline='alphabetic';g.fillText('VARSITY',90,170);
+  g.fillStyle='#FFC23D';g.font=F(800,34);g.fillText('SAN DIEGO SECTION · 2026',90,225);
+  const src=(window.SCHOOL_LOGOS||{})[p.school];
+  if(src){try{const im=new Image();im.src=src;await im.decode();g.save();g.beginPath();g.arc(W/2,450,170,0,7);g.fillStyle='#fff';g.fill();g.clip();const k=Math.min(290/im.width,290/im.height);g.drawImage(im,W/2-im.width*k/2,450-im.height*k/2,im.width*k,im.height*k);g.restore()}catch(_){}}
+  else{g.beginPath();g.arc(W/2,450,170,0,7);g.fillStyle='#1B2E47';g.fill();g.fillStyle='#fff';g.font=F(800,140);g.textAlign='center';g.fillText(String(p.school||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2),W/2,500);g.textAlign='left'}
+  g.textAlign='center';
+  const tags=[isT10(p)?'TOP 10':'',isPOTW(p)?'PLAYER OF THE WEEK':''].filter(Boolean);
+  let y=730;if(tags.length){g.font=F(800,40);const t=tags.join('  ·  '),w=g.measureText(t).width+70;g.fillStyle='#FFC23D';g.beginPath();g.roundRect(W/2-w/2,y-52,w,72,36);g.fill();g.fillStyle='#0B1626';g.fillText(t,W/2,y-2);y+=70}
+  let fs=150;g.font=F(800,fs);const nm=String(p.name).toUpperCase();while(g.measureText(nm).width>W-140&&fs>70){fs-=6;g.font=F(800,fs)}
+  g.fillStyle='#fff';g.fillText(nm,W/2,y+110);
+  g.fillStyle='#B4C2D2';g.font=B(500,44);g.fillText(`${p.school} · ${p.pos==='DEF'&&p.sub?p.sub:p.pos}${classOf(p.name,p.school)?' · '+GRL[classOf(p.name,p.school)]:''}`,W/2,y+190);
+  const a=agg(p,'season'),gs=p.games.filter(Boolean),best=gs.length?Math.max(...gs.map(x=>pts(x.stat))):0;
+  const pool=players().filter(x=>x.mp&&x.pos===p.pos).map(x=>agg(x,'season').v).sort((m,n)=>n-m),rk=pool.findIndex(v=>v<=a.v)+1;
+  g.fillStyle='#FFC23D';g.font=F(800,260);g.fillText(f1(a.v),W/2,y+470);
+  g.fillStyle='#98A8BA';g.font=F(800,46);g.fillText('SEASON FANTASY POINTS',W/2,y+535);
+  const box=(x,v,l)=>{g.fillStyle='rgba(17,30,48,.9)';g.beginPath();g.roundRect(x,y+610,280,190,28);g.fill();g.fillStyle='#fff';g.font=F(800,92);g.fillText(v,x+140,y+715);g.fillStyle='#98A8BA';g.font=B(600,30);g.fillText(l,x+140,y+770)};
+  box(90,f1(a.n?a.v/a.n:0),'per game');box(400,f1(best),'best game');box(710,rk?'#'+rk:'—',`among ${p.pos==='DEF'?'defenders':p.pos+'s'}`);
+  g.fillStyle='#C9D4E0';g.font=B(500,38);const ln=String(line(p.pos,a.s)||'').replace(/<[^>]+>/g,'');
+  const words=ln.split(' ');let L='',yy=y+900;for(const w of words){const t=L?L+' '+w:w;if(g.measureText(t).width>W-180){g.fillText(L,W/2,yy);yy+=54;L=w}else L=t}if(L)g.fillText(L,W/2,yy);
+  g.fillStyle='rgba(255,255,255,.14)';g.fillRect(90,H-170,W-180,2);
+  g.fillStyle='#98A8BA';g.font=F(800,36);g.textAlign='left';g.fillText(`${gs.length} GAMES · ${String(MAXPREPS&&MAXPREPS.through||'').split(' (')[0].toUpperCase()}`,90,H-105);
+  g.textAlign='right';g.fillStyle='#fff';g.font=F(900,40,1);g.fillText('VARSITY',W-90,H-105);
+  return await new Promise(r=>c.toBlob(r,'image/png'));
+}
 function viewMini(){
-  const T=UI.mtab==='spread'?'props':['picks','draw','props','mock'].includes(UI.mtab)?UI.mtab:'picks';
-  const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-box" title="Tokens are shared by Pick ’em and Over / Under"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}</b></div>`:'';
-  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':T==='props'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks',"Pick 'em"],['props','Over / Under'],['draw','5 Card Draw'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
-  return head+tabs+(T==='draw'?fcHTML():T==='mock'?mockHTML():T==='props'?propsHTML():picksHTML());
+  const T0=UI.mtab==='spread'?'props':['picks','draw','props','mock','sim'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
+  const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='sim'?'Draw a full 17-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['mock','Mock Draft'],['sim','Simulate']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
+  const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Game winners'],['props','Player over / under']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
+  const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
+  return head+tabs+sub+(T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
 }
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
@@ -3029,7 +3155,9 @@ function hotHTML(){
   const up=[...ts].filter(x=>x.t.d>0).sort((a,b)=>b.t.d-a.t.d).slice(0,3),dn=[...ts].filter(x=>x.t.d<0).sort((a,b)=>a.t.d-b.t.d).slice(0,3);
   if(!up.length)return'';
   const col=(title,list,cls)=>`<div class="hotc">${title?`<h3>${title}</h3>`:''}${list.map(x=>`<button class="hotr" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,32)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><em class="tr ${cls}">${cls==='up'?'▲':'▼'} ${f1(Math.abs(x.t.d))}</em></button>`).join('')||'<span class="muted">Nobody yet</span>'}</div>`;
-  return `<section class="card hot-card"><div class="qh"><h3>Hot right now</h3><span class="pill approved">Recent form</span></div><div class="hot">${col('',up,'up')}</div></section>`;
+  const wt=weekTop(),pd=wt.list,slot=(x,k)=>x?`<button class="potw-s p${k}" data-act="player" data-id="${esc(x.p.key)}">${k===1?'<span class="potw-cr" aria-hidden="true">★</span>':''}${av(x.p.name,x.p.school,k===1?54:42)}<b>${esc(x.p.name)}</b><small>${esc(x.p.school)}</small><span class="potw-v">${f1(x.v)}</span><i class="potw-st">${k}</i></button>`:'';
+  const pod=pd.length?`<div class="potw"><div class="potw-h"><span>Player of the Week</span><small>Week ${wt.w}</small></div><div class="potw-pod">${slot(pd[1],2)}${slot(pd[0],1)}${slot(pd[2],3)}</div></div>`:'';
+  return `<section class="card hot-card">${pod}<div class="qh"><h3>Hot right now</h3><span class="pill approved">Recent form</span></div><div class="hot">${col('',up,'up')}</div></section>`;
 }
 function viewLeague(){
   const schools=[...new Set(players().map(p=>p.school))].filter(Boolean).sort();
@@ -3386,8 +3514,9 @@ function viewGroups(){
         <div><small>Record</small><b>${me?`${me.rec.w}-${me.rec.l}${me.rec.t?'-'+me.rec.t:''}`:'0-0'}</b><small>finished weeks</small></div>
         <div><small>Lineup pts</small><b>${me?f1(me.t):'0.0'}</b><small>${UI.scope==='season'?'this season':'week '+UI.scope}</small></div>
       </div>
-      <div class="lg-inv"><span class="lbl">Invite code</span><code id="code">${esc(g.code)}</code><button class="btn sm" data-act="copy" data-code="${esc(g.code)}">Copy</button></div>
+      <div class="lg-inv"><span class="lbl">Invite code</span><code id="code">${esc(g.code)}</code><button class="btn sm" data-act="copy" data-code="${esc(g.code)}">Copy</button><button class="btn sm ghost" data-act="lgSet" aria-expanded="${!!UI.lgSet}">League settings</button></div>
     </section>
+    ${UI.lgSet?lgSettingsHTML(g):''}
     ${draftRoomHTML(g)}
     ${matchup}
     <div class="lg-grid">
@@ -3731,7 +3860,7 @@ function drawerHTML(p){
     ?`<tr><td>Wk ${w}</td><td>${line(p.pos,g.stat)}</td><td class="n">${f1(pts(g.stat))}</td></tr>`
     :`<tr class="dim"><td>Wk ${w}</td><td>${w>=cw&&!noGameWk(p.school,w)?'Not reported yet':'No game'}</td><td class="n">—</td></tr>`).join('');
   return `<aside class="dp" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
-    <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${gs.length} games</span></div></div></div><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div>
+    <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${gs.length} games</span></div></div></div><div class="dh-btns"><button class="btn sm" data-act="pshare" data-id="${esc(p.key)}">Share</button><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div></div>
     <div class="big"><div><span class="lbl">Season pts</span><b>${f1(total)}</b></div><div><span class="lbl">Per game</span><b>${f1(avg)}</b></div><div><span class="lbl">Best week</span><b>${f1(best)}</b></div></div>
     ${projCard(p)}
     ${weekChart(p)}
@@ -3981,7 +4110,7 @@ document.addEventListener('click',async e=>{
 });
 
 /* ---------- render ---------- */
-const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk'];
+const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk','privacy'];
 const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
 function bannerHTML(){
   const b=[];
@@ -4026,7 +4155,7 @@ function chrome(v){
   const wk=$('#wk');if(wk)wk.textContent='Week '+CURW();
   const wk2=$('#wk2');if(wk2)wk2.textContent='Week '+CURW();
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
-  if(v!=='scoring'){const hp=document.querySelector('#main .head:not(.sub) p');if(hp)hp.insertAdjacentHTML('beforeend',' <a class="btn sm ghost sr-link" href="#scoring">Scoring rules</a>')}
+  infoIcons();
 }
 /* While the opening animation plays, the app waits to draw itself: building the whole player list at the same moment makes the animation stutter.
    The intro calls releaseHold() as it ends, and a timer releases it anyway if the intro never does. */
@@ -4035,8 +4164,9 @@ window.releaseHold=()=>{if(!HOLD)return;HOLD=false;try{render()}catch(_){}};
 setTimeout(()=>window.releaseHold(),9000);
 function render(){
   if(HOLD)return;
-  T10S=null;
-  const V={team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
+  T10S=null;POTW_C=null;
+  if(location.hash==='#simulate'){UI.mtab='sim';history.replaceState(null,'','#minigames')}
+  const V={team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,scoring:viewScoring,privacy:viewPrivacy,admin:viewAdmin};
   let v=UI.view;
   $('#main').innerHTML=V[v]();
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
@@ -4102,7 +4232,14 @@ document.addEventListener('click',async e=>{
   else if(a==='ntToggle'){const k=t.dataset.v,p=ntPrefs();p[k]=!p[k];ntSave(p);openNotes()}
   else if(a==='markRead'){await act(writeSeen);sheetClose()}
   else if(a==='consent')openGate();
-  else if(a==='adWatch')adPlay();
+  else if(a==='adWatch'){if(!$('#cfm').hidden)closeConfirm();adPlay()}
+  else if(a==='tokOpen'){const c=$('#cfm');const l=adLeft(ME.uid);
+    c.innerHTML=`<div class="gcard tok-sheet" role="dialog" aria-modal="true" aria-labelledby="tk-t"><h2 id="tk-t">Get tokens</h2>
+      <div class="tok-bal"><small>You have</small><b>${Math.floor(bank(ME.uid)*10)/10}</b><small>tokens</small></div>
+      <button type="button" class="tok-opt" data-act="adWatch" ${l?'':'disabled'}><span class="tok-ic" aria-hidden="true">▶</span><span><b>Watch a short sponsor spot</b><small>+${ADS.reward} tokens · ${l?l+' left today':'back tomorrow'}</small></span></button>
+      <p class="muted">Tokens are free, are shared by every game in Minigames, and have no cash value.</p>
+      <div class="gbtns"><button class="btn ghost" data-c="no">Close</button></div></div>`;
+    c.hidden=false;const b=c.querySelector('.tok-opt');if(b)b.focus()}
   else if(a==='ftoggle'){UI.fOpen=!UI.fOpen;const fp=document.querySelector('.fpanel');if(fp)fp.hidden=!UI.fOpen;t.setAttribute('aria-expanded',String(!!UI.fOpen))}
   else if(a==='pos'){const bar=document.querySelector('.tools .chips[aria-label="Position"]'),sx=bar?bar.scrollLeft:0;UI.pos=t.dataset.v;UI.more=false;render();const nb=document.querySelector('.tools .chips[aria-label="Position"]');if(nb)nb.scrollLeft=sx}
   else if(a==='more'){UI.more=(+UI.more||5)+10;$('#lb-list').innerHTML=listHTML()}
@@ -4125,6 +4262,8 @@ document.addEventListener('click',async e=>{
     setTimeout(()=>{if(UI.cmpNew===sd){UI.cmpNew=null;UI.cmpPh=null}},1500)}
   else if(a==='cmpClear'){UI.cmp[+t.dataset.s]=null;render()}
   else if(a==='cmpReset'){UI.cmp=[null,null];render()}
+  else if(a==='info'){const h=t.closest('.head'),pop=h&&h.querySelector('.ib-pop');if(pop){pop.hidden=!pop.hidden;t.setAttribute('aria-expanded',String(!pop.hidden))}}
+  else if(a==='lgSet'){UI.lgSet=!UI.lgSet;render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
   else if(a==='team'){UI.ttab='sched';location.hash='#team/'+encodeURIComponent(t.dataset.t)}
   else if(a==='ttab'){UI.ttab=t.dataset.v;render()}
@@ -4210,6 +4349,15 @@ document.addEventListener('click',async e=>{
   }
   else if(a==='copyRank'){const me=meP(),info=me&&myRanks(me);if(info)copyText(rankText(info,me),'Copied. Paste it anywhere.')}
   else if(a==='meSide'){UI.meSide=t.dataset.v;render()}
+  else if(a==='pshare'){
+    const p=pByKey(t.dataset.id);if(!p)return;const fn='varsity-'+String(p.name).toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.png';
+    try{const blob=await playerCardBlob(p);if(!blob)throw new Error('no image');
+      let file=null;try{file=new File([blob],fn,{type:'image/png'})}catch(_){}
+      if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(err){if(err&&err.name==='AbortError')return}}
+      if(DL){await DL.save({filename:fn,data:blob});say('Player card saved to your device')}
+      else{const u=URL.createObjectURL(blob),l=document.createElement('a');l.href=u;l.download=fn;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);say('Player card saved')}
+    }catch(err){if(!(err&&err.code==='declined'))say('Could not make the card. Try again.')}
+  }
   else if(a==='share'){
     const me=meP(),info=me&&myRanks(me);if(!info)return;
     try{
@@ -4323,6 +4471,9 @@ async function createGroup(coll,name,stateKey){
 async function joinGroup(coll,code,stateKey){
   if(needJoin('join a league'))return;
   if(!code){say('Enter an invite code');return}
+  /* join through the server so non-members never need write access to a league (falls back if the function is not installed) */
+  if(typeof SB!=='undefined'&&SB&&ME.mode==='live'){let r=null;try{r=await SB.rpc('join_league',{p_coll:DB.collection(coll).path,p_code:code})}catch(_){}
+    if(r&&!r.error){if(!r.data){say('No league found for that code');return}UI[stateKey]=r.data;UI.member=null;say('Joined the league');render();return}}
   let snap;
   try{snap=await DB.collection(coll).where('code','==',code).get()}catch(_){say('Could not look that code up. Try again.');return}
   const d=snap.docs[0];
@@ -4406,7 +4557,11 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('[data-act]');if(!t)return;
   const a=t.dataset.act;
   if(a==='delProfile'){
-    confirmBox('Delete your profile?','This removes your account, every game you entered, your lineups, and you from every league. Leagues you started pass to the next member. It cannot be undone.','Delete my profile',async()=>{
+    confirmBox('Delete your account?','This permanently deletes your login, your profile, every game you entered, your picks and lineups, and removes you from every league. Leagues you started pass to the next member. It cannot be undone.','Delete my account',async()=>{
+      if(ME.mode==='live'&&SB){
+        try{const {error}=await SB.rpc('delete_my_account');if(error)throw error}catch(_){say('Could not delete your account. Try again.');return}
+        try{localStorage.clear();sessionStorage.clear()}catch(_){}
+        say('Your account was deleted');await signOut();return}
       const ok=await act(deleteProfile);
       if(!ok)return;
       if(ME.mode==='demo'){try{localStorage.removeItem('gsd-demo-profile')}catch(_){}}
@@ -4513,31 +4668,29 @@ function sportCut(href,label,opt){
  if(document.getElementById('cut'))return;
  const go=()=>{try{sessionStorage.setItem('vsCut','1')}catch(_){}location.href=href+location.hash};
  if(opt.freeze==null&&matchMedia('(prefers-reduced-motion: reduce)').matches){go();return}
- const toB=/basketball/i.test(href),END=1050;
+ /* a dark circle wipes out from the switch you tapped, with a gold edge, and the new sport's icon spins in. About half a second, never white. */
+ const toB=/basketball/i.test(href),END=520;
  const cv=document.createElement('canvas');cv.id='cut';cv.setAttribute('aria-hidden','true');
- cv.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;z-index:9998;background:#050b1e;touch-action:none;cursor:pointer';
+ cv.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;z-index:9998;touch-action:none;cursor:pointer';
  const dpr=Math.min(2,window.devicePixelRatio||1),W=cv.width=Math.round(innerWidth*dpr),H=cv.height=Math.round(innerHeight*dpr),g=cv.getContext('2d');document.body.appendChild(cv);
- const TAU=Math.PI*2,R=Math.min(W,H)*.2,cl=(v,a,b)=>Math.max(a,Math.min(b,v)),sm=u=>{u=cl(u,0,1);return u*u*(3-2*u)};
- /* the same two line icons as the switcher, drawn big */
+ const cl=(v,a,b)=>Math.max(a,Math.min(b,v)),eo=u=>1-Math.pow(1-cl(u,0,1),3),back=u=>{u=cl(u,0,1);const c=1.9;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2)};
+ const fr=opt.from,ox=fr?(fr.left+fr.width/2)*dpr:W/2,oy=fr?(fr.top+fr.height/2)*dpr:H*.1,RMAX=Math.hypot(Math.max(ox,W-ox),Math.max(oy,H-oy))+10,R=Math.min(W,H)*.17;
  const FB=[new Path2D('M4.2 19.8C2.6 14 6 6.2 14.6 4.4c2.5-.5 4.4-.3 5.2-.2.2.8.4 2.7-.2 5.2C17.8 18 10 21.4 4.2 19.8z'),new Path2D('M9.2 14.8l5.6-5.6M11.4 10.4l2.2 2.2M9.4 12.4l2.2 2.2M13.2 8.6l2.2 2.2')];
  const BB=[new Path2D('M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z'),new Path2D('M3 12h18M12 3v18M5.6 5.6c3.3 3.2 3.3 9.6 0 12.8M18.4 5.6c-3.3 3.2-3.3 9.6 0 12.8')];
- const icon=(ps,r)=>{const k=r*3/24;g.save();g.scale(k,k);g.translate(-12,-12);g.strokeStyle='#FFC23D';g.lineWidth=1.8;g.lineCap='round';g.lineJoin='round';for(const q of ps)g.stroke(q);g.restore()};
- const foot=r=>icon(FB,r),hoop=r=>icon(BB,r);
+ const icon=(ps,r,a)=>{const k=r*3/24;g.save();g.globalAlpha=a;g.scale(k,k);g.translate(-12,-12);g.strokeStyle='#FFC23D';g.lineWidth=1.8;g.lineCap='round';g.lineJoin='round';g.shadowColor='rgba(255,194,61,.6)';g.shadowBlur=8;for(const q of ps)g.stroke(q);g.restore()};
  const draw=t=>{
-  g.setTransform(1,0,0,1,0,0);g.fillStyle='#050b1e';g.fillRect(0,0,W,H);
-  const u=cl(t/END,0,1);
-  const first=toB?foot:hoop,second=toB?hoop:foot,show=u<.5?first:second;
-  const pop=1+.35*Math.sin(u*Math.PI);
-  g.save();g.translate(W/2,H/2);g.scale(pop,pop);
-  /* it spins on its vertical axis: edge-on at the swap */
-  const flip=Math.cos(u*Math.PI*3);g.rotate(-.45+Math.sin(u*Math.PI)*.35);g.scale(Math.abs(flip)<.05?.05:flip,1);show(R);g.restore();
-  g.globalAlpha=1;if(u>.85){g.fillStyle='rgba(255,255,255,'+sm((u-.85)/.15)+')';g.fillRect(0,0,W,H)}
+  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);
+  const u=cl(t/END,0,1),w=eo(u/.6),r=RMAX*w;
+  g.fillStyle='#050b1e';g.beginPath();g.arc(ox,oy,r,0,Math.PI*2);g.fill();
+  if(w<1){g.strokeStyle='rgba(255,194,61,'+(1-w)+')';g.lineWidth=7*dpr;g.beginPath();g.arc(ox,oy,r,0,Math.PI*2);g.stroke()}
+  const v=cl((u-.22)/.6,0,1);
+  if(v>0){g.save();g.translate(W/2,H/2);g.rotate((1-eo(v))*-Math.PI/2);const sc=back(v);g.scale(sc,sc);icon(toB?BB:FB,R,cl(v*2,0,1));g.restore()}
  };
  if(opt.freeze!=null){draw(opt.freeze);return}
  let t0=null,done=false;const fin=()=>{if(!done){done=true;go()}};
  cv.addEventListener('pointerdown',fin);
  const loop=ts=>{if(done)return;if(t0==null)t0=ts;const tr=ts-t0;draw(tr);if(tr>=END){fin();return}requestAnimationFrame(loop)};
- requestAnimationFrame(loop);setTimeout(fin,END+1000);
+ requestAnimationFrame(loop);setTimeout(fin,END+800);
 }
 
 route();
@@ -4663,7 +4816,7 @@ boot();
   document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',reset,{passive:true});
 })();
 
-document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.sport-opt');if(!a||a.classList.contains('on'))return;e.preventDefault();sportCut(a.getAttribute('href'),(a.getAttribute('title')||'').toUpperCase())});
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.sport-opt');if(!a||a.classList.contains('on'))return;e.preventDefault();sportCut(a.getAttribute('href'),(a.getAttribute('title')||'').toUpperCase(),{from:a.getBoundingClientRect()})});
 /* gear button: a small settings menu that reuses the app's own actions */
 (()=>{
   const g0=document.getElementById('gear'),g2=document.getElementById('gear2');let m=null,g=g0;
@@ -4676,11 +4829,11 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     m.innerHTML='<h4>Settings</h4>'+
       '<a role="menuitem" href="#account">Account information</a>'+
       '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':ME.mode==='guest'?'Sign in or create account':'Pick a name')+'</button>'+
-      '<a role="menuitem" href="#scoring">Scoring rules</a>'+
       '<button role="menuitem" data-act="ntSettings">Notification settings</button>'+
       (ME.admin?'<a role="menuitem" href="#admin">Admin systems</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
       '<hr><div class="setv" aria-hidden="true">Version '+APP_BUILD+'</div>'+
-      (joined?'<hr><button role="menuitem" class="dz" data-act="delProfile">Delete my profile</button>':'')+
+      '<a role="menuitem" href="#privacy">Privacy policy</a>'+
+      (joined||ME.mode==='live'?'<hr><button role="menuitem" class="dz" data-act="delProfile">Delete my account</button>':'')+
       (ME.mode==='live'?'<hr><button role="menuitem" id="sm-out">Sign out'+(ME.email?' <small style="opacity:.6;margin-left:auto">'+esc(ME.email)+'</small>':'')+'</button>':'');
     document.body.appendChild(m);g.setAttribute('aria-expanded','true');
     const r=g.getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,innerWidth-r.right)+'px';

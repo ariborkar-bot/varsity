@@ -266,6 +266,16 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, "function agg(p,scope){\n  const g=scoped(p,scope);\n",
             "let _pk=-1,_pv=true;\nfunction PRE(){if(_pk!==_rev){_pk=_rev;_pv=!players().some(p=>p.games.some(Boolean))}return _pv}\n"
             "function agg(p,scope){\n  const g=scoped(p,scope);\n  if(!g.length&&!p.sample&&PRE())return{n:1,s:sum([]),v:0,unv:false,ver:false};\n")
+    # preseason: points read "—" instead of 0.0, and a note on the Stats page says when the season starts
+    s = rep(s, "  infoIcons();\n", "  infoIcons();bbPre();\n")
+    s = rep(s, "function infoIcons(){",
+            "function bbPre(){\n  if(!PRE())return;\n"
+            "  document.querySelectorAll('#main .pv2,#main .pod .pv,#main .row .pt b,#main .ldr .pv').forEach(e=>{if(/^0\\.0$/.test(e.textContent.trim()))e.textContent='\u2014'});\n"
+            "  const h=document.querySelector('#main .head');if(!h||document.querySelector('.bb-pre')||!/^#?(league)?$/.test(location.hash))return;\n"
+            "  const ds=((typeof GAMES!=='undefined'&&GAMES&&GAMES.games)||[]).map(g=>g.d).filter(Boolean).sort(),d0=ds[0];\n"
+            "  const when=d0?new Date(d0+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric'}):'soon';\n"
+            "  h.insertAdjacentHTML('afterend',`<section class=\"card bb-pre\"><b>The season tips off ${when}.</b><span>Fantasy points show up here after each game. Until then, players are listed by last season.</span></section>`);\n}\n"
+            "function infoIcons(){")
     s = rep(s, ".sort((a,b)=>b.a.v-a.a.v).slice(0,16)", ".sort((a,b)=>b.a.v-a.a.v||((window.BB_RANK||{})[b.p.key]||0)-((window.BB_RANK||{})[a.p.key]||0)).slice(0,16)")
     s = re.sub(r"\$\{((?:x\.)?a)\.n\} \$\{\1\.n===1\?'game':'games'\}", lambda m: "${PRE()?0:%s.n} ${!PRE()&&%s.n===1?'game':'games'}" % (m.group(1), m.group(1)), s)
     s = rep(s, '<span class="lbl">Games</span><b>${info.a.n}</b>', '<span class="lbl">Games</span><b>${PRE()?0:info.a.n}</b>')
@@ -443,6 +453,9 @@ COURT_JS = r"""function simField(tab){
 """
 
 BB_CSS = r"""
+.bb-pre{display:flex;flex-direction:column;gap:4px;margin:12px 0;border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 0 0,rgba(255,194,61,.14),transparent 60%),var(--card,#132235)}
+.bb-pre b{font:800 1.15rem/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#FFC23D}.bb-pre span{opacity:.8}
+
 /* basketball: position colors and a hardwood header */
 .pos.PG{--c:#E65B28}.pos.SG{--c:#2868E8}.pos.SF{--c:#079B82}.pos.PF{--c:#9655D8}.pos.C{--c:#E0455B}
 .sim-board{background:#c98a45!important;border-color:#8b5a25!important}
