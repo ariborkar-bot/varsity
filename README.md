@@ -26,4 +26,4 @@ rebounds, assists, steals, blocks, turnovers and 3-pointers made). 127 schools, 
   the pseudo-weeks that carry last season's averages; the first real game week is week 5 (week of Nov 9, 2026).
 - Before 20 games have final scores, odds and spreads come from each team's 2025-26 scoring (`window.BB_PRIOR`).
 - The playoff bracket is a projection from the same ratings until the real brackets are posted.
-- When scores start to appear, scrape the new results into the games file (add `HS AS` to a line) and re-run the generator.
+- Scores are not read yet: once games are played, the games file and `load_games()` need a score field, then re-run the generator.
