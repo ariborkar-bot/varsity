@@ -1696,7 +1696,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v180 · Nov 4';
+const APP_BUILD='v181 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4167,14 +4167,15 @@ function sportCut(href,label,opt){
  cv.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;z-index:9998;background:#050b1e;touch-action:none;cursor:pointer';
  const dpr=Math.min(2,window.devicePixelRatio||1),W=cv.width=Math.round(innerWidth*dpr),H=cv.height=Math.round(innerHeight*dpr),g=cv.getContext('2d');document.body.appendChild(cv);
  const TAU=Math.PI*2,R=Math.min(W,H)*.2,cl=(v,a,b)=>Math.max(a,Math.min(b,v)),sm=u=>{u=cl(u,0,1);return u*u*(3-2*u)};
- const foot=r=>{g.fillStyle='#8B4A1E';g.beginPath();g.ellipse(0,0,r*1.55,r*.9,0,0,TAU);g.fill();g.strokeStyle='#fff';g.lineWidth=r*.07;g.lineCap='round';g.beginPath();g.moveTo(-r*.6,0);g.lineTo(r*.6,0);for(let i=-2;i<=2;i++){g.moveTo(i*r*.22,-r*.22);g.lineTo(i*r*.22,r*.22)}g.stroke();g.lineWidth=r*.05;g.beginPath();g.moveTo(-r*1.05,-r*.5);g.quadraticCurveTo(-r*1.2,0,-r*1.05,r*.5);g.moveTo(r*1.05,-r*.5);g.quadraticCurveTo(r*1.2,0,r*1.05,r*.5);g.stroke()};
- const hoop=r=>{r*=1.1;g.fillStyle='#E8692B';g.beginPath();g.arc(0,0,r,0,TAU);g.fill();g.strokeStyle='#2a1005';g.lineWidth=r*.06;g.lineCap='round';g.beginPath();g.moveTo(-r,0);g.lineTo(r,0);g.moveTo(0,-r);g.lineTo(0,r);g.stroke();g.beginPath();g.arc(-r*1.28,0,r*.88,-.95,.95);g.stroke();g.beginPath();g.arc(r*1.28,0,r*.88,Math.PI-.95,Math.PI+.95);g.stroke()};
+ /* the same two line icons as the switcher, drawn big */
+ const FB=[new Path2D('M4.2 19.8C2.6 14 6 6.2 14.6 4.4c2.5-.5 4.4-.3 5.2-.2.2.8.4 2.7-.2 5.2C17.8 18 10 21.4 4.2 19.8z'),new Path2D('M9.2 14.8l5.6-5.6M11.4 10.4l2.2 2.2M9.4 12.4l2.2 2.2M13.2 8.6l2.2 2.2')];
+ const BB=[new Path2D('M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z'),new Path2D('M3 12h18M12 3v18M5.6 5.6c3.3 3.2 3.3 9.6 0 12.8M18.4 5.6c-3.3 3.2-3.3 9.6 0 12.8')];
+ const icon=(ps,r)=>{const k=r*3/24;g.save();g.scale(k,k);g.translate(-12,-12);g.strokeStyle='#FFC23D';g.lineWidth=1.8;g.lineCap='round';g.lineJoin='round';for(const q of ps)g.stroke(q);g.restore()};
+ const foot=r=>icon(FB,r),hoop=r=>icon(BB,r);
  const draw=t=>{
   g.setTransform(1,0,0,1,0,0);g.fillStyle='#050b1e';g.fillRect(0,0,W,H);
   const u=cl(t/END,0,1);
   const first=toB?foot:hoop,second=toB?hoop:foot,show=u<.5?first:second;
-  /* a glow in the colour of the ball it is turning into */
-  const gl=g.createRadialGradient(W/2,H/2,0,W/2,H/2,R*3);gl.addColorStop(0,u<.5?'rgba(139,74,30,.35)':'rgba(255,140,60,.35)');gl.addColorStop(1,'rgba(0,0,0,0)');if(!toB&&u>=.5)gl.addColorStop(0,'rgba(139,74,30,.35)');g.fillStyle=gl;g.fillRect(0,0,W,H);
   const pop=1+.35*Math.sin(u*Math.PI);
   g.save();g.translate(W/2,H/2);g.scale(pop,pop);
   /* it spins on its vertical axis: edge-on at the swap */
