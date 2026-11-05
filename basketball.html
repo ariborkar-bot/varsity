@@ -1716,7 +1716,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v183 · Nov 4';
+const APP_BUILD='v184 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2428,11 +2428,11 @@ function anticipatedHTML(){
 /* ---------- Simulate: build the best team you can ---------- */
 const SIM_RESPINS=5;
 const SIM_SLOTS=[
-  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']},
-  {k:'BG1',label:'G',elig:['PG','SG']},{k:'BG2',label:'G',elig:['PG','SG']},{k:'BF1',label:'F',elig:['SF','PF']},{k:'BF2',label:'F',elig:['SF','PF']},{k:'BC',label:'C',elig:['C','PF']}];
-/* spots on the court, as [left %, top %]. The starters and the bench each get a court of their own. */
-const SIM_POS={C:[50,15],PF:[21,37],SF:[79,37],SG:[27,65],PG:[73,65],BG1:[27,20],BG2:[73,20],BF1:[27,50],BF2:[73,50],BC:[50,80]};
-const SIM_UNIT=k=>['PG','SG','SF','PF','C'].includes(k)?'off':'def';
+  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']}];
+/* spots on the court, as [left %, top %] */
+const SIM_POS={C:[50,15],PF:[21,37],SF:[79,37],SG:[27,65],PG:[73,65]};
+/* one unit: every respin comes out of the same 5 (left.off) */
+const SIM_UNIT=k=>'off';
 const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G:'#22A6D9',F:'#E8A317'};
 const simKey=p=>((p.name||'')+'|'+(p.school||'')).toLowerCase();
 const simTot=p=>agg(p,'season').v;
@@ -2449,7 +2449,7 @@ function simStart(){
   const ex=new Set(),c=[];
   for(const sl of SIM_SLOTS){const pool=simPool(sl,ex);if(!pool.length){say('Not enough players to build a team yet');return}
     const p=pool[fcRnd(pool.length)];ex.add(simKey(p));c.push(p.key)}
-  UI.sim={c,left:{off:SIM_RESPINS,def:SIM_RESPINS},done:false,seen:[...ex],flip:'deal',res:null};render();
+  UI.sim={c,left:{off:SIM_RESPINS,def:0},done:false,seen:[...ex],flip:'deal',res:null};render();
   setTimeout(()=>{if(UI.sim&&UI.sim.flip==='deal'){UI.sim.flip=null;render()}},3600);
 }
 function simRespin(i){
@@ -2548,27 +2548,27 @@ function simPickHTML(m){
 }
 function viewSim(){
   const m=UI.sim,my=(ME.uid&&(S.picks[ME.uid]||{}).sim)||{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>Simulate</h2><p>Draw a 10-player team, use up to ${SIM_RESPINS} starter and ${SIM_RESPINS} bench respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
+  const head=`<div class="head"><h2>Simulate</h2><p>Draw a 5-player team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
   const myBest=my.best?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best team</small><b>${f1(my.best)}</b></div><div><small>Teams built</small><b>${my.runs||1}</b></div></div>`:'';
   const rows=Object.keys(S.picks).map(u=>({u,b:+((S.picks[u]||{}).sim||{}).best||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
   const board=mgBoard('Best simulated teams',rows);
-  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 10 spots: a starting five of PG, SG, SF, PF and C, then a bench of 2 guards, 2 forwards and a center. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for the starters and ${SIM_RESPINS} for the bench to swap any player for a new one. Aim for the highest total.</p>${myBest}<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div></section>${board}`;
+  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 5 spots: a starting five of PG, SG, SF, PF and C. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div></section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
-  const tab=UI.simTab==='def'?'def':'off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
+  const tab='off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
   const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p||SIM_UNIT(sl.k)!==tab)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
     return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}${T10(p).replace('class="top10"','class="top10 sm"')}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
       <div class="sb-pts"><b>${f1(a.n?a.v/a.n:0)}<u>PPG</u></b><small>${f1(a.v)} pts<em> · ${a.n} gp</em></small></div>
       ${m.done?'':`<button class="sb-rs ${m.left[SIM_UNIT(sl.k)]>0&&!busy?'':'off'}" data-act="simRespin" data-i="${i}" ${m.left[SIM_UNIT(sl.k)]>0&&!busy?'':'disabled'} aria-label="Respin ${sl.label}">↻<span> Respin</span></button>`}</div></div>`};
-  const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Starter respins</small><b>${m.left.off}</b></div><div><small>Bench respins</small><b>${m.left.def}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
+  const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins</small><b>${m.left.off}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
   let res='';
   if(m.done&&m.res){const r=m.res,pc=Math.round(r.pct*100),bt=Math.round(r.beat*100),gr=bt>=98?'S':bt>=90?'A':bt>=70?'B':bt>=40?'C':'D';
     res=`<section class="card sim-res"><div class="sim-gr">${gr}</div><div><h3>${f1(r.total)} points</h3><p class="muted">Better than ${bt}% of randomly drawn teams. The best possible team scores ${f1(r.max)} points, and you got ${pc}% of that.${my.best&&my.best>=Math.round(r.total*10)/10?` Your best is ${f1(my.best)}.`:''}</p></div>
       <details class="sim-opt"><summary>See the best possible team</summary>${r.best.list.map(x=>`<div class="bt-r"><b>${x.l} · ${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><b class="d">${f1(simTot(x.p))}</b></div>`).join('')}</details>
       <div class="btns"><button class="btn" data-act="simSeason">Simulate a season</button><button class="btn ghost" data-act="simStart">Build another team</button></div></section>`}
-  const act2=m.done?'':`<div class="bt-go" style="margin-top:14px"><button class="btn" data-act="simFinish" ${busy?'disabled':''}>Finish team</button><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} starter and ${m.left.def} bench ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Finish your team when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
+  const act2=m.done?'':`<div class="bt-go" style="margin-top:14px"><button class="btn" data-act="simFinish" ${busy?'disabled':''}>Finish team</button><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Finish your team when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
   const stage=m.done&&m.stage==='pick'?simPickHTML(m):m.done&&m.stage==='season'&&m.season?simSeasonHTML(m):'';
-  return head+stage+(m.stage==='pick'?'':res)+`<section class="card fc-hero">${bar}<div class="sim-heads" role="tablist" aria-label="Unit">${[['off','Starters'],['def','Bench']].map(([u,l])=>`<button type="button" role="tab" class="sim-ch ${u}" aria-selected="${tab===u}" data-act="simTab" data-v="${u}">${l}<small>${unitN(u)} spots · ${f1(unitTot(u))} pts</small></button>`).join('')}</div><div class="sim-board sim-${tab}">${simField(tab)}${m.c.map(card).join('')}</div>${act2}</section>${board}`;
+  return head+stage+(m.stage==='pick'?'':res)+`<section class="card fc-hero">${bar}<div class="sim-board sim-${tab}">${simField(tab)}${m.c.map(card).join('')}</div>${act2}</section>${board}`;
 }
 /* ---------- minigames: Pick 'em and 5 Card Draw ---------- */
 

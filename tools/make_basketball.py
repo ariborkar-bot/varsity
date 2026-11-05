@@ -363,14 +363,14 @@ def transform(s, mp, games, seeds, teams, prior):
                 "{name:'Semifinals',d:PO_DATES.r2,games:[[W(0,0),W(0,1)],[W(0,2),W(0,3)]]},"
                 "{name:'Championship',d:PO_DATES.r3,games:[[W(1,0),W(1,1)]]}]}]})();" % (T(1), T(8), T(4), T(5), T(2), T(7), T(3), T(6)))
 
-    # --- Simulate: ten players on a half court ---------------------------------------------------------------------
+    # --- Simulate: a starting five on one court, 5 respins in all ---------------------------------------------------
     s = between(s, 'const SIM_SLOTS=[', 'const simKey=',
                 """const SIM_SLOTS=[
-  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']},
-  {k:'BG1',label:'G',elig:['PG','SG']},{k:'BG2',label:'G',elig:['PG','SG']},{k:'BF1',label:'F',elig:['SF','PF']},{k:'BF2',label:'F',elig:['SF','PF']},{k:'BC',label:'C',elig:['C','PF']}];
-/* spots on the court, as [left %, top %]. The starters and the bench each get a court of their own. */
-const SIM_POS={C:[50,15],PF:[21,37],SF:[79,37],SG:[27,65],PG:[73,65],BG1:[27,20],BG2:[73,20],BF1:[27,50],BF2:[73,50],BC:[50,80]};
-const SIM_UNIT=k=>['PG','SG','SF','PF','C'].includes(k)?'off':'def';
+  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']}];
+/* spots on the court, as [left %, top %] */
+const SIM_POS={C:[50,15],PF:[21,37],SF:[79,37],SG:[27,65],PG:[73,65]};
+/* one unit: every respin comes out of the same 5 (left.off) */
+const SIM_UNIT=k=>'off';
 const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G:'#22A6D9',F:'#E8A317'};
 """)
     s = between(s, 'function simBest(){', '\nfunction simStart',
@@ -385,14 +385,19 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     s = rep(s, 'const SIM_SD=22;', 'const SIM_SD=11;')
     s = rep(s, "const tot=Math.max(18,Math.min(84,Math.round(44+8*gauss())));", "const tot=Math.max(80,Math.min(180,Math.round(122+12*gauss())));")
     s = rep(s, 'bonus=Math.max(-8,Math.min(16,z*4.5))', 'bonus=Math.max(-6,Math.min(12,z*3.5))')
+    s = rep(s, "left:{off:SIM_RESPINS,def:SIM_RESPINS}", "left:{off:SIM_RESPINS,def:0}")
     s = rep(s, "Draw a full 17-player team, use up to ${SIM_RESPINS} offense and ${SIM_RESPINS} defense respins to swap out players,",
-            "Draw a 10-player team, use up to ${SIM_RESPINS} starter and ${SIM_RESPINS} bench respins to swap out players,")
+            "Draw a 5-player team, use up to ${SIM_RESPINS} respins to swap out players,")
     s = rep(s, "You get 17 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 4 DL, 3 LB and 4 DB on defense. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for offense and ${SIM_RESPINS} for defense to swap any player for a new one.",
-            "You get 10 spots: a starting five of PG, SG, SF, PF and C, then a bench of 2 guards, 2 forwards and a center. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for the starters and ${SIM_RESPINS} for the bench to swap any player for a new one.")
+            "You get 5 spots: a starting five of PG, SG, SF, PF and C. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one.")
     s = rep(s, "<div><small>Offense respins</small><b>${m.left.off}</b></div><div><small>Defense respins</small><b>${m.left.def}</b></div>",
-            "<div><small>Starter respins</small><b>${m.left.off}</b></div><div><small>Bench respins</small><b>${m.left.def}</b></div>")
-    s = rep(s, "You have ${m.left.off} offense and ${m.left.def} defense ${", "You have ${m.left.off} starter and ${m.left.def} bench ${")
-    s = rep(s, "[['off','Offense'],['def','Defense']]", "[['off','Starters'],['def','Bench']]")
+            "<div><small>Respins</small><b>${m.left.off}</b></div>")
+    s = rep(s, "You have ${m.left.off} offense and ${m.left.def} defense ${", "You have ${m.left.off} ${")
+    # one court, so no Starters/Bench tabs
+    i = s.index('<div class="sim-heads" role="tablist" aria-label="Unit">')
+    j = s.index('<div class="sim-board sim-${tab}">', i)
+    s = s[:i] + s[j:]
+    s = rep(s, "const tab=UI.simTab==='def'?'def':'off',", "const tab='off',")
 
     # --- Supabase: basketball keeps its own leagues, lineups, picks and settings. Accounts (profiles) are shared. ---------------
     i = s.index('function supaDb(sb){')
