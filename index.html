@@ -1662,7 +1662,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v155 · Nov 4';
+const APP_BUILD='v156 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4454,7 +4454,9 @@ boot();
     ball=$$('.in-ball'),white=$$('.in-white'),cv=$$('canvas'),cx=cv.getContext('2d');
   const anims=[];const A=(n,k,o)=>{const a=n.animate(k,Object.assign({fill:'both'},o));anims.push(a);return a};
   let done=false,timers=[],raf=0;
-  const at=(ms,f)=>timers.push(setTimeout(f,ms));
+  /* the whole intro plays RATE times faster: every animation gets that playback rate and every scheduled event is moved up to match */
+  const RATE=1.2;
+  const at=(ms,f)=>timers.push(setTimeout(f,ms/RATE));
   const finish=()=>{if(done)return;done=true;timers.forEach(clearTimeout);cancelAnimationFrame(raf);el.classList.add('out');setTimeout(()=>{el.remove();document.documentElement.style.overflow=''},620)};
   el.addEventListener('pointerdown',finish);
   el.querySelector('.in-skip').addEventListener('click',finish);
@@ -4500,6 +4502,7 @@ boot();
   const t0=performance.now();let last=t0,now=0;
   const frame=t=>{
     if(done)return;raf=requestAnimationFrame(frame);
+    for(const a of el.getAnimations({subtree:true}))if(!a._r){a._r=1;a.playbackRate=RATE}
     let dt=Math.min(50,t-last);last=t;if(hold>0){hold-=dt;dt=0}now=t-t0;
     cx.setTransform(DPR,0,0,DPR,0,0);cx.clearRect(0,0,CW,CH);cx.globalCompositeOperation='source-over';
     const tin=eo(now/1100),gy=groundY,vpy=gy-CH*.12;
