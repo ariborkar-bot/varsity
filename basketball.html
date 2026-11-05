@@ -2648,9 +2648,9 @@ function leadersHTML(rows){
 function listHTML(){
   const rows=leagueRows();
   if(!rows.length)return `<p class="empty">No players match these filters yet. Players appear here after they join and their games are reported.</p>`;
-  const vis=UI.more?rows:rows.slice(0,5);
+  const shown=UI.more?Math.max(5,+UI.more||5):5,vis=rows.slice(0,shown);
   const top=!UI.q.trim()&&vis.length>=3,rest=top?vis.slice(3):vis;
-  const more=rows.length>5?`<div class="btns" style="justify-content:center"><button class="btn ghost" data-act="more">${UI.more?'Show less':'Show more ('+(rows.length-5)+' more)'}</button></div>`:'';
+  const left=rows.length-shown,more=rows.length>5?`<div class="btns" style="justify-content:center">${left>0?`<button class="btn ghost" data-act="more">Show ${Math.min(10,left)} more (${left} left)</button>`:''}${shown>5?`<button class="btn ghost" data-act="less">Show less</button>`:''}</div>`:'';
   return leadersHTML(rows)+(top?podiumHTML(vis):'')+(rest.length?`<div class="board"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">${UI.rank==='prev'?'Last game pts':'Fantasy pts'}</span></div>${rest.map(x=>rowHTML(x,x.rank)).join('')}</div>`:'')+more;
 }
 function hotHTML(){
@@ -3699,7 +3699,8 @@ document.addEventListener('click',async e=>{
   else if(a==='markRead'){await act(writeSeen);closeNotes()}
   else if(a==='consent')openGate();
   else if(a==='pos'){const bar=document.querySelector('.tools .chips[aria-label="Position"]'),sx=bar?bar.scrollLeft:0;UI.pos=t.dataset.v;UI.more=false;render();const nb=document.querySelector('.tools .chips[aria-label="Position"]');if(nb)nb.scrollLeft=sx}
-  else if(a==='more'){UI.more=!UI.more;$('#lb-list').innerHTML=listHTML()}
+  else if(a==='more'){UI.more=(+UI.more||5)+10;$('#lb-list').innerHTML=listHTML()}
+  else if(a==='less'){UI.more=false;$('#lb-list').innerHTML=listHTML()}
   else if(a==='toGroups')location.hash='#groups';
   else if(a==='toMe')location.hash='#me';
   else if(a==='resetDemo'){if(confirm('Reset the demo and your consent choice? This cannot be undone.')){try{localStorage.removeItem('gsd-demo-profile')}catch(_){}location.reload()}}
