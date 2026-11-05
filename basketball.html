@@ -1687,7 +1687,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v166 · Nov 4';
+const APP_BUILD='v167 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3615,7 +3615,6 @@ function bannerHTML(){
   /* no sign-up banners */
   if(ME.mode==='readonly'&&!VA)b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
   if(S.timeout&&!S.loaded.profiles)b.push(`<p class="note"><span class="pill pending">Slow</span><span>The league data is taking a while to load. What you see may be out of date.</span></p>`);
-  b.push('<p class="note"><span class="pill pending">2025-26 stats</span><span>Players, grades, positions and per-game stats are real, from MaxPreps for the 2025-26 season (some schools did not enter full stats). The schedule is the real 2026-27 schedule from MaxPreps. Scores appear as games are played.</span></p>');
   const sample=!MP&&!S.settings.hideSample;
   if(sample)b.push(`<p class="note"><span class="pill pending">Sample</span><span>Sample players are made-up placeholders so the boards are never empty. Real players appear as they join.</span></p>`);
   return b.join('');

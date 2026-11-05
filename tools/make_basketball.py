@@ -280,8 +280,6 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, "const ATS_PAY=1.91,ATS_K=3;", "const ATS_PAY=1.91,ATS_K=2.2;")
     s = rep(s, "L=Math.max(-35,Math.min(35,L));", "L=Math.max(-25,Math.min(25,L));")
 
-    s = rep(s, "  const sample=!MP&&!S.settings.hideSample;",
-            "  b.push('<p class=\"note\"><span class=\"pill pending\">2025-26 stats</span><span>Players, grades, positions and per-game stats are real, from MaxPreps for the 2025-26 season (some schools did not enter full stats). The schedule is the real 2026-27 schedule from MaxPreps. Scores appear as games are played.</span></p>');\n  const sample=!MP&&!S.settings.hideSample;")
 
     # --- lineups ------------------------------------------------------------------------------------------------
     s = between(s, 'const SLOTS_DRAFT=[', 'const slotOk',
