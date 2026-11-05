@@ -1433,7 +1433,7 @@ const NOW=()=>Date.now();
 
 /* scoring */
 const WEEKS=18;
-const PTS={pts:1,reb:1.2,ast:1.5,stl:3,blk:3,tov:-1,tpm:.5};
+const PTS={pts:1,reb:1.2,ast:1.5,stl:3,blk:3,tov:-2,tpm:0};
 const KEYS=Object.keys(PTS);
 const KM=Object.fromEntries(KEYS.map(k=>[k.toLowerCase(),k]));
 const LABEL={pts:'Points',reb:'Rebounds',ast:'Assists',stl:'Steals',blk:'Blocks',tov:'Turnovers',tpm:'3-pointers made'};
@@ -1687,7 +1687,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v167 · Nov 4';
+const APP_BUILD='v168 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3133,13 +3133,13 @@ function viewScoring(){
   return `<div class="head"><h2>Scoring</h2><p>Every stat line becomes fantasy points the same way, for every player in the league.</p></div>
   <div class="two">
     <section class="card"><h3>Box score</h3><ul class="rules">
-      ${item('pts','Point')}${item('tpm','3-pointer made','bonus on top of its 3 points')}${item('reb','Rebound')}${item('ast','Assist')}
+      ${item('pts','Point','3-pointers count as 3 points, with no extra bonus')}${item('reb','Rebound')}${item('ast','Assist')}
       ${item('stl','Steal')}${item('blk','Block')}${item('tov','Turnover')}
     </ul></section>
     <section class="card"><h3>Lineups and matchups</h3>
       <p><b>Snake draft leagues:</b> by default 1 PG, 1 SG, 1 SF, 1 PF, 1 C and 1 FLEX (any position), plus 3 bench spots. Bench players do not count toward your lineup total, but you can swap one into a matching starting spot at any time after the draft. The league owner can change the roster before the draft.</p>
       <p>In a league, you face one other member each game and the higher lineup total wins.</p>
-      <p class="muted">Example: 22 points, 8 rebounds, 5 assists, 2 steals, 1 block, 3 turnovers and 2 threes scores 22 + 9.6 + 7.5 + 6 + 3 − 3 + 1 = 46.1 points.</p></section>
+      <p class="muted">Example: 22 points, 8 rebounds, 5 assists, 2 steals, 1 block, 3 turnovers and 2 threes scores 22 + 9.6 + 7.5 + 6 + 3 − 6 = 42.1 points. The threes are already in the 22 points.</p></section>
   </div>`;
 }
 
