@@ -1203,7 +1203,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .pod .top10{position:absolute;top:8px;right:10px;z-index:2}
 /* the position row wraps instead of sliding sideways on phones */
 @media (min-width:760px){.tools .chips[aria-label="Position"]{flex-wrap:wrap!important;overflow:visible!important;margin:0!important;padding:0!important;width:auto!important}}
-@media (max-width:759px){.tools .chips[aria-label="Position"]{flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -10px!important;padding:2px 10px!important;width:calc(100% + 20px)!important;scroll-snap-type:x proximity;touch-action:pan-x}.tools .chips[aria-label="Position"]::-webkit-scrollbar{display:none}.tools .chips[aria-label="Position"] .chip{flex:none;white-space:nowrap}}
+@media (max-width:759px){.tools .chips[aria-label="Position"]{flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -10px!important;padding:2px 10px!important;width:calc(100% + 20px)!important;touch-action:pan-x pan-y;overscroll-behavior-x:contain}.tools .chips[aria-label="Position"]::-webkit-scrollbar{display:none}.tools .chips[aria-label="Position"] .chip{flex:none;white-space:nowrap}}
 
 /* compare players: stadium-lit cards, a ring that sweeps in when a player lands in a slot */
 .cmp-card{position:relative;overflow:hidden;background:radial-gradient(120% 80% at 50% -10%,rgba(47,107,255,.22),transparent 60%),var(--surface)}
@@ -1373,7 +1373,7 @@ const logoFor=s=>{const L=window.SCHOOL_LOGOS||{};return L[s]||L[LOGO_ALIAS[s]]|
 const slogo=(s,size=18)=>{const u=logoFor(s);return u?`<img class="slogo" src="${u}" alt="" width="${size}" height="${size}">`:''};
 const av=(name,seed,size=40)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);return `<span class="av" style="--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px" aria-hidden="true">${esc(ini)}${u?`<img class="avl" src="${u}" alt="">`:''}</span>`};
 /* position filters: offense by position, defense by group (DB covers CB, S and plain DB) */
-const FILTERS=['ALL','QB','RB','WR','TE','K','DEF','DL','LB','DB'];
+const FILTERS=['ALL','QB','RB','WR','TE','DEF','DL','LB','DB','K'];
 const FLABEL={ALL:'All'};
 const posMatch=(p,f)=>f==='ALL'||p.pos===f||(p.pos==='DEF'&&(p.sub===f||(f==='DB'&&['CB','S','DB'].includes(p.sub))));
 const pb=(pos,sub)=>`<span class="pos ${pos}">${sub||pos}</span>`;
@@ -3720,7 +3720,7 @@ document.addEventListener('click',async e=>{
   else if(a==='ntToggle'){const k=t.dataset.v,p=ntPrefs();p[k]=!p[k];ntSave(p);openNotes()}
   else if(a==='markRead'){await act(writeSeen);closeNotes()}
   else if(a==='consent')openGate();
-  else if(a==='pos'){UI.pos=t.dataset.v;UI.more=false;render()}
+  else if(a==='pos'){const bar=document.querySelector('.tools .chips[aria-label="Position"]'),sx=bar?bar.scrollLeft:0;UI.pos=t.dataset.v;UI.more=false;render();const nb=document.querySelector('.tools .chips[aria-label="Position"]');if(nb)nb.scrollLeft=sx}
   else if(a==='more'){UI.more=!UI.more;$('#lb-list').innerHTML=listHTML()}
   else if(a==='toGroups')location.hash='#groups';
   else if(a==='toMe')location.hash='#me';
@@ -4143,7 +4143,7 @@ boot();
 /* pull down to refresh: drag down from the very top and let go past the line */
 (()=>{
   const el=document.createElement('div');el.id='ptr';el.setAttribute('aria-hidden','true');el.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>';document.body.appendChild(el);
-  const T=110,blocked=t=>t&&t.closest&&t.closest('#gate,#drawer,#notif,#intro,.dd,.setm,.pk-bg,.cfm,input,select,textarea,.gm-wks,.gm-divs,.dr-tabs,.dr-pos');
+  const T=110,blocked=t=>t&&t.closest&&t.closest('#gate,#drawer,#notif,#intro,.dd,.setm,.pk-bg,.cfm,input,select,textarea,.gm-wks,.gm-divs,.dr-tabs,.dr-pos,.tools .chips');
   let y0=null,dy=0,busy=false;
   const reset=()=>{y0=null;dy=0;el.style.transition='transform .2s,opacity .2s';el.style.opacity='0';el.style.transform='translateY(-70px)';el.classList.remove('ready')};
   document.addEventListener('touchstart',e=>{if(busy||e.touches.length!==1||window.scrollY>0||blocked(e.target)){y0=null;return}y0=e.touches[0].clientY;dy=0;el.style.transition='none'},{passive:true});
