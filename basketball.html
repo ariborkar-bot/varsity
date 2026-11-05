@@ -1485,11 +1485,11 @@ html,body{overflow-x:clip;max-width:100%}
 .sb-card .av{margin-bottom:max(4px,1.2cqw)}
 @container (max-width:360px){.sb-slot{scale:.9}}
 @container (max-width:320px){.sb-slot{scale:.82}}
-/* phones: a finished 5 Card Draw hand sits 3 cards over 2 (no lone card on its own row) */
+/* phones: a finished 5 Card Draw hand sits 3 cards over 2, all the same size, the bottom two centered */
 @media (max-width:759px){
-  .fc-hand.done{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+  .fc-hand.done{grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:1fr;gap:8px}
   .fc-hand.done>*{grid-column:span 2;min-width:0;padding-left:6px;padding-right:6px}
-  .fc-hand.done>:nth-child(n+4){grid-column:span 3}
+  .fc-hand.done>:nth-child(4){grid-column:2/span 2}.fc-hand.done>:nth-child(5){grid-column:4/span 2}
   .fc-hand.done [data-act=fcRedraw]{display:none}
   .fc-hand.done .fc-card b,.fc-hand.done .fc-card .nm{overflow-wrap:anywhere}
 }
@@ -1940,7 +1940,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v196 · Nov 5';
+const APP_BUILD='v197 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
