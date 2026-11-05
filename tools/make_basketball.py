@@ -13,7 +13,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'index.html')
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'basketball.html')
 
-PRIOR = 4        # weeks 1-4 carry last season's (2025-26) per-game averages; the real 2026-27 games start at week 5
+SHOW_LAST_YEAR = False   # True: weeks 1-4 carry last season's (2025-26) per-game averages. False: every player starts the season at 0.0
+PRIOR = 4 if SHOW_LAST_YEAR else 0   # pseudo-weeks before the first real 2026-27 week
 START = datetime.date(2026, 11, 9)   # Monday of the week of the first 2026-27 game
 GAMES_FILE = os.path.join(ROOT, 'tools', 'data', 'bb_2627_games.txt')
 
@@ -145,7 +146,7 @@ def build_data():
         for x in t['rows']:
             pid += 1
             w = {}
-            if x['st'] and x['gp'] > 0:
+            if SHOW_LAST_YEAR and x['st'] and x['gp'] > 0:
                 # MaxPreps only has season averages for most teams: every finished week carries the per-game average,
                 # and the number of weeks follows games played so a player with 3 games counts for less than one with 30.
                 nw = min(PRIOR, max(1, round(x['gp'] / 7)))
@@ -161,7 +162,7 @@ def build_data():
 
 GAMES_JS = """<script>
 /* Real 2026-27 San Diego Section boys basketball schedule (MaxPreps). No scores yet: nothing has been played.
-   Weeks 1-%(prior)d hold last season's (2025-26) per-game averages; week %(first)d is the week of %(start)s. */
+   Week %(first)d is the week of %(start)s (weeks before it, if any, carry last season's averages). */
 (function(){
   var G=%(games)s, P=%(prior)d, W=%(weeks)d, st=new Date(%(sy)d,%(sm)d,%(sd)d), now=new Date();
   var wk=Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate())-st)/604800000);
@@ -239,6 +240,13 @@ def transform(s, mp, games, seeds, teams, prior):
                             prior_ratings=json.dumps(prior, separators=(',', ':'))))
     s = rep(s, " The top 4 seeds in the 12-team divisions (II, III, IV) have a first-round bye.", " This bracket is a projection from last season's scoring until the real brackets are posted.")
     s = rep(s, 'const WEEKS=12;', 'const WEEKS=%d;' % weeks)
+    # preseason: nobody has played, so every player counts as one game of 0.0 (lists, pools and cards stay full).
+    # This switches itself off as soon as any real stat line exists.
+    s = rep(s, "function agg(p,scope){\n  const g=scoped(p,scope);\n",
+            "let _pk=-1,_pv=true;\nfunction PRE(){if(_pk!==_rev){_pk=_rev;_pv=!players().some(p=>p.games.some(Boolean))}return _pv}\n"
+            "function agg(p,scope){\n  const g=scoped(p,scope);\n  if(!g.length&&!p.sample&&PRE())return{n:1,s:sum([]),v:0,unv:false,ver:false};\n")
+    s = rep(s, "const isT10=p=>{if(!p||!p.key)return false;", "const isT10=p=>{if(!p||!p.key||PRE())return false;")
+    s = rep(s, ".filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a));", ".filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a)||x.p.name.localeCompare(y.p.name));")
     s = rep(s, "if(fin.length<20){_rg={r:{},H:0,s:12};return _rg}",
             "if(fin.length<20){_rg=window.BB_PRIOR?{r:window.BB_PRIOR,H:3,s:12}:{r:{},H:0,s:12};return _rg}")
     s = rep(s, "const PO_DATES={r1:'2026-11-06',r2:'2026-11-13',r3:'2026-11-20',r4:'2026-11-27'};",
