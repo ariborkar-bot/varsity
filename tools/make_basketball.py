@@ -405,38 +405,32 @@ BB_CSS = r"""
 /* basketball: position colors and a hardwood header */
 .pos.PG{--c:#E65B28}.pos.SG{--c:#2868E8}.pos.SF{--c:#079B82}.pos.PF{--c:#9655D8}.pos.C{--c:#E0455B}
 .sim-board{background:#c98a45!important;border-color:#8b5a25!important}
-.mast{background:linear-gradient(90deg,rgba(24,10,0,.62),rgba(24,10,0,.12) 42%,rgba(24,10,0,.12) 62%,rgba(24,10,0,.55)),linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(20,8,0,.45)),url("__COURT__") left center/auto 100% repeat-x!important}
+.mast{background:linear-gradient(90deg,rgba(24,10,0,.62),rgba(24,10,0,.12) 42%,rgba(24,10,0,.12) 62%,rgba(24,10,0,.55)),linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(20,8,0,.45)),url("__COURT__") center/cover no-repeat!important}
 .mast::before,.mast::after,.mast-yards{display:none!important;content:none!important}
 .mast .wk,.mast .bell,.sport-sw{background:rgba(26,12,2,.82)!important;border:1px solid rgba(255,236,200,.3)!important}
 """
 
 def _court_uri():
-    """One full high-school court (84 x 50 ft, NFHS markings) as a tile. Units are tenths of a foot."""
+    """One full high-school court (84 x 50 ft, NFHS markings) centred on a long strip of floor. Units are tenths of a foot."""
     import urllib.parse
-    import base64, io
-    from PIL import Image
-    im = Image.open(os.path.join(ROOT, 'logo.png')).convert('RGBA').resize((160, 160), Image.LANCZOS)
-    buf = io.BytesIO(); im.save(buf, 'PNG', optimize=True)
-    gem = 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
-    L, W, GOLD = '#fff6e6', 6, '#FFC23D'     # line colour and stroke width (exaggerated so it reads at banner size)
-    floor = ''.join('<rect x="-20" y="%d" width="880" height="25" fill="%s"/>' % (-20 + k * 25, '#c98a45' if k % 2 else '#bd7d3c') for k in range(22))
-    oob = '<path d="M-20 -20H860V520H-20Z M0 0V500H840V0Z" fill="#061a4d" fill-opacity=".9" fill-rule="evenodd"/>'
+    L, W = '#fff6e6', 6                      # line colour and stroke width (exaggerated so it reads at banner size)
+    floor = ''.join('<rect x="-3580" y="%d" width="8000" height="25" fill="%s"/>' % (-20 + k * 25, '#c98a45' if k % 2 else '#bd7d3c') for k in range(22))
+    oob = '<path d="M-3580 -20H4420V520H-3580Z M0 0V500H840V0Z" fill="#6b3f17" fill-opacity=".5" fill-rule="evenodd"/>'
     # left half (baseline at x=0, rim centre at x=53, y=250); mirrored for the right half
     half = (
-        '<rect x="0" y="190" width="190" height="120" fill="#1F4FD1" fill-opacity=".8"/>'                      # painted lane (12 ft wide, 19 ft long)
+        '<rect x="0" y="190" width="190" height="120" fill="#1d4fd0" fill-opacity=".5"/>'                      # painted lane (12 ft wide, 19 ft long)
         '<path d="M0 190H190V310H0" fill="none" stroke="%(L)s" stroke-width="%(W)s"/>'                          # lane lines + free-throw line
-        '<path d="M190 190A60 60 0 0 1 190 310" fill="#1F4FD1" fill-opacity=".8" stroke="%(L)s" stroke-width="%(W)s"/>'  # free-throw circle, solid half
+        '<path d="M190 190A60 60 0 0 1 190 310" fill="#1d4fd0" fill-opacity=".5" stroke="%(L)s" stroke-width="%(W)s"/>'  # free-throw circle, solid half
         '<path d="M190 190A60 60 0 0 0 190 310" fill="none" stroke="%(L)s" stroke-width="%(W)s" stroke-dasharray="11 9"/>'  # dashed half
-        '<path d="M0 52.5H53A197.5 197.5 0 0 1 53 447.5H0" fill="none" stroke="%(G)s" stroke-width="%(W)s"/>'    # three-point line, 19 ft 9 in, in gold
+        '<path d="M0 52.5H53A197.5 197.5 0 0 1 53 447.5H0" fill="none" stroke="%(L)s" stroke-width="%(W)s"/>'    # three-point line, 19 ft 9 in
         '<path d="M40 215V285" stroke="#fff" stroke-width="9" stroke-linecap="round"/>'                          # backboard
         '<path d="M40 250H44" stroke="#ff7a1a" stroke-width="5"/><circle cx="53" cy="250" r="9" fill="none" stroke="#ff7a1a" stroke-width="5"/>'  # rim
         '<path d="M60 180v-10M60 320v10M100 190v-10M100 310v10M140 190v-10M140 310v10" stroke="%(L)s" stroke-width="%(W)s"/>'  # lane hash marks
-    ) % {'L': L, 'W': W, 'G': GOLD}
+    ) % {'L': L, 'W': W}
     mid = ('<path d="M420 0V500" stroke="%(L)s" stroke-width="%(W)s"/>'
-           '<circle cx="420" cy="250" r="64" fill="#0B2A74" fill-opacity=".95" stroke="%(G)s" stroke-width="%(W)s"/>'
-           '<image href="%(gem)s" x="352" y="182" width="136" height="136"/>') % {'L': L, 'W': W, 'G': GOLD, 'gem': gem}
-    border = '<rect x="0" y="0" width="840" height="500" fill="none" stroke="%s" stroke-width="%d"/><rect x="-10" y="-10" width="860" height="520" fill="none" stroke="%s" stroke-width="3"/>' % (L, W, GOLD)
-    svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="880" height="540" viewBox="-20 -20 880 540">' + floor + oob + border + half +
+           '<circle cx="420" cy="250" r="60" fill="#1d4fd0" fill-opacity=".4" stroke="%(L)s" stroke-width="%(W)s"/>') % {'L': L, 'W': W}
+    border = '<rect x="0" y="0" width="840" height="500" fill="none" stroke="%s" stroke-width="%d"/>' % (L, W)
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="8000" height="540" viewBox="-3580 -20 8000 540" preserveAspectRatio="xMidYMid slice">' + floor + oob + border + half +
            '<g transform="translate(840 0) scale(-1 1)">' + half + '</g>' + mid + '</svg>')
     return 'data:image/svg+xml,' + urllib.parse.quote(svg, safe='')
 
