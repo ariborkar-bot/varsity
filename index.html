@@ -481,7 +481,7 @@ body{background:radial-gradient(ellipse at 12% 0%,rgba(41,125,221,.10),transpare
 .tabs a[aria-current="page"]{background:linear-gradient(135deg,#FFD15A,#FFAD19);box-shadow:0 3px 12px rgba(255,178,26,.28)}
 .head h2{display:inline-block;position:relative;padding-bottom:8px}
 .head h2::after{content:"";position:absolute;left:0;bottom:0;width:54px;height:4px;border-radius:9px;background:linear-gradient(90deg,#FFB21A,#08B6B0)}
-.head p{margin-top:8px}
+.head p{margin-top:8px}.sr-link{margin-left:6px;vertical-align:1px;white-space:nowrap}
 .card,.board,.tools{box-shadow:var(--shadow)}
 .card{border-color:color-mix(in srgb,var(--line) 78%,#8DB9E8);background:linear-gradient(155deg,var(--surface),color-mix(in srgb,var(--surface2) 38%,var(--surface)));}
 .card h3{letter-spacing:-.015em}
@@ -3621,7 +3621,7 @@ function bannerHTML(){
   if(ME.mode==='readonly'&&!VA)b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
   if(S.timeout&&!S.loaded.profiles)b.push(`<p class="note"><span class="pill pending">Slow</span><span>The league data is taking a while to load. What you see may be out of date.</span></p>`);
   const sample=!MP&&!S.settings.hideSample;
-  b.push(`<p class="note">${sample?'<span class="pill pending">Sample</span><span>Sample players are made-up placeholders so the boards are never empty. Real players appear as they join.</span>':''}<a class="btn sm ghost" href="#scoring">Scoring rules</a></p>`);
+  if(sample)b.push(`<p class="note"><span class="pill pending">Sample</span><span>Sample players are made-up placeholders so the boards are never empty. Real players appear as they join.</span></p>`);
   return b.join('');
 }
 /* header ticker: the season's top stat lines, scrolling through the middle of the field */
@@ -3656,6 +3656,7 @@ function chrome(v){
   const n=computeNotes().length,bc=$('#bcount');if(bc){bc.textContent=n;bc.hidden=!n}
   const wk=$('#wk');if(wk)wk.textContent='Week '+CURW();
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
+  if(v!=='scoring'){const hp=document.querySelector('#main .head:not(.sub) p');if(hp)hp.insertAdjacentHTML('beforeend',' <a class="btn sm ghost sr-link" href="#scoring">Scoring rules</a>')}
 }
 function render(){
   T10S=null;
