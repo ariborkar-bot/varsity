@@ -32,7 +32,18 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - Football scores live in `games.js`; basketball scores are a trailing `64-58` (home first) on a line of `tools/data/bb_2627_games.txt`, read by `load_games()` and passed through to `basketball.html`.
 - Player stats are not updated automatically (news sources rarely publish full box scores). The owner is asking MaxPreps/PlayOn for a data license and ScoreStream for an API quote; the owner wants to expand the app to the whole U.S. The app is free, with no purchases and no gambling.
 
+## Phone behaviour (Nov 5 mobile audit, owner approved)
+- Back button: tabs use `history.pushState`, so the phone's Back goes to the previous tab. Opening a player card or notifications calls `sheetPush()`; Back (popstate) closes the sheet. User closes go through `sheetClose()`.
+- Phones (< 760 px): the big banner scrolls away and `#mastMini` (logo, week, settings via `#gear2`) slides in at the top.
+- Login server: the real site has `NEEDS_SERVER=true`. If the Supabase library cannot load (jsDelivr, then unpkg as backup), `ME.mode='offline'`: an Offline banner with Try again, `act()` refuses to save, sign-in says it can't connect. Previews set `NEEDS_SERVER=false` and run in demo mode. Hosting supabase.min.js in the repo was approved but not done: package downloads were blocked in that session.
+- Pick 'em draws one week of games at a time (`pkWeeksHTML`, Show more adds a week): a basketball season is ~1,400 games.
+- Over/Under player names open the player card. Join forms start with no position and require one for players.
+- Basketball preseason: `PRE()` still counts everyone as one 0.0 game for ranking, but game counts show 0; Simulate says when it opens instead of "Not enough players".
+- Declined for now (do not do without asking): hiding "Admin sign in", intro shown once ever, bigger tap targets, 12 px minimum text, shorter Minigames tab labels, Simulate leaderboard wording, "VARSITY 05" yard numbers, Stats list loading more at once.
+- Football `games.js` is missing many weeks 1-11 results (most teams show 6-9 games, not 10). Cloud search could only find 2 more; the rest needs SI or MaxPreps pages read through the owner's Chrome.
+
 ## Open items and ideas
+- Database rules: only `tools/sql/mocks_policies.sql` is in the repo. Its "update mock" policy lets any signed-in user change any mock draft. Policies for the rest of `public.docs` and the `merge_doc` / admin RPCs are unverified (need the Supabase dashboard).
 - Supabase: basketball uses `bb_`-prefixed collections. Row-level security for them is unverified.
 - Home/away follows MaxPreps entry order and is unverified.
 - Bishop's and 38 other schools have no stats on MaxPreps.

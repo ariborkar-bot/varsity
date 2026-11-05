@@ -25,6 +25,8 @@ def build(src, dest, profile, start):
     for x in (A, B, C):
         assert h.count(x) == 1, x
     h = h.replace(A, "if(false){", 1).replace(B, profile, 1).replace(C, "\nif(!location.hash)location.hash='%s';\nroute();\n" % start, 1)
+    assert h.count('const NEEDS_SERVER=true;') == 1
+    h = h.replace('const NEEDS_SERVER=true;', 'const NEEDS_SERVER=false;', 1)
     h = h.replace('</head>', '<style>#tab-admin{display:none!important}</style></head>', 1)
     h = h.replace('href="basketball.html"', 'href="varsity-basketball.html"').replace('href="index.html"', 'href="varsity-football.html"')
     open(os.path.join(OUT, dest), 'w', encoding='utf-8').write(h)

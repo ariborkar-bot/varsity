@@ -267,6 +267,9 @@ def transform(s, mp, games, seeds, teams, prior):
             "let _pk=-1,_pv=true;\nfunction PRE(){if(_pk!==_rev){_pk=_rev;_pv=!players().some(p=>p.games.some(Boolean))}return _pv}\n"
             "function agg(p,scope){\n  const g=scoped(p,scope);\n  if(!g.length&&!p.sample&&PRE())return{n:1,s:sum([]),v:0,unv:false,ver:false};\n")
     s = rep(s, ".sort((a,b)=>b.a.v-a.a.v).slice(0,16)", ".sort((a,b)=>b.a.v-a.a.v||((window.BB_RANK||{})[b.p.key]||0)-((window.BB_RANK||{})[a.p.key]||0)).slice(0,16)")
+    s = re.sub(r"\$\{((?:x\.)?a)\.n\} \$\{\1\.n===1\?'game':'games'\}", lambda m: "${PRE()?0:%s.n} ${!PRE()&&%s.n===1?'game':'games'}" % (m.group(1), m.group(1)), s)
+    s = rep(s, '<span class="lbl">Games</span><b>${info.a.n}</b>', '<span class="lbl">Games</span><b>${PRE()?0:info.a.n}</b>')
+    s = rep(s, 'Average over your ${info.a.n} approved ${info.a.n===1?', 'Average over your ${PRE()?0:info.a.n} approved ${!PRE()&&info.a.n===1?')
     s = rep(s, "const isT10=p=>{if(!p||!p.key)return false;", "const isT10=p=>{if(!p||!p.key)return false;if(PRE())return (window.BB_TOP10||[]).includes(p.key);")
     s = rep(s, ".filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a));", ".filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a)||((window.BB_RANK||{})[y.p.key]||0)-((window.BB_RANK||{})[x.p.key]||0)||x.p.name.localeCompare(y.p.name));")
     s = rep(s, "if(fin.length<20){_rg={r:{},H:0,s:12};return _rg}",
@@ -304,12 +307,12 @@ def transform(s, mp, games, seeds, teams, prior):
             "const ORD=['PG','SG','SF','PF','C'],NAMES={PG:'Point guards',SG:'Shooting guards',SF:'Small forwards',PF:'Power forwards',C:'Centers'};")
     s = rep(s, "const SHORT={", "const SHORT={pts:'Pts',reb:'Reb',ast:'Ast',stl:'Stl',blk:'Blk',tov:'TO',tpm:'3PM',")
 
-    s = rep(s, "posOptions(pr.posLabel||pos||'RB')", "posOptions(pr.posLabel||pos||'PG')")
     s = rep(s, "const POSF=['ALL','QB','RB','WR','TE','K','DL','LB','DB'];", "const POSF=['ALL','PG','SG','SF','PF','C'];")
     s = rep(s, "San Diego high school fantasy football", "San Diego high school fantasy basketball")
-    s = rep(s, "pos:'RB',agree:false", "pos:'PG',agree:false", 2)
     s = rep(s, "p.pos='QB';p.posLabel='QB'", "void 0")
-    s = rep(s, "Default roster: one each of QB, RB, TE, DL, LB, DB and K, plus 2 WR.", "Default roster: one each of PG, SG, SF, PF, C and a FLEX.")
+    s = rep(s, "Default roster: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots.", "Default roster: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots.")
+    s = rep(s, "Over or under on player stats like yards, touchdowns and tackles.", "Over or under on player stats like points, rebounds and assists.")
+    s = rep(s, "Build your team opens once players have at least 2 games of stats.", "Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.")
     s = rep(s, "Default: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots.", "Default: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots.")
     s = rep(s, "const CAP=70,CAP_FULL=140;", "const CAP=60,CAP_FULL=90;")
     s = rep(s, "const ATS_PAY=1.91,ATS_K=3;", "const ATS_PAY=1.91,ATS_K=2.2;")

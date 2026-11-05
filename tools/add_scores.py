@@ -45,7 +45,7 @@ def today_pacific():
     # Pacific time without tz data: UTC-8 (PST) is close enough for picking a date. VARSITY_TODAY=YYYY-MM-DD overrides it (for tests).
     if os.environ.get('VARSITY_TODAY'):
         return datetime.date.fromisoformat(os.environ['VARSITY_TODAY'])
-    return (datetime.datetime.utcnow() - datetime.timedelta(hours=8)).date()
+    return (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=8)).date()
 
 
 def norm(s):

@@ -1359,7 +1359,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .bf-bar{display:flex;flex-direction:row;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;margin:12px 0}
 .bf-bar .fld{flex:1 1 150px;min-width:130px;margin:0}
 .bf-bar .bf-mk{flex:1 1 100%;margin:0}
-.pp-who{display:flex;align-items:center;gap:10px;margin:6px 0 2px}.pp-who b{display:block;font-size:1rem}.pp-who small{font-size:.76rem}
+.pp-who{display:flex;align-items:center;gap:10px;margin:6px 0 2px;width:100%;min-height:44px;padding:4px 0;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.pp-who b{text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:3px}.pp-go{margin-left:auto;font-size:1.4rem;line-height:1;color:var(--muted)}.pp-who b{display:block;font-size:1rem}.pp-who small{font-size:.76rem}
 .pp-m{font:700 .78rem/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:#FFC23D;margin:4px 0 8px}
 .pp-stat{font-size:.74rem;margin:8px 0 2px}.pp-stat b{color:var(--ink,#fff)}
 .pp .bt-t{padding:10px 6px}
@@ -1367,6 +1367,23 @@ select option{background:#0B1730;color:#EAF0F8}
 .mk-row{display:flex;flex-direction:column;gap:6px;margin:8px 0}
 .mk-lb{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.mk-lb small{display:block;font-size:.76rem}
 .mk-rec{list-style:none;margin:10px 0 0;padding:0;font-size:.8rem;color:var(--muted)}
+
+/* phones: the big banner scrolls away and a slim bar (logo, week, settings) slides in at the top */
+.mast-mini{display:none}
+@media (max-width:759px){
+  .mast{position:relative!important}
+  .mast-mini{display:flex;position:fixed;top:0;left:0;right:0;z-index:55;align-items:center;gap:10px;
+    padding:calc(6px + env(safe-area-inset-top,0px)) 14px 6px;background:rgba(5,12,30,.94);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.12);
+    box-shadow:0 6px 18px rgba(0,0,0,.35);transform:translateY(-110%);transition:transform .22s ease;pointer-events:none}
+  .mast-mini.on{transform:none;pointer-events:auto}
+  .mm-brand{display:flex;align-items:center;gap:8px;background:none;border:0;color:#fff;padding:0;margin-right:auto;font:inherit;cursor:pointer;min-height:44px}
+  .mm-brand img{width:30px;height:30px;border-radius:8px}
+  .mm-brand b{font:900 1.15rem/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;font-style:italic}
+  .mast-mini .wk{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.22)!important}
+  .mast-mini .bell{width:44px;height:44px}
+}
+@media (max-width:759px) and (prefers-reduced-motion:reduce){.mast-mini{transition:none}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1391,6 +1408,11 @@ select option{background:#0B1730;color:#EAF0F8}
   <div class="mast-yards" aria-hidden="true"><i class="t" style="left:14%">10</i><i class="b" style="left:14%">10</i><i class="t" style="left:23%">20</i><i class="b" style="left:23%">20</i><i class="t" style="left:32%">30</i><i class="b" style="left:32%">30</i><i class="t" style="left:41%">40</i><i class="b" style="left:41%">40</i><i class="t" style="left:50%">50</i><i class="b" style="left:50%">50</i><i class="t" style="left:59%">40</i><i class="b" style="left:59%">40</i><i class="t" style="left:68%">30</i><i class="b" style="left:68%">30</i><i class="t" style="left:77%">20</i><i class="b" style="left:77%">20</i><i class="t" style="left:86%">10</i><i class="b" style="left:86%">10</i></div>
   <div class="mast-tick" id="mast-tick" aria-label="Top player stat lines"></div>
 </header>
+<div class="mast-mini" id="mastMini" aria-hidden="true">
+  <button class="mm-brand" type="button" data-act="toTop" aria-label="Back to top" tabindex="-1"><img src="logo.png" alt=""><b>Varsity</b></button>
+  <div class="wk mm-wk"><span class="live"></span><span id="wk2"></span></div>
+  <button class="bell mm-gear" id="gear2" type="button" aria-label="Settings" aria-haspopup="menu" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</div>
 <main class="wrap">
   <div id="banner" class="banner"></div>
   <div id="main"></div>
@@ -1417,6 +1439,7 @@ select option{background:#0B1730;color:#EAF0F8}
 </div>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>/* backup source for the login library, for networks that block jsDelivr */window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\/script>')</script>
 <script src="logos.js"></script>
 <script src="games.js" onerror="void 0"></script>
 <script>
@@ -1456,7 +1479,7 @@ const POSITIONS=['QB','RB','WR','TE','DEF','K'];
 const POS_ALL=[['QB','Quarterback'],['RB','Running back'],['FB','Fullback'],['WR','Wide receiver'],['TE','Tight end'],['OL','Offensive line'],
   ['DL','Defensive line'],['LB','Linebacker'],['CB','Cornerback'],['S','Safety'],['K','Kicker'],['P','Punter'],['LS','Long snapper'],['ATH','Athlete']];
 const POS_MAP={QB:'QB',RB:'RB',FB:'RB',WR:'WR',TE:'TE',DL:'DEF',LB:'DEF',CB:'DEF',S:'DEF',K:'K',P:'K',ATH:'WR'};
-const posOptions=sel=>POS_ALL.map(([k,n])=>`<option value="${k}" ${k===sel?'selected':''}>${n} (${k})</option>`).join('');
+const posOptions=sel=>(sel?'':'<option value="" selected disabled>Choose your position</option>')+POS_ALL.map(([k,n])=>`<option value="${k}" ${k===sel?'selected':''}>${n} (${k})</option>`).join('');
 
 const blank=()=>Object.fromEntries(KEYS.map(k=>[k,0]));
 const S0=o=>Object.assign(blank(),o||{});
@@ -1544,6 +1567,9 @@ function memDb(){
 
 
 /* ---------- Supabase: accounts and the shared database ---------- */
+/* the real site needs the server: when the login library cannot load, the app says so instead of starting a
+   local-only profile that never saves (the single-file previews set this to false and run in demo mode) */
+const NEEDS_SERVER=true;
 const SB_URL='https://urdkamhsdjhzhrjwzyoq.supabase.co',SB_KEY='sb_publishable_Kwc2VdtM1AbcKB7xgsOhlw_KOw02EOb';
 const SITE_URL=location.origin+location.pathname;
 let SB=null;
@@ -1612,7 +1638,7 @@ function authHTML(){
     <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button>'}<button class="link" data-au="browse">Keep browsing</button></div>
   </div>`;
 }
-function openAuth(){const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
+function openAuth(){if(!SB){say('Can’t connect to Varsity. Check your connection and try again.');return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
 document.addEventListener('click',e=>{
   const b=e.target.closest&&e.target.closest('[data-au]');if(!b)return;e.preventDefault();
   const v=b.dataset.au;
@@ -1675,7 +1701,7 @@ function nameHTML(){
       <details ${sch?'open':''}><summary>I play high school football: add my school and position</summary>
         <div class="nm-play">
           <label class="fld"><span>School</span><select id="nm-school"><option value="">Pick your school</option>${SD_SCHOOLS.map(x=>`<option ${x===sch?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
-          <label class="fld"><span>Position</span><select id="nm-pos">${posOptions(pr.posLabel||pos||'RB')}</select></label>
+          <label class="fld"><span>Position</span><select id="nm-pos">${posOptions(pr.posLabel||pos||'')}</select></label>
         </div></details>
       ${NM.err?`<p class="au-err" role="alert">${esc(NM.err)}</p>`:''}
       <div class="btns"><button class="btn" type="submit" ${NM.busy?'disabled':''}>${NM.busy?'One moment…':myProfile()?'Save':'Let’s play'}</button><button class="btn ghost" type="button" data-nm="close">${myProfile()?'Close':'Not now'}</button></div>
@@ -1688,6 +1714,7 @@ document.addEventListener('submit',async e=>{
   if(e.target.id!=='nm-form')return;e.preventDefault();e.stopImmediatePropagation();
   const name=$('#nm-name').value.trim(),school=$('#nm-school').value,pos=$('#nm-pos').value;
   if(name.length<2){NM.err='Type at least 2 letters.';openName();return}
+  if(school&&!pos){NM.err='Pick your position.';openName();$('#nm-name').value=name;$('#nm-school').value=school;return}
   NM.busy=true;NM.err='';openName();$('#nm-name').value=name;
   try{
     if(!ME.uid){NM.busy=false;openAuth();return}
@@ -1710,7 +1737,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v186 · Nov 5';
+const APP_BUILD='v187 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2038,6 +2065,7 @@ function myRanks(me){
 let tt;
 function say(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>{t.hidden=true},3200)}
 async function act(fn,ok){
+  if(ME.mode==='offline'){say('Can’t connect to Varsity, so nothing can be saved right now. Check your connection and try again.');return false}
   if(ME.mode==='readonly'){say('You have view-only access. Ask the owner for contributor access.');return false}
   try{await fn();if(ok)say(ok);return true}
   catch(e){say(e&&e.code==='invalid_argument'?'You do not have permission to do that.':'That did not save. Try again.');return false}
@@ -2066,8 +2094,8 @@ const OPP=(()=>{
   const avg=tg?tp/tg:21;
   Object.values(teams).forEach(x=>{x.pf=x.g?x.pf/x.g:avg;x.pa=x.g?x.pa/x.g:avg});
   GAMES.games.filter(g=>g.hs==null&&g.d>=today).sort((a,b)=>a.d<b.d?-1:1).forEach(g=>{
-    if(!next[g.h])next[g.h]={opp:g.a,date:fmtDate(g.d),home:true};
-    if(!next[g.a])next[g.a]={opp:g.h,date:fmtDate(g.d),home:false};
+    if(!next[g.h])next[g.h]={opp:g.a,date:fmtDate(g.d),home:true,w:g.w};
+    if(!next[g.a])next[g.a]={opp:g.h,date:fmtDate(g.d),home:false,w:g.w};
   });
   /* a team with no game left this season is out: no projection */
   if(Object.keys(next).length)Object.keys(teams).forEach(n=>{if(!next[n])next[n]=null});   /* only once upcoming games are listed */
@@ -2080,7 +2108,7 @@ function oppInfo(school){
   if(!OPP||!OPP.next)return null;
   const n=OPP.next[school];if(n===undefined)return null;if(!n)return {bye:true};
   const d=(OPP.teams||{})[n.opp]||null;
-  return {opp:n.opp,date:n.date,home:n.home,def:d};
+  return {opp:n.opp,date:n.date,home:n.home,w:n.w,def:d};
 }
 function proj(p){
   const k=nextWeek()+'|'+UI.scope;if(_pjK!==k){_pj={};_pjK=k}
@@ -2395,6 +2423,13 @@ function recordCard(results){
   const n=results.length,w=results.filter(x=>x==='won').length,l=results.filter(x=>x==='lost').length,dec=w+l,pct=dec?Math.round(w/dec*100):null,open=results.filter(x=>x==='open').length;
   return `<section class="card bt-rec"><div class="bt-rc"><b>${n}</b><small>${n===1?'game':'games'} predicted</small></div><div class="bt-rc"><b>${w}-${l}</b><small>${dec?'right-wrong':'no results yet'}</small></div><div class="bt-rc"><b>${pct===null?'-':pct+'%'}</b><small>correct${open?`, ${open} still open`:''}</small></div></section>`;
 }
+/* only the next week of games is drawn at first (a basketball season is ~1,400 games, far too many for a phone),
+   and Show more adds the following week each time */
+function pkWeeksHTML(list,card,nextW){
+  const ws=wkOrder(list),shown=UI.bf.w?ws:ws.slice(0,UI.pkWeeks||1),rest=ws.slice(shown.length).reduce((t,w)=>t+list.filter(g=>g.w===w).length,0);
+  return shown.map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')
+    +(rest?`<button class="btn ghost bt-more pk-more" data-act="pkMoreW">Show more games (${rest} left)</button>`:'');
+}
 function picksHTML(){
   const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10);
   const open=gs.filter(g=>!gDone(g)),nextW=open.length?Math.min(...open.map(g=>g.w)):null;
@@ -2436,7 +2471,7 @@ function picksHTML(){
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||5)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Hit the button to save your picks.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>${staged.length===1?'Lock in pick':'Lock in all '+staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
-  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+myCard+bfBar()+allBar+(list.length?wkOrder(list).map(w=>{const L=list.filter(g=>g.w===w);return `<div class="qh"><h3>Week ${w} pick ’em</h3><span class="muted">${L.length} games${w===nextW?', odds set by Varsity':''}</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join(''):`<p class="empty">${UI.bf.dv||UI.bf.w||UI.bf.sc?'No games match those filters. Try clearing them.':'No upcoming games to pick yet. New matchups show up here as they are set.'}</p>`)+histCard;
+  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+myCard+bfBar()+allBar+(list.length?pkWeeksHTML(list,card,nextW):`<p class="empty">${UI.bf.dv||UI.bf.w||UI.bf.sc?'No games match those filters. Try clearing them.':'No upcoming games to pick yet. New matchups show up here as they are set.'}</p>`)+histCard;
 }
 /* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
 function anticipated(){
@@ -2589,7 +2624,7 @@ function viewSim(){
   const myBest=my.best?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best team</small><b>${f1(my.best)}</b></div><div><small>Teams built</small><b>${my.runs||1}</b></div></div>`:'';
   const rows=Object.keys(S.picks).map(u=>({u,b:+((S.picks[u]||{}).sim||{}).best||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
   const board=mgBoard('Best simulated teams',rows);
-  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 17 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 4 DL, 3 LB and 4 DB on defense. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for offense and ${SIM_RESPINS} for defense to swap any player for a new one. Aim for the highest total.</p>${myBest}<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div></section>${board}`;
+  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 17 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 4 DL, 3 LB and 4 DB on defense. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for offense and ${SIM_RESPINS} for defense to swap any player for a new one. Aim for the highest total.</p>${myBest}${SIM_SLOTS.every(sl=>simPool(sl,new Set()).length)?'<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div>':'<p class="hint sim-wait">Build your team opens once players have at least 2 games of stats.</p>'}</section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
   const tab=UI.simTab==='def'?'def':'off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
@@ -2752,7 +2787,7 @@ function propsHTML(){
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span>${b?`<button class="btn sm ghost" data-act="ppDrop" data-id="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under.</p>';
     return `<article class="gm bt-g pp"><div class="gm-h"><span>${esc(fmtDate(x.game.d))} · vs ${esc(x.opp)}</span>${x.game.dv?`<span class="gm-k p">${esc(x.game.dv)}</span>`:''}</div>
-      <div class="pp-who">${slogo(x.school,30)}<div><b>${esc(x.name)}</b><small class="muted">${esc(x.school)} · ${esc(x.pos)}</small></div></div>
+      <button class="pp-who" type="button" data-act="player" data-id="${esc(x.k)}" aria-label="${esc(x.name)}, open player profile">${slogo(x.school,30)}<div><b>${esc(x.name)}</b><small class="muted">${esc(x.school)} · ${esc(x.pos)}</small></div><span class="pp-go" aria-hidden="true">›</span></button>
       <div class="pp-m">${esc(M.l)}</div>
       <div class="bt-row">${btn('o','Over',x.over)}${btn('u','Under',x.under)}</div>
       <div class="pp-stat muted">Avg <b>${fmtN(x.mean)}</b> · last 3 <b>${fmtN(x.rc)}</b> · over ${fmtN(x.line)} in <b>${x.hits}</b> of ${x.n} games</div>${foot}</article>`};
@@ -3313,7 +3348,7 @@ function viewGroups(){
   const gs=myGroups(),g=curGroup();
   const newForm=`<form class="card lg-form" id="create-form"><h3>Start a league</h3><p class="muted">Pick a format, name it, then send the invite code to your friends.</p>
       <div class="lg-modes" role="radiogroup" aria-label="League format">
-        <label class="lg-mode"><input type="radio" name="lg-mode" value="draft" checked><span><b>Snake draft</b><small>Classic fantasy football. Take turns picking players for each spot, and every player is on only one team. Default roster: one each of QB, RB, TE, DL, LB, DB and K, plus 2 WR. You can change it below.</small></span></label>
+        <label class="lg-mode"><input type="radio" name="lg-mode" value="draft" checked><span><b>Snake draft</b><small>Classic fantasy football. Take turns picking players for each spot, and every player is on only one team. Default roster: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots. You can change it below.</small></span></label>
         <label class="lg-mode"><input type="radio" name="lg-mode" value="budget"><span><b>Budget</b><small>Like Premier League fantasy. Build the best team for ${money(CAP_FULL)}, and friends can pick the same players. Uses the same roster spots as a snake draft.</small></span></label>
       </div>
       <div class="ro-wrap card-sub"><b>Roster spots</b><small class="muted">How many of each position every team gets, in snake draft and budget leagues. Default: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots. Bench players do not score; swap them into a starting spot any time after the draft.</small>${rosterPickerHTML('ro-new',ROSTER_DEFAULT)}</div>
@@ -3683,16 +3718,18 @@ function lineupAction(p){
 }
 function projCard(p){
   const j=proj(p);if(!j.n)return '';
-  const wk=nextWeek(),info=j.info;
+  const info=j.info,wk=(info&&info.w)||nextWeek();
   const opp=info&&info.bye?'No game scheduled this week':info&&info.opp?`vs ${esc(info.opp)}${info.date?' · '+esc(info.date):''}`:'Opponent not loaded yet';
   const adj=info&&info.def&&!info.bye?(j.f>=1.05?`Good matchup: ${esc(info.opp)} has given up more than most teams.`:j.f<=.95?`Tough matchup: ${esc(info.opp)} has been hard to score on.`:`Average matchup.`):'Based on recent games, recent weeks count more.';
   return `<section class="pj-card"><div><span class="lbl">Projected week ${wk}</span><b>${f1(j.pts)}</b><small>${opp}</small></div><p>${esc(projLine(p))}</p><p class="muted">${adj}</p></section>`;
 }
+/* true when that week's schedule is listed and the school is not in it */
+const noGameWk=(school,w)=>{const gs=(GAMES&&GAMES.games)||[];return gs.some(g=>g.w===w)&&!gs.some(g=>g.w===w&&(g.h===school||g.a===school))};
 function drawerHTML(p){
   const gs=p.games.filter(Boolean),total=gs.reduce((a,x)=>a+pts(x.stat),0),avg=gs.length?total/gs.length:0,best=gs.length?Math.max(...gs.map(x=>pts(x.stat))):0,cw=CURW();
   const log=p.games.map((g,i)=>({w:i+1,g})).reverse().map(({w,g})=>g
     ?`<tr><td>Wk ${w}</td><td>${line(p.pos,g.stat)}</td><td class="n">${f1(pts(g.stat))}</td></tr>`
-    :`<tr class="dim"><td>Wk ${w}</td><td>${w>=cw?'Not reported yet':'No game'}</td><td class="n">—</td></tr>`).join('');
+    :`<tr class="dim"><td>Wk ${w}</td><td>${w>=cw&&!noGameWk(p.school,w)?'Not reported yet':'No game'}</td><td class="n">—</td></tr>`).join('');
   return `<aside class="dp" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
     <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${gs.length} games</span></div></div></div><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div>
     <div class="big"><div><span class="lbl">Season pts</span><b>${f1(total)}</b></div><div><span class="lbl">Per game</span><b>${f1(avg)}</b></div><div><span class="lbl">Best week</span><b>${f1(best)}</b></div></div>
@@ -3706,7 +3743,14 @@ function openPlayer(key){
   const p=pByKey(key);if(!p)return;
   const d=$('#drawer');d.dataset.id=key;d.innerHTML=drawerHTML(p);d.hidden=false;
   const c=$('#dclose');if(c)c.focus();
+  sheetPush();
 }
+/* the phone's Back button closes an open sheet (player card, notifications) instead of leaving the app:
+   opening a sheet adds a history entry, Back removes it, and a popstate closes the sheet */
+let SHEET=false;
+function sheetPush(){if(SHEET)return;try{history.pushState({sheet:1},'',location.href);SHEET=true}catch(_){}}
+function sheetClose(){if(SHEET){try{history.back();return}catch(_){SHEET=false}}closePlayer();closeNotes()}
+window.addEventListener('popstate',()=>{if(SHEET){SHEET=false;closePlayer();closeNotes()}});
 function closePlayer(){const d=$('#drawer');d.hidden=true;d.innerHTML='';delete d.dataset.id}
 function refreshDrawer(){const d=$('#drawer');if(!d.hidden&&d.dataset.id){const p=pByKey(d.dataset.id);if(p){d.innerHTML=drawerHTML(p);const c=$('#dclose');if(c)c.focus()}else closePlayer()}}
 
@@ -3729,7 +3773,7 @@ function ntSettingsHTML(){const p=ntPrefs();
     <p class="muted nt-foot">Changes apply to this device only.</p>`}
 function openNotes(){
   const d=$('#notif');
-  if(UI.notifView==='settings'){d.innerHTML=`<aside class="dp narrow" role="dialog" aria-modal="true" aria-label="Notification settings">${ntSettingsHTML()}</aside>`;d.hidden=false;const b=d.querySelector('[data-act="ntBack"]');if(b)b.focus();return}
+  if(UI.notifView==='settings'){d.innerHTML=`<aside class="dp narrow" role="dialog" aria-modal="true" aria-label="Notification settings">${ntSettingsHTML()}</aside>`;d.hidden=false;const b=d.querySelector('[data-act="ntBack"]');if(b)b.focus();sheetPush();return}
   const p=ntPrefs(),n=computeNotes().filter(x=>!x.c||p[x.c]!==false);
   d.innerHTML=`<aside class="dp narrow" role="dialog" aria-modal="true" aria-label="Notifications">
     <div class="dh"><h2>Notifications</h2><div class="btns" style="margin:0"><button class="btn ghost sm" data-act="ntSettings">Settings</button><button class="btn ghost sm" data-act="closeNotes" id="nclose">Close</button></div></div>
@@ -3737,6 +3781,7 @@ function openNotes(){
     <p class="muted">These show when you open the app. The app cannot send alerts to your phone.</p>
   </aside>`;
   d.hidden=false;const c=$('#nclose');if(c)c.focus();
+  sheetPush();
 }
 function closeNotes(){UI.notifView=null;const d=$('#notif');d.hidden=true;d.innerHTML=''}
 function writeSeen(){
@@ -3783,13 +3828,13 @@ const ROLES={
   fan:{t:'A fan joining to compete with friends',s:'I only want to build lineups.',c:'I understand that players appear here only with their own or a parent’s or guardian’s agreement, and I will use their names and stats only inside this app.'}
 };
 const OTHER='__other';
-const G={role:'',name:'',school:'',other:'',pos:'RB',agree:false,withdrawn:false};
+const G={role:'',name:'',school:'',other:'',pos:'',agree:false,withdrawn:false};
 const shareHTML=`<div class="gshare"><div><b>Shown to everyone in the app</b>Name, school, position, game stats and fantasy points.</div><div><b>Never shown</b>Photo, birthday, phone number, email or home address.</div></div>`;
 function gateHTML(){
   return `<div class="gcard" role="dialog" aria-modal="true" aria-labelledby="g-t">
     <div><h2 id="g-t">Before you join</h2></div>
     ${G.withdrawn?'<p class="note">Consent withdrawn. Your stats were removed from the rankings.</p>':''}
-    <p>Varsity ranks San Diego high school players by fantasy points from their game stats. Player stats come from box scores for every San Diego Section team. Players can also join to add their own games.</p>
+    <p>Varsity ranks San Diego high school players by fantasy points from their game stats. Player stats come from box scores posted for San Diego Section teams, so a few schools have none yet. Players can also join to add their own games.</p>
     <fieldset class="gopts"><legend class="lbl">I am</legend>
       ${Object.entries(ROLES).map(([k,r])=>`<label class="gopt"><input type="radio" name="g-role" value="${k}"><span><b>${r.t}</b><small>${r.s}</small></span></label>`).join('')}
     </fieldset>
@@ -3821,14 +3866,14 @@ function updateGate(){
   const r=ROLES[G.role];
   $('#g-form').hidden=!r;
   if(r){$('#g-text').textContent=r.c;$('#g-owrap').hidden=G.school!==OTHER;$('#g-pwrap').hidden=G.role!=='player'}
-  $('#g-go').disabled=!(r&&G.name.trim().length>1&&gateSchool().length>1&&G.agree);
+  $('#g-go').disabled=!(r&&G.name.trim().length>1&&gateSchool().length>1&&G.agree&&(G.role!=='player'||!!G.pos));
 }
 function openGate(){
   if(ME.mode==='guest'){openAuth();return}
   if(ME.mode!=='demo'){openName();return}
   const g=$('#gate');
   if(myProfile())g.innerHTML=manageHTML();
-  else{Object.assign(G,{role:'',name:'',school:'',other:'',pos:'RB',agree:false});g.innerHTML=gateHTML();updateGate()}
+  else{Object.assign(G,{role:'',name:'',school:'',other:'',pos:'',agree:false});g.innerHTML=gateHTML();updateGate()}
   g.hidden=false;document.body.style.overflow='hidden';
   const f=g.querySelector('input,button');if(f)f.focus();
 }
@@ -3941,6 +3986,7 @@ const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.adm
 function bannerHTML(){
   const b=[];
   /* no sign-up banners */
+  if(ME.mode==='offline')b.push(`<p class="note"><span class="pill pending">Offline</span><span>Can’t connect to Varsity, so you can look around but not join, sign in or save anything. Some school and work Wi-Fi networks block it; try mobile data. <button class="btn sm ghost" data-act="reload">Try again</button></span></p>`);
   if(ME.mode==='readonly'&&!VA)b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
   if(S.timeout&&!S.loaded.profiles)b.push(`<p class="note"><span class="pill pending">Slow</span><span>The league data is taking a while to load. What you see may be out of date.</span></p>`);
   const sample=!MP&&!S.settings.hideSample;
@@ -3978,6 +4024,7 @@ function chrome(v){
   
   const n=computeNotes().length,bc=$('#bcount');if(bc){bc.textContent=n;bc.hidden=!n}
   const wk=$('#wk');if(wk)wk.textContent='Week '+CURW();
+  const wk2=$('#wk2');if(wk2)wk2.textContent='Week '+CURW();
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
   if(v!=='scoring'){const hp=document.querySelector('#main .head:not(.sub) p');if(hp)hp.insertAdjacentHTML('beforeend',' <a class="btn sm ghost sr-link" href="#scoring">Scoring rules</a>')}
 }
@@ -4014,16 +4061,22 @@ function route(){
   let v=location.hash.slice(1);if(v==='hub')v='me';
   if(v.startsWith('team/')){try{UI.team=decodeURIComponent(v.slice(5))}catch(_){UI.team=''}v='team'}
   UI.view=viewOK(v)?v:'league';
-  closePlayer();closeNotes();render();window.scrollTo(0,0);
+  SHEET=false;closePlayer();closeNotes();render();window.scrollTo(0,0);
 }
 window.addEventListener('hashchange',route);
+/* slim bar on phones: shown once the big banner has scrolled out of view */
+(()=>{const mm=document.getElementById('mastMini'),mast=document.querySelector('.mast');if(!mm||!mast)return;let on=false,q=false;
+  const upd=()=>{q=false;const v=scrollY>mast.offsetHeight-10;if(v!==on){on=v;mm.classList.toggle('on',v);mm.setAttribute('aria-hidden',v?'false':'true');mm.querySelectorAll('button').forEach(b=>b.tabIndex=v?0:-1)}};
+  addEventListener('scroll',()=>{if(!q){q=true;requestAnimationFrame(upd)}},{passive:true});addEventListener('resize',upd);})();
 /* tab navigation handled in script so it works even where hash links are blocked */
 document.addEventListener('click',e=>{
   const a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
   const v=a.getAttribute('href').slice(1);if(!viewOK(v))return;
   e.preventDefault();
-  try{history.replaceState(null,'','#'+v)}catch(_){}
-  UI.view=v;closePlayer();closeNotes();render();window.scrollTo(0,0);
+  /* each tab is its own history entry, so the phone's Back button goes to the previous tab.
+     From an open sheet, the new tab takes the sheet's entry, so Back still lands on the tab before. */
+  try{if(SHEET||location.hash==='#'+v)history.replaceState(null,'','#'+v);else history.pushState(null,'','#'+v)}catch(_){}
+  SHEET=false;UI.view=v;closePlayer();closeNotes();render();window.scrollTo(0,0);
 });
 
 
@@ -4034,18 +4087,20 @@ async function copyText(text,okMsg,sel){
 }
 let DL=null;
 document.addEventListener('click',async e=>{
-  if(e.target.id==='drawer'){closePlayer();return}
-  if(e.target.id==='notif'){closeNotes();return}
+  if(e.target.id==='drawer'){sheetClose();return}
+  if(e.target.id==='notif'){sheetClose();return}
   const t=e.target.closest('[data-act]');if(!t)return;
   const a=t.dataset.act,id=t.dataset.id;
   if(a==='player')openPlayer(id);
-  else if(a==='close')closePlayer();
-  else if(a==='closeNotes')closeNotes();
+  else if(a==='close')sheetClose();
+  else if(a==='reload')location.reload();
+  else if(a==='toTop')window.scrollTo({top:0,behavior:'smooth'});
+  else if(a==='closeNotes')sheetClose();
   else if(a==='bell'){UI.notifView=null;openNotes()}
   else if(a==='ntSettings'){UI.notifView='settings';openNotes()}
   else if(a==='ntBack'){UI.notifView=null;openNotes()}
   else if(a==='ntToggle'){const k=t.dataset.v,p=ntPrefs();p[k]=!p[k];ntSave(p);openNotes()}
-  else if(a==='markRead'){await act(writeSeen);closeNotes()}
+  else if(a==='markRead'){await act(writeSeen);sheetClose()}
   else if(a==='consent')openGate();
   else if(a==='adWatch')adPlay();
   else if(a==='ftoggle'){UI.fOpen=!UI.fOpen;const fp=document.querySelector('.fpanel');if(fp)fp.hidden=!UI.fOpen;t.setAttribute('aria-expanded',String(!!UI.fOpen))}
@@ -4078,6 +4133,7 @@ document.addEventListener('click',async e=>{
   else if(a==='gsec'){UI.gsec=t.dataset.v;render()}
   else if(a==='mgRes'){UI.mgRes=!UI.mgRes;render()}
   else if(a==='mgMore'){UI.mgMore=!UI.mgMore;render()}
+  else if(a==='pkMoreW'){UI.pkWeeks=(UI.pkWeeks||1)+1;render()}
   else if(a==='atClear'){UI.at={};render()}
   else if(a==='bfClear'){UI.bf={dv:'',w:'',sc:''};UI.ppN=24;render()}
   else if(a==='ppM'){UI.pm=t.dataset.v;UI.ppN=24;render()}
@@ -4311,7 +4367,7 @@ $('#gate').addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
-  if(!$('#notif').hidden)closeNotes();else if(!$('#drawer').hidden)closePlayer();
+  if(!$('#notif').hidden||!$('#drawer').hidden)sheetClose();
 });
 
 
@@ -4390,6 +4446,9 @@ async function boot(){
     else{ME.uid=null;ME.mode='guest';ME.admin=false}
     try{const v=JSON.parse(sessionStorage.getItem('varsity-viewas')||'null');if(v&&v.uid&&ME.admin&&ME.mode==='live'&&v.uid!==ME.uid){VA={uid:v.uid,name:v.name||'this member',real:ME.uid};ME.uid=v.uid;ME.mode='readonly'}else sessionStorage.removeItem('varsity-viewas')}catch(_){}
     SB.auth.onAuthStateChange((ev,s)=>{if((ev==='SIGNED_IN'&&s&&s.user.id!==(VA?VA.real:ME.uid))||(ev==='SIGNED_OUT'&&ME.uid))location.reload();if(ev==='PASSWORD_RECOVERY')setTimeout(newPassword,300)});
+  }else if(NEEDS_SERVER){
+    DB=memDb();ME.uid=null;ME.mode='offline';ME.admin=false;
+    setTimeout(()=>say('Can’t connect to Varsity. Check your connection and try again.'),600);
   }else{
     DB=memDb();ME.uid='me';ME.admin=true;ME.mode='demo';
     try{const p=JSON.parse(localStorage.getItem('gsd-demo-profile')||'null');if(p)await DB.doc('profiles/me').set(p)}catch(_){}
@@ -4607,9 +4666,11 @@ boot();
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.sport-opt');if(!a||a.classList.contains('on'))return;e.preventDefault();sportCut(a.getAttribute('href'),(a.getAttribute('title')||'').toUpperCase())});
 /* gear button: a small settings menu that reuses the app's own actions */
 (()=>{
-  const g=document.getElementById('gear');let m=null;
+  const g0=document.getElementById('gear'),g2=document.getElementById('gear2');let m=null,g=g0;
   const close=()=>{if(m){m.remove();m=null;g.setAttribute('aria-expanded','false')}};
-  g.addEventListener('click',e=>{e.stopPropagation();if(m){close();return}
+  if(g2)g2.addEventListener('click',e=>{e.stopPropagation();if(m){close();return}g=g2;openMenu()});
+  g0.addEventListener('click',e=>{e.stopPropagation();if(m){close();return}g=g0;openMenu()});
+  function openMenu(){
     const joined=typeof myProfile==='function'&&!!myProfile();
     m=document.createElement('div');m.className='setm';m.setAttribute('role','menu');
     m.innerHTML='<h4>Settings</h4>'+
@@ -4624,7 +4685,7 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     document.body.appendChild(m);g.setAttribute('aria-expanded','true');
     const r=g.getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,innerWidth-r.right)+'px';
     m.addEventListener('click',e=>{if(e.target.closest('#sm-out'))signOut();if(e.target.closest('#sm-admin')){AUTH.mode='admin';AUTH.step=1;AUTH.pin='';AUTH.err='';AUTH.msg='';openAuth()}setTimeout(close,0)});
-    const f=m.querySelector('a,button');if(f)f.focus();});
+    const f=m.querySelector('a,button');if(f)f.focus();}
   document.addEventListener('click',e=>{if(m&&!m.contains(e.target)&&e.target!==g)close()});
   document.addEventListener('keydown',e=>{if(m&&e.key==='Escape'){close();g.focus()}});
   addEventListener('resize',close);addEventListener('hashchange',close);
