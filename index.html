@@ -3621,7 +3621,7 @@ function bannerHTML(){
   if(ME.mode==='readonly'&&!VA)b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
   if(S.timeout&&!S.loaded.profiles)b.push(`<p class="note"><span class="pill pending">Slow</span><span>The league data is taking a while to load. What you see may be out of date.</span></p>`);
   const sample=!MP&&!S.settings.hideSample;
-  b.push(`<p class="note">${sample?'<span class="pill pending">Sample</span><span>Sample players are made-up placeholders so the boards are never empty. Real players appear as they join.</span>':''}<a class="btn sm ghost" href="#scoring">Scoring rules</a>${ME.mode==='readonly'?'':'<button class="btn sm ghost" data-act="consent">Consent settings</button>'}</p>`);
+  b.push(`<p class="note">${sample?'<span class="pill pending">Sample</span><span>Sample players are made-up placeholders so the boards are never empty. Real players appear as they join.</span>':''}<a class="btn sm ghost" href="#scoring">Scoring rules</a></p>`);
   return b.join('');
 }
 /* header ticker: the season's top stat lines, scrolling through the middle of the field */
