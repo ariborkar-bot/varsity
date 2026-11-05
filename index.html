@@ -1668,7 +1668,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v156 · Nov 4';
+const APP_BUILD='v157 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4802,43 +4802,54 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     const fl2=mk('in-fline cool');fl2.style.top=floor2+'px';
     fl2.animate([{opacity:0},{opacity:1,offset:.1},{opacity:1,offset:.9},{opacity:0}],{delay:1500,duration:2000,fill:'forwards'});
     const rc=sprite(S2,fig2(RECV)),df=sprite(S2,fig2(CHASER));
-    const rb=rc.querySelector('.bl');if(rb){rb.style.visibility='hidden';rb.animate([{visibility:'visible'},{visibility:'visible'}],{delay:2660,duration:10,fill:'forwards'})}
+    const rb=rc.querySelector('.bl');if(rb){rb.style.visibility='hidden';rb.animate([{visibility:'visible'},{visibility:'visible'}],{delay:2700,duration:10,fill:'forwards'})}
     cycle(rc,0);cycle(df,0);
-    const xT=SW*.47,xC=SW*.6,tC=2660;
-    const rcP=[[1650,-.7*S2,floor2,0,'cubic-bezier(.25,.1,.5,1)'],[2400,xT,floor2,0,'cubic-bezier(.2,.7,.4,1)'],[2520,xT+.5*(xC-xT),floor2-.5*S2,-4,'cubic-bezier(.3,.6,.5,1)'],[tC,xC,floor2-.62*S2,-7,'cubic-bezier(.5,0,.8,.5)'],
-      [2800,xC+SW*.07,floor2-.36*S2,0,'cubic-bezier(.5,0,.9,.6)'],[2960,xC+SW*.14,floor2,0,'linear'],[3550,SW+S2,floor2,0]];
+    /* the play: he sprints in, leaps, the pass taps off his helmet, he flips and snags it one-handed, and the chaser lays him out on the spot */
+    const xT=SW*.47,xC=SW*.6,tTap=2540,tC=2700,tH=2745;
+    const xTap=xT+.4*(xC-xT),xMid=xT+.72*(xC-xT),yC=floor2-.4*S2,xH=xC+.03*SW,yH=floor2-.36*S2;
+    const rcP=[[1650,-.7*S2,floor2,0,'cubic-bezier(.25,.1,.5,1)'],[2420,xT,floor2,0,'cubic-bezier(.2,.7,.4,1)'],[tTap,xTap,floor2-.5*S2,8,'ease-out'],[2615,xMid,floor2-.58*S2,185,'ease-in'],
+      [tC,xC,yC,353,'linear'],[tH,xH,yH,360,'cubic-bezier(.5,0,.9,.6)'],[2860,xH+.09*SW,floor2-.1*S2,402,'ease-out'],[2960,xH+.15*SW,floor2+.1*S2,443,'linear'],[3550,xH+.23*SW,floor2+.1*S2,443]];
     track(rc,rcP,spT(S2));vis(rc,1650,3550,150,120);
-    L(rc,'.aN',[[2380,-58],[2540,-150],[tC,-160],[2760,-132],[2900,-75],[2960,-24]]);L(rc,'.fN',[[2380,-105],[2540,-20],[tC,-5],[2760,-95],[2900,-112],[2960,-112]]);
-    L(rc,'.aB',[[2380,58],[2540,50],[tC,70],[2900,-30],[2960,-58]]);L(rc,'.fB',[[2380,-70],[tC,-95],[2960,-70]]);
-    L(rc,'.tN',[[2380,-52],[2500,-95],[tC,-80],[2820,-30],[2960,-14]]);L(rc,'.sN',[[2380,16],[2500,75],[tC,65],[2820,20],[2960,16]]);
-    L(rc,'.tB',[[2380,36],[2500,30],[tC,25],[2820,-40],[2960,-52]]);L(rc,'.sB',[[2380,108],[2500,96],[tC,80],[2820,30],[2960,16]]);
-    L(rc,'.tr',[[2380,0],[2540,-10],[tC,-6],[2820,4],[2960,0]]);L(rc,'.pl',[[2380,9],[2540,-4],[tC,-8],[2820,4],[2960,9]]);
-    at(2955,()=>{cycle(rc,1)});
+    L(rc,'.aN',[[2420,-58],[tTap,-150],[tC,-160],[tH,-150],[2900,-110],[3000,-70]]);L(rc,'.fN',[[2420,-105],[tTap,-20],[tC,-5],[tH,-5],[3000,-60]]);
+    L(rc,'.aB',[[2420,58],[tTap,-100],[2620,-160],[tC,40],[tH,-40],[3000,30]]);L(rc,'.fB',[[2420,-70],[tC,-95],[3000,-40]]);
+    L(rc,'.tN',[[2420,-52],[2500,-120],[2620,-130],[tC,-60],[tH,-30],[3000,-10]]);L(rc,'.sN',[[2420,16],[2500,110],[2620,120],[tC,60],[tH,30],[3000,15]]);
+    L(rc,'.tB',[[2420,36],[2500,50],[2620,80],[tC,25],[tH,-20],[3000,-40]]);L(rc,'.sB',[[2420,108],[2500,120],[2620,130],[tC,80],[tH,30],[3000,16]]);
+    L(rc,'.tr',[[2420,0],[tTap,-10],[tC,-6],[tH,6],[3000,10]]);L(rc,'.pl',[[2420,9],[tTap,-4],[tC,-8],[tH,4],[3000,9]]);
     shadow(S2,rcP.map(p=>[p[0],p[1],p[2]]),floor2).animate([{opacity:0},{opacity:.7,offset:.1},{opacity:.7,offset:.9},{opacity:0}],{delay:1650,duration:1900,fill:'forwards'});
-    /* the defender, a step behind, dives and misses */
-    const rx=t=>pathAt(rcP,t)[1];
-    const dfP=[[1560,-1.8*S2,floor2,0,'cubic-bezier(.25,.1,.5,1)'],[2400,xT-.95*S2,floor2,0,'linear'],[2570,rx(2570)-.95*S2,floor2,0,'ease-out'],[2700,rx(2700)-.85*S2,floor2-.28*S2,50,'ease-in'],
-      [2850,rx(2850)-1.05*S2,floor2+.06*S2,85,'ease-out'],[3000,rx(2850)-.8*S2,floor2+.1*S2,90]];
+    /* the chaser: a step behind, then he launches and meets him in the air the instant the ball is caught, no slowing down */
+    const dfP=[[1560,-1.8*S2,floor2,0,'cubic-bezier(.25,.1,.5,1)'],[2420,xT-.95*S2,floor2,0,'linear'],[2560,xTap-.9*S2,floor2,0,'ease-out'],[2650,xMid-.7*S2,floor2-.22*S2,42,'ease-in'],
+      [tH,xH-.42*S2,yH,78,'linear'],[2860,xH+.09*SW-.42*S2,floor2-.1*S2,84,'ease-out'],[2960,xH+.15*SW-.46*S2,floor2+.08*S2,90,'linear'],[3350,xH+.2*SW-.46*S2,floor2+.08*S2,90]];
     track(df,dfP,spT(S2));vis(df,1560,3350,150,320);
-    L(df,'.aN',[[2570,-58],[2640,-100],[3000,-100]]);L(df,'.fN',[[2570,-105],[2700,-5],[3000,-5]]);L(df,'.aB',[[2570,58],[2640,-98],[3000,-95]]);L(df,'.fB',[[2570,-70],[2700,-5]]);
-    L(df,'.tN',[[2570,-52],[2680,10],[3000,20]]);L(df,'.sN',[[2570,16],[2700,30]]);L(df,'.tB',[[2570,36],[2680,15],[3000,25]]);L(df,'.sB',[[2570,108],[2700,50],[3000,40]]);
+    L(df,'.aN',[[2560,-58],[2650,-112],[3350,-100]]);L(df,'.fN',[[2560,-105],[2660,-5]]);L(df,'.aB',[[2560,58],[2650,-100],[3350,-95]]);L(df,'.fB',[[2560,-70],[2660,-5]]);
+    L(df,'.tN',[[2560,-52],[2660,10],[3000,20]]);L(df,'.sN',[[2560,16],[2660,30]]);L(df,'.tB',[[2560,36],[2660,15],[3000,25]]);L(df,'.sB',[[2560,108],[2660,50],[3000,40]]);
     shadow(S2,dfP.map(p=>[p[0],p[1],mn(p[2],floor2)]),floor2).animate([{opacity:0},{opacity:.6,offset:.1},{opacity:.6,offset:.9},{opacity:0}],{delay:1560,duration:1800,fill:'forwards'});
-    /* the pass: a spiral thrown from off screen left that arrives exactly at the receiver's outstretched hand */
-    const hx=xC+.118*S2,hy=floor2-.62*S2-.786*S2,y0=floor2-.95*S2,hh=.42*S2,fw=S2*.34;
+    /* the ball: a spiral from off screen to his helmet (tap), pops up, and drops into his hand mid-flip */
+    const hx=xC+.118*S2,hy=yC-.786*S2,y0=floor2-.95*S2,hh=.42*S2,fw=S2*.34;
+    const tx=xTap+.07*S2,ty=floor2-.5*S2-.72*S2;
     const fb=mk('in-fb','<svg viewBox="0 0 40 24" width="100%" height="100%"><ellipse cx="20" cy="12" rx="18" ry="10" fill="#8B4A1E"/><ellipse cx="20" cy="12" rx="18" ry="10" fill="none" stroke="#5a2d0e" stroke-width="1.2"/><path d="M9 12H31M14 9v6M18 9v6M22 9v6M26 9v6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>');
     fb.style.width=fw+'px';fb.style.height=fw*.6+'px';
-    const fbP=[];for(let i=0;i<=12;i++){const u=i/12,tt=1650+u*(tC-1650),x=-40+(hx+40)*u,y=y0+(hy-y0)*u-4*hh*u*(1-u),u2=mn(1,u+.02),x2=-40+(hx+40)*u2,y2=y0+(hy-y0)*u2-4*hh*u2*(1-u2);fbP.push([tt,x,y,Math.atan2(y2-y,x2-x)*180/Math.PI+(i%2?3:-3),'linear'])}
+    const fbP=[];for(let i=0;i<=12;i++){const u=i/12,tt=1650+u*(tTap-1650),x=-40+(tx+40)*u,y=y0+(ty-y0)*u-4*hh*u*(1-u),u2=mn(1,u+.02),x2=-40+(tx+40)*u2,y2=y0+(ty-y0)*u2-4*hh*u2*(1-u2);fbP.push([tt,x,y,Math.atan2(y2-y,x2-x)*180/Math.PI+(i%2?3:-3),'linear'])}
+    fbP.push([2585,tx+.1*S2,ty-.26*S2,170,'linear'],[2640,(tx+hx)/2,ty-.34*S2,330,'linear'],[tC,hx,hy,540,'linear']);
     track(fb,fbP,p=>`translate(${(p[1]-fw/2).toFixed(1)}px,${(p[2]-fw*.3).toFixed(1)}px) rotate(${p[3].toFixed(1)}deg)`);
     fb.animate([{opacity:0},{opacity:1,offset:.03},{opacity:1},{opacity:0}],{delay:1650,duration:tC-1650+8,fill:'forwards'});
-    /* the catch: flash, rings, sparks, stamp, and gems everywhere */
+    /* head tap: a small pop where the ball hits the helmet */
+    flashAt(tx,ty,tTap,1.6);ring(tx,ty,S2*1.1,tTap,'255,255,255',2.2,1);sparks(tx,ty,18,tTap,['255,255,255','170,205,255'],[120,420]);burst(tx,ty,tTap,8,SML);
+    /* the catch: flash, rings, sparks, and gems everywhere */
     flashAt(hx,hy,tC,3.2);
-    white.animate([{opacity:.26},{opacity:0}],{delay:tC,duration:240,easing:'ease-out',fill:'forwards'});
+    white.animate([{opacity:.24},{opacity:0}],{delay:tC,duration:240,easing:'ease-out',fill:'forwards'});
     ring(hx,hy,mx(SW,SH)*.45,tC,'255,214,120',5,1);ring(hx,hy,mx(SW,SH)*.65,tC+60,'255,255,255',2.4,1);
     sparks(hx,hy,60,tC,['255,214,110','255,255,255','170,205,255'],[200,860]);
-    shake(tC,8);
     burst(hx,hy,tC,40,BIG);burst(hx,hy,tC+70,14,Object.assign({},BIG,{up:1}));
-    for(let t=1700;t<tC;t+=44){const q=fbP.reduce((a,p,i)=>t>=p[0]?p:a,fbP[0]);gem(q[1],q[2],t,{sz:[12,26],d:[30,120],dur:[600,1000],fall:SH*.22,j:30})}
-    burst(xC+SW*.14,floor2-.1*S2,2960,12,SML);ring(xC+SW*.14,floor2,S2*1.4,2960,'160,200,255',2.4,.16);
+    for(let t=1700;t<tTap;t+=44){const q=fbP.reduce((a,p,i)=>t>=p[0]?p:a,fbP[0]);gem(q[1],q[2],t,{sz:[12,26],d:[30,120],dur:[600,1000],fall:SH*.22,j:30})}
+    /* the hit: right on the catch. The screen buzzes, the phone buzzes, flash and a ring and a burst of gems */
+    const hitX=xH-.1*S2,hitY=yH-.4*S2;
+    flashAt(hitX,hitY,tH,3.6);
+    white.animate([{opacity:.34},{opacity:0}],{delay:tH,duration:280,easing:'ease-out',fill:'forwards'});
+    ring(hitX,hitY,mx(SW,SH)*.55,tH,'255,255,255',5,1);ring(hitX,hitY,mx(SW,SH)*.4,tH+50,'255,190,120',3,1);
+    sparks(hitX,hitY,70,tH,['255,214,110','255,255,255','255,150,60'],[220,950]);
+    burst(hitX,hitY,tH,36,BIG);
+    at(tH,()=>{const k=[];for(let i=0;i<14;i++){const d=(1-i/14)*15;k.push({translate:`${(i%2?-1:1)*d}px ${(i%3?1:-1)*d*.55}px`})}k.push({translate:'0 0'});[stage,cv].forEach(n=>A(n,k,{duration:520,fill:'none'}));try{if(navigator.vibrate)navigator.vibrate([50,30,80,30,40])}catch(_){}});
+    burst(xH+.15*SW,floor2,2960,12,SML);ring(xH+.15*SW,floor2,S2*1.4,2960,'160,200,255',2.4,.16);
   }
   /* 4. into the app */
   at(T_HIT+95+1550,finish);
