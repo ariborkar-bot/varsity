@@ -132,6 +132,11 @@ def build_data():
     mean = sum(live) / len(live)
     rating = {n: (max(-14, min(14, (v - mean) * .45)) if v > 0 else 0) for n, v in ppg.items()}
 
+    # seniors (grade 4 in 2025-26) graduate before the 2026-27 season, so they are left out. Team strength above still
+    # counts them: it is last season's real scoring, the best signal there is for the preseason odds.
+    for t in real:
+        t['rows'] = [x for x in t['rows'] if x['g'] != 4]
+
     games = load_games()
 
     players, pid = [], 3000
