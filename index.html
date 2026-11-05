@@ -1202,7 +1202,8 @@ select option{background:#0B1730;color:#EAF0F8}
 .row,.pod{position:relative}
 .pod .top10{position:absolute;top:8px;right:10px;z-index:2}
 /* the position row wraps instead of sliding sideways on phones */
-.tools .chips[aria-label="Position"]{flex-wrap:wrap!important;overflow:visible!important;margin:0!important;padding:0!important;width:auto!important}
+@media (min-width:760px){.tools .chips[aria-label="Position"]{flex-wrap:wrap!important;overflow:visible!important;margin:0!important;padding:0!important;width:auto!important}}
+@media (max-width:759px){.tools .chips[aria-label="Position"]{flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -10px!important;padding:2px 10px!important;width:calc(100% + 20px)!important;scroll-snap-type:x proximity;touch-action:pan-x}.tools .chips[aria-label="Position"]::-webkit-scrollbar{display:none}.tools .chips[aria-label="Position"] .chip{flex:none;white-space:nowrap}}
 
 /* compare players: stadium-lit cards, a ring that sweeps in when a player lands in a slot */
 .cmp-card{position:relative;overflow:hidden;background:radial-gradient(120% 80% at 50% -10%,rgba(47,107,255,.22),transparent 60%),var(--surface)}
