@@ -1470,6 +1470,33 @@ select option{background:#0B1730;color:#EAF0F8}
 @media (max-width:759px){.st-grid{grid-template-columns:minmax(0,1fr)!important}}
 html,body{overflow-x:clip;max-width:100%}
 @supports not (overflow:clip){html,body{overflow-x:hidden}}
+/* phones: the Simulate field uses the card's full width, and on small phones the player cards shrink a little so they never cover each other */
+@media (max-width:480px){.fc-hero .sim-board{width:calc(100% + 28px);max-width:none;margin-left:-14px;margin-right:-14px;border-radius:12px}}
+/* phones: records like 6-0 and short headers never break across lines, and a long school name moves to its own line instead of being cut off */
+@media (max-width:759px){
+  .scroll th,.scroll td:not(:nth-child(2)){white-space:nowrap}
+  .row .who i,.who i{flex-wrap:wrap;row-gap:3px}
+}
+/* phones: a player card's header wraps its buttons (Share, Close) under the name instead of on top of it */
+@media (max-width:759px){.dh{flex-wrap:wrap;row-gap:8px}.dh .dhl{min-width:0;flex:1 1 200px}.dh h2{overflow-wrap:anywhere}}
+/* your own row: the name may wrap so the "you" tag is never cut off */
+.row.me .who b,.row.me .who .nmt>b{white-space:normal;overflow:visible;text-overflow:clip}
+/* the school badge hangs off the avatar's corner; keep it clear of the name under it */
+.sb-card .av{margin-bottom:max(4px,1.2cqw)}
+@container (max-width:360px){.sb-slot{scale:.9}}
+@container (max-width:320px){.sb-slot{scale:.82}}
+/* phones: lineup cards stack (name and tags full width, points on their own line, buttons below) so no words overlap */
+@media (max-width:759px){
+  .lg-card:not(.bd-c):not(.empty){grid-template-columns:40px minmax(0,1fr);gap:8px 10px}
+  .lg-card:not(.bd-c):not(.empty)>.lg-slot{grid-column:1;grid-row:1;align-self:start}
+  .lg-card:not(.bd-c):not(.empty)>.lg-who{grid-column:2;grid-row:1}
+  .lg-card:not(.bd-c):not(.empty)>.lg-pts{grid-column:2;grid-row:2;flex-direction:row;align-items:baseline;justify-content:space-between;gap:4px 10px;flex-wrap:wrap}
+  .lg-card:not(.bd-c):not(.empty)>.lg-pts small{white-space:normal;text-align:right;line-height:1.35}
+  .lg-card:not(.bd-c):not(.empty)>.lg-acts{grid-column:1/-1;grid-row:3;justify-content:flex-end;flex-wrap:wrap}
+  .lg-who .lt i,.bd-c .lg-who .lt i{flex-wrap:wrap;row-gap:4px}
+  .lg-who .nmt{flex-wrap:wrap;row-gap:4px}
+  .lg-who .nmt>b,.lg-who .lt b{overflow:visible;white-space:normal;line-height:1.15}
+}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1830,7 +1857,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v193 · Nov 5';
+const APP_BUILD='v194 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
