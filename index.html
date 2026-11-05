@@ -1464,6 +1464,12 @@ select option{background:#0B1730;color:#EAF0F8}
 @media (prefers-reduced-motion:reduce){.top10.potw,.pw-tag.gold,.pw-k,.pw-r,.av.rim-g,.av.rim-s{animation:none!important}}
 /* phones: the bottom tab bar tucks away while scrolling down and comes back on the way up */
 @media (max-width:759px){.tabs{transition:transform .22s ease}html.navhide .tabs{transform:translateY(110%)}}
+
+/* nothing may push the page sideways: grid/flex children can shrink, and anything that still overflows is clipped */
+.st-grid>*,.lb,.podium,.pod,.wrap>*{min-width:0}
+@media (max-width:759px){.st-grid{grid-template-columns:minmax(0,1fr)!important}}
+html,body{overflow-x:clip;max-width:100%}
+@supports not (overflow:clip){html,body{overflow-x:hidden}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1824,7 +1830,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v192 · Nov 5';
+const APP_BUILD='v193 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
