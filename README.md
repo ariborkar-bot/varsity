@@ -9,3 +9,17 @@ San Diego high school fantasy football. Player stats come from public box scores
 ## Basketball
 
 `basketball.html` is generated from `index.html` by `tools/make_basketball.py` (swaps in basketball positions, scoring, lineups, the Simulate court, and placeholder players and games). Run `python3 tools/make_basketball.py` after changing `index.html` and commit both files. The Football / Basketball switch in the header links the two pages. Basketball keeps its own leagues, lineups and picks in `bb_`-prefixed collections; accounts (`profiles`) are shared.
+
+### Basketball data (2025-26)
+
+`tools/data/bb_2526_players.txt` holds the real San Diego Section boys basketball rosters and season stats, copied from each
+school's MaxPreps team pages (roster tab for name, grade and position; Player Stats tab for games played and per-game points,
+rebounds, assists, steals, blocks, turnovers and 3-pointers made). 127 schools, 88 of them with stats entered.
+
+- MaxPreps has season averages, not box scores, for almost every team, so each finished week carries the per-game average
+  (the number of weeks follows games played).
+- Many schools list positions as G / F / W or nothing. `assign_positions()` in `make_basketball.py` maps those to PG/SG/SF/PF/C
+  (guards by assists, forwards by rebounds, blanks by their own stats, or evenly when there are none).
+- Some schools did not enter every stat, so those columns read 0.
+- Bishop's and 38 other schools have rosters but no stats entered.
+- The schedule and scores are still placeholders (generated from each team's real scoring).

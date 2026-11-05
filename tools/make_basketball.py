@@ -2,8 +2,8 @@
 """Builds basketball.html from index.html.
 
 The football app is the source of truth. This script copies it, swaps in basketball
-positions, scoring, lineups, schedule and the Simulate court, and bakes in placeholder
-players and games (made up, so the layout can be seen working before real box scores exist).
+positions, scoring, lineups, schedule and the Simulate court, and bakes in the real 2025-26
+San Diego Section rosters and season stats (tools/data/bb_2526_players.txt, from MaxPreps) plus a placeholder schedule.
 
 Run:  python3 tools/make_basketball.py            (writes basketball.html next to index.html)
 """
@@ -16,55 +16,97 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'basketball.html'
 CUR = 7          # the placeholder season is "in week 7": weeks 1-6 are finished, 7-12 are still to play
 WEEKS = 12
 
-TEAMS = ["Bishop's", "Cathedral Catholic", "La Jolla Country Day", "Torrey Pines", "Carlsbad", "Mission Hills", "Helix",
-         "Lincoln", "Morse", "Oceanside", "Rancho Bernardo", "Santa Fe Christian", "Mater Dei Catholic", "Vista",
-         "Grossmont", "El Camino", "Granite Hills", "Hoover", "Madison", "Mira Mesa", "Poway", "Point Loma", "San Marcos",
-         "Scripps Ranch", "Steele Canyon", "Valley Center", "Westview", "Eastlake", "Otay Ranch", "Chula Vista",
-         "Bonita Vista", "Coronado", "La Costa Canyon", "Ramona", "Escondido", "Fallbrook", "Christian High", "Del Norte",
-         "Mount Miguel", "University City"]
+DATA = os.path.join(ROOT, 'tools', 'data', 'bb_2526_players.txt')
+POS5 = ['PG', 'SG', 'SF', 'PF', 'C']
 
-FIRST = ["Marcus", "Jalen", "Dante", "Elijah", "Mateo", "Noah", "Isaiah", "Caleb", "Xavier", "Andre", "Tyrese", "Julian",
-         "Malik", "Devin", "Aiden", "Ezra", "Omar", "Kai", "Jordan", "Cameron", "Terrell", "Rafael", "Diego", "Jaden",
-         "Trey", "Micah", "Landon", "Bryce", "Ryder", "Zion", "Nico", "Anthony", "Darius", "Gabe", "Hunter", "Ibrahim",
-         "Jayce", "Kobe", "Leo", "Miles", "Nate", "Owen", "Parker", "Quincy", "Reese", "Sean", "Tobias", "Victor",
-         "Wesley", "Yusuf", "Zach", "Brandon", "Colby", "Derek", "Emilio", "Finn", "Grant", "Hayden", "Ivan", "Jace"]
-LAST = ["Alvarez", "Brooks", "Coleman", "Dawson", "Escobar", "Foster", "Garcia", "Hughes", "Ibarra", "Jenkins", "Kim",
-        "Lopez", "Mitchell", "Nguyen", "Ortega", "Pierce", "Quintero", "Reyes", "Santos", "Tran", "Underwood", "Vega",
-        "Walker", "Xiong", "Yamada", "Zimmerman", "Aoki", "Bennett", "Castillo", "Doyle", "Ellis", "Flores", "Grant",
-        "Holloway", "Ito", "Jimenez", "Kealoha", "Lindqvist", "Moreno", "Nakamura", "Okafor", "Pruitt", "Ramos",
-        "Sandoval", "Tate", "Valdez", "Whitfield", "Yee", "Abbott", "Barrera", "Cruz", "Dixon", "Enriquez", "Fields",
-        "Gomez", "Hendrickson", "Ingram", "Jordan", "Knight", "Lacey", "Mendoza", "Nelson", "Orozco", "Park", "Rivera",
-        "Soto", "Thomas", "Vaughn", "Washington", "Young", "Zamora"]
 
-POS = ['PG', 'SG', 'SF', 'PF', 'C']
-REB = dict(PG=3.2, SG=3.6, SF=5.2, PF=7.6, C=9.4)
-AST = dict(PG=5.6, SG=3.0, SF=2.5, PF=1.9, C=1.3)
-STL = dict(PG=1.9, SG=1.6, SF=1.3, PF=1.0, C=0.8)
-BLK = dict(PG=0.2, SG=0.3, SF=0.6, PF=1.0, C=1.9)
-TOV = dict(PG=3.0, SG=2.3, SF=2.0, PF=1.9, C=1.8)
-TPR = dict(PG=.13, SG=.14, SF=.10, PF=.05, C=.01)          # three pointers made per point scored
-# the nine-man rotation: five starters and four off the bench, with each player's share of the team's points
-ROT = [('PG', .25), ('SG', .21), ('SF', .17), ('PF', .13), ('C', .10), ('PG', .05), ('SG', .04), ('SF', .03), ('PF', .02)]
+def clean_name(n):
+    """tidy MaxPreps names: drop nicknames, fix ALL CAPS / lower case, fix a stray capital"""
+    n = re.sub(r'\s*[\"\u201c][^\"\u201d]*[\"\u201d]\s*', ' ', n)
+    n = re.sub(r'\([^)]*\)', '', n)
+    n = n.replace('Runnar', 'Runnar').replace('MigueL', 'Miguel')
+    out = []
+    for w in n.split():
+        if (w.isupper() and len(w) > 2) or w.islower():
+            w = '-'.join(x[:1].upper() + x[1:].lower() for x in w.split('-'))
+        out.append(w)
+    return ' '.join(out).strip()
+
+
+def load_real():
+    """tools/data/bb_2526_players.txt: one '#slug|School|rows' line per team, then one player per line:
+    name,grade(1-4, 0=unknown),position,GP,PPG,RPG,APG,SPG,BPG,TPG,3PM per game   (stat fields are missing when MaxPreps has none)"""
+    teams, cur = [], None
+    for ln in open(DATA, encoding='utf-8').read().split('\n'):
+        if not ln.strip():
+            continue
+        if ln.startswith('#'):
+            slug, name, _ = ln[1:].split('|')
+            cur = dict(slug=slug, name=name, rows=[])
+            teams.append(cur)
+            continue
+        f = ln.split(',')
+        nm = clean_name(f[0])
+        if not nm or re.match(r'^(null )?Player( #?\w+)?$', nm):
+            continue
+        row = dict(n=nm, g=int(f[1] or 0), pos=f[2] if len(f) > 2 else '', gp=0, st=None)
+        if len(f) >= 11:
+            row['gp'] = int(float(f[3]))
+            row['st'] = [float(x) for x in f[4:11]]          # pts reb ast stl blk tov tpm
+        if any(r['n'] == nm for r in cur['rows']):
+            continue
+        cur['rows'].append(row)
+    return teams
+
+
+def assign_positions(rows):
+    """MaxPreps lists G / F / W or nothing for many teams. Map to PG SG SF PF C, using the player's own stats where there are some."""
+    n_un = 0
+    for r in rows:
+        if r['pos'] in POS5:
+            r['p'] = r['pos']
+    rest = [r for r in rows if r['pos'] not in POS5]
+    G = sorted([r for r in rest if r['pos'] == 'G'], key=lambda r: -((r['st'] or [0, 0, 0])[2] * 3 + (r['st'] or [0])[0] * .1))
+    F = sorted([r for r in rest if r['pos'] == 'F'], key=lambda r: -((r['st'] or [0, 0])[1]))
+    for i, r in enumerate(G):
+        r['p'] = 'PG' if i < max(1, round(len(G) * .4)) else 'SG'
+    for i, r in enumerate(F):
+        r['p'] = 'PF' if i < max(1, round(len(F) * .5)) else 'SF'
+    for r in rest:
+        if r['pos'] == 'W':
+            r['p'] = 'SF'
+    blank = [r for r in rest if r['pos'] not in ('G', 'F', 'W')]
+    cyc = ['SG', 'SF', 'PG', 'PF', 'C']
+    for r in blank:
+        st = r['st']
+        if st and r['gp'] >= 3 and (st[1] or st[2]):
+            pts, reb, ast, stl, blk, tov, tpm = st
+            r['p'] = 'PG' if (ast >= 2.5 and reb < 5) else 'C' if reb >= 7 else 'PF' if reb >= 5 else 'SG' if tpm >= .8 else 'SF'
+        else:
+            r['p'] = cyc[n_un % 5]
+            n_un += 1
+    return rows
 
 
 def build_data():
     r = random.Random(2026)
+    real = load_real()
+    TEAMS = sorted(t['name'] for t in real)
 
-    def pois(lam):
-        L, k, p = math.exp(-lam), 0, 1.0
-        while True:
-            k += 1
-            p *= r.random()
-            if p <= L:
-                return k - 1
+    # team strength comes from the real scoring: the sum of every listed player's points per game
+    ppg = {}
+    for t in real:
+        ppg[t['name']] = sum(x['st'][0] for x in t['rows'] if x['st'])
+    live = [v for v in ppg.values() if v > 0]
+    mean = sum(live) / len(live)
+    rating = {n: (max(-14, min(14, (v - mean) * .45)) if v > 0 else 0) for n, v in ppg.items()}
 
-    rating = {t: r.gauss(0, 5) for t in TEAMS}
     games, seen = [], set()
     for w in range(1, WEEKS + 1):
         for _ in range(80):
             order = TEAMS[:]
             r.shuffle(order)
-            pairs = [(order[i], order[i + 1]) for i in range(0, len(order), 2)]
+            pairs = [(order[i], order[i + 1]) for i in range(0, len(order) - 1, 2)]
             if not any(frozenset(p) in seen for p in pairs):
                 break
         for h, a in pairs:
@@ -81,46 +123,24 @@ def build_data():
                 g['hs'], g['as'] = hs, as_
             games.append(g)
 
-    names_used, players, pid = set(), [], 3000
-    for t in TEAMS:
-        boost = r.uniform(.8, 1.25)
-        roster = []
-        for i, (pos, share) in enumerate(ROT):
-            while True:
-                n = r.choice(FIRST) + ' ' + r.choice(LAST)
-                if (n, t) not in names_used:
-                    names_used.add((n, t))
-                    break
-            talent = max(.55, min(1.6, r.lognormvariate(0, .3))) * (boost if i < 2 else 1)
-            roster.append(dict(n=n, pos=pos, share=share * talent, g=(r.choice([2, 3, 3, 4, 4]) if i < 5 else r.choice([1, 2, 2, 3]))))
-        for p in roster:
+    players, pid = [], 3000
+    for t in real:
+        assign_positions(t['rows'])
+        for x in t['rows']:
             pid += 1
-            p['id'] = str(pid)
-            p['w'] = {}
-        for g in games:
-            if g['hs'] is None or t not in (g['h'], g['a']):
-                continue
-            tp = g['hs'] if g['h'] == t else g['as']
-            play = [p for p in roster if r.random() > .05]
-            wts = [p['share'] * r.lognormvariate(0, .28) for p in play]
-            s = sum(wts)
-            pts = [round(tp * x / s) for x in wts]
-            pts[pts.index(max(pts))] += tp - sum(pts)
-            for p, pt in zip(play, pts):
-                sc = (p['share'] / .18) ** .7
-                reb = pois(REB[p['pos']] * sc * r.uniform(.7, 1.3))
-                ast = pois(AST[p['pos']] * sc * r.uniform(.6, 1.4))
-                stl = pois(STL[p['pos']] * sc * .8)
-                blk = pois(BLK[p['pos']] * sc * .8)
-                tov = pois(TOV[p['pos']] * sc * .8)
-                tpm = min(pt // 3, pois(pt * TPR[p['pos']]))
-                p['w'][str(g['w'])] = [max(pt, 0), reb, ast, stl, blk, tov, tpm]
-        for p in roster:
-            players.append({'id': p['id'], 'n': p['n'], 's': t, 'g': p['g'], 'p': p['pos'], 'u': p['pos'], 'w': p['w']})
+            w = {}
+            if x['st'] and x['gp'] > 0:
+                # MaxPreps only has season averages for most teams: every finished week carries the per-game average,
+                # and the number of weeks follows games played so a player with 3 games counts for less than one with 30.
+                nw = min(CUR - 1, max(1, round(x['gp'] / 5)))
+                line = [x['st'][0], x['st'][1], x['st'][2], x['st'][3], x['st'][4], x['st'][5], x['st'][6]]
+                for wk in range(1, nw + 1):
+                    w[str(wk)] = line
+            players.append({'id': str(pid), 'n': x['n'], 's': t['name'], 'g': x['g'], 'p': x['p'], 'u': x['p'], 'w': w})
     done = sum(1 for g in games if g['hs'] is not None)
-    mp = {'through': 'Week %d' % (CUR - 1), 'games': done, 'updated': 'Placeholder data', 'players': players}
-    seeds = sorted(TEAMS, key=lambda t: -rating[t])[:8]
-    return mp, games, seeds
+    mp = {'through': '2025-26 season', 'games': done, 'updated': 'MaxPreps 2025-26 season averages', 'players': players}
+    seeds = sorted([n for n in TEAMS if ppg[n] > 0], key=lambda t: -rating[t])[:8]
+    return mp, games, seeds, TEAMS
 
 
 GAMES_JS = """<script>
@@ -162,7 +182,7 @@ def rep(s, a, b, count=1):
     return s.replace(a, b)
 
 
-def transform(s, mp, games, seeds):
+def transform(s, mp, games, seeds, teams):
     # --- identity ---------------------------------------------------------------------------------------------
     s = rep(s, '<title>Varsity</title>', '<title>Varsity Basketball</title>')
     s = rep(s, '<h1>Varsity</h1><p>High school fantasy football</p>', '<h1>Varsity</h1><p>High school fantasy basketball</p>')
@@ -194,7 +214,8 @@ def transform(s, mp, games, seeds):
     s = between(s, 'const RAW=[', '\nfunction gen', 'const RAW=[];')
     s = rep(s, "const avg=tg?tp/tg:21;", "const avg=tg?tp/tg:62;")
     s = rep(s, 'LAM=12,CAP=21', 'LAM=12,CAP=30')
-    s = rep(s, "'<span class=\"vt mp\">Verified</span>'", "'<span class=\"vt un\">Sample</span>'")
+    s = rep(s, "'<span class=\"vt mp\">Verified</span>'", "'<span class=\"vt mp\">Season avg</span>'")
+    s = line_replace(s, 'const SD_SCHOOLS=', 'const SD_SCHOOLS=' + json.dumps(teams) + '.sort((a,b)=>a.localeCompare(b));')
     s = between(s, 'function projLine(p){', '\nfunction projTag',
                 "function projLine(p){\n  const j=proj(p);if(!j.n)return 'No games yet';\n  if(j.info&&j.info.bye)return 'No game this week';\n"
                 "  const s=j.stat;return `${s.pts.toFixed(1)} pts · ${s.reb.toFixed(1)} reb · ${s.ast.toFixed(1)} ast`;\n}")
@@ -219,7 +240,7 @@ def transform(s, mp, games, seeds):
     s = rep(s, "L=Math.max(-35,Math.min(35,L));", "L=Math.max(-25,Math.min(25,L));")
 
     s = rep(s, "  const sample=!MP&&!S.settings.hideSample;",
-            "  b.push('<p class=\"note\"><span class=\"pill pending\">Sample data</span><span>These basketball players and games are made up so you can try the layout. Real box scores come later.</span></p>');\n  const sample=!MP&&!S.settings.hideSample;")
+            "  b.push('<p class=\"note\"><span class=\"pill pending\">2025-26 stats</span><span>Players, grades, positions and per-game stats are real, from MaxPreps for the 2025-26 season (some schools did not enter full stats). The schedule and scores are placeholders until the new season is posted.</span></p>');\n  const sample=!MP&&!S.settings.hideSample;")
 
     # --- lineups ------------------------------------------------------------------------------------------------
     s = between(s, 'const SLOTS_DRAFT=[', 'const slotOk',
@@ -363,8 +384,8 @@ COURT_URI = _court_uri()
 
 
 if __name__ == '__main__':
-    mp, games, seeds = build_data()
+    mp, games, seeds, teams = build_data()
     src = open(SRC, encoding='utf-8').read()
-    out = transform(src, mp, games, seeds)
+    out = transform(src, mp, games, seeds, teams)
     open(OUT, 'w', encoding='utf-8').write(out)
     print('wrote', OUT, len(out) // 1024, 'KB;', len(mp['players']), 'players,', len(games), 'games')
