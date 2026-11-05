@@ -271,7 +271,7 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, "function infoIcons(){",
             "function bbPre(){\n  if(!PRE())return;\n"
             "  document.querySelectorAll('#main .pv2,#main .pod .pv,#main .row .pt b,#main .ldr .pv').forEach(e=>{if(/^0\\.0$/.test(e.textContent.trim()))e.textContent='\u2014'});\n"
-            "  const h=document.querySelector('#main .head');if(!h||document.querySelector('.bb-pre')||!/^#?(league)?$/.test(location.hash))return;\n"
+            "  const h=document.querySelector('#main .st-seg')||document.querySelector('#main .head');if(!h||UI.stab==='stats'||document.querySelector('.bb-pre')||!/^#?(league)?$/.test(location.hash))return;\n"
             "  const ds=((typeof GAMES!=='undefined'&&GAMES&&GAMES.games)||[]).map(g=>g.d).filter(Boolean).sort(),d0=ds[0];\n"
             "  const when=d0?new Date(d0+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric'}):'soon';\n"
             "  h.insertAdjacentHTML('afterend',`<section class=\"card bb-pre\"><b>The season tips off ${when}.</b><span>Fantasy points show up here after each game. Until then, players are listed by last season.</span></section>`);\n}\n"
