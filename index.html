@@ -1337,6 +1337,22 @@ select option{background:#0B1730;color:#EAF0F8}
 .fpanel{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:2px}
 .fpanel[hidden]{display:none}
 .fpanel select{width:100%}
+
+/* sponsor spot: watch to earn tokens */
+.adbtn{margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 18px;border-radius:14px;border:0;cursor:pointer;background:linear-gradient(180deg,#FFD25E,#FFB41F);color:#0b1220;font:inherit;box-shadow:0 6px 18px rgba(255,180,31,.28)}
+.adbtn b{font-weight:800;letter-spacing:.02em}.adbtn small{font-weight:700;opacity:.78;font-size:.74rem}
+.adbtn:disabled{filter:grayscale(.7) brightness(.8);cursor:not-allowed;box-shadow:none}
+#adov{position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:rgba(2,6,16,.86);backdrop-filter:blur(6px);padding:18px}
+#adov .adc{width:min(420px,100%);background:var(--surface,#0f1b36);border:1px solid var(--line,#24365e);border-radius:22px;padding:18px;display:grid;gap:14px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+#adov .adt{justify-self:center;font-size:.7rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#9FB3D9;border:1px solid var(--line,#24365e);border-radius:99px;padding:4px 12px}
+#adov .adm{display:grid;gap:8px;justify-items:center;padding:18px 8px;border-radius:16px;background:radial-gradient(120% 90% at 50% 0%,#17358a,#0a1840)}
+#adov .adm img{max-width:100%;max-height:200px;border-radius:12px;object-fit:contain}#adov .adm .adg{width:96px;height:96px}
+#adov .adm h3{margin:0;font-size:1.5rem}#adov .adm p{margin:0;color:#C9D6F2}
+#adov .adl{color:#FFC23D;font-weight:700}
+#adov .adbar{height:6px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}#adov .adbar i{display:block;height:100%;width:0;background:#FFC23D;transition:width .2s linear}
+#adov .adgo{height:48px;border-radius:14px;border:0;font:inherit;font-weight:800;background:linear-gradient(180deg,#FFD25E,#FFB41F);color:#0b1220;cursor:pointer}
+#adov .adgo:disabled{background:rgba(255,255,255,.1);color:#9FB3D9;cursor:wait}
+#adov .adx{background:none;border:0;color:#9FB3D9;font:inherit;cursor:pointer;padding:6px}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -1680,7 +1696,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v171 · Nov 4';
+const APP_BUILD='v172 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2138,6 +2154,15 @@ function viewSched(head){
 const gid=g=>g.w+'|'+g.h+'|'+g.a;
 const gDone=g=>g.hs!=null&&g.as!=null;
 const TOK0=100;
+/* Rewarded sponsor spots: watch a short sponsor message, earn tokens. Sponsors are plain data below (no ad network, no tracking).
+   Swap the placeholder for a real sponsor: name, a line, an optional image and an optional link. */
+const ADS={reward:25,perDay:5,secs:10,sponsors:[{name:'Your business here',line:'Sponsor the Varsity minigames and reach every player.',img:'',url:''}]};
+const adDay=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const adOf=u=>((S.picks[u]||{}).ad)||{};
+const adLeft=u=>Math.max(0,ADS.perDay-(adOf(u).d===adDay()?+adOf(u).n||0:0));
+const adBonus=u=>+adOf(u).t||0;
+const adBtn=()=>{if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return'';const l=adLeft(ME.uid);
+  return `<button type="button" class="adbtn" data-act="adWatch" ${l?'':'disabled'}><b>Watch a sponsor</b><small>+${ADS.reward} tokens · ${l?l+' left today':'back tomorrow'}</small></button>`};
 /* odds: an Elo rating for every team from this season's finals, home field to the higher seed, and a 7% house cut */
 let _rt=null,_rtN=-1;
 function ratings(){
@@ -2181,7 +2206,7 @@ const betsOf=u=>((S.picks[u]||{}).bets)||{};
 const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g});return m};
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
-  const gm=gameMap();let t=TOK0;
+  const gm=gameMap();let t=TOK0+adBonus(u);
   Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   return Math.round(t*100)/100;
@@ -2269,7 +2294,7 @@ const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim;if(sm)o.sim=sm;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad;if(sm)o.sim=sm;if(ad)o.ad=ad;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -2364,7 +2389,7 @@ function picksHTML(){
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(betResult(b,gm[id])==='open'?+b.stake||0:0),0);
   const avail=Math.round((bal-0)*100)/100;
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div>${adBtn()}</section>`;
   const card=g=>{
     const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
@@ -2591,7 +2616,7 @@ function spreadHTML(){
   const open=gs.filter(g=>!gDone(g)||mine[gid(g)]).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||a.h.localeCompare(b.h));
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(atsResult(b,gm[id])==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div>${adBtn()}</section>`;
   const nm2=(x,g)=>x.s==='h'?g.h:g.a,lnTxt=x=>fmtLine(x.s==='h'?+x.line:-x.line);
   const card=g=>{
     const id=gid(g),L=spreadFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
@@ -3645,7 +3670,7 @@ document.addEventListener('click',async e=>{
   else if(a==='rstFc'||a==='rstBets'||a==='rstAts'||a==='rstAll'){
     if(VA||!ME.uid)return;const all=a==='rstAll',what=all?'all three games':a==='rstFc'?'5 Card Draw':a==='rstBets'?'Pick ’em':'Against the spread';
     if(!confirm('Reset your own '+what+'? Your hand, picks and tokens for it are cleared so you can replay. Other people are not affected.'))return;
-    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid)};
+    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{})};
     if(await act(()=>setDoc('picks/'+ME.uid,nx),what+' reset. Play it again from the Games tab.')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],nx);UI.pk={};UI.at={};UI.fcDeal=null;UI.fcAnim=null;render()}}
   else if(a==='lock'){try{await SB.rpc('admin_lock')}catch(_){}ME.admin=false;AD.rows=null;AD.sel=null;render()}
   else if(a==='saveSchool'){const v=$('#ad-school').value.trim();await act(()=>upsert('profiles/'+id,{school:v}),'School saved')}
@@ -3765,6 +3790,7 @@ document.addEventListener('click',async e=>{
   else if(a==='ntToggle'){const k=t.dataset.v,p=ntPrefs();p[k]=!p[k];ntSave(p);openNotes()}
   else if(a==='markRead'){await act(writeSeen);closeNotes()}
   else if(a==='consent')openGate();
+  else if(a==='adWatch')adPlay();
   else if(a==='ftoggle'){UI.fOpen=!UI.fOpen;const fp=document.querySelector('.fpanel');if(fp)fp.hidden=!UI.fOpen;t.setAttribute('aria-expanded',String(!!UI.fOpen))}
   else if(a==='pos'){const bar=document.querySelector('.tools .chips[aria-label="Position"]'),sx=bar?bar.scrollLeft:0;UI.pos=t.dataset.v;UI.more=false;render();const nb=document.querySelector('.tools .chips[aria-label="Position"]');if(nb)nb.scrollLeft=sx}
   else if(a==='more'){UI.more=(+UI.more||5)+10;$('#lb-list').innerHTML=listHTML()}
@@ -4080,6 +4106,34 @@ async function boot(){
   subscribe();touch();
 }
 async function newPassword(){const p=prompt('Choose a new password (at least 6 characters)');if(!p)return;const {error}=await SB.auth.updateUser({password:p});say(error?'Could not change the password: '+error.message:'Password updated')}
+
+/* ---------- rewarded sponsor spot: watch a sponsor for a few seconds, then collect tokens ---------- */
+function adPlay(){
+  if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||document.getElementById('adov'))return;
+  if(!adLeft(ME.uid)){say('You have used today’s sponsor spots. Back tomorrow.');return}
+  const sp=ADS.sponsors[Math.floor(Math.random()*ADS.sponsors.length)]||ADS.sponsors[0];
+  const o=document.createElement('div');o.id='adov';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Sponsor');
+  o.innerHTML=`<div class="adc"><span class="adt">Sponsored</span>
+    <div class="adm">${sp.img?`<img src="${esc(sp.img)}" alt="">`:`<img class="adg" src="logo.png" alt="">`}<h3>${esc(sp.name)}</h3><p>${esc(sp.line||'')}</p>${sp.url?`<a class="adl" href="${esc(sp.url)}" target="_blank" rel="noopener sponsored">Learn more</a>`:''}</div>
+    <div class="adbar"><i></i></div>
+    <button type="button" class="adgo" disabled>Collect in <span id="adn">${ADS.secs}</span>s</button>
+    <button type="button" class="adx">No thanks</button></div>`;
+  document.body.appendChild(o);document.documentElement.style.overflow='hidden';
+  let left=ADS.secs,last=Date.now(),done=false;const bar=o.querySelector('.adbar i'),go=o.querySelector('.adgo'),n=o.querySelector('#adn');
+  const close=()=>{clearInterval(iv);o.remove();document.documentElement.style.overflow=''};
+  const iv=setInterval(()=>{const now=Date.now();if(!document.hidden)left-=(now-last)/1000;last=now;       /* the clock only runs while the page is visible */
+    if(left<=0&&!done){done=true;left=0;go.disabled=false;go.textContent='Collect +'+ADS.reward+' tokens'}else if(!done)n.textContent=Math.ceil(left);
+    bar.style.width=Math.min(100,100*(1-left/ADS.secs))+'%'},200);
+  o.querySelector('.adx').onclick=close;
+  go.onclick=async()=>{if(!done||go.dataset.b)return;go.dataset.b='1';
+    if(!adLeft(ME.uid)){close();return}
+    const a=adOf(ME.uid),day=adDay(),nx={d:day,n:(a.d===day?+a.n||0:0)+1,t:(+a.t||0)+ADS.reward};
+    const ok=await act(()=>upsert('picks/'+ME.uid,{ad:nx}),'+'+ADS.reward+' tokens');
+    if(ok){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{ad:nx})}
+    close();if(ok)render()};
+  go.focus&&0;
+}
+
 route();
 boot();
 
