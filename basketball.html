@@ -1417,19 +1417,36 @@ select option{background:#0B1730;color:#EAF0F8}
 .top10.potw{color:#3A2600;background:linear-gradient(100deg,#FFD15A,#FFF1B8 45%,#F5B300);border-color:transparent;box-shadow:0 0 8px rgba(255,194,61,.45)}
 .top10.potw.s{color:#1D2633;background:linear-gradient(100deg,#C9D3DF,#F4F7FB 45%,#9AA7B8);box-shadow:0 0 6px rgba(200,215,235,.35)}
 
-.pw-card{padding:14px 14px 8px;border:1px solid rgba(255,194,61,.35)}
-.pw-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
-.pw-h h3{margin:0;font:800 italic 1.05rem/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#FFC23D}
-.pw-h span{font-size:.72rem;opacity:.6;letter-spacing:.08em;text-transform:uppercase}
-.pw-r{display:flex;align-items:center;gap:10px;width:100%;padding:8px 6px;border:0;border-top:1px solid var(--line,#22344B);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.pw-r:first-of-type{border-top:0}
-.pw-r.gold{background:linear-gradient(90deg,rgba(255,194,61,.14),transparent 70%);border-radius:10px}
-.pw-k{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font:800 .8rem/1 'Barlow Condensed',sans-serif}
-.gold .pw-k{background:linear-gradient(135deg,#FFE08A,#E0A100);color:#3A2600}
-.silver .pw-k{background:linear-gradient(135deg,#F1F4F8,#97A4B5);color:#1D2633}
-.pw-who{flex:1;min-width:0}.pw-who b{display:block;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pw-who small{display:block;font-size:.72rem;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.pw-pt{font:800 1.25rem/1 'Barlow Condensed',sans-serif}.gold .pw-pt{color:#FFC23D}
+
+.pw-card{position:relative;overflow:hidden;padding:14px 12px 8px;border:1px solid rgba(255,194,61,.5);background:radial-gradient(80% 120% at 0% 0%,rgba(255,194,61,.2),transparent 55%),radial-gradient(70% 90% at 100% 100%,rgba(47,107,255,.22),transparent 60%),linear-gradient(160deg,#101F3A,#0A1426);box-shadow:0 0 0 1px rgba(255,194,61,.12) inset,0 14px 34px -18px rgba(255,170,0,.45)}
+.pw-card::after{content:"";position:absolute;top:0;left:-40%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,230,160,.10),transparent);animation:pwSweep 5s ease-in-out 1.2s infinite;pointer-events:none}
+@keyframes pwSweep{0%,70%{left:-40%}100%{left:120%}}
+.pw-h{position:relative;display:flex;justify-content:space-between;align-items:center;margin:0 2px 8px}
+.pw-h h3{margin:0;display:flex;align-items:center;gap:6px;font:900 italic 1.25rem/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.05em;text-transform:uppercase;background:linear-gradient(180deg,#FFF4C8,#FFC23D 55%,#E39B00);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pw-bolt{-webkit-text-fill-color:initial;color:#FFC23D;filter:drop-shadow(0 0 6px rgba(255,194,61,.8));font-style:normal}
+.pw-wk{font:800 .68rem/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;padding:5px 9px;border-radius:99px;border:1px solid rgba(255,194,61,.5);color:#FFC23D}
+.pw-r{position:relative;display:flex;align-items:center;gap:10px;width:100%;padding:9px 8px;margin-top:4px;border:1px solid transparent;border-radius:12px;background:rgba(255,255,255,.03);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.pw-r.gold{padding:12px 8px;border-color:rgba(255,194,61,.55);background:linear-gradient(90deg,rgba(255,194,61,.22),rgba(255,194,61,.04) 70%);box-shadow:0 0 22px -8px rgba(255,194,61,.6)}
+.pw-r.silver{border-color:rgba(200,214,232,.18);background:linear-gradient(90deg,rgba(200,214,232,.09),transparent 70%)}
+.pw-k{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:900 .85rem/1 'Barlow Condensed',sans-serif}
+.gold .pw-k{width:28px;height:28px;font-size:1rem;background:linear-gradient(135deg,#FFF0B0,#F5B300 55%,#B97800);color:#3A2600;box-shadow:0 0 12px rgba(255,194,61,.7)}
+.silver .pw-k{background:linear-gradient(135deg,#FFFFFF,#AEB9C8 55%,#7D8A9C);color:#1D2633}
+.pw-who{flex:1;min-width:0}
+.pw-nm{display:flex;align-items:center;gap:5px;min-width:0}
+.pw-nm b{min-width:0;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gold .pw-nm b{font-size:1.05rem}
+.pw-nm .top10{flex:none}
+.pw-who small{display:block;font-size:.72rem;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.pw-pt{flex:none;text-align:right;font:900 1.35rem/1 'Barlow Condensed',sans-serif}.pw-pt i{display:block;font:700 .55rem/1 system-ui;font-style:normal;letter-spacing:.12em;text-transform:uppercase;opacity:.55;margin-top:2px}
+.gold .pw-pt{font-size:1.7rem;color:#FFC23D;text-shadow:0 0 14px rgba(255,194,61,.5)}
+@media (prefers-reduced-motion:reduce){.pw-card::after{animation:none;display:none}}
+/* Player of the Game rims on every avatar: gold for #1, silver for #2 and #3 */
+.av.rim-g{box-shadow:0 0 0 2px #0A1426,0 0 0 4px #F5B300,0 0 12px 2px rgba(255,194,61,.55)}
+.av.rim-s{box-shadow:0 0 0 2px #0A1426,0 0 0 4px #C3CDD9,0 0 9px 1px rgba(200,214,232,.35)}
+/* when a player has more than one tag, stack them instead of overlapping */
+.pod .top10+.top10{top:-9px;right:auto;left:50%;transform:translateX(-50%)}
+.top10.sm+.top10.sm{top:calc(4px + max(.4rem,1.9cqw) + 4px)}
+.nmt{flex-wrap:wrap;row-gap:3px}.nmt .top10{flex:none}.nmt>b,.nmt>h2{flex:0 1 auto;min-width:min(5.5em,100%)}
 </style><style id="bb-theme">
 .bb-pre{display:flex;flex-direction:column;gap:4px;margin:12px 0;border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 0 0,rgba(255,194,61,.14),transparent 60%),var(--card,#132235)}
 .bb-pre b{font:800 1.15rem/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#FFC23D}.bb-pre span{opacity:.8}
@@ -1525,7 +1542,8 @@ const hash=s=>[...String(s)].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
 const LOGO_ALIAS={'Army and Navy Academy':'Army-Navy','Central Union':'Central','Christian High':'Christian','Mount Carmel':'Mt. Carmel','San Diego High':'San Diego','Southwest San Diego':'Southwest SD','Southwest (El Centro)':'Southwest EC'};
 const logoFor=s=>{const L=window.SCHOOL_LOGOS||{};return L[s]||L[LOGO_ALIAS[s]]||''};
 const slogo=(s,size=18)=>{const u=logoFor(s);return u?`<img class="slogo" src="${u}" alt="" width="${size}" height="${size}">`:''};
-const av=(name,seed,size=40)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);return `<span class="av" style="--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px" aria-hidden="true">${esc(ini)}${u?`<img class="avl" src="${u}" alt="">`:''}</span>`};
+const _pwRim=(name,seed)=>{try{const i=weekTop().list.findIndex(x=>x.p.name===name&&(x.p.school===seed||x.p.key===seed));return i<0?'':i===0?' rim-g':' rim-s'}catch(_){return''}};
+const av=(name,seed,size=40)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);return `<span class="av${_pwRim(name,seed)}" style="--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px" aria-hidden="true">${esc(ini)}${u?`<img class="avl" src="${u}" alt="">`:''}</span>`};
 /* position filters: offense by position, defense by group (DB covers CB, S and plain DB) */
 const FILTERS=['ALL','PG','SG','SF','PF','C'];
 const FLABEL={ALL:'All'};
@@ -1800,7 +1818,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v190 · Nov 5';
+const APP_BUILD='v191 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2660,7 +2678,7 @@ function viewSim(){
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
   const tab='off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
   const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p||SIM_UNIT(sl.k)!==tab)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
-    return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}${T10(p).replace('class="top10"','class="top10 sm"')}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
+    return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}${T10(p).replace(/class="top10/g,'class="top10 sm')}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
       <div class="sb-pts"><b>${f1(a.n?a.v/a.n:0)}<u>PPG</u></b><small>${f1(a.v)} pts<em> · ${a.n} gp</em></small></div>
       ${m.done?'':`<button class="sb-rs ${m.left[SIM_UNIT(sl.k)]>0&&!busy?'':'off'}" data-act="simRespin" data-i="${i}" ${m.left[SIM_UNIT(sl.k)]>0&&!busy?'':'disabled'} aria-label="Respin ${sl.label}">↻<span> Respin</span></button>`}</div></div>`};
   const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins</small><b>${m.left.off}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
@@ -3137,11 +3155,11 @@ function hotHTML(){
   const wt=weekTop(),pd=wt.list;if(!pd.length)return'';
   const AB={passYd:'pass yds',passTD:'pass TD',rushYd:'rush yds',rushTD:'rush TD',rec:'rec',recYd:'rec yds',recTD:'rec TD',tkl:'tkl',sack:'sacks',dInt:'INT',ff:'FF',fr:'FR',dTD:'def TD',retTD:'ret TD',fgm:'FG',xpm:'XP'};
   const sl=st=>Object.keys(AB).filter(k=>st&&st[k]>0).sort((x,y)=>Math.abs(st[y]*PTS[y])-Math.abs(st[x]*PTS[x])).slice(0,2).map(k=>`${st[k]>=1000?st[k].toLocaleString():st[k]} ${AB[k]}`).join(' · ');
-  const row=(x,k)=>{const g=x.p.games[wt.w-1];return `<button class="pw-r ${k===1?'gold':'silver'}" data-act="player" data-id="${esc(x.p.key)}">
-    <span class="pw-k">${k}</span>${av(x.p.name,x.p.school,36)}
-    <span class="pw-who"><b>${esc(x.p.name)}</b><small>${esc(x.p.school)} · ${esc(sl(g&&g.stat))}</small></span>
-    <span class="pw-pt">${f1(x.v)}</span></button>`};
-  return `<section class="card pw-card"><div class="pw-h"><h3>Players of the Game</h3><span>Game ${wt.w}</span></div>${pd.map((x,i)=>row(x,i+1)).join('')}</section>`;
+  const row=(x,k)=>{const g=x.p.games[wt.w-1],m=k===1?'gold':'silver';return `<button class="pw-r ${m}" data-act="player" data-id="${esc(x.p.key)}">
+    <span class="pw-k">${k}</span>${av(x.p.name,x.p.school,k===1?46:38)}
+    <span class="pw-who"><span class="pw-nm"><b>${esc(x.p.name)}</b><em class="top10 potw${k>1?' s':''}">POTW</em>${isT10(x.p)?'<em class="top10">TOP 10</em>':''}</span><small>${esc(x.p.school)} · ${esc(sl(g&&g.stat))}</small></span>
+    <span class="pw-pt">${f1(x.v)}<i>pts</i></span></button>`};
+  return `<section class="card pw-card"><div class="pw-h"><h3><span class="pw-bolt" aria-hidden="true">⚡</span>Players of the Game</h3><span class="pw-wk">Game ${wt.w}</span></div>${pd.map((x,i)=>row(x,i+1)).join('')}</section>`;
 }
 function viewLeague(){
   const schools=[...new Set(players().map(p=>p.school))].filter(Boolean).sort();
