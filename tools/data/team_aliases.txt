@@ -1,0 +1,12 @@
+# Other spellings of team names, one per line: Name as a source writes it=Name the app uses
+# A line only applies to the sport whose team list contains the name on the right.
+# tools/add_scores.py already ignores punctuation, 'High School', 'Saint'/'St.' and 'Mount'/'Mt.',
+# and matches a short name to a longer one when only one fits ('Cathedral' -> 'Cathedral Catholic').
+Army-Navy=Army and Navy Academy
+Army and Navy=Army and Navy Academy
+Army and Navy Academy=Army-Navy
+Army and Navy=Army-Navy
+Academy of Our Lady of Peace=Our Lady of Peace
+Preuss=Preuss UCSD
+The Preuss School=Preuss UCSD
+Francis Parker School=Francis Parker

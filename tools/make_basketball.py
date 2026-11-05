@@ -92,14 +92,20 @@ def assign_positions(rows):
 
 def load_games():
     """tools/data/bb_2627_games.txt: the real 2026-27 schedule from MaxPreps. First line NAMES:a|b|c, then one game per line
-    'MMDD HHMM home away' where home/away are an index into NAMES or ~Name for a school outside the list."""
+    'MMDD HHMM home away' where home/away are an index into NAMES or ~Name for a school outside the list.
+    A played game ends with the final score, home first: 'MMDD HHMM home away 64-58' (tools/add_scores.py writes these)."""
     lines = open(GAMES_FILE, encoding='utf-8').read().split('\n')
     names = lines[0][6:].split('|')
     nm = lambda t: t[1:] if t.startswith('~') else names[int(t)]
-    out, seen = [], set()
+    out, seen = [], {}
     for ln in lines[1:]:
         if not ln.strip():
             continue
+        sc = re.search(r' (\d{1,3})-(\d{1,3})$', ln)
+        hs = as_ = None
+        if sc:
+            hs, as_ = int(sc.group(1)), int(sc.group(2))
+            ln = ln[:sc.start()]
         md, hm, rest = ln.split(' ', 2)
         if rest.startswith('~'):                       # a school outside the list is the home team: '~Name 12'
             h, a = rest.rsplit(' ', 1)
@@ -111,11 +117,13 @@ def load_games():
         mo, dy = int(md[:2]), int(md[2:])
         d = datetime.date(2026 if mo >= 7 else 2027, mo, dy)
         key = (d, frozenset((h, a)))
-        if key in seen:
+        if key in seen:                                # the same game listed twice: keep the copy that has a score
+            if hs is not None and seen[key]['hs'] is None:
+                seen[key].update(h=h, a=a, hs=hs, **{'as': as_})
             continue
-        seen.add(key)
         w = PRIOR + 1 + (d - START).days // 7
-        out.append(dict(w=w, d=d.isoformat(), h=h, a=a, hs=None, **{'as': None}))
+        seen[key] = dict(w=w, d=d.isoformat(), h=h, a=a, hs=hs, **{'as': as_})
+        out.append(seen[key])
     out.sort(key=lambda g: (g['d'], g['h']))
     return out
 
@@ -170,7 +178,7 @@ def build_data():
 
 
 GAMES_JS = """<script>
-/* Real 2026-27 San Diego Section boys basketball schedule (MaxPreps). No scores yet: nothing has been played.
+/* Real 2026-27 San Diego Section boys basketball schedule (MaxPreps). Final scores are added by tools/add_scores.py as games are played.
    Week %(first)d is the week of %(start)s (weeks before it, if any, carry last season's averages). */
 (function(){
   var G=%(games)s, P=%(prior)d, W=%(weeks)d, st=new Date(%(sy)d,%(sm)d,%(sd)d), now=new Date();
@@ -246,7 +254,7 @@ def transform(s, mp, games, seeds, teams, prior):
     top10 = [k for k, _ in sorted(rank.items(), key=lambda kv: -kv[1])[:10]]
     s = line_replace(s, 'window.MAXPREPS=', 'window.MAXPREPS=' + json.dumps(mp, separators=(',', ':')) + ';')
     weeks = max(g['w'] for g in games)
-    g2 = [dict(w=g['w'], d=g['d'], h=g['h'], a=g['a'], hs=None, **{'as': None}) for g in games]
+    g2 = [dict(w=g['w'], d=g['d'], h=g['h'], a=g['a'], hs=g['hs'], **{'as': g['as']}) for g in games]
     s = rep(s, '<script src="games.js" onerror="void 0"></script>',
             GAMES_JS % dict(games=json.dumps(g2, separators=(',', ':')), prior=PRIOR, first=PRIOR + 1, weeks=weeks,
                             start=START.isoformat(), sy=START.year, sm=START.month - 1, sd=START.day,

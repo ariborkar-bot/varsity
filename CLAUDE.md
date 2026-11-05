@@ -26,8 +26,13 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - Positions: MaxPreps gives PG/SG/SF/PF/C, G, F, W or blank; `assign_positions()` infers the rest from stats.
 - 11 small schools now have empty rosters (all seniors); 24 have fewer than 5 players.
 
+## Daily score update
+- A Claude scheduled task ("Varsity daily scores", 5:41 am Pacific every day) finds final scores in news scoreboards (High School On SI, local papers) and adds them with `tools/add_scores.py`. It does not scrape MaxPreps: from the cloud MaxPreps pages come back about a year stale, and automated scraping breaks their terms.
+- `tools/add_scores.py` (read its docstring): input lines `fb|YYYY-MM-DD|home|hs|away|as|source`; fills scores for scheduled games, adds unscheduled games that involve a San Diego Section school, reports CONFLICT/SKIPPED and never guesses. `--pending` lists played games with no score, `--names fb|bb` lists team names, `--dry-run` previews. Other spellings go in `tools/data/team_aliases.txt`.
+- Football scores live in `games.js`; basketball scores are a trailing `64-58` (home first) on a line of `tools/data/bb_2627_games.txt`, read by `load_games()` and passed through to `basketball.html`.
+- Player stats are not updated automatically (news sources rarely publish full box scores). The owner is asking MaxPreps/PlayOn for a data license and ScoreStream for an API quote; the owner wants to expand the app to the whole U.S. The app is free, with no purchases and no gambling.
+
 ## Open items and ideas
-- Scores are not read yet. When games are played, `tools/data/bb_2627_games.txt` and `load_games()` need a score field. A daily update was discussed: either a Claude scheduled task (needs a paid plan in the session) or a GitHub Actions cron job that pulls scores from MaxPreps and pushes. MaxPreps rarely has real per-game box scores, so player stats would stay season averages for most schools. Automated scraping may break MaxPreps' terms and may get blocked; tell the owner this.
 - Supabase: basketball uses `bb_`-prefixed collections. Row-level security for them is unverified.
 - Home/away follows MaxPreps entry order and is unverified.
 - Bishop's and 38 other schools have no stats on MaxPreps.
