@@ -920,7 +920,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .mast .wk,.mast .bell{background:rgba(4,22,10,.78)!important;border:1px solid rgba(255,255,255,.28)!important}
 @media (min-width:760px){.tabs a:not([aria-current="page"]){background:rgba(4,22,10,.8)!important;border:1px solid rgba(255,255,255,.28)!important}.tabs a:not([aria-current="page"]):hover{background:rgba(10,45,20,.92)!important}}
 
-/* Stats page: list on the left, "Hot this game" beside it on a computer */
+/* Stats page: list on the left, "Hot right now" beside it on a computer */
 .st-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
 .st-grid>.lb{display:flex;flex-direction:column;gap:16px;min-width:0}
 .st-side{position:sticky;top:16px}
@@ -2658,8 +2658,8 @@ function hotHTML(){
   const ts=players().map(p=>({p,t:trend(p)})).filter(x=>x.t);
   const up=[...ts].filter(x=>x.t.d>0).sort((a,b)=>b.t.d-a.t.d).slice(0,3),dn=[...ts].filter(x=>x.t.d<0).sort((a,b)=>a.t.d-b.t.d).slice(0,3);
   if(!up.length)return'';
-  const col=(title,list,cls)=>`<div class="hotc"><h3>${title}</h3>${list.map(x=>`<button class="hotr" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,32)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><em class="tr ${cls}">${cls==='up'?'▲':'▼'} ${f1(Math.abs(x.t.d))}</em></button>`).join('')||'<span class="muted">Nobody yet</span>'}</div>`;
-  return `<section class="card hot-card"><div class="qh"><h3>Hot this game</h3><span class="pill approved">Recent form</span></div><div class="hot">${col('Hot right now',up,'up')}</div></section>`;
+  const col=(title,list,cls)=>`<div class="hotc">${title?`<h3>${title}</h3>`:''}${list.map(x=>`<button class="hotr" data-act="player" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,32)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></i></span><em class="tr ${cls}">${cls==='up'?'▲':'▼'} ${f1(Math.abs(x.t.d))}</em></button>`).join('')||'<span class="muted">Nobody yet</span>'}</div>`;
+  return `<section class="card hot-card"><div class="qh"><h3>Hot right now</h3><span class="pill approved">Recent form</span></div><div class="hot">${col('',up,'up')}</div></section>`;
 }
 function viewLeague(){
   const schools=[...new Set(players().map(p=>p.school))].filter(Boolean).sort();
