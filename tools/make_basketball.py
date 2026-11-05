@@ -7,14 +7,15 @@ San Diego Section rosters and season stats (tools/data/bb_2526_players.txt, from
 
 Run:  python3 tools/make_basketball.py            (writes basketball.html next to index.html)
 """
-import json, math, os, random, re, sys
+import datetime, json, math, os, random, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'index.html')
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'basketball.html')
 
-CUR = 7          # the placeholder season is "in week 7": weeks 1-6 are finished, 7-12 are still to play
-WEEKS = 12
+PRIOR = 4        # weeks 1-4 carry last season's (2025-26) per-game averages; the real 2026-27 games start at week 5
+START = datetime.date(2026, 11, 9)   # Monday of the week of the first 2026-27 game
+GAMES_FILE = os.path.join(ROOT, 'tools', 'data', 'bb_2627_games.txt')
 
 DATA = os.path.join(ROOT, 'tools', 'data', 'bb_2526_players.txt')
 POS5 = ['PG', 'SG', 'SF', 'PF', 'C']
@@ -88,6 +89,36 @@ def assign_positions(rows):
     return rows
 
 
+def load_games():
+    """tools/data/bb_2627_games.txt: the real 2026-27 schedule from MaxPreps. First line NAMES:a|b|c, then one game per line
+    'MMDD HHMM home away' where home/away are an index into NAMES or ~Name for a school outside the list."""
+    lines = open(GAMES_FILE, encoding='utf-8').read().split('\n')
+    names = lines[0][6:].split('|')
+    nm = lambda t: t[1:] if t.startswith('~') else names[int(t)]
+    out, seen = [], set()
+    for ln in lines[1:]:
+        if not ln.strip():
+            continue
+        md, hm, rest = ln.split(' ', 2)
+        if rest.startswith('~'):                       # a school outside the list is the home team: '~Name 12'
+            h, a = rest.rsplit(' ', 1)
+        else:                                          # '12 34' or '12 ~Name'
+            h, a = rest.split(' ', 1)
+        h, a = nm(h), nm(a)
+        if h == a:
+            continue
+        mo, dy = int(md[:2]), int(md[2:])
+        d = datetime.date(2026 if mo >= 7 else 2027, mo, dy)
+        key = (d, frozenset((h, a)))
+        if key in seen:
+            continue
+        seen.add(key)
+        w = PRIOR + 1 + (d - START).days // 7
+        out.append(dict(w=w, d=d.isoformat(), h=h, a=a, hs=None, **{'as': None}))
+    out.sort(key=lambda g: (g['d'], g['h']))
+    return out
+
+
 def build_data():
     r = random.Random(2026)
     real = load_real()
@@ -101,27 +132,7 @@ def build_data():
     mean = sum(live) / len(live)
     rating = {n: (max(-14, min(14, (v - mean) * .45)) if v > 0 else 0) for n, v in ppg.items()}
 
-    games, seen = [], set()
-    for w in range(1, WEEKS + 1):
-        for _ in range(80):
-            order = TEAMS[:]
-            r.shuffle(order)
-            pairs = [(order[i], order[i + 1]) for i in range(0, len(order) - 1, 2)]
-            if not any(frozenset(p) in seen for p in pairs):
-                break
-        for h, a in pairs:
-            seen.add(frozenset((h, a)))
-            if r.random() < .5:
-                h, a = a, h
-            g = dict(w=w, h=h, a=a, hs=None, **{'as': None}, dow=r.choice([0, 1, 1, 3, 3, 3]))
-            if w < CUR:
-                m = rating[h] - rating[a] + 3 + r.gauss(0, 10)
-                tot = max(90, min(170, r.gauss(122, 12)))
-                hs, as_ = round((tot + m) / 2), round((tot - m) / 2)
-                if hs == as_:
-                    hs += 1
-                g['hs'], g['as'] = hs, as_
-            games.append(g)
+    games = load_games()
 
     players, pid = [], 3000
     for t in real:
@@ -132,25 +143,25 @@ def build_data():
             if x['st'] and x['gp'] > 0:
                 # MaxPreps only has season averages for most teams: every finished week carries the per-game average,
                 # and the number of weeks follows games played so a player with 3 games counts for less than one with 30.
-                nw = min(CUR - 1, max(1, round(x['gp'] / 5)))
+                nw = min(PRIOR, max(1, round(x['gp'] / 7)))
                 line = [x['st'][0], x['st'][1], x['st'][2], x['st'][3], x['st'][4], x['st'][5], x['st'][6]]
                 for wk in range(1, nw + 1):
                     w[str(wk)] = line
             players.append({'id': str(pid), 'n': x['n'], 's': t['name'], 'g': x['g'], 'p': x['p'], 'u': x['p'], 'w': w})
-    done = sum(1 for g in games if g['hs'] is not None)
-    mp = {'through': '2025-26 season', 'games': done, 'updated': 'MaxPreps 2025-26 season averages', 'players': players}
+    mp = {'through': '2025-26 season', 'games': 0, 'updated': 'MaxPreps 2025-26 season averages', 'players': players}
     seeds = sorted([n for n in TEAMS if ppg[n] > 0], key=lambda t: -rating[t])[:8]
-    return mp, games, seeds, TEAMS
+    prior = {n: round(rating[n], 1) for n in TEAMS if rating[n]}
+    return mp, games, seeds, TEAMS, prior
 
 
 GAMES_JS = """<script>
-/* PLACEHOLDER basketball schedule: made-up games between real San Diego Section schools, so the layout can be seen working.
-   Dates are set relative to today: weeks 1-%(prev)d are finished, week %(cur)d is next. */
+/* Real 2026-27 San Diego Section boys basketball schedule (MaxPreps). No scores yet: nothing has been played.
+   Weeks 1-%(prior)d hold last season's (2025-26) per-game averages; week %(first)d is the week of %(start)s. */
 (function(){
-  var G=%(games)s, cur=%(cur)d, now=new Date(), pad=function(n){return(n<10?'0':'')+n};
-  G.forEach(function(g){var t=new Date(now.getFullYear(),now.getMonth(),now.getDate()+(g.w-cur)*7+2+g.dow);
-    g.d=t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());delete g.dow});
-  window.BB_CUR=cur;
+  var G=%(games)s, P=%(prior)d, W=%(weeks)d, st=new Date(%(sy)d,%(sm)d,%(sd)d), now=new Date();
+  var wk=Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate())-st)/604800000);
+  window.BB_CUR=Math.max(P+1,Math.min(W,P+1+wk));
+  window.BB_PRIOR=%(prior_ratings)s;
   window.VARSITY_GAMES={games:G,brackets:[],bracketName:'CIF San Diego Section playoffs'};
 })();
 </script>"""
@@ -182,7 +193,7 @@ def rep(s, a, b, count=1):
     return s.replace(a, b)
 
 
-def transform(s, mp, games, seeds, teams):
+def transform(s, mp, games, seeds, teams, prior):
     # --- identity ---------------------------------------------------------------------------------------------
     s = rep(s, '<title>Varsity</title>', '<title>Varsity Basketball</title>')
     s = rep(s, '<h1>Varsity</h1><p>High school fantasy football</p>', '<h1>Varsity</h1><p>High school fantasy basketball</p>')
@@ -194,9 +205,18 @@ def transform(s, mp, games, seeds, teams):
 
     # --- data: baked-in placeholder players and games ------------------------------------------------------------
     s = line_replace(s, 'window.MAXPREPS=', 'window.MAXPREPS=' + json.dumps(mp, separators=(',', ':')) + ';')
-    g2 = [dict(w=g['w'], h=g['h'], a=g['a'], hs=g['hs'], **{'as': g['as']}, dow=g['dow']) for g in games]
+    weeks = max(g['w'] for g in games)
+    g2 = [dict(w=g['w'], d=g['d'], h=g['h'], a=g['a'], hs=None, **{'as': None}) for g in games]
     s = rep(s, '<script src="games.js" onerror="void 0"></script>',
-            GAMES_JS % dict(games=json.dumps(g2, separators=(',', ':')), cur=CUR, prev=CUR - 1))
+            GAMES_JS % dict(games=json.dumps(g2, separators=(',', ':')), prior=PRIOR, first=PRIOR + 1, weeks=weeks,
+                            start=START.isoformat(), sy=START.year, sm=START.month - 1, sd=START.day,
+                            prior_ratings=json.dumps(prior, separators=(',', ':'))))
+    s = rep(s, " The top 4 seeds in the 12-team divisions (II, III, IV) have a first-round bye.", " This bracket is a projection from last season's scoring until the real brackets are posted.")
+    s = rep(s, 'const WEEKS=12;', 'const WEEKS=%d;' % weeks)
+    s = rep(s, "if(fin.length<20){_rg={r:{},H:0,s:12};return _rg}",
+            "if(fin.length<20){_rg=window.BB_PRIOR?{r:window.BB_PRIOR,H:3,s:12}:{r:{},H:0,s:12};return _rg}")
+    s = rep(s, "const PO_DATES={r1:'2026-11-06',r2:'2026-11-13',r3:'2026-11-20',r4:'2026-11-27'};",
+            "const PO_DATES={r1:'2027-02-19',r2:'2027-02-23',r3:'2027-02-26',r4:'2027-03-01'};")
     s = rep(s, "x.n==='Amaree Maye'", "x.n==='nobody'")
 
     # --- positions, stats and scoring -------------------------------------------------------------------------------
@@ -240,7 +260,7 @@ def transform(s, mp, games, seeds, teams):
     s = rep(s, "L=Math.max(-35,Math.min(35,L));", "L=Math.max(-25,Math.min(25,L));")
 
     s = rep(s, "  const sample=!MP&&!S.settings.hideSample;",
-            "  b.push('<p class=\"note\"><span class=\"pill pending\">2025-26 stats</span><span>Players, grades, positions and per-game stats are real, from MaxPreps for the 2025-26 season (some schools did not enter full stats). The schedule and scores are placeholders until the new season is posted.</span></p>');\n  const sample=!MP&&!S.settings.hideSample;")
+            "  b.push('<p class=\"note\"><span class=\"pill pending\">2025-26 stats</span><span>Players, grades, positions and per-game stats are real, from MaxPreps for the 2025-26 season (some schools did not enter full stats). The schedule is the real 2026-27 schedule from MaxPreps. Scores appear as games are played.</span></p>');\n  const sample=!MP&&!S.settings.hideSample;")
 
     # --- lineups ------------------------------------------------------------------------------------------------
     s = between(s, 'const SLOTS_DRAFT=[', 'const slotOk',
@@ -284,7 +304,7 @@ def transform(s, mp, games, seeds, teams):
     # --- brackets: the football brackets name football seeds; basketball starts with none ------------------------------
     T = lambda i: "T(%s,%d)" % (json.dumps(seeds[i - 1]), i)
     s = between(s, 'const PO_DEFS=(()=>{', '\nfunction buildBrackets',
-                "const PO_DEFS=(()=>{const T=(n,s)=>({n,s}),W=(r,g)=>({from:[r,g]});return [{div:'Open Division',rounds:["
+                "const PO_DEFS=(()=>{const T=(n,s)=>({n,s}),W=(r,g)=>({from:[r,g]});return [{div:'Projected Open Division',rounds:["
                 "{name:'Quarterfinals',d:PO_DATES.r1,games:[[%s,%s],[%s,%s],[%s,%s],[%s,%s]]},"
                 "{name:'Semifinals',d:PO_DATES.r2,games:[[W(0,0),W(0,1)],[W(0,2),W(0,3)]]},"
                 "{name:'Championship',d:PO_DATES.r3,games:[[W(1,0),W(1,1)]]}]}]})();" % (T(1), T(8), T(4), T(5), T(2), T(7), T(3), T(6)))
@@ -384,8 +404,8 @@ COURT_URI = _court_uri()
 
 
 if __name__ == '__main__':
-    mp, games, seeds, teams = build_data()
+    mp, games, seeds, teams, prior = build_data()
     src = open(SRC, encoding='utf-8').read()
-    out = transform(src, mp, games, seeds, teams)
+    out = transform(src, mp, games, seeds, teams, prior)
     open(OUT, 'w', encoding='utf-8').write(out)
     print('wrote', OUT, len(out) // 1024, 'KB;', len(mp['players']), 'players,', len(games), 'games')

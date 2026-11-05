@@ -22,4 +22,8 @@ rebounds, assists, steals, blocks, turnovers and 3-pointers made). 127 schools, 
   (guards by assists, forwards by rebounds, blanks by their own stats, or evenly when there are none).
 - Some schools did not enter every stat, so those columns read 0.
 - Bishop's and 38 other schools have rosters but no stats entered.
-- The schedule and scores are still placeholders (generated from each team's real scoring).
+- `tools/data/bb_2627_games.txt` is the real 2026-27 schedule from MaxPreps (about 1,450 games, no scores yet). Weeks 1-4 are
+  the pseudo-weeks that carry last season's averages; the first real game week is week 5 (week of Nov 9, 2026).
+- Before 20 games have final scores, odds and spreads come from each team's 2025-26 scoring (`window.BB_PRIOR`).
+- The playoff bracket is a projection from the same ratings until the real brackets are posted.
+- When scores start to appear, scrape the new results into the games file (add `HS AS` to a line) and re-run the generator.
