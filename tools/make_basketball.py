@@ -154,9 +154,18 @@ def build_data():
                 for wk in range(1, nw + 1):
                     w[str(wk)] = line
             players.append({'id': str(pid), 'n': x['n'], 's': t['name'], 'g': x['g'], 'p': x['p'], 'u': x['p'], 'w': w})
+    # hidden preseason order: last season's fantasy points under the current scoring, weighted by games played.
+    # It never shows as a stat; it only decides who sits at the top while everyone is at 0.0.
+    rank = {}
+    for pl, x in [(pl, x) for pl, x in zip(players, [x for t in real for x in t['rows']])]:
+        if x['st'] and x['gp'] > 0:
+            ppg_, reb, ast, stl, blk, tov, tpm = x['st']
+            per = ppg_ + 1.2 * reb + 1.5 * ast + 3 * stl + 3 * blk - 2 * tov
+            rank['mp' + pl['id']] = round(per * min(4, max(1, round(x['gp'] / 7))), 1)
     mp = {'through': '2025-26 season', 'games': 0, 'updated': 'MaxPreps 2025-26 season averages', 'players': players}
     seeds = sorted([n for n in TEAMS if ppg[n] > 0], key=lambda t: -rating[t])[:8]
     prior = {n: round(rating[n], 1) for n in TEAMS if rating[n]}
+    mp['rank'] = rank
     return mp, games, seeds, TEAMS, prior
 
 
@@ -168,6 +177,7 @@ GAMES_JS = """<script>
   var wk=Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate())-st)/604800000);
   window.BB_CUR=Math.max(P+1,Math.min(W,P+1+wk));
   window.BB_PRIOR=%(prior_ratings)s;
+  window.BB_RANK=%(rank)s; window.BB_TOP10=%(top10)s;
   window.VARSITY_GAMES={games:G,brackets:[],bracketName:'CIF San Diego Section playoffs'};
 })();
 </script>"""
@@ -231,13 +241,16 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, '<a class="sport-opt" href="basketball.html', '<a class="sport-opt on" href="basketball.html')
 
     # --- data: baked-in placeholder players and games ------------------------------------------------------------
+    mp = dict(mp)
+    rank = mp.pop('rank', {})
+    top10 = [k for k, _ in sorted(rank.items(), key=lambda kv: -kv[1])[:10]]
     s = line_replace(s, 'window.MAXPREPS=', 'window.MAXPREPS=' + json.dumps(mp, separators=(',', ':')) + ';')
     weeks = max(g['w'] for g in games)
     g2 = [dict(w=g['w'], d=g['d'], h=g['h'], a=g['a'], hs=None, **{'as': None}) for g in games]
     s = rep(s, '<script src="games.js" onerror="void 0"></script>',
             GAMES_JS % dict(games=json.dumps(g2, separators=(',', ':')), prior=PRIOR, first=PRIOR + 1, weeks=weeks,
                             start=START.isoformat(), sy=START.year, sm=START.month - 1, sd=START.day,
-                            prior_ratings=json.dumps(prior, separators=(',', ':'))))
+                            prior_ratings=json.dumps(prior, separators=(',', ':')), rank=json.dumps(rank, separators=(',', ':')), top10=json.dumps(top10)))
     s = rep(s, " The top 4 seeds in the 12-team divisions (II, III, IV) have a first-round bye.", " This bracket is a projection from last season's scoring until the real brackets are posted.")
     s = rep(s, 'const WEEKS=12;', 'const WEEKS=%d;' % weeks)
     # preseason: nobody has played, so every player counts as one game of 0.0 (lists, pools and cards stay full).
@@ -245,8 +258,9 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, "function agg(p,scope){\n  const g=scoped(p,scope);\n",
             "let _pk=-1,_pv=true;\nfunction PRE(){if(_pk!==_rev){_pk=_rev;_pv=!players().some(p=>p.games.some(Boolean))}return _pv}\n"
             "function agg(p,scope){\n  const g=scoped(p,scope);\n  if(!g.length&&!p.sample&&PRE())return{n:1,s:sum([]),v:0,unv:false,ver:false};\n")
-    s = rep(s, "const isT10=p=>{if(!p||!p.key)return false;", "const isT10=p=>{if(!p||!p.key||PRE())return false;")
-    s = rep(s, ".filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a));", ".filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a)||x.p.name.localeCompare(y.p.name));")
+    s = rep(s, ".sort((a,b)=>b.a.v-a.a.v).slice(0,16)", ".sort((a,b)=>b.a.v-a.a.v||((window.BB_RANK||{})[b.p.key]||0)-((window.BB_RANK||{})[a.p.key]||0)).slice(0,16)")
+    s = rep(s, "const isT10=p=>{if(!p||!p.key)return false;", "const isT10=p=>{if(!p||!p.key)return false;if(PRE())return (window.BB_TOP10||[]).includes(p.key);")
+    s = rep(s, ".filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a));", ".filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a)||((window.BB_RANK||{})[y.p.key]||0)-((window.BB_RANK||{})[x.p.key]||0)||x.p.name.localeCompare(y.p.name));")
     s = rep(s, "if(fin.length<20){_rg={r:{},H:0,s:12};return _rg}",
             "if(fin.length<20){_rg=window.BB_PRIOR?{r:window.BB_PRIOR,H:3,s:12}:{r:{},H:0,s:12};return _rg}")
     s = rep(s, "const PO_DATES={r1:'2026-11-06',r2:'2026-11-13',r3:'2026-11-20',r4:'2026-11-27'};",

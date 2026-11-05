@@ -29,3 +29,5 @@ rebounds, assists, steals, blocks, turnovers and 3-pointers made). 127 schools, 
 - Scores are not read yet: once games are played, the games file and `load_games()` need a score field, then re-run the generator.
 
 Last season's stats are hidden in the basketball app: `SHOW_LAST_YEAR = False` in `tools/make_basketball.py`, so everyone starts at 0.0 and real 2026-27 games begin at game 1. The 2025-26 averages are still used to set positions and the preseason team ratings. While no player has a real stat line, every player counts as one 0.0 game (`PRE()`), so lists and pools stay full; that switches off by itself once real stats exist. Set the flag to `True` to bring the 2025-26 averages back.
+
+While everyone is at 0.0, the leaderboard order and the TOP 10 tags still follow last season: each player's 2025-26 fantasy points under the current scoring, weighted by games played (`window.BB_RANK`, `window.BB_TOP10`). This is only a sort order and is never shown as a stat. It stops mattering once real 2026-27 stats arrive.
