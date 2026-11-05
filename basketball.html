@@ -1704,7 +1704,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v177 · Nov 4';
+const APP_BUILD='v178 · Nov 4';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4129,26 +4129,17 @@ function sportCut(href,label,opt){
  let sd=5;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647,R=(a,b)=>a+rnd()*(b-a);
  /* ---- the intro's player rigs, copied from the intro ---- */
  const mn=Math.min,mx=Math.max;
-     const fig2=c=>{const kit=!!c.kit,bs=kit?c.jd:c.skd,fs=kit?c.j:c.skin,lb=kit?c.pd:c.skd,lf=kit?c.p:c.skin;
-      const ball=c.ball?(kit?'<g class="bl"><ellipse cx="62" cy="82.5" rx="9.4" ry="5.4" fill="#8B4A1E" transform="rotate(-18 62 82.5)"/><path d="M56.6 82L67.6 79.8M60 80.6v3.4M63 80v3.4M66 79.4v3.4" stroke="#fff" stroke-width="1.15" stroke-linecap="round"/></g>':'<g class="bl"><circle cx="61.5" cy="83" r="7.6" fill="#E8692B"/><path d="M53.9 83H69.1M61.5 75.4V90.6" stroke="#2a1205" stroke-width=".9"/><path d="M56.2 77.6Q61.5 83 56.2 88.4M66.8 77.6Q61.5 83 66.8 88.4" stroke="#2a1205" stroke-width=".8" fill="none"/></g>'):'';
-      const head=kit?`<circle cx="65" cy="26" r="11.8" fill="${c.h}"/><path d="M54 24Q65 12 76 24" stroke="${c.st}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M72 23Q81 27 76 37" stroke="#DCE6FF" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M73 29H79" stroke="#DCE6FF" stroke-width="1.6" stroke-linecap="round"/>`
-        :`<circle cx="65" cy="26" r="10.8" fill="${c.skin}"/><path d="M54.4 25Q54.6 13.5 66 14.6Q76.4 15.6 75.6 25Q70.4 19.6 63 21.4Q57.4 22.6 54.4 25Z" fill="${c.hair}"/><path d="M54.5 22.8Q65.4 17.2 75.7 22.6" stroke="${c.band}" stroke-width="2.7" fill="none" stroke-linecap="round"/><circle cx="71.4" cy="27" r="1.25" fill="#1a0f0a"/><path d="M71 31.6Q73 32.4 74.6 31.4" stroke="#6b3a2a" stroke-width="1" fill="none" stroke-linecap="round"/>`;
-      const sock=kit?'':'<path d="M57 93.5V99" stroke="#E9EEF7" stroke-width="7.2"/>';
-      return `<svg viewBox="0 0 120 120"><g class="pl" style="transform-origin:58px 100px">
-      <g class="aB" style="transform-origin:61px 44px"><path d="M61 44V61" stroke="${bs}" stroke-width="6.6" stroke-linecap="round"/><g class="fB" style="transform-origin:61px 61px"><path d="M61 61V77" stroke="${c.skd}" stroke-width="5.2" stroke-linecap="round"/>${kit?'':`<path d="M61 70.5V73.5" stroke="${c.band}" stroke-width="6"/>`}</g></g>
-      <g class="tB" style="transform-origin:57px 68px"><path d="M57 68V84" stroke="${lb}" stroke-width="${kit?9:8.2}" stroke-linecap="round"/>${kit?'':`<path d="M57 68V79" stroke="${c.pd}" stroke-width="10.6" stroke-linecap="round"/>`}<g class="sB" style="transform-origin:57px 84px"><path d="M57 84V99" stroke="${lb}" stroke-width="${kit?7.6:6.8}" stroke-linecap="round"/>${sock}<ellipse cx="60" cy="101" rx="8" ry="3.7" fill="${c.shoe}"/><path d="M52.5 103.3H67.5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" opacity="${kit?.25:1}"/></g></g>
-      <g class="tr" style="transform-origin:58px 70px"><path d="${kit?'M48.5 42Q60 36 71.5 42L68 70Q58.5 74.5 50 70Z':'M50 41.5Q60 37 70 41.5L67.5 70Q58.5 74.5 50.5 70Z'}" fill="${c.j}"/>${kit?'':`<path d="M55 40.2Q60 47.5 65.5 40.2Z" fill="${c.skin}"/><path d="M50.2 55L50.6 70" stroke="${c.num}" stroke-width="1.6"/>`}<rect x="55" y="50" width="8" height="11" rx="1.5" fill="${c.num}" opacity=".92"/><path d="M49 66H67.5V75Q58.5 79 49 75Z" fill="${c.p}"/><path d="M49.2 69H67.3" stroke="#fff" stroke-width="1.2" opacity=".6"/>${kit?`<path d="M48.5 42Q60 36 71.5 42L70.5 47Q60 41.5 49.5 47Z" fill="#fff" opacity=".22"/>`:''}</g>
-      <g class="tN" style="transform-origin:57px 68px"><path d="M57 68V84" stroke="${lf}" stroke-width="${kit?9.6:8.8}" stroke-linecap="round"/>${kit?'':`<path d="M57 68V79.5" stroke="${c.p}" stroke-width="11" stroke-linecap="round"/>`}<g class="sN" style="transform-origin:57px 84px"><path d="M57 84V99" stroke="${lf}" stroke-width="${kit?8.2:7.2}" stroke-linecap="round"/>${kit?'':'<path d="M57 93.5V99" stroke="#fff" stroke-width="7.6"/>'}<ellipse cx="60" cy="101" rx="8.4" ry="3.9" fill="${c.shoe}"/><path d="M52 103.4H68" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="${kit?.25:1}"/></g></g>
-      <path d="M62 37V43" stroke="${c.skin}" stroke-width="6" stroke-linecap="round"/>${head}
-      <g class="aN" style="transform-origin:61px 44px"><path d="M61 44V61" stroke="${fs}" stroke-width="7.2" stroke-linecap="round"/><g class="fN" style="transform-origin:61px 61px"><path d="M61 61V77" stroke="${c.skin}" stroke-width="5.6" stroke-linecap="round"/>${kit?'':`<path d="M61 70.5V73.5" stroke="${c.band}" stroke-width="6.4"/>`}<circle cx="61" cy="78" r="3.1" fill="${c.skin}"/>${ball}</g></g>
-    </g></svg>`};
-    const RECV={j:'#F2F6FF',jd:'#C3D2F2',p:'#2A4FC4',pd:'#2A4FC4',skin:'#D9A47A',skd:'#B98258',h:'#2F6BFF',st:'#fff',num:'#2F6BFF',shoe:'#10161f',kit:1,ball:1};
-    const CHASER={j:'#FFC23D',jd:'#D99A12',p:'#2B2F3A',pd:'#2B2F3A',skin:'#D9A47A',skd:'#B98258',h:'#F0A800',st:'#2B2F3A',num:'#2B2F3A',shoe:'#0a0f16',kit:1,ball:0};
-    const DUNKER={j:'#F4F8FF',num:'#2F6BFF',p:'#2A4FC4',pd:'#1C3A96',skin:'#9A6240',skd:'#7A4A30',hair:'#14100D',band:'#FFC23D',shoe:'#2F6BFF',ball:1};
-    const BLOCKER={j:'#FFC23D',num:'#2B2F3A',p:'#2B2F3A',pd:'#1B1E27',skin:'#D9A47A',skd:'#B98258',hair:'#3a2a1a',band:'#fff',shoe:'#F0A800',ball:0};
-
-
-   const PMS=360;
+  const fig=c=>`<svg viewBox="0 0 120 120"><g class="pl" style="transform-origin:58px 100px">
+    <g class="aB" style="transform-origin:61px 44px"><path d="M61 44V58" stroke="${c.jd}" stroke-width="7" stroke-linecap="round"/><g class="fB" style="transform-origin:61px 58px"><path d="M61 58V70" stroke="${c.skin}" stroke-width="5.5" stroke-linecap="round"/></g></g>
+    <g class="tB" style="transform-origin:57px 68px"><path d="M57 68V84" stroke="${c.pd}" stroke-width="9" stroke-linecap="round"/><g class="sB" style="transform-origin:57px 84px"><path d="M57 84V99" stroke="${c.pd}" stroke-width="8" stroke-linecap="round"/><ellipse cx="60" cy="101" rx="7.5" ry="3.4" fill="#10161f"/></g></g>
+    <g class="tr" style="transform-origin:58px 70px"><path d="M49 42Q60 35 70 42L67 70Q58 75 50 70Z" fill="${c.j}"/><rect x="55" y="50" width="8" height="11" rx="1.6" fill="${c.num}" opacity=".9"/><path d="M49 66H67V74Q58 78 49 74Z" fill="${c.p}"/><path d="M49 42Q60 35 70 42L69 47Q60 41 50 47Z" fill="#fff" opacity=".22"/></g>
+    <g class="tN" style="transform-origin:57px 68px"><path d="M57 68V84" stroke="${c.p}" stroke-width="9.5" stroke-linecap="round"/><g class="sN" style="transform-origin:57px 84px"><path d="M57 84V99" stroke="${c.p}" stroke-width="8.5" stroke-linecap="round"/><ellipse cx="60" cy="101" rx="7.5" ry="3.4" fill="#0a0f16"/></g></g>
+    <g class="aN" style="transform-origin:61px 44px"><path d="M61 44V58" stroke="${c.j}" stroke-width="7.5" stroke-linecap="round"/><g class="fN" style="transform-origin:61px 58px"><path d="M61 58V70" stroke="${c.skin}" stroke-width="5.8" stroke-linecap="round"/>${c.ball?'<g class="bl"><ellipse cx="62" cy="71" rx="9" ry="5.2" fill="#8B4A1E" transform="rotate(-18 62 71)"/><path d="M57 70.5L67 68.5" stroke="#fff" stroke-width="1.3"/></g>':''}</g></g>
+    <circle cx="65" cy="26" r="11.5" fill="${c.h}"/><path d="M54 24Q65 12 76 24" stroke="${c.st}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M72 23Q81 27 76 37" stroke="#DCE6FF" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M73 29H79" stroke="#DCE6FF" stroke-width="1.6" stroke-linecap="round"/>
+  </g></svg>`;
+  const CARRIER={j:'#F2F6FF',jd:'#C3D2F2',p:'#2A4FC4',pd:'#1C3A96',skin:'#D9A47A',h:'#2F6BFF',st:'#fff',num:'#2F6BFF',ball:1};
+  const DEFENDER={j:'#FFC23D',jd:'#D99A12',p:'#2B2F3A',pd:'#1B1E27',skin:'#D9A47A',h:'#F0A800',st:'#2B2F3A',num:'#2B2F3A',ball:0};
+ const PMS=360;
   const cycle=(root,carry)=>{
     const q=s=>root.querySelector(s),out=[],o=(ph,d)=>({duration:d||PMS,iterations:Infinity,delay:-ph*(d||PMS),easing:'linear'});
     const leg=(t,s,ph)=>{
@@ -4167,8 +4158,10 @@ function sportCut(href,label,opt){
  const anims=[];
  const track=(n,pts,fn,sh)=>{const t0=pts[0][0]+sh,t1=pts[pts.length-1][0]+sh;const a=n.animate(pts.map(p=>({offset:t1>t0?(p[0]+sh-t0)/(t1-t0):0,transform:fn(p),easing:p[2]||'ease-in-out'})),{delay:t0,duration:t1-t0,fill:'forwards'});anims.push(a);return a};
  const L=(r,sel,pts,sh)=>{const n=r.querySelector(sel);if(n)track(n,pts.map(p=>[p[0],p[1]]),p=>'rotate('+p[1]+'deg)',sh)};
- const mkSp=(c,flip,carry,run)=>{const d=document.createElement('div');d.style.cssText='position:absolute;left:0;top:0;width:100px;height:100px;transform-origin:48.33px 85px;display:none;will-change:transform';
-  d.innerHTML='<div style="width:100%;height:100%;transform-origin:48.33px 85px;'+(flip?'transform:scaleX(-1)':'')+'">'+fig2(c)+'</div>';const sv=d.querySelector('svg');sv.style.cssText='width:100%;height:100%;overflow:visible;display:block';sp.appendChild(d);if(run)cycle(d,carry);return d};
+ const bbl=d=>{const b=d.querySelector('.bl');if(b)b.innerHTML='<circle cx="62" cy="72" r="7.4" fill="#E8692B"/><path d="M54.6 72H69.4M62 64.6V79.4" stroke="#2a1205" stroke-width=".9"/><path d="M57 66.5Q62 72 57 77.5M67 66.5Q62 72 67 77.5" stroke="#2a1205" stroke-width=".8" fill="none"/>';return d};
+ const RECV=CARRIER,CHASER=DEFENDER,DUNKER=CARRIER,BLOCKER=DEFENDER;
+ const mkSp=(c,flip,carry,run,hoopBall)=>{const d=document.createElement('div');d.style.cssText='position:absolute;left:0;top:0;width:100px;height:100px;transform-origin:48.33px 85px;display:none;will-change:transform';
+  d.innerHTML='<div style="width:100%;height:100%;transform-origin:48.33px 85px;'+(flip?'transform:scaleX(-1)':'')+'">'+fig(c)+'</div>';if(hoopBall)bbl(d);const sv=d.querySelector('svg');sv.style.cssText='width:100%;height:100%;overflow:visible;display:block';sp.appendChild(d);if(run)cycle(d,carry);return d};
  /* paths: [t,x,y,rot,ease]; positions are in "sprite sides", y up */
  const run=(x0,x1)=>[[650,x0,0,0,'linear'],[2250,x1,0,0,'linear']];
  const dunk=(()=>{const q=[[2390,-1.5,.95,-4,'o'],[2560,-.95,1.25,-10,'i'],[2755,-.22,.78,8,'l'],[2770,-.22,.78,8,'l'],[3070,-.2,.68,10,'i'],[3290,-.55,0,0,'o'],[3410,-.6,0,0,'l']];return q})();
@@ -4183,7 +4176,7 @@ function sportCut(href,label,opt){
  let c1,d1,c2,d2;
  if(toB){/* football kit players run in, the intro's dunker and blocker take over */
   c1=act(mkSp(RECV,0,1,1),run(X0,XT),0,TM);d1=act(mkSp(CHASER,0,0,1),run(X0-1.15,XT-1.1),0,TM,.14);
-  const dk=mkSp(DUNKER,0,1,1),bl=mkSp(BLOCKER,1,0,0);
+  const dk=mkSp(DUNKER,0,1,1,1),bl=mkSp(BLOCKER,1,0,0);
   c2=act(dk,cat(run(X0,XT),dunk),TM,3600);d2=act(bl,[[1000,bx0,0,0],[2460,bx0,0,0,'l'],[2560,bx0,.32,0,'i'],[2670,bx0+.05,.28,10,'i'],[2730,bx0+.08,.18,25,'i'],[2920,bx0+.5,-.1,85,'o'],[3170,bx0+.55,-.1,86]],TM,3600,.1);
   const S=775;
   L(dk,'.aN',[[1470,-24],[1650,95],[1800,165],[1950,192],[1990,225],[2300,210],[2500,230]],S);L(dk,'.fN',[[1470,-112],[1650,-60],[1800,-35],[1950,-8],[1990,-15],[2300,-8],[2500,-20]],S);
@@ -4197,7 +4190,7 @@ function sportCut(href,label,opt){
   L(bl,'.tN',[[1000,-30],[1690,-34],[1790,-55],[1960,-30],[2150,-15],[2400,-10]],S+270);L(bl,'.sN',[[1000,45],[1690,50],[1790,70],[1960,40],[2150,15],[2400,10]],S+270);
   L(bl,'.tB',[[1000,25],[1690,28],[1790,12],[1960,35],[2150,50],[2400,48]],S+270);L(bl,'.sB',[[1000,50],[1790,85],[1960,70],[2150,20],[2400,15]],S+270);L(bl,'.tr',[[1000,-4],[1790,-2],[1960,6],[2150,-14],[2400,-12]],S+270);
  }else{/* basketball players run in, the intro's receiver and chaser take over */
-  c1=act(mkSp(DUNKER,0,1,1),run(X0,XT),0,TM);d1=act(mkSp(BLOCKER,0,0,1),run(X0-1.15,XT-1.1),0,TM,.14);
+  c1=act(mkSp(DUNKER,0,1,1,1),run(X0,XT),0,TM);d1=act(mkSp(BLOCKER,0,0,1),run(X0-1.15,XT-1.1),0,TM,.14);
   const rc=mkSp(RECV,0,0,1),df=mkSp(CHASER,0,0,1);
   c2=act(rc,cat(run(X0,XT),grab.rc),TM,3600);d2=act(df,cat(run(X0-1.15,XT-.95),grab.df),TM,3600,.14);
   const S=D2;
@@ -4269,7 +4262,7 @@ function sportCut(href,label,opt){
   g.globalAlpha=1;
   /* ad boards */
   if(path3([[-34,0,3.6],[34,0,3.6],[34,.5,3.6],[-34,.5,3.6]])){g.fillStyle='#071235';g.fill()}
-  g.fillStyle='#FFC23D';for(let x=-27;x<27;x+=3.3){const p=pj(x,.25,3.6);if(!p)continue;const k=F/p[2];if(p[0]<-k*3||p[0]>W+k*3)continue;g.font='900 '+k*.26+'px '+fam;g.textAlign='center';g.textBaseline='middle';g.fillText('VARSITY',p[0],p[1])}
+  if(path3([[-34,.46,3.6],[34,.46,3.6],[34,.5,3.6],[-34,.5,3.6]])){g.fillStyle='#FFC23D';g.fill()}
   /* floor: the old surface everywhere, the new one growing out of the morph */
   const fromWood=!toB;FLOOR(fromWood);
   if(tr>=TM){const rr=(tr-TM)*.03;g.save();const pts=[];for(let i=0;i<60;i++){const a=i/60*TAU;pts.push([wipeX+Math.cos(a)*rr,0,Math.sin(a)*rr*.9])}
@@ -4293,10 +4286,10 @@ function sportCut(href,label,opt){
  let buzz=0;const vib=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(_){}};
  E(120,()=>{const p=wp(-5,2.5,4);ring(p[0],p[1],H*.55,120,'255,226,140',5);ring(p[0],p[1],H*.8,200,'255,255,255',2.5);spark(p[0],p[1],50,120,['255,214,110','255,255,255','150,190,255']);gem(p[0],p[1],14,120,0);buzz=1;vib(30)});
  E(TM,()=>{const p=wp(c1.x,.8,0);flash=1;ring(p[0],p[1],H*.8,TM,'255,226,140',6);ring(p[0],p[1],H*1.1,TM+60,'255,255,255',3);spark(p[0],p[1],70,TM,['255,214,110','255,255,255','150,190,255']);gem(p[0],p[1],34,TM,1);wipeX=c1.x;buzz=1.4;vib([30,20,40])});
- if(toB){E(2765,()=>{const p=wp(0,1.42,0);flash=1.4;ring(p[0],p[1],H*.7,2765,'255,214,120',7);ring(p[0],p[1],H*1,2825,'255,255,255',3);spark(p[0],p[1],90,2765,['255,214,110','255,255,255','255,150,60']);gem(p[0],p[1],50,2765,1);stamp('POSTERIZED!',2790,.2);buzz=2.4;excite=1;exT=2765;vib([40,30,60])});
+ if(toB){E(2765,()=>{const p=wp(0,1.42,0);flash=1.4;ring(p[0],p[1],H*.7,2765,'255,214,120',7);ring(p[0],p[1],H*1,2825,'255,255,255',3);spark(p[0],p[1],90,2765,['255,214,110','255,255,255','255,150,60']);gem(p[0],p[1],50,2765,1);buzz=2.4;excite=1;exT=2765;vib([40,30,60])});
   E(3000,()=>{const p=wp(.1,.1,0);ring(p[0],p[1],H*.5,3000,'255,190,120',3);gem(p[0],p[1],14,3000,0)})}
  else{E(2370,()=>{const p=wp(XT+.25,1.2,0);flash=.6;ring(p[0],p[1],H*.3,2370,'255,255,255',3);spark(p[0],p[1],20,2370,['255,255,255','170,205,255']);buzz=.6});
-  E(2530,()=>{const p=wp(XT+.57,1.2,0);flash=1.2;ring(p[0],p[1],H*.6,2530,'255,214,120',6);spark(p[0],p[1],60,2530,['255,214,110','255,255,255','150,190,255']);gem(p[0],p[1],30,2530,1);stamp('BIG CATCH!',2540,.2);excite=1;exT=2530;buzz=1.6;vib([30,20,40])});
+  E(2530,()=>{const p=wp(XT+.57,1.2,0);flash=1.2;ring(p[0],p[1],H*.6,2530,'255,214,120',6);spark(p[0],p[1],60,2530,['255,214,110','255,255,255','150,190,255']);gem(p[0],p[1],30,2530,1);excite=1;exT=2530;buzz=1.6;vib([30,20,40])});
   E(2575,()=>{const p=wp(XT+.5,.8,0);flash=1.6;ring(p[0],p[1],H*.75,2575,'255,255,255',7);spark(p[0],p[1],80,2575,['255,214,110','255,255,255','255,150,60']);gem(p[0],p[1],40,2575,1);buzz=2.6;vib([40,30,60])})}
  E(3350,()=>{conf.length=0;for(let i=0;i<110;i++)conf.push({x:R(0,W),y:R(-H*.3,-10),vy:R(.25,.7)*H,ph:R(0,6),c:['#FFC23D','#2F6BFF','#f4f6fb','#ff6a1a'][i&3],t0:3350+R(0,500)})});
  const pop=(txt,t0,t1,tr,y,size,fill,rot)=>{const t=tr-t0;if(t<0||t>t1-t0)return;f.font='italic 900 '+size+'px '+fam;const w=f.measureText(txt).width;if(w>W*.9)size*=W*.9/w;const u=cl(t/170,0,1),sc=u<1?1+(1-u)*.9:1+Math.sin(t*.012)*.012;
@@ -4313,18 +4306,14 @@ function sportCut(href,label,opt){
   if(lok())for(const q of gems){const t=(tr-q.t0)/1000;if(t<0||t*1000>q.life)continue;const u=t*1000/q.life,x=q.x+q.vx*t*.7,y=q.y+q.vy*t*.7+H*.5*t*t;f.save();f.globalAlpha=1-Math.pow(u,3);f.translate(x,y);f.rotate(q.rot+q.vr*t);const z=q.sz*(.6+.4*Math.min(1,u*5));f.drawImage(logo,-z/2,-z/2,z,z*logo.naturalHeight/logo.naturalWidth);f.restore()}
   /* hero finale: the gem and the sport */
   if(tr>3300){const a=sm((tr-3300)/420);f.fillStyle='rgba(3,8,26,'+.62*a+')';f.fillRect(0,0,W,H);
-   const cx=W/2,cy=H*.4,sz=mn(W*.62,H*.34)*bk((tr-3350)/520);
+   const cx=W/2,cy=H*.5,sz=mn(W*.7,H*.4)*bk((tr-3350)/520);
    f.save();f.globalCompositeOperation='lighter';f.translate(cx,cy);f.rotate(tr*.0004);for(let i=0;i<14;i++){f.rotate(TAU/14);f.fillStyle='rgba(255,200,90,'+.16*a+')';f.beginPath();f.moveTo(0,0);f.lineTo(H*.9,-H*.05);f.lineTo(H*.9,H*.05);f.fill()}f.restore();
    if(lok()){f.save();f.translate(cx,cy+Math.sin(tr*.004)*H*.006);f.shadowColor='rgba(110,170,255,.9)';f.shadowBlur=H*.05;f.drawImage(logo,-sz/2,-sz*logo.naturalHeight/logo.naturalWidth/2,sz,sz*logo.naturalHeight/logo.naturalWidth);f.restore()}
-   const tt=bk((tr-3550)/420);f.save();f.translate(cx,H*.67);f.scale(tt,tt);f.font='900 '+H*.085+'px '+fam;if(f.measureText(label).width>W*.9)f.font='900 '+H*.085*W*.9/f.measureText(label).width+'px '+fam;f.textAlign='center';f.textBaseline='middle';
-   const gr=f.createLinearGradient(0,-H*.05,0,H*.05);gr.addColorStop(0,'#fffbe6');gr.addColorStop(.5,'#FFC23D');gr.addColorStop(1,'#ff9f1c');f.lineJoin='round';f.lineWidth=H*.012;f.strokeStyle='#08113a';f.strokeText(label,0,0);f.fillStyle=gr;f.fillText(label,0,0);
-   f.font='700 '+H*.02+'px '+fam;f.fillStyle='#9FB3D9';f.fillText('VARSITY  •  HIGH SCHOOL FANTASY',0,H*.07);f.restore()}
+}
   for(const c of conf){const t=(tr-c.t0)/1000;if(t<0)continue;const y=c.y+c.vy*t,x=c.x+Math.sin(t*3+c.ph)*H*.03;if(y>H+20)continue;f.save();f.translate(x,y);f.rotate(t*5+c.ph);f.fillStyle=c.c;f.globalAlpha=cl((END-tr)/500,0,1);f.fillRect(-H*.008,-H*.014,H*.016,H*.028*Math.abs(Math.cos(t*6+c.ph)));f.restore()}
   f.globalAlpha=1;
   if(flash>.01){f.fillStyle='rgba(255,255,255,'+cl(flash,0,1)*.8+')';f.fillRect(0,0,W,H);flash*=Math.pow(.0016,dt/1000)}
   const bar=H*.07*sm(tr/400);f.fillStyle='#000';f.fillRect(0,0,W,bar);f.fillRect(0,H-bar,W,bar);
-  pop('FAST BREAK',950,1650,tr,H*.17,H*.07,'#FFC23D',-.06);
-  for(const s of stamps)pop(s.txt,s.t0,s.t1,tr,H*(s.y||.2)+H*.02,H*.1,'#FFC23D',-.08);
   if(tr>4650){f.fillStyle='rgba(255,255,255,'+sm((tr-4650)/330)+')';f.fillRect(0,0,W,H)}};
  let last=0,done=false,evI=0;
  const place=(o,tr)=>{const on=tr>=o.t0&&tr<o.t1;o.on=on;if(!on){o.el.style.display='none';return}
