@@ -2628,7 +2628,7 @@ function viewTeam(){
 function viewHub(){
   const pr=myProfile();
   const kind={player:'Athlete and fantasy manager',coach:'Coach or scorekeeper',fan:'Fantasy manager'};
-  const head=`<div class="head"><h2>Me</h2><p>Your account and school, then your own stats and where you rank.</p></div>`;
+  const head=`<div class="head"><h2>Account information</h2><p>Your Varsity profile and account.</p></div>`;
   const acct=pr?`<section class="card"><div class="qh"><h3>Your Varsity profile</h3></div>
       <div class="two"><div><span class="lbl">Name</span><h3>${esc(pr.name)}</h3><p class="muted">${kind[pr.role]||''}</p></div>
       <div><span class="lbl">School</span>${pr.school?`<p class="sch">${slogo(pr.school,28)}<b>${esc(pr.school)}</b></p><p class="muted">${esc((POS_ALL.find(x=>x[0]===(pr.posLabel||pr.pos))||[0,pr.posLabel||pr.pos||''])[1])}</p>`:'<p class="muted">Not set. Add your school to see your own stats on Me.</p>'}</div></div>
@@ -3228,10 +3228,11 @@ function meP(){
   const mp=c.find(p=>p.key===UI.meSide)||c.find(p=>p.pos===pr.pos)||c[0];
   return mp||players().find(p=>p.uid===ME.uid)||null;
 }
-function viewMeAll(){return viewHub()+viewMe()}
+function viewMeAll(){return viewMe()}
+function viewAccount(){return viewHub()}
 function viewMe(){
   const pr=myProfile();
-  const head=`<div class="head" style="margin-top:26px"><h2>My stats</h2><p>Your own stats, fantasy points, and where you rank at your school and across the San Diego Section.</p></div>`;
+  const head=`<div class="head"><h2>Me</h2><p>Your own stats, fantasy points, and where you rank at your school and across the San Diego Section.</p></div>`;
   if(pr&&pr.role==='player'&&pr.school&&!FIELDS[pr.pos])return head+`<p class="empty">Box scores don’t track stats for ${esc((POS_ALL.find(x=>x[0]===pr.posLabel)||[0,'your position'])[1].toLowerCase())} players, so there’s no fantasy stat line for you. You can still build lineups and play in leagues.</p><div class="btns"><button class="btn ghost" data-act="consent">Edit profile</button></div>`;
   if(!pr||pr.role!=='player'||!pr.school)return head+`<p class="empty">Play high school football? Add your school and position to see your own stats and where you rank.</p><div class="btns"><button class="btn" data-act="consent">${pr?'Add my school':ME.mode==='guest'?'Sign in to get started':'Get started'}</button></div>`;
   const me=meP()||{key:ME.uid,uid:ME.uid,name:pr.name,school:pr.school,pos:pr.pos,games:Array(WEEKS).fill(null)};
@@ -3613,7 +3614,7 @@ document.addEventListener('click',async e=>{
 });
 
 /* ---------- render ---------- */
-const VIEWS=['team','league','groups','games','minigames','simulate','me','scoring','admin','desk'];
+const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk'];
 const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
 function bannerHTML(){
   const b=[];
@@ -3660,7 +3661,7 @@ function chrome(v){
 }
 function render(){
   T10S=null;
-  const V={team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
+  const V={team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,scoring:viewScoring,admin:viewAdmin};
   let v=UI.view;
   $('#main').innerHTML=V[v]();
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
@@ -4162,7 +4163,7 @@ boot();
     const joined=typeof myProfile==='function'&&!!myProfile();
     m=document.createElement('div');m.className='setm';m.setAttribute('role','menu');
     m.innerHTML='<h4>Settings</h4>'+
-      '<a role="menuitem" href="#me">Me and account</a>'+
+      '<a role="menuitem" href="#account">Account information</a>'+
       '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':ME.mode==='guest'?'Sign in or create account':'Pick a name')+'</button>'+
       '<a role="menuitem" href="#scoring">Scoring rules</a>'+
       '<button role="menuitem" data-act="ntSettings">Notification settings</button>'+
