@@ -151,7 +151,13 @@ input[type=number]{width:100%}
 .sim-heads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .sim-ch{cursor:pointer;flex-direction:column;gap:5px;transition:background .2s,opacity .2s,box-shadow .2s,transform .2s}
 .sim-ch small{font:700 .66rem/1 var(--f-body);letter-spacing:.04em;text-transform:none;opacity:.85}
-.sim-ch[aria-selected="false"]{opacity:.55}
+.sim-ch[aria-selected="false"]{opacity:.8}
+.sim-ch.def.nudge{opacity:1;animation:simNudge 1.3s ease-in-out infinite}
+@keyframes simNudge{0%,100%{box-shadow:0 0 0 0 rgba(255,107,134,0)}50%{box-shadow:0 0 0 5px rgba(255,107,134,.45)}}
+.sim-ch .tapme{font-style:normal;display:inline-block;margin-left:6px;background:#FF6B86;color:#fff;border-radius:99px;padding:3px 7px;font-size:.62rem;letter-spacing:.06em;vertical-align:1px}
+.sim-unit-tag{position:absolute;left:10px;top:10px;z-index:3;font:900 .78rem/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border-radius:8px;background:rgba(47,107,255,.92);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.35);pointer-events:none}.sim-unit-tag.def{background:rgba(225,29,72,.92)}
+.sim-next{width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}.sim-next small{flex-basis:100%;font:700 .72rem/1 var(--f-body);letter-spacing:.02em;text-transform:none;opacity:.85}
+.sim-next.def{background:linear-gradient(180deg,#FF6B86,#E11D48)!important;color:#fff!important;border-color:#E11D48!important}
 .sim-ch:focus-visible{outline:2px solid #FFC23D;outline-offset:2px}
 .sim-ch.off[aria-selected="true"]{background:rgba(47,107,255,.34);border-color:#4B86FF;color:#fff;box-shadow:0 8px 22px -10px rgba(47,107,255,.8)}
 .sim-ch.def[aria-selected="true"]{background:rgba(244,63,94,.3);border-color:#FF6B86;color:#fff;box-shadow:0 8px 22px -10px rgba(244,63,94,.8)}
@@ -2098,7 +2104,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v224 · Nov 6';
+const APP_BUILD='v225 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2854,6 +2860,7 @@ function simStart(){
   const ex=new Set(),c=[];
   for(const sl of SIM_SLOTS){const pool=simPool(sl,ex);if(!pool.length){say('Not enough players to build a team yet');return}
     const p=pool[fcRnd(pool.length)];ex.add(simKey(p));c.push(p.key)}
+  UI.simSeenDef=false;UI.simTab='off';
   UI.sim={c,left:{off:SIM_RESPINS,def:0},done:false,seen:[...ex],flip:'deal',res:null};render();
   setTimeout(()=>{if(UI.sim&&UI.sim.flip==='deal'){UI.sim.flip=null;render()}},3600);
 }
@@ -2960,7 +2967,7 @@ function viewSim(){
   if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 5 spots: a starting five of PG, SG, SF, PF and C. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}${SIM_SLOTS.every(sl=>simPool(sl,new Set()).length)?'<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div>':'<p class="hint sim-wait">Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.</p>'}</section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
-  const tab='off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
+  const HASDEF=false,tab='off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
   const card=(k,i)=>{const p=pByKey(k),sl=SIM_SLOTS[i];if(!p||SIM_UNIT(sl.k)!==tab)return '';const a=agg(p,'season'),fl=dealing?{d:.6+i*.1}:(m.flip&&m.flip.i===i?{d:.3}:null),pos=SIM_POS[sl.k],nmp=String(p.name).trim().split(/\s+/),sn=nmp.length>1?nmp[0][0]+'. '+nmp.slice(1).join(' '):p.name;
     return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}${T10(p).replace(/class="top10/g,'class="top10 sm')}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
       <div class="sb-pts"><b>${f1(a.n?a.v/a.n:0)}<u>PPG</u></b><small>${f1(a.v)} pts<em> · ${a.n} gp</em></small></div>
@@ -2973,7 +2980,7 @@ function viewSim(){
       <div class="btns"><button class="btn" data-act="simSeason">Simulate a season</button><button class="btn ghost" data-act="simStart">Build another team</button></div></section>`}
   const act2=m.done?'':`<div class="bt-go" style="margin-top:14px"><button class="btn" data-act="simFinish" ${busy?'disabled':''}>Finish team</button><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Finish your team when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
   const stage=m.done&&m.stage==='pick'?simPickHTML(m):m.done&&m.stage==='season'&&m.season?simSeasonHTML(m):'';
-  return head+stage+(m.stage==='pick'?'':res)+`<section class="card fc-hero">${bar}<div class="sim-board sim-${tab}">${simField(tab)}${m.c.map(card).join('')}</div>${act2}</section>${board}`;
+  return head+stage+(m.stage==='pick'?'':res)+`<section class="card fc-hero">${bar}<div class="sim-board sim-${tab}">${simField(tab)}${HASDEF?`<div class="sim-unit-tag ${tab}">${tab==='def'?'Defense':'Offense'}</div>`:''}${m.c.map(card).join('')}</div>${HASDEF?(tab==='off'?`<button type="button" class="btn sim-next def" data-act="simTab" data-v="def">See your defense <span aria-hidden="true">→</span><small>${unitN('def')} players · ${f1(unitTot('def'))} pts</small></button>`:`<button type="button" class="btn ghost sim-next" data-act="simTab" data-v="off"><span aria-hidden="true">←</span> Back to your offense</button>`):''}${act2}</section>${board}`;
 }
 /* ---------- minigames: Pick 'em and 5 Card Draw ---------- */
 
@@ -4523,7 +4530,7 @@ function drawerHTML(p){
 }
 function openPlayer(key){
   const p=pByKey(key);if(!p)return;
-  const d=$('#drawer');d.dataset.id=key;d.innerHTML=drawerHTML(p);d.hidden=false;
+  const d=$("#drawer");d.dataset.id=key;{const h=drawerHTML(p);d.innerHTML=h;d.__html=h}d.hidden=false;
   const c=$('#dclose');if(c)c.focus();
   sheetPush();
 }
@@ -4534,7 +4541,9 @@ function sheetPush(){if(SHEET)return;try{history.pushState({sheet:1},'',location
 function sheetClose(){if(SHEET){try{history.back();return}catch(_){SHEET=false}}closePlayer();closeNotes()}
 window.addEventListener('popstate',()=>{if(SHEET){SHEET=false;closePlayer();closeNotes()}});
 function closePlayer(){const d=$('#drawer');d.hidden=true;d.innerHTML='';delete d.dataset.id}
-function refreshDrawer(){const d=$('#drawer');if(!d.hidden&&d.dataset.id){const p=pByKey(d.dataset.id);if(p){d.innerHTML=drawerHTML(p);const c=$('#dclose');if(c)c.focus()}else closePlayer()}}
+/* live refresh of an open player card: unchanged -> leave it alone; changed -> redraw but keep the scroll position (no focus jump) */
+function refreshDrawer(){const d=$('#drawer');if(!d.hidden&&d.dataset.id){const p=pByKey(d.dataset.id);if(!p){closePlayer();return}
+  const h=drawerHTML(p);if(h===d.__html)return;const sp=d.querySelector('.dp'),y=sp?sp.scrollTop:0;d.innerHTML=h;d.__html=h;const np=d.querySelector('.dp');if(np){np.style.animation='none';np.scrollTop=y}}}
 
 /* ---------- notifications ---------- */
 /* notification preferences, saved on this device. Sound is shared with the draft sounds switch. */
@@ -5220,13 +5229,19 @@ function chrome(v){
 let HOLD=(()=>{try{return sessionStorage.getItem('vs-intro')!=='1'&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!!document.getElementById('intro')&&!!document.createElement('i').animate}catch(_){return false}})();
 window.releaseHold=()=>{if(!HOLD)return;HOLD=false;try{render()}catch(_){}};
 setTimeout(()=>window.releaseHold(),9000);
-function render(){
+/* background refreshes (live data, the 20 s backstop) call render(true): when the page would come out exactly the same, the
+   DOM is left alone, so a scroll in progress is not interrupted and nothing rebuilds under your finger */
+let LAST_HTML='',LAST_V='';
+function render(bg){
   if(HOLD)return;
   T10S=null;POTW_C=null;
   if(location.hash==='#simulate'){UI.mtab='sim';history.replaceState(null,'','#minigames')}
   const V={team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,scoring:viewScoring,privacy:viewPrivacy,admin:viewAdmin};
   let v=UI.view;
-  $('#main').innerHTML=V[v]();
+  const html=V[v]();
+  if(bg===true&&html===LAST_HTML&&v===LAST_V){chrome(v);return}
+  LAST_HTML=html;LAST_V=v;
+  $('#main').innerHTML=html;
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
   /* week chip rows open scrolled to the selected week (the current game by default), not to Game 1 */
   document.querySelectorAll('#main .gm-wks,#main .wks,#main .gm-tabs').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
@@ -5242,8 +5257,15 @@ function touch(){
   maybeInitSeen();
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
-  requestAnimationFrame(()=>{rq=false;let v=UI.view;chrome(v);if(typing()){if(document.activeElement.id==='chat-in')refreshChat();dirty=true;return}render();if(!$('#drawer').hidden)refreshDrawer()});
+  /* a refresh that lands mid-swipe waits until the finger is up and the page has stopped scrolling */
+  const go=()=>{if(FINGER||Date.now()-LASTSCROLL<350){setTimeout(go,250);return}
+    rq=false;let v=UI.view;chrome(v);if(typing()){if(document.activeElement.id==='chat-in')refreshChat();dirty=true;return}render(true);if(!$('#drawer').hidden)refreshDrawer()};
+  requestAnimationFrame(go);
 }
+let FINGER=false,LASTSCROLL=0;
+addEventListener('touchstart',()=>{FINGER=true},{passive:true,capture:true});
+['touchend','touchcancel'].forEach(t=>addEventListener(t,()=>{FINGER=false},{passive:true,capture:true}));
+addEventListener('scroll',()=>{LASTSCROLL=Date.now()},{passive:true,capture:true});
 let pdown=false;['pointerdown'].forEach(t=>document.addEventListener(t,()=>{pdown=true},true));['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{pdown=false},true));
 /* a redraw that was held back while typing waits until a tap or click in progress has finished, so the tap is not lost */
 document.addEventListener('focusout',()=>{if(dirty){const go=()=>{if(pdown){setTimeout(go,60);return}if(!typing()){dirty=false;render()}};setTimeout(go,60)}});
@@ -6151,7 +6173,7 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     else if(a==='fcRedraw')fcRedraw(+t.dataset.i)
     else if(a==='simStart')simStart()
     else if(a==='simRespin')simRespin(+t.dataset.i)
-    else if(a==='simTab'){UI.simTab=t.dataset.v==='def'?'def':'off';render()}
+    else if(a==='simTab'){UI.simTab=t.dataset.v==='def'?'def':'off';if(UI.simTab==='def')UI.simSeenDef=true;render();if(t.classList.contains('sim-next')){const h=document.querySelector('.sim-heads');if(h)window.scrollTo({top:h.getBoundingClientRect().top+scrollY-90,behavior:'smooth'})}}
     else if(a==='simFinish')simFinish()
     else if(a==='simReset'){UI.sim=null;render()}
     else if(a==='simSeason'){if(UI.sim){UI.sim.stage='pick';render();window.scrollTo(0,0)}}

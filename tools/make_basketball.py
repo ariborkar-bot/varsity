@@ -420,7 +420,7 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     i = s.index('<div class="sim-heads" role="tablist" aria-label="Unit">')
     j = s.index('<div class="sim-board sim-${tab}">', i)
     s = s[:i] + s[j:]
-    s = rep(s, "const tab=UI.simTab==='def'?'def':'off',", "const tab='off',")
+    s = rep(s, "const HASDEF=SIM_SLOTS.some(x=>SIM_UNIT(x.k)==='def'),tab=UI.simTab==='def'&&HASDEF?'def':'off',", "const HASDEF=false,tab='off',")
 
     # --- Supabase: basketball keeps its own leagues, lineups, picks and settings. Accounts (profiles) are shared. ---------------
     i = s.index('function supaDb(sb){')
