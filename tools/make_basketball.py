@@ -323,6 +323,7 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, "San Diego high school fantasy football", "San Diego high school fantasy basketball")
     s = rep(s, "p.pos='QB';p.posLabel='QB'", "void 0")
     s = rep(s, "Default roster: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots.", "Default roster: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots.")
+    s = rep(s, "const FG_SPORT='fb';", "const FG_SPORT='bb';")
     s = rep(s, "Over or under on player stats like yards, touchdowns and tackles.", "Over or under on player stats like points, rebounds and assists.")
     s = rep(s, "Build your team opens once players have at least 2 games of stats.", "Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.")
     s = rep(s, "Default: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots.", "Default: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots.")

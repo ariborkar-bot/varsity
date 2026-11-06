@@ -1500,6 +1500,13 @@ html,body{overflow-x:clip;max-width:100%}
 }
 /* phones: a grab handle on sheets hints that they swipe down to close */
 @media (max-width:759px){.dr .dp{position:relative;touch-action:pan-y}.dr .dp::before{content:"";position:sticky;top:-12px;display:block;width:42px;height:5px;margin:-8px auto 8px;border-radius:99px;background:rgba(255,255,255,.28);flex:none;z-index:2}}
+/* Field Goal game: full-screen layer */
+.fgx{position:fixed;inset:0;z-index:90;background:#0b1626;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.fgx canvas{display:block;width:100%;height:100%}
+.fgx-x{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(5,12,30,.6);color:#fff;font:700 20px/1 system-ui;cursor:pointer}
+body.fg-on{overflow:hidden}
+.fg-card{text-align:center}.fg-hero{font-size:3rem;line-height:1;margin:4px 0 6px}
+:root{--sat:env(safe-area-inset-top,0px)}
 /* phones: lineup cards stack (name and tags full width, points on their own line, buttons below) so no words overlap */
 @media (max-width:759px){
   .lg-card:not(.bd-c):not(.empty){grid-template-columns:40px minmax(0,1fr);gap:8px 10px}
@@ -1943,7 +1950,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v203 · Nov 5';
+const APP_BUILD='v204 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2543,7 +2550,7 @@ const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad;if(sm)o.sim=sm;if(ad)o.ad=ad;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg;if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -3226,14 +3233,141 @@ async function playerCardBlob(p){
   g.textAlign='right';g.fillStyle='#fff';g.font=F(900,40,1);g.fillText('VARSITY',W-90,H-105);
   return await new Promise(r=>c.toBlob(r,'image/png'));
 }
+/* ---- Field Goal: tap to keep the ball in the air and kick it through the uprights (Flappy Bird style).
+   Normal goals score 1, narrow gold goals score 3. Touching a post, the ground or the top ends the run.
+   The game runs in its own full-screen layer, so app re-renders never interrupt it. ---- */
+const FG_SPORT='fb';
+const fgRec=u=>((S.picks[u]||{}).fg)||{};
+function fgHTML(){
+  const my=ME.uid?fgRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const rows=Object.keys(S.picks).map(u=>({u,b:+fgRec(u).best||0,t:+fgRec(u).t||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b||b.t-a.t).map(x=>({u:x.u,v:x.b+' pts · '+fgTime(x.t)}));
+  return `<section class="card fg-card"><div class="fg-hero" aria-hidden="true">${FG_SPORT==='bb'?'🏀':'🏈'}</div>
+    <h3>${FG_SPORT==='bb'?'Hoops':'Field Goal'}</h3>
+    <p class="muted">Tap to lift the ball, let go to drop. Fly it through the ${FG_SPORT==='bb'?'hoops':'uprights'}: a normal ${FG_SPORT==='bb'?'hoop':'goal'} is <b>1 point</b>, a narrow gold one is <b>3</b>. Hit anything else and the run is over. The clock shows how long you last.</p>
+    ${my.best?`<div class="fc-bar" style="grid-template-columns:repeat(3,1fr)"><div><small>Your best</small><b>${my.best}</b></div><div><small>Longest run</small><b>${fgTime(my.lt||my.t||0)}</b></div><div><small>Runs</small><b>${my.runs||1}</b></div></div>`:''}
+    <div class="fc-deal"><button class="btn" data-act="fgPlay">Play</button></div>${can?'':'<p class="hint">Sign in to save your best score.</p>'}</section>`
+    +mgBoard(FG_SPORT==='bb'?'Best Hoops runs':'Best Field Goal runs',rows);
+}
+const fgTime=s=>{s=Math.max(0,s||0);const m=Math.floor(s/60),r=s-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)};
+let FG=null;
+function fgOpen(){
+  if(FG)return;
+  const el=document.createElement('div');el.className='fgx';el.setAttribute('role','dialog');el.setAttribute('aria-label',FG_SPORT==='bb'?'Hoops':'Field Goal');
+  el.innerHTML='<canvas></canvas><button class="fgx-x" aria-label="Close game">✕</button>';
+  document.body.appendChild(el);document.body.classList.add('fg-on');
+  const cv=el.querySelector('canvas'),cx=cv.getContext('2d');
+  const g=FG={el,cv,cx,st:'ready',raf:0,last:0};
+  const size=()=>{const r=devicePixelRatio||1;g.W=innerWidth;g.H=innerHeight;cv.width=g.W*r;cv.height=g.H*r;cv.style.width=g.W+'px';cv.style.height=g.H+'px';cx.setTransform(r,0,0,r,0,0)};
+  size();g.onR=size;addEventListener('resize',size);
+  fgReset();
+  const flap=e=>{if(e){if(e.target.closest&&e.target.closest('.fgx-x'))return;e.preventDefault()}
+    if(g.st==='ready'){g.st='play';g.t0=performance.now()}
+    if(g.st==='play'){g.vy=-g.s*7.2}
+    else if(g.st==='over'&&performance.now()-g.tEnd>600){fgReset()}};
+  g.flap=flap;
+  el.addEventListener('pointerdown',flap);
+  el.addEventListener('touchstart',e=>{if(!e.target.closest('.fgx-x'))e.preventDefault()},{passive:false});
+  g.key=e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();flap()}else if(e.key==='Escape')fgClose()};
+  addEventListener('keydown',g.key);
+  el.querySelector('.fgx-x').addEventListener('click',()=>fgClose());
+  g.vis=()=>{if(document.hidden&&g.st==='play'){g.paused=true}};document.addEventListener('visibilitychange',g.vis);
+  try{history.pushState({fg:1},'',location.href);g.hist=true}catch(_){}
+  g.last=performance.now();const loop=t=>{if(FG!==g)return;fgStep(Math.min(3,(t-g.last)/16.67));g.last=t;fgDraw();g.raf=requestAnimationFrame(loop)};g.raf=requestAnimationFrame(loop);
+}
+function fgReset(){
+  const g=FG;g.s=Math.max(.8,Math.min(1.35,g.H/700));   /* scale everything to the screen height */
+  g.st='ready';g.y=g.H*.45;g.vy=0;g.x=Math.min(g.W*.28,140);g.score=0;g.goals=0;g.posts=[];g.dist=0;g.t=0;g.rot=0;g.paused=false;g.next=g.W*.9;g.n=0;g.yl=0;
+}
+function fgClose(fromPop){
+  const g=FG;if(!g)return;FG=null;cancelAnimationFrame(g.raf);removeEventListener('resize',g.onR);removeEventListener('keydown',g.key);document.removeEventListener('visibilitychange',g.vis);
+  g.el.remove();document.body.classList.remove('fg-on');
+  if(g.hist&&!fromPop){try{history.back()}catch(_){}}
+  render();
+}
+window.addEventListener('popstate',()=>{if(FG)fgClose(true)});
+function fgStep(k){
+  const g=FG;if(g.paused){if(g.st==='play'){g.last=performance.now()}return}
+  const s=g.s,ground=g.H-Math.round(56*s);
+  if(g.st==='ready'){g.y=g.H*.45+Math.sin(performance.now()/300)*8;g.rot=0;return}
+  if(g.st!=='play'){if(g.y<ground-12*s){g.vy+=0.5*s*k;g.y+=g.vy*k}return}
+  g.t=(performance.now()-g.t0)/1000;
+  const speed=s*(2.8+Math.min(2.2,g.t/40));   /* speeds up slowly the longer you last */
+  g.vy=Math.min(g.vy+0.42*s*k,11*s);g.y+=g.vy*k;g.rot=Math.max(-.5,Math.min(1.2,g.vy/(10*s)));
+  g.dist+=speed*k;g.yl=(g.yl+speed*k)%(80*s);
+  for(const p of g.posts)p.x-=speed*k;
+  g.posts=g.posts.filter(p=>p.x>-80*s);
+  g.next-=speed*k;
+  if(g.next<=0){
+    g.n++;const small=g.n>2&&(g.n%4===0||Math.random()<.18);
+    const gap=(small?118:170)*s*(g.t>60?.94:1),top=60*s,bot=ground-30*s,c=top+gap/2+Math.random()*Math.max(10,bot-top-gap);
+    g.posts.push({x:g.W+30*s,c,gap,small,pts:small?3:1,done:false});
+    g.next=(230+Math.random()*60)*s;
+  }
+  const r=11*s;
+  if(g.y-r<0||g.y+r>ground)return fgOver();
+  for(const p of g.posts){
+    const pw=12*s,arm=26*s,t=p.c-p.gap/2,b=p.c+p.gap/2;
+    /* the post (upright) above and below the opening, plus the short crossbar ends at the opening */
+    const hits=[[p.x-pw/2,-9999,pw,t+9999],[p.x-pw/2,b,pw,9999],[p.x-arm,t-5*s,arm*2,6*s],[p.x-arm,b-1*s,arm*2,6*s]];
+    for(const[hx,hy,hw,hh]of hits){const nx=Math.max(hx,Math.min(g.x,hx+hw)),ny=Math.max(hy,Math.min(g.y,hy+hh));if((g.x-nx)**2+(g.y-ny)**2<r*r*.8)return fgOver()}
+    if(!p.done&&p.x<g.x){p.done=true;g.score+=p.pts;g.goals++;p.flash=1}
+  }
+}
+async function fgOver(){
+  const g=FG;g.st='over';g.tEnd=performance.now();g.vy=-3*g.s;
+  try{navigator.vibrate&&navigator.vibrate(60)}catch(_){}
+  const my=ME.uid?fgRec(ME.uid):{};g.newBest=g.score>(+my.best||0);
+  if(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'){
+    const t=Math.round(g.t*10)/10,nx={best:Math.max(+my.best||0,g.score),t:g.score>(+my.best||0)?t:(+my.t||0),lt:Math.max(+my.lt||0,t),runs:(+my.runs||0)+1,at:NOW()};
+    S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:nx};
+    try{await upsert('picks/'+ME.uid,{fg:nx})}catch(_){}
+  }
+}
+function fgDraw(){
+  const g=FG,c=g.cx,W=g.W,H=g.H,s=g.s,ground=H-Math.round(56*s),bb=FG_SPORT==='bb';
+  /* field or court */
+  if(bb){const gr=c.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#0b1a33');gr.addColorStop(1,'#14284a');c.fillStyle=gr;c.fillRect(0,0,W,H);
+    c.fillStyle='#c98a4b';c.fillRect(0,ground,W,H-ground);c.strokeStyle='rgba(0,0,0,.18)';c.lineWidth=2;for(let x=-g.yl;x<W;x+=40*s){c.beginPath();c.moveTo(x,ground);c.lineTo(x,H);c.stroke()}}
+  else{for(let i=0;i*40*s<H;i++){c.fillStyle=i%2?'#2f7a3a':'#2a7034';c.fillRect(0,i*40*s,W,40*s)}
+    c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=3*s;for(let x=-g.yl;x<W+80*s;x+=80*s){c.beginPath();c.moveTo(x,0);c.lineTo(x,ground);c.stroke()}
+    c.fillStyle='#1d4f26';c.fillRect(0,ground,W,H-ground);c.fillStyle='rgba(255,255,255,.85)';c.fillRect(0,ground,W,4*s)}
+  /* goals */
+  for(const p of g.posts){
+    const pw=12*s,arm=26*s,t=p.c-p.gap/2,b=p.c+p.gap/2,col=p.small?'#FFD54A':(bb?'#ff7a1a':'#f4f4f0'),edge=p.small?'#b88a00':(bb?'#b04a00':'#bdbdb5');
+    c.fillStyle=col;c.strokeStyle=edge;c.lineWidth=2;
+    c.fillRect(p.x-pw/2,-5,pw,t+5);c.strokeRect(p.x-pw/2,-5,pw,t+5);
+    c.fillRect(p.x-pw/2,b,pw,ground-b);c.strokeRect(p.x-pw/2,b,pw,ground-b);
+    c.fillRect(p.x-arm,t-5*s,arm*2,6*s);c.fillRect(p.x-arm,b-1*s,arm*2,6*s);
+    if(p.small){c.fillStyle='#FFD54A';c.font=`800 ${Math.round(15*s)}px system-ui,sans-serif`;c.textAlign='center';c.fillText('3',p.x,t-12*s)}
+    if(p.flash){c.fillStyle=`rgba(255,213,74,${p.flash})`;c.font=`900 ${Math.round(20*s)}px system-ui,sans-serif`;c.textAlign='center';c.fillText('+'+p.pts,p.x,p.c);p.flash=Math.max(0,p.flash-.03)}
+  }
+  /* ball */
+  c.save();c.translate(g.x,g.y);c.rotate(g.rot);
+  if(bb){const r=12*s;c.fillStyle='#e8762b';c.beginPath();c.arc(0,0,r,0,7);c.fill();c.strokeStyle='#2b1406';c.lineWidth=1.6*s;c.beginPath();c.arc(0,0,r,0,7);c.moveTo(-r,0);c.lineTo(r,0);c.moveTo(0,-r);c.lineTo(0,r);c.stroke()}
+  else{c.fillStyle='#8a4b22';c.beginPath();c.ellipse(0,0,16*s,10*s,0,0,7);c.fill();c.strokeStyle='#5a2e12';c.lineWidth=1.5*s;c.stroke();
+    c.strokeStyle='#fff';c.lineWidth=2*s;c.beginPath();c.moveTo(-6*s,0);c.lineTo(6*s,0);c.stroke();c.lineWidth=1.4*s;for(let i=-4;i<=4;i+=2.7){c.beginPath();c.moveTo(i*s,-3*s);c.lineTo(i*s,3*s);c.stroke()}
+    c.beginPath();c.moveTo(-15*s,-2*s);c.lineTo(-11*s,-3*s);c.moveTo(-15*s,2*s);c.lineTo(-11*s,3*s);c.moveTo(15*s,-2*s);c.lineTo(11*s,-3*s);c.moveTo(15*s,2*s);c.lineTo(11*s,3*s);c.stroke()}
+  c.restore();
+  /* scoreboard: points in the middle, clock on the left */
+  const top=Math.max(14,(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0)+14);
+  c.textAlign='center';c.fillStyle='#fff';c.strokeStyle='rgba(0,0,0,.5)';c.lineWidth=5;c.font=`900 ${Math.round(44*s)}px system-ui,sans-serif`;
+  c.strokeText(g.score,W/2,top+40*s);c.fillText(g.score,W/2,top+40*s);
+  c.textAlign='left';c.font=`800 ${Math.round(17*s)}px system-ui,sans-serif`;c.lineWidth=4;const tt='⏱ '+fgTime(g.t);c.strokeText(tt,14,top+20*s);c.fillText(tt,14,top+20*s);
+  const msg=(a,b)=>{c.fillStyle='rgba(5,12,30,.78)';const w=Math.min(W-40,330),h=b?150*s:96*s,x=(W-w)/2,y=g.st==='over'?H*.3:H*.58;c.beginPath();c.roundRect?c.roundRect(x,y,w,h,18):c.rect(x,y,w,h);c.fill();
+    c.fillStyle='#fff';c.textAlign='center';c.font=`900 ${Math.round(26*s)}px system-ui,sans-serif`;c.fillText(a,W/2,y+42*s);
+    if(b){c.font=`700 ${Math.round(15*s)}px system-ui,sans-serif`;b.split('\n').forEach((l,i)=>c.fillText(l,W/2,y+74*s+i*24*s))}};
+  if(g.st==='ready')msg('Tap to kick off',bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts');
+  else if(g.paused&&g.st==='play'){msg('Paused','Tap to keep going');}
+  else if(g.st==='over'){const my=ME.uid?fgRec(ME.uid):{};msg(g.newBest&&g.score>0?'New best!':'No good!',`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}\n${my.best?'Best: '+my.best+' pts':''}\nTap to try again`)}
+}
 function viewMini(){
-  const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
+  const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
-  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','10-0']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','10-0'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
-  return head+tabs+sub+(T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
+  return head+tabs+sub+(T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
 }
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
@@ -4541,6 +4675,7 @@ document.addEventListener('click',async e=>{
   else if(a==='lgSet'){UI.lgSet=!UI.lgSet;render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
   else if(a==='ltab'){UI.ltab=t.dataset.v;render()}
+  else if(a==='fgPlay')fgOpen();
   else if(a==='team'){UI.ttab='sched';location.hash='#team/'+encodeURIComponent(t.dataset.t)}
   else if(a==='ttab'){UI.ttab=t.dataset.v;render()}
   else if(a==='tback'){if(history.length>1)history.back();else location.hash='#games'}
