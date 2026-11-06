@@ -2110,7 +2110,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v233 · Nov 6';
+const APP_BUILD='v234 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2689,7 +2689,14 @@ let _fcBusy=false;
 async function fcDeal(){
   if(_fcBusy||ME.mode==='guest'||ME.mode==='readonly'||!ME.uid)return;
   const w=CURW();if(fcHand(ME.uid,w))return;_fcBusy=true;
-  try{const hand=fcDraw(fcPool(new Set()),FC_SIZE);if(hand.length<FC_SIZE){say(((GAMES&&GAMES.games)||[]).some(g=>g.w===w&&started(g))?'This game’s games have started. 5 Card Draw opens again once stats post.':'Not enough players to deal a hand yet');return}
+  try{
+    /* one hand per game, for good: always ask the server first, so a refresh (or a slow load) can never deal a second hand
+       over the one you already have */
+    let saved=null;
+    try{const d=await DB.doc('picks/'+ME.uid).get();saved=d.exists?(((d.data()||{}).fc)||{})[w]||null:null}
+    catch(_){say('Could not load your hand. Check your connection and try again.');return}
+    if(saved){fcSet(w,saved);say('You already have a hand for game '+w);return}
+    const hand=fcDraw(fcPool(new Set()),FC_SIZE);if(hand.length<FC_SIZE){say(((GAMES&&GAMES.games)||[]).some(g=>g.w===w&&started(g))?'This game’s games have started. 5 Card Draw opens again once stats post.':'Not enough players to deal a hand yet');return}
     const nx={h:hand,r:0,d:[],rd:[],at:NOW()};fcSet(w,nx);
     const t0=Date.now(),st=hand.map(()=>'back');UI.fcDeal={w,st};render();   /* five face-down cards, then they flip one by one */
     if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Your hand is dealt')){const f={...fcDoc(ME.uid)};delete f[w];S.picks[ME.uid].fc=f;UI.fcDeal=null}
@@ -2745,6 +2752,7 @@ function fcHTML(){
     ${wk.length>1?`<div class="chips" role="group" aria-label="Game">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">Game ${n}</button>`).join('')}</div>`:''}
     ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&bank?`<small>${bank} saved from before</small>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> ${left?`${Math.min(FC_BANK_MAX,left)} unused ${left===1?'redraw is':'redraws are'} saved for next game.`:'No redraws left to save.'}</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand${left?` · save ${Math.min(FC_BANK_MAX,left)} ${left===1?'redraw':'redraws'}`:''}</button></div>`):''}`
       :w!==cw?'<p class="hint">You had no hand that game.</p>'
+      :can&&!S.loaded.picks?`<div class="fc-deal"><p class="muted">Loading your hand…</p></div>`
       :can?`<div class="fc-deal"><p>You have not been dealt a hand for game ${cw} yet. Once dealt, your 5 cards are yours for the game.</p><button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
     <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS}">Game ${w}</button><button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
