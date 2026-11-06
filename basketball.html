@@ -1,4 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script>try{if(sessionStorage.getItem('vsCut')){sessionStorage.removeItem('vsCut');var d=document.documentElement;d.classList.add('cutin');setTimeout(function(){d.classList.remove('cutin')},700)}}catch(e){}</script><link rel="preload" href="logo.png" as="image"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.sport-sw{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(3,12,32,.72);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
+<!doctype html><html><head><meta charset=utf8><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script>try{if(sessionStorage.getItem('vsCut')){sessionStorage.removeItem('vsCut');var d=document.documentElement;d.classList.add('cutin');setTimeout(function(){d.classList.remove('cutin')},700)}}catch(e){}</script><link rel="preload" href="logo.png" as="image"><style>
+html,body{overscroll-behavior-y:contain}:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.sport-sw{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(3,12,32,.72);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
 .sport-opt{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;color:#cfe0ff;font:800 .72rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;min-height:32px}
 .sport-opt i{font-style:normal;line-height:1;display:grid}.sport-opt svg{width:19px;height:19px;display:block;transition:transform .25s}.sport-opt:hover svg{transform:rotate(-14deg) scale(1.12)}.sport-opt.on svg{animation:sportpop .7s cubic-bezier(.2,1.7,.4,1);filter:drop-shadow(0 0 4px rgba(255,255,255,.5))}@keyframes sportpop{from{transform:scale(.4) rotate(-120deg)}to{transform:none}}html.cutin,html.cutin body{background:#050b1e}html.cutin::after{content:'';position:fixed;inset:0;z-index:99999;background:#050b1e;pointer-events:none;animation:cutout .32s .05s ease-out forwards}@keyframes cutout{to{opacity:0;visibility:hidden}}
 .sport-opt.on{background:linear-gradient(180deg,#FFC23D,#FF9F1C);color:#1a1200}
@@ -1520,7 +1521,7 @@ html,body{overflow-x:clip;max-width:100%}
 /* the sheet scrolls: its sections keep their own height instead of being squeezed to fit (flex column + max-height) */
 .dp>*{flex-shrink:0}.dr .dp::before{content:"";position:sticky;top:-12px;display:block;width:42px;height:5px;margin:-8px auto 8px;border-radius:99px;background:rgba(255,255,255,.28);flex:none;z-index:2}}
 .tw-o{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
-.tw-note{font-size:.9rem;color:var(--muted);background:rgba(255,194,61,.08);border:1px solid rgba(255,194,61,.25);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:8px 0}.tw-note b{color:var(--ink,#fff)}
+.tw-note{font-size:.9rem;color:var(--muted);background:rgba(255,194,61,.08);border:1px solid rgba(255,194,61,.25);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:8px 0}.tw-note b{color:var(--ink,#fff)}.ppg-u{font-size:.55em;text-decoration:none;opacity:.7;margin-left:3px}
 /* admin dashboard */
 .adm-pill.r{background:#FDECEE;color:#D6334D}.adm-pill.x{background:#F1F3F8;color:#6B7189}
 .adm-alerts{display:grid;gap:8px;margin:-4px 0 16px}.adm-alert{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-radius:12px;padding:10px 14px;border:1px solid;cursor:pointer;font:600 13px/1.3 inherit}
@@ -2104,7 +2105,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v225 · Nov 6';
+const APP_BUILD='v226 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2847,6 +2848,8 @@ const SIM_UNIT=k=>'off';
 const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G:'#22A6D9',F:'#E8A317'};
 const simKey=p=>((p.name||'')+'|'+(p.school||'')).toLowerCase();
 const simTot=p=>agg(p,'season').v;
+/* points per game: the 10-0 leaderboard ranks teams by the players' combined PPG (owner, Nov 6), so games played don't decide it */
+const simPPG=p=>{const a=agg(p,'season');return a.n?a.v/a.n:0},teamPPG=c=>c.reduce((t,k)=>t+(pByKey(k)?simPPG(pByKey(k)):0),0);
 const simPool=(slot,ex)=>players().filter(p=>p.mp&&!ex.has(simKey(p))&&slotOk(slot,p)&&agg(p,'season').n>=2);
 /* the best team that could have been drawn: top player at each spot, FLEX goes to the best one left over */
 function simBest(){
@@ -2880,7 +2883,8 @@ async function simFinish(){
   m.done=true;m.res={total,max,pct:Math.min(1,total/max),beat:beat/N,best:b,mean,sd};render();
   if(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'){
     const old=simRec(ME.uid);
-    await act(()=>upsert('picks/'+ME.uid,{sim:{v:SIM_V,best:Math.max(+old.best||0,Math.round(total*10)/10),runs:(+old.runs||0)+1,last:Math.round(total*10)/10,max:Math.round(max*10)/10,at:NOW()}}),'Team saved');render()}
+    const ppg=Math.round(teamPPG(m.c)*10)/10;
+    await act(()=>upsert('picks/'+ME.uid,{sim:{v:SIM_V,best:Math.max(+old.best||0,Math.round(total*10)/10),bppg:Math.max(+old.bppg||0,ppg),lppg:ppg,runs:(+old.runs||0)+1,last:Math.round(total*10)/10,max:Math.round(max*10)/10,at:NOW()}}),'Team saved');render()}
 }
 /* the field: end zone with the Varsity wordmark and goal posts, mowed stripes, yard lines, hash marks, yard numbers with arrows,
    the line of scrimmage, the first-down line, and the opposite unit shown as faint markers */
@@ -2961,9 +2965,9 @@ function simPickHTML(m){
 function viewSim(){
   const m=UI.sim,my=ME.uid?simRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const head=`<div class="head"><h2>10-0</h2><p>Draw a 5-player team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
-  const myBest=my.best?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best team</small><b>${f1(my.best)}</b></div><div><small>Teams built</small><b>${my.runs||1}</b></div></div>`:'';
-  const rows=Object.keys(S.picks).map(u=>({u,b:+simRec(u).best||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
-  const board=mgBoard('Best simulated teams',rows);
+  const myBest=(my.bppg||my.best)?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best team</small><b>${my.bppg?f1(my.bppg)+'<u class="ppg-u">PPG</u>':'Build one to rank'}</b></div><div><small>Teams built</small><b>${my.runs||1}</b></div></div>`:'';
+  const rows=Object.keys(S.picks).map(u=>({u,b:+simRec(u).bppg||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)+' PPG'}));
+  const board=mgBoard('Best teams · points per game',rows);
   if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 5 spots: a starting five of PG, SG, SF, PF and C. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}${SIM_SLOTS.every(sl=>simPool(sl,new Set()).length)?'<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div>':'<p class="hint sim-wait">Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.</p>'}</section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
@@ -2972,10 +2976,10 @@ function viewSim(){
     return `<div class="sb-slot" style="left:${pos[0]}%;top:${pos[1]}%"><div class="fc-card sb-card ${fl?'fc-flip':''}" style="--pc:${SIM_COL[sl.label]};${fl?`animation-delay:${fl.d}s`:''}">${fl?'<div class="fc-cover">?</div>':''}${T10(p).replace(/class="top10/g,'class="top10 sm')}<span class="sim-pos">${sl.label}${sl.label==='FLEX'?`<i>${p.pos}</i>`:''}</span>${av(p.name,p.school,38)}<b class="sb-nm"><span class="n-s">${esc(sn)}</span><span class="n-l">${esc(p.name)}</span></b><small class="sb-sc">${esc(p.school)}</small>
       <div class="sb-pts"><b>${f1(a.n?a.v/a.n:0)}<u>PPG</u></b><small>${f1(a.v)} pts<em> · ${a.n} gp</em></small></div>
       ${m.done?'':`<button class="sb-rs ${m.left[SIM_UNIT(sl.k)]>0&&!busy?'':'off'}" data-act="simRespin" data-i="${i}" ${m.left[SIM_UNIT(sl.k)]>0&&!busy?'':'disabled'} aria-label="Respin ${sl.label}">↻<span> Respin</span></button>`}</div></div>`};
-  const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins</small><b>${m.left.off}</b></div><div><small>Spots</small><b>${m.c.length}</b></div></div>`;
+  const bar=`<div class="fc-bar"><div><small>Team total</small><b>${f1(total)}</b></div><div><small>Respins</small><b>${m.left.off}</b></div><div><small>Team PPG</small><b>${f1(teamPPG(m.c))}</b></div></div>`;
   let res='';
   if(m.done&&m.res){const r=m.res,pc=Math.round(r.pct*100),bt=Math.round(r.beat*100),gr=bt>=98?'S':bt>=90?'A':bt>=70?'B':bt>=40?'C':'D';
-    res=`<section class="card sim-res"><div class="sim-gr">${gr}</div><div><h3>${f1(r.total)} points</h3><p class="muted">Better than ${bt}% of randomly drawn teams. The best possible team scores ${f1(r.max)} points, and you got ${pc}% of that.${my.best&&my.best>=Math.round(r.total*10)/10?` Your best is ${f1(my.best)}.`:''}</p></div>
+    res=`<section class="card sim-res"><div class="sim-gr">${gr}</div><div><h3>${f1(teamPPG(m.c))} PPG <small class="muted">· ${f1(r.total)} season pts</small></h3><p class="muted">Better than ${bt}% of randomly drawn teams. The best possible team scores ${f1(r.max)} points, and you got ${pc}% of that.${my.best&&my.best>=Math.round(r.total*10)/10?` Your best is ${f1(my.best)}.`:''}</p></div>
       <details class="sim-opt"><summary>See the best possible team</summary>${r.best.list.map(x=>`<div class="bt-r"><b>${x.l} · ${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><b class="d">${f1(simTot(x.p))}</b></div>`).join('')}</details>
       <div class="btns"><button class="btn" data-act="simSeason">Simulate a season</button><button class="btn ghost" data-act="simStart">Build another team</button></div></section>`}
   const act2=m.done?'':`<div class="bt-go" style="margin-top:14px"><button class="btn" data-act="simFinish" ${busy?'disabled':''}>Finish team</button><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Finish your team when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
@@ -4854,9 +4858,9 @@ function admHTML(){
   const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',announce:'Announce',weekly:'Weekly',tools:'Tools'},nav=ADM_NAV.map(([k,l,d])=>`<button class="adm-nav ${P===k?'on':''}" data-admp="${k}" aria-current="${P===k?'page':'false'}" aria-label="${l}">${admIco(d)}<span class="adm-l">${l}</span><span class="adm-s">${SH[k]}</span></button>`).join('');
   const shell=body=>`<div class="adm" role="region" aria-label="Admin dashboard">
     <aside class="adm-side"><div class="adm-brand"><span class="adm-logo">V</span><b>Varsity</b><small>Admin</small></div><nav>${nav}</nav>
-      <div class="adm-side-foot"><a class="adm-nav" href="#me">${admIco('M15 18l-6-6 6-6')}<span>Back to app</span></a><button class="adm-nav" data-ad="lock">${admIco('M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z')}<span>Lock admin</span></button></div></aside>
+      <div class="adm-side-foot"><button class="adm-nav" data-ad="lock">${admIco('M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z')}<span>Lock admin</span></button></div></aside>
     <main class="adm-main"><header class="adm-top"><label class="adm-search">${admIco('M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3')}<input id="dash-q" type="search" placeholder="Search users by name, email or school" value="${esc(DASH.q)}"></label>
-      <div class="adm-top-r"><button class="adm-ibtn" data-dash="reload" title="Refresh">${admIco('M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5')}</button><span class="adm-me"><span class="adm-av">${esc(((S.profiles[ME.uid]||{}).name||'A').slice(0,1).toUpperCase())}</span><span class="adm-me-n">${esc((S.profiles[ME.uid]||{}).name||'Admin')}</span></span><a class="adm-exit" href="#me" aria-label="Exit admin and go back to the app">${admIco('M18 6L6 18M6 6l12 12')}<span>Exit</span></a></div></header>
+      <div class="adm-top-r"><button class="adm-ibtn" data-dash="reload" title="Refresh">${admIco('M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5')}</button><span class="adm-me"><span class="adm-av">${esc(((S.profiles[ME.uid]||{}).name||'A').slice(0,1).toUpperCase())}</span><span class="adm-me-n">${esc((S.profiles[ME.uid]||{}).name||'Admin')}</span></span><a class="adm-exit" href="#me" data-admexit="1" aria-label="Exit admin and go back to the app">${admIco('M18 6L6 18M6 6l12 12')}<span>Exit</span></a></div></header>
       ${ME.mode==='demo'?'<div class="adm-demo">Preview file: no real users here. The live site shows your real users.</div>':''}${DASH.err?`<div class="adm-demo err">${esc(DASH.err)}</div>`:''}
       ${body}</main></div>`;
   if(loading)return shell('<div class="adm-card"><p class="adm-mut">Loading…</p></div>');
@@ -5241,7 +5245,11 @@ function render(bg){
   const html=V[v]();
   if(bg===true&&html===LAST_HTML&&v===LAST_V){chrome(v);return}
   LAST_HTML=html;LAST_V=v;
+  /* redraws keep your place (10-0 respins used to jump the page up ~60 px: the description line showed for a moment, then folded away) */
+  const y0=scrollY;
   $('#main').innerHTML=html;
+  infoIcons();   /* fold the page description behind its "i" now, not after the browser has laid the page out with it showing */
+  if(scrollY!==y0)window.scrollTo(0,y0);
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
   /* week chip rows open scrolled to the selected week (the current game by default), not to Game 1 */
   document.querySelectorAll('#main .gm-wks,#main .wks,#main .gm-tabs').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
@@ -5269,8 +5277,13 @@ addEventListener('scroll',()=>{LASTSCROLL=Date.now()},{passive:true,capture:true
 let pdown=false;['pointerdown'].forEach(t=>document.addEventListener(t,()=>{pdown=true},true));['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{pdown=false},true));
 /* a redraw that was held back while typing waits until a tap or click in progress has finished, so the tap is not lost */
 document.addEventListener('focusout',()=>{if(dirty){const go=()=>{if(pdown){setTimeout(go,60);return}if(!typing()){dirty=false;render()}};setTimeout(go,60)}});
+/* the unlocked admin console is left only through its Exit button: Back, swipe-back and other links put you back on #admin */
+let ADM_LEAVE=false;
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-admexit]'))ADM_LEAVE=true},true);
 function route(){
   let v=location.hash.slice(1);if(v==='hub')v='me';
+  if(UI.view==='admin'&&ME.admin&&v!=='admin'&&v!=='desk'&&!ADM_LEAVE){try{history.pushState(null,'','#admin')}catch(_){location.hash='admin'}return}
+  ADM_LEAVE=false;
   if(v.startsWith('join=')){UI.joinCode=decodeURIComponent(v.slice(5)).toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,12);v='groups';try{history.replaceState(null,'','#groups')}catch(_){};if(UI.joinCode){try{localStorage.setItem('vs-invite',JSON.stringify({c:UI.joinCode,at:Date.now()}))}catch(_){}if(typeof runInvite==='function')runInvite()}}
   if(v.startsWith('team/')){try{UI.team=decodeURIComponent(v.slice(5))}catch(_){UI.team=''}v='team'}
   UI.view=viewOK(v)?v:'league';
@@ -5298,6 +5311,8 @@ document.addEventListener('click',e=>{
   const a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
   const v=a.getAttribute('href').slice(1);if(!viewOK(v))return;
   e.preventDefault();
+  if(UI.view==='admin'&&ME.admin&&v!=='admin'&&v!=='desk'&&!a.hasAttribute('data-admexit'))return;   /* admin: only Exit leaves */
+  ADM_LEAVE=false;
   /* each tab is its own history entry, so the phone's Back button goes to the previous tab.
      From an open sheet, the new tab takes the sheet's entry, so Back still lands on the tab before. */
   try{if(SHEET||location.hash==='#'+v)history.replaceState(null,'','#'+v);else history.pushState(null,'','#'+v)}catch(_){}
@@ -5939,8 +5954,8 @@ boot();
 })();
 </script>
 <script>
-/* pull down to refresh: drag down from the very top and let go past the line */
-(()=>{
+/* pull down to refresh: turned OFF (owner, Nov 6 2026: scrolling up should never refresh). Kept here in case it comes back. */
+(()=>{return;
   const el=document.createElement('div');el.id='ptr';el.setAttribute('aria-hidden','true');el.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>';document.body.appendChild(el);
   const T=110,blocked=t=>t&&t.closest&&t.closest('#gate,#drawer,#notif,#intro,.dd,.setm,.pk-bg,.cfm,input,select,textarea,.gm-wks,.gm-divs,.dr-tabs,.dr-pos,.tools .chips');
   let y0=null,dy=0,busy=false;
