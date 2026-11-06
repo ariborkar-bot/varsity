@@ -1,0 +1,66 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+.board{width:860px;padding:40px 46px;border-radius:30px;background:#090c12;border:10px solid #1c222e;box-shadow:0 0 0 4px #000,0 40px 120px rgba(0,0,0,.7)}
+.board .row{display:flex;justify-content:space-between;align-items:center}
+.board .lbl{font-family:BC;font-weight:800;font-size:64px;color:#e8eefc;letter-spacing:.06em}
+.board .num{font-family:'DejaVu Sans Mono',monospace;font-weight:700;font-size:170px;color:#ff3b2f;text-shadow:0 0 18px rgba(255,59,47,.9),0 0 50px rgba(255,59,47,.5);letter-spacing:.05em}
+.board .fin{font-family:BC;font-weight:900;font-size:70px;color:#FFC23D;text-shadow:0 0 18px rgba(255,194,61,.8);text-align:center;margin-top:10px;letter-spacing:.2em}
+.chat{position:absolute;width:820px;height:1500px;border-radius:70px;background:#000;overflow:hidden;box-shadow:0 0 0 8px #1a1d24,0 40px 120px rgba(0,0,0,.6)}
+.chat .top{height:230px;background:#141416;border-bottom:1px solid #222;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:22px;font-family:Inter,sans-serif;color:#fff}
+.chat .av{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#2F6BFF,#7aa2ff);display:grid;place-items:center;font-size:52px;margin-bottom:10px}
+.chat .nm{font-size:30px;font-weight:600}
+.msgs{padding:30px 28px;display:flex;flex-direction:column;gap:14px;font-family:Inter,sans-serif}
+.m{max-width:640px;padding:24px 34px;border-radius:48px;font-size:46px;line-height:1.25;color:#fff;transform-origin:left bottom}
+.m.in{background:#262628;align-self:flex-start;border-bottom-left-radius:12px}
+.m.out{background:#0A84FF;align-self:flex-end;border-bottom-right-radius:12px;transform-origin:right bottom}
+.who{font-size:26px;color:#8e8e93;margin:6px 0 -6px 26px;font-family:Inter}
+.m.img{padding:8px;background:#262628}
+.m.img img{width:620px;border-radius:34px;display:block}
+</style></head><body><div id="stage">
+<div class="full bg-field"></div><div class="full stripes"></div>
+</div><script src="lib.js"></script><script src="end.js"></script><script>
+const PX=220,PY=560,PS=.78;
+const board=el(`<div class="board"><div class="row"><div><div class="lbl">HOME</div><div class="num" id="hs">00</div></div><div style="text-align:right"><div class="lbl">GUEST</div><div class="num" id="gs">00</div></div></div><div class="fin" id="fin">4TH QTR</div></div>`);
+const pov=el(`<div class="tt" style="font-size:76px;width:1080px;text-align:center;line-height:1.15">POV: you went off<br>Friday night 🏈</div>`);
+const chat=el(`<div class="top"><div class="av">🏈</div><div class="nm">Varsity Squad ›</div></div><div class="msgs" id="ms">
+<div class="who" data-t="3.0">Jaylen</div><div class="m in" data-t="3.0">bro you’re on varsity 😭</div>
+<div class="m in img" data-t="3.7"><img src="/home/claude/mk/stills/potw_crop.png"></div>
+<div class="who" data-t="4.7">Marcus</div><div class="m in" data-t="4.7">PLAYER OF THE WEEK??</div>
+<div class="m in" data-t="5.3">53 points is actually crazy</div>
+<div class="m out" data-t="6.1">wait send the link 😂</div></div>`,'chat');
+const ph=phone();ph.style.transformOrigin='0 0';
+const head=el('','abs h1');st(head,{fontSize:'118px',width:'1080px',textAlign:'center',padding:'0 50px'});
+const tag=el(`<div class="tag" style="background:linear-gradient(90deg,#FFC23D,#FFE08A);color:#0B1626;font-size:96px;box-shadow:0 10px 40px rgba(255,194,61,.45)">POTW</div>`);
+const share=el(`<img src="/home/claude/mk/stills/share_potw.png" style="width:700px;border-radius:40px;box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 0 6px rgba(255,255,255,.08)">`);
+const cap=el('','abs tt');st(cap,{fontSize:'60px',width:'1080px',textAlign:'center',padding:'0 70px'});
+const end=endCard();const flash=el('','full');st(flash,{background:'#fff',opacity:0});
+const DUR=16.4,CUTS=[2.6,7.0,10.8,13.6];
+function H(t,a,b,html,size=118,y=200){if(t<a||t>=b)return;head.style.display='';const u=seg(t,a,a+.22,'back');head.innerHTML=html;head.style.fontSize=size+'px';tf(head,{y:y+(1-u)*60,s:lerp(1.3,1,u),o:Math.min(1,u*3)*(1-seg(t,b-.1,b))})}
+async function render(t){
+  const sh=shake(t);
+  /* scoreboard 0 - 2.6 */
+  const sb=t<2.6;board.style.display=pov.style.display=sb?'':'none';
+  if(sb){const h=Math.min(35,Math.floor(seg(t,.1,1.4,'out')*35)),g=28;document.getElementById('hs').textContent=String(h).padStart(2,'0');document.getElementById('gs').textContent=g;
+    document.getElementById('fin').textContent=t>1.45?'FINAL':'4TH QTR';const k=kick(t,1.45,22);
+    tf(board,{x:110+sh.x+k.x,y:820+sh.y+k.y,r:-2+sh.r,s:lerp(1.08,1,seg(t,0,2.6,'lin'))});tf(pov,{y:420,o:seg(t,.2,.45)})}
+  /* chat 2.6 - 7.0 */
+  const ch=t>=2.6&&t<7.0;chat.style.display=ch?'':'none';
+  if(ch){const u=seg(t,2.6,2.95,'back');tf(chat,{x:130+sh.x,y:lerp(1900,300,u)+sh.y,r:sh.r});
+    chat.querySelectorAll('[data-t]').forEach(m=>{const a=+m.dataset.t,k=seg(t,a,a+.22,'back');m.style.display=t>=a?'':'none';m.style.transform=`scale(${lerp(.4,1,k)})`;m.style.opacity=Math.min(1,k*2)})}
+  /* phone with leaderboard 7.0 - 10.8 */
+  const pn=t>=7.0&&t<10.8;ph.style.display=pn?'':'none';
+  if(pn){const u=seg(t,7.0,7.35,'back');let y=lerp(1900,PY,u),s=PS;const z=seg(t,7.4,7.8,'io')*(1-seg(t,9.3,9.7,'io'))*.8,fx=410,fy=1050;
+    y+=z*300;const zs=s*(1+z*.55),X=PX-(fx*zs-fx*s),Y=y-(fy*zs-fy*s);tf(ph,{x:X+sh.x,y:Y+sh.y,s:zs,r:sh.r});
+    const fi=t<9.5?0:Math.min(149,Math.round((t-9.5)*30*2.2));await setImg(ph.img,clip('stats_scroll',fi))}
+  const tg=t>=7.9&&t<9.4;tag.style.display=tg?'':'none';if(tg){const u=seg(t,7.9,8.12,'back');const k=kick(t,7.9,16);tf(tag,{x:640+k.x,y:1370+k.y,r:8,s:lerp(2.5,1,u),o:u>0?1:0})}
+  /* share 10.8 - 13.6 */
+  const sn=t>=10.8&&t<13.6;share.style.display=sn?'':'none';
+  if(sn){const u=seg(t,10.8,11.3,'back'),q=seg(t,13.3,13.6,'in');tf(share,{x:190+sh.x,y:lerp(1800,430,u)+sh.y-q*150,r:lerp(14,-3,u)+sh.r*2,s:lerp(.8,1,u),o:1-q})}
+  head.style.display='none';cap.style.display='none';
+  H(t,7.0,9.4,'WAKE UP <span class="gold">#1</span>',160,170);
+  H(t,9.4,10.8,'EVERY GAME <span class="gold">COUNTS</span>',118);
+  H(t,10.8,13.6,'NOW <span class="gold">FLEX</span> IT',140,170);
+  if(t>=11.5&&t<13.4){cap.style.display='';tf(cap,{y:1700});words(cap,t,[['your',11.5],['card',11.58],['is',11.64],['ready',11.7],['to',11.78],['post',11.84,'#FFC23D'],['📲',11.95]])}
+  showEnd(end,t,13.6);flashes(flash,t,CUTS);
+}
+</script></body></html>

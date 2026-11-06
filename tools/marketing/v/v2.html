@@ -1,0 +1,42 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css"></head><body><div id="stage">
+<div class="full bg-field"></div>
+</div><script src="lib.js"></script><script src="end.js"></script><script>
+/* Field Goal challenge: full-screen gameplay */
+const game=el('<img style="width:1080px;display:block">','abs');const gimg=game.querySelector('img');
+const shade=el('','full');st(shade,{background:'linear-gradient(180deg,rgba(5,8,15,.0) 0%,rgba(5,8,15,0) 100%)'});
+const hook=el(`<div class="h1" style="font-size:190px;text-align:center;width:1080px;line-height:.82;text-shadow:0 10px 40px rgba(0,0,0,.6)"><div id="h1">BET YOU</div><div id="h2">CAN’T GET</div><div id="h3" class="gold">PAST 10</div></div>`);
+const cap=el('','abs tt');st(cap,{fontSize:'62px',width:'1080px',textAlign:'center',padding:'0 80px',lineHeight:'1.15'});
+const badge=el(`<div class="tag" style="background:#FFC23D;color:#0B1626;font-size:64px">GOLD POSTS = 3 PTS</div>`);
+const ten=el(`<div class="h1 gold" style="font-size:300px;text-align:center;width:1080px;text-shadow:0 0 60px rgba(255,194,61,.6),0 12px 0 #0B1626">10!</div>`);
+const end=endCard();
+const ask=el(`<div class="tt" style="font-size:72px;width:1080px;text-align:center">drop your score 👇</div>`);
+const flash=el('','full');st(flash,{background:'#fff',opacity:0});
+const DUR=18.6,CUTS=[.05,15.6];
+async function render(t){
+  const sh=shake(t,.6);
+  /* gameplay: 0 - 14.6 (clip frames 0..449 at real speed, held at the end) */
+  const g=t<15.6;game.style.display=g?'':'none';
+  if(g){const fi=Math.min(449,Math.round(t*30));await setImg(gimg,clip('fg_play',fi));
+    const k=kick(t,.05,20);const zin=1.06-seg(t,0,1.2,'out')*.06;tf(game,{x:-(1080*zin-1080)/2+sh.x+k.x,y:-30+sh.y+k.y,s:zin});game.style.transformOrigin='0 0'}
+  st(shade,{opacity:1,background:t<2.4?'linear-gradient(180deg,rgba(5,8,15,.75) 0%,rgba(5,8,15,.35) 55%,rgba(5,8,15,0) 80%)':'linear-gradient(180deg,rgba(5,8,15,0) 70%,rgba(5,8,15,.55) 100%)'});
+  /* hook 0 - 2.4 */
+  const hk=t<2.4;hook.style.display=hk?'':'none';
+  if(hk){['h1','h2','h3'].forEach((id,i)=>{const s=seg(t,.05+i*.16,.2+i*.16,'out');const e=document.getElementById(id);e.style.transform=`scale(${lerp(2.6,1,s)}) skewX(-6deg)`;e.style.opacity=s>0?1:0});
+    const k=kick(t,.37,22);tf(hook,{x:k.x,y:330+k.y,o:1-seg(t,2.2,2.4)})}
+  /* captions */
+  cap.style.display='none';
+  const C=(a,b,list,y=1440)=>{if(t>=a&&t<b){cap.style.display='';tf(cap,{y,o:1-seg(t,b-.1,b)});words(cap,t,list)}};
+  C(2.5,5.0,[['tap',2.5],['to',2.58],['kick',2.64],['it',2.7],['through',2.76],['the',2.84],['uprights',2.9,'#FFC23D']]);
+  C(7.2,9.9,[['it',7.2],['gets',7.26],['faster',7.34,'#FFC23D'],['the',7.44],['longer',7.5],['you',7.58],['last',7.64],['😬',7.75]]);
+  C(11.4,14.2,[['hit',11.4],['the',11.46],['banner',11.52],['and',11.62],['it’s',11.68],['over',11.76,'#FF5A6E']]);
+  C(14.5,15.6,[['17',14.5,'#FFC23D'],['🔥',14.62],['your',14.8],['turn',14.9]]);
+  const bon=t>=5.6&&t<7.1;badge.style.display=bon?'':'none';
+  if(bon){const u=seg(t,5.6,5.8,'back');tf(badge,{x:250,y:1440,s:lerp(2,1,u),r:-4,o:(u>0?1:0)*(1-seg(t,6.9,7.1))})}
+  const tn=t>=10.1&&t<11.3;ten.style.display=tn?'':'none';
+  if(tn){const u=seg(t,10.1,10.32,'back');const k=kick(t,10.1,24);tf(ten,{x:k.x,y:620+k.y,s:lerp(2.4,1,u),o:(u>0?1:0)*(1-seg(t,11.1,11.3))})}
+  /* end */
+  showEnd(end,t,15.6);
+  const an=t>=16.4;ask.style.display=an?'':'none';if(an){const u=seg(t,16.4,16.7,'back');tf(ask,{y:1540,s:lerp(1.6,1,u),o:u>0?1:0})}
+  flashes(flash,t,CUTS);
+}
+</script></body></html>

@@ -1,0 +1,26 @@
+@font-face{font-family:BC;src:url(/home/claude/varsity/fonts/barlow-condensed-latin-900-italic.woff2);font-weight:900;font-style:italic}
+@font-face{font-family:BC;src:url(/home/claude/varsity/fonts/barlow-condensed-latin-900-normal.woff2);font-weight:900;font-style:normal}
+@font-face{font-family:BC;src:url(/home/claude/varsity/fonts/barlow-condensed-latin-800-normal.woff2);font-weight:800;font-style:normal}
+@font-face{font-family:BC;src:url(/home/claude/varsity/fonts/barlow-condensed-latin-700-normal.woff2);font-weight:700;font-style:normal}
+@font-face{font-family:JO;src:url(/home/claude/varsity/fonts/jost-latin-700-normal.woff2);font-weight:700}
+@font-face{font-family:JO;src:url(/home/claude/varsity/fonts/jost-latin-800-normal.woff2);font-weight:800}
+@font-face{font-family:JO;src:url(/home/claude/varsity/fonts/jost-latin-500-normal.woff2);font-weight:500}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#05080F}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#070B14;color:#fff;font-family:JO,Inter,sans-serif}
+.abs{position:absolute;left:0;top:0;will-change:transform,opacity}
+.full{position:absolute;inset:0}
+.bg-field{background:radial-gradient(120% 70% at 50% 35%,#13284a 0%,#0a1426 45%,#05080f 100%)}
+.stripes{background:repeating-linear-gradient(90deg,transparent 0 118px,rgba(255,255,255,.035) 118px 122px)}
+.vig{background:radial-gradient(90% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.55) 100%);pointer-events:none}
+#grain{position:absolute;inset:0;mix-blend-mode:overlay;opacity:.22;pointer-events:none}
+.phone{position:absolute;width:820px;height:1775px;border-radius:92px;background:#0b0d12;padding:22px;box-shadow:0 0 0 3px #2a2f3a,0 0 0 9px #11141b,0 40px 120px rgba(0,0,0,.65),0 0 140px rgba(47,107,255,.18)}
+.phone .scr{position:relative;width:100%;height:100%;border-radius:72px;overflow:hidden;background:#0B1626}
+.phone .scr img{position:absolute;left:0;top:0;width:100%;display:block}
+.phone .island{position:absolute;left:50%;top:40px;width:190px;height:54px;margin-left:-95px;border-radius:30px;background:#000;z-index:3}
+.h1{font-family:BC;font-weight:900;font-style:italic;text-transform:uppercase;line-height:.86;letter-spacing:-.01em}
+.gold{color:#FFC23D}.blue{color:#4F8BFF}
+.tt{font-family:JO;font-weight:800;color:#fff;-webkit-text-stroke:0;text-shadow:0 0 1px #000,3px 3px 0 #000,-3px 3px 0 #000,3px -3px 0 #000,-3px -3px 0 #000,0 4px 0 #000,0 -4px 0 #000,4px 0 0 #000,-4px 0 0 #000,0 10px 30px rgba(0,0,0,.5)}
+.pill{display:inline-block;background:#fff;color:#0B1626;border-radius:18px;padding:14px 26px;font-family:JO;font-weight:800}
+.tag{display:inline-block;font-family:BC;font-weight:900;font-style:italic;text-transform:uppercase;padding:6px 18px 4px;border-radius:10px}
+.center{left:50%;transform:translateX(-50%)}

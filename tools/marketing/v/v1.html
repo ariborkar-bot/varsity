@@ -1,0 +1,63 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css"></head><body><div id="stage">
+<div class="full bg-field"></div><div class="full stripes"></div>
+</div><script src="lib.js"></script><script>
+const PX=220,PY=560,PS=.78;              /* phone home spot */
+const ph=phone();ph.style.transformOrigin='0 0';
+const dim=el('','full');st(dim,{background:'rgba(5,8,15,.6)'});
+const hook=el(`<div class="h1" style="font-size:150px;text-align:center;width:1080px"><div id="a1">HIGH SCHOOL</div><div id="a2" class="gold">ATHLETES</div></div>`);
+const big=el(`<div class="h1" style="font-size:270px;text-align:center;width:1080px;line-height:.8"><div id="b1">SEARCH</div><div id="b2">YOUR</div><div id="b3" class="gold">NAME</div></div>`);
+const head=el('','abs h1');st(head,{fontSize:'118px',width:'1080px',textAlign:'center',padding:'0 50px'});
+const cap=el('','abs tt');st(cap,{fontSize:'58px',width:'1080px',textAlign:'center',padding:'0 70px',lineHeight:'1.15'});
+const ring=el(`<svg width="420" height="230" viewBox="0 0 420 230"><ellipse cx="210" cy="115" rx="196" ry="96" fill="none" stroke="#FFC23D" stroke-width="11" stroke-linecap="round" stroke-dasharray="1000" stroke-dashoffset="1000" id="rg" transform="rotate(-5 210 115)"/></svg>`);
+const arrow=el(`<svg width="200" height="160" viewBox="0 0 200 160"><path id="ar" d="M170 150 C 150 100, 110 60, 50 28" fill="none" stroke="#FFC23D" stroke-width="11" stroke-linecap="round" stroke-dasharray="300" stroke-dashoffset="300"/><path id="ah" d="M96 24 L50 28 L66 70" fill="none" stroke="#FFC23D" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" opacity="0"/></svg>`);
+const sticker=el(`<div class="tag" style="background:#FFC23D;color:#0B1626;font-size:70px;box-shadow:0 12px 40px rgba(0,0,0,.4)">#3 WR IN SAN DIEGO</div>`);
+const share=el(`<img src="/home/claude/mk/stills/share_wr.png" style="width:700px;border-radius:40px;box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 0 6px rgba(255,255,255,.08)">`);
+const end=el(`<div style="width:1080px;text-align:center"><img src="/home/claude/varsity/icons/icon-512-v2.png" style="width:300px;border-radius:70px;box-shadow:0 0 140px rgba(47,107,255,.6)"><div class="h1" style="font-size:230px;margin-top:40px">VARSITY</div><div style="font-family:JO;font-weight:700;font-size:56px;color:#C9D6EE;margin-top:14px">Fantasy for high school sports</div><div style="margin-top:60px"><span class="pill" style="font-size:60px;background:#FFC23D">Free · link in bio</span></div></div>`);
+const flash=el('','full');st(flash,{background:'#fff',opacity:0,mixBlendMode:'screen'});
+const CUTS=[1.0,2.6,7.0,10.4,13.4];
+function headline(t,a,b,html,size=118,y=230){if(t<a||t>=b)return false;const u=seg(t,a,a+.22,'back');head.innerHTML=html;head.style.fontSize=size+'px';tf(head,{y:y+(1-u)*60,s:lerp(1.3,1,u),o:Math.min(u*3,1)*(1-seg(t,b-.12,b))});return true}
+async function render(t){
+  const sh=shake(t);
+  /* hook */
+  const hk=t<2.6;hook.style.display=big.style.display=hk?'':'none';
+  if(hk){const a=seg(t,.03,.28,'back'),b=seg(t,.24,.5,'back');tf(hook,{x:sh.x,y:640+sh.y,o:t<1.0?1:0});
+    document.getElementById('a1').style.transform=`translateX(${(1-a)*-1000}px) skewX(-8deg)`;document.getElementById('a2').style.transform=`translateX(${(1-b)*1000}px) skewX(-8deg)`;
+    const k=kick(t,1.0,28);tf(big,{x:k.x+sh.x,y:430+k.y+sh.y,o:t>=1?1:0});
+    ['b1','b2','b3'].forEach((id,i)=>{const s=seg(t,1.0+i*.14,1.14+i*.14,'out');const e=document.getElementById(id);e.style.transform=`scale(${lerp(2.8,1,s)})`;e.style.opacity=s>0?1:0})}
+  /* phone */
+  let y=PY,s=PS,o=1,bl=0,fx=0,fy=0,z=0;
+  if(t<2.6){y=1250;s=.82;o=.55;bl=16}
+  else if(t<7.0){const u=seg(t,2.6,3.0,'back');y=lerp(1900,PY,u);z=seg(t,3.15,3.6,'io')*(1-seg(t,5.15,5.6,'io'));fx=410;fy=330}
+  else if(t<10.4){z=seg(t,7.05,7.4,'io')*(1-seg(t,8.9,9.3,'io'))*.9;fx=150;fy=310}
+  else{y=lerp(PY,2000,seg(t,10.4,10.75,'in'))}
+  const zs=s*(1+z*.55);const X=PX-(fx*zs-fx*s),Y=y-(fy*zs-fy*s);
+  tf(ph,{x:X+sh.x,y:Y+sh.y,s:zs,r:sh.r,o,blur:bl});ph.style.display=t<13.4?'':'none';
+  st(dim,{opacity:hk?1:0});
+  if(t<7.0){const fi=t<2.6?0:Math.min(138,Math.round((t-2.7)*30));await setImg(ph.img,clip('search',fi));ph.img.style.transform='none'}
+  else if(t<10.4){await setImg(ph.img,'/home/claude/mk/stills/card_wr_c.png');ph.img.style.transform=`translateY(${-seg(t,9.2,10.3,'io')*700}px)`}
+  /* text */
+  head.style.display='none';cap.style.display='none';
+  if(t>=1.55&&t<2.6){cap.style.display='';tf(cap,{y:1300});words(cap,t,[['you',1.55],['might',1.6],['already',1.66],['be',1.72],['on',1.78],['here',1.84],['👀',1.95]])}
+  const H=(a,b,h,sz,yy)=>{if(headline(t,a,b,h,sz,yy))head.style.display=''};
+  H(2.65,5.2,'TYPE YOUR <span class="gold">NAME</span>',128);
+  H(5.2,7.0,'THERE’S YOUR <span class="gold">FANTASY SCORE</span>',112);
+  H(7.0,8.5,'EVERY GAME.<br>EVERY STAT.',118,170);
+  H(8.5,10.4,'<span class="gold">REAL</span> POINTS.',140);
+  H(10.4,13.4,'SHARE YOUR <span class="gold">CARD</span>',128,160);
+  if(t>=11.3&&t<13.3){cap.style.display='';tf(cap,{y:1700});words(cap,t,[['flex',11.3],['on',11.38],['the',11.44],['group',11.5],['chat',11.58,'#FFC23D'],['😤',11.7]])}
+  /* callouts on the card */
+  const ron=t>=7.45&&t<9.0;ring.style.display=ron?'':'none';
+  if(ron){const zs2=PS*(1+.9*.55),sx=PX-(150*zs2-150*PS),sy=PY-(310*zs2-310*PS);
+    const cx=sx+(22+ (20*2.5)*(776/975))*zs2, cy=sy+(22+(148*2.5)*(776/975))*zs2;
+    tf(ring,{x:cx-85+sh.x,y:cy+5+sh.y,s:1,o:1-seg(t,8.7,9.0)});document.getElementById('rg').setAttribute('stroke-dashoffset',1000*(1-seg(t,7.45,7.85,'io')))}
+  const son=t>=7.9&&t<9.0;sticker.style.display=son?'':'none';arrow.style.display=son?'':'none';
+  if(son){const u=seg(t,7.9,8.12,'back');tf(sticker,{x:300,y:1240,s:lerp(2,1,u),r:-4,o:u>0?1:0,blur:0});tf(arrow,{x:250,y:1080,s:1,o:1});document.getElementById('ar').setAttribute('stroke-dashoffset',300*(1-seg(t,8.0,8.25)));document.getElementById('ah').setAttribute('opacity',t>8.22?1:0)}
+  /* share card */
+  const shn=t>=10.45&&t<13.45;share.style.display=shn?'':'none';
+  if(shn){const u=seg(t,10.45,10.95,'back'),q=seg(t,13.15,13.45,'in');tf(share,{x:190+sh.x,y:lerp(1800,430,u)+sh.y-q*150,r:lerp(14,-3,u)+sh.r*2,s:lerp(.8,1,u),o:1-q})}
+  /* end */
+  const en=t>=13.4;end.style.display=en?'':'none';
+  if(en){const u=seg(t,13.4,13.8,'back');tf(end,{y:lerp(560,480,u)+sh.y*.5,s:lerp(1.25,1,u),o:seg(t,13.4,13.6)})}
+  st(flash,{opacity:CUTS.map(c=>t>=c&&t<c+.12?(1-(t-c)/.12)*.5:0).reduce((a,b)=>Math.max(a,b),0)});
+}
+</script></body></html>

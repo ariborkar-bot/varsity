@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css"></head><body><div id="stage">
+<div class="full bg-field"></div><div class="full stripes"></div>
+</div><script src="lib.js"></script><script src="end.js"></script><script>
+const PX=220,PY=560,PS=.78;const ph=phone();ph.style.transformOrigin='0 0';
+const dim=el('','full');st(dim,{background:'rgba(5,8,15,.6)'});
+const hook=el(`<div class="h1" style="font-size:150px;text-align:center;width:1080px;line-height:.9"><div id="k1">FANTASY FOOTBALL</div><div id="k2" style="font-size:120px;color:#C9D6EE">BUT IT’S YOUR</div><div id="k3" class="gold" style="font-size:300px">SCHOOL</div></div>`);
+const head=el('','abs h1');st(head,{fontSize:'112px',width:'1080px',textAlign:'center',padding:'0 50px'});
+const cap=el('','abs tt');st(cap,{fontSize:'60px',width:'1080px',textAlign:'center',padding:'0 70px',lineHeight:'1.15'});
+const trio=el(`<div class="h1" style="font-size:196px;text-align:center;width:1080px;line-height:.95"><div id="w1">DRAFT.</div><div id="w2">TRASH TALK.</div><div id="w3" class="gold">WIN.</div></div>`);
+const end=endCard();const flash=el('','full');st(flash,{background:'#fff',opacity:0});
+const DUR=16.4,CUTS=[.05,2.5,5.8,9.0,11.8,13.6];
+function H(t,a,b,html,size=112,y=200){if(t<a||t>=b)return;head.style.display='';const u=seg(t,a,a+.22,'back');head.innerHTML=html;head.style.fontSize=size+'px';tf(head,{y:y+(1-u)*60,s:lerp(1.3,1,u),o:Math.min(1,u*3)*(1-seg(t,b-.1,b))})}
+function C(t,a,b,list,y=1700){if(t<a||t>=b)return;cap.style.display='';tf(cap,{y,o:1-seg(t,b-.1,b)});words(cap,t,list)}
+async function render(t){
+  const sh=shake(t);
+  const hk=t<2.5;hook.style.display=hk?'':'none';
+  if(hk){['k1','k2','k3'].forEach((id,i)=>{const s=seg(t,.05+i*.38,.2+i*.38,'out');const e=document.getElementById(id);e.style.transform=`scale(${lerp(2.4,1,s)}) skewX(-6deg)`;e.style.opacity=s>0?1:0});
+    const k=kick(t,.81,30);tf(hook,{x:sh.x+k.x,y:560+sh.y+k.y})}
+  /* phone */
+  let y=PY,s=PS,o=1,bl=0,src=null,pan=0;
+  if(t<2.5){y=1150;s=.85;o=.5;bl=14;src=clip('stats_scroll',0)}
+  else if(t<5.8){y=lerp(1900,PY,seg(t,2.5,2.9,'back'));src='/home/claude/mk/stills/leagues.png';pan=seg(t,3.4,5.6,'io')*900}
+  else if(t<9.0){src=clip('stats_scroll',Math.min(149,Math.round((t-5.8)*30*1.4)))}
+  else if(t<11.8){src='/home/claude/mk/stills/card_rb_c.png';pan=seg(t,9.8,11.6,'io')*650}
+  else{y=PY;o=.4;bl=16;src='/home/claude/mk/stills/card_rb_c.png';pan=650}
+  if(t>=13.6)o=0;
+  tf(ph,{x:PX+sh.x,y:y+sh.y,s,r:sh.r,o,blur:bl});if(src)await setImg(ph.img,src);ph.img.style.transform=`translateY(${-pan}px)`;
+  st(dim,{opacity:hk||(t>=11.8&&t<13.6)?1:0});
+  head.style.display='none';cap.style.display='none';
+  H(t,2.5,5.8,'START A <span class="gold">LEAGUE</span>',128);
+  C(t,3.0,5.8,[['invite',3.0],['the',3.08],['whole',3.14],['team',3.22],['🏈',3.34]]);
+  H(t,5.8,9.0,'DRAFT <span class="gold">REAL PLAYERS</span>',118);
+  C(t,6.3,9.0,[['from',6.3],['every',6.38],['school',6.46],['in',6.54],['your',6.6],['section',6.68,'#FFC23D']]);
+  H(t,9.0,11.8,'EVERY TD = <span class="gold">POINTS</span>',124);
+  C(t,9.4,11.8,[['draft',9.4],['the',9.48],['guy',9.54],['who',9.6],['picked',9.68],['you',9.76],['off',9.82],['last',9.9],['week',9.98],['😭',10.1]]);
+  const tr=t>=11.8&&t<13.6;trio.style.display=tr?'':'none';
+  if(tr){['w1','w2','w3'].forEach((id,i)=>{const s=seg(t,11.85+i*.45,12.0+i*.45,'out');const e=document.getElementById(id);e.style.transform=`scale(${lerp(2.4,1,s)}) skewX(-6deg)`;e.style.opacity=s>0?1:0});
+    const k=kick(t,12.75,26);tf(trio,{x:sh.x+k.x,y:560+sh.y+k.y})}
+  showEnd(end,t,13.6);flashes(flash,t,CUTS);
+}
+</script></body></html>

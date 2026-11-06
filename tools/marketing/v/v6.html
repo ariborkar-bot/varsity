@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css"></head><body><div id="stage">
+<div class="full bg-field"></div><div class="full stripes"></div>
+</div><script src="lib.js"></script><script src="end.js"></script><script>
+const PX=220,PY=560,PS=.78;const ph=phone();ph.style.transformOrigin='0 0';
+const dim=el('','full');st(dim,{background:'rgba(5,8,15,.6)'});
+const hook=el(`<div class="h1" style="font-size:150px;text-align:center;width:1080px;line-height:.9"><div id="k1">WAITING FOR</div><div id="k2" class="gold" style="font-size:172px">FRIDAY NIGHT?</div></div>`);
+const hook2=el(`<div class="tt" style="font-size:84px;width:1080px;text-align:center">play these 👇</div>`);
+const num=el('','abs h1');st(num,{fontSize:'260px',color:'#FFC23D',textShadow:'0 10px 0 #0B1626,0 0 50px rgba(255,194,61,.4)'});
+const name=el('','abs h1');st(name,{fontSize:'110px',lineHeight:'.9'});
+const sub=el('','abs');st(sub,{fontFamily:'JO',fontWeight:'700',fontSize:'44px',color:'#C9D6EE'});
+const end=endCard();const flash=el('','full');st(flash,{background:'#fff',opacity:0});
+const GM=[[2.0,4.4,'1','FIELD GOAL','tap. kick. don’t hit the banner.'],[4.4,6.8,'2','5 CARD DRAW','5 random players every week'],[6.8,9.2,'3','RING CHASER','draft from random schools vs AI'],[9.2,11.6,'4','10-0','deal a team. go undefeated.'],[11.6,13.8,'5','YOUR LEAGUE','real fantasy with your friends']];
+const DUR=16.6,CUTS=[.05,2.0,4.4,6.8,9.2,11.6,13.8];
+async function render(t){
+  const sh=shake(t);
+  const hk=t<2.0;hook.style.display=hook2.style.display=hk?'':'none';
+  if(hk){['k1','k2'].forEach((id,i)=>{const s=seg(t,.05+i*.35,.2+i*.35,'out');const e=document.getElementById(id);e.style.transform=`scale(${lerp(2.4,1,s)}) skewX(-6deg)`;e.style.opacity=s>0?1:0});
+    const k=kick(t,.4,26);tf(hook,{x:sh.x+k.x,y:600+sh.y+k.y});const u=seg(t,1.1,1.3,'back');tf(hook2,{y:1150,s:lerp(1.6,1,u),o:u>0?1:0})}
+  let y=PY,o=1,bl=0,src=clip('fg_play',0),pan=0,fade=1;
+  if(hk){y=1150;o=.5;bl=14}
+  const g=GM.find(x=>t>=x[0]&&t<x[1]);
+  if(g){const lt=t-g[0];const u=seg(t,g[0],g[0]+.3,'back');y=PY+(1-u)*120;o=1;
+    if(g[2]==='1')src=clip('fg_play',Math.min(449,120+Math.round(lt*30)));
+    if(g[2]==='2')src=clip('fc_deal',Math.min(169,12+Math.round(lt*30*1.2)));
+    if(g[2]==='3')src=clip('ring',Math.min(699,60+Math.round(lt*30*2.6)));
+    if(g[2]==='4'){src='/home/claude/mk/stills/sim.png';pan=seg(t,g[0]+.6,g[1]-.2,'io')*250}
+    if(g[2]==='5'){src='/home/claude/mk/stills/leagues.png';pan=seg(t,g[0]+.5,g[1]-.1,'io')*700}
+    num.style.display=name.style.display=sub.style.display='';num.textContent=g[2];name.textContent=g[3];sub.textContent=g[4];
+    const a=seg(t,g[0],g[0]+.2,'back'),b=seg(t,g[0]+.08,g[0]+.3,'back'),c=seg(t,g[0]+.2,g[0]+.4,'out'),q=seg(t,g[1]-.12,g[1]);
+    const k=kick(t,g[0],18);tf(num,{x:70+k.x,y:110+k.y,s:lerp(2.2,1,a),o:(a>0?1:0)*(1-q)});tf(name,{x:330+(1-b)*300,y:170,o:(b>0?1:0)*(1-q)});tf(sub,{x:334,y:290,o:c*(1-q)})}
+  else{num.style.display=name.style.display=sub.style.display='none'}
+  if(t>=13.8)o=0;
+  tf(ph,{x:PX+sh.x,y:y+sh.y,s:PS,r:sh.r,o,blur:bl});await setImg(ph.img,src);ph.img.style.transform=`translateY(${-pan}px)`;
+  st(dim,{opacity:hk?1:0});
+  showEnd(end,t,13.8);flashes(flash,t,CUTS);
+}
+</script></body></html>

@@ -1,0 +1,4 @@
+/* shared end card */
+function endCard(){return el(`<div style="width:1080px;text-align:center"><img src="/home/claude/varsity/icons/icon-512-v2.png" style="width:280px;border-radius:66px;box-shadow:0 0 140px rgba(47,107,255,.6)"><div class="h1" style="font-size:220px;margin-top:36px">VARSITY</div><div style="font-family:JO;font-weight:700;font-size:54px;color:#C9D6EE;margin-top:12px">Fantasy for high school sports</div><div style="margin-top:56px"><span class="pill" style="font-size:58px;background:#FFC23D">Free · link in bio</span></div></div>`)}
+function showEnd(e,t,a){const on=t>=a;e.style.display=on?'':'none';if(on){const u=seg(t,a,a+.4,'back'),sh=shake(t);tf(e,{y:lerp(560,470,u)+sh.y*.5,s:lerp(1.25,1,u),o:seg(t,a,a+.2)})}}
+function flashes(f,t,cuts){st(f,{opacity:cuts.map(c=>t>=c&&t<c+.12?(1-(t-c)/.12)*.5:0).reduce((a,b)=>Math.max(a,b),0)})}
