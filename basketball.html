@@ -1954,7 +1954,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v202 · Nov 5';
+const APP_BUILD='v203 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3203,10 +3203,10 @@ async function playerCardBlob(p){
   return await new Promise(r=>c.toBlob(r,'image/png'));
 }
 function viewMini(){
-  const T0=UI.mtab==='spread'?'props':['picks','draw','props','mock','sim'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
+  const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['mock','Mock Draft'],['sim','10-0']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','10-0']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
@@ -3696,7 +3696,15 @@ function matchupsHTML(g){
     <div>${rows}</div><p class="muted">Each game you face one other member. The higher lineup total wins.</p></section>`;
 }
 const groupDanger=(coll,g,word)=>{const own=g.ownerId===ME.uid;return `<div class="card danger-row"><div><b>${own?'Delete '+word:'Leave '+word}</b><p class="muted">${own?'You started '+esc(g.name)+'. Deleting it removes it for every member, with all its lineups and standings.':'Takes you out of '+esc(g.name)+'. You can rejoin later with the invite code.'}</p></div><button class="btn danger" data-act="${own?'delGroup':'leaveGroup'}" data-coll="${coll}" data-id="${esc(g.id)}">${own?'Delete '+word:'Leave '+word}</button></div>`};
+/* Leagues tab: My leagues and Mock Draft (moved here from Minigames) */
 function viewGroups(){
+  const L=UI.ltab==='mock'?'mock':'leagues';
+  const seg=`<div class="chips gm-tabs lgx-tabs" role="group" aria-label="Leagues">${[['leagues','My leagues'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="ltab" data-v="${v}" aria-pressed="${v===L}">${l}</button>`).join('')}</div>`;
+  if(L==='mock')return `<div class="head"><h2>Mock Draft</h2><p>Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.</p></div>`+seg+mockHTML();
+  const h=viewGroups0(),i=h.indexOf('</div>',h.indexOf('<div class="head"'));
+  return h.indexOf('<div class="head"')===0&&i>0?h.slice(0,i+6)+seg+h.slice(i+6):seg+h;
+}
+function viewGroups0(){
   const gs=myGroups(),g=curGroup();
   const newForm=`<form class="card lg-form" id="create-form"><h3>Start a league</h3><p class="muted">Pick a format, name it, then send the invite code to your friends.</p>
       <div class="lg-modes" role="radiogroup" aria-label="League format">
@@ -4497,6 +4505,7 @@ document.addEventListener('click',async e=>{
   else if(a==='info'){const h=t.closest('.head'),pop=h&&h.querySelector('.ib-pop');if(pop){pop.hidden=!pop.hidden;t.setAttribute('aria-expanded',String(!pop.hidden))}}
   else if(a==='lgSet'){UI.lgSet=!UI.lgSet;render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
+  else if(a==='ltab'){UI.ltab=t.dataset.v;render()}
   else if(a==='team'){UI.ttab='sched';location.hash='#team/'+encodeURIComponent(t.dataset.t)}
   else if(a==='ttab'){UI.ttab=t.dataset.v;render()}
   else if(a==='tback'){if(history.length>1)history.back();else location.hash='#games'}
