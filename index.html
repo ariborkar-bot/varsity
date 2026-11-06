@@ -1498,6 +1498,8 @@ html,body{overflow-x:clip;max-width:100%}
   .fc-hand.done [data-act=fcRedraw]{display:none}
   .fc-hand.done .fc-card b,.fc-hand.done .fc-card .nm{overflow-wrap:anywhere}
 }
+/* phones: a grab handle on sheets hints that they swipe down to close */
+@media (max-width:759px){.dr .dp{position:relative;touch-action:pan-y}.dr .dp::before{content:"";position:sticky;top:-12px;display:block;width:42px;height:5px;margin:-8px auto 8px;border-radius:99px;background:rgba(255,255,255,.28);flex:none;z-index:2}}
 /* phones: lineup cards stack (name and tags full width, points on their own line, buttons below) so no words overlap */
 @media (max-width:759px){
   .lg-card:not(.bd-c):not(.empty){grid-template-columns:40px minmax(0,1fr);gap:8px 10px}
@@ -1767,6 +1769,12 @@ function memDb(){
 /* the real site needs the server: when the login library cannot load, the app says so instead of starting a
    local-only profile that never saves (the single-file previews set this to false and run in demo mode) */
 const TODAY=()=>{try{return new Date().toLocaleDateString('en-CA',{timeZone:'America/Los_Angeles'})}catch(_){const d=new Date(Date.now()-8*36e5);return d.toISOString().slice(0,10)}};
+/* games close at kickoff/tip-off, San Diego time. Games without a listed time are treated as 7:00 pm starts. */
+const NOWPT=()=>{try{const o={};new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).forEach(x=>o[x.type]=x.value);return o.year+'-'+o.month+'-'+o.day+'T'+o.hour+':'+o.minute}catch(_){return new Date(Date.now()-8*36e5).toISOString().slice(0,16)}};
+const KICK='19:00';
+const started=g=>!!g&&NOWPT()>=g.d+'T'+(g.t||KICK);
+/* a player's game this week has started (5 Card Draw locks that card) */
+const pStarted=p=>{const w=CURW();return((GAMES&&GAMES.games)||[]).some(g=>g.w===w&&(g.h===p.school||g.a===p.school)&&started(g))};
 const NEEDS_SERVER=true;
 const SB_URL='https://urdkamhsdjhzhrjwzyoq.supabase.co',SB_KEY='sb_publishable_Kwc2VdtM1AbcKB7xgsOhlw_KOw02EOb';
 const SITE_URL=location.origin+location.pathname;
@@ -1935,7 +1943,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v200 · Nov 5';
+const APP_BUILD='v201 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2540,13 +2548,15 @@ function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k o
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
 /* anyone with a game on record and no stats in yet this week, and a team that is not on a bye */
-const fcPool=ex=>players().filter(p=>p.mp&&!ex.has(p.key)&&!statsIn(p)&&agg(p,'season').n>0&&!(oppInfo(p.school)||{}).bye);
+/* only players whose team still has a game this week that has not started (when this week's schedule is listed) */
+const fcPlays=p=>{const w=CURW(),gs=((GAMES&&GAMES.games)||[]).filter(g=>g.w===w);return !gs.length||gs.some(g=>(g.h===p.school||g.a===p.school)&&!started(g))};
+const fcPool=ex=>players().filter(p=>p.mp&&!ex.has(p.key)&&!statsIn(p)&&!pStarted(p)&&fcPlays(p)&&agg(p,'season').n>0&&!(oppInfo(p.school)||{}).bye);
 const fcDraw=(pool,n)=>{const out=[],a=pool.slice();while(out.length<n&&a.length){out.push(a.splice(fcRnd(a.length),1)[0].key)}return out};
 let _fcBusy=false;
 async function fcDeal(){
   if(_fcBusy||ME.mode==='guest'||ME.mode==='readonly'||!ME.uid)return;
   const w=CURW();if(fcHand(ME.uid,w))return;_fcBusy=true;
-  try{const hand=fcDraw(fcPool(new Set()),FC_SIZE);if(hand.length<FC_SIZE){say('Not enough players to deal a hand yet');return}
+  try{const hand=fcDraw(fcPool(new Set()),FC_SIZE);if(hand.length<FC_SIZE){say(((GAMES&&GAMES.games)||[]).some(g=>g.w===w&&started(g))?'This week’s games have started. 5 Card Draw opens again once stats post.':'Not enough players to deal a hand yet');return}
     const nx={h:hand,r:0,d:[],rd:[],at:NOW()};fcSet(w,nx);
     const t0=Date.now(),st=hand.map(()=>'back');UI.fcDeal={w,st};render();   /* five face-down cards, then they flip one by one */
     if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Your hand is dealt')){const f={...fcDoc(ME.uid)};delete f[w];S.picks[ME.uid].fc=f;UI.fcDeal=null}
@@ -2565,7 +2575,7 @@ async function fcRedraw(i){
   if(_fcBusy||!ME.uid)return;const w=CURW(),hd=fcHand(ME.uid,w);if(!hd)return;
   if(hd.lk){say('Your hand is locked in for the week');return}
   if(fcLeft(ME.uid,w)<=0){say('You are out of redraws this week');return}
-  const old=pByKey(hd.h[i]);if(!old)return;if(statsIn(old)){say(old.name+' already has stats this week, so that card is locked');return}
+  const old=pByKey(hd.h[i]);if(!old)return;if(statsIn(old)||pStarted(old)){say(old.name+'’s game has started, so that card is locked until stats post');return}
   _fcBusy=true;
   try{const seen=new Set([...hd.h,...(hd.d||[])]),nk=fcDraw(fcPool(seen),1)[0];if(!nk){say('No new players to draw right now');return}
     const nh=hd.h.slice();nh[i]=nk;
@@ -2581,7 +2591,7 @@ async function fcRedraw(i){
 function fcHTML(){
   const cw=CURW(),w=UI.fcw&&UI.fcw<=cw?UI.fcw:cw,mine=ME.uid&&ME.mode!=='guest'?fcHand(ME.uid,w):null,can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const left=mine?fcLeft(ME.uid,w):0,bank=mine?fcBank(ME.uid,w):0,lkd=!!(mine&&mine.lk);
-  const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=p.games[w-1],lk=w===cw&&statsIn(p);
+  const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=p.games[w-1],lk=w===cw&&(statsIn(p)||pStarted(p));
     const an=UI.fcAnim&&UI.fcAnim.w===w&&UI.fcAnim.i===i?UI.fcAnim:null,dl=UI.fcDeal&&UI.fcDeal.w===w?UI.fcDeal.st[i]:null;
     const mode=dl?{back:'fc-mys fc-back',flip:'fc-flip'}[dl]:an?(an.rev?'fc-flip':'fc-mys'):'',fdel=dl==='flip'?i*.13:0;
     return `<div class="fc-card ${x?'in':''} ${mode}" ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}${T10W(p,`<b class="fc-nm">${esc(p.name)}</b>`)}<small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
@@ -2639,7 +2649,7 @@ function picksHTML(){
   const avail=Math.round((bal-0)*100)/100;
   const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
   const card=g=>{
-    const id=gid(g),o=oddsFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
+    const id=gid(g),o=oddsFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
       return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small></button>`};
     const od=side?o[side]:0,room=avail+(b?+b.stake:0);
@@ -2660,12 +2670,12 @@ function picksHTML(){
   /* the picks you have locked in that are still waiting on a final score */
   const openBets=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id]})).filter(x=>x.g&&!gDone(x.g)).sort((a,b)=>a.g.d<b.g.d?-1:a.g.d>b.g.d?1:0);
   const myCard=openBets.length?`<section class="card bt-mine"><div class="qh"><h3>Your picks</h3><span class="muted">${openBets.length} locked in · ${tk(openBets.reduce((t,x)=>t+(+x.b.stake||0),0))} wagered</span></div>${openBets.map(x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
-    return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)}</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${x.g.d<=today?' · locked':''}</small></span></span><span class="bt-pay"><b>${tk(x.b.stake*x.b.odds)}</b><small class="muted">${tk(x.b.stake)} at ${(+x.b.odds).toFixed(2)}x</small></span></div>`}).join('')}</section>`:'';
+    return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)}</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${started(x.g)?' · locked':''}</small></span></span><span class="bt-pay"><b>${tk(x.b.stake*x.b.odds)}</b><small class="muted">${tk(x.b.stake)} at ${(+x.b.odds).toFixed(2)}x</small></span></div>`}).join('')}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t);
   if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid)){board.push({u:ME.uid,t:bank(ME.uid)});board.sort((a,b)=>b.t-a.t)}
   const boardCard=mgBoard('Token leaders',board.map(x=>({u:x.u,v:n1(x.t)})));
   /* lock in everything at once */
-  const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
+  const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&!started(g)&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||5)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Hit the button to save your picks.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>${staged.length===1?'Lock in pick':'Lock in all '+staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
@@ -2878,7 +2888,7 @@ function spreadHTML(){
   const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
   const nm2=(x,g)=>x.s==='h'?g.h:g.a,lnTxt=x=>fmtLine(x.s==='h'?+x.line:-x.line);
   const card=g=>{
-    const id=gid(g),L=spreadFor(g),b=mine[id],locked=g.d<=today||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
+    const id=gid(g),L=spreadFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const ln=sd==='h'?L:-L,lk=b&&b.s===sd&&ui.s===undefined?(sd==='h'?+b.line:-b.line):ln;
       return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="atSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${fmtLine(lk)}</span><small>pays ${ATS_PAY.toFixed(2)}x</small></button>`};
     const room=bal+(b?+b.stake:0);let foot='';
@@ -2898,7 +2908,7 @@ function spreadHTML(){
   if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid))board.push({u:ME.uid,w:0,l:0});
   const boardCard=mgBoard('Best against the spread',board.map(x=>({u:x.u,v:x.w+'-'+x.l})));
   const stakeOf=g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||5)};
-  const staged=can?open.filter(g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return u&&u.s&&g.d>today&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
+  const staged=can?open.filter(g=>{const u=UI.at[gid(g)],b=mine[gid(g)];return u&&u.s&&!started(g)&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-bal;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(bal)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Hit the button to save your picks.`}</div></div><div class="bt-go"><button class="btn" data-act="atAll" ${over>0?'disabled':''}>${staged.length===1?'Lock in pick':'Lock in all '+staged.length}</button><button class="btn ghost" data-act="atClear">Clear</button></div></section>`:'';
   const nextW=open.length?open[0].w:null;
@@ -2985,7 +2995,7 @@ function propsHTML(){
   const all=propCands().filter(x=>bfOK(x.game)&&(UI.pm==='ALL'||PP_MK[x.m].g===UI.pm));
   const shown=all.slice(0,UI.ppN);
   const card=x=>{
-    const id=x.id,b=mine[id],M=PP_MK[x.m],locked=x.game.d<=today,ui=UI.pp[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
+    const id=x.id,b=mine[id],M=PP_MK[x.m],locked=started(x.game),ui=UI.pp[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,t,odd)=>`<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="ppSide" data-id="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}><b>${t} ${fmtN(x.line)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${Math.round((sd==='o'?x.po:1-x.po)*100)}% chance</small></button>`;
     const room=bal+(b?+b.stake:0),od=side==='o'?x.over:side==='u'?x.under:0;let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
@@ -3000,7 +3010,7 @@ function propsHTML(){
       <div class="pp-m">${esc(M.l)}</div>
       <div class="bt-row">${btn('o','Over',x.over)}${btn('u','Under',x.under)}</div>
       <div class="pp-stat muted">Avg <b>${fmtN(x.mean)}</b> · last 3 <b>${fmtN(x.rc)}</b> · over ${fmtN(x.line)} in <b>${x.hits}</b> of ${x.n} games</div>${foot}</article>`};
-  const stagedList=can?Object.entries(UI.pp).filter(([id,u])=>{const x=pm[id],b=mine[id];return x&&u&&u.s&&x.game.d>today&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}).map(([id])=>pm[id]):[];
+  const stagedList=can?Object.entries(UI.pp).filter(([id,u])=>{const x=pm[id],b=mine[id];return x&&u&&u.s&&!started(x.game)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}).map(([id])=>pm[id]):[];
   const stakeOf=x=>{const u=UI.pp[x.id],b=mine[x.id];return Math.floor(u.stake||(b&&b.stake)||5)};
   const need=stagedList.reduce((t,x)=>t+stakeOf(x)-(mine[x.id]?+mine[x.id].stake:0),0),over=need-bal;
   const allBar=stagedList.length?`<section class="card bt-all"><div><b>${stagedList.length} ${stagedList.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(bal)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Hit the button to save your picks.`}</div></div><div class="bt-go"><button class="btn" data-act="ppAll" ${over>0?'disabled':''}>${stagedList.length===1?'Lock in pick':'Lock in all '+stagedList.length}</button><button class="btn ghost" data-act="ppClear">Clear</button></div></section>`:'';
@@ -4432,6 +4442,18 @@ function route(){
   SHEET=false;closePlayer();closeNotes();render();window.scrollTo(0,0);
 }
 window.addEventListener('hashchange',route);
+/* phones: swipe a player card (or notifications) down to close it. Works when the sheet is scrolled to the top. */
+(()=>{let y0=0,x0=0,dy=0,t0=0,dp=null,drag=false;
+  document.addEventListener('touchstart',e=>{const d=e.target.closest('.dr .dp');if(!d||innerWidth>=760||e.touches.length>1)return;
+    if(d.scrollTop>0&&!e.target.closest('.dh'))return;dp=d;y0=e.touches[0].clientY;x0=e.touches[0].clientX;dy=0;t0=Date.now();drag=false},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!dp)return;const y=e.touches[0].clientY-y0,x=e.touches[0].clientX-x0;
+    if(!drag){if(Math.abs(y)<8)return;if(y<0||Math.abs(x)>Math.abs(y)||(dp.scrollTop>0&&!e.target.closest('.dh'))){dp=null;return}drag=true;dp.style.transition='none'}
+    dy=Math.max(0,y);dp.style.transform=`translateY(${dy}px)`;if(e.cancelable)e.preventDefault()},{passive:false});
+  const end=()=>{if(!dp)return;const d=dp;dp=null;if(!drag)return;const fast=dy>60&&dy/(Date.now()-t0)>.6;
+    d.style.transition='transform .2s ease';
+    if(dy>120||fast){d.style.transform='translateY(100%)';setTimeout(()=>{d.style.transform='';d.style.transition='';sheetClose()},190)}
+    else{d.style.transform='';setTimeout(()=>{d.style.transition=''},210)}};
+  document.addEventListener('touchend',end);document.addEventListener('touchcancel',end);})();
 /* slim bar on phones: shown once the big banner has scrolled out of view */
 (()=>{const mm=document.getElementById('mastMini'),mast=document.querySelector('.mast');if(!mm||!mast)return;let on=false,q=false;
   const upd=()=>{q=false;const v=scrollY>mast.offsetHeight-10;if(v!==on){on=v;mm.classList.toggle('on',v);mm.setAttribute('aria-hidden',v?'false':'true');mm.querySelectorAll('button').forEach(b=>b.tabIndex=v?0:-1)}};
@@ -4545,14 +4567,14 @@ document.addEventListener('click',async e=>{
     await mkWrite(m,di.i,{t:mkMe(),key:p.key,at:NOW()})}
   else if(a==='ppDrop'){const id=t.dataset.id,nb={...propsOf(ME.uid)};delete nb[id];delete UI.pp[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:nb}),'Pick removed');if(!Object.keys(nb).length)S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{props:{}});render()}
   else if(a==='ppAll'){const today=TODAY(),pm=propMap(),cur=propsOf(ME.uid),nb={...cur};let n=0,need=0;
-    Object.entries(UI.pp).forEach(([id,u])=>{const x=pm[id],old=cur[id];if(!x||!u||!u.s||x.game.d<=today)return;
+    Object.entries(UI.pp).forEach(([id,u])=>{const x=pm[id],old=cur[id];if(!x||!u||!u.s||started(x.game))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
       const keep=old&&old.s===u.s;nb[id]={k:x.k,m:x.m,w:x.w,g:x.g,s:u.s,stake,line:keep?+old.line:x.line,odds:keep?+old.odds:(u.s==='o'?x.over:x.under),at:NOW()}});
     if(!n){say('Pick Over or Under first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:nb}),n+(n===1?' pick':' picks')+' locked in')){UI.pp={};render()}}
   else if(a==='atAll'){const today=TODAY(),gm=gameMap(),cur=atsOf(ME.uid),nb={...cur};let n=0,need=0;
-    Object.entries(UI.at).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
+    Object.entries(UI.at).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||started(g)||gDone(g))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
       const line=(old&&old.s===u.s)?+old.line:spreadFor(g);nb[id]={s:u.s,stake,line,odds:ATS_PAY,w:g.w,at:NOW()}});
     if(!n){say('Pick a side first.');return}
@@ -4561,7 +4583,7 @@ document.addEventListener('click',async e=>{
   else if(a==='atSide'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{s:t.dataset.s});render()}
   else if(a==='atStake'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{stake:+t.dataset.v});render()}
   else if(a==='atDrop'){const id=t.dataset.g,nb={...atsOf(ME.uid)};delete nb[id];delete UI.at[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Pick removed');render()}
-  else if(a==='atPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=TODAY()||gDone(g)){say('That game is closed.');return}
+  else if(a==='atPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||started(g)||gDone(g)){say('That game is closed.');return}
     const cur=atsOf(ME.uid),old=cur[id],ui=UI.at[id]||{},sd=ui.s||(old&&old.s);if(!sd){say('Tap a side first.');return}
     const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||5,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}
@@ -4572,12 +4594,12 @@ document.addEventListener('click',async e=>{
   else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick removed');render()}
   else if(a==='pkClear'){UI.pk={};render()}
   else if(a==='pkAll'){const today=TODAY(),gm=gameMap(),cur=betsOf(ME.uid),nb={...cur};let n=0,need=0;
-    Object.entries(UI.pk).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
+    Object.entries(UI.pk).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||started(g)||gDone(g))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;nb[id]={s:u.s,stake,odds:oddsFor(g)[u.s],w:g.w,at:NOW()}});
     if(!n){say('Pick a team first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),n+(n===1?' pick':' picks')+' locked in')){UI.pk={};render()}}
-  else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=TODAY()||gDone(g)){say('Pick ’em is closed for that game.');return}
+  else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||started(g)||gDone(g)){say('Pick ’em is closed for that game.');return}
     const cur=betsOf(ME.uid),old=cur[id],ui=UI.pk[id]||{},s=ui.s||(old&&old.s);if(!s){say('Tap a team first.');return}
     const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||5,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}

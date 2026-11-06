@@ -123,6 +123,8 @@ def load_games():
             continue
         w = PRIOR + 1 + (d - START).days // 7
         seen[key] = dict(w=w, d=d.isoformat(), h=h, a=a, hs=hs, **{'as': as_})
+        if hm != '0000':
+            seen[key]['t'] = hm[:2] + ':' + hm[2:]           # tip-off time; Pick 'em and props close then
         out.append(seen[key])
     out.sort(key=lambda g: (g['d'], g['h']))
     return out
@@ -254,7 +256,7 @@ def transform(s, mp, games, seeds, teams, prior):
     top10 = [k for k, _ in sorted(rank.items(), key=lambda kv: -kv[1])[:10]]
     s = line_replace(s, 'window.MAXPREPS=', 'window.MAXPREPS=' + json.dumps(mp, separators=(',', ':')) + ';')
     weeks = max(g['w'] for g in games)
-    g2 = [dict(w=g['w'], d=g['d'], h=g['h'], a=g['a'], hs=g['hs'], **{'as': g['as']}) for g in games]
+    g2 = [dict(w=g['w'], d=g['d'], h=g['h'], a=g['a'], hs=g['hs'], **{'as': g['as']}, **({'t': g['t']} if g.get('t') else {})) for g in games]
     s = rep(s, '<script src="games.js" onerror="void 0"></script>',
             GAMES_JS % dict(games=json.dumps(g2, separators=(',', ':')), prior=PRIOR, first=PRIOR + 1, weeks=weeks,
                             start=START.isoformat(), sy=START.year, sm=START.month - 1, sd=START.day,
