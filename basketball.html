@@ -1954,7 +1954,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v201 · Nov 5';
+const APP_BUILD='v202 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2686,6 +2686,8 @@ function anticipatedHTML_old(){
 }
 /* ---------- Simulate: build the best team you can ---------- */
 const SIM_RESPINS=5;
+/* 10-0 team rules version: v2 = 12 players (2 DL, 2 LB, 2 DB). Bests from older 17-player teams don't count. */
+const SIM_V=2,simRec=u=>{const r=(S.picks[u]||{}).sim||{};return r.v===SIM_V?r:{}};
 const SIM_SLOTS=[
   {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']}];
 /* spots on the court, as [left %, top %] */
@@ -2726,8 +2728,8 @@ async function simFinish(){
   const mean=sm/N,sd=Math.sqrt(Math.max(1,sq/N-mean*mean));
   m.done=true;m.res={total,max,pct:Math.min(1,total/max),beat:beat/N,best:b,mean,sd};render();
   if(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'){
-    const old=(S.picks[ME.uid]||{}).sim||{};
-    await act(()=>upsert('picks/'+ME.uid,{sim:{best:Math.max(+old.best||0,Math.round(total*10)/10),runs:(+old.runs||0)+1,last:Math.round(total*10)/10,max:Math.round(max*10)/10,at:NOW()}}),'Team saved');render()}
+    const old=simRec(ME.uid);
+    await act(()=>upsert('picks/'+ME.uid,{sim:{v:SIM_V,best:Math.max(+old.best||0,Math.round(total*10)/10),runs:(+old.runs||0)+1,last:Math.round(total*10)/10,max:Math.round(max*10)/10,at:NOW()}}),'Team saved');render()}
 }
 /* the field: end zone with the Varsity wordmark and goal posts, mowed stripes, yard lines, hash marks, yard numbers with arrows,
    the line of scrimmage, the first-down line, and the opposite unit shown as faint markers */
@@ -2806,10 +2808,10 @@ function simPickHTML(m){
     <div class="btns"><button class="btn ghost" data-act="simBack">Back</button></div></section>`;
 }
 function viewSim(){
-  const m=UI.sim,my=(ME.uid&&(S.picks[ME.uid]||{}).sim)||{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>Simulate</h2><p>Draw a 5-player team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
+  const m=UI.sim,my=ME.uid?simRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const head=`<div class="head"><h2>10-0</h2><p>Draw a 5-player team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
   const myBest=my.best?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best team</small><b>${f1(my.best)}</b></div><div><small>Teams built</small><b>${my.runs||1}</b></div></div>`:'';
-  const rows=Object.keys(S.picks).map(u=>({u,b:+((S.picks[u]||{}).sim||{}).best||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
+  const rows=Object.keys(S.picks).map(u=>({u,b:+simRec(u).best||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
   const board=mgBoard('Best simulated teams',rows);
   if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 5 spots: a starting five of PG, SG, SF, PF and C. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}${SIM_SLOTS.every(sl=>simPool(sl,new Set()).length)?'<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div>':'<p class="hint sim-wait">Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.</p>'}</section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
@@ -3203,8 +3205,8 @@ async function playerCardBlob(p){
 function viewMini(){
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','mock','sim'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
-  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='sim'?'Draw a full 17-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['mock','Mock Draft'],['sim','Simulate']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['mock','Mock Draft'],['sim','10-0']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());

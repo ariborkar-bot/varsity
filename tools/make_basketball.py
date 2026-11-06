@@ -401,9 +401,9 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     s = rep(s, "const tot=Math.max(18,Math.min(84,Math.round(44+8*gauss())));", "const tot=Math.max(80,Math.min(180,Math.round(122+12*gauss())));")
     s = rep(s, 'bonus=Math.max(-8,Math.min(16,z*4.5))', 'bonus=Math.max(-6,Math.min(12,z*3.5))')
     s = rep(s, "left:{off:SIM_RESPINS,def:SIM_RESPINS}", "left:{off:SIM_RESPINS,def:0}")
-    s = rep(s, "Draw a full 17-player team, use up to ${SIM_RESPINS} offense and ${SIM_RESPINS} defense respins to swap out players,",
+    s = rep(s, "Draw a full 12-player team, use up to ${SIM_RESPINS} offense and ${SIM_RESPINS} defense respins to swap out players,",
             "Draw a 5-player team, use up to ${SIM_RESPINS} respins to swap out players,")
-    s = rep(s, "You get 17 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 4 DL, 3 LB and 4 DB on defense. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for offense and ${SIM_RESPINS} for defense to swap any player for a new one.",
+    s = rep(s, "You get 12 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 2 DL, 2 LB and 2 DB on defense. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for offense and ${SIM_RESPINS} for defense to swap any player for a new one.",
             "You get 5 spots: a starting five of PG, SG, SF, PF and C. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one.")
     s = rep(s, "<div><small>Offense respins</small><b>${m.left.off}</b></div><div><small>Defense respins</small><b>${m.left.def}</b></div>",
             "<div><small>Respins</small><b>${m.left.off}</b></div>")
