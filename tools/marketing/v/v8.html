@@ -41,9 +41,13 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
 .inp .fld{position:absolute;left:160px;right:38px;top:34px;height:104px;border-radius:52px;border:3px solid #3A3A3C;font:400 46px/98px Inter;color:#5A5A5E;padding-left:40px}
 .home{position:absolute;left:50%;bottom:22px;width:380px;height:14px;margin-left:-190px;border-radius:7px;background:#fff;z-index:21}
 /* TikTok-style text */
-.hook{position:absolute;left:70px;width:860px;top:470px;text-align:center;z-index:30;line-height:1.52}
-.hook span{background:#fff;color:#000;font:700 60px Inter;padding:6px 22px;border-radius:14px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.cap{position:absolute;left:60px;width:860px;text-align:center;z-index:30;line-height:1.5}.cap span{background:#fff;color:#000;font:700 60px Inter;padding:6px 22px;border-radius:14px;-webkit-box-decoration-break:clone;box-decoration-break:clone}.cap.sm span{font-size:40px;padding:4px 16px;border-radius:10px}.capx{
+.hook{position:absolute;left:60px;width:880px;top:430px;text-align:center;z-index:30;line-height:.92}
+.nk{font:900 italic 104px/0.92 BC;text-transform:uppercase;letter-spacing:-1px;color:#fff;
+  text-shadow:0 5px 0 rgba(0,0,0,.45),0 0 3px #000,0 10px 30px rgba(0,0,0,.95),0 0 60px rgba(0,0,0,.8)}
+.nk .w{display:inline-block;margin:0 .13em;will-change:transform,opacity,filter}
+.nk .w.hi{color:#FFC23D}
+.nk .bar{display:block;height:10px;width:0;margin:18px auto 0;background:#FFC23D;transform:skewX(-14deg)}
+.cap{position:absolute;left:50px;width:900px;text-align:center;z-index:30}.cap.nk{font-size:96px}.cap.sm.nk{font-size:46px;letter-spacing:1px}.capx{
  text-shadow:0 0 2px #000,0 0 2px #000,2px 2px 0 #000,-2px 2px 0 #000,2px -2px 0 #000,-2px -2px 0 #000,0 3px 0 #000,0 -3px 0 #000,3px 0 0 #000,-3px 0 0 #000,0 8px 24px rgba(0,0,0,.55)}
 
 .rip{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:rgba(255,255,255,.45);border:4px solid rgba(255,255,255,.85);z-index:25;pointer-events:none}
@@ -55,7 +59,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
 #end img{width:300px;border-radius:70px;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 120px rgba(47,107,255,.45)}
 #end .w{font:900 italic 230px/1 BC;margin-top:40px;letter-spacing:-2px}
 #end .s{margin-top:26px}
-#end .s span{background:#fff;color:#000;font:700 56px Inter;padding:8px 24px;border-radius:14px;line-height:1.6;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+#end .s span{display:block;font:900 italic 64px/1.05 BC;text-transform:uppercase;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.7)}#end .s span+br{display:none}#end .s span:last-child{color:#FFC23D;font-size:58px;margin-top:10px}
 </style></head><body><div id="stage">
 <svg width="0" height="0" style="position:absolute"><filter id="hb" x="-20%" y="0" width="140%" height="100%"><feGaussianBlur id="hbv" stdDeviation="0 0"/></filter><filter id="vb" x="0" y="-20%" width="100%" height="140%"><feGaussianBlur id="vbv" stdDeviation="0 0"/></filter></svg>
 <div id="app" class="L"><img id="aimg"><div class="sb" ><div class="tm">7:41</div>
@@ -82,9 +86,9 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
 <div class="home" id="home"></div>
 <div class="ring" id="ring"></div>
 <div class="rip" id="rip"></div>
-<div class="hook" id="hook"></div>
-<div class="cap" id="cap"></div>
-<div class="cap sm" id="cap2"></div>
+<div id="hookbg" style="position:absolute;left:0;top:300px;width:1080px;height:760px;z-index:29;background:radial-gradient(70% 55% at 50% 50%,rgba(0,0,0,.72),rgba(0,0,0,0) 75%);pointer-events:none"></div><div class="hook nk" id="hook"></div>
+<div class="cap nk" id="cap"></div>
+<div class="cap sm nk" id="cap2"></div>
 <div id="end"><div class="bg"></div><div class="c"><img src="/home/claude/varsity/icons/icon-512-v2.png"><div class="w">VARSITY</div><div class="s"><span>fantasy for your high school</span><br><span>free · link in bio</span></div></div></div>
 <div id="flash"></div>
 </div>
@@ -139,13 +143,22 @@ function punch(t){let p=0;const bt=(t-DROP)/B;if(t>=DROP&&t<BRK){const f=bt-Math
 function shake(t){let x=0,y=0;for(const a of ACC){const k=t-a;if(k>=0&&k<.3){const f=1-k/.3;x+=Math.sin(k*95)*16*f;y+=Math.cos(k*80)*12*f}}return{x,y}}
 const TAPS={picks8:[[20,105.1,299.1],[46,259.3,395.5]],props8:[[20,109.5,380.4],[46,202.3,492.6]]};
 /* ---------------- text ---------------- */
+function nkHTML(txt){let hi=false;   /* *gold words*, even across several words */
+  return txt.split(/(<br>)/).map(part=>part==='<br>'?'<br>':part.split(' ').filter(Boolean).map(w=>{const st=w.startsWith('*');if(st){hi=true;w=w.slice(1)}const en=w.endsWith('*');if(en)w=w.slice(0,-1);
+    const h=`<span class="w${hi?' hi':''}">${w}</span>`;if(en)hi=false;return h}).join(' ')).join('')+'<span class="bar"></span>'}
+function nkAnim(el,t0,t1,t){const ws=el.querySelectorAll('.w'),gap=Math.min(.07,.42/Math.max(1,ws.length));
+  ws.forEach((w,i)=>{const a=t0+i*gap,k=cl((t-a)/.2),e=E.back(k);w.style.opacity=cl(k*3);
+    w.style.transform=`translateY(${(1-e)*46}px) scale(${lerp(1.7,1,e)}) skewX(${lerp(-18,-4,e)}deg)`;w.style.filter=k<1?`blur(${(1-k)*9}px)`:'none'});
+  const bar=el.querySelector('.bar');if(bar){const kb=E.out(cl((t-(t0+ws.length*gap))/.28));bar.style.width=(kb*Math.min(560,ws.length*120))+'px'}
+  const ex=cl((t-(t1-.12))/.12);el.style.opacity=1-ex;el.style.transform=`translateY(${-ex*40}px) scaleY(${1-ex*.3})`}
 function capSet(el,t,list,y){let cur=null;for(const c of list)if(t>=c[0]&&t<c[1])cur=c;
-  if(!cur){el.style.display='none';return}el.style.display='';el.innerHTML='<span>'+cur[2]+'</span>';const k=cl((t-cur[0])/.12);
-  el.style.top=(cur[3]||y)+'px';el.style.transform=`scale(${lerp(1.25,1,E.back(k))})`;el.style.opacity=cl(k*2)}
-const CAPS=[[DROP+.05,5.3,'started a league w the boys',300],[5.45,7.4,'week 11 vs diego 😭',300],[7.65,PK,'diego in last place 💀',1560],
-  [PK+.03,9.75,'then we found pick ’em 👀',300],[9.75,10.5,'50 tokens on the upset…',300],[10.5,12.3,'= 383 tokens 🤑',300],[12.3,PP,'mount miguel let’s go 🙏',300],
-  [PP+.03,14.6,'player props too??',300],[14.6,15.5,'hezekiah over 323.5 yds',300],[15.5,BRK,'easy. locked 🔒',1530]];
-const CAPS2=[[12.3,PP,'tokens are free · no real money',395],[DROP+.05,5.3,'',0]];
+  if(!cur){el.style.display='none';el.dataset.k='';return}el.style.display='';
+  if(el.dataset.k!==cur[2]){el.innerHTML=nkHTML(cur[2]);el.dataset.k=cur[2]}
+  el.style.top=(cur[3]||y)+'px';nkAnim(el,cur[0],cur[1],t)}
+const CAPS=[[DROP+.05,5.3,'started a *league*<br>w the boys',280],[5.45,7.4,'week 11 vs *diego* 😭',300],[7.65,PK,'diego in *last place* 💀',1530],
+  [PK+.03,9.75,'then we found<br>*pick ’em* 👀',260],[9.75,10.5,'50 on the *upset*…',300],[10.5,12.3,'= *383* tokens 🤑',300],[12.3,PP,'mount miguel *let’s go* 🙏',290],
+  [PP+.03,14.6,'player *props* too??',300],[14.6,15.5,'hezekiah *over*<br>323.5 yds',260],[15.5,BRK,'easy. *locked* 🔒',1520]];
+const CAPS2=[[12.3,PP,'free tokens · no real money',500],[DROP+.05,5.3,'',0]];
 /* ---------------- render ---------------- */
 const app=$('app'),aimg=$('aimg'),chat=$('chat'),rip=$('rip'),ring=$('ring');
 async function render(t){
@@ -154,7 +167,7 @@ async function render(t){
   $('hbv').setAttribute('stdDeviation','0 0');$('vbv').setAttribute('stdDeviation','0 0');app.style.filter='none';chat.style.filter='none';
   rip.style.display='none';ring.style.display='none';
   /* hook text */
-  const hk=$('hook');hk.style.display=t<DROP-.38?'':'none';if(t<DROP-.38){hk.innerHTML='<span>when the group chat finds out there’s fantasy for OUR high school</span>';hk.style.opacity=1}
+  const hk=$('hook');hk.style.display=t<DROP-.38?'':'none';$('hookbg').style.display=t<DROP-.1?'':'none';$('hookbg').style.opacity=1-cl((t-(DROP-.4))/.3);if(t<DROP-.38){if(!hk.dataset.k){hk.innerHTML=nkHTML('when the group chat<br>finds out there’s<br>fantasy for *our*<br>high school');hk.dataset.k=1}nkAnim(hk,0,DROP-.38,t)}
   if(inChat){
     chatAt(t);let c={x:0,y:0,s:1};
     if(t<DROP){ /* tap the link, then zoom through it into the app */
