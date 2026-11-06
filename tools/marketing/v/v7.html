@@ -1,0 +1,112 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+.num{position:absolute;width:150px;height:150px;border-radius:50%;background:#FFC23D;color:#0B1626;font-family:BC;font-weight:900;font-style:italic;font-size:118px;line-height:150px;text-align:center;box-shadow:0 0 0 8px rgba(255,194,61,.25),0 18px 50px rgba(0,0,0,.5)}
+.rip{position:absolute;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;border:7px solid #FFC23D;background:rgba(255,194,61,.25);pointer-events:none;z-index:5}
+.call{position:absolute;font-family:BC;font-weight:900;font-style:italic;text-transform:uppercase;background:#FFC23D;color:#0B1626;border-radius:22px;padding:18px 34px 12px;box-shadow:0 20px 60px rgba(0,0,0,.55);white-space:nowrap}
+.call.dark{background:#0B1626;color:#fff;border:4px solid #FFC23D}
+.coin{position:absolute;width:86px;height:86px;margin:-43px 0 0 -43px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE6A3,#FFC23D 45%,#C98A00);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18),0 8px 20px rgba(0,0,0,.4);font-family:BC;font-weight:900;font-size:50px;color:#7A4F00;text-align:center;line-height:86px}
+.lbl{position:absolute;font-family:BC;font-weight:900;font-style:italic;font-size:84px;text-transform:uppercase;color:#fff;text-shadow:0 6px 24px rgba(0,0,0,.7)}
+.mini{position:absolute;width:560px;height:1212px;border-radius:64px;background:#0b0d12;padding:16px;box-shadow:0 0 0 3px #2a2f3a,0 30px 90px rgba(0,0,0,.6)}
+.mini .scr{width:100%;height:100%;border-radius:50px;overflow:hidden;position:relative;background:#0B1626}
+.mini img{position:absolute;left:0;top:0;width:100%}
+</style></head><body><div id="stage">
+<div class="full bg-field"></div><div class="full stripes"></div>
+</div><script src="lib.js"></script><script src="end.js"></script><script>
+const SW=776/390;                       /* css px on the phone screen -> screen px */
+const ph=phone();ph.style.transformOrigin='0 0';
+const rip=el('','rip',ph.scr);
+const dim=el('','full');st(dim,{background:'rgba(5,8,15,.62)'});
+const hook=el(`<div class="h1" style="text-align:center;width:1080px"><div id="k1" class="gold" style="font-size:330px;line-height:.82">6 WAYS</div><div id="k2" style="font-size:150px;line-height:.9">TO PLAY</div><div id="k3" style="font-size:132px;line-height:.9">HIGH SCHOOL</div><div id="k4" style="font-size:132px;line-height:.9">FOOTBALL</div><div id="k5" style="font-family:JO;font-style:normal;font-weight:800;font-size:58px;color:#C9D6EE;margin-top:26px;text-transform:none">from your phone 📱</div></div>`);
+const head=el('','abs h1');st(head,{fontSize:'104px',width:'1080px',textAlign:'center',padding:'0 40px 0 190px'});
+const num=el('','num');
+const cap=el('','abs tt');st(cap,{fontSize:'58px',width:'1080px',textAlign:'center',padding:'0 70px',lineHeight:'1.15'});
+const call=el('','call');const call2=el('','call dark');
+/* league standings card */
+const stand=el(`<img src="/home/claude/mk/stills/standings7.png" style="width:700px;border-radius:34px;box-shadow:0 30px 90px rgba(0,0,0,.7),0 0 0 4px #FFC23D">`);
+/* tokens */
+const coins=[...Array(9)].map(()=>el('T','coin'));
+const tokn=el('','abs');st(tokn,{fontFamily:'BC',fontWeight:900,fontStyle:'italic',fontSize:'250px',color:'#FFC23D',width:'1080px',textAlign:'center',textShadow:'0 10px 40px rgba(0,0,0,.6)'});
+const tokl=el('<span class="pill" style="font-size:52px">no real money · no cash value</span>','abs');
+/* minigames montage: three small phones */
+const minis=['fc7','ring_r','fg_play'].map(n=>{const m=el('<div class="scr"><img></div>','mini');m.img=m.querySelector('img');m.clip=n;return m});
+const mlab=['5 CARD DRAW','RING CHASER','FIELD GOAL'].map(t=>el(t,'lbl'));
+const end=endCard();const flash=el('','full');st(flash,{background:'#fff',opacity:0});
+const DUR=25.0,T=[2.4,5.8,9.4,12.8,16.2,19.0,22.6];
+const CUTS=[.05,...T];
+const TAPS={"picks7": [[20, 104.6484375, 279.0703125], [46, 259.25, 375.515625]], "props7": [[20, 109, 360.3671875], [46, 202.3125, 472.578125]]};
+function H(t,a,b,html,n){if(t<a||t>=b)return;head.style.display='';num.style.display='';const u=seg(t,a,a+.22,'back');head.innerHTML=html;
+  tf(head,{y:150+(1-u)*60,s:lerp(1.3,1,u),o:Math.min(1,u*3)*(1-seg(t,b-.1,b))});num.textContent=n;const v=seg(t,a,a+.3,'back');tf(num,{x:60,y:150,s:v,r:lerp(-90,-6,v),o:1-seg(t,b-.1,b)})}
+function C(t,a,b,list,y=1690){if(t<a||t>=b)return;cap.style.display='';tf(cap,{y,o:1-seg(t,b-.1,b)});words(cap,t,list)}
+function CALL(e,t,a,b,html,x,y,size=84,r=-4){if(t<a||t>=b){e.style.display='none';return}e.style.display='';e.innerHTML=html;e.style.fontSize=size+'px';const u=seg(t,a,a+.25,'back');const k=kick(t,a+.05,10,.25);tf(e,{x:x+k.x,y:y+k.y,s:lerp(1.8,1,u),r,o:Math.min(1,u*4)*(1-seg(t,b-.12,b))})}
+/* phone placement: s = scale, (lx,ly) = phone-local point to put at screen (cx,cy) */
+function place(s,lx,ly,cx,cy){return{x:cx-lx*s,y:cy-ly*s,s}}
+function blend(a,b,k){return{x:lerp(a.x,b.x,k),y:lerp(a.y,b.y,k),s:lerp(a.s,b.s,k)}}
+const HOME={x:220,y:560,s:.78};
+function ripple(name,f){rip.style.display='none';for(const [fi,x,y] of TAPS[name]||[]){const k=(f-fi)/12;if(k>=0&&k<1){rip.style.display='';st(rip,{left:x*SW+'px',top:y*SW+'px',opacity:1-k,transform:`scale(${lerp(.5,1.6,E.out(k))})`})}}}
+async function render(t){
+  const sh=shake(t);
+  /* hook */
+  const hk=t<T[0];hook.style.display=hk?'':'none';
+  if(hk){['k1','k2','k3','k4','k5'].forEach((id,i)=>{const a=[.05,.55,.85,1.15,1.5][i],s=seg(t,a,a+.16,'out');const e=document.getElementById(id);e.style.transform=`scale(${lerp(2.2,1,s)})${i<4?' skewX(-6deg)':''}`;e.style.opacity=s>0?1:0});
+    const k=kick(t,.2,34),k2=kick(t,1.3,18);tf(hook,{x:sh.x+k.x+k2.x,y:470+sh.y+k.y+k2.y})}
+  /* phone */
+  let P={...HOME},o=1,bl=0,src=null,pan=0,f=-1,clipn=null;
+  if(t<T[0]){P={x:180,y:900,s:.88};o=.45;bl=16;src='/home/claude/mk/stills/league7.png';pan=900}
+  else if(t<T[1]){ /* 1 fantasy points: Darian Webb card */
+    f=Math.min(149,Math.round((t-T[0])*30*1.3));clipn='card7';
+    const z=place(1.12,410,560,540,860);P=blend({...HOME,y:lerp(1900,HOME.y,seg(t,T[0],T[0]+.4,'back'))},z,seg(t,3.1,3.6,'io'));if(t>4.7)P=blend(z,HOME,seg(t,4.7,5.2,'io'))}
+  else if(t<T[2]){ /* 2 leagues */
+    src='/home/claude/mk/stills/league7.png';pan=lerp(860,2700,seg(t,6.2,7.5,'io'));
+    P=blend({...HOME,y:lerp(1900,HOME.y,seg(t,T[1],T[1]+.4,'back'))},place(.95,410,700,540,1050),seg(t,6.0,6.6,'io'));if(t>8.0){o=1-seg(t,8.0,8.3)*.55;bl=seg(t,8.0,8.3)*10}}
+  else if(t<T[3]){ /* 3 pick 'em */
+    f=10+Math.round((t-T[2])*30);clipn='picks7';
+    P=blend({...HOME,y:lerp(1900,HOME.y,seg(t,T[2],T[2]+.4,'back'))},place(1.05,410,700,540,1050),seg(t,10.6,11.1,'io'))}
+  else if(t<T[4]){ /* 4 props */
+    f=10+Math.round((t-T[3])*30);clipn='props7';
+    P=blend({...HOME,y:lerp(1900,HOME.y,seg(t,T[3],T[3]+.4,'back'))},place(1.05,410,760,540,1060),seg(t,14.0,14.5,'io'))}
+  else if(t<T[5]){ /* 5 tokens */
+    src='/home/claude/mk/stills/tok7.png';
+    P=blend({...HOME,y:lerp(1900,HOME.y,seg(t,T[4],T[4]+.4,'back'))},place(1.25,410,630,540,880),seg(t,16.7,17.2,'io'));
+    if(t>17.6){o=1-seg(t,17.6,17.9)*.5;bl=seg(t,17.6,17.9)*12}}
+  else {o=0}
+  tf(ph,{x:P.x+sh.x,y:P.y+sh.y,s:P.s,r:sh.r,o,blur:bl});
+  if(clipn)await setImg(ph.img,clip(clipn,f));else if(src)await setImg(ph.img,src);
+  ph.img.style.transform=`translateY(${-pan*.796}px)`;ripple(clipn,f);
+  st(dim,{opacity:hk?1:0});
+  head.style.display='none';num.style.display='none';cap.style.display='none';
+  H(t,T[0],T[1],'EVERY PLAY = <span class="gold">POINTS</span>',1);
+  C(t,T[0]+.5,T[1],[['real',2.9],['players.',2.97],['real',3.1],['stats.',3.17],['every',3.32],['Friday.',3.4,'#FFC23D']]);
+  H(t,T[1],T[2],'DRAFT A <span class="gold">LEAGUE</span>',2);
+  C(t,T[1]+.5,T[2],[['you',6.3],['vs',6.38],['the',6.44],['group',6.5],['chat',6.58],['😤',6.7]]);
+  H(t,T[2],T[3],'<span class="gold">PICK ’EM</span>',3);
+  C(t,T[2]+.4,11.1,[['call',9.8],['the',9.86],['upset',9.92,'#FFC23D'],['👀',10.05]]);
+  H(t,T[3],T[4],'PLAYER <span class="gold">PROPS</span>',4);
+  C(t,T[3]+.4,14.5,[['over',13.2],['or',13.28],['under?',13.34,'#FFC23D']]);
+  H(t,T[4],T[5],'FREE <span class="gold">TOKENS</span>',5);
+  H(t,T[5],T[6],'<span class="gold">MINI</span>GAMES',6);
+  /* callouts */
+  CALL(call,t,11.1,12.8,'50 → <span style="color:#fff">383</span> TOKENS',150,1440,96,-4);
+  if(t>=14.5&&t<16.2)CALL(call,t,14.5,16.2,'OVER 323.5 YDS?',190,1440,96,-4);
+  CALL(call2,t,3.65,4.7,'TOP 10 · 416.7 PTS',170,1380,82,-3);
+  if(t>=13.2&&t<14.5)CALL(call2,t,13.2,14.5,'HEZEKIAH MANUEL · HOOVER',90,1380,70,-3);
+  else if(t>=9.8&&t<11.1)CALL(call2,t,9.8,11.1,'MATER DEI · 88% TO WIN',140,1380,74,-3);
+  /* standings card */
+  const sd=t>=8.0&&t<T[2];stand.style.display=sd?'':'none';
+  if(sd){const u=seg(t,8.0,8.35,'back');tf(stand,{x:190+sh.x,y:lerp(1900,520,u)+sh.y,r:lerp(8,-2,u),s:lerp(.9,1,u)});}
+  /* tokens */
+  const tk=t>=17.6&&t<T[5];tokn.style.display=tokl.style.display=tk?'':'none';
+  coins.forEach((c,i)=>{const a=17.6+i*.05,k=seg(t,a,a+.7,'out');c.style.display=tk&&t>=a?'':'none';const ang=i/9*Math.PI*2;tf(c,{x:540+Math.cos(ang)*lerp(0,420,k),y:820+Math.sin(ang)*lerp(0,380,k)-lerp(0,120,k),s:lerp(.4,1.2,k),r:k*360,o:1-seg(t,a+.5,a+.8)})});
+  if(tk){const v=Math.round(lerp(100,125,seg(t,17.7,18.2,'out')));tokn.innerHTML=`${v}<span style="font-size:90px;color:#fff"> tokens</span>`;const u=seg(t,17.6,17.85,'back'),k=kick(t,18.2,16);tf(tokn,{x:k.x,y:640+k.y,s:lerp(1.6,1,u)});
+    tf(tokl,{x:540-((tokl.offsetWidth||700)/2),y:lerp(1300,1010,seg(t,18.0,18.3,'back')),o:seg(t,18.0,18.2)})}
+  /* minigames: three phones, one at a time */
+  const SEGS=[[19.0,20.2,12,1.6],[20.2,21.4,18,1.4],[21.4,22.6,250,1]];
+  for(let i=0;i<3;i++){const m=minis[i],[a,b,f0,sp]=SEGS[i],on=t>=a&&t<T[6];m.style.display=on?'':'none';mlab[i].style.display=on&&t<b?'':'none';if(!on)continue;
+    const act=t<b,u=seg(t,a,a+.3,'back'),v=seg(t,b,b+.3,'io'),fr=Math.round(f0+(Math.min(t,b)-a)*30*sp);
+    m.style.transformOrigin='280px 0';m.style.zIndex=act?3:1;
+    tf(m,{x:(act?lerp(1200,260,u):lerp(260,[-40,560,260][i],v))+sh.x,y:(act?470:lerp(470,640,v))+sh.y,s:act?1:lerp(1,.56,v),r:act?lerp(10,-2,u):lerp(-2,[-7,7,0][i],v)});
+    await setImg(m.img,clip(m.clip,fr));
+    if(act)tf(mlab[i],{x:540-(mlab[i].offsetWidth||400)/2,y:1730,s:lerp(1.5,1,seg(t,a,a+.2,'back')),o:1})}
+  showEnd(end,t,T[6]);flashes(flash,t,CUTS);
+  if(t>=T[6]){minis.forEach(m=>m.style.display='none')}
+}
+</script></body></html>
