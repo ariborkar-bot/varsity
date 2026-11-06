@@ -1771,6 +1771,7 @@ function memDb(){
 /* ---------- Supabase: accounts and the shared database ---------- */
 /* the real site needs the server: when the login library cannot load, the app says so instead of starting a
    local-only profile that never saves (the single-file previews set this to false and run in demo mode) */
+const TODAY=()=>{try{return new Date().toLocaleDateString('en-CA',{timeZone:'America/Los_Angeles'})}catch(_){const d=new Date(Date.now()-8*36e5);return d.toISOString().slice(0,10)}};
 const NEEDS_SERVER=true;
 const SB_URL='https://urdkamhsdjhzhrjwzyoq.supabase.co',SB_KEY='sb_publishable_Kwc2VdtM1AbcKB7xgsOhlw_KOw02EOb';
 const SITE_URL=location.origin+location.pathname;
@@ -1940,7 +1941,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v198 · Nov 5';
+const APP_BUILD='v199 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2287,7 +2288,7 @@ const GAMES=window.VARSITY_GAMES||null;
 /* opponent strength and each team's next game, worked out from the game list */
 const OPP=(()=>{
   if(!GAMES||!GAMES.games)return null;
-  const teams={},today=new Date().toISOString().slice(0,10),next={};
+  const teams={},today=TODAY(),next={};
   const add=(n,pf,pa)=>{const x=teams[n]||(teams[n]={pf:0,pa:0,g:0});x.pf+=pf;x.pa+=pa;x.g++};
   GAMES.games.forEach(g=>{if(g.hs!=null&&g.as!=null){add(g.h,g.hs,g.as);add(g.a,g.as,g.hs)}});
   let tp=0,tg=0;Object.values(teams).forEach(x=>{tp+=x.pf;tg+=x.g});
@@ -2363,7 +2364,7 @@ function bracketHTML(b){
 function viewSched(head){
   if(!GAMES||!GAMES.games||!GAMES.games.length)return head+`<p class="empty">The schedule and scores are being loaded. Check back soon.</p>`;
   const gs=GAMES.games,weeks=[...new Set(gs.map(g=>g.w))].sort((a,b)=>a-b);
-  const today=new Date().toISOString().slice(0,10);
+  const today=TODAY();
   const cur=(gs.filter(g=>g.d>=today).sort((a,b)=>a.d<b.d?-1:1)[0]||{}).w||weeks[weeks.length-1];
   const w=UI.gw===null?cur:UI.gw;
   const brs=GAMES.brackets||[];
@@ -2600,7 +2601,7 @@ function pkWeeksHTML(list,card,nextW){
     +(rest?`<button class="btn ghost bt-more pk-more" data-act="pkMoreW">Show more games (${rest} left)</button>`:'');
 }
 function picksHTML(){
-  const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10);
+  const gs=(GAMES&&GAMES.games)||[],today=TODAY();
   const open=gs.filter(g=>!gDone(g)),nextW=open.length?Math.min(...open.map(g=>g.w)):null;
   const mine0=ME.uid?betsOf(ME.uid):{};
   const list=gs.filter(g=>(!gDone(g)||mine0[gid(g)])&&(gDone(g)||bfOK(g))).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||(a.dv||'').localeCompare(b.dv||'')||a.h.localeCompare(b.h));
@@ -2832,7 +2833,7 @@ function atsResult(b,g){
   return (b.s==='h'?d>0:d<0)?'won':'lost';
 }
 function spreadHTML(){
-  const gs=(GAMES&&GAMES.games)||[],today=new Date().toISOString().slice(0,10),gm=gameMap();
+  const gs=(GAMES&&GAMES.games)||[],today=TODAY(),gm=gameMap();
   const mine=atsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const open=gs.filter(g=>!gDone(g)||mine[gid(g)]).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||a.h.localeCompare(b.h));
   const bal=ME.uid?bank(ME.uid):TOK0;
@@ -2939,7 +2940,7 @@ function bfBar(extra){
   return `<section class="card bf-bar">${sel('dv','Division','All divisions',dvs.map(d=>[d,d]))}${sel('w','Game','All weeks',ws.map(w=>['' +w,'Game '+w]))}${sel('sc','School','All schools',scs.map(s=>[s,s]))}${any?'<button class="btn sm ghost" data-act="bfClear">Clear filters</button>':''}${extra||''}</section>`;
 }
 function propsHTML(){
-  const gm=gameMap(),today=new Date().toISOString().slice(0,10),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
   const staked=Object.values(mine).reduce((a,b)=>a+(propResult(b,gm)==='open'?+b.stake||0:0),0);
   const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, your tokens come back.</div></section>`;
@@ -2972,7 +2973,7 @@ function propsHTML(){
     return `<div class="bt-r ${x.res}"><b>${esc(p?p.name:'Player')} ${x.b.s==='o'?'Over':'Under'} ${fmtN(x.b.line)} ${esc(M.l.toLowerCase())}</b><small class="muted">${a===null?'no stats':fmtN(a)}</small><b class="d">${x.res==='won'?'+'+n1(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+n1(x.b.stake)}</b></div>`}).join('')}${hist.length>5?`<button class="btn sm ghost bt-more" data-act="mgRes">${more?'Show less':'Show all ('+hist.length+')'}</button>`:''}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(propsOf(u)).length).map(u=>{const r=Object.values(propsOf(u)).map(b=>propResult(b,gm));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w);
   if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid))board.push({u:ME.uid,w:0,l:0});
-  const boardCard=mgBoard('Best Over / Under picks',board.map(x=>({u:x.u,v:x.w+'-'+x.l})));
+  const boardCard=mgBoard('Best player props picks',board.map(x=>({u:x.u,v:x.w+'-'+x.l})));
   let body='';
   if(!propCands().length)body='<p class="empty">No player lines yet. They appear once the next games are set and players have three games of stats.</p>';
   else if(!all.length)body='<p class="empty">No lines match those filters. Try clearing them.</p>';
@@ -3189,7 +3190,7 @@ function viewMini(){
   const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='sim'?'Draw a full 17-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['mock','Mock Draft'],['sim','Simulate']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
-  const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player over / under']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
+  const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
 }
@@ -3352,7 +3353,7 @@ function sxTeams(D){
 function statsHTML(){
   const D=sxData();
   if(!D.rows.length){
-    const ds=((typeof GAMES!=='undefined'&&GAMES&&GAMES.games)||[]).map(g=>g.d).filter(Boolean).sort(),d0=ds.find(d=>d>=new Date().toISOString().slice(0,10));
+    const ds=((typeof GAMES!=='undefined'&&GAMES&&GAMES.games)||[]).map(g=>g.d).filter(Boolean).sort(),d0=ds.find(d=>d>=TODAY());
     return `<section class="card sx-empty"><b>Stats start after the first games${d0?' on '+esc(fmtDate(d0)):''}.</b><span>Leaders, hot streaks and the best single games fill in here as box scores come in.</span></section>`;
   }
   const best=D.lines.reduce((m,x)=>x.v>m.v?x:m,D.lines[0]),avg=D.lines.reduce((a,x)=>a+x.v,0)/D.lines.length;
@@ -4265,7 +4266,7 @@ function viewAdmin(){
   <div class="btns"><a class="btn sm" href="#desk">Stat desk and approvals</a><button class="btn sm ghost" data-ad="lock">Lock admin</button><button class="btn sm ghost" data-ad="reload">Refresh</button></div>
   ${detail}
   ${VA?'':`<section class="card"><div class="qh"><h3>Test the games</h3><span class="muted">Your account only</span></div><p class="muted">Wipe your own game progress so you can play it again from the start. Nobody else's hands, picks or tokens are touched.</p>
-    <div class="btns"><button class="btn sm" data-ad="rstFc">Replay 5 Card Draw</button><button class="btn sm" data-ad="rstBets">Replay Pick ’em</button><button class="btn sm" data-ad="rstAts">Replay Over / Under</button><button class="btn sm ghost" data-ad="rstAll">Reset all three</button></div></section>`}
+    <div class="btns"><button class="btn sm" data-ad="rstFc">Replay 5 Card Draw</button><button class="btn sm" data-ad="rstBets">Replay Pick ’em</button><button class="btn sm" data-ad="rstAts">Replay Player props</button><button class="btn sm ghost" data-ad="rstAll">Reset all three</button></div></section>`}
   <section class="card"><div class="qh"><h3>Accounts (${rows.length})</h3><label class="fld" style="max-width:260px"><input id="ad-q" type="search" placeholder="Search name, email, school" value="${esc(AD.q)}"></label></div>
     ${AD.err?`<p class="au-err">${esc(AD.err)}</p>`:''}${AD.rows===null?'<p class="muted">Loading…</p>':''}
     ${list.map(r=>`<button class="ad-row" data-ad="open" data-id="${esc(r.uid)}"><span><b>${esc((r.p&&r.p.name)||r.email||'Account')}${r.is_admin?' <span class="ad-tag">Admin</span>':''}</b><small>${esc(r.email||'')} · ${esc((r.p&&r.p.role)||'no profile')}${r.p&&r.p.school?' · '+esc(r.p.school):''}</small></span><span class="ad-meta">${r.confirmed?'':'Unconfirmed · '}${adWhen(r.created_at)}</span></button>`).join('')||'<p class="muted">No matches.</p>'}</section>`;
@@ -4298,7 +4299,7 @@ document.addEventListener('click',async e=>{
   else if(a==='close'){AD.sel=null;render()}
   else if(a==='reload'){AD.rows=null;render()}
   else if(a==='rstFc'||a==='rstBets'||a==='rstAts'||a==='rstAll'){
-    if(VA||!ME.uid)return;const all=a==='rstAll',what=all?'all three games':a==='rstFc'?'5 Card Draw':a==='rstBets'?'Pick ’em':'Over / Under';
+    if(VA||!ME.uid)return;const all=a==='rstAll',what=all?'all three games':a==='rstFc'?'5 Card Draw':a==='rstBets'?'Pick ’em':'Player props';
     if(!confirm('Reset your own '+what+'? Your hand, picks and tokens for it are cleared so you can replay. Other people are not affected.'))return;
     const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{})};
     if(await act(()=>setDoc('picks/'+ME.uid,nx),what+' reset. Play it again from the Games tab.')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],nx);UI.pk={};UI.at={};UI.fcDeal=null;UI.fcAnim=null;render()}}
@@ -4503,14 +4504,14 @@ document.addEventListener('click',async e=>{
     const p=pByKey(t.dataset.key);if(!p||mkTaken(m).has(p.key)||!mkRoster(m,mkMe()).open.some(s=>slotOk(s,p))){say('That player is not available for your roster.');return}
     await mkWrite(m,di.i,{t:mkMe(),key:p.key,at:NOW()})}
   else if(a==='ppDrop'){const id=t.dataset.id,nb={...propsOf(ME.uid)};delete nb[id];delete UI.pp[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:nb}),'Pick removed');if(!Object.keys(nb).length)S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{props:{}});render()}
-  else if(a==='ppAll'){const today=new Date().toISOString().slice(0,10),pm=propMap(),cur=propsOf(ME.uid),nb={...cur};let n=0,need=0;
+  else if(a==='ppAll'){const today=TODAY(),pm=propMap(),cur=propsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pp).forEach(([id,u])=>{const x=pm[id],old=cur[id];if(!x||!u||!u.s||x.game.d<=today)return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
       const keep=old&&old.s===u.s;nb[id]={k:x.k,m:x.m,w:x.w,g:x.g,s:u.s,stake,line:keep?+old.line:x.line,odds:keep?+old.odds:(u.s==='o'?x.over:x.under),at:NOW()}});
     if(!n){say('Pick Over or Under first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:nb}),n+(n===1?' pick':' picks')+' locked in')){UI.pp={};render()}}
-  else if(a==='atAll'){const today=new Date().toISOString().slice(0,10),gm=gameMap(),cur=atsOf(ME.uid),nb={...cur};let n=0,need=0;
+  else if(a==='atAll'){const today=TODAY(),gm=gameMap(),cur=atsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.at).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
       const line=(old&&old.s===u.s)?+old.line:spreadFor(g);nb[id]={s:u.s,stake,line,odds:ATS_PAY,w:g.w,at:NOW()}});
@@ -4520,7 +4521,7 @@ document.addEventListener('click',async e=>{
   else if(a==='atSide'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{s:t.dataset.s});render()}
   else if(a==='atStake'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{stake:+t.dataset.v});render()}
   else if(a==='atDrop'){const id=t.dataset.g,nb={...atsOf(ME.uid)};delete nb[id];delete UI.at[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Pick removed');render()}
-  else if(a==='atPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('That game is closed.');return}
+  else if(a==='atPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=TODAY()||gDone(g)){say('That game is closed.');return}
     const cur=atsOf(ME.uid),old=cur[id],ui=UI.at[id]||{},sd=ui.s||(old&&old.s);if(!sd){say('Tap a side first.');return}
     const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||5,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}
@@ -4530,13 +4531,13 @@ document.addEventListener('click',async e=>{
   else if(a==='pkStake'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{stake:+t.dataset.v});render()}
   else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick removed');render()}
   else if(a==='pkClear'){UI.pk={};render()}
-  else if(a==='pkAll'){const today=new Date().toISOString().slice(0,10),gm=gameMap(),cur=betsOf(ME.uid),nb={...cur};let n=0,need=0;
+  else if(a==='pkAll'){const today=TODAY(),gm=gameMap(),cur=betsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pk).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||g.d<=today||gDone(g))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;nb[id]={s:u.s,stake,odds:oddsFor(g)[u.s],w:g.w,at:NOW()}});
     if(!n){say('Pick a team first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),n+(n===1?' pick':' picks')+' locked in')){UI.pk={};render()}}
-  else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=new Date().toISOString().slice(0,10)||gDone(g)){say('Pick ’em is closed for that game.');return}
+  else if(a==='pkPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||g.d<=TODAY()||gDone(g)){say('Pick ’em is closed for that game.');return}
     const cur=betsOf(ME.uid),old=cur[id],ui=UI.pk[id]||{},s=ui.s||(old&&old.s);if(!s){say('Tap a team first.');return}
     const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||5,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}
