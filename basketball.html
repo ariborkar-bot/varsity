@@ -1984,7 +1984,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v211 · Nov 5';
+const APP_BUILD='v212 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3428,14 +3428,22 @@ function rcSpin(){
   const tick=()=>{if(!UI.rc||UI.rc.n!==n)return;i++;const el=document.querySelector('.rc-school.spin');if(i<9&&el){const sc=all[Math.floor(Math.random()*all.length)];el.innerHTML=`${slogo(sc,44)}<div><small>Spinning…</small><b>${esc(sc)}</b></div>`;setTimeout(tick,55+i*10)}else{UI.rc.spinning=false;render()}};
   setTimeout(tick,40);
 }
-/* the AI gets its own random school and usually takes the best player that fits (sometimes the 2nd or 3rd) */
+/* the AI gets its own random school (same luck as you) and then plays to build the best team it can:
+   for each player it could take, it compares his per-game average with what it could expect to get for that spot
+   from a random school later, and takes the biggest gain. So it grabs a star at a scarce position before a
+   slightly better player at a position that is easy to fill. */
 function rcAiTurn(){
-  const m=UI.rc;if(!m||!rcOpen(m.ai).length)return;
+  const m=UI.rc;if(!m)return;const open=rcOpen(m.ai);if(!open.length)return;
   const ok=rcSchools().filter(sc=>rcFits(m,m.ai,sc).length);
   if(!ok.length){m.aiLast=null;return}
-  const school=ok[Math.floor(Math.random()*ok.length)],list=rcFits(m,m.ai,school),r=Math.random();
-  const p=list[Math.min(list.length-1,r<.6?0:r<.85?1:2)],s=rcSlotFor(m.ai,p);
-  m.ai.sl[s.k]=p.key;m.aiLast={key:p.key,school,slot:s.label};
+  const school=ok[Math.floor(Math.random()*ok.length)],list=rcFits(m,m.ai,school),used=rcUsed(m);
+  /* expected best player for each open spot from a random school */
+  const best={};for(const p of rcPool()){if(used.has(p.key)||p.school===undefined)continue;for(const s of open)if(slotOk(s,p)){const b=best[s.k]||(best[s.k]={});if((b[p.school]||0)<p._rcv)b[p.school]=p._rcv}}
+  const nS=rcSchools().length,rep={};for(const s of open){const b=best[s.k]||{};rep[s.k]=Object.values(b).reduce((a,v)=>a+v,0)/nS}
+  let pick=null,gain=-1e9;
+  for(const p of list){const s=rcSlotFor(m.ai,p);
+    const g=p._rcv-rep[s.k];if(g>gain||(g===gain&&p._rcv>pick._rcv)){gain=g;pick=p}}
+  const s=rcSlotFor(m.ai,pick);m.ai.sl[s.k]=pick.key;m.aiLast={key:pick.key,school,slot:s.label};
 }
 function rcStart(){UI.rc={me:{sl:{}},ai:{sl:{}},school:null,done:false,n:0,aiLast:null};rcSpin()}
 async function rcFinish(){
