@@ -310,8 +310,8 @@ def transform(s, mp, games, seeds, teams, prior):
     s = between(s, 'function projLine(p){', '\nfunction projTag',
                 "function projLine(p){\n  const j=proj(p);if(!j.n)return 'No games yet';\n  if(j.info&&j.info.bye)return 'No game this week';\n"
                 "  const s=j.stat;return `${s.pts.toFixed(1)} pts · ${s.reb.toFixed(1)} reb · ${s.ast.toFixed(1)} ast`;\n}")
-    s = between(s, 'function tickLine(p,a){', '\nfunction updateTicker',
-                "function tickLine(p,a){const x=a.s||{},n=v=>Math.round(v||0).toLocaleString();\n"
+    s = between(s, 'function tickLine(p,a,pg){', '\nfunction updateTicker',
+                "function tickLine(p,a,pg){const x=a.s||{},n=v=>pg?(Math.round((v||0)/(a.n||1)*10)/10).toLocaleString():Math.round(v||0).toLocaleString();\n"
                 "  return `${n(x.pts)} pts · ${n(x.reb)} reb · ${n(x.ast)} ast`}")
     s = rep(s, "const out=['QB','RB','WR','TE','K','DL','LB','DB'].map(pos=>", "const out=['PG','SG','SF','PF','C'].map(pos=>")
     s = rep(s, "pb(['DL','LB','DB'].includes(pos)?'DEF':pos,pos)", "pb(pos,pos)")
