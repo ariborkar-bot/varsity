@@ -1528,7 +1528,7 @@ html,body{overflow-x:clip;max-width:100%}
 .adm-side nav{display:flex;flex-direction:column;gap:4px}.adm-nav{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:10px;border:0;background:none;color:inherit;font:500 14px/1 inherit;cursor:pointer;text-decoration:none;text-align:left}
 .adm-nav svg{width:19px;height:19px;flex:none}.adm-s{display:none}.adm-nav:hover{background:rgba(255,255,255,.06);color:#fff}.adm-nav.on{background:#F26B3A;color:#fff;box-shadow:0 6px 16px rgba(242,107,58,.35)}
 .adm-side-foot{margin-top:auto;display:flex;flex-direction:column;gap:4px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
-.adm-main{overflow:auto;padding:0 28px 40px}.adm-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:16px;padding:16px 0;background:#F4F6FB;box-shadow:0 -40px 0 #F4F6FB}
+.adm-main{overflow:auto;padding:0 max(28px,env(safe-area-inset-right)) 40px max(28px,env(safe-area-inset-left));-webkit-overflow-scrolling:touch}.adm-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:16px;padding:calc(16px + env(safe-area-inset-top)) 0 16px;background:#F4F6FB;box-shadow:0 -40px 0 #F4F6FB}
 .adm-search{flex:1;min-width:0;max-width:460px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E4E7EF;border-radius:10px;padding:0 12px;color:#8A90A6}.adm-search svg{width:17px;height:17px}
 .adm-search input{border:0;outline:0;background:none;flex:1;padding:10px 0;font:inherit;color:#1C2033;min-width:0}
 .adm-top-r{margin-left:auto;display:flex;align-items:center;gap:12px}.adm-ibtn{width:38px;height:38px;border-radius:10px;border:1px solid #E4E7EF;background:#fff;color:#4A5068;display:grid;place-items:center;cursor:pointer}.adm-ibtn svg{width:18px;height:18px}
@@ -1559,10 +1559,11 @@ html,body{overflow-x:clip;max-width:100%}
 .adm-tb>div{grid-template-columns:minmax(120px,32%) 1fr 64px 40px}.adm-tb em{font-style:normal;color:#8A90A6;font-size:12px;text-align:right}
 .adm-hbt{height:10px;background:#F1F3F8;border-radius:6px;overflow:hidden}.adm-hbt i{display:block;height:100%;border-radius:6px}.adm-big{font-size:40px;font-weight:800;color:#1C2033}
 @media (max-width:1100px){.adm-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.adm-grid{grid-template-columns:1fr}.adm-span2,.adm-span3{grid-column:auto}}
+.adm-exit{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;background:#1E2240;color:#fff;font-weight:600;font-size:14px;text-decoration:none;flex:0 0 auto}.adm-exit svg{width:18px;height:18px}.adm-exit:hover{background:#2C3160}
 @media (max-width:759px){.adm{grid-template-columns:1fr;grid-template-rows:1fr auto}.adm-side{order:2;flex-direction:row;padding:6px;gap:0;border-top:1px solid rgba(255,255,255,.08)}.adm-brand,.adm-side-foot .adm-nav span{display:none}
   .adm-side nav{flex-direction:row;flex:1;justify-content:space-around;gap:0}.adm-side-foot{margin:0;flex-direction:row;border:0;padding:0}.adm-nav{flex-direction:column;gap:3px;padding:7px 4px;font-size:10px;width:auto;flex:1;text-align:center}.adm-nav span{white-space:nowrap}
   .adm-l{display:none}.adm-s{display:inline}.adm-nav{min-width:0}.adm-side-foot .adm-nav{flex:0 0 40px}
-  .adm-main{padding:0 14px 24px}.adm-me-n{display:none}.adm-kpi b{font-size:21px}.adm-kpis{gap:10px}.adm-card{padding:14px}.adm-hs{display:none}.adm-ph h1{font-size:20px}}
+  .adm-main{padding:0 max(14px,env(safe-area-inset-right)) 24px max(14px,env(safe-area-inset-left))}.adm-me-n{display:none}.adm-me{display:none}.adm-top{gap:10px;padding-bottom:12px}.adm-search input{font-size:16px}.adm-exit{height:42px;padding:0 12px}.adm-side{padding-bottom:calc(6px + env(safe-area-inset-bottom))}.adm-kpi b{font-size:21px}.adm-kpis{gap:10px}.adm-card{padding:14px}.adm-hs{display:none}.adm-ph h1{font-size:20px}}
 
 .ad-seg{margin:0}.dfil{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}.dfil .chips{margin:0;flex:0 1 auto}
 .dsel{display:flex;gap:10px;flex-wrap:wrap}.dsel .fld{min-width:160px;margin:0;flex-direction:row;align-items:center;gap:8px}.dsel .fld span{margin:0}
@@ -2085,7 +2086,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v217 · Nov 6';
+const APP_BUILD='v218 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4665,7 +4666,7 @@ async function gateWithdraw(){
    Time only counts while the app is on screen and the person has touched it in the last 2 minutes. */
 const USE={doc:null,loading:false,tick:0,lastAct:Date.now(),dirty:false};
 const useDay=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-const useOn=()=>ME.uid&&ME.mode==='live'&&!VA;
+const useOn=()=>ME.uid&&ME.mode==='live'&&!VA&&!ME.adminAcct;   /* the two admin accounts are never tracked */
 async function useLoad(){if(USE.doc||USE.loading||!useOn())return;USE.loading=true;
   try{const s=await DB.doc('data/users/'+ME.uid+'/usage').get();const d=(s.exists&&s.data())||{};
     USE.doc={...d,first:d.first||NOW(),last:NOW(),dev:matchMedia('(max-width:759px)').matches?'phone':'desktop',days:d.days||{},ses:d.ses||{},ads:d.ads||{},tv:d.tv||{},tc:d.tc||{}};
@@ -4704,7 +4705,7 @@ async function dashLoad(){
 const dKey=t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
 const fmtDur=s=>{s=Math.round(s||0);if(s<60)return s+'s';const m=Math.round(s/60);if(m<60)return m+'m';const h=Math.floor(m/60);return h+'h '+(m%60)+'m'};
 function dashData(){
-  const rows=(AD.rows||[]).map(r=>({...r,p:S.profiles[r.uid]||r.demo||null,u:(DASH.use||{})[r.uid]||null}));
+  const rows=(AD.rows||[]).filter(r=>!r.is_admin).map(r=>({...r,p:S.profiles[r.uid]||r.demo||null,u:(DASH.use||{})[r.uid]||null}));
   const N=DASH.rng==='all'?Math.max(7,Math.ceil((Date.now()-Math.min(...rows.map(r=>+new Date(r.created_at)||Date.now()),Date.now()))/864e5)+1):DASH.rng;
   const days=[...Array(N)].map((_,i)=>dKey(new Date(Date.now()-(N-1-i)*864e5))),inR=new Set(days),start=days[0];
   const sportOk=r=>DASH.sport==='all'||(r.u&&r.u.sp&&r.u.sp[DASH.sport]),roleOk=r=>DASH.role==='all'||(DASH.role==='admin'?r.is_admin:(r.p&&r.p.role)===DASH.role);
@@ -4766,7 +4767,7 @@ function dashHTML(){
   return `${DASH.err?`<p class="au-err">${esc(DASH.err)}</p>`:''}${ME.mode==='demo'?'<p class="note"><span>Preview file: no real users here. The live site shows your real users.</span></p>':''}
   <section class="card dfil"><div class="chips" role="group" aria-label="Date range">${chip('rng',7,'7 days')}${chip('rng',30,'30 days')}${chip('rng',90,'90 days')}${chip('rng','all','All time')}</div>
     <div class="dsel"><label class="fld"><span>App</span><select data-dash="sport"><option value="all" ${DASH.sport==='all'?'selected':''}>Football + basketball</option><option value="fb" ${DASH.sport==='fb'?'selected':''}>Football</option><option value="bb" ${DASH.sport==='bb'?'selected':''}>Basketball</option></select></label>
-    <label class="fld"><span>Who</span><select data-dash="role">${[['all','Everyone'],['player','Players'],['fan','Fans'],['admin','Admins']].map(([v,l])=>`<option value="${v}" ${DASH.role===v?'selected':''}>${l}</option>`).join('')}</select></label></div></section>
+    <label class="fld"><span>Who</span><select data-dash="role">${[['all','Everyone'],['player','Players'],['fan','Fans']].map(([v,l])=>`<option value="${v}" ${DASH.role===v?'selected':''}>${l}</option>`).join('')}</select></label></div></section>
   <div class="dks">
     ${card('Total users',K.total,`${K.players} players · ${K.fans} fans`)}
     ${card('New users',K.newU,`${R} ${delta(K.newU,K.prevNew)}`)}
@@ -4820,7 +4821,7 @@ function admHTML(){
     <aside class="adm-side"><div class="adm-brand"><span class="adm-logo">V</span><b>Varsity</b><small>Admin</small></div><nav>${nav}</nav>
       <div class="adm-side-foot"><a class="adm-nav" href="#me">${admIco('M15 18l-6-6 6-6')}<span>Back to app</span></a><button class="adm-nav" data-ad="lock">${admIco('M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z')}<span>Lock admin</span></button></div></aside>
     <main class="adm-main"><header class="adm-top"><label class="adm-search">${admIco('M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3')}<input id="dash-q" type="search" placeholder="Search users by name, email or school" value="${esc(DASH.q)}"></label>
-      <div class="adm-top-r"><button class="adm-ibtn" data-dash="reload" title="Refresh">${admIco('M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5')}</button><span class="adm-me"><span class="adm-av">${esc(((S.profiles[ME.uid]||{}).name||'A').slice(0,1).toUpperCase())}</span><span class="adm-me-n">${esc((S.profiles[ME.uid]||{}).name||'Admin')}</span></span></div></header>
+      <div class="adm-top-r"><button class="adm-ibtn" data-dash="reload" title="Refresh">${admIco('M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5')}</button><span class="adm-me"><span class="adm-av">${esc(((S.profiles[ME.uid]||{}).name||'A').slice(0,1).toUpperCase())}</span><span class="adm-me-n">${esc((S.profiles[ME.uid]||{}).name||'Admin')}</span></span><a class="adm-exit" href="#me" aria-label="Exit admin and go back to the app">${admIco('M18 6L6 18M6 6l12 12')}<span>Exit</span></a></div></header>
       ${ME.mode==='demo'?'<div class="adm-demo">Preview file: no real users here. The live site shows your real users.</div>':''}${DASH.err?`<div class="adm-demo err">${esc(DASH.err)}</div>`:''}
       ${body}</main></div>`;
   if(loading)return shell('<div class="adm-card"><p class="adm-mut">Loading…</p></div>');
@@ -4829,7 +4830,7 @@ function admHTML(){
   const kpi=(ic,col,l,v,delta,sp)=>`<div class="adm-card adm-kpi"><div class="adm-kpi-h"><span class="adm-kic" style="background:${col}1F;color:${col}">${admIco(ic)}</span><span>${l}</span></div><b>${v}</b>${delta}${admSpark(sp,col)}</div>`;
   const filters=`<div class="adm-fil"><div class="adm-seg">${[[7,'7D'],[30,'30D'],[90,'90D'],['all','All']].map(([v,l])=>`<button data-dash="rng" data-v="${v}" aria-pressed="${String(DASH.rng)===String(v)}">${l}</button>`).join('')}</div>
     <select data-dash="sport" class="adm-sel"><option value="all" ${DASH.sport==='all'?'selected':''}>All apps</option><option value="fb" ${DASH.sport==='fb'?'selected':''}>Football</option><option value="bb" ${DASH.sport==='bb'?'selected':''}>Basketball</option></select>
-    <select data-dash="role" class="adm-sel">${[['all','Everyone'],['player','Players'],['fan','Fans'],['admin','Admins']].map(([v,l])=>`<option value="${v}" ${DASH.role===v?'selected':''}>${l}</option>`).join('')}</select></div>`;
+    <select data-dash="role" class="adm-sel">${[['all','Everyone'],['player','Players'],['fan','Fans']].map(([v,l])=>`<option value="${v}" ${DASH.role===v?'selected':''}>${l}</option>`).join('')}</select></div>`;
   const title=(t,sub)=>`<div class="adm-ph"><div><h1>${t}</h1><p>${sub}</p></div>${filters}</div>`;
   const kpis=`<div class="adm-kpis">
     ${kpi('M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21c0-4 4-6 8-6s8 2 8 6','#5B5FEF','Total users',K.total.toLocaleString(),`<span class="adm-dl up">+${K.newU} new</span>`,D.signups.reduce((a,x,i)=>(a.push((a[i-1]||0)+x),a),[]))}
@@ -4853,7 +4854,7 @@ function admHTML(){
   const hbars=(list,c)=>{const mx=Math.max(1,...list.map(x=>x[1]));return `<div class="adm-hb">${list.map(([l,v])=>`<div><span>${esc(l)}</span><span class="adm-hbt"><i style="width:${v/mx*100}%;background:${c}"></i></span><b>${v}</b></div>`).join('')||'<p class="adm-mut">No data yet.</p>'}</div>`};
   const sel=`<span class="adm-chip">${rngLbl}</span>`;
   const tabBars=list=>{const mx=Math.max(1,...list.map(x=>x.t)),tot=D.tabList.reduce((a,x)=>a+x.t,0)||1;return `<div class="adm-hb adm-tb">${list.map(x=>`<div><span>${esc(x.n)}</span><span class="adm-hbt"><i style="width:${x.t/mx*100}%;background:${x.mg?'#22B07D':'#5B5FEF'}"></i></span><b>${fmtDur(x.t)}</b><em>${Math.round(x.t/tot*100)}%</em></div>`).join('')||'<p class="adm-mut">No tab data yet. It starts collecting the day this ships.</p>'}</div>`};
-  const rc=k=>D.pool.filter(r=>!r.is_admin&&(k?(r.p&&r.p.role)===k:!(r.p&&['player','fan'].includes(r.p.role)))).length,roles=[['Players',rc('player'),'#F26B3A'],['Fans',rc('fan'),'#5B5FEF'],['Admins',D.pool.filter(r=>r.is_admin).length,'#22B07D'],['No profile',rc(''),'#C9CEDA']].filter(p=>p[1]>0);
+  const rc=k=>D.pool.filter(r=>!r.is_admin&&(k?(r.p&&r.p.role)===k:!(r.p&&['player','fan'].includes(r.p.role)))).length,roles=[['Players',rc('player'),'#F26B3A'],['Fans',rc('fan'),'#5B5FEF'],['No profile',rc(''),'#C9CEDA']].filter(p=>p[1]>0);
   const X=dashData2(D),ext=admPages(P,D,K,X,kpi,title,sel,hbars,dl);
   let body='';
   if(ext)body=ext;
@@ -4904,7 +4905,7 @@ setInterval(()=>{if(!useOn()||!USE.doc)return;
   const a=S.settings&&S.settings.ann;if(a&&a.id&&a.text){USE.doc.ann=USE.doc.ann||{};if(!USE.doc.ann[a.id]){USE.doc.ann[a.id]=1;USE.dirty=true}}},2000);
 /* errors on someone's phone are kept in their private doc data/users/<uid>/errors (last 25), for the admins to read */
 const ERRQ={n:0,busy:false,list:[]};
-function logErr(msg,src,line){try{if(!ME.uid||ME.mode!=='live'||ERRQ.n>=10)return;ERRQ.n++;
+function logErr(msg,src,line){try{if(!ME.uid||ME.mode!=='live'||ME.adminAcct||ERRQ.n>=10)return;ERRQ.n++;
   ERRQ.list.push({t:NOW(),m:String(msg||'').slice(0,300),s:String(src||'').split('/').pop().slice(0,80),l:line||0,v:useTab(),d:matchMedia('(max-width:759px)').matches?'phone':'desktop',ua:navigator.userAgent.slice(0,120),b:typeof APP_BUILD!=='undefined'?APP_BUILD:''});
   if(ERRQ.busy)return;ERRQ.busy=true;setTimeout(async()=>{try{const ref=DB.doc('data/users/'+ME.uid+'/errors'),s=await ref.get(),old=(s.exists&&s.data().list)||[];await ref.set({list:old.concat(ERRQ.list).slice(-25)});ERRQ.list=[]}catch(_){}ERRQ.busy=false},4000)}catch(_){}}
 addEventListener('error',e=>logErr(e.message,e.filename,e.lineno));
