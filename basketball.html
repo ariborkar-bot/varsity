@@ -1961,7 +1961,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v206 · Nov 5';
+const APP_BUILD='v207 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3283,7 +3283,7 @@ function fgStep(k){
     g.n++;const small=g.n>2&&(g.n%4===0||Math.random()<.18);
     const gap=(small?132:188)*s*(g.t>60?.94:1),top=60*s,bot=ground-30*s,c=top+gap/2+Math.random()*Math.max(10,bot-top-gap);
     const tm=fgTeam();g.posts.push({x:g.W+30*s,c,gap,small,pts:small?3:1,done:false,tm});
-    g.next=(205+Math.random()*45)*s;
+    g.next=(230+Math.random()*60)*s;
   }
   const r=14*s;
   if(g.y-r<0||g.y+r>ground)return fgOver();
@@ -3310,9 +3310,23 @@ function fgDraw(){
   /* field or court */
   if(bb){const gr=c.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#0b1a33');gr.addColorStop(1,'#14284a');c.fillStyle=gr;c.fillRect(0,0,W,H);
     c.fillStyle='#c98a4b';c.fillRect(0,ground,W,H-ground);c.strokeStyle='rgba(0,0,0,.18)';c.lineWidth=2;for(let x=-g.yl;x<W;x+=40*s){c.beginPath();c.moveTo(x,ground);c.lineTo(x,H);c.stroke()}}
-  else{for(let i=0;i*40*s<H;i++){c.fillStyle=i%2?'#2f7a3a':'#2a7034';c.fillRect(0,i*40*s,W,40*s)}
-    c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=3*s;for(let x=-g.yl;x<W+80*s;x+=80*s){c.beginPath();c.moveTo(x,0);c.lineTo(x,ground);c.stroke()}
-    c.fillStyle='#1d4f26';c.fillRect(0,ground,W,H-ground);c.fillStyle='rgba(255,255,255,.85)';c.fillRect(0,ground,W,4*s)}
+  else{
+    /* a real field scrolling by: 5-yard mowed stripes between the yard lines, hash marks, and yard numbers every 10 yards */
+    const st=80*s,off=g.dist%(st*2),base=Math.floor(g.dist/st);
+    c.fillStyle='#2b7535';c.fillRect(0,0,W,ground);
+    for(let k=0,x=-(g.dist%st);x<W+st;k++,x+=st){
+      const idx=base+k;
+      if(idx%2===0){c.fillStyle='#2f7d3a';c.fillRect(x,0,st,ground)}
+      c.fillStyle='rgba(255,255,255,.55)';c.fillRect(x-1.5*s,0,3*s,ground);                       /* yard line */
+      c.fillStyle='rgba(255,255,255,.45)';
+      for(let h=1;h<5;h++){const hx=x+h*st/5;c.fillRect(hx-1*s,ground*.30,2*s,9*s);c.fillRect(hx-1*s,ground*.68,2*s,9*s)}   /* hash marks */
+      if(idx%2===0){const yd=((idx/2)%10+10)%10,num=(yd<=5?yd:10-yd)*10;
+        if(num>0){c.fillStyle='rgba(255,255,255,.38)';c.font=`900 ${Math.round(30*s)}px system-ui,sans-serif`;c.textAlign='center';
+          c.fillText(String(num),x,ground*.88);c.save();c.translate(x,ground*.14);c.rotate(Math.PI);c.fillText(String(num),0,0);c.restore()}}
+    }
+    /* sideline at the bottom */
+    c.fillStyle='#1d4f26';c.fillRect(0,ground,W,H-ground);c.fillStyle='rgba(255,255,255,.9)';c.fillRect(0,ground,W,5*s);
+    c.fillStyle='rgba(255,255,255,.12)';for(let x=-(g.dist%(24*s));x<W;x+=24*s)c.fillRect(x,ground+14*s,12*s,3*s)}
   /* goals: a team banner hangs from the top, a real goalpost (base post, crossbar, two uprights) stands below.
      Fly between the uprights, above the crossbar and under the banner. */
   for(const p of g.posts){
