@@ -1119,6 +1119,7 @@ select option{background:#0B1730;color:#EAF0F8}
 @media (min-width:760px){.tabs a:not([aria-current="page"]){background:rgba(4,22,10,.72)!important;border:1px solid rgba(255,255,255,.28)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
 .mast-tick{margin-bottom:30px!important;background:rgba(4,22,10,.6)!important;border-block:1px solid rgba(255,255,255,.45)!important;box-shadow:0 6px 16px rgba(2,18,7,.4)!important;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .gm-tabs{margin:2px 0 14px}.gm-tabs .chip{flex:1 1 0;min-width:0}
+@media (max-width:759px){.gm-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.gm-tabs::-webkit-scrollbar{display:none}.gm-tabs .chip{flex:0 0 auto;white-space:nowrap}}
 .bt-bank{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .bt-n{font:800 2.6rem/1 var(--f-display);color:#FFC23D;letter-spacing:.02em}
 .bt-row{display:flex;align-items:stretch;gap:8px}.bt-at{align-self:center;color:var(--muted);font-size:.8rem}
@@ -1500,6 +1501,22 @@ html,body{overflow-x:clip;max-width:100%}
 }
 /* phones: a grab handle on sheets hints that they swipe down to close */
 @media (max-width:759px){.dr .dp{position:relative;touch-action:pan-y}.dr .dp::before{content:"";position:sticky;top:-12px;display:block;width:42px;height:5px;margin:-8px auto 8px;border-radius:99px;background:rgba(255,255,255,.28);flex:none;z-index:2}}
+/* Ring Chaser */
+.rc-card{text-align:left}.rc-card .fg-hero,.rc-card>h3{text-align:center}
+.rc-school{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(47,107,255,.25),rgba(255,194,61,.12));border:1px solid rgba(255,255,255,.14);margin:6px 0 10px}
+.rc-school small{display:block;color:var(--muted);font-size:.75rem}.rc-school b{font:800 1.25rem/1.15 var(--f-display,inherit);text-transform:uppercase;letter-spacing:.02em}
+.rc-school.spin{animation:rcpulse .25s ease-in-out infinite alternate}@keyframes rcpulse{to{transform:scale(1.02);filter:brightness(1.25)}}
+.rc-need{margin:0 0 8px}
+.rc-list{display:grid;gap:6px;max-height:min(60vh,520px);overflow:auto;padding:2px}
+.rc-p{display:grid;grid-template-columns:22px 36px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;border-radius:12px;border:1px solid var(--line,#22344B);background:var(--surface2,#16253A);color:inherit;font:inherit;cursor:pointer;min-height:52px}
+.rc-p:active{transform:scale(.99)}.rc-p .rc-rk{color:var(--muted);font-weight:800;text-align:center}
+.rc-who{min-width:0;display:flex;flex-direction:column;gap:2px}.rc-who b{overflow-wrap:anywhere;line-height:1.15}.rc-who small{color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.rc-pts{text-align:right}.rc-pts b{display:block;font:800 1.05rem/1 var(--f-display,inherit)}.rc-pts small{color:var(--muted);font-size:.7rem}
+.rc-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
+.rc-slot{display:grid;grid-template-columns:40px 30px minmax(0,1fr);align-items:center;gap:8px;padding:7px 8px;border-radius:12px;border:1px dashed var(--line,#22344B);min-height:48px}
+.rc-slot:not(.on){grid-template-columns:40px minmax(0,1fr)}.rc-slot.on{border-style:solid;background:var(--surface2,#16253A)}
+.rc-sl{font:800 .72rem/1 var(--f-body,inherit);text-align:center;padding:5px 0;border-radius:8px;background:rgba(255,255,255,.08)}
+.rc-total{text-align:center;margin:6px 0 12px}.rc-total b{display:block;font:900 2.6rem/1 var(--f-display,inherit);color:#FFC23D}.rc-total small{color:var(--muted)}
 /* Field Goal game: full-screen layer */
 .fgx{position:fixed;inset:0;z-index:90;background:#0b1626;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .fgx canvas{display:block;width:100%;height:100%}
@@ -1961,7 +1978,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v207 · Nov 5';
+const APP_BUILD='v208 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2527,7 +2544,7 @@ const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg;if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -3375,14 +3392,73 @@ function fgDraw(){
   else if(g.paused&&g.st==='play'){msg('Paused','Tap to keep going');}
   else if(g.st==='over'){const my=ME.uid?fgRec(ME.uid):{};msg(g.newBest&&g.score>0?'New best!':'No good!',`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}\n${my.best?'Best: '+my.best+' pts':''}\nTap to try again`)}
 }
+/* ---- Ring Chaser: fill a lineup one random school at a time.
+   Spin a school, pick one of its players for an open spot, spin again (the same school can come up again).
+   Only players who fit a still-open spot are shown, best season points first. Score = the lineup's season points. ---- */
+const RC_SLOTS=[
+  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']},
+  {k:'G',label:'G',elig:['PG','SG']},{k:'F',label:'F',elig:['SF','PF','C']},{k:'UTIL',label:'UTIL',elig:['PG','SG','SF','PF','C']}];
+const rcRec=u=>((S.picks[u]||{}).rc)||{};
+const rcPool=()=>players().filter(p=>p.mp&&p.school&&agg(p,'season').n>0);
+const rcOpen=m=>RC_SLOTS.filter(s=>!m.sl[s.k]);
+const rcUsed=m=>new Set(Object.values(m.sl));
+/* players of a school who fit an open spot, best first */
+const rcFits=(m,school)=>{const open=rcOpen(m),used=rcUsed(m);return rcPool().filter(p=>p.school===school&&!used.has(p.key)&&open.some(s=>slotOk(s,p))).sort((a,b)=>simTot(b)-simTot(a))};
+/* the spot a pick goes into: its own position first, FLEX last */
+const rcSlotFor=(m,p)=>rcOpen(m).find(s=>slotOk(s,p));
+function rcSpin(){
+  const m=UI.rc;if(!m)return;
+  const schools=[...new Set(rcPool().map(p=>p.school))],ok=schools.filter(sc=>rcFits(m,sc).length);
+  if(!ok.length){m.school=null;m.stuck=true;render();return}
+  m.school=ok[Math.floor(Math.random()*ok.length)];m.spinning=true;m.n=(m.n||0)+1;render();
+  const n=m.n,names=schools;let i=0;
+  const tick=()=>{if(!UI.rc||UI.rc.n!==n)return;i++;const el=document.querySelector('.rc-school.spin');if(i<9&&el){const sc=names[Math.floor(Math.random()*names.length)];el.innerHTML=`${slogo(sc,44)}<div><small>Spinning…</small><b>${esc(sc)}</b></div>`;setTimeout(tick,55+i*10)}else{UI.rc.spinning=false;render()}};
+  setTimeout(tick,40);
+}
+function rcStart(){UI.rc={sl:{},school:null,done:false,n:0,picks:[]};rcSpin()}
+async function rcPick(key){
+  const m=UI.rc;if(!m||m.spinning||m.done)return;const p=pByKey(key);if(!p||p.school!==m.school)return;
+  const s=rcSlotFor(m,p);if(!s)return;m.sl[s.k]=p.key;m.picks.push({k:s.k,school:m.school});
+  if(!rcOpen(m).length){
+    m.done=true;m.school=null;const total=Math.round(RC_SLOTS.reduce((a,s)=>a+simTot(pByKey(m.sl[s.k])),0)*10)/10;m.total=total;
+    const my=ME.uid?rcRec(ME.uid):{};m.newBest=total>(+my.best||0);render();
+    if(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline')await act(()=>upsert('picks/'+ME.uid,{rc:{best:Math.max(+my.best||0,total),last:total,runs:(+my.runs||0)+1,at:NOW()}}),m.newBest?'New best lineup saved':'Lineup saved');
+    render();return}
+  rcSpin();
+}
+function rcHTML(){
+  const m=UI.rc,my=ME.uid?rcRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const rows=Object.keys(S.picks).map(u=>({u,b:+rcRec(u).best||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
+  const board=mgBoard('Best Ring Chaser lineups',rows);
+  const ready=rcPool().length>=RC_SLOTS.length&&rcPool().some(p=>simTot(p)>0);
+  const myBar=my.best?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best</small><b>${f1(my.best)}</b></div><div><small>Lineups built</small><b>${my.runs||1}</b></div></div>`:'';
+  const slotsHTML=`<div class="rc-slots">${RC_SLOTS.map(s=>{const p=m&&pByKey(m.sl[s.k]);return `<div class="rc-slot ${p?'on':''}"><span class="rc-sl">${s.label}</span>${p?`${av(p.name,p.school,30)}<span class="rc-who"><b>${esc(p.name)}</b><small>${esc(p.school)} · ${f1(simTot(p))}</small></span>`:'<span class="rc-who muted">Open</span>'}</div>`}).join('')}</div>`;
+  if(!m)return `<section class="card rc-card"><div class="fg-hero" aria-hidden="true">💍</div><h3>Ring Chaser</h3>
+    <p class="muted">Build a lineup one random school at a time: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 G, 1 F and 1 UTIL. Spin a school, take one of its players for an open spot, then spin again. The same school can come up more than once. Your score is the season fantasy points of your lineup.</p>
+    ${myBar}<div class="fc-deal">${ready?'<button class="btn" data-act="rcStart">Spin first school</button>':'<p class="hint">Ring Chaser opens once players have stats.</p>'}</div>${can?'':'<p class="hint">Sign in to save your best lineup.</p>'}</section>`+board;
+  if(m.done)return `<section class="card rc-card"><div class="qh"><h3>${m.newBest?'New best lineup!':'Lineup complete'}</h3></div>
+    <div class="rc-total"><small>Season points</small><b>${f1(m.total)}</b>${my.best?`<small>Your best: ${f1(Math.max(+my.best||0,m.total))}</small>`:''}</div>${slotsHTML}
+    <div class="btns" style="justify-content:center;margin-top:12px"><button class="btn" data-act="rcStart">Play again</button><button class="btn ghost" data-act="rcQuit">Done</button></div></section>`+board;
+  const open=rcOpen(m),need=[...new Set(open.map(s=>s.label))].join(', ');
+  let pick='';
+  if(m.stuck)pick=`<p class="hint">No school has players left for your open spots.</p>`;
+  else if(m.school){
+    const sc=m.school,list=m.spinning?[]:rcFits(m,m.school);
+    pick=`<div class="rc-school ${m.spinning?'spin':''}">${slogo(sc,44)}<div><small>${m.spinning?'Spinning…':'Your school'}</small><b>${esc(sc)}</b></div></div>
+      ${m.spinning?'':`<p class="muted rc-need">Pick one player for: <b>${esc(need)}</b>. Best season first.</p>
+      <div class="rc-list">${list.map((p,i)=>{const s=rcSlotFor(m,p);return `<button class="rc-p" data-act="rcPick" data-id="${esc(p.key)}"><span class="rc-rk">${i+1}</span>${av(p.name,p.school,36)}<span class="rc-who"><b>${esc(p.name)}</b><small>${pb(p.pos,p.sub)} ${agg(p,'season').n} games</small></span><span class="rc-pts"><b>${f1(simTot(p))}</b><small>to ${s?s.label:''}</small></span></button>`}).join('')}</div>`}`;
+  }
+  return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser</h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${pick}</section>
+    <section class="card"><div class="qh"><h3>Your lineup</h3><button class="btn sm ghost" data-act="rcQuit">Quit</button></div>${slotsHTML}</section>`;
+}
 function viewMini(){
-  const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
+  const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
-  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','10-0'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Spin a random school, draft one of its players, and chase the best lineup.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','10-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
-  return head+tabs+sub+(T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
+  return head+tabs+sub+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
 }
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
@@ -4565,7 +4641,7 @@ function render(){
   $('#main').innerHTML=V[v]();
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
   /* week chip rows open scrolled to the selected week (the current game by default), not to Game 1 */
-  document.querySelectorAll('#main .gm-wks,#main .wks').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
+  document.querySelectorAll('#main .gm-wks,#main .wks,#main .gm-tabs').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
   chrome(v);
 }
 const typing=()=>{const a=document.activeElement;return a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)&&($('#main').contains(a))};
@@ -4680,6 +4756,9 @@ document.addEventListener('click',async e=>{
   else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
   else if(a==='ltab'){UI.ltab=t.dataset.v;render()}
   else if(a==='fgPlay')fgOpen();
+  else if(a==='rcStart')rcStart();
+  else if(a==='rcPick')rcPick(t.dataset.id);
+  else if(a==='rcQuit'){UI.rc=null;render()}
   else if(a==='team'){UI.ttab='sched';location.hash='#team/'+encodeURIComponent(t.dataset.t)}
   else if(a==='ttab'){UI.ttab=t.dataset.v;render()}
   else if(a==='tback'){if(history.length>1)history.back();else location.hash='#games'}

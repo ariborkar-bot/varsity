@@ -379,6 +379,13 @@ def transform(s, mp, games, seeds, teams, prior):
                 "{name:'Semifinals',d:PO_DATES.r2,games:[[W(0,0),W(0,1)],[W(0,2),W(0,3)]]},"
                 "{name:'Championship',d:PO_DATES.r3,games:[[W(1,0),W(1,1)]]}]}]})();" % (T(1), T(8), T(4), T(5), T(2), T(7), T(3), T(6)))
 
+    # --- Ring Chaser: basketball lineup (5 starters, a guard, a forward and a utility spot) ------------------------------
+    s = between(s, 'const RC_SLOTS=[', 'const rcRec=',
+                """const RC_SLOTS=[
+  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']},
+  {k:'G',label:'G',elig:['PG','SG']},{k:'F',label:'F',elig:['SF','PF','C']},{k:'UTIL',label:'UTIL',elig:['PG','SG','SF','PF','C']}];
+""")
+    s = rep(s, "1 QB, 1 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB and 1 DB", "1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 G, 1 F and 1 UTIL")
     # --- Simulate: a starting five on one court, 5 respins in all ---------------------------------------------------
     s = between(s, 'const SIM_SLOTS=[', 'const simKey=',
                 """const SIM_SLOTS=[
