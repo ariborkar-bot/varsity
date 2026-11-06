@@ -679,6 +679,15 @@ select option{background:#0B1730;color:#EAF0F8}
 .lg-stats b{font:900 2rem/1 var(--f-display)}
 .lg-inv{grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid rgba(170,200,255,.25);padding-top:14px}
 .lg-inv code{font-size:1.3rem!important;padding:6px 12px!important;border-width:1px!important}
+.dslot-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin:14px 0 8px}.dslot-h span{color:var(--mut,#9fb0cc);font-size:.9rem}
+.dslots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.dslot{display:flex;align-items:center;gap:8px;min-height:46px;padding:6px 10px;border-radius:12px;border:1px solid rgba(170,200,255,.22);background:rgba(255,255,255,.03);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.dslot i{font-style:normal;font-family:var(--disp,inherit);font-weight:900;min-width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);font-size:.95rem}
+.dslot span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.dslot.open{border-style:dashed}.dslot.open span{color:var(--mut,#9fb0cc);font-weight:500}.dslot.open:hover{border-color:#FFC23D}
+.dslot.me{border-color:#FFC23D;background:rgba(255,194,61,.14)}.dslot.me i{background:#FFC23D;color:#0B1626}
+.dslot.taken{cursor:default;opacity:.92}.dslot-left{margin:10px 0 0;font-size:.92rem}.dslot-left span{color:var(--mut,#9fb0cc)}.dslot .av{flex:0 0 auto}
+.lg-sms{background:#34C759!important;color:#06210f!important;border-color:#34C759!important}.lg-wbtn{display:flex;gap:10px;flex-wrap:wrap}.lg-wbtn .btn:first-child{background:#34C759;color:#06210f;border-color:#34C759}
 .lg-vs .lg-vsrow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:8px 0 10px}
 .lg-side{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
 .lg-side.r{align-items:flex-end;text-align:right}
@@ -2077,7 +2086,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v220 · Nov 6';
+const APP_BUILD='v221 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4135,7 +4144,7 @@ function viewGroups0(){
       <div class="ro-wrap card-sub"><b>Roster spots</b><small class="muted">How many of each position every team gets, in snake draft and budget leagues. Default: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots. Bench players do not score; swap them into a starting spot any time after the draft.</small>${rosterPickerHTML('ro-new',ROSTER_DEFAULT)}</div>
       <div class="lg-row"><input id="new-name" maxlength="32" placeholder="League name, like Friday Night Crew" autocomplete="off" aria-label="League name"><button class="btn" type="submit">Create</button></div></form>`;
   const joinForm=`<form class="card lg-form" id="join-form"><h3>Join a league</h3><p class="muted">Paste the invite code a friend sent you.</p>
-      <div class="lg-row"><input id="join-code" maxlength="12" placeholder="Invite code, like FNL-7Q2K" autocomplete="off" aria-label="Invite code"><button class="btn" type="submit">Join</button></div></form>`;
+      <div class="lg-row"><input id="join-code" maxlength="12" placeholder="Invite code, like FNL-7Q2K" autocomplete="off" aria-label="Invite code" value="${esc(UI.joinCode||'')}"><button class="btn" type="submit">Join</button></div></form>`;
   if(!g)return `<div class="head"><h2>My leagues</h2><p>Build a lineup of real players, face a friend every week, and climb your league’s standings.</p></div>
     <div class="two">${newForm}${joinForm}</div>`;
   const ids=Object.keys(g.members),cw=CURW(),mem=UI.member&&g.members[UI.member]?UI.member:ME.uid;
@@ -4146,7 +4155,7 @@ function viewGroups0(){
   const opp=pr?(pr[0]===ME.uid?pr[1]:pr[0]):null;
   const mySc=lineupWeek(g.id,ME.uid,cw),opSc=opp?lineupWeek(g.id,opp,cw):0;
   const side=(u,sc,r)=>`<div class="lg-side ${r?'r':''}">${av(nm(u),u,52)}<b>${esc(u===ME.uid?'You':nm(u))}</b><small>${(()=>{const x=st.find(y=>y.uid===u);return x?`${x.rec.w}-${x.rec.l}${x.rec.t?'-'+x.rec.t:''}`:''})()}</small><span class="lg-sc">${f1(sc)}</span></div>`;
-  const matchup=ids.length<2?`<section class="card lg-vs wait"><div><h3>Week ${cw} matchup</h3><p class="muted">You need at least one opponent. Send your friends the invite code <b class="lg-code">${esc(g.code)}</b> and matchups start right away.</p></div><button class="btn" data-act="copy" data-code="${esc(g.code)}">Copy invite code</button></section>`
+  const matchup=ids.length<2?`<section class="card lg-vs wait"><div><h3>Week ${cw} matchup</h3><p class="muted">You need at least one opponent. Send your friends the invite code <b class="lg-code">${esc(g.code)}</b> and matchups start right away.</p></div><div class="lg-wbtn"><button class="btn" data-act="smsInv" data-gid="${esc(g.id)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Text invite</button><button class="btn ghost" data-act="copy" data-code="${esc(g.code)}">Copy invite code</button></div></section>`
     :`<section class="card lg-vs"><div class="qh"><h3>Week ${cw} matchup</h3><span class="pill live">This week</span></div>
       <div class="lg-vsrow">${side(ME.uid,mySc)}<span class="lg-v">VS</span>${opp?side(opp,opSc,true):`<div class="lg-side r"><b>Bye week</b><small>No opponent this week</small></div>`}</div>
       <p class="muted">Projected: <b>You ${f1(lineupProj(g.id,ME.uid))}</b>${opp?` · <b>${esc(nm(opp))} ${f1(lineupProj(g.id,opp))}</b>`:''}. Scores fill in as week ${cw} box scores are posted.</p></section>`;
@@ -4167,7 +4176,7 @@ function viewGroups0(){
         <div><small>Record</small><b>${me?`${me.rec.w}-${me.rec.l}${me.rec.t?'-'+me.rec.t:''}`:'0-0'}</b><small>finished weeks</small></div>
         <div><small>Lineup pts</small><b>${me?f1(me.t):'0.0'}</b><small>${UI.scope==='season'?'this season':'week '+UI.scope}</small></div>
       </div>
-      <div class="lg-inv"><span class="lbl">Invite code</span><code id="code">${esc(g.code)}</code><button class="btn sm" data-act="copy" data-code="${esc(g.code)}">Copy</button><button class="btn sm ghost" data-act="lgSet" aria-expanded="${!!UI.lgSet}">League settings</button></div>
+      <div class="lg-inv"><span class="lbl">Invite code</span><code id="code">${esc(g.code)}</code><button class="btn sm" data-act="copy" data-code="${esc(g.code)}">Copy</button><button class="btn sm lg-sms" data-act="smsInv" data-gid="${esc(g.id)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Text invite</button><button class="btn sm ghost" data-act="lgSet" aria-expanded="${!!UI.lgSet}">League settings</button></div>
     </section>
     ${UI.lgSet?lgSettingsHTML(g):''}
     ${draftRoomHTML(g)}
@@ -4220,6 +4229,20 @@ function boardHTML(g,di){
     rows+=`<tr><th>Rd ${r+1}</th>${cells}</tr>`}
   return `<div class="scroll"><table class="dboard"><thead><tr><th></th>${di.order.map(u=>`<th>${esc(u===ME.uid?'You':nm(u))}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
+/* draft slots: before the draft, each member can claim a pick number (1..teams). Earliest claim wins a tie; open
+   spots are filled at random when the owner starts the draft. Leagues hold up to LG_MAX teams. */
+const LG_MAX=32;
+function slotClaims(g,ids){const N=ids.length,sl=(g.draft&&g.draft.slots)||{},by={};
+  Object.entries(sl).filter(([u,x])=>x&&g.members[u]&&x.n>=1&&x.n<=N).sort((a,b)=>(a[1].at||0)-(b[1].at||0))
+    .forEach(([u,x])=>{if(!by[x.n]&&!Object.values(by).includes(u))by[x.n]=u});return by}
+function slotGridHTML(g,ids){const N=ids.length,by=slotClaims(g,ids),mine=Object.keys(by).find(k=>by[k]===ME.uid);
+  return `<div class="dslot-h"><b>Draft order</b><span>${mine?'You pick '+ordinal(+mine)+'. Tap it again to give it up.':'Tap an open spot to take that pick.'}</span></div>
+    <div class="dslots">${Array.from({length:N},(_,i)=>{const n=i+1,u=by[n];
+      return u?`<button class="dslot ${u===ME.uid?'me':'taken'}" data-act="drSlot" data-n="${n}" ${u===ME.uid?'':'disabled'} aria-label="Pick ${n}: ${esc(u===ME.uid?'you':nm(u))}"><i>${n}</i>${av(nm(u),u,24)}<span>${esc(u===ME.uid?'You':nm(u))}</span></button>`
+        :`<button class="dslot open" data-act="drSlot" data-n="${n}" aria-label="Take pick ${n}"><i>${n}</i><span>Open</span></button>`}).join('')}</div>
+    ${(()=>{const left=ids.filter(u=>!Object.values(by).includes(u));return left.length?`<p class="dslot-left"><span>Still choosing:</span> ${left.map(u=>esc(u===ME.uid?'You':nm(u))).join(', ')}</p>`:''})()}
+    <p class="muted">${R_TXT(g)} Open spots are filled at random when the draft starts. ${ids.length} of ${LG_MAX} teams.</p>`}
+const R_TXT=g=>`${slotsOf(g).length} rounds in snake order: the last pick of a round picks first in the next.`;
 function draftRoomHTML(g){
   const di=draftInfo(g);if(di.status==='off')return '';
   const ids=Object.keys(g.members),own=g.ownerId===ME.uid,R=slotsOf(g).length;
@@ -4236,8 +4259,7 @@ function draftRoomHTML(g){
     return `<section class="card lg-draft"><div class="qh"><h3>Draft room</h3><span class="pill pending">Not started</span></div>
       <p class="muted"><b>Roster:</b> ${esc(rosterText(g.roster||ROSTER_DEFAULT))}</p>
       ${own?`<details class="ro-edit"><summary>Change roster spots</summary>${rosterPickerHTML('ro-edit',g.roster||ROSTER_DEFAULT)}<button class="btn ghost" data-act="lgRoster">Save roster</button></details>`:''}
-      <p class="muted">${R} rounds in snake order: the last pick of a round picks first in the next. The order is random when the draft starts.</p>
-      <div class="lg-order">${ids.map(u=>`<span class="lg-ch">${av(nm(u),u,26)}${esc(u===ME.uid?'You':nm(u))}</span>`).join('')}</div>
+      ${slotGridHTML(g,ids)}
       ${own?(ids.length<2?`<p class="hint">Invite at least one friend before you start the draft.</p>`:`<div class="dr-set"><label class="fld"><span>Pick clock</span><select id="dclock">${DCLOCK.map(([v,l])=>`<option value="${v}" ${v===c?'selected':''}>${l}</option>`).join('')}</select></label>
           <button class="btn" data-act="lgDraftStart">Start the draft</button></div><p class="muted">If someone’s clock runs out, Varsity picks the best player for their open spot. People who join later pick from free agents.</p>`)
         :`<p class="hint">Waiting for ${esc(nm(g.ownerId))} to start the draft. Keep this page open: you’ll hear a sound when you’re up.</p>`}
@@ -5261,6 +5283,7 @@ let pdown=false;['pointerdown'].forEach(t=>document.addEventListener(t,()=>{pdow
 document.addEventListener('focusout',()=>{if(dirty){const go=()=>{if(pdown){setTimeout(go,60);return}if(!typing()){dirty=false;render()}};setTimeout(go,60)}});
 function route(){
   let v=location.hash.slice(1);if(v==='hub')v='me';
+  if(v.startsWith('join=')){UI.joinCode=decodeURIComponent(v.slice(5)).toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,12);v='groups';try{history.replaceState(null,'','#groups')}catch(_){};if(UI.joinCode){try{localStorage.setItem('vs-invite',JSON.stringify({c:UI.joinCode,at:Date.now()}))}catch(_){}if(typeof runInvite==='function')runInvite()}}
   if(v.startsWith('team/')){try{UI.team=decodeURIComponent(v.slice(5))}catch(_){UI.team=''}v='team'}
   UI.view=viewOK(v)?v:'league';
   SHEET=false;closePlayer();closeNotes();render();window.scrollTo(0,0);
@@ -5295,6 +5318,12 @@ document.addEventListener('click',e=>{
 
 
 /* ---------- events ---------- */
+/* league invite as a text message: opens Messages with the invite written; on a computer the message is copied instead */
+function invText(g){const bb=typeof FG_SPORT!=='undefined'&&FG_SPORT==='bb',st=draftInfo(g).status;
+  const when=st==='pending'?' Get in before the draft starts.':st==='live'?' The draft is live right now!':'';
+  return `Join my ${bb?'basketball':'football'} league "${g.name}" on Varsity ${bb?'🏀':'🏈'}${when}\n\nTap to join: ${SITE_URL}#join=${g.code}`}
+function smsInvite(g){const m=invText(g),phone=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent));
+  if(phone)location.href='sms:?&body='+encodeURIComponent(m);else copyText(m,'Invite message copied. Paste it into a text.')}
 async function copyText(text,okMsg,sel){
   const fb=()=>{if(sel){const el=$(sel);if(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}}say('Select the text to copy it.')};
   try{await navigator.clipboard.writeText(text);say(okMsg)}catch(_){fb()}
@@ -5435,6 +5464,7 @@ document.addEventListener('click',async e=>{
     const o=oddsFor(g),nb={...cur,[id]:{s,stake,odds:o[s],w:g.w,at:NOW()}};
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick locked in: '+(s==='h'?g.h:g.a)+' for '+stake+' tokens')){delete UI.pk[id];render()}}
     else if(a==='copy')copyText(t.dataset.code,'Invite code copied','#code');
+    else if(a==='smsInv'){const g=S.groups[t.dataset.gid];if(g)smsInvite(g)}
   else if(a==='fcopy')copyText(t.dataset.code,'Invite code copied','#fcode');
   else if(a==='copyFriends'){
     const g=curFGroup();if(!g)return;
@@ -5567,6 +5597,7 @@ async function joinGroup(coll,code,stateKey){
   if(!code){say('Enter an invite code');return}
   /* join through the server so non-members never need write access to a league (falls back if the function is not installed) */
   if(typeof SB!=='undefined'&&SB&&ME.mode==='live'){let r=null;try{r=await SB.rpc('join_league',{p_coll:DB.collection(coll).path,p_code:code})}catch(_){}
+    if(r&&r.error&&/full/i.test(r.error.message||'')){say('That league is full ('+LG_MAX+' teams max)');return}
     if(r&&!r.error){if(!r.data){say('No league found for that code');return}UI[stateKey]=r.data;UI.member=null;say('Joined the league');render();return}}
   let snap;
   try{snap=await DB.collection(coll).where('code','==',code).get()}catch(_){say('Could not look that code up. Try again.');return}
@@ -5574,6 +5605,7 @@ async function joinGroup(coll,code,stateKey){
   if(!d){say('No league found for that code');return}
   const g=d.data();
   if(g.members&&g.members[ME.uid]){say('You are already in that league');UI[stateKey]=d.id;render();return}
+  if(coll==='groups'&&Object.keys(g.members||{}).length>=LG_MAX){say('That league is full ('+LG_MAX+' teams max)');return}
   const ok=await act(()=>upsert(coll+'/'+d.id,{members:{[ME.uid]:NOW()}}),'Joined '+g.name);
   if(ok){UI[stateKey]=d.id;UI.member=null}
 }
@@ -6173,9 +6205,16 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
       await act(()=>upsert('groups/'+g.id,{roster:cleanRoster(r)}),'Roster saved: '+rosterText(r))}
     else if(a==='lgDraftStart'){const g=curGroup();if(!g||g.ownerId!==ME.uid)return;
       const ids=Object.keys(g.members);if(ids.length<2){say('Invite at least one friend first');return}
-      const order=ids.map(u=>[Math.random(),u]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+      const by=slotClaims(g,ids),order=Array(ids.length).fill(null);Object.entries(by).forEach(([n,u])=>{order[n-1]=u});
+      const rest=ids.filter(u=>!order.includes(u)).map(u=>[Math.random(),u]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+      for(let i=0;i<order.length;i++)if(!order[i])order[i]=rest.shift();
       const ck=$('#dclock')?+$('#dclock').value:90;
-      await act(()=>upsert('groups/'+g.id,{roster:cleanRoster(g.roster||ROSTER_DEFAULT),draft:{status:'live',order,startedAt:NOW(),clock:ck,picks:{}}}),'The draft has started')}
+      await act(()=>upsert('groups/'+g.id,{roster:cleanRoster(g.roster||ROSTER_DEFAULT),draft:{status:'live',order,startedAt:NOW(),clock:ck,picks:{},slots:(g.draft&&g.draft.slots)||{}}}),'The draft has started')}
+    else if(a==='drSlot'){const g=curGroup();if(!g||!g.members[ME.uid]||draftInfo(g).status!=='pending')return;
+      const n=+t.dataset.n,ids=Object.keys(g.members),by=slotClaims(g,ids);
+      if(by[n]&&by[n]!==ME.uid){say(nm(by[n])+' already has pick '+n);return}
+      const val=by[n]===ME.uid?null:{n,at:NOW()};
+      await act(()=>upsert('groups/'+g.id,{draft:{slots:{[ME.uid]:val}}}),val?'You have the '+ordinal(n)+' pick':'Pick '+n+' is open again')}
   });
 })();
 </script>
@@ -6191,6 +6230,22 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
 </script>
 <script>
 /* finish the league someone was starting or joining before they picked a name */
+/* invite links (#join=CODE): join the league automatically and open its draft room. Kept in localStorage for 3 days so it
+   survives signing in, signing up, or confirming an email in another tab. */
+function inviteJoin(code){try{localStorage.setItem('vs-invite',JSON.stringify({c:code,at:Date.now()}))}catch(_){}runInvite()}
+var INV_T=null,INV_GATE=false;
+function runInvite(){if(INV_T)return;let p=null;try{p=JSON.parse(localStorage.getItem('vs-invite')||'null')}catch(_){}
+  if(!p||!p.c||Date.now()-p.at>3*864e5){try{localStorage.removeItem('vs-invite')}catch(_){}return}
+  INV_T=setInterval(async()=>{
+    if(ME.mode==='offline')return;
+    if(ME.mode==='guest'||(ME.uid&&S.loaded.profiles&&!myProfile())){if(!INV_GATE){INV_GATE=true;say('Sign in to join the league');openGate()}return}
+    if(!ME.uid||!S.loaded.profiles||!S.loaded.groups||!myProfile())return;
+    clearInterval(INV_T);INV_T=null;try{localStorage.removeItem('vs-invite')}catch(_){}
+    if(location.hash!=='#groups')location.hash='groups';
+    UI.lgp=null;await joinGroup('groups',p.c,'gi');
+    setTimeout(()=>{const d=document.querySelector('.lg-draft');if(d)window.scrollTo({top:d.getBoundingClientRect().top+scrollY-90,behavior:'smooth'})},450);
+  },400)}
+runInvite();
 (()=>{let p=null;try{p=JSON.parse(sessionStorage.getItem('vs-pending')||'null')}catch(_){}
   if(!p)return;
   const t=setInterval(async()=>{
