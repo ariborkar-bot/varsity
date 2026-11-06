@@ -2099,7 +2099,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v228 · Nov 6';
+const APP_BUILD='v229 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3397,6 +3397,8 @@ async function playerCardBlob(p){
    Normal goals score 1, narrow gold goals score 3. Touching a post, the ground or the top ends the run.
    The game runs in its own full-screen layer, so app re-renders never interrupt it. ---- */
 const FG_SPORT='fb';
+/* Hoops (basketball): each obstacle is a hoop turned on its side, rim facing you; this is its rim's half-width and half-height */
+const fgRim=(p,s)=>({rx:Math.max(10*s,p.gap*.13),ry:p.gap/2+5*s});
 const fgRec=u=>((S.picks[u]||{}).fg)||{};
 function fgHTML(){
   const my=ME.uid?fgRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
@@ -3410,6 +3412,7 @@ function fgHTML(){
 }
 const fgTime=s=>{s=Math.max(0,s||0);const m=Math.floor(s/60),r=s-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)};
 let FG=null;const FG_IMG={};
+const FG_PEB=Array.from({length:70},(_,i)=>{const a=i*2.399,d=Math.sqrt((i+.5)/70);return [Math.cos(a)*d*.95,Math.sin(a)*d*.95]});
 function fgTeam(){
   const list=(typeof SD_SCHOOLS!=='undefined'&&SD_SCHOOLS.length?SD_SCHOOLS:['Varsity']),n=list[Math.floor(Math.random()*list.length)];
   const h=hash(n)%360,u=logoFor(n);
@@ -3472,7 +3475,7 @@ function fgStep(k){
   const r=14*s;
   if(g.y-r<0||g.y+r>ground)return fgOver();
   for(const p of g.posts){
-    const t=p.c-p.gap/2,b=p.c+p.gap/2,bw=(p.small?54:64)*s,cw=(p.small?60:78)*s;
+    const t=p.c-p.gap/2,b=p.c+p.gap/2,bw=(p.small?54:64)*s,cw=FG_SPORT==='bb'?fgRim(p,s).rx*2:(p.small?60:78)*s;
     /* the team banner hanging above the opening, and the goal's crossbar and base post below it */
     const hits=[[p.x-bw/2,-9999,bw,t+9999],[p.x-cw/2,b,cw,7*s],[p.x-5*s,b,10*s,9999]];
     for(const[hx,hy,hw,hh]of hits){const nx=Math.max(hx,Math.min(g.x,hx+hw)),ny=Math.max(hy,Math.min(g.y,hy+hh));if((g.x-nx)**2+(g.y-ny)**2<r*r*.8)return fgOver()}
@@ -3528,6 +3531,23 @@ function fgDraw(){
     else if(h>40*s){c.fillStyle='#fff';c.font=`900 ${Math.round(16*s)}px system-ui,sans-serif`;c.textAlign='center';c.fillText(tm.ab||'V',p.x,h-20*s)}
     if(tm.n&&h>L+80*s){c.translate(p.x,h-26*s-L);c.rotate(-Math.PI/2);c.fillStyle='rgba(255,255,255,.92)';c.font=`800 ${Math.round(11*s)}px system-ui,sans-serif`;c.textAlign='left';c.fillText(tm.n.toUpperCase().slice(0,16),6*s,4*s)}
     c.restore();
+    if(bb){
+      /* the hoop: a pole from the floor, a net trailing behind, and the back half of the rim (the front half is drawn after the ball,
+         so the ball goes through the ring) */
+      const {rx,ry}=fgRim(p,s),nl=Math.min(74*s,p.gap*.55);
+      c.save();
+      c.fillStyle='#24324d';c.fillRect(p.x-5*s,p.c+ry,10*s,ground-p.c-ry);c.fillStyle='rgba(255,255,255,.16)';c.fillRect(p.x-5*s,p.c+ry,3*s,ground-p.c-ry);
+      c.fillStyle='#16213a';c.beginPath();c.roundRect?c.roundRect(p.x-16*s,ground-11*s,32*s,11*s,3*s):c.rect(p.x-16*s,ground-11*s,32*s,11*s);c.fill();
+      c.strokeStyle='rgba(255,255,255,.88)';c.lineWidth=1.6*s;
+      for(let i=0;i<=6;i++){const y0=p.c-ry+2*ry*i/6,y1=p.c+(y0-p.c)*.5;c.beginPath();c.moveTo(p.x+2*s,y0);c.quadraticCurveTo(p.x+nl*.55,y0+(y1-y0)*.35,p.x+nl,y1);c.stroke()}
+      for(let j=1;j<=3;j++){const k=j/3;c.beginPath();c.ellipse(p.x+nl*k,p.c,rx*(1-.35*k),ry*(1-.5*k),0,0,Math.PI*2);c.stroke()}
+      if(gold){c.shadowColor='rgba(255,213,74,.95)';c.shadowBlur=18*s}
+      c.strokeStyle=dk;c.lineWidth=7*s;c.beginPath();c.ellipse(p.x,p.c,rx,ry,0,-Math.PI/2,Math.PI/2);c.stroke();
+      c.restore();
+      if(gold){c.fillStyle='#FFD54A';c.strokeStyle='rgba(0,0,0,.55)';c.lineWidth=4;c.font=`900 ${Math.round(16*s)}px system-ui,sans-serif`;c.textAlign='center';c.strokeText('3 PTS',p.x,p.c+ry+24*s);c.fillText('3 PTS',p.x,p.c+ry+24*s)}
+      if(p.flash){c.fillStyle=`rgba(255,213,74,${p.flash})`;c.font=`900 ${Math.round(22*s)}px system-ui,sans-serif`;c.textAlign='center';c.fillText('+'+p.pts,p.x+nl*.5,p.c);p.flash=Math.max(0,p.flash-.03)}
+      continue;
+    }
     /* goalpost (the 3-point ones glow) */
     c.save();if(gold){c.shadowColor='rgba(255,213,74,.9)';c.shadowBlur=16*s}
     c.fillStyle=col;c.strokeStyle=dk;c.lineWidth=1.5;
@@ -3542,11 +3562,25 @@ function fgDraw(){
   }
   /* ball */
   c.save();c.translate(g.x,g.y);c.rotate(g.rot);
-  if(bb){const r=15*s;c.fillStyle='#e8762b';c.beginPath();c.arc(0,0,r,0,7);c.fill();c.strokeStyle='#2b1406';c.lineWidth=1.6*s;c.beginPath();c.arc(0,0,r,0,7);c.moveTo(-r,0);c.lineTo(r,0);c.moveTo(0,-r);c.lineTo(0,r);c.stroke()}
+  if(bb){const r=17*s;c.rotate(g.st==='ready'?performance.now()/900:g.dist/(r*2.2)-g.rot);   /* a basketball spins as it flies */
+    const gr=c.createRadialGradient(-r*.35,-r*.4,r*.08,0,0,r*1.05);gr.addColorStop(0,'#ffa75a');gr.addColorStop(.55,'#ee6a1f');gr.addColorStop(1,'#b8470f');
+    c.fillStyle=gr;c.beginPath();c.arc(0,0,r,0,7);c.fill();
+    c.save();c.beginPath();c.arc(0,0,r,0,7);c.clip();
+    c.fillStyle='rgba(90,30,0,.22)';for(const [px,py] of FG_PEB)c.fillRect(px*r,py*r,1.3*s,1.3*s);   /* pebbled leather */
+    c.strokeStyle='#1c0c03';c.lineWidth=2.1*s;c.lineCap='round';
+    c.beginPath();c.moveTo(-r,0);c.lineTo(r,0);c.moveTo(0,-r);c.lineTo(0,r);c.stroke();
+    c.beginPath();c.arc(-r*1.32,0,r*1.02,-.98,.98);c.stroke();c.beginPath();c.arc(r*1.32,0,r*1.02,Math.PI-.98,Math.PI+.98);c.stroke();
+    c.restore();
+    c.strokeStyle='#1c0c03';c.lineWidth=1.8*s;c.beginPath();c.arc(0,0,r,0,7);c.stroke();
+    c.rotate(-(g.st==='ready'?performance.now()/900:g.dist/(r*2.2)-g.rot));   /* the shine stays on top-left while the ball turns */
+    c.fillStyle='rgba(255,255,255,.28)';c.beginPath();c.ellipse(-r*.38,-r*.45,r*.38,r*.2,-.6,0,7);c.fill()}
   else{c.scale(1.25,1.25);c.fillStyle='#8a4b22';c.beginPath();c.ellipse(0,0,16*s,10*s,0,0,7);c.fill();c.strokeStyle='#5a2e12';c.lineWidth=1.5*s;c.stroke();
     c.strokeStyle='#fff';c.lineWidth=2*s;c.beginPath();c.moveTo(-6*s,0);c.lineTo(6*s,0);c.stroke();c.lineWidth=1.4*s;for(let i=-4;i<=4;i+=2.7){c.beginPath();c.moveTo(i*s,-3*s);c.lineTo(i*s,3*s);c.stroke()}
     c.beginPath();c.moveTo(-15*s,-2*s);c.lineTo(-11*s,-3*s);c.moveTo(-15*s,2*s);c.lineTo(-11*s,3*s);c.moveTo(15*s,-2*s);c.lineTo(11*s,-3*s);c.moveTo(15*s,2*s);c.lineTo(11*s,3*s);c.stroke()}
   c.restore();
+  if(bb)for(const p of g.posts){const {rx,ry}=fgRim(p,s),gold=p.small;c.save();if(gold){c.shadowColor='rgba(255,213,74,.95)';c.shadowBlur=18*s}
+    c.strokeStyle=gold?'#FFD54A':'#ff7a1a';c.lineWidth=7*s;c.beginPath();c.ellipse(p.x,p.c,rx,ry,0,Math.PI/2,Math.PI*1.5);c.stroke();
+    c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=2*s;c.beginPath();c.ellipse(p.x-1.5*s,p.c,rx,ry,0,Math.PI*.62,Math.PI*1.38);c.stroke();c.restore()}
   /* scoreboard: points in the middle, clock on the left */
   const top=Math.max(14,(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0)+14);
   c.textAlign='center';c.fillStyle='#fff';c.strokeStyle='rgba(0,0,0,.5)';c.lineWidth=5;c.font=`900 ${Math.round(44*s)}px system-ui,sans-serif`;
@@ -3555,9 +3589,9 @@ function fgDraw(){
   const msg=(a,b)=>{c.fillStyle='rgba(5,12,30,.78)';const w=Math.min(W-40,330),h=b?150*s:96*s,x=(W-w)/2,y=g.st==='over'?H*.3:H*.58;c.beginPath();c.roundRect?c.roundRect(x,y,w,h,18):c.rect(x,y,w,h);c.fill();
     c.fillStyle='#fff';c.textAlign='center';c.font=`900 ${Math.round(26*s)}px system-ui,sans-serif`;c.fillText(a,W/2,y+42*s);
     if(b){c.font=`700 ${Math.round(15*s)}px system-ui,sans-serif`;b.split('\n').forEach((l,i)=>c.fillText(l,W/2,y+74*s+i*24*s))}};
-  if(g.st==='ready')msg('Tap to kick off',bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts');
+  if(g.st==='ready')msg(bb?'Tap to tip off':'Tap to kick off',bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts');
   else if(g.paused&&g.st==='play'){msg('Paused','Tap to keep going');}
-  else if(g.st==='over'){const my=ME.uid?fgRec(ME.uid):{};msg(g.newBest&&g.score>0?'New best!':'No good!',`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}\n${my.best?'Best: '+my.best+' pts':''}\nTap to try again`)}
+  else if(g.st==='over'){const my=ME.uid?fgRec(ME.uid):{};msg(g.newBest&&g.score>0?'New best!':(bb?'Brick!':'No good!'),`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}\n${my.best?'Best: '+my.best+' pts':''}\nTap to try again`)}
 }
 /* ---- Ring Chaser: fill a lineup one random school at a time.
    Spin a school, pick one of its players for an open spot, spin again (the same school can come up again).

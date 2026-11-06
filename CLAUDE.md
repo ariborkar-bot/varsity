@@ -25,6 +25,7 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - The 2025-26 stats banner was removed from every tab. "Show more" on the Stats leaderboard reveals 10 players at a time.
 - The header court is one centered full court (cream lines, blue lane, wood floor) drawn in `_court_uri()`. The other contributor's navy and gold branded court is still used on the Simulate tab's court (`COURT_JS`).
 - Basketball's 10-0 is called 82-0 (v228; every '10-0' label is swapped in make_basketball.py). Teams have 7 spots: PG, SG, SF, PF, C, G (PG or SG) and PF/C (SF, PF or C); rules version `SIM_V=3`, so older 5-player bests don't count. The season is the school's whole real regular-season schedule (no 10-game cap or filler like football).
+- Hoops (basketball's Field Goal game, v229): obstacles are hoops on their side (`fgRim`): back half of the rim + trailing net + pole drawn before the ball, front half after it, so the ball flies through the ring; the hit box under the gap is the rim's width. The ball is a spinning basketball (gradient, pebbles `FG_PEB`, seams, shine). Wording: 'Tap to tip off', 'Brick!'.
 - Positions: MaxPreps gives PG/SG/SF/PF/C, G, F, W or blank; `assign_positions()` infers the rest from stats.
 - 11 small schools now have empty rosters (all seniors); 24 have fewer than 5 players.
 
