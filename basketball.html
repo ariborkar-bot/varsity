@@ -2110,7 +2110,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v227 · Nov 6';
+const APP_BUILD='v228 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2842,18 +2842,19 @@ function anticipatedHTML_old(){
 }
 /* ---------- Simulate: build the best team you can ---------- */
 const SIM_RESPINS=5;
-/* 10-0 team rules version: v2 = 12 players (2 DL, 2 LB, 2 DB). Bests from older 17-player teams don't count. */
-const SIM_V=2,simRec=u=>{const r=(S.picks[u]||{}).sim||{};return r.v===SIM_V?r:{}};
+/* 82-0 team rules version: v2 = 12 players (2 DL, 2 LB, 2 DB). Bests from older 17-player teams don't count. */
+const SIM_V=3,simRec=u=>{const r=(S.picks[u]||{}).sim||{};return r.v===SIM_V?r:{}};
 const SIM_SLOTS=[
-  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']}];
-/* spots on the court, as [left %, top %] */
-const SIM_POS={C:[50,15],PF:[21,37],SF:[79,37],SG:[27,65],PG:[73,65]};
+  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']},
+  {k:'G',label:'G',elig:['PG','SG']},{k:'FC',label:'PF/C',elig:['SF','PF','C']}];
+/* spots on the court, as [left %, top %]: the five starters plus a G (PG or SG) and a PF/C (SF, PF or C) in the middle */
+const SIM_POS={PF:[18,17],C:[50,17],SF:[82,17],FC:[33,48],G:[67,48],SG:[24,79],PG:[76,79]};
 /* one unit: every respin comes out of the same 5 (left.off) */
 const SIM_UNIT=k=>'off';
-const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G:'#22A6D9',F:'#E8A317'};
+const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G:'#22A6D9',F:'#E8A317','PF/C':'#E8A317'};
 const simKey=p=>((p.name||'')+'|'+(p.school||'')).toLowerCase();
 const simTot=p=>agg(p,'season').v;
-/* points per game: the 10-0 leaderboard ranks teams by the players' combined PPG (owner, Nov 6), so games played don't decide it */
+/* points per game: the 82-0 leaderboard ranks teams by the players' combined PPG (owner, Nov 6), so games played don't decide it */
 const simPPG=p=>{const a=agg(p,'season');return a.n?a.v/a.n:0},teamPPG=c=>c.reduce((t,k)=>t+(pByKey(k)?simPPG(pByKey(k)):0),0);
 const simPool=(slot,ex)=>players().filter(p=>p.mp&&!ex.has(simKey(p))&&slotOk(slot,p)&&agg(p,'season').n>=2);
 /* the best team that could have been drawn: top player at each spot, FLEX goes to the best one left over */
@@ -2939,9 +2940,9 @@ function simRun(school){
   const mine=R.r[school]||0;let W=0,L=0,PF=0,PA=0;
   /* always a 10-game regular season: the school's real regular-season games (playoff games left out), and any open weeks
      filled with the closest-rated schools it did not play */
-  const sched=((GAMES&&GAMES.games)||[]).filter(g=>(g.h===school||g.a===school)&&g.k!=='P'&&g.w<=11).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0))
-    .slice(0,SIM_GAMES).map(g=>({w:g.w,opp:g.h===school?g.a:g.h,home:g.h===school}));
-  if(sched.length<SIM_GAMES){const used=new Set([school,...sched.map(x=>x.opp)]),weeks=new Set(sched.map(x=>x.w));
+  const sched=((GAMES&&GAMES.games)||[]).filter(g=>(g.h===school||g.a===school)&&g.k!=='P').sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0))
+    .map(g=>({w:g.w,opp:g.h===school?g.a:g.h,home:g.h===school}));
+  if(false){const used=new Set([school,...sched.map(x=>x.opp)]),weeks=new Set(sched.map(x=>x.w));
     const near=simSchools().filter(x=>!used.has(x)&&R.r[x]!=null).sort((a,b)=>Math.abs((R.r[a]||0)-mine)-Math.abs((R.r[b]||0)-mine));
     let wk=1,i=0;while(sched.length<SIM_GAMES&&i<near.length){while(weeks.has(wk))wk++;weeks.add(wk);sched.push({w:wk,opp:near[i++],home:sched.length%2===0,add:true})}
     sched.sort((a,b)=>a.w-b.w)}
@@ -2962,7 +2963,7 @@ function simSeasonHTML(m){
   const row=(lab,opp,a,b,win)=>`<div class="bt-r ${win?'won':'lost'}"><b>${lab}${esc(opp)}</b><small class="muted">${win?'W':'L'} ${a}-${b}</small></div>`;
   return `<section class="card sim-season"><div class="qh"><h3>${slogo(s.school,26)} ${esc(s.school)} season</h3></div>
     <div class="fc-bar"><div><small>Record</small><b>${s.W}-${s.L}</b></div><div><small>Points</small><b>${s.PF}-${s.PA}</b></div><div><small>Result</small><b style="font-size:1rem;line-height:1.2">${verdict}</b></div></div>
-    <p class="muted">Your drafted team gives ${esc(s.school)} ${sp>=0?'+':''}${f1(sp)} points per game on top of their real rating. Ten regular-season games: their real schedule, with any open weeks filled by similar teams, simulated from team ratings.</p>
+    <p class="muted">Your drafted team gives ${esc(s.school)} ${sp>=0?'+':''}${f1(sp)} points per game on top of their real rating. Games follow their real regular-season schedule, simulated from team ratings.</p>
     ${s.games.map(g=>row('Game '+g.w+' · '+(g.home?'vs ':'at '),g.opp,g.a,g.b,g.win)).join('')}
     ${s.po.length?`<div class="qh" style="margin-top:12px"><h3>Playoffs</h3></div>${s.po.map(p=>row(p.round+' · vs ',p.opp,p.a,p.b,p.win)).join('')}`:''}
     <div class="btns"><button class="btn" data-act="simAgain">Simulate again</button><button class="btn ghost" data-act="simSeason">Choose another school</button></div></section>`;
@@ -2976,11 +2977,11 @@ function simPickHTML(m){
 }
 function viewSim(){
   const m=UI.sim,my=ME.uid?simRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>10-0</h2><p>Draw a 5-player team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
+  const head=`<div class="head"><h2>82-0</h2><p>Draw a 7-player team, use up to ${SIM_RESPINS} respins to swap out players, and build the best team you can. Your score is the season fantasy points of everyone on it.</p></div>`;
   const myBest=(my.bppg||my.best)?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best team</small><b>${my.bppg?f1(my.bppg)+'<u class="ppg-u">PPG</u>':'Build one to rank'}</b></div><div><small>Teams built</small><b>${my.runs||1}</b></div></div>`:'';
   const rows=Object.keys(S.picks).map(u=>({u,b:+simRec(u).bppg||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)+' PPG'}));
   const board=mgBoard('Best teams · points per game',rows);
-  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 5 spots: a starting five of PG, SG, SF, PF and C. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}${SIM_SLOTS.every(sl=>simPool(sl,new Set()).length)?'<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div>':'<p class="hint sim-wait">Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.</p>'}</section>${board}`;
+  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 7 spots: PG, SG, SF, PF and C, plus a G (PG or SG) and a PF/C (SF, PF or C). Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}${SIM_SLOTS.every(sl=>simPool(sl,new Set()).length)?'<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div>':'<p class="hint sim-wait">Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.</p>'}</section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
   const HASDEF=false,tab='off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
@@ -2994,7 +2995,7 @@ function viewSim(){
     res=`<section class="card sim-res"><div class="sim-gr">${gr}</div><div><h3>${f1(teamPPG(m.c))} PPG <small class="muted">· ${f1(r.total)} season pts</small></h3><p class="muted">Better than ${bt}% of randomly drawn teams. The best possible team scores ${f1(r.max)} points, and you got ${pc}% of that.${my.best&&my.best>=Math.round(r.total*10)/10?` Your best is ${f1(my.best)}.`:''}</p></div>
       <details class="sim-opt"><summary>See the best possible team</summary>${r.best.list.map(x=>`<div class="bt-r"><b>${x.l} · ${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><b class="d">${f1(simTot(x.p))}</b></div>`).join('')}</details>
       <div class="btns"><button class="btn" data-act="simSeason">Simulate a season</button><button class="btn ghost" data-act="simStart">Build another team</button></div></section>`}
-  const act2=m.done?'':`<button class="btn sim-go" data-act="simGo" ${busy?'disabled':''}><span aria-hidden="true">▶</span> Simulate season<small>Lock in this team and play a ${SIM_GAMES}-game season</small></button><div class="bt-go" style="margin-top:10px"><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Simulate your season when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
+  const act2=m.done?'':`<button class="btn sim-go" data-act="simGo" ${busy?'disabled':''}><span aria-hidden="true">▶</span> Simulate season<small>Lock in this team and play the season</small></button><div class="bt-go" style="margin-top:10px"><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Simulate your season when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
   const stage=m.done&&m.stage==='pick'?simPickHTML(m):m.done&&m.stage==='season'&&m.season?simSeasonHTML(m):'';
   return head+stage+(m.stage==='pick'?'':res)+`<section class="card fc-hero">${bar}<div class="sim-board sim-${tab}">${simField(tab)}${HASDEF?`<div class="sim-unit-tag ${tab}">${tab==='def'?'Defense':'Offense'}</div>`:''}${m.c.map(card).join('')}</div>${HASDEF?(tab==='off'?`<button type="button" class="btn sim-next def" data-act="simTab" data-v="def">See your defense <span aria-hidden="true">→</span><small>${unitN('def')} players · ${f1(unitTot('def'))} pts</small></button>`:`<button type="button" class="btn ghost sim-next" data-act="simTab" data-v="off"><span aria-hidden="true">←</span> Back to your offense</button>`):''}${act2}</section>${board}`;
 }
@@ -3635,7 +3636,7 @@ function viewMini(){
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'?'predict':T0,PT=T0==='props'?'props':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','10-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','82-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
@@ -4772,11 +4773,11 @@ function dashData(){
   /* the period before, for the up/down arrows */
   const prevNew=pool.filter(r=>{const c=r.created_at&&dKey(new Date(r.created_at));return c&&c<start&&c>=dKey(new Date(Date.now()-(2*N-1)*864e5))}).length;
   const gstat=[['Pick ’em','mg:picks',u=>Object.keys(betsOf(u)).length,null],['Player props','mg:props',u=>Object.keys(propsOf(u)).length,null],['5 Card Draw','mg:draw',u=>Object.keys(fcDoc(u)).length,null],
-    ['10-0','mg:sim',u=>+simRec(u).runs||0,u=>+simRec(u).best||0],['Ring Chaser','mg:rc',u=>+((S.picks[u]||{}).rc||{}).runs||0,u=>+((S.picks[u]||{}).rc||{}).bpg||0],[FG_SPORT==='bb'?'Hoops':'Field Goal','mg:fg',u=>+((S.picks[u]||{}).fg||{}).runs||0,u=>+((S.picks[u]||{}).fg||{}).best||0]]
+    ['82-0','mg:sim',u=>+simRec(u).runs||0,u=>+simRec(u).best||0],['Ring Chaser','mg:rc',u=>+((S.picks[u]||{}).rc||{}).runs||0,u=>+((S.picks[u]||{}).rc||{}).bpg||0],[FG_SPORT==='bb'?'Hoops':'Field Goal','mg:fg',u=>+((S.picks[u]||{}).fg||{}).runs||0,u=>+((S.picks[u]||{}).fg||{}).best||0]]
     .map(([l,k,pl,be],i)=>{const r=rng(31+i);let people=0,plays=0,best=0;pool.forEach(x=>{let p=0;try{p=pl(x.uid)}catch(_){}if(p){people++;plays+=p}if(be){try{best=Math.max(best,be(x.uid))}catch(_){}}});
       if(ME.mode==='demo'){people=Math.round(pool.length*[.62,.41,.55,.33,.28,.47][i]);plays=Math.round(people*(2+r()*9));best=be?Math.round(r()*[0,0,0,400,180,60][i]*10)/10+[0,0,0,300,90,20][i]:0}
       return {l,k,people,plays,best:be?best:null}});
-  const games=[['Pick ’em',u=>Object.keys(betsOf(u)).length],['Player props',u=>Object.keys(propsOf(u)).length],['5 Card Draw',u=>{const f=fcDoc(u);return f&&Object.keys(f).length}],['10-0',u=>((S.picks[u]||{}).sim||{}).runs||(S.picks[u]||{}).sim],['Ring Chaser',u=>((S.picks[u]||{}).rc||{}).runs],[FG_SPORT==='bb'?'Hoops':'Field Goal',u=>((S.picks[u]||{}).fg||{}).runs]]
+  const games=[['Pick ’em',u=>Object.keys(betsOf(u)).length],['Player props',u=>Object.keys(propsOf(u)).length],['5 Card Draw',u=>{const f=fcDoc(u);return f&&Object.keys(f).length}],['82-0',u=>((S.picks[u]||{}).sim||{}).runs||(S.picks[u]||{}).sim],['Ring Chaser',u=>((S.picks[u]||{}).rc||{}).runs],[FG_SPORT==='bb'?'Hoops':'Field Goal',u=>((S.picks[u]||{}).fg||{}).runs]]
     .map(([l,f],i)=>({l,v:ME.mode==='demo'?Math.round(pool.length*[.62,.41,.55,.33,.28,.47][i]):pool.filter(r=>{try{return !!f(r.uid)}catch(_){return false}}).length}));
   const schools={};pool.forEach(r=>{const s=r.p&&r.p.school;if(s)schools[s]=(schools[s]||0)+1});
   const dev={phone:0,desktop:0};pool.forEach(r=>{if(r.u&&r.u.dev)dev[r.u.dev]=(dev[r.u.dev]||0)+1});
@@ -4936,7 +4937,7 @@ function admHTML(){
   else if(P==='sponsors')body=title('Sponsor videos','Watched through Get tokens. Each finished video pays 25 tokens, up to 5 a day.')+`<div class="adm-kpis">${kpi('M4 5h16v14H4zM10 9l5 3-5 3z','#E0455B','Videos watched',K.ads.toLocaleString(),dl(K.ads,D.prev.ads),D.ads)}${kpi('M4 5h16v14H4z','#5B5FEF','All time',K.adsAll.toLocaleString(),'',D.ads)}${kpi('M16 11a4 4 0 1 0-8 0','#22B07D','Watchers',D.users.filter(u=>u.a).length,'',D.ads)}${kpi('M12 7v5','#F26B3A','Per watcher',f1(K.ads/Math.max(1,D.users.filter(u=>u.a).length)),'',D.ads)}</div>
     <div class="adm-grid"><div class="adm-card adm-span3"><div class="adm-ch"><h3>Videos per day</h3>${sel}</div>${admBars(D.days,D.ads,{c:'#E0455B',label:'Sponsor videos per day'})}</div>
     <div class="adm-card adm-span3"><div class="adm-ch"><h3>Top watchers</h3>${sel}</div>${hbars(D.users.filter(u=>u.a).sort((a,b)=>b.a-a.a).slice(0,10).map(u=>[u.name,u.a]),'#E0455B')}</div></div>`;
-  else if(P==='games'){const tt=k=>{const x=D.tabList.filter(t=>t.mg&&((k==='mg:fg'&&/Field Goal|Hoops/.test(t.n))||t.n.startsWith(({'mg:picks':'Pick','mg:props':'Player props','mg:draw':'5 Card','mg:sim':'10-0','mg:rc':'Ring'})[k]||'~')));return x.reduce((a,y)=>a+y.t,0)};
+  else if(P==='games'){const tt=k=>{const x=D.tabList.filter(t=>t.mg&&((k==='mg:fg'&&/Field Goal|Hoops/.test(t.n))||t.n.startsWith(({'mg:picks':'Pick','mg:props':'Player props','mg:draw':'5 Card','mg:sim':'82-0','mg:rc':'Ring'})[k]||'~')));return x.reduce((a,y)=>a+y.t,0)};
     body=title('Games and schools','Every minigame: who plays, how much, and the best scores. Plus leagues and schools.')+`<div class="adm-card" style="margin-bottom:16px"><div class="adm-ch"><h3>Minigames</h3>${sel}</div><div class="adm-tw"><table class="adm-t"><thead><tr><th>Game</th><th class="n">People</th><th class="n">Plays</th><th class="n">Time spent</th><th class="n adm-hs">Per player</th><th class="n adm-hs">Best score</th></tr></thead><tbody>
       ${D.gstat.map(g=>{const t=tt(g.k);return `<tr><td><b>${esc(g.l)}</b></td><td class="n">${g.people}</td><td class="n">${g.plays}</td><td class="n"><b>${fmtDur(t)}</b></td><td class="n adm-hs">${fmtDur(g.people?t/g.people:0)}</td><td class="n adm-hs">${g.best===null?'—':f1(g.best)}</td></tr>`}).join('')}</tbody></table></div>
       <p class="adm-mut" style="font-size:12px;margin:10px 0 0">Plays: Pick ’em and props count picks, 5 Card Draw counts weekly hands, the others count finished runs. Time spent is for the date range.</p></div>
@@ -4946,8 +4947,8 @@ function admHTML(){
   return shell(body);
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-admp]');if(!b||!ME.admin)return;const p=b.dataset.admp;if(p==='tools'){UI.adtab='accounts';render();window.scrollTo(0,0);return}UI.admp=p;DASH.show=20;render();const m=document.querySelector('.adm-main');if(m)m.scrollTop=0});
-const TAB_NAMES={me:'Me',games:'Games','stats:players':'Stats · Players','stats:stats':'Stats · Stats',leagues:'Leagues',mock:'Mock Draft',team:'Team pages',player:'Player cards',scoring:'Scoring',account:'Account',privacy:'Privacy',simulate:'10-0',
-  'mg:picks':'Pick ’em','mg:props':'Player props','mg:draw':'5 Card Draw','mg:sim':'10-0','mg:rc':'Ring Chaser','mg:fg':'FGH menu','mg:fgplay':'FGH (playing)'};
+const TAB_NAMES={me:'Me',games:'Games','stats:players':'Stats · Players','stats:stats':'Stats · Stats',leagues:'Leagues',mock:'Mock Draft',team:'Team pages',player:'Player cards',scoring:'Scoring',account:'Account',privacy:'Privacy',simulate:'82-0',
+  'mg:picks':'Pick ’em','mg:props':'Player props','mg:draw':'5 Card Draw','mg:sim':'82-0','mg:rc':'Ring Chaser','mg:fg':'FGH menu','mg:fgplay':'FGH (playing)'};
 const tabName=key=>{const [app,t]=key.includes('|')?key.split('|'):['fb',key];let n=TAB_NAMES[t]||t;return app==='bb'?n.replace('FGH','Hoops')+' · basketball':n.replace('FGH','Field Goal')};
 /* ---------- extra tracking for the admin console: busy hours, sponsor starts, announcements seen, app errors ---------- */
 function useAdStart(){if(!USE.doc)return;const k=useDay();USE.doc.as=USE.doc.as||{};USE.doc.as[k]=(+USE.doc.as[k]||0)+1;USE.dirty=true}
@@ -5089,7 +5090,7 @@ function admPages(P,D,K,X,kpi,title,sel,hbars,dl){
   return null}
 function dashWeekly(D,X){const N=7,days=[...Array(14)].map((_,i)=>dKey(new Date(Date.now()-(13-i)*864e5))),a=days.slice(7),b=days.slice(0,7),P=D.pool;
   const sum=(k,ds)=>P.reduce((t,r)=>t+ds.reduce((x,d)=>x+(r.u&&r.u[k]?+r.u[k][d]||0:0),0),0),act=ds=>P.filter(r=>r.u&&ds.some(d=>r.u.days[d]||r.u.ses[d])).length,nu=ds=>P.filter(r=>r.created_at&&ds.includes(dKey(new Date(r.created_at)))).length;
-  const tabs={};P.forEach(r=>{if(!r.u||!r.u.tv)return;a.forEach(d=>{for(const [k,v] of Object.entries(r.u.tv[d]||{})){const n=tabName(k);tabs[n]=(tabs[n]||0)+v}})});const top=Object.entries(tabs).sort((x,y)=>y[1]-x[1]);const mg=top.filter(([n])=>/Pick|props|Card|10-0|Ring|Field|Hoops/.test(n));
+  const tabs={};P.forEach(r=>{if(!r.u||!r.u.tv)return;a.forEach(d=>{for(const [k,v] of Object.entries(r.u.tv[d]||{})){const n=tabName(k);tabs[n]=(tabs[n]||0)+v}})});const top=Object.entries(tabs).sort((x,y)=>y[1]-x[1]);const mg=top.filter(([n])=>/Pick|props|Card|82-0|Ring|Field|Hoops/.test(n));
   const errA=X.errs.filter(e=>dKey(new Date(e.t))>=a[0]).length;
   const ch=(x,y)=>y?`<span class="adm-dl ${x>=y?'up':'dn'}">${x>=y?'↑':'↓'} ${Math.abs(Math.round((x-y)/y*100))}% vs last game</span>`:'<span class="adm-dl">new</span>';
   const rows=[['New users',nu(a),nu(b)],['Active users',act(a),act(b)],['Time on app',sum('days',a),sum('days',b),fmtDur],['Visits',sum('ses',a),sum('ses',b)],['Sponsor videos',sum('ads',a),sum('ads',b)],['Errors',errA,null],['Leagues',X.lg.length,null],['Total users',P.length,null]]
@@ -5257,7 +5258,7 @@ function render(bg){
   const html=V[v]();
   if(bg===true&&html===LAST_HTML&&v===LAST_V){chrome(v);return}
   LAST_HTML=html;LAST_V=v;
-  /* redraws keep your place (10-0 respins used to jump the page up ~60 px: the description line showed for a moment, then folded away) */
+  /* redraws keep your place (82-0 respins used to jump the page up ~60 px: the description line showed for a moment, then folded away) */
   const y0=scrollY;
   $('#main').innerHTML=html;
   infoIcons();   /* fold the page description behind its "i" now, not after the browser has laid the page out with it showing */

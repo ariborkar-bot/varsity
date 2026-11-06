@@ -389,12 +389,13 @@ def transform(s, mp, games, seeds, teams, prior):
     # --- Simulate: a starting five on one court, 5 respins in all ---------------------------------------------------
     s = between(s, 'const SIM_SLOTS=[', 'const simKey=',
                 """const SIM_SLOTS=[
-  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']}];
-/* spots on the court, as [left %, top %] */
-const SIM_POS={C:[50,15],PF:[21,37],SF:[79,37],SG:[27,65],PG:[73,65]};
+  {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']},
+  {k:'G',label:'G',elig:['PG','SG']},{k:'FC',label:'PF/C',elig:['SF','PF','C']}];
+/* spots on the court, as [left %, top %]: the five starters plus a G (PG or SG) and a PF/C (SF, PF or C) in the middle */
+const SIM_POS={PF:[18,17],C:[50,17],SF:[82,17],FC:[33,48],G:[67,48],SG:[24,79],PG:[76,79]};
 /* one unit: every respin comes out of the same 5 (left.off) */
 const SIM_UNIT=k=>'off';
-const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G:'#22A6D9',F:'#E8A317'};
+const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G:'#22A6D9',F:'#E8A317','PF/C':'#E8A317'};
 """)
     s = between(s, 'function simBest(){', '\nfunction simStart',
                 """function simBest(){
@@ -410,9 +411,9 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     s = rep(s, 'bonus=Math.max(-8,Math.min(16,z*4.5))', 'bonus=Math.max(-6,Math.min(12,z*3.5))')
     s = rep(s, "left:{off:SIM_RESPINS,def:SIM_RESPINS}", "left:{off:SIM_RESPINS,def:0}")
     s = rep(s, "Draw a full 12-player team, use up to ${SIM_RESPINS} offense and ${SIM_RESPINS} defense respins to swap out players,",
-            "Draw a 5-player team, use up to ${SIM_RESPINS} respins to swap out players,")
+            "Draw a 7-player team, use up to ${SIM_RESPINS} respins to swap out players,")
     s = rep(s, "You get 12 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 2 DL, 2 LB and 2 DB on defense. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for offense and ${SIM_RESPINS} for defense to swap any player for a new one.",
-            "You get 5 spots: a starting five of PG, SG, SF, PF and C. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one.")
+            "You get 7 spots: PG, SG, SF, PF and C, plus a G (PG or SG) and a PF/C (SF, PF or C). Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one.")
     s = rep(s, "<div><small>Offense respins</small><b>${m.left.off}</b></div><div><small>Defense respins</small><b>${m.left.def}</b></div>",
             "<div><small>Respins</small><b>${m.left.off}</b></div>")
     s = rep(s, "You have ${m.left.off} offense and ${m.left.def} defense ${", "You have ${m.left.off} ${")
@@ -421,6 +422,16 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     j = s.index('<div class="sim-board sim-${tab}">', i)
     s = s[:i] + s[j:]
     s = rep(s, "const HASDEF=SIM_SLOTS.some(x=>SIM_UNIT(x.k)==='def'),tab=UI.simTab==='def'&&HASDEF?'def':'off',", "const HASDEF=false,tab='off',")
+    # 7-player teams: older 5-player bests don't count (rules version 3)
+    s = rep(s, "const SIM_V=2,simRec=", "const SIM_V=3,simRec=")
+    # season = the school's real regular-season schedule, every game (football caps at 10 and fills open weeks)
+    s = rep(s, "g.k!=='P'&&g.w<=11).sort(", "g.k!=='P').sort(")
+    s = rep(s, ".slice(0,SIM_GAMES).map(g=>({w:g.w,", ".map(g=>({w:g.w,")
+    s = rep(s, "if(sched.length<SIM_GAMES){", "if(false){")
+    s = rep(s, "Ten regular-season games: their real schedule, with any open weeks filled by similar teams, simulated from team ratings.", "Games follow their real regular-season schedule, simulated from team ratings.")
+    s = rep(s, "Lock in this team and play a ${SIM_GAMES}-game season", "Lock in this team and play the season")
+    # the game is called 82-0 in basketball (every label; the football app keeps 10-0)
+    s = s.replace("10-0", "82-0")
 
     # --- Supabase: basketball keeps its own leagues, lineups, picks and settings. Accounts (profiles) are shared. ---------------
     i = s.index('function supaDb(sb){')
