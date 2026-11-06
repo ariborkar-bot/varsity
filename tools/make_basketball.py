@@ -163,7 +163,8 @@ def build_data():
                 line = [x['st'][0], x['st'][1], x['st'][2], x['st'][3], x['st'][4], x['st'][5], x['st'][6]]
                 for wk in range(1, nw + 1):
                     w[str(wk)] = line
-            players.append({'id': str(pid), 'n': x['n'], 's': t['name'], 'g': x['g'], 'p': x['p'], 'u': x['p'], 'w': w})
+            # grades are moved up one year for 2026-27 (Fr->So, So->Jr, Jr->Sr; 0 = unknown stays 0)
+            players.append({'id': str(pid), 'n': x['n'], 's': t['name'], 'g': x['g'] + 1 if x['g'] in (1, 2, 3) else x['g'], 'p': x['p'], 'u': x['p'], 'w': w})
     # hidden preseason order: last season's fantasy points under the current scoring, weighted by games played.
     # It never shows as a stat; it only decides who sits at the top while everyone is at 0.0.
     rank = {}

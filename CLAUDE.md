@@ -19,7 +19,7 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 ## Basketball decisions already made (do not undo without asking)
 - Scoring: point +1, rebound +1.2, assist +1.5, steal +3, block +3, turnover -2, no 3-pointer bonus.
 - The word "week" is replaced by "game" everywhere visible in basketball (`gameify()` in `make_basketball.py`). The data is still bucketed by calendar week, so "Game 5" is really all of a team's games that week. A true per-game model was offered and not started.
-- 2025-26 seniors (grade 4) are removed (graduated). Remaining players still show their 2025-26 grade; moving everyone up a grade was offered and not done.
+- 2025-26 seniors (grade 4) are removed (graduated). Everyone else moved up one grade for 2026-27 (Nov 6, v219, in `make_basketball.py` where players are built): 446 Sr, 243 Jr, 116 So, no Fr (new freshmen are not in last year's rosters), 31 unknown.
 - Last year's stats are hidden: `SHOW_LAST_YEAR = False`. Everyone shows 0.0. While nobody has a real stat line, `PRE()` makes every player count as one 0.0 game, and the leaderboard order and TOP 10 tags follow a hidden ranking from last season (`window.BB_RANK`, `window.BB_TOP10`). Last season's team scoring still drives preseason odds (`window.BB_PRIOR`) and the projected playoff bracket.
 - The 2025-26 stats banner was removed from every tab. "Show more" on the Stats leaderboard reveals 10 players at a time.
 - The header court is one centered full court (cream lines, blue lane, wood floor) drawn in `_court_uri()`. The other contributor's navy and gold branded court is still used on the Simulate tab's court (`COURT_JS`).
