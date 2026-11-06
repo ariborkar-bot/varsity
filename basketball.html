@@ -1140,7 +1140,10 @@ select option{background:#0B1730;color:#EAF0F8}
 @media (min-width:760px){.tabs a:not([aria-current="page"]){background:rgba(4,22,10,.72)!important;border:1px solid rgba(255,255,255,.28)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
 .mast-tick{margin-bottom:30px!important;background:rgba(4,22,10,.6)!important;border-block:1px solid rgba(255,255,255,.45)!important;box-shadow:0 6px 16px rgba(2,18,7,.4)!important;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .gm-tabs{margin:2px 0 14px}.gm-tabs .chip{flex:1 1 0;min-width:0}
-@media (max-width:759px){.gm-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.gm-tabs::-webkit-scrollbar{display:none}.gm-tabs .chip{flex:0 0 auto;white-space:nowrap}}
+@media (max-width:759px){.gm-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.gm-tabs::-webkit-scrollbar{display:none}.gm-tabs .chip{flex:0 0 auto;white-space:nowrap}
+/* phones: all five games fit on one row (no sideways scrolling); long names wrap onto two lines */
+@media (max-width:620px){.gm-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;overflow:visible}
+  .gm-tabs .chip{white-space:normal;text-align:center;justify-content:center;line-height:1.1;padding:7px 3px;min-height:44px;font-size:.68rem;letter-spacing:.02em;word-break:normal;overflow-wrap:anywhere}}}
 .bt-bank{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .bt-n{font:800 2.6rem/1 var(--f-display);color:#FFC23D;letter-spacing:.02em}
 .bt-row{display:flex;align-items:stretch;gap:8px}.bt-at{align-self:center;color:var(--muted);font-size:.8rem}
@@ -2110,7 +2113,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v234 · Nov 6';
+const APP_BUILD='v235 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
