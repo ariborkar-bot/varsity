@@ -385,7 +385,6 @@ def transform(s, mp, games, seeds, teams, prior):
   {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']},
   {k:'G',label:'G',elig:['PG','SG']},{k:'F',label:'F',elig:['SF','PF','C']},{k:'UTIL',label:'UTIL',elig:['PG','SG','SF','PF','C']}];
 """)
-    s = rep(s, "1 QB, 1 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB and 1 DB", "1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 G, 1 F and 1 UTIL")
     # --- Simulate: a starting five on one court, 5 respins in all ---------------------------------------------------
     s = between(s, 'const SIM_SLOTS=[', 'const simKey=',
                 """const SIM_SLOTS=[
