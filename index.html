@@ -157,6 +157,11 @@ input[type=number]{width:100%}
 @keyframes simNudge{0%,100%{box-shadow:0 0 0 0 rgba(255,107,134,0)}50%{box-shadow:0 0 0 5px rgba(255,107,134,.45)}}
 .sim-ch .tapme{font-style:normal;display:inline-block;margin-left:6px;background:#FF6B86;color:#fff;border-radius:99px;padding:3px 7px;font-size:.62rem;letter-spacing:.06em;vertical-align:1px}
 .sim-unit-tag{position:absolute;left:10px;top:10px;z-index:3;font:900 .78rem/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border-radius:8px;background:rgba(47,107,255,.92);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.35);pointer-events:none}.sim-unit-tag.def{background:rgba(225,29,72,.92)}
+.sim-go{width:100%;margin-top:14px;min-height:64px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 10px;font-size:1.15rem!important;letter-spacing:.06em;
+  background:linear-gradient(180deg,#FFD15C,#FF9F1C)!important;color:#1a1200!important;border:0!important;box-shadow:0 10px 28px -8px rgba(255,170,40,.75),0 0 0 3px rgba(255,194,61,.25);animation:simGo 1.8s ease-in-out infinite}
+.sim-go small{flex-basis:100%;font:700 .74rem/1 var(--f-body);letter-spacing:.01em;text-transform:none;opacity:.8}
+.sim-go:disabled{animation:none;opacity:.6}
+@keyframes simGo{0%,100%{box-shadow:0 10px 28px -8px rgba(255,170,40,.75),0 0 0 3px rgba(255,194,61,.25)}50%{box-shadow:0 10px 34px -6px rgba(255,170,40,.95),0 0 0 7px rgba(255,194,61,.18)}}
 .sim-next{width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}.sim-next small{flex-basis:100%;font:700 .72rem/1 var(--f-body);letter-spacing:.02em;text-transform:none;opacity:.85}
 .sim-next.def{background:linear-gradient(180deg,#FF6B86,#E11D48)!important;color:#fff!important;border-color:#E11D48!important}
 .sim-ch:focus-visible{outline:2px solid #FFC23D;outline-offset:2px}
@@ -2094,7 +2099,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v226 · Nov 6';
+const APP_BUILD='v227 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2903,14 +2908,14 @@ function simRespin(i){
   const p=pool[fcRnd(pool.length)];m.c[i]=p.key;m.seen.push(simKey(p));m.left[u]--;m.flip={i};render();
   setTimeout(()=>{if(UI.sim&&UI.sim.flip&&UI.sim.flip.i===i){UI.sim.flip=null;render()}},1000);
 }
-async function simFinish(){
+async function simFinish(go){
   const m=UI.sim;if(!m||m.done)return;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0),b=simBest(),max=b.total||1;
   /* how a random, no-respin draw does, so the grade means something */
   const pools=SIM_SLOTS.map(sl=>simPool(sl,new Set()).map(simTot)),N=400;let beat=0,sm=0,sq=0;
   for(let n=0;n<N;n++){let t=0;for(const pl of pools)if(pl.length)t+=pl[fcRnd(pl.length)];if(t<total)beat++;sm+=t;sq+=t*t}
   const mean=sm/N,sd=Math.sqrt(Math.max(1,sq/N-mean*mean));
-  m.done=true;m.res={total,max,pct:Math.min(1,total/max),beat:beat/N,best:b,mean,sd};render();
+  m.done=true;m.res={total,max,pct:Math.min(1,total/max),beat:beat/N,best:b,mean,sd};if(go)m.stage='pick';render();if(go)window.scrollTo(0,0);
   if(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'){
     const old=simRec(ME.uid);
     const ppg=Math.round(teamPPG(m.c)*10)/10;
@@ -2949,7 +2954,7 @@ function simField(tab){
 }
 
 /* ---- play a season as a school ---- */
-const SIM_PO=['Round of 16','Quarterfinal','Semifinal','Final'];
+const SIM_PO=['Round of 16','Quarterfinal','Semifinal','Final'],SIM_GAMES=10;
 const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
 const SIM_SD=22;
 function simScore(mu){
@@ -2963,10 +2968,17 @@ const simSchools=()=>{const R=ridgeRatings(),set=new Set();((GAMES&&GAMES.games)
 function simRun(school){
   const m=UI.sim;if(!m||!m.res)return;
   const R=ridgeRatings(),z=(m.res.total-m.res.mean)/(m.res.sd||1),bonus=Math.max(-8,Math.min(16,z*4.5)),K=ATS_K;
-  const sched=((GAMES&&GAMES.games)||[]).filter(g=>g.h===school||g.a===school).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0));
   const mine=R.r[school]||0;let W=0,L=0,PF=0,PA=0;
-  const games=sched.map(g=>{const home=g.h===school,opp=home?g.a:g.h,mu=K*(mine-(R.r[opp]||0)+(home?R.H:-R.H))+bonus,[a,b]=simScore(mu),win=a>b;
-    W+=win?1:0;L+=win?0:1;PF+=a;PA+=b;return {w:g.w,opp,home,a,b,win}});
+  /* always a 10-game regular season: the school's real regular-season games (playoff games left out), and any open weeks
+     filled with the closest-rated schools it did not play */
+  const sched=((GAMES&&GAMES.games)||[]).filter(g=>(g.h===school||g.a===school)&&g.k!=='P'&&g.w<=11).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0))
+    .slice(0,SIM_GAMES).map(g=>({w:g.w,opp:g.h===school?g.a:g.h,home:g.h===school}));
+  if(sched.length<SIM_GAMES){const used=new Set([school,...sched.map(x=>x.opp)]),weeks=new Set(sched.map(x=>x.w));
+    const near=simSchools().filter(x=>!used.has(x)&&R.r[x]!=null).sort((a,b)=>Math.abs((R.r[a]||0)-mine)-Math.abs((R.r[b]||0)-mine));
+    let wk=1,i=0;while(sched.length<SIM_GAMES&&i<near.length){while(weeks.has(wk))wk++;weeks.add(wk);sched.push({w:wk,opp:near[i++],home:sched.length%2===0,add:true})}
+    sched.sort((a,b)=>a.w-b.w)}
+  const games=sched.map(g=>{const {home,opp}=g,mu=K*(mine-(R.r[opp]||0)+(home?R.H:-R.H))+bonus,[a,b]=simScore(mu),win=a>b;
+    W+=win?1:0;L+=win?0:1;PF+=a;PA+=b;return {w:g.w,opp,home,a,b,win,add:!!g.add}});
   const n=games.length,qual=n>0&&W>=Math.max(4,Math.ceil(n*.55));
   const po=[];let title=false,out=null;
   if(qual){
@@ -2982,7 +2994,7 @@ function simSeasonHTML(m){
   const row=(lab,opp,a,b,win)=>`<div class="bt-r ${win?'won':'lost'}"><b>${lab}${esc(opp)}</b><small class="muted">${win?'W':'L'} ${a}-${b}</small></div>`;
   return `<section class="card sim-season"><div class="qh"><h3>${slogo(s.school,26)} ${esc(s.school)} season</h3></div>
     <div class="fc-bar"><div><small>Record</small><b>${s.W}-${s.L}</b></div><div><small>Points</small><b>${s.PF}-${s.PA}</b></div><div><small>Result</small><b style="font-size:1rem;line-height:1.2">${verdict}</b></div></div>
-    <p class="muted">Your drafted team gives ${esc(s.school)} ${sp>=0?'+':''}${f1(sp)} points per game on top of their real rating. Games follow their real schedule, simulated from team ratings.</p>
+    <p class="muted">Your drafted team gives ${esc(s.school)} ${sp>=0?'+':''}${f1(sp)} points per game on top of their real rating. Ten regular-season games: their real schedule, with any open weeks filled by similar teams, simulated from team ratings.</p>
     ${s.games.map(g=>row('Wk '+g.w+' · '+(g.home?'vs ':'at '),g.opp,g.a,g.b,g.win)).join('')}
     ${s.po.length?`<div class="qh" style="margin-top:12px"><h3>Playoffs</h3></div>${s.po.map(p=>row(p.round+' · vs ',p.opp,p.a,p.b,p.win)).join('')}`:''}
     <div class="btns"><button class="btn" data-act="simAgain">Simulate again</button><button class="btn ghost" data-act="simSeason">Choose another school</button></div></section>`;
@@ -3014,7 +3026,7 @@ function viewSim(){
     res=`<section class="card sim-res"><div class="sim-gr">${gr}</div><div><h3>${f1(teamPPG(m.c))} PPG <small class="muted">· ${f1(r.total)} season pts</small></h3><p class="muted">Better than ${bt}% of randomly drawn teams. The best possible team scores ${f1(r.max)} points, and you got ${pc}% of that.${my.best&&my.best>=Math.round(r.total*10)/10?` Your best is ${f1(my.best)}.`:''}</p></div>
       <details class="sim-opt"><summary>See the best possible team</summary>${r.best.list.map(x=>`<div class="bt-r"><b>${x.l} · ${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><b class="d">${f1(simTot(x.p))}</b></div>`).join('')}</details>
       <div class="btns"><button class="btn" data-act="simSeason">Simulate a season</button><button class="btn ghost" data-act="simStart">Build another team</button></div></section>`}
-  const act2=m.done?'':`<div class="bt-go" style="margin-top:14px"><button class="btn" data-act="simFinish" ${busy?'disabled':''}>Finish team</button><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} offense and ${m.left.def} defense ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Finish your team when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
+  const act2=m.done?'':`<button class="btn sim-go" data-act="simGo" ${busy?'disabled':''}><span aria-hidden="true">▶</span> Simulate season<small>Lock in this team and play a ${SIM_GAMES}-game season</small></button><div class="bt-go" style="margin-top:10px"><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} offense and ${m.left.def} defense ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Simulate your season when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
   const stage=m.done&&m.stage==='pick'?simPickHTML(m):m.done&&m.stage==='season'&&m.season?simSeasonHTML(m):'';
   return head+stage+(m.stage==='pick'?'':res)+`<section class="card fc-hero">${bar}<div class="sim-heads" role="tablist" aria-label="Unit">${[['off','Offense'],['def','Defense']].map(([u,l])=>`<button type="button" role="tab" class="sim-ch ${u} ${u==='def'&&tab!=='def'&&!UI.simSeenDef?'nudge':''}" aria-selected="${tab===u}" data-act="simTab" data-v="${u}">${l}${u==='def'&&tab!=='def'&&!UI.simSeenDef?'<em class="tapme">Tap</em>':''}<small>${unitN(u)} spots · ${f1(unitTot(u))} pts</small></button>`).join('')}</div><div class="sim-board sim-${tab}">${simField(tab)}${HASDEF?`<div class="sim-unit-tag ${tab}">${tab==='def'?'Defense':'Offense'}</div>`:''}${m.c.map(card).join('')}</div>${HASDEF?(tab==='off'?`<button type="button" class="btn sim-next def" data-act="simTab" data-v="def">See your defense <span aria-hidden="true">→</span><small>${unitN('def')} players · ${f1(unitTot('def'))} pts</small></button>`:`<button type="button" class="btn ghost sim-next" data-act="simTab" data-v="off"><span aria-hidden="true">←</span> Back to your offense</button>`):''}${act2}</section>${board}`;
 }
@@ -6226,6 +6238,7 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     else if(a==='simRespin')simRespin(+t.dataset.i)
     else if(a==='simTab'){UI.simTab=t.dataset.v==='def'?'def':'off';if(UI.simTab==='def')UI.simSeenDef=true;render();if(t.classList.contains('sim-next')){const h=document.querySelector('.sim-heads');if(h)window.scrollTo({top:h.getBoundingClientRect().top+scrollY-90,behavior:'smooth'})}}
     else if(a==='simFinish')simFinish()
+    else if(a==='simGo')simFinish(true)
     else if(a==='simReset'){UI.sim=null;render()}
     else if(a==='simSeason'){if(UI.sim){UI.sim.stage='pick';render();window.scrollTo(0,0)}}
     else if(a==='simBack'){if(UI.sim){UI.sim.stage=UI.sim.season?'season':null;render()}}
