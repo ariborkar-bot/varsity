@@ -76,6 +76,14 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - Home/away follows MaxPreps entry order and is unverified.
 - Bishop's and 38 other schools have no stats on MaxPreps.
 
+## v236 (Nov 6): notifications, starter rewards, daily challenge, revive, league social
+- Notifications (shown in the app's bell, not phone push): new or updated stat lines for your claimed profile (`meKeys`, kind `mystats`) and for every player on your league rosters (`teamKeys`, kind `team`), one note per player with "(+N more)"; new league chat messages (kind `chat`). Baseline is `seen.st` (`statSnap`/`statSig`, saved by Mark all as read); `stWatchNew` adds newly rostered players silently; older accounts get a baseline on first load. Two-way empty twin cards are skipped.
+- Starter rewards: +5 tokens (`RW_PAY`) the first time you do each item in `rwList()` (profile, league, lineup, invite a friend who joins, chat, pick, prop, 5 Card Draw, 10-0, Ring Chaser, FG/Hoops, daily challenge, sponsor). Worked out from state and claimed automatically by `rwClaim()` into `picks/<uid>.rw`; added in `bank()`; checklist in Get tokens (`rwHTML`). `fcKeep` and the admin reset keep `rw`.
+- Field Goal / Hoops modes (`UI.fgm`): Daily challenge = same seeded course for everyone (`fgSeed(hash('fg|sport|'+TODAY()))`), `FG_TRIES`=3 a day (a try counts when the run starts, `fgTry`), best today saved in `fg.dd`, Today's leaderboard. Unlimited = old game plus `fg.tot` (all-time total points); leaderboard toggle Best run / Total points (`UI.fgb`).
+- Revive: once per run, game over offers "Watch an ad to keep going" (`fgOffer`); `adPlay(cb)` plays the sponsor video and runs `fgRevive` instead of paying tokens (does not use the 5/day token cap). Revive clears the goal you hit, waits for a tap, 1.8 s of no collisions (ball blinks). The run is saved only when it really ends (`fgSave`, also on close). Fixed: a paused game (tab hidden) now resumes on tap.
+- League social: chat reactions (`CHAT_RX`, `chat[mid].r[uid]`), quick-message chips (`CHAT_QUICK`), The Weekly recap card for the last finished week (`recapData`/`weeklyHTML`) with Share to chat (a `k:'recap'` message).
+- Subscriptions and cosmetics were explained to the owner, not built.
+
 ## Getting MaxPreps data (if needed again)
 Use Claude in Chrome. `javascript_tool` output is cut off at about 1 KB and blocks query-string URLs, so write results into the page DOM and read them with `get_page_text`. Verify hand-transcribed data with a checksum computed in the browser and in Python.
 
