@@ -37,6 +37,7 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - Phones (< 760 px): the big banner scrolls away and `#mastMini` (logo, week, settings via `#gear2`) slides in at the top.
 - Login server: the real site has `NEEDS_SERVER=true`. If the Supabase library cannot load (jsDelivr, then unpkg as backup), `ME.mode='offline'`: an Offline banner with Try again, `act()` refuses to save, sign-in says it can't connect. Previews set `NEEDS_SERVER=false` and run in demo mode. Hosting supabase.min.js in the repo was approved but not done: package downloads were blocked in that session.
 - Pick 'em draws one week of games at a time (`pkWeeksHTML`, Show more adds a week): a basketball season is ~1,400 games.
+- Player card / notifications sheet (`.dp`, a flex column with max-height) must scroll as one page: `.dp>*{flex-shrink:0}` stops sections being squeezed (the game log had shrunk to a 39 px inner scroll box). `.dr` z-index 70 sits above the phone tab bar (65); `#toast` 80 (v220).
 - Over/Under player names open the player card. Join forms start with no position and require one for players.
 - Basketball preseason: `PRE()` still counts everyone as one 0.0 game for ranking, but game counts show 0; Simulate says when it opens instead of "Not enough players".
 - Declined for now (do not do without asking): hiding "Admin sign in", intro shown once ever, bigger tap targets, 12 px minimum text, shorter Minigames tab labels, Simulate leaderboard wording, "VARSITY 05" yard numbers, Stats list loading more at once.

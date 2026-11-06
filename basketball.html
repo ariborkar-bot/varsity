@@ -318,7 +318,7 @@ html,body{overscroll-behavior-y:none}
 .rules small{color:var(--muted);display:block}
 
 /* player sheet */
-.dr{position:fixed;inset:0;z-index:50;background:rgba(6,14,24,.6);backdrop-filter:blur(3px);display:flex;justify-content:flex-end}
+.dr{position:fixed;inset:0;z-index:70;background:rgba(6,14,24,.6);backdrop-filter:blur(3px);display:flex;justify-content:flex-end}
 .dp{width:min(520px,100%);height:100%;overflow-y:auto;background:var(--surface);border-radius:22px 0 0 22px;padding:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
 .dh{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .dhl{display:flex;gap:14px;align-items:center;min-width:0}
@@ -339,7 +339,7 @@ th{font-size:.8rem;color:var(--muted);font-weight:600;text-align:left;padding:6p
 td{border-top:1px solid var(--line);padding:9px 8px 9px 0;vertical-align:top}
 td.n,th.n{text-align:right;padding-right:0;font-weight:700}
 tr.dim td{color:var(--muted)}
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;max-width:calc(100% - 32px);font-weight:600;font-size:.9rem;box-shadow:var(--shadow)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:80;background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;max-width:calc(100% - 32px);font-weight:600;font-size:.9rem;box-shadow:var(--shadow)}
 
 .head.sub h2{font-size:1.5rem}
 .fsec{display:flex;flex-direction:column;gap:16px}
@@ -1500,7 +1500,9 @@ html,body{overflow-x:clip;max-width:100%}
   .fc-hand.done .fc-card b,.fc-hand.done .fc-card .nm{overflow-wrap:anywhere}
 }
 /* phones: a grab handle on sheets hints that they swipe down to close */
-@media (max-width:759px){.dr .dp{position:relative;touch-action:pan-y}.dr .dp::before{content:"";position:sticky;top:-12px;display:block;width:42px;height:5px;margin:-8px auto 8px;border-radius:99px;background:rgba(255,255,255,.28);flex:none;z-index:2}}
+@media (max-width:759px){.dr .dp{position:relative;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+/* the sheet scrolls: its sections keep their own height instead of being squeezed to fit (flex column + max-height) */
+.dp>*{flex-shrink:0}.dr .dp::before{content:"";position:sticky;top:-12px;display:block;width:42px;height:5px;margin:-8px auto 8px;border-radius:99px;background:rgba(255,255,255,.28);flex:none;z-index:2}}
 .tw-o{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
 .tw-note{font-size:.85rem;color:var(--muted);background:rgba(255,194,61,.08);border:1px solid rgba(255,194,61,.25);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
 /* admin dashboard */
@@ -2086,7 +2088,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v219 · Nov 6';
+const APP_BUILD='v220 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
