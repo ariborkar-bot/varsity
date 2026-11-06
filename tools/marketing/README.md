@@ -10,3 +10,9 @@ How the six TikTok/Reels videos were made, so they can be remade with new player
 
 ## Video 7: "6 ways to play" (Nov 6)
 Uses REAL player names (owner's call): `REAL=1` env or `newpage(b,fake=False)`. `rec7.py card picks props fc still` records Darian Webb's card, Pick 'em on Mount Miguel vs Mater Dei Catholic, props on Hezekiah Manuel, a 5 Card Draw hand of the top player at each position, and a sample league (`LEAGUE` in cap.py, `__seed=39`, week set to 11). `REAL=1 SUF=_r python3 rec2.py rc` records Ring Chaser.
+
+## Video 8: "group chat" (Nov 6) — the native-style one
+Built to look like a real phone screen recording, not a mockup: an iMessage group chat hook ("when the group chat finds out there's fantasy for OUR high school"), then full-screen app footage with velocity edits (beat zoom punches, whip pans, zoom-through), TikTok white-box captions, and a muffled-to-drop phonk beat.
+- `rec8.py league picks props`: records the app at 392x697 (true 9:16, 1080x1920 frames) with iPhone safe-area spacing patched in. League clip = one frame per 7 px of scroll, so the page can speed-ramp.
+- `audio8.py audio8_v8.json`: 140 BPM synthesized beat + iMessage dings/swoosh, taps, coin, lock. Cuts sit on beats (drop = beat 8).
+- `render.py video v/v8.html out.mp4 20.571 audio/v8.wav`.
