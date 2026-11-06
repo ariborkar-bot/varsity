@@ -42,6 +42,8 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - Declined for now (do not do without asking): hiding "Admin sign in", intro shown once ever, bigger tap targets, 12 px minimum text, shorter Minigames tab labels, Simulate leaderboard wording, "VARSITY 05" yard numbers, Stats list loading more at once.
 - Football `games.js` is missing many weeks 1-11 results (most teams show 6-9 games, not 10). Cloud search could only find 2 more; the rest needs SI or MaxPreps pages read through the owner's Chrome.
 
+- Sponsor spot (Get tokens → Watch a sponsor): plays `ads/fogo.mp4` (owner's FOGO video, 21.7 s, 720p, 0.9 MB) in `adPlay()`; Collect unlocks only when it ends (no skipping ahead, pauses when the tab is hidden), +25 tokens, 5/day. It is a stand-in until a real ad network is used; the native AdMob path in `adNative()` is unchanged. `sw.js` skips .mp4. `make_previews.py` inlines the video. To swap the ad, replace the file or edit `ADS.sponsors`.
+
 ## Open items and ideas
 - Database rules: only `tools/sql/mocks_policies.sql` is in the repo. Its "update mock" policy lets any signed-in user change any mock draft. (`merge_doc` runs as the caller, so table policies apply.)
 - Supabase (Nov 5 2026, migration `league_security_and_account_delete`, copy in tools/sql/): only a league's owner/members/admins can update it; joining by code goes through the `join_league` RPC; `bb_` collections have the same rules as football; `delete_my_account()` RPC backs Settings → Delete my account. Multiplayer mock drafts still need tools/sql/mocks_policies.sql.

@@ -1350,6 +1350,11 @@ select option{background:#0B1730;color:#EAF0F8}
 #adov .adm{display:grid;gap:8px;justify-items:center;padding:18px 8px;border-radius:16px;background:radial-gradient(120% 90% at 50% 0%,#17358a,#0a1840)}
 #adov .adm img{max-width:100%;max-height:200px;border-radius:12px;object-fit:contain}#adov .adm .adg{width:96px;height:96px}
 #adov .adm h3{margin:0;font-size:1.5rem}#adov .adm p{margin:0;color:#C9D6F2}
+#adov .adv{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:1/1;width:100%}
+#adov .adv video{display:block;width:100%;height:100%;object-fit:cover}
+#adov .adv .adtap{position:absolute;inset:0;display:none;place-items:center;background:rgba(2,6,16,.55);border:0;color:#fff;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer}
+#adov .adv.paused .adtap{display:grid}
+#adov .adsnd{position:absolute;right:10px;bottom:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:1rem;cursor:pointer}
 #adov .adl{color:#FFC23D;font-weight:700}
 #adov .adbar{height:6px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}#adov .adbar i{display:block;height:100%;width:0;background:#FFC23D;transition:width .2s linear}
 #adov .adgo{height:48px;border-radius:14px;border:0;font:inherit;font-weight:800;background:linear-gradient(180deg,#FFD25E,#FFB41F);color:#0b1220;cursor:pointer}
@@ -1930,7 +1935,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v199 · Nov 5';
+const APP_BUILD='v200 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2391,7 +2396,7 @@ const gDone=g=>g.hs!=null&&g.as!=null;
 const TOK0=100;
 /* Rewarded sponsor spots: watch a short sponsor message, earn tokens. Sponsors are plain data below (no ad network, no tracking).
    Swap the placeholder for a real sponsor: name, a line, an optional image and an optional link. */
-const ADS={reward:25,perDay:5,secs:10,sponsors:[{name:'Your business here',line:'Sponsor the Varsity minigames and reach every player.',img:'',url:''}]};
+const ADS={reward:25,perDay:5,secs:10,sponsors:[{name:'FOGO',line:'Face-off timing and leaderboards.',video:'ads/fogo.mp4',img:'',url:''}]};   /* video: a short mp4 in ads/; the Collect button unlocks when it ends */
 const adDay=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const adOf=u=>((S.picks[u]||{}).ad)||{};
 const adLeft=u=>Math.max(0,ADS.perDay-(adOf(u).d===adDay()?+adOf(u).n||0:0));
@@ -4882,15 +4887,33 @@ async function adPlay(){
   if(await adNative())return;
   const sp=ADS.sponsors[Math.floor(Math.random()*ADS.sponsors.length)]||ADS.sponsors[0];
   const o=document.createElement('div');o.id='adov';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Sponsor');
+  const vid=sp.video||'';
   o.innerHTML=`<div class="adc"><span class="adt">Sponsored</span>
-    <div class="adm">${sp.img?`<img src="${esc(sp.img)}" alt="">`:`<img class="adg" src="logo.png" alt="">`}<h3>${esc(sp.name)}</h3><p>${esc(sp.line||'')}</p>${sp.url?`<a class="adl" href="${esc(sp.url)}" target="_blank" rel="noopener sponsored">Learn more</a>`:''}</div>
+    ${vid?`<div class="adv"><video src="${esc(vid)}" playsinline webkit-playsinline preload="auto" disablepictureinpicture controlslist="nodownload noremoteplayback"></video><button type="button" class="adtap">▶ Tap to play</button><button type="button" class="adsnd" aria-label="Sound">🔊</button></div>`:`<div class="adm">${sp.img?`<img src="${esc(sp.img)}" alt="">`:`<img class="adg" src="logo.png" alt="">`}<h3>${esc(sp.name)}</h3><p>${esc(sp.line||'')}</p>${sp.url?`<a class="adl" href="${esc(sp.url)}" target="_blank" rel="noopener sponsored">Learn more</a>`:''}</div>`}
     <div class="adbar"><i></i></div>
     <button type="button" class="adgo" disabled>Collect in <span id="adn">${ADS.secs}</span>s</button>
     <button type="button" class="adx">No thanks</button></div>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
   let left=ADS.secs,last=Date.now(),done=false;const bar=o.querySelector('.adbar i'),go=o.querySelector('.adgo'),n=o.querySelector('#adn');
-  const close=()=>{clearInterval(iv);o.remove();document.documentElement.style.overflow=''};
-  const iv=setInterval(()=>{const now=Date.now();if(!document.hidden)left-=(now-last)/1000;last=now;       /* the clock only runs while the page is visible */
+  const close=()=>{if(iv)clearInterval(iv);try{o.querySelector('video').pause()}catch(_){}o.remove();document.documentElement.style.overflow=''};
+  const V=o.querySelector('video');
+  if(V){   /* real video: the clock is the video itself; it only counts while it is playing and the page is visible */
+    const box=o.querySelector('.adv'),snd=o.querySelector('.adsnd');let nat=false;
+    go.textContent='Watch to the end to collect';
+    const start=()=>{const r=V.play();if(r&&r.catch)r.catch(()=>{V.muted=true;snd.textContent='🔇';const r2=V.play();if(r2&&r2.catch)r2.catch(()=>box.classList.add('paused'))})};
+    V.addEventListener('playing',()=>box.classList.remove('paused'));
+    V.addEventListener('pause',()=>{if(!V.ended&&!document.hidden)box.classList.add('paused')});
+    V.addEventListener('timeupdate',()=>{if(V.duration)bar.style.width=Math.min(100,100*V.currentTime/V.duration)+'%'});
+    V.addEventListener('seeking',()=>{if(!done&&V.currentTime>mx+1)V.currentTime=mx;});   /* no skipping ahead */
+    let mx=0;V.addEventListener('timeupdate',()=>{if(V.currentTime>mx&&V.currentTime<mx+1.5)mx=V.currentTime});
+    V.addEventListener('ended',()=>{done=true;bar.style.width='100%';go.disabled=false;go.textContent='Collect +'+ADS.reward+' tokens'});
+    V.addEventListener('error',()=>{V.remove();box.innerHTML='<p style="margin:0;padding:40px 12px;color:#C9D6F2">Could not load the video. Try again in a moment.</p>'});
+    box.querySelector('.adtap').onclick=start;
+    snd.onclick=()=>{V.muted=!V.muted;snd.textContent=V.muted?'🔇':'🔊'};
+    document.addEventListener('visibilitychange',()=>{if(document.hidden&&!done){V.pause();box.classList.add('paused')}});
+    start();
+  }
+  const iv=V?0:setInterval(()=>{const now=Date.now();if(!document.hidden)left-=(now-last)/1000;last=now;       /* the clock only runs while the page is visible */
     if(left<=0&&!done){done=true;left=0;go.disabled=false;go.textContent='Collect +'+ADS.reward+' tokens'}else if(!done)n.textContent=Math.ceil(left);
     bar.style.width=Math.min(100,100*(1-left/ADS.secs))+'%'},200);
   o.querySelector('.adx').onclick=close;

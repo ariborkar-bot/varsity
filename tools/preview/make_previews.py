@@ -27,6 +27,10 @@ def build(src, dest, profile, start):
     h = h.replace(A, "if(false){", 1).replace(B, profile, 1).replace(C, "\nif(!location.hash)location.hash='%s';\nroute();\n" % start, 1)
     assert h.count('const NEEDS_SERVER=true;') == 1
     h = h.replace('const NEEDS_SERVER=true;', 'const NEEDS_SERVER=false;', 1)
+    import base64
+    vp = os.path.join(ROOT, 'ads', 'fogo.mp4')
+    if os.path.exists(vp) and 'ads/fogo.mp4' in h:       # the sponsor video rides along inside the single file
+        h = h.replace("video:'ads/fogo.mp4'", "video:'data:video/mp4;base64,%s'" % base64.b64encode(open(vp, 'rb').read()).decode(), 1)
     h = h.replace('</head>', '<style>#tab-admin{display:none!important}</style></head>', 1)
     h = h.replace('href="basketball.html"', 'href="varsity-basketball.html"').replace('href="index.html"', 'href="varsity-football.html"')
     open(os.path.join(OUT, dest), 'w', encoding='utf-8').write(h)
