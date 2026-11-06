@@ -1929,7 +1929,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v197 · Nov 5';
+const APP_BUILD='v198 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3213,7 +3213,7 @@ function viewMini(){
   const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='sim'?'Draw a full 17-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['mock','Mock Draft'],['sim','Simulate']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
-  const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Game winners'],['props','Player over / under']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
+  const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player over / under']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():picksHTML());
 }
@@ -4400,6 +4400,8 @@ function render(){
   let v=UI.view;
   $('#main').innerHTML=V[v]();
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
+  /* week chip rows open scrolled to the selected week (the current week by default), not to Week 1 */
+  document.querySelectorAll('#main .gm-wks,#main .wks').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
   chrome(v);
 }
 const typing=()=>{const a=document.activeElement;return a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)&&($('#main').contains(a))};
