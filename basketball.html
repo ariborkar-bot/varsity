@@ -2085,7 +2085,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v216 · Nov 6';
+const APP_BUILD='v217 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4668,7 +4668,7 @@ const useDay=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMont
 const useOn=()=>ME.uid&&ME.mode==='live'&&!VA;
 async function useLoad(){if(USE.doc||USE.loading||!useOn())return;USE.loading=true;
   try{const s=await DB.doc('data/users/'+ME.uid+'/usage').get();const d=(s.exists&&s.data())||{};
-    USE.doc={first:d.first||NOW(),last:NOW(),dev:matchMedia('(max-width:759px)').matches?'phone':'desktop',days:d.days||{},ses:d.ses||{},ads:d.ads||{},tv:d.tv||{},tc:d.tc||{}};
+    USE.doc={...d,first:d.first||NOW(),last:NOW(),dev:matchMedia('(max-width:759px)').matches?'phone':'desktop',days:d.days||{},ses:d.ses||{},ads:d.ads||{},tv:d.tv||{},tc:d.tc||{}};
     const k=useDay();USE.doc.ses[k]=(+USE.doc.ses[k]||0)+1;USE.dirty=true;useSave()}catch(_){}USE.loading=false}
 function useSave(){if(!USE.doc||!USE.dirty||!useOn())return;USE.dirty=false;USE.doc.last=NOW();DB.doc('data/users/'+ME.uid+'/usage').set(USE.doc).catch(()=>{USE.dirty=true})}
 function useAd(){if(!USE.doc)return;const k=useDay();USE.doc.ads[k]=(+USE.doc.ads[k]||0)+1;USE.dirty=true;useSave()}
@@ -4688,7 +4688,7 @@ const DASH={rng:30,sport:'all',role:'all',q:'',sort:'time',dir:-1,show:20,use:nu
 async function dashLoad(){
   if(DASH.loading)return;DASH.loading=true;DASH.err='';
   try{
-    if(ME.mode==='demo'){DASH.use=dashDemoUse();DASH.ex=dashDemoExtra()}
+    if(ME.mode==='demo'){DASH.use={};DASH.ex={err:{},leagues:[]}}
     else{const out={};for(const pre of ['data/users/','bb_data/users/']){const {data,error}=await SB.from('docs').select('coll,data').eq('id','usage').like('coll',pre+'%').limit(10000);if(error)throw error;
         for(const r of data||[]){const uid=r.coll.slice(pre.length),sp=pre.startsWith('bb')?'bb':'fb',o=out[uid]||(out[uid]={days:{},ses:{},ads:{},sp:{},first:null,last:null,dev:null});o.sp[sp]=1;
           for(const f of ['days','ses','ads'])for(const [k,v] of Object.entries(r.data[f]||{})){o[f][k]=(o[f][k]||0)+(+v||0);(o.spd||(o.spd={}))[sp+k]=1}
@@ -4701,16 +4701,6 @@ async function dashLoad(){
   }catch(e){DASH.err='Could not load usage. Your admin unlock may have timed out.';DASH.use={}}
   DASH.loading=false;if(UI.view==='admin')render();
 }
-/* sample data so the dashboard can be looked at in the preview files (demo mode only, never on the real site) */
-function dashDemoRows(){const r=rng(77),names=['Jordan','Ava','Malik','Sofia','Ethan','Mia','Isaiah','Leah','Noah','Chloe','Elijah','Zoe','Caleb','Nora','Marcus','Ella','Diego','Lily','Andre','Grace'],last=['Lopez','Kim','Johnson','Nguyen','Patel','Garcia','Brown','Davis','Reyes','Walker'],out=[],now=Date.now();
-  for(let i=0;i<64;i++){const c=now-Math.floor(r()*80)*864e5,uid='demo'+i,nm=names[i%names.length]+' '+last[Math.floor(r()*last.length)];
-    out.push({uid,email:nm.toLowerCase().replace(' ','.')+'@example.com',created_at:new Date(c).toISOString(),last_sign_in_at:new Date(Math.max(c,now-Math.floor(r()*20)*864e5)).toISOString(),confirmed:r()>.1,is_admin:i<2,
-      demo:{name:i<2?['ZH_VARSITY_ADMIN','AB_VARSITY_ADMIN'][i]:nm,role:r()<.45?'player':'fan',school:SD_SCHOOLS[Math.floor(r()*SD_SCHOOLS.length)]}})}return out}
-function dashDemoUse(){const r=rng(91),out={},now=new Date();for(const a of (AD.rows||[])){const o={days:{},ses:{},ads:{},sp:{fb:1},first:a.created_at,last:a.last_sign_in_at,dev:r()<.7?'phone':'desktop'};if(r()<.35)o.sp.bb=1;
-    const keen=.25+r()*.7;for(let d=0;d<90;d++){const t=new Date(now-d*864e5);if(t<new Date(a.created_at))break;if(r()>keen*.8)continue;const k=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-      o.ses[k]=1+Math.floor(r()*3);o.days[k]=Math.round((90+r()*900)*keen);if(r()<.4)o.ads[k]=1+Math.floor(r()*4);
-      const W={'fb|stats:players':18,'fb|leagues':16,'fb|me':12,'fb|games':9,'fb|mg:picks':10,'fb|mg:props':6,'fb|mg:draw':8,'fb|mg:sim':5,'fb|mg:rc':7,'fb|mg:fgplay':9,'fb|player':8,'fb|stats:stats':4,'fb|mock':4,'fb|team':3,'bb|stats:players':5,'bb|mg:draw':3},tot=Object.values(W).reduce((x,y)=>x+y,0);
-      o.tv=o.tv||{};o.tc=o.tc||{};o.tv[k]={};o.tc[k]={};for(const [tab,w] of Object.entries(W)){if(r()<.25)continue;o.tv[k][tab]=Math.round(o.days[k]*w/tot*(.6+r()*.8));o.tc[k][tab]=1+Math.floor(r()*w/4)}}out[a.uid]=o}return out}
 const dKey=t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
 const fmtDur=s=>{s=Math.round(s||0);if(s<60)return s+'s';const m=Math.round(s/60);if(m<60)return m+'m';const h=Math.floor(m/60);return h+'h '+(m%60)+'m'};
 function dashData(){
@@ -4773,7 +4763,7 @@ function dashHTML(){
   list.sort((a,b)=>{const x=sk(a),y=sk(b);return (x<y?-1:x>y?1:0)*DASH.dir});
   const th=(k,l,cl='')=>`<th class="${cl}"><button data-dash="sort" data-v="${k}">${l}${DASH.sort===k?(DASH.dir<0?' ▼':' ▲'):''}</button></th>`;
   const shown=list.slice(0,DASH.show);
-  return `${DASH.err?`<p class="au-err">${esc(DASH.err)}</p>`:''}${ME.mode==='demo'?'<p class="note"><span class="pill pending">Sample data</span><span>This preview shows made-up numbers. The real site shows your users.</span></p>':''}
+  return `${DASH.err?`<p class="au-err">${esc(DASH.err)}</p>`:''}${ME.mode==='demo'?'<p class="note"><span>Preview file: no real users here. The live site shows your real users.</span></p>':''}
   <section class="card dfil"><div class="chips" role="group" aria-label="Date range">${chip('rng',7,'7 days')}${chip('rng',30,'30 days')}${chip('rng',90,'90 days')}${chip('rng','all','All time')}</div>
     <div class="dsel"><label class="fld"><span>App</span><select data-dash="sport"><option value="all" ${DASH.sport==='all'?'selected':''}>Football + basketball</option><option value="fb" ${DASH.sport==='fb'?'selected':''}>Football</option><option value="bb" ${DASH.sport==='bb'?'selected':''}>Basketball</option></select></label>
     <label class="fld"><span>Who</span><select data-dash="role">${[['all','Everyone'],['player','Players'],['fan','Fans'],['admin','Admins']].map(([v,l])=>`<option value="${v}" ${DASH.role===v?'selected':''}>${l}</option>`).join('')}</select></label></div></section>
@@ -4812,7 +4802,7 @@ const admAgo=t=>{if(!t)return'never';const m=Math.round((Date.now()-new Date(t))
 function admSpark(v,c){const W=120,H=34,mx=Math.max(1,...v),n=v.length,pts=v.map((x,i)=>[i/(Math.max(1,n-1))*W,H-3-(x/mx)*(H-8)]);
   const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
   return `<svg viewBox="0 0 ${W} ${H}" class="adm-spark" preserveAspectRatio="none"><path d="${d} L${W} ${H} L0 ${H}Z" fill="${c}" opacity=".12"/><path d="${d}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round"/></svg>`}
-function admBars(days,v,o={}){const W=640,H=230,P={l:40,r:8,t:14,b:26},w=W-P.l-P.r,h=H-P.t-P.b,n=days.length,mx=Math.max(1,...v),p=Math.pow(10,Math.floor(Math.log10(mx))),top=Math.ceil(mx/p)*p,Y=x=>P.t+h-x/top*h,bw=w/n;
+function admBars(days,v,o={}){const W=640,H=230,P={l:40,r:8,t:14,b:26},w=W-P.l-P.r,h=H-P.t-P.b,n=days.length,mx=Math.max(4,...v),p=Math.pow(10,Math.floor(Math.log10(mx))),top=Math.ceil(mx/p)*p,Y=x=>P.t+h-x/top*h,bw=w/n;
   const fmt=o.fmt||(x=>Math.round(x)),g=[0,.25,.5,.75,1].map(f=>`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(top*f)}" y2="${Y(top*f)}" stroke="#EEF0F5"/><text x="${P.l-8}" y="${Y(top*f)+4}" text-anchor="end" class="adm-ax">${fmt(top*f)}</text>`).join('');
   const step=Math.ceil(n/8),xl=days.map((d,i)=>i%step===0||(i===n-1&&i%step>step/2)?`<text x="${P.l+bw*i+bw/2}" y="${H-7}" text-anchor="middle" class="adm-ax">${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+d.slice(5,7)-1]} ${+d.slice(8)}</text>`:'').join('');
   const b=v.map((x,i)=>x?`<rect x="${P.l+bw*i+bw*.2}" y="${Y(x)}" width="${Math.max(2,bw*.6)}" height="${P.t+h-Y(x)}" rx="${Math.min(4,bw*.2)}" fill="${o.c||'#F26B3A'}"><title>${days[i]}: ${fmt(x)}</title></rect>`:'').join('');
@@ -4831,7 +4821,7 @@ function admHTML(){
       <div class="adm-side-foot"><a class="adm-nav" href="#me">${admIco('M15 18l-6-6 6-6')}<span>Back to app</span></a><button class="adm-nav" data-ad="lock">${admIco('M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z')}<span>Lock admin</span></button></div></aside>
     <main class="adm-main"><header class="adm-top"><label class="adm-search">${admIco('M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3')}<input id="dash-q" type="search" placeholder="Search users by name, email or school" value="${esc(DASH.q)}"></label>
       <div class="adm-top-r"><button class="adm-ibtn" data-dash="reload" title="Refresh">${admIco('M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5')}</button><span class="adm-me"><span class="adm-av">${esc(((S.profiles[ME.uid]||{}).name||'A').slice(0,1).toUpperCase())}</span><span class="adm-me-n">${esc((S.profiles[ME.uid]||{}).name||'Admin')}</span></span></div></header>
-      ${ME.mode==='demo'?'<div class="adm-demo">Preview with sample numbers. The real site shows your users.</div>':''}${DASH.err?`<div class="adm-demo err">${esc(DASH.err)}</div>`:''}
+      ${ME.mode==='demo'?'<div class="adm-demo">Preview file: no real users here. The live site shows your real users.</div>':''}${DASH.err?`<div class="adm-demo err">${esc(DASH.err)}</div>`:''}
       ${body}</main></div>`;
   if(loading)return shell('<div class="adm-card"><p class="adm-mut">Loading…</p></div>');
   const D=dashData(),K=D.k,rngLbl=DASH.rng==='all'?'All time':'Last '+DASH.rng+' days';
@@ -4920,13 +4910,8 @@ function logErr(msg,src,line){try{if(!ME.uid||ME.mode!=='live'||ERRQ.n>=10)retur
 addEventListener('error',e=>logErr(e.message,e.filename,e.lineno));
 addEventListener('unhandledrejection',e=>{const r=e.reason;logErr('Promise: '+((r&&(r.message||r.toString()))||'rejected'),'',0)});
 
-/* sample data for the preview (demo mode) */
-function dashDemoExtra(){const r=rng(5),out={err:{},leagues:[]},users=(AD.rows||[]),msgs=['TypeError: Cannot read properties of undefined (reading \'games\')','Network request failed','Promise: Failed to fetch','RangeError: Maximum call stack size exceeded'],views=['stats:players','leagues','mg:draw','mg:fgplay','me'];
-  for(let i=0;i<14;i++){const u=users[Math.floor(r()*users.length)];if(!u)break;(out.err[u.uid]=out.err[u.uid]||[]).push({t:new Date(Date.now()-r()*20*864e5).toISOString(),m:msgs[Math.floor(r()*r()*msgs.length)],s:'index.html',l:1000+Math.floor(r()*5000),v:views[Math.floor(r()*views.length)],d:r()<.7?'phone':'desktop',ua:'',b:APP_BUILD})}
-  const nm=['Friday Night Lights','Chieftain Fantasy','Section Sharks','Coastal League','Bolt Brothers','Gridiron Gang','North County Kings','The Bench Mob','Weekend Warriors'];
-  nm.forEach((n,i)=>{const m=users.slice(i*5,i*5+2+Math.floor(r()*8));out.leagues.push({id:'dl'+i,name:n,members:Object.fromEntries(m.map(x=>[x.uid,1])),draft:{status:['done','done','done','live','lobby','done','done',null,'done'][i]},createdAt:Date.now()-r()*60*864e5,lineups:Math.floor(m.length*(.3+r()*.7))})});
-  return out}
-async function dashLoadExtra(){if(ME.mode==='demo'){DASH.ex=dashDemoExtra();return}
+/* error log and league list for the admin pages (empty in the preview files) */
+async function dashLoadExtra(){if(ME.mode==='demo'){DASH.ex={err:{},leagues:[]};return}
   const err={};try{for(const pre of ['data/users/','bb_data/users/']){const {data}=await SB.from('docs').select('coll,data').eq('id','errors').like('coll',pre+'%').limit(5000);for(const r of data||[]){const uid=r.coll.slice(pre.length);err[uid]=(err[uid]||[]).concat(((r.data||{}).list)||[])}}}catch(_){}
   DASH.ex={err,leagues:null}}
 
@@ -4975,7 +4960,7 @@ function dashData2(D){
   const pend=Object.values(S.games||{}).reduce((a,g)=>a+Object.values((g&&g.weeks)||{}).filter(x=>x&&x.ver==='self').length,0);
   return {ret:{d1:ret(1),d7:ret(7),d30:ret(30)},weeks,wkNew,wkRet,cohorts,funnel,hr,as,tok,lg,errs,byMsg:Object.values(byMsg).sort((a,b)=>b.n-a.n),health:{noScore,noStats,gaps,pend,updated:MP?MP.updated:'',through:MP?MP.through:'',players:mp.length}};
 }
-function admStack(labels,series){const W=640,H=220,P={l:36,r:8,t:12,b:26},w=W-P.l-P.r,h=H-P.t-P.b,n=labels.length,tot=labels.map((_,i)=>series.reduce((a,s)=>a+s.v[i],0)),mx=Math.max(1,...tot),Y=x=>h*x/mx,bw=w/n;
+function admStack(labels,series){const W=640,H=220,P={l:36,r:8,t:12,b:26},w=W-P.l-P.r,h=H-P.t-P.b,n=labels.length,tot=labels.map((_,i)=>series.reduce((a,s)=>a+s.v[i],0)),mx=Math.max(2,...tot),Y=x=>h*x/mx,bw=w/n;
   return `<svg viewBox="0 0 ${W} ${H}" class="adm-chart">${[0,.5,1].map(f=>`<line x1="${P.l}" x2="${W-P.r}" y1="${P.t+h-h*f}" y2="${P.t+h-h*f}" stroke="#EEF0F5"/><text x="${P.l-8}" y="${P.t+h-h*f+4}" text-anchor="end" class="adm-ax">${Math.round(mx*f)}</text>`).join('')}
     ${labels.map((l,i)=>{let y=P.t+h;return series.map(s=>{const hh=Y(s.v[i]);y-=hh;return hh?`<rect x="${P.l+bw*i+bw*.2}" y="${y}" width="${bw*.6}" height="${hh}" fill="${s.c}" rx="3"><title>${l}: ${s.v[i]} ${s.n}</title></rect>`:''}).join('')+`<text x="${P.l+bw*i+bw/2}" y="${H-7}" text-anchor="middle" class="adm-ax">${l}</text>`}).join('')}</svg>`}
 function admHeat(hr){const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mx=Math.max(1,...Object.values(hr)),c=(d,h)=>(hr[d+'-'+h]||0)/mx,lab=h=>h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p';
@@ -5091,7 +5076,7 @@ async function adLoad(){
 }
 const adWhen=t=>t?new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'never';
 function viewAdmin(){
-  if(ME.mode==='demo'&&ME.admin&&AD.rows===null)AD.rows=dashDemoRows();
+  if(ME.mode==='demo'&&ME.admin&&AD.rows===null)AD.rows=[];
   if(!ME.uid||(ME.mode!=='live'&&ME.mode!=='demo'))return `<div class="head"><h2>Admin systems</h2><p>Sign in, then use Settings → Admin sign in.</p></div>`;
   if(!ME.admin)return `<div class="head"><h2>Admin systems</h2><p>Enter your admin account and PIN to unlock the admin tools.</p></div>
     <section class="card"><form id="ad-unlock" class="au-form"><label class="fld"><span>Admin PIN</span><input id="ad-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="## - ## - ####" required></label><p class="au-err" id="ad-err" role="alert" hidden></p><button class="btn" type="submit">Continue</button></form></section>`;
