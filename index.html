@@ -1501,6 +1501,8 @@ html,body{overflow-x:clip;max-width:100%}
 }
 /* phones: a grab handle on sheets hints that they swipe down to close */
 @media (max-width:759px){.dr .dp{position:relative;touch-action:pan-y}.dr .dp::before{content:"";position:sticky;top:-12px;display:block;width:42px;height:5px;margin:-8px auto 8px;border-radius:99px;background:rgba(255,255,255,.28);flex:none;z-index:2}}
+.tw-o{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+.tw-note{font-size:.85rem;color:var(--muted);background:rgba(255,194,61,.08);border:1px solid rgba(255,194,61,.25);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
 /* Ring Chaser */
 .rc-card{text-align:left}.rc-card .fg-hero,.rc-card>h3{text-align:center}
 .rc-school{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(47,107,255,.25),rgba(255,194,61,.12));border:1px solid rgba(255,255,255,.14);margin:6px 0 10px}
@@ -1760,6 +1762,28 @@ const T10W=(p,h)=>isT10(p)||isPOTW(p)?`<span class="nmt">${h}${isT10(p)?'<em cla
 const gtag=p=>p&&p.gr?`<span class="gr">${GRL[p.gr]}</span>`:'';
 const mpP=MP?MP.players.map(p=>({key:'mp'+p.id,gr:p.g||0,name:p.n,school:p.s,pos:p.p,sub:['CB','S'].includes(p.u)?'DB':(p.u||p.p),mp:true,tw:!!p.tw,sample:false,
   games:Array.from({length:WEEKS},(_,i)=>{const l=p.w[i+1];return l?{stat:Object.fromEntries(KEYS.map((k,j)=>[k,l[j]||0])),ver:'maxpreps'}:null})})):[];
+/* two-way players: if he was on the field at all (offense or defense), the game counts for both of his cards.
+   A side with no stats that week gets a 0 line, so it counts as a game played worth 0 points. */
+/* No cross-crediting: an offense card scores only offense, a defense card only defense.
+   A one-card player who also has stats on the other side of the ball gets a second card (key + 'x') for that side,
+   and his original card keeps only its own side. Kick and punt return TDs stay with the offense card. */
+const OFFK=['passYd','passTD','int','rushYd','rushTD','rec','recYd','recTD','fumLost','retTD'],DEFK=['tkl','sack','dInt','ff','fr','dTD'];
+const zeroStat=()=>Object.fromEntries(KEYS.map(k=>[k,0]));
+const keepOnly=(st,ks)=>{const o=zeroStat();ks.forEach(k=>o[k]=st[k]||0);return o};
+(()=>{const add=[];for(const p of mpP){if(p.tw||p.pos==='K')continue;const isD=p.pos==='DEF',mine=isD?DEFK:OFFK,theirs=isD?OFFK:DEFK;
+  if(!p.games.some(g=>g&&theirs.some(k=>g.stat[k])))continue;
+  const t={...p,key:p.key+'x',tw:true,games:p.games.map(g=>g&&theirs.some(k=>g.stat[k])?{...g,stat:keepOnly(g.stat,theirs)}:null)};
+  const tot=k=>t.games.reduce((a,g)=>a+(g?g.stat[k]:0),0);
+  if(isD){t.pos=tot('passYd')>Math.max(tot('rushYd'),tot('recYd'))?'QB':tot('rushYd')>=tot('recYd')&&tot('rushYd')>0?'RB':'WR';t.sub=t.pos}
+  else{t.pos='DEF';t.sub=tot('sack')>=1?'DL':tot('dInt')>0?'DB':'LB'}
+  p.games=p.games.map(g=>g&&{...g,stat:keepOnly(g.stat,mine)});p.tw=true;p.twin=t.key;t.twin=p.key;add.push(t)}
+  mpP.push(...add)})();
+/* two-way players: if he was on the field at all (offense or defense), the game counts for both of his cards.
+   A side with no stats that week gets a 0 line, so it counts as a game played worth 0 points. */
+(()=>{const by=new Map(mpP.map(p=>[p.key,p])),done=new Set();for(const p of mpP){if(!p.tw||done.has(p.key))continue;const d=by.get(p.twin||(/[od]$/.test(p.key)?p.key.slice(0,-1)+(p.key.endsWith('o')?'d':'o'):''));if(!d)continue;
+  p.twin=d.key;d.twin=p.key;done.add(p.key);done.add(d.key);
+  for(const x of [p,d]){const ks=x.pos==='DEF'?DEFK:OFFK;x.games=x.games.map(g=>g&&{...g,stat:keepOnly(g.stat,ks)})}
+  for(let i=0;i<WEEKS;i++){const a=p.games[i],b=d.games[i];if(a&&!b)d.games[i]={stat:zeroStat(),ver:'maxpreps',zero:1};else if(b&&!a)p.games[i]={stat:zeroStat(),ver:'maxpreps',zero:1}}}})();
 const sampleP=RAW.map((r,i)=>({key:'s'+i,name:r[0],school:r[1],pos:r[2],sub:['CB','S'].includes(r[3])?'DB':(r[3]||r[2]),sample:true,games:[]}));
 sampleP.forEach((p,i)=>{
   const r=rng(i*7919+101),t=.75+r()*.6,bye=1+hash(p.school)%9;
@@ -1973,7 +1997,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v213 · Nov 5';
+const APP_BUILD='v214 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4403,14 +4427,22 @@ function projCard(p){
 }
 /* true when that week's schedule is listed and the school is not in it */
 const noGameWk=(school,w)=>{const gs=(GAMES&&GAMES.games)||[];return gs.some(g=>g.w===w)&&!gs.some(g=>g.w===w&&(g.h===school||g.a===school))};
+/* two-way players have two cards (offense and defense) so each side scores on its own; this finds the other one */
+const twinOf=p=>p&&p.tw&&p.twin?pByKey(p.twin):null;
 function drawerHTML(p){
   const gs=p.games.filter(Boolean),total=gs.reduce((a,x)=>a+pts(x.stat),0),avg=gs.length?total/gs.length:0,best=gs.length?Math.max(...gs.map(x=>pts(x.stat))):0,cw=CURW();
-  const log=p.games.map((g,i)=>({w:i+1,g})).reverse().map(({w,g})=>g
-    ?`<tr><td>Wk ${w}</td><td>${line(p.pos,g.stat)}</td><td class="n">${f1(pts(g.stat))}</td></tr>`
+  /* a two-way card shows every game he played: the other side's line is listed too, without points (they count on the other card) */
+  const tw=twinOf(p),side=x=>x.pos==='DEF'?'defense':'offense',played=p.games.map((g,i)=>!!g||!!(tw&&tw.games[i])).filter(Boolean).length;
+  const other=(i,lead)=>{const t=tw&&tw.games[i];return t&&!t.zero?`<small class="tw-o">${lead?'':'+ '}${esc(side(tw))}: ${line(tw.pos,t.stat)} · ${f1(pts(t.stat))} on ${tw.pos==='DEF'?'DEF':tw.pos} card</small>`:''};
+  const log=p.games.map((g,i)=>({w:i+1,g,i})).reverse().map(({w,g,i})=>g
+    ?`<tr><td>Wk ${w}</td><td>${line(p.pos,g.stat)}${other(i)}</td><td class="n">${f1(pts(g.stat))}</td></tr>`
+    :tw&&tw.games[i]?`<tr><td>Wk ${w}</td><td><span class="muted">No ${esc(side(p))} stats</span>${other(i)}</td><td class="n">—</td></tr>`
     :`<tr class="dim"><td>Wk ${w}</td><td>${w>=cw&&!noGameWk(p.school,w)?'Not reported yet':'No game'}</td><td class="n">—</td></tr>`).join('');
+  const twNote=tw?`<p class="tw-note">Two-way player: this card scores his ${side(p)}. Every game he played counts here, even with no ${side(p)} stats (0 points). His ${side(tw)} scores on his ${tw.pos==='DEF'?'DEF':tw.pos} card. <button class="btn sm ghost" data-act="player" data-id="${esc(tw.key)}">Open ${tw.pos==='DEF'?'DEF':tw.pos} card</button></p>`:'';
   return `<aside class="dp" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
-    <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${gs.length} games</span></div></div></div><div class="dh-btns"><button class="btn sm" data-act="pshare" data-id="${esc(p.key)}">Share</button><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div></div>
+    <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${tw?played:gs.length} games</span></div></div></div><div class="dh-btns"><button class="btn sm" data-act="pshare" data-id="${esc(p.key)}">Share</button><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div></div>
     <div class="big"><div><span class="lbl">Season pts</span><b>${f1(total)}</b></div><div><span class="lbl">Per game</span><b>${f1(avg)}</b></div><div><span class="lbl">Best week</span><b>${f1(best)}</b></div></div>
+    ${twNote}
     ${projCard(p)}
     ${weekChart(p)}
     <div id="la" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">${lineupAction(p)}</div>
