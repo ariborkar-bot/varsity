@@ -1504,8 +1504,24 @@ html,body{overflow-x:clip;max-width:100%}
 .tw-o{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
 .tw-note{font-size:.85rem;color:var(--muted);background:rgba(255,194,61,.08);border:1px solid rgba(255,194,61,.25);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
 /* admin dashboard */
+.adm-pill.r{background:#FDECEE;color:#D6334D}.adm-pill.x{background:#F1F3F8;color:#6B7189}
+.adm-alerts{display:grid;gap:8px;margin:-4px 0 16px}.adm-alert{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-radius:12px;padding:10px 14px;border:1px solid;cursor:pointer;font:600 13px/1.3 inherit}
+.adm-alert svg{width:18px;height:18px;flex:none}.adm-alert span{flex:1}.adm-alert b{font-weight:700;white-space:nowrap}.adm-alert.r{background:#FDF1F3;border-color:#F8C9D0;color:#9B1C2E}.adm-alert.o{background:#FFF6EE;border-color:#FFD9BF;color:#A04712}
+.adm-fun{display:grid;gap:12px}.adm-fun-h{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}.adm-fun small{display:block;color:#8A90A6;font-size:11.5px;margin-top:3px}.adm-fun .adm-hbt{height:12px;display:block}
+.adm-heat{display:grid;gap:3px;overflow-x:auto}.adm-hrow{display:grid;grid-template-columns:34px repeat(24,minmax(12px,1fr));gap:3px;align-items:center}.adm-hrow span{font-size:11px;color:#8A90A6}.adm-hrow b{height:18px;border-radius:4px;display:block}.adm-hh i{font-size:10px;color:#9AA0B4;font-style:normal;white-space:nowrap}
+.adm-coh td{padding:7px 8px}.adm-cell{display:inline-block;min-width:44px;text-align:center;border-radius:6px;padding:3px 6px;color:#0F5E3C;font-weight:700;font-size:12px}
+.adm-list{display:grid;gap:2px}.adm-list>div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid #F0F2F7;font-size:13px}.adm-list>div:first-child{border-top:0}.adm-list small{color:#8A90A6;white-space:nowrap}
+.adm-tags{display:flex;flex-wrap:wrap;gap:6px}.adm-tags span{background:#F1F3F8;border-radius:8px;padding:4px 9px;font-size:12px;color:#4A5068}
+.adm .adm-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace!important;font-size:12px!important;text-transform:none!important;letter-spacing:0!important;line-height:1.4;background:#F6F7FB;border-radius:6px;padding:2px 6px;color:#9B1C2E;word-break:break-word}
+.adm-lbl{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B7189;margin-bottom:10px}.adm textarea{border:1px solid #E4E7EF!important;border-radius:10px!important;padding:10px!important;font:14px/1.4 Inter,system-ui,sans-serif!important;color:#1C2033!important;background:#fff!important;resize:vertical;width:100%;text-transform:none!important}
+.adm-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}.adm-row .adm-lbl{margin:0}.adm-pri{background:#F26B3A!important;color:#fff!important;border-color:#F26B3A!important}
+.adm-ann{border-radius:12px;padding:12px 14px;background:#E7EDFF;color:#23308F;font-weight:600}.adm-ann.warn{background:#FFF1E0;color:#8A4A00}
+.adm-pre{white-space:pre-wrap;background:#F7F8FC;border-radius:10px;padding:14px;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#1C2033;margin:0}
+.ann-note .pill{background:#2F6BFF;color:#fff;border-color:transparent}.ann-note.warn .pill{background:#FFC23D;color:#0B1626}.ann-note button{margin-left:auto}
+@media (max-width:759px){.adm-side nav{overflow-x:auto;justify-content:flex-start;scrollbar-width:none}.adm-side nav::-webkit-scrollbar{display:none}.adm-side nav .adm-nav{flex:0 0 64px}}
+
 .adm{position:fixed;inset:0;z-index:2000;display:grid;grid-template-columns:232px 1fr;background:#F4F6FB;color:#1C2033;font:400 14px/1.45 Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;letter-spacing:0;text-transform:none}
-.adm *{box-sizing:border-box}.adm h1,.adm h3,.adm b,.adm button,.adm select,.adm input,.adm th,.adm td{font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif!important;font-style:normal}.adm h1,.adm h3{letter-spacing:0;text-transform:none;margin:0;color:#1C2033}
+.adm *{box-sizing:border-box}.adm h1,.adm h3,.adm b,.adm button,.adm select,.adm input,.adm th,.adm td,.adm th button{text-transform:none!important;letter-spacing:0!important;font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif!important;font-style:normal}.adm h1,.adm h3{letter-spacing:0;text-transform:none;margin:0;color:#1C2033}
 .adm-side{background:#1E2240;color:#C9CDE4;display:flex;flex-direction:column;padding:18px 12px;gap:6px;overflow:auto}
 .adm-brand{display:flex;align-items:center;gap:10px;padding:4px 10px 18px}.adm-brand b{color:#fff;font-size:16px}.adm-brand small{margin-left:auto;font-size:11px;background:rgba(255,255,255,.1);padding:2px 8px;border-radius:20px}
 .adm-logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#F26B3A,#F59E3B);color:#fff;display:grid;place-items:center;font-weight:800}
@@ -4704,13 +4720,16 @@ const DASH={rng:30,sport:'all',role:'all',q:'',sort:'time',dir:-1,show:20,use:nu
 async function dashLoad(){
   if(DASH.loading)return;DASH.loading=true;DASH.err='';
   try{
-    if(ME.mode==='demo'){DASH.use=dashDemoUse()}
+    if(ME.mode==='demo'){DASH.use=dashDemoUse();DASH.ex=dashDemoExtra()}
     else{const out={};for(const pre of ['data/users/','bb_data/users/']){const {data,error}=await SB.from('docs').select('coll,data').eq('id','usage').like('coll',pre+'%').limit(10000);if(error)throw error;
         for(const r of data||[]){const uid=r.coll.slice(pre.length),sp=pre.startsWith('bb')?'bb':'fb',o=out[uid]||(out[uid]={days:{},ses:{},ads:{},sp:{},first:null,last:null,dev:null});o.sp[sp]=1;
           for(const f of ['days','ses','ads'])for(const [k,v] of Object.entries(r.data[f]||{})){o[f][k]=(o[f][k]||0)+(+v||0);(o.spd||(o.spd={}))[sp+k]=1}
+          for(const f of ['as'])for(const [k,v] of Object.entries(r.data[f]||{})){(o[f]||(o[f]={}))[k]=(o[f][k]||0)+(+v||0)}
+          for(const f of ['hr','ann'])for(const [k,v] of Object.entries(r.data[f]||{})){(o[f]||(o[f]={}))[k]=(o[f][k]||0)+(+v||0)}
           for(const f of ['tv','tc'])for(const [d,m] of Object.entries(r.data[f]||{})){const t=(o[f]||(o[f]={}))[d]||(o[f][d]={});for(const [tab,v] of Object.entries(m||{})){const key=(sp==='bb'?'bb|':'fb|')+tab;t[key]=(t[key]||0)+(+v||0)}}
           if(!o.first||r.data.first<o.first)o.first=r.data.first;if(!o.last||r.data.last>o.last)o.last=r.data.last;o.dev=r.data.dev||o.dev}}
       DASH.use=out}
+    await dashLoadExtra();
   }catch(e){DASH.err='Could not load usage. Your admin unlock may have timed out.';DASH.use={}}
   DASH.loading=false;if(UI.view==='admin')render();
 }
@@ -4815,8 +4834,11 @@ function dashHTML(){
     <p class="muted" style="font-size:.8rem">Visits, time and videos are for ${R}. Time counts only while the app is open and in use. Tracking started Nov 5, 2026, so earlier days show no time.</p></section>`;
 }
 /* ---------- admin console: a light, separate-looking dashboard (owner asked for a standard admin look, not the app theme) ---------- */
-const ADM_NAV=[['overview','Overview','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],['usage','App usage','M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z'],['users','Users','M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21c0-4 4-6 8-6s8 2 8 6'],['engagement','Engagement','M4 20V10M10 20V4M16 20v-7M22 20H2'],
-  ['sponsors','Sponsor videos','M4 5h16v14H4zM10 9l5 3-5 3z'],['games','Games','M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a5 5 0 0 1 5 5v2a4 4 0 0 1-7 2.5L13.5 14h-3L9 15.5A4 4 0 0 1 2 13v-2a5 5 0 0 1 5-5z'],['tools','Accounts & tools','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z']];
+const ADM_NAV=[['overview','Overview','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],['usage','App usage','M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z'],['growth','Growth','M3 17l6-6 4 4 8-8M15 7h6v6'],
+  ['users','Users','M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21c0-4 4-6 8-6s8 2 8 6'],['engagement','Engagement','M4 20V10M10 20V4M16 20v-7M22 20H2'],['sponsors','Sponsors & tokens','M4 5h16v14H4zM10 9l5 3-5 3z'],
+  ['games','Games','M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a5 5 0 0 1 5 5v2a4 4 0 0 1-7 2.5L13.5 14h-3L9 15.5A4 4 0 0 1 2 13v-2a5 5 0 0 1 5-5z'],['leagues','Leagues','M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4'],
+  ['health','Data health','M22 12h-4l-3 9L9 3l-3 9H2'],['errors','Error log','M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'],['announce','Announcements','M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8'],
+  ['weekly','Weekly report','M8 2v4M16 2v4M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],['tools','Accounts & tools','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z']];
 const admIco=(d,c='')=>`<svg viewBox="0 0 24 24" class="${c}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const admAgo=t=>{if(!t)return'never';const m=Math.round((Date.now()-new Date(t))/6e4);if(m<1)return'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<24)return h+(h===1?' hour ago':' hours ago');const d=Math.round(h/24);return d<31?d+(d===1?' day ago':' days ago'):adWhen(t).split(',')[0]};
 function admSpark(v,c){const W=120,H=34,mx=Math.max(1,...v),n=v.length,pts=v.map((x,i)=>[i/(Math.max(1,n-1))*W,H-3-(x/mx)*(H-8)]);
@@ -4835,7 +4857,7 @@ function admDonut(parts){const tot=parts.reduce((a,p)=>a+p[1],0)||1,R=52,C=2*Mat
 function admHTML(){
   if(DASH.use===null&&!DASH.loading)dashLoad();
   const P=UI.admp||'overview',loading=AD.rows===null||DASH.use===null;
-  const SH={usage:'Usage',overview:'Home',users:'Users',engagement:'Activity',sponsors:'Videos',games:'Games',tools:'Tools'},nav=ADM_NAV.map(([k,l,d])=>`<button class="adm-nav ${P===k?'on':''}" data-admp="${k}" aria-current="${P===k?'page':'false'}" aria-label="${l}">${admIco(d)}<span class="adm-l">${l}</span><span class="adm-s">${SH[k]}</span></button>`).join('');
+  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',announce:'Announce',weekly:'Weekly',tools:'Tools'},nav=ADM_NAV.map(([k,l,d])=>`<button class="adm-nav ${P===k?'on':''}" data-admp="${k}" aria-current="${P===k?'page':'false'}" aria-label="${l}">${admIco(d)}<span class="adm-l">${l}</span><span class="adm-s">${SH[k]}</span></button>`).join('');
   const shell=body=>`<div class="adm" role="region" aria-label="Admin dashboard">
     <aside class="adm-side"><div class="adm-brand"><span class="adm-logo">V</span><b>Varsity</b><small>Admin</small></div><nav>${nav}</nav>
       <div class="adm-side-foot"><a class="adm-nav" href="#me">${admIco('M15 18l-6-6 6-6')}<span>Back to app</span></a><button class="adm-nav" data-ad="lock">${admIco('M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z')}<span>Lock admin</span></button></div></aside>
@@ -4874,13 +4896,16 @@ function admHTML(){
   const sel=`<span class="adm-chip">${rngLbl}</span>`;
   const tabBars=list=>{const mx=Math.max(1,...list.map(x=>x.t)),tot=D.tabList.reduce((a,x)=>a+x.t,0)||1;return `<div class="adm-hb adm-tb">${list.map(x=>`<div><span>${esc(x.n)}</span><span class="adm-hbt"><i style="width:${x.t/mx*100}%;background:${x.mg?'#22B07D':'#5B5FEF'}"></i></span><b>${fmtDur(x.t)}</b><em>${Math.round(x.t/tot*100)}%</em></div>`).join('')||'<p class="adm-mut">No tab data yet. It starts collecting the day this ships.</p>'}</div>`};
   const rc=k=>D.pool.filter(r=>!r.is_admin&&(k?(r.p&&r.p.role)===k:!(r.p&&['player','fan'].includes(r.p.role)))).length,roles=[['Players',rc('player'),'#F26B3A'],['Fans',rc('fan'),'#5B5FEF'],['Admins',D.pool.filter(r=>r.is_admin).length,'#22B07D'],['No profile',rc(''),'#C9CEDA']].filter(p=>p[1]>0);
+  const X=dashData2(D),ext=admPages(P,D,K,X,kpi,title,sel,hbars,dl);
   let body='';
-  if(P==='overview')body=title('Overview','How Varsity is doing: users, time on the app and sponsor videos.')+kpis+`<div class="adm-grid">
+  if(ext)body=ext;
+  else if(P==='overview')body=title('Overview','How Varsity is doing: users, time on the app and sponsor videos.')+admAlerts(X)+kpis+`<div class="adm-grid">
     <div class="adm-card adm-span2"><div class="adm-ch"><h3>Daily active users</h3>${sel}</div><div class="adm-leg"><span><i style="background:#F26B3A"></i>Active users</span><span><i style="background:#5B5FEF"></i>New sign-ups</span></div>${admBars(D.days,D.dau,{line:D.signups,label:'Daily active users'})}</div>
     <div class="adm-card"><div class="adm-ch"><h3>Users by role</h3></div>${admDonut(roles)}</div>
     ${actTable(6)}
+        <div class="adm-card"><div class="adm-ch"><h3>At a glance</h3></div><div class="adm-glance"><div><small>Most-used tab</small><b>${esc(D.tabList[0]?D.tabList[0].n:'—')}</b></div><div><small>Avg daily active</small><b>${f1(K.avgDau)}</b></div><div><small>Time per person / day</small><b>${fmtDur(K.perUserDay)}</b></div><div><small>Avg visit</small><b>${fmtDur(K.perSes)}</b></div><div><small>Leagues</small><b>${X.lg.length}</b></div><div><small>Phones / computers</small><b>${D.dev.phone||0} / ${D.dev.desktop||0}</b></div><div><small>Videos all time</small><b>${K.adsAll}</b></div></div></div>
     <div class="adm-card adm-span3"><div class="adm-ch"><h3>Where people spend their time</h3><button class="adm-link" data-admp="usage">See every tab →</button></div>${tabBars(D.tabList.slice(0,8))}</div>
-    <div class="adm-card"><div class="adm-ch"><h3>At a glance</h3></div><div class="adm-glance"><div><small>Most-used tab</small><b>${esc(D.tabList[0]?D.tabList[0].n:'—')}</b></div><div><small>Avg daily active</small><b>${f1(K.avgDau)}</b></div><div><small>Time per person / day</small><b>${fmtDur(K.perUserDay)}</b></div><div><small>Avg visit</small><b>${fmtDur(K.perSes)}</b></div><div><small>Leagues</small><b>${K.leagues}</b></div><div><small>Phones / computers</small><b>${D.dev.phone||0} / ${D.dev.desktop||0}</b></div><div><small>Videos all time</small><b>${K.adsAll}</b></div></div></div></div>`;
+</div>`;
   else if(P==='usage'){const T=D.tabList,tot=T.reduce((a,x)=>a+x.t,0)||1,mg=T.filter(x=>x.mg),mgT=mg.reduce((a,x)=>a+x.t,0),visits=T.reduce((a,x)=>a+x.c,0);
     const grp={};T.forEach(x=>{const g=x.mg?'Minigames':x.n.startsWith('Stats')?'Stats':x.n.startsWith('Leagues')||x.n.startsWith('Mock')?'Leagues':x.n.startsWith('Me')?'Me':x.n.startsWith('Games')?'Games':x.n.startsWith('Player cards')?'Player cards':'Other';grp[g]=(grp[g]||0)+x.t});
     const cols={Stats:'#5B5FEF',Leagues:'#F26B3A',Minigames:'#22B07D',Me:'#E0455B','Player cards':'#F5B83D',Games:'#3BA7E0',Other:'#C9CEDA'};
@@ -4914,6 +4939,166 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 const TAB_NAMES={me:'Me',games:'Games','stats:players':'Stats · Players','stats:stats':'Stats · Stats',leagues:'Leagues',mock:'Mock Draft',team:'Team pages',player:'Player cards',scoring:'Scoring',account:'Account',privacy:'Privacy',simulate:'10-0',
   'mg:picks':'Pick ’em','mg:props':'Player props','mg:draw':'5 Card Draw','mg:sim':'10-0','mg:rc':'Ring Chaser','mg:fg':'FGH menu','mg:fgplay':'FGH (playing)'};
 const tabName=key=>{const [app,t]=key.includes('|')?key.split('|'):['fb',key];let n=TAB_NAMES[t]||t;return app==='bb'?n.replace('FGH','Hoops')+' · basketball':n.replace('FGH','Field Goal')};
+/* ---------- extra tracking for the admin console: busy hours, sponsor starts, announcements seen, app errors ---------- */
+function useAdStart(){if(!USE.doc)return;const k=useDay();USE.doc.as=USE.doc.as||{};USE.doc.as[k]=(+USE.doc.as[k]||0)+1;USE.dirty=true}
+setInterval(()=>{if(!useOn()||!USE.doc)return;
+  if(document.visibilityState==='visible'&&Date.now()-USE.lastAct<120000&&useTab()!=='admin'){const d=new Date(),h=d.getDay()+'-'+d.getHours();USE.doc.hr=USE.doc.hr||{};USE.doc.hr[h]=(+USE.doc.hr[h]||0)+2}
+  const a=S.settings&&S.settings.ann;if(a&&a.id&&a.text){USE.doc.ann=USE.doc.ann||{};if(!USE.doc.ann[a.id]){USE.doc.ann[a.id]=1;USE.dirty=true}}},2000);
+/* errors on someone's phone are kept in their private doc data/users/<uid>/errors (last 25), for the admins to read */
+const ERRQ={n:0,busy:false,list:[]};
+function logErr(msg,src,line){try{if(!ME.uid||ME.mode!=='live'||ERRQ.n>=10)return;ERRQ.n++;
+  ERRQ.list.push({t:NOW(),m:String(msg||'').slice(0,300),s:String(src||'').split('/').pop().slice(0,80),l:line||0,v:useTab(),d:matchMedia('(max-width:759px)').matches?'phone':'desktop',ua:navigator.userAgent.slice(0,120),b:typeof APP_BUILD!=='undefined'?APP_BUILD:''});
+  if(ERRQ.busy)return;ERRQ.busy=true;setTimeout(async()=>{try{const ref=DB.doc('data/users/'+ME.uid+'/errors'),s=await ref.get(),old=(s.exists&&s.data().list)||[];await ref.set({list:old.concat(ERRQ.list).slice(-25)});ERRQ.list=[]}catch(_){}ERRQ.busy=false},4000)}catch(_){}}
+addEventListener('error',e=>logErr(e.message,e.filename,e.lineno));
+addEventListener('unhandledrejection',e=>{const r=e.reason;logErr('Promise: '+((r&&(r.message||r.toString()))||'rejected'),'',0)});
+
+/* sample data for the preview (demo mode) */
+function dashDemoExtra(){const r=rng(5),out={err:{},leagues:[]},users=(AD.rows||[]),msgs=['TypeError: Cannot read properties of undefined (reading \'games\')','Network request failed','Promise: Failed to fetch','RangeError: Maximum call stack size exceeded'],views=['stats:players','leagues','mg:draw','mg:fgplay','me'];
+  for(let i=0;i<14;i++){const u=users[Math.floor(r()*users.length)];if(!u)break;(out.err[u.uid]=out.err[u.uid]||[]).push({t:new Date(Date.now()-r()*20*864e5).toISOString(),m:msgs[Math.floor(r()*r()*msgs.length)],s:'index.html',l:1000+Math.floor(r()*5000),v:views[Math.floor(r()*views.length)],d:r()<.7?'phone':'desktop',ua:'',b:APP_BUILD})}
+  const nm=['Friday Night Lights','Chieftain Fantasy','Section Sharks','Coastal League','Bolt Brothers','Gridiron Gang','North County Kings','The Bench Mob','Weekend Warriors'];
+  nm.forEach((n,i)=>{const m=users.slice(i*5,i*5+2+Math.floor(r()*8));out.leagues.push({id:'dl'+i,name:n,members:Object.fromEntries(m.map(x=>[x.uid,1])),draft:{status:['done','done','done','live','lobby','done','done',null,'done'][i]},createdAt:Date.now()-r()*60*864e5,lineups:Math.floor(m.length*(.3+r()*.7))})});
+  return out}
+async function dashLoadExtra(){if(ME.mode==='demo'){DASH.ex=dashDemoExtra();return}
+  const err={};try{for(const pre of ['data/users/','bb_data/users/']){const {data}=await SB.from('docs').select('coll,data').eq('id','errors').like('coll',pre+'%').limit(5000);for(const r of data||[]){const uid=r.coll.slice(pre.length);err[uid]=(err[uid]||[]).concat(((r.data||{}).list)||[])}}}catch(_){}
+  DASH.ex={err,leagues:null}}
+
+function dashData2(D){
+  const today=new Date(),dayMs=864e5,joinDay=r=>r.created_at?new Date(dKey(new Date(r.created_at))):null,actDays=r=>r.u?Object.keys(r.u.days||{}).concat(Object.keys(r.u.ses||{})):[];
+  /* retention: of people who joined at least N days ago, how many came back on day N or later */
+  const ret=N=>{const el=D.pool.filter(r=>{const j=joinDay(r);return j&&(today-j)/dayMs>=N});if(!el.length)return null;const back=el.filter(r=>{const j=joinDay(r);return actDays(r).some(d=>(new Date(d)-j)/dayMs>=N)}).length;return {p:back/el.length,n:el.length,b:back}};
+  const wkStart=d=>{const x=new Date(d);x.setDate(x.getDate()-x.getDay());return dKey(x)};
+  const weeks=[...Array(8)].map((_,i)=>wkStart(new Date(Date.now()-(7-i)*7*dayMs)));
+  const wkNew=weeks.map(w=>0),wkRet=weeks.map(w=>0);
+  D.pool.forEach(r=>{const j=r.created_at?wkStart(new Date(r.created_at)):null;const aw=new Set(actDays(r).map(d=>wkStart(new Date(d+'T12:00'))));weeks.forEach((w,i)=>{if(aw.has(w)||j===w){if(j===w)wkNew[i]++;else if(aw.has(w))wkRet[i]++}})});
+  const cohorts=weeks.slice(2).map(w=>{const c=D.pool.filter(r=>r.created_at&&wkStart(new Date(r.created_at))===w);const cells=[1,2,3,4].map(k=>{const tw=dKey(new Date(new Date(w+'T12:00').getTime()+k*7*dayMs));if(new Date(tw)>today)return null;if(!c.length)return null;return c.filter(r=>actDays(r).some(d=>wkStart(new Date(d+'T12:00'))===tw)).length/c.length});return {w,n:c.length,cells}});
+  /* funnel */
+  const inLeague=u=>[...Object.values(S.groups||{}),...Object.values(S.fgroups||{})].some(g=>g&&g.members&&g.members[u]);
+  const hasLineup=u=>{const l=(S.lineups[u]||{}).g;return !!(l&&Object.keys(l).length)};
+  const played=u=>{const p=S.picks[u]||{};return !!(Object.keys(betsOf(u)).length||Object.keys(propsOf(u)).length||Object.keys(fcDoc(u)).length||p.sim||p.rc||p.fg)};
+  const demo=ME.mode==='demo',P=D.pool,f=(fn,frac)=>demo?Math.round(P.length*frac):P.filter(r=>{try{return fn(r)}catch(_){return false}}).length;
+  const funnel=[['Created an account',P.length],['Made a profile',f(r=>!!(S.profiles[r.uid]||r.demo),.92)],['Played a minigame',f(r=>played(r.uid),.71)],['Joined a league',f(r=>inLeague(r.uid),.48)],['Set a lineup',f(r=>hasLineup(r.uid),.37)],['Watched a sponsor video',f(r=>(+adOf(r.uid).t||0)>0||(r.u&&Object.keys(r.u.ads||{}).length),.58)]];
+  /* busy hours: seconds by weekday and hour */
+  const hr={};P.forEach(r=>{const h=r.u&&r.u.hr;if(h)for(const [k,v] of Object.entries(h))hr[k]=(hr[k]||0)+(+v||0)});
+  if(demo&&!Object.keys(hr).length){const g=rng(12);for(let d=0;d<7;d++)for(let h=0;h<24;h++){const base=(h>=15&&h<=22?1:h>=7&&h<=9?.45:h<6?.03:.25)*(d===5?1.7:d===6||d===0?1.2:1);hr[d+'-'+h]=Math.round(base*(400+g()*500))}}
+  /* sponsor starts vs finishes */
+  const as=D.days.map(d=>P.reduce((a,r)=>a+(r.u&&r.u.as?+r.u.as[d]||0:0),0)).map((v,i)=>demo?Math.round(D.ads[i]*(1.15+rng(i+3)()*.4)):v);
+  /* tokens */
+  const bals=P.map(r=>{try{return demo?Math.round(40+rng(r.uid.length*7+(+r.uid.slice(4)||0))()*400):bank(r.uid)}catch(_){return TOK0}}),sb=bals.slice().sort((a,b)=>a-b);
+  const tok={sum:bals.reduce((a,b)=>a+b,0),avg:bals.length?bals.reduce((a,b)=>a+b,0)/bals.length:0,med:sb.length?sb[Math.floor(sb.length/2)]:0,broke:bals.filter(b=>b<5).length,fromAds:D.users.reduce((a,u)=>a+u.adsAll,0)*ADS.reward};
+  if(demo)tok.fromAds=D.k.adsAll*ADS.reward;
+  /* leagues */
+  const L=(DASH.ex&&DASH.ex.leagues)||[...Object.entries(S.groups||{}),...Object.entries(S.fgroups||{})].filter(([,g])=>g).map(([id,g])=>({id,...g,lineups:Object.keys(g.members||{}).filter(u=>((S.lineups[u]||{}).g||{})[id]).length}));
+  const lg=L.map(g=>{const m=Object.keys(g.members||{}).length,st=g.draft?(g.draft.status==='done'||(g.draft.picks&&g.draft.order&&Object.keys(g.draft.picks).length>=g.draft.order.length*slotsOf(g).length)?'Draft done':g.draft.status==='live'?'Drafting':'Waiting to draft'):'No draft';
+    return {id:g.id,name:g.name||'League',m,st,lu:g.lineups||0,made:g.createdAt||g.at||null,health:m<2?'Empty':st==='Waiting to draft'?'Stuck':st==='Drafting'?'Drafting':(g.lineups||0)>=Math.ceil(m/2)?'Active':'Quiet'}});
+  /* errors in range */
+  const errs=[];Object.entries((DASH.ex&&DASH.ex.err)||{}).forEach(([uid,list])=>list.forEach(e=>{if(e&&e.t&&dKey(new Date(e.t))>=D.days[0])errs.push({...e,uid})}));errs.sort((a,b)=>b.t<a.t?-1:1);
+  const byMsg={};errs.forEach(e=>{const k=e.m.slice(0,120);(byMsg[k]=byMsg[k]||{m:k,n:0,u:new Set(),last:e.t,v:e.v}).n++;byMsg[k].u.add(e.uid)});
+  /* data health (this app's own data) */
+  const td=TODAY(),gs=(GAMES&&GAMES.games)||[],noScore=gs.filter(g=>g.d<td&&(g.hs==null||g.as==null)).sort((a,b)=>b.d<a.d?-1:1);
+  const mp=players().filter(p=>p.mp),haveSch=new Set(mp.filter(p=>p.games.some(Boolean)).map(p=>p.school));
+  const nz0=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]/g,''),AL0={southwestsandiego:'southwestsd',armyandnavyacademy:'armynavy',mountcarmel:'mtcarmel',christianhigh:'christian',sandiegohigh:'sandiego',southwestelcentro:'southwestec',ofarrell:'ofarrellcharter',centralunion:'central'},haveN=new Set([...haveSch].map(nz0));
+  const noStats=(typeof SD_SCHOOLS!=='undefined'?SD_SCHOOLS:[]).filter(sc=>!haveN.has(nz0(sc))&&!haveN.has(AL0[nz0(sc)]||'~'));
+  const teamWk={};mp.forEach(p=>p.games.forEach((g,i)=>{if(g&&!g.zero)(teamWk[p.school]=teamWk[p.school]||new Set()).add(i+1)}));
+  /* team games that have a final score but no player stats at all (schedule names differ a little from stat names) */
+  const nz=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]/g,''),AL={southwestsd:'southwestsandiego',armynavy:'armyandnavyacademy',mtcarmel:'mountcarmel',christian:'christianhigh',sandiego:'sandiegohigh',southwestec:'southwestelcentro',ofarrellcharter:'ofarrell',central:'centralunion'};
+  const playedBy={};gs.forEach(g=>{if(g.hs==null||g.as==null||!g.w)return;[g.h,g.a].forEach(t=>{(playedBy[nz(t)]=playedBy[nz(t)]||[]).push(g)})});
+  const gaps=[];Object.keys(teamWk).forEach(sc=>{const key=AL[nz(sc)]||nz(sc),list=playedBy[key]||[];const miss=list.filter(g=>!teamWk[sc].has(g.w)).map(g=>g.w).sort((a,b)=>a-b);if(miss.length)gaps.push({sc,miss,of:list.length})});
+  gaps.sort((a,b)=>b.miss.length-a.miss.length);
+  const pend=Object.values(S.games||{}).reduce((a,g)=>a+Object.values((g&&g.weeks)||{}).filter(x=>x&&x.ver==='self').length,0);
+  return {ret:{d1:ret(1),d7:ret(7),d30:ret(30)},weeks,wkNew,wkRet,cohorts,funnel,hr,as,tok,lg,errs,byMsg:Object.values(byMsg).sort((a,b)=>b.n-a.n),health:{noScore,noStats,gaps,pend,updated:MP?MP.updated:'',through:MP?MP.through:'',players:mp.length}};
+}
+function admStack(labels,series){const W=640,H=220,P={l:36,r:8,t:12,b:26},w=W-P.l-P.r,h=H-P.t-P.b,n=labels.length,tot=labels.map((_,i)=>series.reduce((a,s)=>a+s.v[i],0)),mx=Math.max(1,...tot),Y=x=>h*x/mx,bw=w/n;
+  return `<svg viewBox="0 0 ${W} ${H}" class="adm-chart">${[0,.5,1].map(f=>`<line x1="${P.l}" x2="${W-P.r}" y1="${P.t+h-h*f}" y2="${P.t+h-h*f}" stroke="#EEF0F5"/><text x="${P.l-8}" y="${P.t+h-h*f+4}" text-anchor="end" class="adm-ax">${Math.round(mx*f)}</text>`).join('')}
+    ${labels.map((l,i)=>{let y=P.t+h;return series.map(s=>{const hh=Y(s.v[i]);y-=hh;return hh?`<rect x="${P.l+bw*i+bw*.2}" y="${y}" width="${bw*.6}" height="${hh}" fill="${s.c}" rx="3"><title>${l}: ${s.v[i]} ${s.n}</title></rect>`:''}).join('')+`<text x="${P.l+bw*i+bw/2}" y="${H-7}" text-anchor="middle" class="adm-ax">${l}</text>`}).join('')}</svg>`}
+function admHeat(hr){const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mx=Math.max(1,...Object.values(hr)),c=(d,h)=>(hr[d+'-'+h]||0)/mx,lab=h=>h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p';
+  let best=null;Object.entries(hr).forEach(([k,v])=>{if(!best||v>best[1])best=[k,v]});
+  return `<div class="adm-heat"><div class="adm-hrow adm-hh"><span></span>${[...Array(24)].map((_,h)=>`<i>${h%3===0?lab(h):''}</i>`).join('')}</div>${days.map((dn,d)=>`<div class="adm-hrow"><span>${dn}</span>${[...Array(24)].map((_,h)=>`<b title="${dn} ${lab(h)}: ${fmtDur(hr[d+'-'+h]||0)}" style="background:rgba(91,95,239,${(.06+c(d,h)*.94).toFixed(2)})"></b>`).join('')}</div>`).join('')}</div>
+    ${best?`<p class="adm-mut" style="margin:10px 0 0">Busiest: <b style="color:#1C2033">${days[+best[0].split('-')[0]]} around ${lab(+best[0].split('-')[1])}</b>. Times are in each person's own time zone.</p>`:''}`}
+function admAlerts(X){const a=[];if(X.health.noScore.length)a.push(['r',`${X.health.noScore.length} played games have no score`,'health']);if(X.health.gaps.length)a.push(['o',`${X.health.gaps.reduce((t,x)=>t+x.miss.length,0)} scored games have no player stats yet`,'health']);
+  const e7=X.errs.filter(e=>Date.now()-new Date(e.t)<7*864e5).length;if(e7)a.push(['r',`${e7} app errors in the last week`,'errors']);const st=X.lg.filter(x=>x.health==='Stuck').length;if(st)a.push(['o',`${st} leagues are stuck before their draft`,'leagues']);
+  return a.length?`<div class="adm-alerts">${a.map(([c,t,p])=>`<button class="adm-alert ${c}" data-admp="${p}">${admIco('M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z')}<span>${t}</span><b>View →</b></button>`).join('')}</div>`:''}
+function admPages(P,D,K,X,kpi,title,sel,hbars,dl){
+  const pc=x=>x==null?'—':Math.round(x*100)+'%';
+  if(P==='growth'){const f0=X.funnel[0][1]||1;
+    return title('Growth and retention','Do people come back, and where do new people drop off?')+`<div class="adm-kpis">
+      ${kpi('M3 12h18','#5B5FEF','Back after 1 day',pc(X.ret.d1&&X.ret.d1.p),X.ret.d1?`<span class="adm-dl">${X.ret.d1.b} of ${X.ret.d1.n} people</span>`:'',X.wkRet)}
+      ${kpi('M3 12h18','#22B07D','Back after 7 days',pc(X.ret.d7&&X.ret.d7.p),X.ret.d7?`<span class="adm-dl">${X.ret.d7.b} of ${X.ret.d7.n} people</span>`:'',X.wkRet)}
+      ${kpi('M3 12h18','#F26B3A','Back after 30 days',pc(X.ret.d30&&X.ret.d30.p),X.ret.d30?`<span class="adm-dl">${X.ret.d30.b} of ${X.ret.d30.n} people</span>`:'<span class="adm-dl">needs 30 days of data</span>',X.wkRet)}
+      ${kpi('M16 11a4 4 0 1 0-8 0','#E0455B','Returning this week',X.wkRet[7],dl(X.wkRet[7],X.wkRet[6]),X.wkRet)}</div>
+    <div class="adm-grid"><div class="adm-card adm-span2"><div class="adm-ch"><h3>New vs returning people</h3><span class="adm-chip">per week</span></div><div class="adm-leg"><span><i style="background:#5B5FEF"></i>Returning</span><span><i style="background:#F26B3A"></i>New</span></div>${admStack(X.weeks.map(w=>(+w.slice(5,7))+'/'+(+w.slice(8))),[{n:'returning',v:X.wkRet,c:'#5B5FEF'},{n:'new',v:X.wkNew,c:'#F26B3A'}])}</div>
+      <div class="adm-card"><div class="adm-ch"><h3>Sign-up funnel</h3><span class="adm-chip">all time</span></div><div class="adm-fun">${X.funnel.map(([l,v],i)=>`<div><div class="adm-fun-h"><span>${esc(l)}</span><b>${v}</b></div><span class="adm-hbt"><i style="width:${v/f0*100}%;background:${['#5B5FEF','#6F73F2','#22B07D','#F26B3A','#F59E3B','#E0455B'][i]}"></i></span><small>${Math.round(v/f0*100)}% of sign-ups${i&&i<5?` · ${Math.round(v/Math.max(1,X.funnel[i-1][1])*100)}% of the step before`:''}</small></div>`).join('')}</div></div>
+      <div class="adm-card adm-span2"><div class="adm-ch"><h3>Busiest times</h3><span class="adm-chip">time on the app</span></div>${admHeat(X.hr)}</div>
+      <div class="adm-card"><div class="adm-ch"><h3>Weekly groups</h3><span class="adm-chip">% back each week</span></div><div class="adm-tw"><table class="adm-t adm-coh"><thead><tr><th>Joined week of</th><th class="n">People</th><th class="n">W1</th><th class="n">W2</th><th class="n">W3</th><th class="n">W4</th></tr></thead><tbody>
+      ${X.cohorts.map(c=>`<tr><td>${+c.w.slice(5,7)}/${+c.w.slice(8)}</td><td class="n">${c.n}</td>${c.cells.map(v=>v==null?'<td class="n adm-mut">—</td>':`<td class="n"><span class="adm-cell" style="background:rgba(34,176,125,${(.1+v*.8).toFixed(2)})">${Math.round(v*100)}%</span></td>`).join('')}</tr>`).join('')}</tbody></table></div></div></div>`}
+  if(P==='sponsors'){const st=X.as.reduce((a,b)=>a+b,0),fin=K.ads;
+    return title('Sponsors and tokens','Sponsor videos started and finished, and the token economy. Each finished video pays 25 tokens, up to 5 a day.')+`<div class="adm-kpis">
+      ${kpi('M4 5h16v14H4zM10 9l5 3-5 3z','#E0455B','Videos finished',fin.toLocaleString(),dl(fin,D.prev.ads),D.ads)}
+      ${kpi('M5 12l5 5L20 7','#22B07D','Finish rate',st?Math.round(fin/st*100)+'%':'—',`<span class="adm-dl">${st.toLocaleString()} started</span>`,X.as)}
+      ${kpi('M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6','#F59E3B','Tokens from sponsors',Math.round(X.tok.fromAds).toLocaleString(),'<span class="adm-dl">all time</span>',D.ads)}
+      ${kpi('M16 11a4 4 0 1 0-8 0','#5B5FEF','Out of tokens',X.tok.broke,`<span class="adm-dl">people under 5 tokens</span>`,D.dau)}</div>
+    <div class="adm-grid"><div class="adm-card adm-span2"><div class="adm-ch"><h3>Videos started vs finished</h3>${sel}</div><div class="adm-leg"><span><i style="background:#F7B4BF"></i>Started</span><span><i style="background:#E0455B"></i>Finished</span></div>${admBars(D.days,X.as,{c:'#F7B4BF',line:D.ads,lc:'#E0455B',label:'Sponsor videos started and finished'})}</div>
+      <div class="adm-card"><div class="adm-ch"><h3>Token balances</h3></div><div class="adm-glance"><div><small>Average</small><b>${Math.round(X.tok.avg)}</b></div><div><small>Middle person</small><b>${Math.round(X.tok.med)}</b></div><div><small>All tokens out there</small><b>${Math.round(X.tok.sum).toLocaleString()}</b></div><div><small>Start with</small><b>${TOK0}</b></div></div><p class="adm-mut" style="font-size:12px;margin:10px 0 0">Tokens are free and can't be bought. People run low after losing picks, then watch videos to top up.</p></div>
+      <div class="adm-card adm-span3"><div class="adm-ch"><h3>Top watchers</h3>${sel}</div>${hbars(D.users.filter(u=>u.a).sort((a,b)=>b.a-a.a).slice(0,10).map(u=>[u.name,u.a]),'#E0455B')}</div></div>`}
+  if(P==='leagues'){const L=X.lg,cnt=h=>L.filter(x=>x.health===h).length,col={Active:'g',Quiet:'b',Drafting:'o',Stuck:'r',Empty:'x'};
+    return title('League health','Every fantasy league: is it drafting, playing or stuck?')+`<div class="adm-kpis">
+      ${kpi('M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21c0-4 4-6 8-6s8 2 8 6','#5B5FEF','Leagues',L.length,`<span class="adm-dl">${f1(L.reduce((a,x)=>a+x.m,0)/Math.max(1,L.length))} members on average</span>`,L.map(x=>x.m))}
+      ${kpi('M5 12l5 5L20 7','#22B07D','Active',cnt('Active'),'<span class="adm-dl">most members set a lineup</span>',L.map(x=>x.lu))}
+      ${kpi('M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z','#E0455B','Stuck before the draft',cnt('Stuck'),'<span class="adm-dl">never started drafting</span>',L.map(x=>x.m))}
+      ${kpi('M16 11a4 4 0 1 0-8 0','#F26B3A','Empty',cnt('Empty'),'<span class="adm-dl">only the owner</span>',L.map(x=>x.m))}</div>
+    <div class="adm-card"><div class="adm-ch"><h3>All leagues</h3></div><div class="adm-tw"><table class="adm-t"><thead><tr><th>League</th><th>Status</th><th class="n">Members</th><th class="adm-hs">Draft</th><th class="n adm-hs">Lineups set</th><th class="adm-hs">Made</th></tr></thead><tbody>
+      ${L.sort((a,b)=>b.m-a.m).map(x=>`<tr><td><b>${esc(x.name)}</b></td><td><span class="adm-pill ${col[x.health]}">${x.health}</span></td><td class="n">${x.m}</td><td class="adm-hs">${x.st}</td><td class="n adm-hs">${x.lu} of ${x.m}</td><td class="adm-hs adm-mut">${x.made?admAgo(x.made):'—'}</td></tr>`).join('')||'<tr><td colspan="6" class="adm-mut">No leagues yet.</td></tr>'}</tbody></table></div></div>`}
+  if(P==='health'){const H=X.health,warn=H.noScore.length+H.gaps.length;
+    return title('Data health','Is the app’s data complete? Check here before your users notice.')+`<div class="adm-kpis">
+      ${kpi('M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z','#5B5FEF','Player stats updated',esc(H.updated||'—'),`<span class="adm-dl">${esc(H.through||'')}</span>`,D.dau)}
+      ${kpi('M12 8v4M12 16h.01','#E0455B','Games missing a score',H.noScore.length,`<span class="adm-dl ${H.noScore.length?'dn':'up'}">${H.noScore.length?'played, no final score':'all good'}</span>`,D.dau)}
+      ${kpi('M16 11a4 4 0 1 0-8 0','#F26B3A','Games with no player stats',H.gaps.reduce((a,x)=>a+x.miss.length,0),`<span class="adm-dl">scored, but no box score yet · ${H.gaps.length} teams</span>`,D.dau)}
+      ${kpi('M4 4h16v16H4z','#22B07D','Schools with no stats',H.noStats.length,`<span class="adm-dl">${H.players.toLocaleString()} player cards in all</span>`,D.dau)}</div>
+    <div class="adm-grid"><div class="adm-card"><div class="adm-ch"><h3>Games missing a score</h3><span class="adm-chip">${H.noScore.length}</span></div><div class="adm-list">${H.noScore.slice(0,12).map(g=>`<div><span>${esc(g.a)} at ${esc(g.h)}</span><small>${g.d}</small></div>`).join('')||'<p class="adm-mut">None. Every played game has a score.</p>'}</div><p class="adm-mut" style="font-size:12px;margin:10px 0 0">The 5:41 am task fills these from news sites. Ask Claude to fill the rest.</p></div>
+      <div class="adm-card"><div class="adm-ch"><h3>Games with no player stats</h3><span class="adm-chip">${H.gaps.length} teams</span></div><div class="adm-list">${H.gaps.slice(0,14).map(x=>`<div><span>${esc(x.sc)}</span><small>week ${x.miss.join(', ')} · ${x.miss.length} of ${x.of}</small></div>`).join('')||'<p class="adm-mut">Every scored game has player stats.</p>'}</div><p class="adm-mut" style="font-size:12px;margin:10px 0 0">Usually the team hasn't entered that box score on MaxPreps yet. Ask Claude to re-check.</p></div>
+      <div class="adm-card"><div class="adm-ch"><h3>Schools with no player stats</h3><span class="adm-chip">${H.noStats.length}</span></div><div class="adm-tags">${H.noStats.map(s=>`<span>${esc(s)}</span>`).join('')||'<p class="adm-mut">Every school has stats.</p>'}</div><p class="adm-mut" style="font-size:12px;margin:10px 0 0">Usually these schools never enter stats on MaxPreps.</p></div></div>
+    ${warn?'':'<div class="adm-card" style="margin-top:16px"><b>Everything looks complete.</b></div>'}`}
+  if(P==='errors'){const E=X.errs;
+    return title('Error log','Crashes and failures on people’s phones and computers, newest first.')+`<div class="adm-kpis">
+      ${kpi('M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z','#E0455B','Errors',E.length,`<span class="adm-dl">${DASH.rng==='all'?'all time':'last '+DASH.rng+' days'}</span>`,D.days.map(d=>E.filter(e=>dKey(new Date(e.t))===d).length))}
+      ${kpi('M16 11a4 4 0 1 0-8 0','#F26B3A','People affected',new Set(E.map(e=>e.uid)).size,'',D.dau)}
+      ${kpi('M4 4h16v16H4z','#5B5FEF','Different problems',X.byMsg.length,'',D.dau)}
+      ${kpi('M7 3h10v18H7z','#22B07D','On phones',E.length?Math.round(E.filter(e=>e.d==='phone').length/E.length*100)+'%':'—','',D.dau)}</div>
+    <div class="adm-card" style="margin-bottom:16px"><div class="adm-ch"><h3>Most common problems</h3></div><div class="adm-tw"><table class="adm-t"><thead><tr><th>Problem</th><th class="n">Times</th><th class="n">People</th><th class="adm-hs">Where</th><th>Last</th></tr></thead><tbody>
+      ${X.byMsg.slice(0,10).map(m=>`<tr><td><code class="adm-code">${esc(m.m)}</code></td><td class="n">${m.n}</td><td class="n">${m.u.size}</td><td class="adm-hs">${esc(tabName(m.v||''))}</td><td class="adm-mut">${admAgo(m.last)}</td></tr>`).join('')||'<tr><td colspan="5" class="adm-mut">No errors. Nice.</td></tr>'}</tbody></table></div></div>
+    <div class="adm-card"><div class="adm-ch"><h3>Latest</h3></div><div class="adm-tw"><table class="adm-t"><thead><tr><th>When</th><th>Who</th><th>Problem</th><th class="adm-hs">Screen</th><th class="adm-hs">Device</th><th class="adm-hs">Version</th></tr></thead><tbody>
+      ${E.slice(0,25).map(e=>{const u=D.users.find(x=>x.uid===e.uid);return `<tr data-ad="open" data-id="${esc(e.uid)}"><td class="adm-mut">${admAgo(e.t)}</td><td>${esc(u?u.name:'Account')}</td><td><code class="adm-code">${esc(e.m.slice(0,90))}</code></td><td class="adm-hs">${esc(tabName(e.v||''))}</td><td class="adm-hs">${esc(e.d||'')}</td><td class="adm-hs adm-mut">${esc(String(e.b||'').split(' ')[0])}</td></tr>`}).join('')||'<tr><td colspan="6" class="adm-mut">Nothing logged. Errors start being recorded the day this ships.</td></tr>'}</tbody></table></div></div>`}
+  if(P==='announce'){const a=S.settings&&S.settings.ann,on=a&&a.text&&(!a.until||+new Date(a.until)>Date.now()),seen=a&&a.id?D.pool.filter(r=>r.u&&r.u.ann&&r.u.ann[a.id]).length:0,act=D.pool.filter(r=>r.u&&r.u.last&&(!a||!a.at||+new Date(r.u.last)>=+new Date(a.at))).length;
+    return title('Announcements','Show a message at the top of the app for everyone, in football and basketball.')+`<div class="adm-grid">
+      <div class="adm-card adm-span2"><div class="adm-ch"><h3>New announcement</h3></div>
+        <label class="adm-lbl">Message<textarea id="ann-text" maxlength="180" rows="3" placeholder="Playoff Pick ’em is open! Make your picks before Friday at 7 pm."></textarea></label>
+        <div class="adm-row"><label class="adm-lbl">Show for<select id="ann-days" class="adm-sel"><option value="1">1 day</option><option value="3">3 days</option><option value="7" selected>1 week</option><option value="0">Until I remove it</option></select></label>
+        <label class="adm-lbl">Style<select id="ann-kind" class="adm-sel"><option value="info">News</option><option value="warn">Heads up</option></select></label>
+        <button class="adm-btn adm-pri" data-ann="post">${admIco('M22 2 11 13M22 2l-7 20-4-9-9-4z')}Post announcement</button></div>
+        <p class="adm-mut" style="font-size:12px;margin:8px 0 0">Up to 180 characters. Posting replaces the current one. People can close it, and it stays closed for them.</p></div>
+      <div class="adm-card"><div class="adm-ch"><h3>Showing now</h3>${on?'<span class="adm-pill g">Live</span>':'<span class="adm-pill x">None</span>'}</div>
+        ${on?`<div class="adm-ann ${a.kind==='warn'?'warn':''}">${esc(a.text)}</div><div class="adm-glance" style="margin-top:12px"><div><small>Seen by</small><b>${seen}</b></div><div><small>Active since posted</small><b>${act}</b></div><div><small>Posted</small><b>${admAgo(a.at)}</b></div><div><small>Ends</small><b>${a.until?adWhen(a.until).split(',')[0]:'when removed'}</b></div></div>
+          <button class="adm-btn" data-ann="remove" style="margin-top:12px">Remove it</button>`:'<p class="adm-mut">No announcement is showing.</p>'}</div></div>`}
+  if(P==='weekly'){const W=dashWeekly(D,X);
+    return title('Weekly report','The last 7 days compared with the 7 before. Copy it into a text or email.')+`<div class="adm-kpis">${W.rows.slice(0,8).map(r=>`<div class="adm-card adm-kpi"><div class="adm-kpi-h"><span>${r[0]}</span></div><b>${r[1]}</b>${r[3]}</div>`).join('')}</div>
+      <div class="adm-card"><div class="adm-ch"><h3>Summary</h3><button class="adm-btn" data-ann="copy">${admIco('M8 8h12v12H8zM4 16V4h12')}Copy text</button></div><pre class="adm-pre" id="adm-weekly">${esc(W.text)}</pre></div>`}
+  return null}
+function dashWeekly(D,X){const N=7,days=[...Array(14)].map((_,i)=>dKey(new Date(Date.now()-(13-i)*864e5))),a=days.slice(7),b=days.slice(0,7),P=D.pool;
+  const sum=(k,ds)=>P.reduce((t,r)=>t+ds.reduce((x,d)=>x+(r.u&&r.u[k]?+r.u[k][d]||0:0),0),0),act=ds=>P.filter(r=>r.u&&ds.some(d=>r.u.days[d]||r.u.ses[d])).length,nu=ds=>P.filter(r=>r.created_at&&ds.includes(dKey(new Date(r.created_at)))).length;
+  const tabs={};P.forEach(r=>{if(!r.u||!r.u.tv)return;a.forEach(d=>{for(const [k,v] of Object.entries(r.u.tv[d]||{})){const n=tabName(k);tabs[n]=(tabs[n]||0)+v}})});const top=Object.entries(tabs).sort((x,y)=>y[1]-x[1]);const mg=top.filter(([n])=>/Pick|props|Card|10-0|Ring|Field|Hoops/.test(n));
+  const errA=X.errs.filter(e=>dKey(new Date(e.t))>=a[0]).length;
+  const ch=(x,y)=>y?`<span class="adm-dl ${x>=y?'up':'dn'}">${x>=y?'↑':'↓'} ${Math.abs(Math.round((x-y)/y*100))}% vs last week</span>`:'<span class="adm-dl">new</span>';
+  const rows=[['New users',nu(a),nu(b)],['Active users',act(a),act(b)],['Time on app',sum('days',a),sum('days',b),fmtDur],['Visits',sum('ses',a),sum('ses',b)],['Sponsor videos',sum('ads',a),sum('ads',b)],['Errors',errA,null],['Leagues',X.lg.length,null],['Total users',P.length,null]]
+    .map(([l,x,y,f])=>[l,f?f(x):x.toLocaleString(),y,y==null?'':ch(x,y),x]);
+  const text=`Varsity weekly report (${+a[0].slice(5,7)}/${+a[0].slice(8)} to ${+a[6].slice(5,7)}/${+a[6].slice(8)})\n\n`+rows.map(r=>`${r[0]}: ${r[1]}${r[2]!=null&&r[2]!==''?` (last week ${typeof r[2]==='number'&&r[0]==='Time on app'?fmtDur(r[2]):r[2]})`:''}`).join('\n')+
+    `\n\nMost-used tab: ${top[0]?top[0][0]+' ('+fmtDur(top[0][1])+')':'not enough data yet'}\nTop minigame: ${mg[0]?mg[0][0]+' ('+fmtDur(mg[0][1])+')':'not enough data yet'}\nBack after 7 days: ${X.ret.d7?Math.round(X.ret.d7.p*100)+'%':'not enough data yet'}\nGames missing a score: ${X.health.noScore.length}\nScored games with no player stats: ${X.health.gaps.reduce((t,x)=>t+x.miss.length,0)}`;
+  return {rows,text}}
+document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-ann]');if(!b||!ME.admin)return;const k=b.dataset.ann;
+  if(k==='copy'){const t=($('#adm-weekly')||{}).textContent||'';try{await navigator.clipboard.writeText(t);say('Copied')}catch(_){say('Could not copy')}return}
+  if(k==='post'){const text=($('#ann-text').value||'').trim();if(!text){say('Write a message first');return}const d=+$('#ann-days').value,ann={id:'a'+Date.now().toString(36),text,kind:$('#ann-kind').value,at:NOW(),until:d?Date.now()+d*864e5:null,by:ME.uid};
+    if(await act(()=>upsert('config/settings',{ann}),'Announcement posted')){S.settings=Object.assign({},S.settings,{ann});render()}}
+  if(k==='remove'){if(!confirm('Remove the announcement for everyone?'))return;if(await act(()=>upsert('config/settings',{ann:{id:'',text:''}}),'Announcement removed')){S.settings=Object.assign({},S.settings,{ann:{id:'',text:''}});render()}}});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-annx]');if(!b)return;try{localStorage.setItem('vs-ann-x',b.dataset.annx)}catch(_){}render()});
+
 function dashCSV(){const D=dashData(),h=['name','email','role','school','joined','last_active','visits','seconds','sponsor_videos','sponsor_videos_all_time'];
   const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"',lines=[h.join(',')].concat(D.users.map(u=>[u.name,u.email,u.role,u.school,u.created_at,u.lastAct,u.s,u.t,u.a,u.adsAll].map(q).join(',')));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='varsity-users-'+useDay()+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
@@ -5009,6 +5194,8 @@ const VIEWS=['team','league','groups','games','minigames','simulate','me','accou
 const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
 function bannerHTML(){
   const b=[];
+  {const a=S.settings&&S.settings.ann;let x='';try{x=localStorage.getItem('vs-ann-x')||''}catch(_){}
+   if(a&&a.id&&a.text&&(!a.until||+new Date(a.until)>Date.now())&&x!==a.id&&UI.view!=='admin')b.push(`<p class="note ann-note ${a.kind==='warn'?'warn':''}"><span class="pill">${a.kind==='warn'?'Heads up':'News'}</span><span>${esc(a.text)}</span><button class="btn sm ghost" data-annx="${esc(a.id)}" aria-label="Close announcement">✕</button></p>`)}
   /* no sign-up banners */
   if(ME.mode==='offline')b.push(`<p class="note"><span class="pill pending">Offline</span><span>Can’t connect to Varsity, so you can look around but not join, sign in or save anything. Some school and work Wi-Fi networks block it; try mobile data. <button class="btn sm ghost" data-act="reload">Try again</button></span></p>`);
   if(ME.mode==='readonly'&&!VA)b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
@@ -5560,6 +5747,7 @@ async function adNative(){
 async function adPlay(){
   if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||document.getElementById('adov'))return;
   if(!adLeft(ME.uid)){say('You have used today’s sponsor spots. Back tomorrow.');return}
+  useAdStart();
   if(await adNative())return;
   const sp=ADS.sponsors[Math.floor(Math.random()*ADS.sponsors.length)]||ADS.sponsors[0];
   const o=document.createElement('div');o.id='adov';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Sponsor');
