@@ -1973,7 +1973,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v209 · Nov 5';
+const APP_BUILD='v210 · Nov 5';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3483,8 +3483,8 @@ async function rcPick(key){
 function rcSlots(t,who){return `<div class="rc-slots">${RC_SLOTS.map(s=>{const p=pByKey(t.sl[s.k]);return `<div class="rc-slot ${p?'on':''}"><span class="rc-sl">${s.label}</span>${p?`${av(p.name,p.school,30)}<span class="rc-who"><b>${esc(p.name)}</b><small>${esc(p.school)} · <b class="rc-v">${f1(simTot(p))}</b></small><small class="rc-st">${esc(rcLine(p))}</small></span>`:`<span class="rc-who muted">Open</span>`}</div>`}).join('')}</div>`}
 function rcHTML(){
   const m=UI.rc,my=ME.uid?rcRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const rows=Object.keys(S.picks).map(u=>({u,w:+rcRec(u).w||0,b:+rcRec(u).best||0})).filter(x=>x.w>0||x.b>0).sort((a,b)=>b.w-a.w||b.b-a.b).map(x=>({u:x.u,v:`${x.w} W`}));
-  const board=mgBoard('Most Ring Chaser wins',rows);
+  const rows=Object.keys(S.picks).map(u=>({u,b:+rcRec(u).best||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
+  const board=mgBoard('Highest Ring Chaser team totals',rows);
   const ready=rcPool().length>=RC_SLOTS.length*2&&rcPool().some(p=>simTot(p)>0);
   const rec=`${+my.w||0}-${+my.l||0}${+my.t?'-'+my.t:''}`;
   const myBar=my.runs?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Record vs AI</small><b>${rec}</b></div><div><small>Best lineup</small><b>${f1(my.best||0)}</b></div></div>`:'';
