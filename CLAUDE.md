@@ -46,7 +46,7 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 
 - Sponsor spot (Get tokens → Watch a sponsor): plays `ads/fogo.mp4` (owner's FOGO video, 21.7 s, 720p, 0.9 MB) in `adPlay()`; Collect unlocks only when it ends (no skipping ahead, pauses when the tab is hidden), +25 tokens, 5/day. It is a stand-in until a real ad network is used; the native AdMob path in `adNative()` is unchanged. `sw.js` skips .mp4. `make_previews.py` inlines the video. To swap the ad, replace the file or edit `ADS.sponsors`.
 
-- Admin dashboard (Nov 5, owner approved): `#admin` opens a light admin console (`admHTML`, styles `.adm*`, not the app theme) for the two admin accounts after the PIN: Overview, App usage (time and opens per tab), Users (sortable, CSV), Engagement, Sponsor videos, Games, Accounts & tools (the old admin page). Usage is tracked per signed-in user in the private doc `data/users/<uid>/usage` (`USE`, `useTab()`): seconds per day (`days`), opens (`ses`), sponsor videos (`ads`), seconds and opens per tab (`tv`, `tc`). Time counts only while on screen and touched in the last 2 min; admin pages are not tracked. Previews (demo mode) show sample numbers (`dashDemoRows`/`dashDemoUse`).
+- Admin dashboard (Nov 5, owner approved): `#admin` opens a light admin console (`admHTML`, styles `.adm*`, not the app theme) for the two admin accounts after the PIN: Overview, App usage (time and opens per tab), Users (sortable, CSV), Engagement, Sponsor videos, Games, Accounts & tools (the old admin page). Usage is tracked per signed-in user in the private doc `data/users/<uid>/usage` (`USE`, `useTab()`): seconds per day (`days`), opens (`ses`), sponsor videos (`ads`), seconds and opens per tab (`tv`, `tc`). Time counts only while on screen and touched in the last 2 min; admin pages are not tracked. Previews (demo mode) show sample numbers (`dashDemoRows`/`dashDemoUse`). Extras shipped Nov 6 (v216): Growth & retention, funnel, busy times (`hr`), League health, Data health, Error log (`logErr`, `data/users/<uid>/errors`), Sponsors & tokens, Announcements (`config/settings.ann`, banner with close), Weekly report, alerts on Overview.
 
 ## Open items and ideas
 - Database rules: only `tools/sql/mocks_policies.sql` is in the repo. Its "update mock" policy lets any signed-in user change any mock draft. (`merge_doc` runs as the caller, so table policies apply.)
@@ -59,3 +59,6 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 
 ## Getting MaxPreps data (if needed again)
 Use Claude in Chrome. `javascript_tool` output is cut off at about 1 KB and blocks query-string URLs, so write results into the page DOM and read them with `get_page_text`. Verify hand-transcribed data with a checksum computed in the browser and in Python.
+
+## Marketing
+- Six TikTok/Reels videos (Nov 5) and the tools that made them are on branch `marketing-videos` (`tools/marketing/`, read its README). Player names in videos are made up; music is synthesized. Pick 'em odds were kept out of the first six videos.
