@@ -96,3 +96,9 @@ Use Claude in Chrome. `javascript_tool` output is cut off at about 1 KB and bloc
 
 ## Marketing
 - Six TikTok/Reels videos (Nov 5) and the tools that made them are on branch `marketing-videos` (`tools/marketing/`, read its README). Player names in videos 1-6 are made up; video 7 ("6 ways to play", Nov 6) uses real players at the owner's request (Darian Webb, Hezekiah Manuel, top 5 Card Draw hand); the owner was told California needs consent (a parent's for minors) to use names in ads. Music is synthesized.
+
+## v250 (Nov 6): Ring Chaser online
+- Ring Chaser main card: Play the AI, Find an opponent (`rcoNew(true)`), Create a party (`rcoNew(false)`, 5-letter code from `RCO_ABC`, Send invite shares it) and a code box + Join a party (`rcoJoin`).
+- A match is one doc in `rcm` (`bb_rcm` in basketball): host, guest, st wait/live/done/gone, turn `t` (host on even turns), `spin {t,s}`, `sl {uid:{slot:key}}`, `last`, `stuck`. Only the player whose turn it is writes; their phone spins the school and saves it (a reload can't re-roll). 30 s pick clock (`RCO_CLOCK`) then the top player is taken; if the other player is idle 75 s (`RCO_AFK`) you can Take the win. Leaving a live match is a loss. Online record is `picks/<uid>.rc.on {w,l,t}` (`oid` = last counted match); full lineups also count for Best lineup. A match in progress is picked back up after a reload for an hour (localStorage `vs-rco-fb`/`vs-rco-bb`).
+- Joining goes through the `rc_claim` RPC (code join, or oldest open public match; a searcher only joins matches opened before theirs, so two searchers never grab each other). Demo/preview files run the same rules locally.
+- **Needs `tools/sql/ring_chaser_online.sql` run in the Supabase SQL editor** (policies for rcm/bb_rcm + rc_claim). Until then online buttons say online play isn't switched on yet; Play the AI is unaffected.
