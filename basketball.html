@@ -2043,6 +2043,7 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .mast-tick{background:rgba(3,14,8,.92)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)!important;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)!important}
 .mast-tick::after{display:none!important}
 .mt-i{text-shadow:none!important}
+#create-form:has(input[value=pk]:checked) .ro-wrap{display:none}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2497,7 +2498,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v262 · Nov 7';
+const APP_BUILD='v263 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3212,7 +3213,7 @@ const myPKL=()=>Object.values(S.fgroups).filter(g=>g&&g.kind==='pk'&&g.members&&
 const pklOf=u=>((S.picks[u]||{}).pkl)||{};
 const pklWeekOf=at=>{if(!at)return 1;const d=new Date(at),w=Math.floor((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-W1)/864e5/7)+1;return Math.max(1,w)};
 function pklRec(u,games){let c=0,n=0,m=0;const P=pklOf(u);for(const g of games){if(!gDone(g)||g.hs===g.as)continue;n++;const p=P[gid(g)];if(!p){m++;continue}if((p==='h')===(g.hs>g.as))c++}return{c,n,m,pct:n?c/n:0}}
-function pklHTML(){
+function pklHTML(inL){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const forms=`<div class="two"><form class="card lg-form" id="pkl-create"><h3>Start a Pick ’em league</h3><p class="muted">Name it, then send the code to your friends.</p>
       <div class="lg-row"><input id="pkl-name" maxlength="32" placeholder="League name, like Lunch Table Picks" autocomplete="off" aria-label="League name"><button class="btn" type="submit">Create</button></div></form>
@@ -3242,7 +3243,7 @@ function pklHTML(){
     return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(x.d))}${lock&&!done?' · locked':''}</span>${done?`<span class="pill ${p?(win&&p===win?'final':'live'):'live'}">${!p?'Missed':win===p?'Right':win?'Wrong':'Tie'}</span>`:!p&&!lock?'<span class="pill live">Pick needed</span>':''}</div><div class="bt-row">${btn('a',x.a)}<span class="bt-at">at</span>${btn('h',x.h)}</div></article>`};
   const bar=w===cw&&can&&wk.length?`<div class="pkl-bar"><div><b>${picked} of ${wk.length} picked</b><small class="muted">${openLeft?openLeft+' open '+(openLeft===1?'game still needs a pick':'games still need a pick'):'Every open game is picked'}</small></div>
     <div class="btns" style="margin:0">${openLeft?'<button class="btn sm ghost" data-act="pklFav">Pick favorites for the rest</button>':''}<button class="btn sm" data-act="pklSave" ${dirty?'':'disabled'}>${dirty?'Lock in '+dirty+(dirty===1?' pick':' picks'):'Saved'}</button></div></div>`:'';
-  return (L.length>1?sel:'')+head+stand+`<section class="card"><div class="qh"><h3>Game ${w}</h3><span class="muted">${wk.length} ${wk.length===1?'game':'games'}</span></div>${weeks}${bar}</section>`
+  return (L.length>1&&!inL?sel:'')+head+stand+`<section class="card"><div class="qh"><h3>Game ${w}</h3><span class="muted">${wk.length} ${wk.length===1?'game':'games'}</span></div>${weeks}${bar}</section>`
     +(wk.length?`<div class="bt-grid">${wk.map(card).join('')}</div>`:'<p class="empty">No games this game.</p>')+(UI.pklNew||L.length<2?`<details class="card pkl-more" ${UI.pklNew?'open':''}><summary><b>Start or join another Pick ’em league</b></summary>${forms}</details>`:'');
 }
 /* ---------- The Locker: packs, items, boosts (v240) ----------
@@ -5184,7 +5185,7 @@ function rcoHTML(){
   return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser <span class="rco-live">Online</span></h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${score}${rcoWgBar(d,on)}${oppNote}${body}</section>`+teams;
 }
 function viewMini(){
-  if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='pkl';setTimeout(()=>{location.hash='#groups'},0)}
+  if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='leagues';UI.lgk='pk';setTimeout(()=>{location.hash='#groups'},0)}
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-wrap"><a class="tok-box shop-box" href="#shop" aria-label="Shop: open packs"><small>Shop</small><b><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b></a><button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${coinIc(ME.uid)}${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button></div>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI or a real person, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':PT==='pkl'?'Pick the winner of every game each game. The friend with the best accuracy tops your league.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
@@ -5721,9 +5722,9 @@ function matchupsHTML(g){
 const groupDanger=(coll,g,word)=>{const own=g.ownerId===ME.uid;return `<div class="card danger-row"><div><b>${own?'Delete '+word:'Leave '+word}</b><p class="muted">${own?'You started '+esc(g.name)+'. Deleting it removes it for every member, with all its lineups and standings.':'Takes you out of '+esc(g.name)+'. You can rejoin later with the invite code.'}</p></div><button class="btn danger" data-act="${own?'delGroup':'leaveGroup'}" data-coll="${coll}" data-id="${esc(g.id)}">${own?'Delete '+word:'Leave '+word}</button></div>`};
 /* Leagues tab: My leagues and Mock Draft (moved here from Minigames) */
 function viewGroups(){
-  const L=UI.ltab==='mock'?'mock':UI.ltab==='pkl'?'pkl':'leagues';
-  const seg=`<div class="chips gm-tabs lgx-tabs" role="group" aria-label="Leagues">${[['leagues','My leagues'],['pkl','Pick ’em league'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="ltab" data-v="${v}" aria-pressed="${v===L}">${l}</button>`).join('')}</div>`;
-  if(L==='pkl')return `<div class="head"><h2>Pick ’em league</h2><p>Play with your friends: pick the winner of every game each game. Highest percentage correct wins.</p></div>`+seg+pklHTML();
+  if(UI.ltab==='pkl'){UI.ltab='leagues';UI.lgk='pk'}
+  const L=UI.ltab==='mock'?'mock':'leagues';
+  const seg=`<div class="chips gm-tabs lgx-tabs" role="group" aria-label="Leagues">${[['leagues','My leagues'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="ltab" data-v="${v}" aria-pressed="${v===L}">${l}</button>`).join('')}</div>`;
   if(L==='mock')return `<div class="head"><h2>Mock Draft</h2><p>Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.</p></div>`+seg+mockHTML();
   const h=viewGroups0(),i=h.indexOf('</div>',h.indexOf('<div class="head"'));
   return h.indexOf('<div class="head"')===0&&i>0?h.slice(0,i+6)+seg+h.slice(i+6):seg+h;
@@ -5733,12 +5734,20 @@ function viewGroups0(){
   const newForm=`<form class="card lg-form" id="create-form"><h3>Start a league</h3><p class="muted">Pick a format, name it, then send the invite code to your friends.</p>
       <div class="lg-modes" role="radiogroup" aria-label="League format">
         <label class="lg-mode"><input type="radio" name="lg-mode" value="draft" checked><span><b>Snake draft</b><small>Classic fantasy basketball. Take turns picking players for each spot, and every player is on only one team. Default roster: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots. You can change it below.</small></span></label>
+        <label class="lg-mode"><input type="radio" name="lg-mode" value="pk"><span><b>Pick ’em</b><small>Every game, everyone picks the winner of every game. Highest percentage correct wins. No draft, no lineups.</small></span></label>
         <label class="lg-mode"><input type="radio" name="lg-mode" value="budget"><span><b>Budget</b><small>Like Premier League fantasy. Build the best team for ${money(CAP_FULL)}, and friends can pick the same players. Uses the same roster spots as a snake draft.</small></span></label>
       </div>
       <div class="ro-wrap card-sub"><b>Roster spots</b><small class="muted">How many of each position every team gets, in snake draft and budget leagues. Default: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots. Bench players do not score; swap them into a starting spot any time after the draft.</small>${rosterPickerHTML('ro-new',ROSTER_DEFAULT)}</div>
       <div class="lg-row"><input id="new-name" maxlength="32" placeholder="League name, like Friday Night Crew" autocomplete="off" aria-label="League name"><button class="btn" type="submit">Create</button></div></form>`;
   const joinForm=`<form class="card lg-form" id="join-form"><h3>Join a league</h3><p class="muted">Paste the invite code a friend sent you.</p>
       <div class="lg-row"><input id="join-code" maxlength="12" placeholder="Invite code, like FNL-7Q2K" autocomplete="off" aria-label="Invite code" value="${esc(UI.joinCode||'')}"><button class="btn" type="submit">Join</button></div></form>`;
+  const pks=myPKL(),pkMode=!!pks.length&&(UI.lgk==='pk'||!g),pkg=pkMode?(pks.find(x=>x.id===UI.pkli)||pks[0]):null;if(pkg)UI.pkli=pkg.id;
+  const topRow=`<div class="lg-top">
+      <div class="lg-tabs" role="tablist" aria-label="Your leagues">${gs.map(x=>`<button class="gtab" role="tab" aria-selected="${!pkMode&&g&&x.id===g.id}" data-act="group" data-id="${esc(x.id)}">${esc(x.name)}<small>${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'team':'teams'}</small></button>`).join('')}${pks.map(x=>`<button class="gtab" role="tab" aria-selected="${!!pkg&&x.id===pkg.id}" data-act="pklSel" data-v="${esc(x.id)}">${esc(x.name)}<small>Pick ’em · ${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'player':'players'}</small></button>`).join('')}</div>
+      <div class="lg-new"><button class="btn sm ${UI.lgp==='new'?'':'ghost'}" data-act="lgPanel" data-v="new">+ New league</button><button class="btn sm ${UI.lgp==='join'?'':'ghost'}" data-act="lgPanel" data-v="join">Join with code</button></div>
+    </div>
+    ${UI.lgp==='new'?newForm:UI.lgp==='join'?joinForm:''}`;
+  if(pkMode)return `<div class="head"><h2>My leagues</h2><p>Pick ’em league: every game, pick the winner of every game. Highest percentage correct wins.</p></div>`+topRow+pklHTML(true);
   if(!g)return `<div class="head"><h2>My leagues</h2><p>Build a lineup of real players, face a friend every game, and climb your league’s standings.</p></div>
     <div class="two">${newForm}${joinForm}</div>`;
   const ids=Object.keys(g.members),cw=CURW(),mem=UI.member&&g.members[UI.member]?UI.member:ME.uid;
@@ -5758,11 +5767,7 @@ function viewGroups0(){
     ${st.map((x,i)=>`<tr class="${x.uid===ME.uid?'me':''} ${x.uid===mem?'sel':''} ${eqOf(x.uid,'banner')?'bn bn-tr '+eqOf(x.uid,'banner'):''}" style="${eqOf(x.uid,'banner')?cosStyle(eqOf(x.uid,'banner')):''}" data-act="member" data-m="${esc(x.uid)}" tabindex="0"><td class="rk">${i+1}</td><td><span class="lg-tm">${crestOr(x.uid,30)}<b>${nmC(x.uid,esc(nm(x.uid)))}</b>${x.uid===ME.uid?'<em>you</em>':''}</span></td><td>${x.rec.w}-${x.rec.l}${x.rec.t?'-'+x.rec.t:''}</td><td>${f1(x.rec.pf)}</td><td><b>${f1(x.t)}</b></td></tr>`).join('')}
     </tbody></table></div><p class="muted">Records count finished games since the league started. Tap a team to see its lineup.</p></section>`;
   const own=g.ownerId===ME.uid;
-  return `<div class="lg-top">
-      <div class="lg-tabs" role="tablist" aria-label="Your leagues">${gs.map(x=>`<button class="gtab" role="tab" aria-selected="${x.id===g.id}" data-act="group" data-id="${esc(x.id)}">${esc(x.name)}<small>${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'team':'teams'}</small></button>`).join('')}</div>
-      <div class="lg-new"><button class="btn sm ${UI.lgp==='new'?'':'ghost'}" data-act="lgPanel" data-v="new">+ New league</button><button class="btn sm ${UI.lgp==='join'?'':'ghost'}" data-act="lgPanel" data-v="join">Join with code</button></div>
-    </div>
-    ${UI.lgp==='new'?newForm:UI.lgp==='join'?joinForm:''}
+  return `${topRow}
     <section class="lg-hero">
       <div class="lg-hl"><span class="lbl">League</span><h2>${esc(g.name)}</h2><p>${lgMode(g)==='budget'?'Budget league · '+money(capOf(g))+' cap':'Snake draft league'+(draftInfo(g).status==='done'?' · Draft complete, free agency open':draftInfo(g).status==='live'?' · Draft in progress':' · Draft not started')} · ${ids.length} ${ids.length===1?'team':'teams'} · Game ${cw}${own?' · You run this league':''}</p></div>
       <div class="lg-stats">
@@ -6335,7 +6340,7 @@ function useAd(){if(!USE.doc)return;const k=useDay();USE.doc.ads[k]=(+USE.doc.ad
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{USE.lastAct=Date.now()},{passive:true,capture:true}));
 /* which part of the app is on screen: the tab, plus the sub-tab for Stats, Leagues and Minigames */
 const useTab=()=>{try{if(typeof FG!=='undefined'&&FG)return 'mg:fgplay';const d=$('#drawer');if(d&&!d.hidden)return 'player';const v=UI.view;
-  if(v==='minigames')return 'mg:'+(UI.mtab||'picks');if(v==='groups')return UI.ltab==='mock'?'mock':UI.ltab==='pkl'?'pkl':'leagues';if(v==='league')return 'stats:'+(UI.stab||'players');return v}catch(_){return 'other'}};
+  if(v==='minigames')return 'mg:'+(UI.mtab||'picks');if(v==='groups')return UI.ltab==='mock'?'mock':UI.lgk==='pk'?'pkl':'leagues';if(v==='league')return 'stats:'+(UI.stab||'players');return v}catch(_){return 'other'}};
 setInterval(()=>{if(!useOn())return;if(!USE.doc){if(++USE.tick%8===0)useLoad();return}
   const k=useDay(),t=useTab();if(t==='admin'||t==='desk')return;
   if(t!==USE.tab){USE.tab=t;const c=USE.doc.tc[k]||(USE.doc.tc[k]={});c[t]=(+c[t]||0)+1;USE.dirty=true}
@@ -6993,7 +6998,7 @@ document.addEventListener('click',async e=>{
   else if(a==='toMe')location.hash='#me';
   else if(a==='resetDemo'){if(confirm('Reset the demo and your consent choice? This cannot be undone.')){try{localStorage.removeItem('gsd-demo-profile')}catch(_){}location.reload()}}
   else if(a==='rank'){UI.rank=t.dataset.v;render()}
-  else if(a==='group'){UI.gi=id;UI.member=null;render()}
+  else if(a==='group'){UI.gi=id;UI.member=null;UI.lgk='';render()}
   else if(a==='fgroup'){UI.fi=id;render()}
   else if(a==='member'){UI.member=t.dataset.m;render()}
   else if(a==='mweek'){UI.mw=+t.dataset.w;render()}
@@ -7146,10 +7151,10 @@ document.addEventListener('click',async e=>{
   else if(a==='perkTry'){const d=fgDay(ME.uid)||{d:TODAY(),tries:0,best:0,t:0},dd=Object.assign({},d,{d:TODAY(),x:(+d.x||0)+1}),my=fgRec(ME.uid);
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{fg:Object.assign({},my,{dd})});upsert('picks/'+ME.uid,{fg:{dd}}).catch(()=>{});await invUse('p_try');say('Extra try added');render()}
   else if(a==='perkRedraw'){const w=CURW(),inv=invOf(ME.uid),fcx=Object.assign({},inv.fcx,{[w]:fcX(ME.uid,w)+1});await invUse('p_redraw',{fcx});say('+1 redraw this game');render()}
-  else if(a==='pklSel'){UI.pkli=t.dataset.v;UI.pkls={};UI.pklw=null;render()}
+  else if(a==='pklSel'){UI.pkli=t.dataset.v;UI.pkls={};UI.pklw=null;UI.lgk='pk';render()}
   else if(a==='pklNew'){UI.pklNew=!UI.pklNew;render()}
   else if(a==='pklWk'){UI.pklw=+t.dataset.w;render()}
-  else if(a==='pklInv'){const g=S.fgroups[t.dataset.gid];if(g){const bb=FG_SPORT==='bb',m=`Join my ${bb?'basketball':'football'} Pick ’em league "${g.name}" on Varsity. Pick every game each game and see who’s most accurate.\n\nOpen ${SITE_URL}#groups, tap Pick ’em league, and enter code ${g.code}`;
+  else if(a==='pklInv'){const g=S.fgroups[t.dataset.gid];if(g){const bb=FG_SPORT==='bb',m=`Join my ${bb?'basketball':'football'} Pick ’em league "${g.name}" on Varsity. Pick every game each game and see who’s most accurate.\n\nOpen ${SITE_URL}#groups, tap Join with code, and enter ${g.code}`;
       const phone=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);if(phone)location.href='sms:?&body='+encodeURIComponent(m);else copyText(m,'Invite message copied. Paste it into a text.')}}
   else if(a==='pklPick'){const id=t.dataset.g,sd=t.dataset.s,cur=(UI.pkls||{})[id]||pklOf(ME.uid)[id];UI.pkls=Object.assign({},UI.pkls);if(cur===sd&&!pklOf(ME.uid)[id])delete UI.pkls[id];else if(pklOf(ME.uid)[id]===sd)delete UI.pkls[id];else UI.pkls[id]=sd;render(true)}
   else if(a==='pklFav'){const cw=CURW(),mine=pklOf(ME.uid);UI.pkls=Object.assign({},UI.pkls);
@@ -7276,17 +7281,17 @@ async function createGroup(coll,name,stateKey){
   const ok=await act(async()=>{ref=await DB.collection(coll).add(Object.assign({name,code,ownerId:ME.uid,createdAt:now,members:{[ME.uid]:now}},coll==='groups'?(()=>{const md=(window.__pendMode||(document.querySelector('input[name=lg-mode]:checked')||{}).value)==='budget'?'budget':'draft';return {mode:md,roster:cleanRoster(window.__pendRoster||readRoster('ro-new'))}})():{}))},'League created. Share code '+code);
   if(ok&&ref){UI[stateKey]=ref.id;UI.member=null}
 }
-async function joinGroup(coll,code,stateKey){
+async function joinGroup(coll,code,stateKey,quiet){
   if(needJoin('join a league'))return;
   if(!code){say('Enter an invite code');return}
   /* join through the server so non-members never need write access to a league (falls back if the function is not installed) */
   if(typeof SB!=='undefined'&&SB&&ME.mode==='live'){let r=null;try{r=await SB.rpc('join_league',{p_coll:DB.collection(coll).path,p_code:code})}catch(_){}
     if(r&&r.error&&/full/i.test(r.error.message||'')){say('That league is full ('+LG_MAX+' teams max)');return}
-    if(r&&!r.error){if(!r.data){say('No league found for that code');return}UI[stateKey]=r.data;UI.member=null;say('Joined the league');render();return}}
+    if(r&&!r.error){if(!r.data){if(quiet)return 'nf';say('No league found for that code');return}UI[stateKey]=r.data;UI.member=null;say('Joined the league');render();return}}
   let snap;
   try{snap=await DB.collection(coll).where('code','==',code).get()}catch(_){say('Could not look that code up. Try again.');return}
   const d=snap.docs[0];
-  if(!d){say('No league found for that code');return}
+  if(!d){if(quiet)return 'nf';say('No league found for that code');return}
   const g=d.data();
   if(g.members&&g.members[ME.uid]){say('You are already in that league');UI[stateKey]=d.id;render();return}
   if(coll==='groups'&&Object.keys(g.members||{}).length>=LG_MAX){say('That league is full ('+LG_MAX+' teams max)');return}
@@ -7298,9 +7303,12 @@ document.addEventListener('submit',async e=>{
   const id=e.target.id;
   if(id==='create-form'){const n=$('#new-name').value.trim();if(!n){say('Give your league a name first');return}
     if(!myProfile()){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'create',n,m:(document.querySelector('input[name=lg-mode]:checked')||{}).value||'draft',r:readRoster('ro-new')}))}catch(_){}}
-    UI.lgp=null;await createGroup('groups',n,'gi')}
+    UI.lgp=null;if((document.querySelector('input[name=lg-mode]:checked')||{}).value==='pk'){if(needJoin('start a league'))return;const now=NOW();let ref=null;
+      const ok=await act(async()=>{ref=await DB.collection('fgroups').add({name:n,code:makeCode(n,'PKL'),ownerId:ME.uid,createdAt:now,kind:'pk',members:{[ME.uid]:now}})},'League created. Send your friends the code.');
+      if(ok&&ref){UI.pkli=ref.id;UI.lgk='pk';render()}return}
+    await createGroup('groups',n,'gi');UI.lgk='';render()}
   else if(id==='join-form'){const c=$('#join-code').value.trim().toUpperCase();if(!myProfile()&&c){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'join',c}))}catch(_){}}
-    UI.lgp=null;await joinGroup('groups',c,'gi')}
+    UI.lgp=null;if(await joinGroup('groups',c,'gi',true)==='nf'){if(await joinGroup('fgroups',c,'pkli',true)==='nf')say('No league found for that code');else{UI.lgk='pk';render()}}else{UI.lgk='';render()}}
   else if(id==='pkl-create'){const n=$('#pkl-name').value.trim();if(!n){say('Give your league a name first');return}
     if(needJoin('start a league'))return;const now=NOW();let ref=null;
     const ok=await act(async()=>{ref=await DB.collection('fgroups').add({name:n,code:makeCode(n,'PKL'),ownerId:ME.uid,createdAt:now,kind:'pk',members:{[ME.uid]:now}})},'League created. Send your friends the code.');
