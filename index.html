@@ -1403,7 +1403,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .ave-o.sw{width:40px;height:40px;padding:0;border-radius:50%;border:2px solid rgba(255,255,255,.25)}
 .ave-o.on{border-color:#FFC23D;box-shadow:0 0 0 2px rgba(255,194,61,.45)}.ave-o.lock{opacity:.35;cursor:default;position:relative}
 .ave-o.lock::after{content:"";position:absolute;right:-2px;top:-2px;width:12px;height:12px;border-radius:50%;background:#3A4A6B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 11V8a5 5 0 0 1 10 0v3' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E") center/8px no-repeat}
-.ave-num{max-width:140px;margin-top:10px}
+.ave-num{max-width:140px;margin-top:10px}.ave-gear{margin:18px 0 0;font:900 italic 1.2rem var(--f-display,inherit);text-transform:uppercase}
 
 /* Locker (v240) */
 .me-lk{display:flex!important;flex-direction:row!important;text-align:left;align-items:center;gap:14px;text-decoration:none;color:inherit;margin-bottom:14px}.me-lk>span:nth-child(2){flex:1;display:flex;flex-direction:column}.me-lk>b{font-size:1.6rem;color:var(--muted)}
@@ -3025,7 +3025,7 @@ const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)};
 function freePacks(u){const v=invOf(u),fr=v.fr||{},d=+fgRec(u).days||0;return (fr.st?0:1)+Math.max(0,Math.floor(d/7)-(+fr.d7||0))}
 function rollRarity(odds,floor){const ord=['c','r','e','l'];let x=fcRnd(10000)/100,acc=0,r='c';for(const k of ord){acc+=odds[k];if(x<acc){r=k;break}}
   if(floor&&ord.indexOf(r)<ord.indexOf(floor))r=floor;return r}
-function rollItem(r){const pool=ITEMS.filter(x=>x.r===r);return pool[fcRnd(pool.length)].id}
+function rollItem(r){const bbx=typeof FG_SPORT!=='undefined'&&FG_SPORT==='bb';const pool=ITEMS.filter(x=>x.r===r&&!(bbx&&x.fb));return pool[fcRnd(pool.length)].id}
 async function packOpen(type,how){
   const P=PACKS[type];if(!P)return;
   if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
@@ -3058,6 +3058,8 @@ function packShow(P,got){
 function itemArt(id,s=48){const x=ITEM[id];if(!x)return'';
   if(x.k==='ball')return `<span class="ia ia-ball ${id}" style="width:${s}px;height:${s}px"></span>`;
   if(x.k==='frame')return `<span class="ia ia-frame ${id}" style="width:${s}px;height:${s}px"><i></i></span>`;
+  if(x.k==='av'||x.k==='badge'){const g={helm:'M4 14a8 8 0 0 1 16 0v2H9l-2 3H4z',pads:'M3 10l5-4h8l5 4-3 3H6z',cleat:'M3 15h11l6 2v2H3z',hw:'M4 13a8 7 0 0 1 16 0z',hair:'M5 13a7 8 0 0 1 14 0c0-2-3-3-7-3s-7 1-7 3z',kicks:'M3 15h11l6 2v2H3z'}[x.slot]||'M8 3l4 2 4-2 4 4-3 3v10H7V10L4 7z';
+    return `<span class="ia ia-perk av" style="width:${s}px;height:${s}px"><svg viewBox="0 0 24 24" width="${Math.round(s*.55)}" height="${Math.round(s*.55)}" aria-hidden="true"><path d="${g}" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>`}
   const ic={p_revive:'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l3 3M15 15l3 3M6 18l3-3M15 9l3-3',p_try:'M12 5v14M5 12h14',p_redraw:'M4 4v6h6M20 20v-6h-6M5 15a7 7 0 0 0 12 3M19 9A7 7 0 0 0 7 6',p_freeze:'M12 2v20M4 6l16 12M20 6L4 18',t_boost:'M13 2L4 14h7l-1 8 9-12h-7z',t_insure:'M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z'}[id]||'M12 12h.01';
   return `<span class="ia ia-perk ${x.k}" style="width:${s}px;height:${s}px"><svg viewBox="0 0 24 24" width="${Math.round(s*.55)}" height="${Math.round(s*.55)}" aria-hidden="true"><path d="${ic}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`}
 const frameOf=u=>{const f=(invOf(u).eq||{}).frame;return f&&invHas(u,f)?f:''};
@@ -3120,12 +3122,19 @@ ITEMS.push(
   {id:'a_cap',k:'av',r:'c',n:'Ball cap',d:'Headwear.',slot:'hw'},{id:'a_beanie',k:'av',r:'c',n:'Beanie',d:'Headwear.',slot:'hw'},{id:'a_crown',k:'av',r:'l',n:'Crown',d:'Headwear.',slot:'hw'},
   {id:'a_chain',k:'av',r:'r',n:'Gold chain',d:'Accessory.',slot:'acc'},{id:'a_shades',k:'av',r:'r',n:'Shades',d:'Accessory.',slot:'acc'},
   {id:'a_goldkicks',k:'av',r:'e',n:'Gold kicks',d:'Shoes.',slot:'kicks'},{id:'a_neonkicks',k:'av',r:'r',n:'Neon kicks',d:'Shoes.',slot:'kicks'},
+  {id:'g_helmet',k:'av',r:'c',n:'Helmet',d:'Football helmet with facemask.',slot:'helm',fb:1},{id:'g_chrome',k:'av',r:'l',n:'Chrome helmet',d:'Mirror-finish helmet.',slot:'helm',fb:1},
+  {id:'g_visor',k:'av',r:'r',n:'Visor',d:'Tinted eye shield.',slot:'visor',fb:1},{id:'g_pads',k:'av',r:'c',n:'Shoulder pads',d:'Big shoulders under the jersey.',slot:'pads',fb:1},
+  {id:'g_cleats',k:'av',r:'c',n:'Cleats',d:'Black cleats with studs.',slot:'cleat',fb:1},{id:'g_goldcleats',k:'av',r:'e',n:'Gold cleats',d:'Shiny gold cleats.',slot:'cleat',fb:1},
+  {id:'g_sleeve',k:'av',r:'c',n:'Arm sleeve',d:'One compression sleeve.',slot:'slv'},{id:'g_sleeves',k:'av',r:'r',n:'Two arm sleeves',d:'Sleeves on both arms.',slot:'slv'},
+  {id:'g_armband',k:'av',r:'c',n:'Armband',d:'Band on the bicep.',slot:'band2'},{id:'g_gloves',k:'av',r:'c',n:'Gloves',d:'Receiver gloves.',slot:'glove',fb:1},
+  {id:'g_wrist',k:'av',r:'c',n:'Wristbands',d:'Bands on both wrists.',slot:'wrist'},{id:'g_eyeblack',k:'av',r:'c',n:'Eye black',d:'Under-eye stripes.',slot:'eb'},
+  {id:'g_towel',k:'av',r:'c',n:'Towel',d:'Hangs from the waist.',slot:'towel',fb:1},{id:'g_socks',k:'av',r:'r',n:'High socks',d:'Striped socks up to the knee.',slot:'hsock'},
   {id:'g_sunset',k:'badge',r:'c',n:'Sunset badge',d:'Badge background.',slot:'bg'},{id:'g_ocean',k:'badge',r:'c',n:'Ocean badge',d:'Badge background.',slot:'bg'},
   {id:'g_galaxy',k:'badge',r:'e',n:'Galaxy badge',d:'Badge background.',slot:'bg'},{id:'g_gold',k:'badge',r:'l',n:'Gold badge',d:'Badge background.',slot:'bg'},
   {id:'i_star',k:'badge',r:'c',n:'Star icon',d:'Badge icon.',slot:'ic'},{id:'i_flame',k:'badge',r:'c',n:'Flame icon',d:'Badge icon.',slot:'ic'},
   {id:'i_bolt',k:'badge',r:'r',n:'Bolt icon',d:'Badge icon.',slot:'ic'},{id:'i_crown',k:'badge',r:'e',n:'Crown icon',d:'Badge icon.',slot:'ic'});
 ITEMS.forEach(x=>{ITEM[x.id]=x});
-const AV_DEF={m:'badge',bg:'blue',ic:'',skin:2,hair:'fade',hc:'black',hw:'',acc:'',kicks:'',c1:'#1F4FBF',c2:'#FFFFFF',num:'1'};
+const AV_DEF={m:'badge',bg:'blue',ic:'',skin:2,hair:'fade',hc:'black',hw:'',acc:'',kicks:'',c1:'#1F4FBF',c2:'#FFFFFF',num:'1',helm:'',visor:'',pads:'',cleat:'',slv:'',band2:'',glove:'',wrist:'',eb:'',towel:'',hsock:''};
 const avtOf=u=>Object.assign({},AV_DEF,((S.profiles[u]||{}).avt)||{});
 /* an option is usable if it's free or you own the item */
 const avOwn=(u,id)=>!id||!ITEM[id]||invHas(u,id)>0;
@@ -3179,7 +3188,8 @@ function av3Draw(R,a,yaw,W,H,por){
   /* a person about 2 units tall standing on y=0: head is 1/8 of the height */
   const P=M.persp(.62,W/H,.05,50),V=por?M.look([0,1.78,1.15],[0,1.72,0]):M.look([0,1.12,3.75],[0,.98,0]),PV=M.mul(P,V),root=M.ry(yaw);
   const skin=AV_SKIN[a.skin|0]||AV_SKIN[2],hc=AV_HC[a.hc]||AV_HC.black,c1=a.c1||'#1F4FBF',c2=a.c2||'#FFFFFF',bb=typeof FG_SPORT!=='undefined'&&FG_SPORT==='bb';
-  const kick=a.kicks==='a_goldkicks'?'#F2BE2C':a.kicks==='a_neonkicks'?'#26F0FF':'#F4F4F6';
+  let kick=a.kicks==='a_goldkicks'?'#F2BE2C':a.kicks==='a_neonkicks'?'#26F0FF':'#F4F4F6';if(!bb&&a.cleat)kick=a.cleat==='g_goldcleats'?'#F2BE2C':'#15161a';
+  const pads=!bb&&!!a.pads,helm=!bb&&a.helm;
   const sh=(h,k)=>{const c=hex3(h);return '#'+c.map(v=>Math.max(0,Math.min(255,Math.round(v*255*k))).toString(16).padStart(2,'0')).join('')};
   const lip=sh(skin,.78),c1d=sh(c1,.82);
   const nmat=m=>{const a0=m[0],a1=m[1],a2=m[2],b0=m[4],b1=m[5],b2=m[6],c0=m[8],c1_=m[9],c2_=m[10];
@@ -3202,19 +3212,27 @@ function av3Draw(R,a,yaw,W,H,por){
   /* legs: thigh (shorts on top), knee, calf, sock, sneaker */
   for(const s of [-1,1]){const hip=[s*.095,.98,0],knee=[s*.105,.55,.01],ank=[s*.1,.11,-.01];
     limb(hip,knee,.082,.055,skin,.05);limb(knee,ank,.05,.034,skin,.05);E(s*.1,.73,-.035,.055,.11,.05,skin);   /* calf muscle */
-    limb([s*.1,.24,-.01],ank,.037,.035,'#F2F3F5');                       /* sock */
-    E(s*.1,.06,.045,.055,.045,.115,kick,.35);Bx(s*.1,.018,.045,.105,.03,.23,sh(kick,.78))}
+    if(a.hsock){limb([s*.105,.5,0],ank,.05,.036,'#F2F3F5');for(const yy of [.42,.38])draw('cyl',M.mul(M.tr(s*.104,yy,0),M.sc(.047,.012,.045)),c1)}else limb([s*.1,.24,-.01],ank,.037,.035,'#F2F3F5');   /* sock */
+    E(s*.1,.06,.045,.055,.045,.115,kick,a.cleat==='g_goldcleats'?.8:.35);Bx(s*.1,.018,.045,.105,.03,.23,sh(kick,.78));
+    if(!bb&&a.cleat)for(const zz of [-.04,.02,.08,.13])Bx(s*.1,-.005,zz,.08,.02,.02,'#888b92')}
   /* shorts */
   tube(.9,1.1,[.17,.175,.16],.68,c1,.1);for(const s of [-1,1])limb([s*.095,.95,0],[s*.105,.76,.005],.092,.085,c1,.1);
   for(const s of [-1,1])Bx(s*.11,.88,.0,.012,.2,.2,c2,0,s*.08);
+  if(!bb&&a.towel)Bx(-.07,.93,.12,.07,.16,.01,'#FFFFFF',.05);
   /* torso: chest and waist under the jersey */
-  tube(1.08,1.6,[.158,.152,.17,.2,.21],.56,c1,.12);E(0,1.6,0,.215,.045,.118,c1,.12);
+  if(pads){tube(1.08,1.62,[.158,.152,.175,.225,.25],.6,c1,.14);E(0,1.62,0,.27,.06,.15,c1,.14);for(const s of [-1,1])E(s*.25,1.6,0,.11,.085,.12,c1,.14)}
+  else{tube(1.08,1.6,[.158,.152,.17,.2,.21],.56,c1,.12);E(0,1.6,0,.215,.045,.118,c1,.12)}
   E(0,1.635,.02,.075,.022,.06,c2);   /* collar */
   /* arms */
   for(const s of [-1,1]){const sho=[s*.215,1.6,0],elb=[s*.265,1.31,-.01],wr=[s*.285,1.06,.02];
     if(bb){E(s*.2,1.595,0,.07,.052,.07,skin,.05);limb(sho,elb,.062,.046,skin,.05)}else{E(s*.205,1.595,0,.074,.058,.076,c1,.1);limb(sho,[s*.24,1.45,0],.07,.064,c1,.1);limb([s*.24,1.45,0],elb,.052,.046,skin,.05)}
-    limb(elb,wr,.042,.032,skin,.05);
-    E(s*.29,.995,.025,.032,.055,.024,skin,.05,s*.08);E(s*.27,1.0,.05,.012,.028,.012,skin,.05,s*-.4)}   /* hand and thumb */
+    const sleeve=a.slv==='g_sleeves'||(a.slv==='g_sleeve'&&s<0),slc=c2==='#FFFFFF'?'#16171c':c2;
+    limb(elb,wr,sleeve?.046:.042,sleeve?.036:.032,sleeve?slc:skin,sleeve?.25:.05);
+    if(sleeve)limb([s*.235,1.45,0],elb,.054,.047,slc,.25);
+    if(a.band2&&s>0)draw('cyl',M.mul(M.tr(s*.25,1.4,0),M.mul(M.rz(s*.17),M.sc(.06,.022,.058))),c2==='#FFFFFF'?'#FFFFFF':c2);
+    if(a.wrist)draw('cyl',M.mul(M.tr(s*.283,1.07,.02),M.mul(M.rz(s*.08),M.sc(.04,.03,.038))),'#FFFFFF');
+    const hand=!bb&&a.glove?(c2==='#FFFFFF'?'#f4f4f6':c2):skin;
+    E(s*.29,.995,.025,.032,.055,.024,hand,a.glove?.3:.05,s*.08);E(s*.27,1.0,.05,.012,.028,.012,hand,.05,s*-.4)}   /* hand and thumb */
   /* neck, head, jaw */
   limb([0,1.62,0],[0,1.72,.005],.048,.046,skin,.05);
   E(0,1.86,0,.102,.122,.115,skin,.06);E(0,1.8,.012,.088,.07,.092,skin,.06);E(0,1.765,.07,.035,.022,.035,skin,.06);   /* skull, jaw, chin */
@@ -3222,17 +3240,26 @@ function av3Draw(R,a,yaw,W,H,por){
     E(s*.038,1.875,.098,.022,.013,.01,'#F7F7F2',.4);E(s*.038,1.875,.106,.009,.009,.005,'#2a1b12',.6);   /* eyes */
     Bx(s*.04,1.9,.104,.04,.007,.012,hc,0,s*-.08);                        /* eyebrows */
   }
+  if(a.eb)for(const s of [-1,1])Bx(s*.04,1.852,.107,.03,.009,.006,'#0b0b0d');
   E(0,1.845,.118,.014,.028,.018,sh(skin,.97),.05,0,-.25);E(0,1.825,.12,.02,.009,.012,sh(skin,.9));   /* nose */
   E(0,1.795,.107,.026,.007,.01,lip,.2);E(0,1.787,.105,.022,.006,.009,sh(lip,.95),.2);              /* lips */
+  /* helmet (football): shell, ear holes, stripe, facemask; hides hair and headwear */
+  if(helm){const hc2=helm==='g_chrome'?'#d9dde4':c1,gl2=helm==='g_chrome'?1.2:.7;
+    draw('hemi',M.mul(M.tr(0,1.865,-.01),M.sc(.15,.16,.165)),hc2,gl2);E(0,1.83,-.06,.148,.11,.12,hc2,gl2);
+    for(const s of [-1,1]){E(s*.128,1.82,.005,.035,.085,.075,hc2,gl2);E(s*.15,1.84,.0,.006,.022,.022,'#111')}
+    Bx(0,1.96,0,.035,.05,.3,c2);
+    const fm='#9aa0a8';for(const yy of [1.84,1.79,1.75])draw('cyl',M.mul(M.tr(0,yy,.15),M.mul(M.rz(Math.PI/2),M.sc(.008,.2,.008))),fm,.6);
+    for(const s of [-1,1])limb([s*.1,1.86,.12],[s*.07,1.73,.15],.007,.007,fm,.6);limb([0,1.84,.155],[0,1.74,.155],.007,.007,fm,.6);
+    if(a.visor)Bx(0,1.872,.128,.15,.034,.006,'#1a2a44',1.4)}
   /* hair */
-  const hair=a.hair||'fade';
+  const hair=helm?'':(a.hair||'fade');
   if(hair==='fade'){draw('hemi',M.mul(M.tr(0,1.885,-.004),M.sc(.108,.1,.12)),hc);E(0,1.86,-.03,.104,.08,.1,hc)}
   else if(hair==='buzz')draw('hemi',M.mul(M.tr(0,1.875,-.003),M.sc(.105,.11,.118)),hc);
   else if(hair==='a_afro'){E(0,1.95,-.02,.165,.135,.155,hc);E(0,1.87,-.05,.13,.1,.12,hc)}
   else if(hair==='a_mohawk'){draw('hemi',M.mul(M.tr(0,1.875,-.003),M.sc(.105,.1,.118)),sh(hc,.8));Bx(0,1.995,-.01,.03,.07,.2,hc)}
   else if(hair==='a_long'){draw('hemi',M.mul(M.tr(0,1.885,-.006),M.sc(.112,.105,.125)),hc);E(0,1.74,-.07,.11,.17,.07,hc);for(const s of [-1,1])E(s*.095,1.8,.0,.025,.1,.05,hc)}
   /* headwear */
-  if(a.hw==='band')draw('cyl',M.mul(M.tr(0,1.905,0),M.sc(.112,.025,.124)),c2);
+  if(helm){}else if(a.hw==='band')draw('cyl',M.mul(M.tr(0,1.905,0),M.sc(.112,.025,.124)),c2);
   else if(a.hw==='a_cap'){draw('hemi',M.mul(M.tr(0,1.9,0),M.sc(.118,.1,.13)),c1,.15);draw('cyl',M.mul(M.tr(0,1.905,.15),M.sc(.1,.008,.08)),c1,.15)}
   else if(a.hw==='a_beanie'){draw('hemi',M.mul(M.tr(0,1.885,0),M.sc(.118,.14,.13)),c2);draw('cyl',M.mul(M.tr(0,1.895,0),M.sc(.12,.03,.132)),c1);E(0,2.04,0,.03,.03,.03,c1)}
   else if(a.hw==='a_crown'){draw('cyl',M.mul(M.tr(0,2.0,0),M.sc(.1,.045,.105)),'#F2BE2C',.9);for(let k=0;k<6;k++){const an=k/6*Math.PI*2;E(Math.sin(an)*.098,2.035,Math.cos(an)*.102,.016,.026,.016,'#FFE38A',.9)}}
@@ -3244,11 +3271,11 @@ function av3Draw(R,a,yaw,W,H,por){
   const num=String(a.num||'').slice(0,2);x.strokeText(num,64,70);x.fillText(num,64,70);
   gl.bindTexture(gl.TEXTURE_2D,R.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,nc);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-  gl.uniform1i(L.uS,0);if(num)draw('quad',M.mul(M.tr(0,1.4,.113),M.sc(.19,.19,1)),'#ffffff',0,true);
+  gl.uniform1i(L.uS,0);if(num)draw('quad',M.mul(M.tr(0,1.42,pads?.137:.113),M.sc(pads?.22:.19,pads?.22:.19,1)),'#ffffff',0,true);
 }
 /* snapshots for small avatars: one hidden canvas, a picture per look */
 const AVC={};let avQ=new Map(),avQT=0;
-const avKey=a=>JSON.stringify([a.skin,a.hair,a.hc,a.hw,a.acc,a.kicks,a.c1,a.c2,a.num]);
+const avKey=a=>JSON.stringify([a.skin,a.hair,a.hc,a.hw,a.acc,a.kicks,a.c1,a.c2,a.num,a.helm,a.visor,a.pads,a.cleat,a.slv,a.band2,a.glove,a.wrist,a.eb,a.towel,a.hsock]);
 function avSnap(a){const k=avKey(a);if(AVC[k])return AVC[k];if(!avQ.has(k)){avQ.set(k,a);if(!avQT)avQT=setTimeout(avFlush,30)}return ''}
 function avFlush(){avQT=0;if(!AV3.off){const c=document.createElement('canvas');c.width=c.height=160;AV3.off=av3Init(c);AV3.offc=c}
   const R=AV3.off;if(!R){avQ.clear();return}
@@ -3288,6 +3315,11 @@ function avEditorHTML(){
       <h4>Headwear</h4>${sw('hw',[['','','None'],['band','','Headband'],['a_cap','a_cap','Cap'],['a_beanie','a_beanie','Beanie'],['a_crown','a_crown','Crown']],a.hw)}
       <h4>Extras</h4>${sw('acc',[['','','None'],['a_chain','a_chain','Gold chain'],['a_shades','a_shades','Shades']],a.acc)}
       <h4>Shoes</h4>${sw('kicks',[['','','White'],['a_neonkicks','a_neonkicks','Neon'],['a_goldkicks','a_goldkicks','Gold']],a.kicks)}
+      ${(()=>{const fb=!(typeof FG_SPORT!=='undefined'&&FG_SPORT==='bb'),on=(k,id,l)=>`<h4>${l}</h4>${sw(k,[['','','Off'],[id,id,'On']],a[k])}`;
+        return `<h3 class="ave-gear">Gear</h3>`+(fb?`<h4>Helmet</h4>${sw('helm',[['','','None'],['g_helmet','g_helmet','Helmet'],['g_chrome','g_chrome','Chrome']],a.helm)}${on('visor','g_visor','Visor')}${on('pads','g_pads','Shoulder pads')}
+          <h4>Cleats</h4>${sw('cleat',[['','','Sneakers'],['g_cleats','g_cleats','Cleats'],['g_goldcleats','g_goldcleats','Gold cleats']],a.cleat)}`:'')+
+          `<h4>Sleeves</h4>${sw('slv',[['','','None'],['g_sleeve','g_sleeve','One arm'],['g_sleeves','g_sleeves','Both arms']],a.slv)}${on('band2','g_armband','Armband')}${on('wrist','g_wrist','Wristbands')}${on('eb','g_eyeblack','Eye black')}${on('hsock','g_socks','High socks')}`+
+          (fb?`${on('glove','g_gloves','Gloves')}${on('towel','g_towel','Towel')}`:'')})()}
       <h4>Jersey</h4>${sw('c1',AV_COL.map(c=>[c,'',c,`background:${c}`]),a.c1,0,true)}<h4>Numbers and trim</h4>${sw('c2',AV_COL.map(c=>[c,'',c,`background:${c}`]),a.c2,0,true)}
       <label class="fld ave-num"><span>Number</span><input id="av-num" inputmode="numeric" maxlength="2" value="${esc(String(a.num||''))}" data-act="avNum"></label>`;
   }
