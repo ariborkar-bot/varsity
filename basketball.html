@@ -2532,7 +2532,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v279 · Nov 7';
+const APP_BUILD='v280 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7199,7 +7199,7 @@ document.addEventListener('click',async e=>{
   else if(a==='ppSel'){UI.ppSel=Object.assign({},UI.ppSel,{[t.dataset.k]:t.dataset.id});render(true)}
   else if(a==='ppG'){UI.ppG=t.dataset.v;render();const h=document.querySelector('.pp-gh');if(h&&h.getBoundingClientRect().top>innerHeight*.6)h.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(a==='ppMore'){UI.ppN+=24;render()}
-  else if(a==='ppSide'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{s:t.dataset.s});render()}
+  else if(a==='ppSide'){const id=t.dataset.id;if(UI.pp[id]&&UI.pp[id].s===t.dataset.s)delete UI.pp[id];else UI.pp[id]=Object.assign({},UI.pp[id],{s:t.dataset.s});render()}
   else if(a==='ppStake'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{stake:+t.dataset.v});render()}
   else if(a==='ppClear'){UI.pp={};render()}
   else if(a==='mkSet'){const f=t.dataset.f;UI.mk.set[f]=f==='level'?t.dataset.v:+t.dataset.v;render()}
@@ -7237,7 +7237,7 @@ document.addEventListener('click',async e=>{
     if(!n){say('Pick a side first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),n+(n===1?' pick':' picks')+' locked in')){UI.at={};render()}}
-  else if(a==='atSide'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{s:t.dataset.s});render()}
+  else if(a==='atSide'){const id=t.dataset.g;if(UI.at[id]&&UI.at[id].s===t.dataset.s)delete UI.at[id];else UI.at[id]=Object.assign({},UI.at[id],{s:t.dataset.s});render()}
   else if(a==='atStake'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{stake:+t.dataset.v});render()}
   else if(a==='atDrop'){const id=t.dataset.g,nb={...atsOf(ME.uid)};delete nb[id];delete UI.at[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Pick removed');render()}
   else if(a==='atPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||started(g)||gDone(g)){say('That game is closed.');return}
@@ -7246,7 +7246,7 @@ document.addEventListener('click',async e=>{
     if(stake<1){say('Not enough tokens.');return}
     const line=(old&&old.s===sd&&ui.s===undefined)?+old.line:spreadFor(g),nb={...cur,[id]:{s:sd,stake,line,odds:ATS_PAY,w:g.w,at:NOW()}};
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Locked in: '+(sd==='h'?g.h:g.a)+' '+fmtLine(sd==='h'?line:-line))){delete UI.at[id];render()}}
-  else if(a==='pkSide'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}
+  else if(a==='pkSide'){const id=t.dataset.g;if(UI.pk[id]&&UI.pk[id].s===t.dataset.s)delete UI.pk[id];else UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}   /* tap the picked team again to unselect */
   else if(a==='pkStake'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{stake:+t.dataset.v});render()}
   else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick removed');render()}
   else if(a==='pkClear'){UI.pk={};render()}
