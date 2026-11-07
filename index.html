@@ -2562,7 +2562,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v287 · Nov 7';
+const APP_BUILD='v288 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3923,17 +3923,17 @@ function picksHTML(){
   const card=g=>{
     const id=gid(g),o=oddsFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
-      return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small>${ME.uid?cardTag(ME.uid,'tc:'+n):''}</button>`};
+      return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||b||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small>${ME.uid?cardTag(ME.uid,'tc:'+n):''}</button>`};
     const od=side?o[side]:0,room=avail+(b?+b.stake:0);
     let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play Pick ’em.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'';
     else if(gDone(g)&&b)foot=`<p class="bt-fin ${res}"><b>${res==='won'?'Correct':res==='lost'?'Wrong':'Push'}</b> · Final ${esc(g.a)} ${g.as}, ${esc(g.h)} ${g.hs} · ${res==='won'?'+'+tk(b.stake*(b.odds-1)):res==='push'?'stake back':'-'+tk(b.stake)}</p>`
-    else if(locked)foot=b?`<p class="muted">Locked: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Pick ’em is closed for this game.</p>';
+    else if(locked||b)foot=b?`<p class="muted">Locked in: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Pick ’em is closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="pkStake" data-g="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pk" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
-      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span>${b?`<button class="btn sm ghost" data-act="pkDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
+      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span></div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a team to pick the winner.</p>';
     if(b&&!locked)foot+=bxChips('pk',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
     if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'tc:'+(side==='h'?g.h:g.a)))foot+=`<p class="bx-tag cbx">Your ${esc(side==='h'?g.h:g.a)} card adds +${cardPct(ME.uid,'tc:'+(side==='h'?g.h:g.a))}% if it wins</p>`;
@@ -4082,7 +4082,7 @@ function simScore(mu){
 }
 const simSchools=()=>{const R=ridgeRatings(),set=new Set();((GAMES&&GAMES.games)||[]).forEach(g=>{set.add(g.h);set.add(g.a)});return [...set].sort((a,b)=>(R.r[b]||0)-(R.r[a]||0))};
 function simRun(school){
-  const m=UI.sim;if(!m||!m.res)return;
+  const m=UI.sim;if(!m||!m.res||m.season)return;   /* one season per team */
   const R=ridgeRatings(),z=(m.res.total-m.res.mean)/(m.res.sd||1),bonus=Math.max(-8,Math.min(16,z*4.5)),K=ATS_K;
   const mine=R.r[school]||0;let W=0,L=0,PF=0,PA=0;
   /* always a 10-game regular season: the school's real regular-season games (playoff games left out), and any open weeks
@@ -4154,7 +4154,7 @@ function viewSim(){
   if(m.done&&m.res){const r=m.res,pc=Math.round(r.pct*100),bt=Math.round(r.beat*100),gr=bt>=98?'S':bt>=90?'A':bt>=70?'B':bt>=40?'C':'D';
     res=`<section class="card sim-res"><div class="sim-gr">${gr}</div><div><h3>${f1(teamPPG(m.c))} PPG <small class="muted">· ${f1(r.total)} season pts</small></h3><p class="muted">Better than ${bt}% of randomly drawn teams. The best possible team scores ${f1(r.max)} points, and you got ${pc}% of that.${my.best&&my.best>=Math.round(r.total*10)/10?` Your best is ${f1(my.best)}.`:''}</p></div>
       <details class="sim-opt"><summary>See the best possible team</summary>${r.best.list.map(x=>`<div class="bt-r"><b>${x.l} · ${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><b class="d">${f1(simTot(x.p))}</b></div>`).join('')}</details>
-      <div class="btns"><button class="btn" data-act="simSeason">Simulate a season</button><button class="btn ghost" data-act="simStart">Build another team</button></div></section>`}
+      <div class="btns">${m.season?'':'<button class="btn" data-act="simSeason">Simulate a season</button>'}<button class="btn ghost" data-act="simStart">Build another team</button></div></section>`}
   const act2=m.done?'':`<button class="btn sim-go" data-act="simGo" ${busy?'disabled':''}><span aria-hidden="true">▶</span> Simulate season<small>Lock in this team and play a ${SIM_GAMES}-game season</small></button><div class="bt-go" style="margin-top:10px"><button class="btn ghost" data-act="simReset">Start over</button></div><p class="hint">${m.left.off+m.left.def>0?`You have ${m.left.off} offense and ${m.left.def} defense ${m.left.off+m.left.def===1?'respin':'respins'} left. You do not have to use them.`:'No respins left. Simulate your season when you are ready.'}${can?'':' Sign in to save your best team.'}</p>`;
   const stage=m.done&&m.stage==='pick'?simPickHTML(m):m.done&&m.stage==='season'&&m.season?simSeasonHTML(m):'';
   return head+stage+(m.stage==='pick'?'':res)+`<section class="card fc-hero sim-hero${jerseyStyle()}">${bar}<div class="sim-heads" role="tablist" aria-label="Unit">${[['off','Offense'],['def','Defense']].map(([u,l])=>`<button type="button" role="tab" class="sim-ch ${u} ${u==='def'&&tab!=='def'&&!UI.simSeenDef?'nudge':''}" aria-selected="${tab===u}" data-act="simTab" data-v="${u}">${l}${u==='def'&&tab!=='def'&&!UI.simSeenDef?'<em class="tapme">Tap</em>':''}<small>${unitN(u)} spots · ${f1(unitTot(u))} pts</small></button>`).join('')}</div><div class="sim-board sim-${tab}">${simSkin(simField(tab))}${HASDEF?`<div class="sim-unit-tag ${tab}">${tab==='def'?'Defense':'Offense'}</div>`:''}${m.c.map(card).join('')}</div>${HASDEF?(tab==='off'?`<button type="button" class="btn sim-next def" data-act="simTab" data-v="def">See your defense <span aria-hidden="true">→</span><small>${unitN('def')} players · ${f1(unitTot('def'))} pts</small></button>`:`<button type="button" class="btn ghost sim-next" data-act="simTab" data-v="off"><span aria-hidden="true">←</span> Back to your offense</button>`):''}${act2}</section>${board}`;
@@ -4188,16 +4188,16 @@ function spreadHTML(){
   const card=g=>{
     const id=gid(g),L=spreadFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const ln=sd==='h'?L:-L,lk=b&&b.s===sd&&ui.s===undefined?(sd==='h'?+b.line:-b.line):ln;
-      return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="atSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${fmtLine(lk)}</span><small>pays ${ATS_PAY.toFixed(2)}x</small></button>`};
+      return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="atSide" data-g="${esc(id)}" data-s="${sd}" ${locked||b||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${fmtLine(lk)}</span><small>pays ${ATS_PAY.toFixed(2)}x</small></button>`};
     const room=bal+(b?+b.stake:0);let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'';
     else if(gDone(g)&&b)foot=`<p class="bt-fin ${res}"><b>${res==='won'?'Correct':res==='lost'?'Wrong':'Push'}</b> · Final ${esc(g.a)} ${g.as}, ${esc(g.h)} ${g.hs} · ${res==='won'?'+'+tk(b.stake*(b.odds-1)):res==='push'?'stake back':'-'+tk(b.stake)}</p>`
-    else if(locked)foot=b?`<p class="muted">Locked: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
+    else if(locked||b)foot=b?`<p class="muted">Locked in: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="atStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="atStake" data-g="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="at" data-g="${esc(id)}" data-o="${ATS_PAY}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
-      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*ATS_PAY)}</b></span>${b?`<button class="btn sm ghost" data-act="atDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
+      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*ATS_PAY)}</b></span></div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a side to take the points.</p>';
     return `<article class="gm bt-g ${res==='won'||res==='lost'?'res-'+res:''}"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:atsResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
@@ -4297,14 +4297,14 @@ function propsHTML(){
   const shown=all.slice(0,UI.ppN);
   const card=(x,grp)=>{
     const id=x.id,b=mine[id],M=PP_MK[x.m],locked=started(x.game),ui=UI.pp[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
-    const btn=(sd,t,odd)=>`<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="ppSide" data-id="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}><b>${t} ${fmtN(x.line)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${Math.round((sd==='o'?x.po:1-x.po)*100)}% chance</small></button>`;
+    const btn=(sd,t,odd)=>`<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="ppSide" data-id="${esc(id)}" data-s="${sd}" ${locked||b||!can?'disabled':''}><b>${t} ${fmtN(x.line)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${Math.round((sd==='o'?x.po:1-x.po)*100)}% chance</small></button>`;
     const room=bal+(b?+b.stake:0),od=side==='o'?x.over:side==='u'?x.under:0;let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'';
-    else if(locked)foot=b?`<p class="muted">Locked: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
+    else if(locked||b)foot=b?`<p class="muted">Locked in: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
     else if(side){const chips=[5,10,25,50].filter(v=>v<=room);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="ppStake" data-id="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="ppStake" data-id="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pp" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
-      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span>${b?`<button class="btn sm ghost" data-act="ppDrop" data-id="${esc(id)}">Remove</button>`:''}</div>`}
+      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span></div>`}
     else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under.</p>';
     if(b&&!locked)foot+=bxChips('pp',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
     if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'pc:'+x.k))foot+=`<p class="bx-tag cbx">Your ${esc(x.name)} card adds +${cardPct(ME.uid,'pc:'+x.k)}% if it hits</p>`;
@@ -7323,7 +7323,7 @@ document.addEventListener('click',async e=>{
   else if(a==='mkPick'){const m=mkGet();if(!m)return;const di=mkInfo(m);if(di.status!=='live'||di.t!==mkMe()){say('It is not your pick.');return}
     const p=pByKey(t.dataset.key);if(!p||mkTaken(m).has(p.key)||!mkRoster(m,mkMe()).open.some(s=>slotOk(s,p))){say('That player is not available for your roster.');return}
     await mkWrite(m,di.i,{t:mkMe(),key:p.key,at:NOW()})}
-  else if(a==='ppDrop'){const id=t.dataset.id,nb={...propsOf(ME.uid)};delete nb[id];delete UI.pp[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:nb}),'Pick removed');if(!Object.keys(nb).length)S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{props:{}});render()}
+  else if(a==='ppDrop'){say('Wagers can’t be taken back once tokens are in.')}
   else if(a==='ppAll'){const today=TODAY(),pm=propMap(),cur=propsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pp).forEach(([id,u])=>{const x=pm[id],old=cur[id];if(!x||!u||!u.s||started(x.game))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
@@ -7340,7 +7340,7 @@ document.addEventListener('click',async e=>{
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),n+(n===1?' pick':' picks')+' locked in')){UI.at={};render()}}
   else if(a==='atSide'){const id=t.dataset.g;if(UI.at[id]&&UI.at[id].s===t.dataset.s)delete UI.at[id];else UI.at[id]=Object.assign({},UI.at[id],{s:t.dataset.s});render()}
   else if(a==='atStake'){const id=t.dataset.g;UI.at[id]=Object.assign({},UI.at[id],{stake:+t.dataset.v});render()}
-  else if(a==='atDrop'){const id=t.dataset.g,nb={...atsOf(ME.uid)};delete nb[id];delete UI.at[id];await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Pick removed');render()}
+  else if(a==='atDrop'){say('Wagers can’t be taken back once tokens are in.')}
   else if(a==='atPlace'){const id=t.dataset.g,g=gameMap()[id];if(!g||started(g)||gDone(g)){say('That game is closed.');return}
     const cur=atsOf(ME.uid),old=cur[id],ui=UI.at[id]||{},sd=ui.s||(old&&old.s);if(!sd){say('Tap a side first.');return}
     const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||5,Math.floor(room));
@@ -7349,7 +7349,7 @@ document.addEventListener('click',async e=>{
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),ats:nb}),'Locked in: '+(sd==='h'?g.h:g.a)+' '+fmtLine(sd==='h'?line:-line))){delete UI.at[id];render()}}
   else if(a==='pkSide'){const id=t.dataset.g;if(UI.pk[id]&&UI.pk[id].s===t.dataset.s)delete UI.pk[id];else UI.pk[id]=Object.assign({},UI.pk[id],{s:t.dataset.s});render()}   /* tap the picked team again to unselect */
   else if(a==='pkStake'){const id=t.dataset.g;UI.pk[id]=Object.assign({},UI.pk[id],{stake:+t.dataset.v});render()}
-  else if(a==='pkDrop'){const id=t.dataset.g,nb={...betsOf(ME.uid)};delete nb[id];delete UI.pk[id];await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick removed');render()}
+  else if(a==='pkDrop'){say('Wagers can’t be taken back once tokens are in.')}
   else if(a==='pkClear'){UI.pk={};render()}
   else if(a==='pkAll'){const today=TODAY(),gm=gameMap(),cur=betsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pk).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||started(g)||gDone(g))return;
@@ -8125,10 +8125,10 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     else if(a==='simFinish')simFinish()
     else if(a==='simGo')simFinish(true)
     else if(a==='simReset'){UI.sim=null;render()}
-    else if(a==='simSeason'){if(UI.sim){UI.sim.stage='pick';render();window.scrollTo(0,0)}}
+    else if(a==='simSeason'){if(UI.sim&&UI.sim.season){say('This team already played its season. Build another team to play again.');return}if(UI.sim){UI.sim.stage='pick';render();window.scrollTo(0,0)}}
     else if(a==='simBack'){if(UI.sim){UI.sim.stage=UI.sim.season?'season':null;render()}}
     else if(a==='simPick'){try{document.activeElement.blur()}catch(_){}simRun(t.dataset.s);window.scrollTo(0,0)}
-    else if(a==='simAgain'){if(UI.sim&&UI.sim.season){simRun(UI.sim.season.school)}}
+    else if(a==='simAgain'){}   /* v288: one season per team */
     else if(a==='fcLock')fcLock()
     else if(a==='fcWeek'){UI.fcw=+t.dataset.v;render()}
     else if(a==='fcBoard'){UI.fcb=t.dataset.v;render()}
