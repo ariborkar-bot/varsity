@@ -2498,7 +2498,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v263 · Nov 7';
+const APP_BUILD='v264 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4431,7 +4431,7 @@ function fgHTML(){
       <p class="fg-prize">🏆 When the day ends, <b>1st place wins a ${esc(PACKS.player.n)}</b> and <b>2nd and 3rd win a ${esc(PACKS.rookie.n)}</b>.${can&&fgPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
       <div class="fc-bar" style="grid-template-columns:repeat(3,1fr)"><div><small>Your best today</small><b>${d&&d.best?d.best:'–'}</b></div><div><small>Tries left</small><b>${left} of ${FG_TRIES}</b></div><div><small>Streak</small><b>${sk} ${sk===1?'day':'days'}</b></div></div>
       <div class="fg-gold ${gold?'on':''}"><span class="fg-gb" aria-hidden="true"></span><span>${gold?`<b>Golden ball active.</b> Play every day to keep it.`:`<b>Golden ball:</b> ${Math.min(sk,FG_GOLD)} of ${FG_GOLD} days`}</span>${gold?'':`<i style="--p:${Math.min(1,sk/FG_GOLD)}"></i>`}</div>
-      <div class="fc-deal"><button class="btn" data-act="fgPlay" data-v="daily" ${can&&!left?'disabled':''}>${can&&!left?'Back tomorrow':'Play today’s challenge'}</button>${can&&!left&&invLeft(ME.uid,'p_try')>0?`<button class="btn ghost" data-act="perkTry">Use an extra try (${invLeft(ME.uid,'p_try')})</button>`:''}</div>`;
+      <div class="fc-deal">${can&&!left?'<button class="btn" data-act="fgPlay" data-v="free">Play Unlimited</button>':'<button class="btn" data-act="fgPlay" data-v="daily">Play today’s challenge</button>'}${can&&!left&&invLeft(ME.uid,'p_try')>0?`<button class="btn ghost" data-act="perkTry">Use an extra try (${invLeft(ME.uid,'p_try')})</button>`:''}</div>`;
     board=mgBoard('Today’s leaderboard',rows,'No one has played today’s course yet. Be the first.');
   }else{
     const B=UI.fgb==='tot'?'tot':'best';
@@ -4509,7 +4509,7 @@ function fgOpen(mode){
     if(g.paused&&g.st==='play'){g.paused=false;if(g.invP){g.inv=performance.now()+g.invP;g.invP=0}g.t0=performance.now()-g.t*1000;g.last=performance.now();g.vy=-g.s*7.2;return}
     if(g.st==='ready'){g.st='play';g.t0=performance.now();if(g.mode==='daily'){fgTry();g.gold=fgGold(ME.uid)}}
     if(g.st==='play'){g.vy=-g.s*7.2}
-    else if(g.st==='over'&&!g.offer&&performance.now()-g.tEnd>600){if(g.mode==='daily'&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft())return;fgReset()}};
+    else if(g.st==='over'&&!g.offer&&performance.now()-g.tEnd>600){if(g.mode==='daily'&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft()){g.mode='free';UI.fgm='free';}fgReset()}};
   g.flap=flap;
   el.addEventListener('pointerdown',flap);
   el.addEventListener('touchstart',e=>{if(!e.target.closest('.fgx-x,.fgx-rv'))e.preventDefault()},{passive:false});
@@ -4794,7 +4794,7 @@ function fgDraw(){
   else if(g.paused&&g.st==='play'){msg(g.invP?'Revived!':'Paused','Tap to keep going');}
   else if(g.st==='over'){const dly=g.mode==='daily',my=ME.uid?fgRec(ME.uid):{},d=ME.uid?fgDay(ME.uid):null,best=dly?(d&&d.best):my.best,line1=`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}`;
     if(g.offer)msg(bb?'Brick!':'No good!',line1+'\nKeep this run going?');
-    else{const out=dly&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft();msg(g.newBest&&g.score>0?(dly?'New best today!':'New best!'):(bb?'Brick!':'No good!'),`${line1}\n${best?(dly?'Best today: ':'Best: ')+best+' pts':''}\n${out?'No tries left. New course tomorrow':dly?'Tap to try again ('+fgTriesLeft()+' left)':'Tap to try again'}`)}}
+    else{const out=dly&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft();msg(g.newBest&&g.score>0?(dly?'New best today!':'New best!'):(bb?'Brick!':'No good!'),`${line1}\n${best?(dly?'Best today: ':'Best: ')+best+' pts':''}\n${out?'Daily tries used. Tap for Unlimited':dly?'Tap to try again ('+fgTriesLeft()+' left)':'Tap to try again'}`)}}
 }
 /* ---- Ring Chaser: fill a lineup one random school at a time.
    Spin a school, pick one of its players for an open spot, spin again (the same school can come up again).
@@ -7021,7 +7021,7 @@ document.addEventListener('click',async e=>{
   else if(a==='lgSet'){UI.lgSet=!UI.lgSet;render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
   else if(a==='ltab'){UI.ltab=t.dataset.v;render()}
-  else if(a==='fgPlay')fgOpen(t.dataset.v);
+  else if(a==='fgPlay'){if(t.dataset.v==='free'&&UI.fgm!=='free'){UI.fgm='free';render()}fgOpen(t.dataset.v)}
   else if(a==='fgm'){UI.fgm=t.dataset.v;UI.mgMore=false;render()}
   else if(a==='fgb'){UI.fgb=t.dataset.v;UI.mgMore=false;render()}
   else if(a==='rcStart'){rcoStop();rcStart()}
