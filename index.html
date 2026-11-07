@@ -1386,7 +1386,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .pkl-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}.pkl-bar>div:first-child{display:flex;flex-direction:column}
 .pkl-t.ok{border-color:#2fbf71!important;box-shadow:0 0 0 2px rgba(47,191,113,.35)}.pkl-t.no{border-color:#e5484d!important;opacity:.85}.pkl-sc{font-weight:800;font-size:1.1rem}
 .pkl-more summary{cursor:pointer;list-style:none}.pkl-more[open] summary{margin-bottom:10px}
-@media (max-width:520px){.pkl-h,.pkl-r{grid-template-columns:22px minmax(0,1fr) 62px 46px 40px;gap:6px;font-size:.8rem}.pkl-h{font-size:.6rem;letter-spacing:.03em}.pkl-h span,.pkl-r>*{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pkl-r small{display:none}}
+@media (max-width:520px){.pkl-h,.pkl-r{grid-template-columns:22px minmax(0,1fr) 62px 46px 40px;gap:6px;font-size:.8rem}.pkl-h{font-size:.6rem;letter-spacing:.03em}.pkl-h span,.pkl-r>*:not(.pkl-n){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pkl-n b{min-width:0}.pkl-r small{display:none}}
 
 /* Locker (v240) */
 .me-lk{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;margin-bottom:14px}.me-lk>span:nth-child(2){flex:1;display:flex;flex-direction:column}.me-lk>b{font-size:1.6rem;color:var(--muted)}
@@ -2074,6 +2074,9 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .pkl-lr small{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700}.pkl-lr b{font:900 1.5rem/1.1 var(--f-display,inherit)}
 .pkl-last{border-color:#3DDC84!important;background:linear-gradient(180deg,rgba(61,220,132,.08),transparent),var(--surface)!important}.pkl-next{margin:10px 0 0;color:#FFC23D;font-weight:800}
 .pkl-pct{font-size:.72rem;color:var(--muted);font-weight:700}.pkl-t.on .pkl-pct{color:#FFC23D}
+/* v282: profile frames never cut off: the Me card avatar sits above the banner, framed avatars keep room for their ring */
+.me-pro.has-bn .me-top{z-index:2}.me-pro .me-top>.av{flex:none;margin:6px}
+.av.avf{flex:none;margin:5px}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2203,7 +2206,7 @@ const LOGO_ALIAS={'Army and Navy Academy':'Army-Navy','Central Union':'Central',
 const logoFor=s=>{const L=window.SCHOOL_LOGOS||{};return L[s]||L[LOGO_ALIAS[s]]||''};
 const slogo=(s,size=18)=>{const u=logoFor(s);return u?`<img class="slogo" src="${u}" alt="" width="${size}" height="${size}">`:''};
 const _pwRim=(name,seed)=>{try{const i=weekTop().list.findIndex(x=>x.p.name===name&&(x.p.school===seed||x.p.key===seed));return i<0?'':i===0?' rim-g':' rim-s'}catch(_){return''}};
-const av=(name,seed,size=40)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);const fr=seed&&typeof frameOf==='function'&&S.picks&&S.picks[seed]?frameOf(seed):'';return `<span class="av${_pwRim(name,seed)}${fr?' avf '+fr+(typeof ITEM!=='undefined'&&ITEM[fr]&&ITEM[fr].fc?' gfr'+(ITEM[fr].glow?' gfr-g':''):''):''}" style="${fr&&typeof ITEM!=='undefined'&&ITEM[fr]&&ITEM[fr].fc?`--fr1:${ITEM[fr].fc[0]};--fr2:${ITEM[fr].fc[1]};`:''}--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px" aria-hidden="true">${esc(ini)}${u?`<img class="avl" src="${u}" alt="">`:''}</span>`};
+const av=(name,seed,size=40,fu)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);const fk=fu||seed,fr=fk&&typeof frameOf==='function'&&S.picks&&S.picks[fk]?frameOf(fk):'';   /* fu: the user whose frame to draw when seed is a school */return `<span class="av${_pwRim(name,seed)}${fr?' avf '+fr+(typeof ITEM!=='undefined'&&ITEM[fr]&&ITEM[fr].fc?' gfr'+(ITEM[fr].glow?' gfr-g':''):''):''}" style="${fr&&typeof ITEM!=='undefined'&&ITEM[fr]&&ITEM[fr].fc?`--fr1:${ITEM[fr].fc[0]};--fr2:${ITEM[fr].fc[1]};`:''}--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px" aria-hidden="true">${esc(ini)}${u?`<img class="avl" src="${u}" alt="">`:''}</span>`};
 /* position filters: offense by position, defense by group (DB covers CB, S and plain DB) */
 const FILTERS=['ALL','QB','RB','WR','TE','DEF','DL','LB','DB','K'];
 const FLABEL={ALL:'All'};
@@ -2521,7 +2524,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v281 · Nov 7';
+const APP_BUILD='v282 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6196,7 +6199,7 @@ function viewMe(){
   <div class="me-lks"><a class="card me-lk" href="#locker"><span class="ia ia-perk tboost" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16v13H4zM9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>My Locker</b><small class="muted">Equip what you’ve pulled</small></span><b aria-hidden="true">›</b></a>
   <a class="card me-lk" href="#shop"><span class="ia ia-perk perk" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>Shop</b><small class="muted">${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' · ':''}Packs</small></span><b aria-hidden="true">›</b></a></div>
   <section class="card me-pro ${eqOf(ME.uid,'banner')?'has-bn':''}">${eqOf(ME.uid,'banner')?`<div class="me-bn bn ${eqOf(ME.uid,'banner')}" style="${cosStyle(eqOf(ME.uid,'banner'))}" aria-hidden="true"></div>`:''}
-    <div class="me-top">${av(pr.name,pr.school,56)}<div class="me-id"><h3>${nmC(ME.uid,esc(pr.name))}</h3>${titleOf(ME.uid)?`<span class="ti r-${ITEM[eqOf(ME.uid,'title')].r}">${esc(titleOf(ME.uid))}</span>`:''}<span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
+    <div class="me-top">${av(pr.name,pr.school,56,ME.uid)}<div class="me-id"><h3>${nmC(ME.uid,esc(pr.name))}</h3>${titleOf(ME.uid)?`<span class="ti r-${ITEM[eqOf(ME.uid,'title')].r}">${esc(titleOf(ME.uid))}</span>`:''}<span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
     ${UI.meEdit?`<div class="pform">
         <label class="fld"><span>Name</span><input id="me-name" maxlength="40" value="${esc(pr.name)}" autocomplete="off" data-act="meName"></label>
         <label class="fld"><span>School</span><select id="me-school" data-act="meSchool">${(SD_SCHOOLS.includes(pr.school)?SD_SCHOOLS:[...SD_SCHOOLS,pr.school]).map(s=>`<option ${s===pr.school?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
