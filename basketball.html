@@ -1427,6 +1427,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .lk-tiers{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.lk-tiers li{display:flex;justify-content:space-between;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:.8rem}
 .lk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:10px}.lk-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;border:1px solid var(--line);border-left:3px solid var(--rc);background:var(--surface2);color:inherit;font:inherit;text-align:left}.lk-card span{display:flex;flex-direction:column;gap:2px;min-width:0}.lk-card small{font-size:.72rem}
 .bu.bu_rainbow{background:linear-gradient(90deg,#FF3B30,#FFC23D,#2FBF71,#2F6BFF,#B48CFF,#FF3B30)!important;background-size:200% 100%!important;animation:ncShine 3s linear infinite;border-color:#fff!important;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.lk-card .lk-vers,.lk-vers{display:flex;flex-direction:row;gap:3px;margin-top:3px}@media (max-width:480px){.lk-tiers{grid-template-columns:repeat(2,1fr)}}.lk-vers i{width:10px;height:10px;border-radius:3px;border:1.5px solid var(--rc);opacity:.35}.lk-vers i.on{background:var(--rc);opacity:1}
 /* v243 cosmetics: banners, name colours, card backs, chat bubbles */
 .ia-bn,.ia-cb{border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#22324f,#141f33);border:1px solid rgba(255,255,255,.12)}
 .ia-nc{border-radius:10px;background:var(--surface,#14213a);border:1px solid var(--line);font-weight:900;font-family:var(--f-display,inherit)}
@@ -2253,7 +2254,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v248 · Nov 6';
+const APP_BUILD='v250 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3113,9 +3114,9 @@ const SOLID_NC=[['white','White','#FFFFFF'],['silver','Silver','#C9CFD6'],['red'
 const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
 const COS_K=['ball','frame','banner','name','cback','bubble','title','badge'];
 const PACKS={
-  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$3.99',odds:{c:55,u:28,r:12,e:4,l:.9,m:.1},g:''},
-  player:{n:'Player pack',c:5,tok:400,usd:'$6.99',odds:{c:40,u:30,r:19,e:8,l:2.5,m:.5},g:'r'},
-  champs:{n:'Champs pack',c:10,tok:1200,usd:'$24.99',odds:{c:28,u:30,r:24,e:12,l:5,m:1},g:'e'}};
+  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$3.99',odds:{c:50,u:30,r:13,e:5,l:1.5,m:.5},g:''},
+  player:{n:'Player pack',c:5,tok:400,usd:'$6.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
+  champs:{n:'Champs pack',c:10,tok:1200,usd:'$24.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return +((invOf(u).it||{})[id])||0};
 const cosOwnCount=u=>{const it=invOf(u).it||{};let n=0;for(const id in it){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&+it[id]>0)n++}return n};
@@ -3145,28 +3146,24 @@ function freePacks(u){const v=invOf(u),fr=v.fr||{},d=+fgRec(u).days||0;return (f
 function rollRarity(odds,floor){const ord=RAR_ORD;let x=fcRnd(10000)/100,acc=0,r='c';for(const k of ord){acc+=odds[k];if(x<acc){r=k;break}}
   if(floor&&ord.indexOf(r)<ord.indexOf(floor))r=floor;return r}
 /* ---------- Player and team cards (v246) ----------
-   A pack slot is a card 30% of the time: a real player (65%) or a team (35%) of the slot's rarity. Rarity comes from how good
-   they are (players: season fantasy points, plus last season's hidden rank in basketball preseason; teams: Pick 'em rating).
-   Stored as picks/<uid>.inv.cards = {'pc:<player key>' | 'tc:<school>': rarity at the time you pulled it}.
+   A pack slot is a card 30% of the time: a random real player (65%) or team (35%), in the slot's rarity. Every player and team
+   has all six versions (Common to Mythical). Stored as picks/<uid>.inv.cards = {'pc:<player key>' | 'tc:<school>': {rarity:1}}.
+   The best version you own sets the boost.
    Owning a team's card boosts a winning Pick 'em pick on that team; a player's card boosts his winning props.
    The boost is saved on the pick when you lock it in (bets/props[id].cb, percent), so it can't change afterwards. */
 const CARD_PCT={c:10,u:15,r:25,e:50,l:75,m:100},CARD_CHANCE=30;
 let _cp=null;
 function cardPools(){
   if(_cp&&_cp.rev===_rev)return _cp;
-  const BR=window.BB_RANK||{};
-  const pl=players().filter(p=>!p.sample&&!/x$/.test(p.key)).map(p=>({id:'pc:'+p.key,v:(agg(p,'season').v||0)+(+BR[p.key]||0)})).sort((a,b)=>b.v-a.v);
-  const cutP=[[10,'m'],[40,'l'],[150,'e'],[450,'r'],[1100,'u'],[1e9,'c']],cutT=[[2,'m'],[6,'l'],[14,'e'],[30,'r'],[60,'u'],[1e9,'c']];
-  const tier=(i,cut)=>cut.find(([n])=>i<n)[1];
-  const R=ratings(),BP=window.BB_PRIOR||{},tv=t=>R[t]!==undefined?R[t]:BP[t]!==undefined?1500+BP[t]*20:1400,tm=SD_SCHOOLS.slice().sort((a,b)=>tv(b)-tv(a)||a.localeCompare(b));
-  const rar={},byR={p:{},t:{}};
-  pl.forEach((x,i)=>{const r=tier(i,cutP);rar[x.id]=r;(byR.p[r]=byR.p[r]||[]).push(x.id)});
-  tm.forEach((t,i)=>{const r=tier(i,cutT),id='tc:'+t;rar[id]=r;(byR.t[r]=byR.t[r]||[]).push(id)});
-  _cp={rev:_rev,rar,byR,nP:pl.length,nT:tm.length};return _cp}
-const cardsOf=u=>invOf(u).cards||{};
-const cardR=(u,id)=>{const r=cardsOf(u)[id];return RAR[r]?r:''};
+  const pl=players().filter(p=>!p.sample&&!/x$/.test(p.key)).map(p=>'pc:'+p.key);
+  const tm=SD_SCHOOLS.map(t=>'tc:'+t);
+  _cp={rev:_rev,pl,tm,nP:pl.length,nT:tm.length};return _cp}
+/* inv.cards = {id: {rarity:1,...}}: every player and team comes in all six versions; the best one you own sets the boost */
+const cardsOf=u=>{const c=invOf(u).cards||{},o={};for(const [id,v] of Object.entries(c))o[id]=typeof v==='string'?{[v]:1}:(v||{});return o};
+const cardVers=(u,id)=>RAR_ORD.filter(r=>(cardsOf(u)[id]||{})[r]);
+const cardR=(u,id)=>{const v=cardVers(u,id);return v.length?v[v.length-1]:''};
 const cardPct=(u,id)=>{const r=cardR(u,id);return r?CARD_PCT[r]:0};
-function rollCard(r){const P=cardPools(),team=fcRnd(100)<35,pool=(team?P.byR.t:P.byR.p)[r]||(team?P.byR.p:P.byR.t)[r];return pool&&pool.length?pool[fcRnd(pool.length)]:''}
+function rollCard(r){const P=cardPools(),team=fcRnd(100)<35,pool=team?P.tm:P.pl;return pool.length?pool[fcRnd(pool.length)]:''}
 function cardInfo(id){if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
   const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
 function cardArt(id,r,s=54){const c=cardInfo(id),R=RAR[r]||RAR.c;
@@ -3183,7 +3180,7 @@ async function packOpen(type,how){
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
-    if(fcRnd(100)<CARD_CHANCE){const cid=rollCard(r);if(cid){const isDup=!!cards[cid];if(isDup)dup+=RAR[r].dup;else{cards[cid]=r;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
+    if(fcRnd(100)<CARD_CHANCE){const cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     const id=rollItem(r);
     const was=+it[id]||0,isDup=isCos(id)&&was>0;if(isDup)dup+=RAR[r].dup;else it[id]=was+1;got.push({id,r,dup:isDup})}
   const patch={it,n:(+v.n||0)+1};if(gotCard)patch.cards=cards;
@@ -3244,14 +3241,16 @@ function viewLocker(){
       <p class="muted lk-note">Items have no cash value and can’t be traded. Real-money packs will go through the App Store or Google Play.</p>`;
   }else if(tab==='cards'){
     const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=UI.lkC==='t'?'t':'p',N=UI.lkN||30;
-    const ids=Object.keys(mine).filter(id=>(T==='t')===id.startsWith('tc:')).sort((a,b)=>ord[mine[a]]-ord[mine[b]]||cardInfo(a).name.localeCompare(cardInfo(b).name));
-    const nP=Object.keys(mine).filter(i=>i.startsWith('pc:')).length,nT=Object.keys(mine).length-nP;
+    const best=id=>cardR(ME.uid,id);
+    const ids=Object.keys(mine).filter(id=>cardVers(ME.uid,id).length&&(T==='t')===id.startsWith('tc:')).sort((a,b)=>ord[best(a)]-ord[best(b)]||cardInfo(a).name.localeCompare(cardInfo(b).name));
+    const vers=Object.keys(mine).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),nP=Object.keys(mine).filter(i=>i.startsWith('pc:')&&cardVers(ME.uid,i).length).length,nT=Object.keys(mine).filter(i=>i.startsWith('tc:')&&cardVers(ME.uid,i).length).length;
     const tiers=RAR_ORD.slice().reverse().map(r=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>+${CARD_PCT[r]}%</b></li>`).join('');
-    body=`<section class="card"><div class="qh"><h3>Player & team cards</h3><span class="muted">${nP+nT} owned</span></div>
-      <p class="muted">Packs can hold real player and team cards. Own a team’s card and your winning Pick ’em picks on that team pay more. Own a player’s card and his winning props pay more. Better players and teams are rarer.</p>
+    const dots=id=>`<span class="lk-vers">${RAR_ORD.map(r=>`<i style="--rc:${RAR[r].c}" class="${(mine[id]||{})[r]?'on':''}" title="${RAR[r].n}"></i>`).join('')}</span>`;
+    body=`<section class="card"><div class="qh"><h3>Player & team cards</h3><span class="muted">${vers} of ${(P.nP+P.nT)*6} versions</span></div>
+      <p class="muted">Packs can hold real player and team cards. Every player and every team comes in six versions, from Common to Mythical. Own a team’s card and your winning Pick ’em picks on that team pay more; own a player’s card and his winning props pay more. Your best version sets the boost.</p>
       <ul class="lk-tiers">${tiers}</ul><small class="muted">Boost on the winnings, added on top of a +25% token boost. It is saved on the pick when you lock it in.</small></section>
       <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button></div>
-      ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=mine[id],R=RAR[r];return `<${c.key?'button type="button" data-act="player" data-id="'+esc(c.key)+'"':'div'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,64)}<span><b>${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">${R.n} · +${CARD_PCT[r]}%</small></span></${c.key?'button':'div'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
+      ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.key?'button type="button" data-act="player" data-id="'+esc(c.key)+'"':'div'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,64)}<span><b>${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">Best: ${R.n} · +${CARD_PCT[r]}%</small>${dots(id)}</span></${c.key?'button':'div'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
         :`<p class="empty">No ${T==='t'?'team':'player'} cards yet. Open packs to pull some.</p>`}</section>`;
   }else if(tab==='cos'){
     const dflt={ball:`<span class="ia ia-ball" style="width:48px;height:48px"></span>`,frame:`<span class="ia ia-frame" style="width:48px;height:48px"><i></i></span>`,
