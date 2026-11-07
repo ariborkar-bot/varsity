@@ -3158,12 +3158,12 @@ function av3Geo(){
     for(const [nn,a,b] of F){const c=k=>[nn[0]*.5+a[0]*k[0]*.5+b[0]*k[1]*.5,nn[1]*.5+a[1]*k[0]*.5+b[1]*k[1]*.5,nn[2]*.5+a[2]*k[0]*.5+b[2]*k[1]*.5];
       for(const k of [[-1,-1],[1,-1],[1,1],[-1,-1],[1,1],[-1,1]]){p.push(...c(k));n.push(...nn);u.push(0,0)}}return{p,n,u}};
   const quad=()=>({p:[-.5,-.5,0,.5,-.5,0,.5,.5,0,-.5,-.5,0,.5,.5,0,-.5,.5,0],n:[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1],u:[0,1,1,1,1,0,0,1,1,0,0,0]});
-  G.sph=sph(14,22);G.hemi=sph(8,22,true);G.cyl=cyl(22);G.box=box();G.quad=quad();return G}
+  G.sph=sph(20,30);G.hemi=sph(10,30,true);G.cyl=cyl(26);G.box=box();G.quad=quad();return G}
 function av3Init(cv){
   const gl=cv.getContext('webgl',{antialias:true,premultipliedAlpha:false,preserveDrawingBuffer:true,alpha:true});if(!gl)return null;
   const vs=`attribute vec3 aP;attribute vec3 aN;attribute vec2 aU;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec2 vU;void main(){gl_Position=uMVP*vec4(aP,1.0);vN=mat3(uM)*aN;vU=aU;}`;
   const fs=`precision mediump float;varying vec3 vN;varying vec2 vU;uniform vec3 uC;uniform float uT;uniform sampler2D uS;uniform float uG;void main(){vec3 n=normalize(vN);float d=max(dot(n,normalize(vec3(.5,.8,.9))),0.0);float b=max(dot(n,normalize(vec3(-.6,.2,-.7))),0.0);
-    vec3 c=uC*(0.42+0.62*d)+uC*0.18*b;float sp=pow(max(dot(reflect(-normalize(vec3(.5,.8,.9)),n),vec3(0,0,1)),0.0),24.0)*uG;c+=vec3(sp);
+    float w=max(dot(n,normalize(vec3(.5,.8,.9)))*.5+.5,0.0);float rim=pow(1.0-max(n.z,0.0),3.0);vec3 c=uC*(0.30+0.78*w*w)+uC*0.16*b+vec3(.10,.12,.18)*rim;float sp=pow(max(dot(reflect(-normalize(vec3(.5,.8,.9)),n),vec3(0,0,1)),0.0),24.0)*uG;c+=vec3(sp);
     if(uT>0.5){vec4 t=texture2D(uS,vU);if(t.a<0.15)discard;c=t.rgb*(0.55+0.5*d);}gl_FragColor=vec4(c,1.0);}`;
   const sh=(t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s};
   const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);
@@ -3176,48 +3176,75 @@ const hex3=h=>{h=String(h||'#888').replace('#','');if(h.length===3)h=h.split('')
 /* the figure: a chibi athlete made of spheres, cylinders and boxes. a = look config, yaw = turn angle */
 function av3Draw(R,a,yaw,W,H,por){
   const {gl,pr,B,L,M}=R;gl.viewport(0,0,W,H);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.useProgram(pr);
-  const P=M.persp(.62,W/H,.1,50),V=por?M.look([0,1.42,3.3],[0,1.22,0]):M.look([0,1.15,6.2],[0,.95,0]),PV=M.mul(P,V),root=M.ry(yaw);
+  /* a person about 2 units tall standing on y=0: head is 1/8 of the height */
+  const P=M.persp(.62,W/H,.05,50),V=por?M.look([0,1.78,1.15],[0,1.72,0]):M.look([0,1.12,3.75],[0,.98,0]),PV=M.mul(P,V),root=M.ry(yaw);
   const skin=AV_SKIN[a.skin|0]||AV_SKIN[2],hc=AV_HC[a.hc]||AV_HC.black,c1=a.c1||'#1F4FBF',c2=a.c2||'#FFFFFF',bb=typeof FG_SPORT!=='undefined'&&FG_SPORT==='bb';
   const kick=a.kicks==='a_goldkicks'?'#F2BE2C':a.kicks==='a_neonkicks'?'#26F0FF':'#F4F4F6';
-  const draw=(g,m,col,gloss,tex)=>{const b=B[g],mm=M.mul(root,m);gl.uniformMatrix4fv(L.uMVP,false,M.mul(PV,mm));gl.uniformMatrix4fv(L.uM,false,mm);gl.uniform3fv(L.uC,hex3(col));gl.uniform1f(L.uG,gloss||0);gl.uniform1f(L.uT,tex?1:0);
+  const sh=(h,k)=>{const c=hex3(h);return '#'+c.map(v=>Math.max(0,Math.min(255,Math.round(v*255*k))).toString(16).padStart(2,'0')).join('')};
+  const lip=sh(skin,.78),c1d=sh(c1,.82);
+  const nmat=m=>{const a0=m[0],a1=m[1],a2=m[2],b0=m[4],b1=m[5],b2=m[6],c0=m[8],c1_=m[9],c2_=m[10];
+    const A=b1*c2_-b2*c1_,Bv=-(b0*c2_-b2*c0),C=b0*c1_-b1*c0,D=-(a1*c2_-a2*c1_),E=a0*c2_-a2*c0,F=-(a0*c1_-a1*c0),G=a1*b2-a2*b1,Hh=-(a0*b2-a2*b0),I=a0*b1-a1*b0,det=a0*A+a1*Bv+a2*C||1;
+    const o=M.id();o[0]=A/det;o[1]=Bv/det;o[2]=C/det;o[4]=D/det;o[5]=E/det;o[6]=F/det;o[8]=G/det;o[9]=Hh/det;o[10]=I/det;return o};
+  const draw=(g,m,col,gloss,tex)=>{const b=B[g],mm=M.mul(root,m);gl.uniformMatrix4fv(L.uMVP,false,M.mul(PV,mm));gl.uniformMatrix4fv(L.uM,false,nmat(mm));gl.uniform3fv(L.uC,hex3(col));gl.uniform1f(L.uG,gloss||0);gl.uniform1f(L.uT,tex?1:0);
     gl.bindBuffer(gl.ARRAY_BUFFER,b.p);gl.enableVertexAttribArray(L.aP);gl.vertexAttribPointer(L.aP,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,b.n);gl.enableVertexAttribArray(L.aN);gl.vertexAttribPointer(L.aN,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,b.u);gl.enableVertexAttribArray(L.aU);gl.vertexAttribPointer(L.aU,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,b.c)};
-  const T=(x,y,z,sx,sy,sz,rz,rx)=>{let m=M.tr(x,y,z);if(rz)m=M.mul(m,M.rz(rz));if(rx)m=M.mul(m,M.rx(rx));return M.mul(m,M.sc(sx,sy,sz))};
-  /* legs, shorts, shoes */
-  for(const s of [-1,1]){draw('cyl',T(s*.2,-.55,0,.13,.6,.13),skin);draw('box',T(s*.21,-.9,.08,.26,.16,.42),kick,.4);draw('box',T(s*.21,-.98,.08,.27,.04,.43),'#d0d3da')}
-  draw('cyl',T(0,-.12,0,.46,.42,.36),c1,.15);draw('box',T(0,-.12,.33,.05,.38,.02),c2);
-  /* torso (jersey) and trim */
-  draw('cyl',T(0,.48,0,.5,.85,.38),c1,.2);draw('cyl',T(0,.9,0,.44,.06,.33),c2);
-  draw('cyl',T(0,.1,0,.5,.06,.38),c2);
-  /* arms: tank-top arms (basketball) or sleeves (football) */
-  for(const s of [-1,1]){if(!bb)draw('cyl',T(s*.6,.68,0,.2,.32,.2,s*.35),c1,.15);draw('cyl',T(s*.68,.38,0,.12,.55,.12,s*.22),skin);draw('sph',T(s*.75,.08,0,.13,.13,.13),skin)}
-  if(bb)for(const s of [-1,1])draw('sph',T(s*.52,.82,0,.17,.14,.17),skin);
-  /* neck and head */
-  draw('cyl',T(0,1.0,0,.17,.2,.17),skin);draw('sph',T(0,1.48,0,.55,.55,.52),skin,.08);
-  for(const s of [-1,1]){draw('sph',T(s*.19,1.5,.46,.07,.08,.04),'#1b1714');draw('sph',T(s*.55,1.45,0,.08,.12,.08),skin)}
-  draw('box',T(0,1.3,.49,.16,.03,.02),'#7a2e2e');
+  /* ellipsoid at (x,y,z) with radii, optional tilt */
+  const E=(x,y,z,rx,ry,rz,col,gl_,tz,tx)=>{let m=M.tr(x,y,z);if(tz)m=M.mul(m,M.rz(tz));if(tx)m=M.mul(m,M.rx(tx));draw('sph',M.mul(m,M.sc(rx,ry,rz)),col,gl_)};
+  const Bx=(x,y,z,sx,sy,sz,col,gl_,tz)=>{let m=M.tr(x,y,z);if(tz)m=M.mul(m,M.rz(tz));draw('box',M.mul(m,M.sc(sx,sy,sz)),col,gl_)};
+  /* a limb: tapered capsule from p to q (in the x-y plane, with a small z), radii r0 at p and r1 at q */
+  const limb=(p,q,r0,r1,col,gl_)=>{const dx=q[0]-p[0],dy=q[1]-p[1],len=Math.hypot(dx,dy),ang=Math.atan2(dx,-dy);const n=4;
+    for(let i=0;i<n;i++){const t0=i/n,t1=(i+1)/n,r=r0+(r1-r0)*(t0+t1)/2;let m=M.tr(p[0]+dx*(t0+t1)/2,p[1]+dy*(t0+t1)/2,(p[2]||0)+((q[2]||0)-(p[2]||0))*(t0+t1)/2);m=M.mul(m,M.rz(ang));draw('cyl',M.mul(m,M.sc(r,len/n+.002,r*.92)),col,gl_)}
+    E(p[0],p[1],p[2]||0,r0,r0,r0*.92,col,gl_);E(q[0],q[1],q[2]||0,r1,r1,r1*.92,col,gl_)};
+  /* smooth tapered body tube from y0 (radius r0) to y1 (radius r1), depth = radius*zr */
+  const tube=(y0,y1,rs,zr,col,gl_)=>{const n=14;for(let i=0;i<n;i++){const t=(i+.5)/n,k=t*(rs.length-1),j=Math.min(rs.length-2,Math.floor(k)),f=k-j,r=rs[j]+(rs[j+1]-rs[j])*(f*f*(3-2*f));
+    draw('cyl',M.mul(M.tr(0,y0+(y1-y0)*t,0),M.sc(r,(y1-y0)/n+.003,r*zr)),col,gl_)}};
+  /* legs: thigh (shorts on top), knee, calf, sock, sneaker */
+  for(const s of [-1,1]){const hip=[s*.095,.98,0],knee=[s*.105,.55,.01],ank=[s*.1,.11,-.01];
+    limb(hip,knee,.082,.055,skin,.05);limb(knee,ank,.05,.034,skin,.05);E(s*.1,.73,-.035,.055,.11,.05,skin);   /* calf muscle */
+    limb([s*.1,.24,-.01],ank,.037,.035,'#F2F3F5');                       /* sock */
+    E(s*.1,.06,.045,.055,.045,.115,kick,.35);Bx(s*.1,.018,.045,.105,.03,.23,sh(kick,.78))}
+  /* shorts */
+  tube(.9,1.1,[.17,.175,.16],.68,c1,.1);for(const s of [-1,1])limb([s*.095,.95,0],[s*.105,.76,.005],.092,.085,c1,.1);
+  for(const s of [-1,1])Bx(s*.11,.88,.0,.012,.2,.2,c2,0,s*.08);
+  /* torso: chest and waist under the jersey */
+  tube(1.08,1.6,[.158,.152,.17,.2,.21],.56,c1,.12);E(0,1.6,0,.215,.045,.118,c1,.12);
+  E(0,1.635,.02,.075,.022,.06,c2);   /* collar */
+  /* arms */
+  for(const s of [-1,1]){const sho=[s*.215,1.6,0],elb=[s*.265,1.31,-.01],wr=[s*.285,1.06,.02];
+    if(bb){E(s*.2,1.595,0,.07,.052,.07,skin,.05);limb(sho,elb,.062,.046,skin,.05)}else{E(s*.205,1.595,0,.074,.058,.076,c1,.1);limb(sho,[s*.24,1.45,0],.07,.064,c1,.1);limb([s*.24,1.45,0],elb,.052,.046,skin,.05)}
+    limb(elb,wr,.042,.032,skin,.05);
+    E(s*.29,.995,.025,.032,.055,.024,skin,.05,s*.08);E(s*.27,1.0,.05,.012,.028,.012,skin,.05,s*-.4)}   /* hand and thumb */
+  /* neck, head, jaw */
+  limb([0,1.62,0],[0,1.72,.005],.048,.046,skin,.05);
+  E(0,1.86,0,.102,.122,.115,skin,.06);E(0,1.8,.012,.088,.07,.092,skin,.06);E(0,1.765,.07,.035,.022,.035,skin,.06);   /* skull, jaw, chin */
+  for(const s of [-1,1]){E(s*.101,1.85,-.005,.016,.03,.024,skin,.05);     /* ears */
+    E(s*.038,1.875,.098,.022,.013,.01,'#F7F7F2',.4);E(s*.038,1.875,.106,.009,.009,.005,'#2a1b12',.6);   /* eyes */
+    Bx(s*.04,1.9,.104,.04,.007,.012,hc,0,s*-.08);                        /* eyebrows */
+  }
+  E(0,1.845,.118,.014,.028,.018,sh(skin,.97),.05,0,-.25);E(0,1.825,.12,.02,.009,.012,sh(skin,.9));   /* nose */
+  E(0,1.795,.107,.026,.007,.01,lip,.2);E(0,1.787,.105,.022,.006,.009,sh(lip,.95),.2);              /* lips */
   /* hair */
   const hair=a.hair||'fade';
-  if(hair==='fade')draw('hemi',T(0,1.6,-.02,.565,.42,.54),hc);
-  else if(hair==='buzz')draw('hemi',T(0,1.62,-.01,.56,.32,.53),hc);
-  else if(hair==='a_afro'){draw('sph',T(0,1.9,-.16,.76,.56,.62),hc);draw('hemi',T(0,1.62,-.02,.58,.36,.55),hc)}
-  else if(hair==='a_mohawk'){draw('hemi',T(0,1.6,-.02,.56,.3,.53),hc);draw('box',T(0,2.0,-.05,.12,.32,.8),hc)}
-  else if(hair==='a_long'){draw('hemi',T(0,1.6,-.03,.6,.46,.57),hc);draw('cyl',T(0,1.25,-.22,.5,.75,.32),hc)}
+  if(hair==='fade'){draw('hemi',M.mul(M.tr(0,1.885,-.004),M.sc(.108,.1,.12)),hc);E(0,1.86,-.03,.104,.08,.1,hc)}
+  else if(hair==='buzz')draw('hemi',M.mul(M.tr(0,1.875,-.003),M.sc(.105,.11,.118)),hc);
+  else if(hair==='a_afro'){E(0,1.95,-.02,.165,.135,.155,hc);E(0,1.87,-.05,.13,.1,.12,hc)}
+  else if(hair==='a_mohawk'){draw('hemi',M.mul(M.tr(0,1.875,-.003),M.sc(.105,.1,.118)),sh(hc,.8));Bx(0,1.995,-.01,.03,.07,.2,hc)}
+  else if(hair==='a_long'){draw('hemi',M.mul(M.tr(0,1.885,-.006),M.sc(.112,.105,.125)),hc);E(0,1.74,-.07,.11,.17,.07,hc);for(const s of [-1,1])E(s*.095,1.8,.0,.025,.1,.05,hc)}
   /* headwear */
-  if(a.hw==='band')draw('cyl',T(0,1.68,0,.58,.1,.55),c2);
-  else if(a.hw==='a_cap'){draw('hemi',T(0,1.7,0,.6,.42,.57),c1);draw('box',T(0,1.72,.56,.6,.04,.38),c1)}
-  else if(a.hw==='a_beanie'){draw('hemi',T(0,1.64,0,.6,.62,.57),c2);draw('cyl',T(0,1.68,0,.61,.12,.58),c1);draw('sph',T(0,2.28,0,.13,.13,.13),c1)}
-  else if(a.hw==='a_crown'){draw('cyl',T(0,2.05,0,.42,.22,.4),'#F2BE2C',.9);for(let k=0;k<6;k++){const an=k/6*Math.PI*2;draw('sph',T(Math.sin(an)*.4,2.2,Math.cos(an)*.38,.07,.1,.07),'#FFE38A',.9)}}
+  if(a.hw==='band')draw('cyl',M.mul(M.tr(0,1.905,0),M.sc(.112,.025,.124)),c2);
+  else if(a.hw==='a_cap'){draw('hemi',M.mul(M.tr(0,1.9,0),M.sc(.118,.1,.13)),c1,.15);draw('cyl',M.mul(M.tr(0,1.905,.15),M.sc(.1,.008,.08)),c1,.15)}
+  else if(a.hw==='a_beanie'){draw('hemi',M.mul(M.tr(0,1.885,0),M.sc(.118,.14,.13)),c2);draw('cyl',M.mul(M.tr(0,1.895,0),M.sc(.12,.03,.132)),c1);E(0,2.04,0,.03,.03,.03,c1)}
+  else if(a.hw==='a_crown'){draw('cyl',M.mul(M.tr(0,2.0,0),M.sc(.1,.045,.105)),'#F2BE2C',.9);for(let k=0;k<6;k++){const an=k/6*Math.PI*2;E(Math.sin(an)*.098,2.035,Math.cos(an)*.102,.016,.026,.016,'#FFE38A',.9)}}
   /* accessories */
-  if(a.acc==='a_chain'){for(let k=0;k<14;k++){const an=(k/13-.5)*2.4;draw('sph',T(Math.sin(an)*.3,.86-Math.cos(an)*.18+.18,.33+Math.cos(an)*.03,.04,.04,.04),'#F2BE2C',.9)}}
-  if(a.acc==='a_shades'){for(const s of [-1,1])draw('box',T(s*.2,1.52,.5,.26,.14,.04),'#0b0b10',.9);draw('box',T(0,1.55,.51,.16,.03,.03),'#0b0b10')}
-  /* jersey number: a textured quad on the chest */
-  const nc=document.createElement('canvas');nc.width=nc.height=128;const x=nc.getContext('2d');x.font='900 92px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.lineWidth=10;x.strokeStyle=c1;x.fillStyle=c2;
+  if(a.acc==='a_chain'){for(let k=0;k<16;k++){const an=(k/15-.5)*2.5;E(Math.sin(an)*.08,1.62-Math.cos(an)*.075,.1+Math.cos(an)*.03,.0095,.0095,.0095,'#F2BE2C',.9)}}
+  if(a.acc==='a_shades'){for(const s of [-1,1])E(s*.04,1.873,.11,.032,.019,.008,'#0b0b10',.9);Bx(0,1.88,.116,.03,.005,.005,'#0b0b10')}
+  /* jersey number on the chest */
+  const nc=document.createElement('canvas');nc.width=nc.height=128;const x=nc.getContext('2d');x.font='900 92px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.lineWidth=10;x.strokeStyle=sh(c1,.6);x.fillStyle=c2;
   const num=String(a.num||'').slice(0,2);x.strokeText(num,64,70);x.fillText(num,64,70);
   gl.bindTexture(gl.TEXTURE_2D,R.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,nc);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-  gl.uniform1i(L.uS,0);if(num)draw('quad',T(0,.5,.385,.5,.5,1),'#ffffff',0,true);
+  gl.uniform1i(L.uS,0);if(num)draw('quad',M.mul(M.tr(0,1.4,.113),M.sc(.19,.19,1)),'#ffffff',0,true);
 }
 /* snapshots for small avatars: one hidden canvas, a picture per look */
 const AVC={};let avQ=new Map(),avQT=0;
