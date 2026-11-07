@@ -3122,7 +3122,7 @@ ITEMS.push(
   {id:'a_cap',k:'av',r:'c',n:'Ball cap',d:'Headwear.',slot:'hw'},{id:'a_beanie',k:'av',r:'c',n:'Beanie',d:'Headwear.',slot:'hw'},{id:'a_crown',k:'av',r:'l',n:'Crown',d:'Headwear.',slot:'hw'},
   {id:'a_chain',k:'av',r:'r',n:'Gold chain',d:'Accessory.',slot:'acc'},{id:'a_shades',k:'av',r:'r',n:'Shades',d:'Accessory.',slot:'acc'},
   {id:'a_goldkicks',k:'av',r:'e',n:'Gold kicks',d:'Shoes.',slot:'kicks'},{id:'a_neonkicks',k:'av',r:'r',n:'Neon kicks',d:'Shoes.',slot:'kicks'},
-  {id:'g_helmet',k:'av',r:'c',n:'Helmet',d:'Football helmet with facemask.',slot:'helm',fb:1},{id:'g_chrome',k:'av',r:'l',n:'Chrome helmet',d:'Mirror-finish helmet.',slot:'helm',fb:1},
+  {id:'g_helmet',k:'av',r:'c',n:'SpeedFlex-style helmet',d:'Rounded shell with the front flex panel.',slot:'helm',fb:1},{id:'g_chrome',k:'av',r:'l',n:'Chrome helmet',d:'Mirror-finish SpeedFlex-style helmet.',slot:'helm',fb:1},{id:'g_f7',k:'av',r:'e',n:'F7-style helmet',d:'Angular F7-style shell.',slot:'helm',fb:1},
   {id:'g_visor',k:'av',r:'r',n:'Visor',d:'Tinted eye shield.',slot:'visor',fb:1},{id:'g_pads',k:'av',r:'c',n:'Shoulder pads',d:'Big shoulders under the jersey.',slot:'pads',fb:1},
   {id:'g_cleats',k:'av',r:'c',n:'Cleats',d:'Black cleats with studs.',slot:'cleat',fb:1},{id:'g_goldcleats',k:'av',r:'e',n:'Gold cleats',d:'Shiny gold cleats.',slot:'cleat',fb:1},
   {id:'g_sleeve',k:'av',r:'c',n:'Arm sleeve',d:'One compression sleeve.',slot:'slv'},{id:'g_sleeves',k:'av',r:'r',n:'Two arm sleeves',d:'Sleeves on both arms.',slot:'slv'},
@@ -3183,6 +3183,53 @@ function av3Init(cv){
   return{gl,pr,B,L,M:av3Mats(),tex:gl.createTexture()}}
 const hex3=h=>{h=String(h||'#888').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]};
 /* the figure: a chibi athlete made of spheres, cylinders and boxes. a = look config, yaw = turn angle */
+/* ---- custom gear meshes: helmets (SpeedFlex-style 'sf', F7-style 'f7') and low cleats, built from reference proportions ---- */
+function av3Mesh(R,key,build){if(R.B[key])return R.B[key];const {gl}=R,g=build(),mk=a=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(a),gl.STATIC_DRAW);return b};
+  R.B[key]={p:mk(g.p),n:mk(g.n),u:mk(g.u||new Array(g.p.length/3*2).fill(0)),c:g.p.length/3};return R.B[key]}
+/* grid surface -> triangles with smooth normals; keep(i,j) decides which quads exist (cut-outs) */
+function gridMesh(N,M_,pt,keep){const P=[];for(let i=0;i<=N;i++){P.push([]);for(let j=0;j<=M_;j++)P[i].push(pt(i/N,j/M_))}
+  const nrm=(i,j)=>{const a=P[Math.min(N,i+1)][j],b=P[Math.max(0,i-1)][j],c=P[i][Math.min(M_,j+1)],d=P[i][Math.max(0,j-1)];
+    const u=[a[0]-b[0],a[1]-b[1],a[2]-b[2]],v=[c[0]-d[0],c[1]-d[1],c[2]-d[2]];let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];const l=Math.hypot(...n)||1;return n.map(x=>x/l)};
+  const p=[],n=[];for(let i=0;i<N;i++)for(let j=0;j<M_;j++){if(keep&&!keep(i/N,j/M_,(i+.5)/N,(j+.5)/M_))continue;for(const [a,b] of [[i,j],[i+1,j],[i+1,j+1],[i,j],[i+1,j+1],[i,j+1]]){p.push(...P[a][b]);n.push(...nrm(a,b))}}return{p,n}}
+const sst=(e0,e1,x)=>{const t=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return t*t*(3-2*t)};
+/* helmet shell around the head centre. u: 0..1 = phi from crown (0) to 1.25*PI/2 ; v: 0..1 = theta around (0 = front) */
+function helmShape(style,inner){
+  return (u,v)=>{const ph=u*2.6,th=(v-.5)*2*Math.PI;   /* th=0 front */
+    const sx=Math.sin(ph)*Math.sin(th),sz=Math.sin(ph)*Math.cos(th),cy=Math.cos(ph);
+    let a=.152,b=.152,c=.172,r=1;
+    if(style==='sf'){
+      r*=1+.055*Math.exp(0-(sx/.05)**2)*sst(-.35,.1,cy);                                       /* raised centre ridge */
+      const inPanel=Math.abs(th)<.62&&ph>.42&&ph<1.02;const edge=Math.min(Math.abs(Math.abs(th)-.62)*3,Math.abs(ph-.42)*3,Math.abs(ph-1.02)*3);
+      if(Math.abs(th)<.7&&ph>.36&&ph<1.08&&edge<.06)r*=.982;                                     /* U-shaped flex panel groove */
+      if(inPanel)r*=1.012;
+      r*=1+.06*sst(1.55,1.9,ph)*sst(-.2,-.75,Math.cos(th));                                       /* flared rear lip */
+      r*=1+.03*sst(1.45,1.9,ph)*Math.exp(0-((Math.abs(th)-1.25)/.4)**2);                           /* jaw flaps out */
+    }else{
+      {const n=11,seg=2*Math.PI/n,f=((th%seg)+seg)%seg-seg/2;r*=1+.5*(Math.cos(seg/2)/Math.cos(f)-1)*sst(.25,.6,ph)}   /* faceted, angular shell */
+      const band=1-sst(.05,.075,Math.abs(sx));r*=1+.035*band*sst(-.3,.2,cy);                     /* flat-topped ridge with sharp edges */
+      if(Math.abs(sx)>.07&&Math.abs(sx)<.09&&cy>-.1)r*=.985;
+      if(Math.cos(th)>.6&&ph>.55&&ph<1.12)r*=.94+.06*sst(.55,.8,ph);                              /* squared, flatter brow */
+      r*=1+.04*sst(.3,.6,ph)*(1-sst(.9,1.3,ph))*Math.exp(0-((Math.abs(th)-.75)/.25)**2);              /* front corner bulges */
+      if(Math.abs(Math.abs(th)-1.15)<.05&&ph>.5&&ph<1.75)r*=.982;                                 /* side panel lines */
+      r*=1+.05*sst(1.5,1.85,ph)*sst(-.3,-.8,Math.cos(th));                                        /* rear shelf */
+      r*=1+.025*sst(1.4,1.9,ph)*Math.exp(0-((Math.abs(th)-1.3)/.4)**2);
+    }
+    if(inner)r*=.9;
+    return[a*sx*r,b*cy*r+(inner?.004:0),c*sz*r-.012]}}
+const helmKeep=(u0,v0,u,v)=>{const ph=u*2.6,th=(v-.5)*2*Math.PI,at=Math.abs(th);
+  const maxPh=2.28+.3*Math.exp(0-((at-1.2)/.45)**2)-.06*sst(2.4,3.1,at);if(ph>maxPh)return false;   /* low at the back of the skull, jaw flaps down to the chin */
+  if(at<.92&&ph>1.05)return false;if(at<1.0&&ph>2.1)return false;                                     /* face opening */
+  const ex=at-1.62,ey=ph-1.72;if(ex*ex/.012+ey*ey/.012<1)return false;                                  /* small ear hole */
+  return true};
+/* low cleat along +z: upper lofted over the sole, sole plate, studs */
+function cleatUpper(){return gridMesh(26,18,(u,v)=>{const z=-.075+u*.25,t=v*Math.PI;
+  const w=(.03+.02*Math.sin(Math.min(1,u*1.25)*Math.PI*.9))*(u>.82?1-(u-.82)*3.2:1),h=(.085*(1-u)+.032*u)*(u<.12?.75+u*2:1)*(u>.85?1-(u-.85)*2.6:1);
+  return[Math.cos(t)*Math.max(.004,w),Math.sin(t)*Math.max(.004,h)+.012,z]})}
+function cleatSole(){return gridMesh(26,10,(u,v)=>{const z=-.08+u*.262,t=v*2*Math.PI;const w=(.034+.021*Math.sin(Math.min(1,u*1.2)*Math.PI*.9))*(u>.82?1-(u-.82)*3:1);return[Math.cos(t)*Math.max(.005,w),Math.sin(t)*.007+.008,z]})}
+/* a bar from p to q (3D) */
+function av3Seg(M,p,q,r){const d=[q[0]-p[0],q[1]-p[1],q[2]-p[2]],len=Math.hypot(...d)||1e-6;const Y=d.map(x=>x/len);const ref=Math.abs(Y[1])<.95?[0,1,0]:[1,0,0];
+  let X=[Y[1]*ref[2]-Y[2]*ref[1],Y[2]*ref[0]-Y[0]*ref[2],Y[0]*ref[1]-Y[1]*ref[0]];const xl=Math.hypot(...X);X=X.map(x=>x/xl);const Z=[X[1]*Y[2]-X[2]*Y[1],X[2]*Y[0]-X[0]*Y[2],X[0]*Y[1]-X[1]*Y[0]];
+  const m=M.id();m[0]=X[0]*r;m[1]=X[1]*r;m[2]=X[2]*r;m[4]=Y[0]*len;m[5]=Y[1]*len;m[6]=Y[2]*len;m[8]=Z[0]*r;m[9]=Z[1]*r;m[10]=Z[2]*r;m[12]=(p[0]+q[0])/2;m[13]=(p[1]+q[1])/2;m[14]=(p[2]+q[2])/2;return m}
 function av3Draw(R,a,yaw,W,H,por){
   const {gl,pr,B,L,M}=R;gl.viewport(0,0,W,H);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.useProgram(pr);
   /* a person about 2 units tall standing on y=0: head is 1/8 of the height */
@@ -3195,7 +3242,7 @@ function av3Draw(R,a,yaw,W,H,por){
   const nmat=m=>{const a0=m[0],a1=m[1],a2=m[2],b0=m[4],b1=m[5],b2=m[6],c0=m[8],c1_=m[9],c2_=m[10];
     const A=b1*c2_-b2*c1_,Bv=-(b0*c2_-b2*c0),C=b0*c1_-b1*c0,D=-(a1*c2_-a2*c1_),E=a0*c2_-a2*c0,F=-(a0*c1_-a1*c0),G=a1*b2-a2*b1,Hh=-(a0*b2-a2*b0),I=a0*b1-a1*b0,det=a0*A+a1*Bv+a2*C||1;
     const o=M.id();o[0]=A/det;o[1]=Bv/det;o[2]=C/det;o[4]=D/det;o[5]=E/det;o[6]=F/det;o[8]=G/det;o[9]=Hh/det;o[10]=I/det;return o};
-  const draw=(g,m,col,gloss,tex)=>{const b=B[g],mm=M.mul(root,m);gl.uniformMatrix4fv(L.uMVP,false,M.mul(PV,mm));gl.uniformMatrix4fv(L.uM,false,nmat(mm));gl.uniform3fv(L.uC,hex3(col));gl.uniform1f(L.uG,gloss||0);gl.uniform1f(L.uT,tex?1:0);
+  const draw=(g,m,col,gloss,tex)=>{const b=typeof g==='string'?B[g]:g,mm=M.mul(root,m);gl.uniformMatrix4fv(L.uMVP,false,M.mul(PV,mm));gl.uniformMatrix4fv(L.uM,false,nmat(mm));gl.uniform3fv(L.uC,hex3(col));gl.uniform1f(L.uG,gloss||0);gl.uniform1f(L.uT,tex?1:0);
     gl.bindBuffer(gl.ARRAY_BUFFER,b.p);gl.enableVertexAttribArray(L.aP);gl.vertexAttribPointer(L.aP,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,b.n);gl.enableVertexAttribArray(L.aN);gl.vertexAttribPointer(L.aN,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,b.u);gl.enableVertexAttribArray(L.aU);gl.vertexAttribPointer(L.aU,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,b.c)};
@@ -3213,8 +3260,11 @@ function av3Draw(R,a,yaw,W,H,por){
   for(const s of [-1,1]){const hip=[s*.095,.98,0],knee=[s*.105,.55,.01],ank=[s*.1,.11,-.01];
     limb(hip,knee,.082,.055,skin,.05);limb(knee,ank,.05,.034,skin,.05);E(s*.1,.73,-.035,.055,.11,.05,skin);   /* calf muscle */
     if(a.hsock){limb([s*.105,.5,0],ank,.05,.036,'#F2F3F5');for(const yy of [.42,.38])draw('cyl',M.mul(M.tr(s*.104,yy,0),M.sc(.047,.012,.045)),c1)}else limb([s*.1,.24,-.01],ank,.037,.035,'#F2F3F5');   /* sock */
-    E(s*.1,.06,.045,.055,.045,.115,kick,a.cleat==='g_goldcleats'?.8:.35);Bx(s*.1,.018,.045,.105,.03,.23,sh(kick,.78));
-    if(!bb&&a.cleat)for(const zz of [-.04,.02,.08,.13])Bx(s*.1,-.005,zz,.08,.02,.02,'#888b92')}
+    if(!bb&&a.cleat){const gold=a.cleat==='g_goldcleats',up=gold?'#E7B53A':'#16171b',acc=gold?'#111216':(c1==='#111318'?'#E3B23C':c1),T1=M.mul(M.tr(s*.1,.0,.0),M.ry(s*.05));
+      draw(av3Mesh(R,'clu',cleatUpper),T1,up,gold?1.1:.55);draw(av3Mesh(R,'cls',cleatSole),T1,acc,.4);
+      draw('cyl',M.mul(T1,M.mul(M.tr(0,.09,-.06),M.sc(.035,.012,.033))),acc,.3);                        /* collar */
+      for(const [sx,sz] of [[-.022,.12],[.022,.12],[-.026,.065],[.026,.065],[0,.15],[-.02,-.045],[.02,-.045]])draw('cyl',M.mul(T1,M.mul(M.tr(sx,-.004,sz),M.sc(.007,.014,.007))),'#c9ccd2',.6)}
+    else{E(s*.1,.06,.045,.055,.045,.115,kick,.35);Bx(s*.1,.018,.045,.105,.03,.23,sh(kick,.78))}}
   /* shorts */
   tube(.9,1.1,[.17,.175,.16],.68,c1,.1);for(const s of [-1,1])limb([s*.095,.95,0],[s*.105,.76,.005],.092,.085,c1,.1);
   for(const s of [-1,1])Bx(s*.11,.88,.0,.012,.2,.2,c2,0,s*.08);
@@ -3236,7 +3286,7 @@ function av3Draw(R,a,yaw,W,H,por){
   /* neck, head, jaw */
   limb([0,1.62,0],[0,1.72,.005],.048,.046,skin,.05);
   E(0,1.86,0,.102,.122,.115,skin,.06);E(0,1.8,.012,.088,.07,.092,skin,.06);E(0,1.765,.07,.035,.022,.035,skin,.06);   /* skull, jaw, chin */
-  for(const s of [-1,1]){E(s*.101,1.85,-.005,.016,.03,.024,skin,.05);     /* ears */
+  for(const s of [-1,1]){if(!helm)E(s*.101,1.85,-.005,.016,.03,.024,skin,.05);     /* ears */
     E(s*.038,1.875,.098,.022,.013,.01,'#F7F7F2',.4);E(s*.038,1.875,.106,.009,.009,.005,'#2a1b12',.6);   /* eyes */
     Bx(s*.04,1.9,.104,.04,.007,.012,hc,0,s*-.08);                        /* eyebrows */
   }
@@ -3244,13 +3294,23 @@ function av3Draw(R,a,yaw,W,H,por){
   E(0,1.845,.118,.014,.028,.018,sh(skin,.97),.05,0,-.25);E(0,1.825,.12,.02,.009,.012,sh(skin,.9));   /* nose */
   E(0,1.795,.107,.026,.007,.01,lip,.2);E(0,1.787,.105,.022,.006,.009,sh(lip,.95),.2);              /* lips */
   /* helmet (football): shell, ear holes, stripe, facemask; hides hair and headwear */
-  if(helm){const hc2=helm==='g_chrome'?'#d9dde4':c1,gl2=helm==='g_chrome'?1.2:.7;
-    draw('hemi',M.mul(M.tr(0,1.865,-.01),M.sc(.15,.16,.165)),hc2,gl2);E(0,1.83,-.06,.148,.11,.12,hc2,gl2);
-    for(const s of [-1,1]){E(s*.128,1.82,.005,.035,.085,.075,hc2,gl2);E(s*.15,1.84,.0,.006,.022,.022,'#111')}
-    Bx(0,1.96,0,.035,.05,.3,c2);
-    const fm='#9aa0a8';for(const yy of [1.84,1.79,1.75])draw('cyl',M.mul(M.tr(0,yy,.15),M.mul(M.rz(Math.PI/2),M.sc(.008,.2,.008))),fm,.6);
-    for(const s of [-1,1])limb([s*.1,1.86,.12],[s*.07,1.73,.15],.007,.007,fm,.6);limb([0,1.84,.155],[0,1.74,.155],.007,.007,fm,.6);
-    if(a.visor)Bx(0,1.872,.128,.15,.034,.006,'#1a2a44',1.4)}
+  if(helm){const st=helm==='g_f7'?'f7':'sf',chrome=helm==='g_chrome',hc2=chrome?'#d9dde4':c1,gl2=chrome?1.3:.75,HC=[0,1.875,0];
+    const T0=M.tr(HC[0],HC[1],HC[2]);
+    draw(av3Mesh(R,'helm2_'+st,()=>gridMesh(70,110,helmShape(st==='f7'?'f7':'sf'),helmKeep)),T0,hc2,gl2);
+    draw(av3Mesh(R,'helmi2_'+st,()=>gridMesh(46,72,helmShape(st==='f7'?'f7':'sf',true),helmKeep)),T0,'#24262b',.05);   /* padding inside */
+    /* vents and stripe */
+    if(st==='sf'){for(const s2 of [-1,1])for(const [th,ph] of [[.5,.62],[1.95,.8]])E(Math.sin(ph)*Math.sin(th)*s2*.158,HC[1]+Math.cos(ph)*.158,Math.sin(ph)*Math.cos(th)*.176-.012,.006,.005,.018,sh(hc2,.35))}
+    else{for(const s2 of [-1,1])for(const [th,ph] of [[.6,.55],[2.25,.75]])E(Math.sin(ph)*Math.sin(th)*s2*.157,HC[1]+Math.cos(ph)*.157,Math.sin(ph)*Math.cos(th)*.175-.012,.009,.005,.02,sh(hc2,.35))}
+    draw(av3Mesh(R,'helms2_'+st,()=>gridMesh(40,4,(u,v)=>{const sh2=helmShape(st)(u*.82,.5+(v-.5)*.012);return[sh2[0]*1.004,sh2[1]*1.004,sh2[2]*1.004]})),T0,c2,.3);
+    /* chin strap and cup */
+    for(const s2 of [-1,1])draw('cyl',av3Seg(M,[s2*.1,1.79,.02],[s2*.035,1.74,.1],.005),'#1b1c20');E(0,1.745,.105,.035,.022,.022,'#e8e9ec',.2);
+    /* facemask: brow bar, two horizontal bars, chin bar, centre bar, side struts (reference: modern 2-bar / 3-bar masks) */
+    const fm=chrome?'#2a2c31':(c2==='#FFFFFF'?'#f1f2f4':'#9aa0a8'),z0=.16,bar=(pts,r)=>{for(let k=0;k<pts.length-1;k++)draw('cyl',av3Seg(M,pts[k],pts[k+1],r),fm,.5);for(const q of pts)E(q[0],q[1],q[2],r,r,r,fm,.5)};
+    const arc=(y,w,zf,n)=>Array.from({length:n},(_,k)=>{const t=(k/(n-1)-.5)*Math.PI*.78;return[Math.sin(t)*w,y,Math.cos(t)*zf-.02]});
+    bar(arc(1.835,.135,z0,9),.0065);bar(arc(1.785,.125,z0+.005,9),.0065);bar(arc(1.745,.1,z0-.005,7),.006);
+    bar([[0,1.86,.145],[0,1.835,z0-.02],[0,1.785,z0-.015],[0,1.745,z0-.025]],.0055);
+    for(const s2 of [-1,1]){bar([[s2*.125,1.875,.065],[s2*.128,1.835,.07],[s2*.118,1.785,.07],[s2*.09,1.745,.075]],.006);bar([[s2*.06,1.835,z0-.035],[s2*.055,1.785,z0-.03]],.005)}
+    if(a.visor)draw(av3Mesh(R,'visor',()=>gridMesh(6,16,(u,v)=>{const t=(v-.5)*1.6;return[Math.sin(t)*.115,1.893-u*.05-1.875,Math.cos(t)*.128-.012]})),T0,'#203552',1.6)}
   /* hair */
   const hair=helm?'':(a.hair||'fade');
   if(hair==='fade'){draw('hemi',M.mul(M.tr(0,1.885,-.004),M.sc(.108,.1,.12)),hc);E(0,1.86,-.03,.104,.08,.1,hc)}
@@ -3316,7 +3376,7 @@ function avEditorHTML(){
       <h4>Extras</h4>${sw('acc',[['','','None'],['a_chain','a_chain','Gold chain'],['a_shades','a_shades','Shades']],a.acc)}
       <h4>Shoes</h4>${sw('kicks',[['','','White'],['a_neonkicks','a_neonkicks','Neon'],['a_goldkicks','a_goldkicks','Gold']],a.kicks)}
       ${(()=>{const fb=!(typeof FG_SPORT!=='undefined'&&FG_SPORT==='bb'),on=(k,id,l)=>`<h4>${l}</h4>${sw(k,[['','','Off'],[id,id,'On']],a[k])}`;
-        return `<h3 class="ave-gear">Gear</h3>`+(fb?`<h4>Helmet</h4>${sw('helm',[['','','None'],['g_helmet','g_helmet','Helmet'],['g_chrome','g_chrome','Chrome']],a.helm)}${on('visor','g_visor','Visor')}${on('pads','g_pads','Shoulder pads')}
+        return `<h3 class="ave-gear">Gear</h3>`+(fb?`<h4>Helmet</h4>${sw('helm',[['','','None'],['g_helmet','g_helmet','SpeedFlex-style'],['g_f7','g_f7','F7-style'],['g_chrome','g_chrome','Chrome']],a.helm)}${on('visor','g_visor','Visor')}${on('pads','g_pads','Shoulder pads')}
           <h4>Cleats</h4>${sw('cleat',[['','','Sneakers'],['g_cleats','g_cleats','Cleats'],['g_goldcleats','g_goldcleats','Gold cleats']],a.cleat)}`:'')+
           `<h4>Sleeves</h4>${sw('slv',[['','','None'],['g_sleeve','g_sleeve','One arm'],['g_sleeves','g_sleeves','Both arms']],a.slv)}${on('band2','g_armband','Armband')}${on('wrist','g_wrist','Wristbands')}${on('eb','g_eyeblack','Eye black')}${on('hsock','g_socks','High socks')}`+
           (fb?`${on('glove','g_gloves','Gloves')}${on('towel','g_towel','Towel')}`:'')})()}
