@@ -1974,6 +1974,59 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 @keyframes wuFall{to{transform:translateY(105vh) rotate(540deg)}}
 #dr-ann.wu_gold .an-t{color:#FFD36B!important}
 @media (prefers-reduced-motion:reduce){#dr-ann::before,#dr-ann::after,#dr-ann .wf,#dr-ann .wg,#dr-ann .wb{animation:none!important}}
+/* v255: My Locker look + pack opening */
+.lk-hero{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:18px;border-radius:20px;margin-bottom:14px;background:radial-gradient(120% 140% at 0% 0%,rgba(47,107,255,.35),transparent 55%),radial-gradient(120% 140% at 100% 100%,rgba(180,140,255,.25),transparent 55%),var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.lk-ring{--p:0;width:92px;height:92px;border-radius:50%;display:grid;place-content:center;text-align:center;background:radial-gradient(closest-side,var(--surface) 78%,transparent 80% 100%),conic-gradient(#FFC23D calc(var(--p)*1%),rgba(255,255,255,.08) 0)}
+.lk-ring b{font:900 1.5rem/1 var(--f-display,inherit)}.lk-ring small{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.lk-hs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.lk-hs div{display:flex;flex-direction:column}.lk-hs b{font:900 1.35rem/1.1 var(--f-display,inherit)}.lk-hs small{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.lk-shopb{align-self:center}
+@media (max-width:560px){.lk-hero{grid-template-columns:auto minmax(0,1fr)}.lk-shopb{grid-column:1/-1;justify-self:stretch;text-align:center}}
+.lk-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);margin-bottom:14px}
+.lk-seg button{border:0;background:transparent;padding:10px 6px;border-radius:10px;font:800 .82rem var(--f-display,inherit);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.lk-seg button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px -6px var(--accent)}
+.lk-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.lk-cat{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:inherit;text-align:center;cursor:pointer;transition:transform .15s,border-color .15s}
+.lk-cat:hover{transform:translateY(-2px)}.lk-cat.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent);background:color-mix(in srgb,var(--accent) 10%,var(--surface2))}
+.lk-cat b{font-size:.72rem;line-height:1.15}.lk-cat small{font-size:.62rem;color:var(--muted)}.lk-cat-a{height:34px;display:grid;place-items:center}.lk-cat-a .ia{transform:scale(.9)}
+.lk-now{display:flex;align-items:center;gap:14px;padding:4px 0 12px;border-bottom:1px solid var(--line)}.lk-now>div{display:flex;flex-direction:column;flex:1;min-width:0}.lk-now b{font:900 1.15rem var(--f-display,inherit);text-transform:uppercase}.lk-now-a{min-width:72px;display:grid;place-items:center}
+.lk-items .lk-grid{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}
+.lk-it{position:relative;overflow:hidden;border-top:3px solid var(--rc,var(--line))!important;background:radial-gradient(120% 70% at 50% 0%,color-mix(in srgb,var(--rc,#4C8DFF) 18%,transparent),transparent 70%),var(--surface2)!important;transition:transform .15s}
+.lk-it:hover:not(.lock){transform:translateY(-2px)}
+.lk-it.r-l,.lk-it.r-m{box-shadow:0 0 18px -6px var(--rc)}
+.lk-it.on::after{content:"Equipped";position:absolute;top:6px;right:-26px;transform:rotate(35deg);background:var(--accent);color:var(--accent-ink);font:900 .55rem var(--f-display,inherit);letter-spacing:.08em;text-transform:uppercase;padding:2px 28px}
+.lk-adp{display:flex;flex-direction:row!important;align-items:center;gap:14px;background:linear-gradient(120deg,rgba(61,220,132,.16),rgba(47,107,255,.12)),var(--surface)!important}
+.lk-adp>div:nth-child(2){flex:1;display:flex;flex-direction:column}.lk-adp-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#3DDC84;color:#062;font-size:1.1rem;flex:none}
+/* pack opening */
+.pko-in h2{margin:0}.pko-hint{margin:-8px 0 0;color:var(--muted,#98A8BA);font-size:.85rem}
+.pko-c{width:118px;height:168px;perspective:900px;position:relative;cursor:pointer;outline:none;animation:pkoDeal .45s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--i)*70ms)}
+@keyframes pkoDeal{from{opacity:0;transform:translateY(40px) rotate(-8deg) scale(.8)}}
+.pko-in3{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.3,1.4,.4,1)}
+.pko-c .pko-f{transition:none;animation:none!important}
+.pko-back{transform:none!important;overflow:hidden}
+.pko-front{transform:rotateY(180deg)!important;overflow:hidden}
+.pko-c.fl .pko-in3{transform:rotateY(180deg)}
+.pko-c:hover:not(.fl) .pko-in3{transform:translateY(-6px) rotate(-1.5deg)}
+.pko-c:focus-visible .pko-back{outline:2px solid #fff;outline-offset:2px}
+.pko-aura{position:absolute;inset:-2px;border-radius:14px;pointer-events:none;opacity:0}
+.pko-c.r-e .pko-aura,.pko-c.r-l .pko-aura,.pko-c.r-m .pko-aura{opacity:1;box-shadow:inset 0 0 18px var(--rc);animation:pkoAura 1.6s ease-in-out infinite}
+@keyframes pkoAura{50%{box-shadow:inset 0 0 30px var(--rc)}}
+.pko-c.pre .pko-in3{animation:pkoShake .12s linear infinite}
+@keyframes pkoShake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-3px,1px) rotate(-2deg)}50%{transform:translate(2px,-2px) rotate(1deg)}75%{transform:translate(-2px,2px) rotate(2deg)}}
+.pko-shine{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.65) 48%,transparent 62%);transform:translateX(-120%);pointer-events:none}
+.pko-c.fl .pko-shine{animation:pkoShine .9s .45s ease-out forwards}
+@keyframes pkoShine{to{transform:translateX(120%)}}
+.pko-burst{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;pointer-events:none;opacity:0}
+.pko-c.fl .pko-burst{animation:pkoBurst .8s .3s ease-out forwards;box-shadow:0 0 0 0 var(--rc)}
+.pko-c.fl.r-r .pko-burst,.pko-c.fl.r-u .pko-burst,.pko-c.fl.r-c .pko-burst{animation-duration:.6s}
+@keyframes pkoBurst{0%{opacity:1;box-shadow:0 0 0 0 var(--rc),0 0 0 0 var(--rc)}100%{opacity:0;box-shadow:0 0 0 70px transparent,0 0 60px 40px transparent}}
+.pko-c.fl.r-e .pko-burst,.pko-c.fl.r-l .pko-burst,.pko-c.fl.r-m .pko-burst{background:radial-gradient(circle,var(--rc),transparent 70%);animation:pkoRays 1s .3s ease-out forwards}
+@keyframes pkoRays{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(28)}}
+.pko-c.fl.r-l .pko-front,.pko-c.fl.r-m .pko-front{animation:pkoGlow 1.6s 1s ease-in-out infinite!important}
+@keyframes pkoGlow{50%{box-shadow:0 0 0 2px var(--rc),0 0 36px var(--rc)}}
+.pko.flash::after{content:"";position:fixed;inset:0;background:radial-gradient(circle,rgba(255,79,109,.55),rgba(255,177,61,.25) 50%,transparent 75%);pointer-events:none;animation:pkoFlash .5s ease-out forwards}
+@keyframes pkoFlash{from{opacity:1}to{opacity:0}}
+.pko-btns{display:flex;gap:10px;justify-content:center}
+@media (prefers-reduced-motion:reduce){.pko-c,.pko-in3,.pko-shine,.pko-burst,.pko-aura{animation:none!important;transition:none!important}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -2363,7 +2416,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v254 · Nov 6';
+const APP_BUILD='v255 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3314,9 +3367,9 @@ const CREST_SHAPES={shield:'polygon(50% 0,100% 12%,100% 60%,50% 100%,0 60%,0 12%
 const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
 const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','theme','coin','icon','share','walkup','crest','lineup','field','jersey'];
 const PACKS={
-  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$3.99',odds:{c:50,u:30,r:13,e:5,l:1.5,m:.5},g:''},
-  player:{n:'Player pack',c:5,tok:400,usd:'$6.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
-  champs:{n:'Champs pack',c:10,tok:1200,usd:'$24.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'}};
+  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:13,e:5,l:1.5,m:.5},g:''},
+  player:{n:'Player pack',c:5,tok:400,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
+  champs:{n:'Champs pack',c:10,tok:1200,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return +((invOf(u).it||{})[id])||0};
 const cosOwnCount=u=>{const it=invOf(u).it||{};let n=0;for(const id in it){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&+it[id]>0)n++}return n};
@@ -3477,6 +3530,7 @@ async function packOpen(type,how){
   if(ME.mode==='readonly'||ME.mode==='offline'){say('Can’t open packs right now.');return}
   if(how==='tok'&&bank(ME.uid)<P.tok){say(`You need ${P.tok} tokens for the ${P.n}.`);return}
   if(how==='free'&&freePacks(ME.uid)<1){say('No free packs right now.');return}
+  if(how==='ad'&&((invOf(ME.uid).fr||{}).ad===TODAY())){say('You already got today’s free pack. Come back tomorrow.');return}
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
@@ -3487,22 +3541,35 @@ async function packOpen(type,how){
   if(how==='tok')patch.sp=(+v.sp||0)+P.tok;
   if(dup)patch.dup=(+v.dup||0)+dup;
   if(how==='free'){const fr=Object.assign({},v.fr);if(!fr.st)fr.st=NOW();else fr.d7=(+fr.d7||0)+1;patch.fr=fr}
+  if(how==='ad'){patch.fr=Object.assign({},v.fr,{ad:TODAY()})}
   S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
   try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){say('That did not save. Try again.');return}
   packShow(P,got);
 }
-/* the opening: cards flip one by one, glowing in their rarity colour */
+/* the opening: every card starts face down. Tap one to flip it, or Flip all. Rarer cards hint through the back and burst when they turn */
 function packShow(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
-  o.innerHTML=`<div class="pko-in"><h2>${esc(P.n)}</h2><div class="pko-cards">${got.map((g,i)=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
-    return `<div class="pko-c ${g.r==='m'?'pko-m':''}" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${cardArt(g.card,g.r,58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n} ${c.team?'team':'player'} card</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${CARD_PCT[g.r]}% on ${c.team?'Pick ’em picks':'his props'}`}</em></div></div>`}
+  const ORD=['c','u','r','e','l','m'];
+  const face=g=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
+      return `${cardArt(g.card,g.r,58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n} ${c.team?'team':'player'} card</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${CARD_PCT[g.r]}% on ${c.team?'Pick ’em picks':'his props'}`}</em>`}
     const x=ITEM[g.id];
-    return `<div class="pko-c ${g.r==='m'?'pko-m':''}" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}</div></div>`}).join('')}</div>
-    <button class="btn pko-ok" type="button">Nice</button></div>`;
+    return `${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}`};
+  o.innerHTML=`<div class="pko-in"><h2>${esc(P.n)}</h2><p class="pko-hint">Tap a card to flip it</p><div class="pko-cards">${got.map((g,i)=>`<div class="pko-c r-${g.r}" style="--rc:${RAR[g.r].c};--i:${i}" tabindex="0" role="button" aria-label="Flip card ${i+1}">
+      <div class="pko-in3"><div class="pko-f pko-back"><span>V</span><i class="pko-aura"></i></div><div class="pko-f pko-front">${face(g)}<i class="pko-shine"></i></div></div><i class="pko-burst"></i></div>`).join('')}</div>
+    <div class="pko-btns"><button class="btn pko-all" type="button">Flip all</button><button class="btn ghost pko-ok" type="button">Done</button></div></div>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
+  const cards=[...o.querySelectorAll('.pko-c')],allB=o.querySelector('.pko-all'),okB=o.querySelector('.pko-ok');
+  const left=()=>cards.filter(c=>!c.classList.contains('fl')).length;
+  const sync=()=>{if(!left()){allB.hidden=true;okB.classList.remove('ghost');okB.textContent='Nice';o.querySelector('.pko-hint').textContent='All cards revealed'}};
+  const flip=c=>{if(c.classList.contains('fl'))return;const r=got[cards.indexOf(c)].r,big=ORD.indexOf(r)>=3;
+    if(big&&!matchMedia('(prefers-reduced-motion: reduce)').matches){c.classList.add('pre');setTimeout(()=>{c.classList.remove('pre');c.classList.add('fl')},r==='m'?700:r==='l'?450:250)}else c.classList.add('fl');
+    if(r==='m')setTimeout(()=>{o.classList.add('flash');setTimeout(()=>o.classList.remove('flash'),500)},700);
+    try{navigator.vibrate&&navigator.vibrate(r==='m'?[40,40,120]:big?[30,30,60]:15)}catch(_){}
+    setTimeout(sync,big?800:450)};
+  cards.forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('button'))return;flip(c)});c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip(c)}})});
+  allB.onclick=()=>{cards.filter(c=>!c.classList.contains('fl')).forEach((c,i)=>setTimeout(()=>flip(c),i*260))};
   const close=()=>{o.remove();document.documentElement.style.overflow='';render()};
-  o.querySelector('.pko-ok').onclick=close;o.addEventListener('click',e=>{if(e.target===o)close()});
-  try{navigator.vibrate&&navigator.vibrate([20,60,20])}catch(_){}
+  okB.onclick=close;o.addEventListener('click',e=>{if(e.target===o&&!left())close()});
 }
 /* small picture of an item, for packs and the Locker */
 function itemArt(id,s=48){const x=ITEM[id];if(!x)return'';
@@ -3535,11 +3602,13 @@ function viewShop(){
   const head=`<div class="head"><h2>Shop</h2><p>Open packs for player and team cards that boost your picks, and cosmetics for your profile. Everything here is earned with tokens and daily play.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to open packs.</p>';
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid);
-  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid,1)}${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
+  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
   let body='';
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
-    body=free+`<div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
+    const adDone=(v.fr||{}).ad===TODAY();
+    body=free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free Rookie pack every day</b><small class="muted">${adDone?'You got today’s pack. A new one is ready tomorrow.':'Watch a short sponsor video and open a Rookie pack. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
+      <div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
       <p class="muted">${P.c} random items, each with a 30% chance to be a player or team card${P.g?`, at least one ${RAR[P.g].n.toLowerCase()} or better`:''}.</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">Each item rolls these odds${P.g?`; the last item is at least ${RAR[P.g].n}`:''}. Duplicate cosmetics turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button>
@@ -3551,10 +3620,13 @@ function viewLocker(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const head=`<div class="head"><h2>My Locker</h2><p>Everything you have pulled from packs. Tap a cosmetic to equip it. Player and team cards boost your picks automatically. Packs are in the Shop.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to keep your items.</p>';
+  const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),pct=Math.min(100,ownN/Math.max(1,totN)*100);
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
   const tab=['cards','cos','boost'].includes(UI.lk)?UI.lk:'cos';
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['boost','Boosts & perks']].map(([k,l])=>`<button class="chip" data-act="lkTab" data-v="${k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
-  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid,1)}${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div><a class="btn sm" href="#shop">Shop${fp?` · ${fp} free`:''}</a></section>`;
+  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['boost','Boosts']].map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const top=`<section class="lk-hero"><div class="lk-ring" style="--p:${pct.toFixed(1)}"><b>${pct>0&&pct<1?'<1':Math.floor(pct)}%</b><small>collected</small></div>
+    <div class="lk-hs"><div><b>${ownN}</b><small>cosmetics</small></div><div><b>${cardN}</b><small>cards</small></div><div><b>${+v.n||0}</b><small>packs opened</small></div><div><b>${coinIc(ME.uid)}${Math.floor(bal*10)/10}</b><small>tokens</small></div></div>
+    <a class="btn lk-shopb" href="#shop">Shop${fp?` · ${fp} free`:''}</a></section>`;
   let body='';
   if(false){
   }else if(tab==='cards'){
@@ -3591,15 +3663,16 @@ function viewLocker(){
       <div class="qh"><h3 style="font-size:.95rem">Team sets</h3><span class="muted">${PALS.length} sets</span></div>
       <div class="lk-sets">${sets.map(t=>`<div class="lk-set"><span class="lk-sw" style="background:linear-gradient(135deg,${t.a} 50%,${t.b} 50%)"></span><span style="min-width:120px">${esc(t.pn)}</span><span class="lk-bar"><i style="width:${(t.have/t.tot*100).toFixed(0)}%"></i></span><small class="muted">${t.have}/${t.tot}</small>${invHas(ME.uid,'bd_set_'+t.pk)?bdgHTML('bd_set_'+t.pk,18):'<span class="lk-mys sm">?</span>'}</div>`).join('')}</div>
       <small class="muted">Collect every item in a team’s colours (${(SET_IDS[PALS[0][0]]||[]).length} items) to earn a secret reward.</small></section>`;
-    const kinds=`<div class="lk-kinds" role="group" aria-label="Cosmetic type">${KINDS.map(([x,l])=>{const L=ITEMS.filter(i=>i.k===x&&itemSp(i));return `<button class="chip" data-act="lkK" data-v="${x}" aria-pressed="${x===k}">${l} <small class="muted">${L.filter(i=>invHas(ME.uid,i.id)).length} found</small></button>`}).join('')}</div>`;
+    const kinds=`<div class="lk-cats" role="group" aria-label="Cosmetic type">${KINDS.map(([x,l])=>{const L=ITEMS.filter(i=>i.k===x&&itemSp(i)),n=L.filter(i=>invHas(ME.uid,i.id)).length,e=eq[x]&&invHas(ME.uid,eq[x])?eq[x]:'';return `<button class="lk-cat ${x===k?'on':''}" data-act="lkK" data-v="${x}" aria-pressed="${x===k}"><span class="lk-cat-a">${e?itemArt(e,30):dflt[x].replace(/width:\d+px;height:\d+px/,'width:30px;height:30px')}</span><b>${l}</b><small>${n} found</small></button>`}).join('')}</div>`;
     const ord={m:0,l:1,e:2,r:3,u:4,c:5};
     let list=ITEMS.filter(x=>x.k===k&&itemSp(x)).sort((p,q)=>(invHas(ME.uid,q.id)-invHas(ME.uid,p.id))||(ord[p.r]-ord[q.r]));
     if(onlyOwn)list=list.filter(x=>invHas(ME.uid,x.id));
     const shown=list.slice(0,N);
-    body=col+`<section class="card"><div class="qh"><h3>${kk[1]}</h3><span class="muted">${list.length} found</span></div>${kinds}
+    const curItem=cur&&invHas(ME.uid,cur)?ITEM[cur]:null;
+    body=`<section class="card lk-catcard">${kinds}</section><section class="card lk-items"><div class="lk-now"><span class="lk-now-a">${curItem?itemArt(cur,64):dflt[k]}</span><div><small class="muted">Equipped ${esc(kk[1].toLowerCase())}</small><b>${curItem?esc(curItem.n):kk[2]}</b>${curItem?`<small style="color:${RAR[curItem.r].c};font-weight:800">${RAR[curItem.r].n}</small>`:''}</div><span class="muted lk-cnt">${list.length} found</span></div>
       <div class="lk-grid"><button class="lk-it ${!cur||!invHas(ME.uid,cur)?'on':''}" data-act="lkEq" data-k="${k}" data-v="">${dflt[k]}<b>${kk[2]}</b><small class="muted">Default</small></button>
-      ${shown.map(x=>{const o=invHas(ME.uid,x.id);return `<button class="lk-it ${cur===x.id&&o?'on':''} ${o?'':'lock'}" data-act="lkEq" data-k="${k}" data-v="${x.id}" ${o?'':'disabled'} title="${esc(x.d)}">${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${o?RAR[x.r].n:'Locked · '+RAR[x.r].n}</small>${x.ex&&!o?`<small class="ex">${x.need?'Own '+x.need+' cosmetics':'Complete the team set'}</small>`:''}</button>`}).join('')}</div>
-      ${list.length?'':`<p class="empty">No ${kk[1].toLowerCase()} yet. Open packs in the <a href="#shop">Shop</a> to find them.</p>`}${list.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${list.length-N})</button>`:''}${k==='ball'?`<p class="hint">The golden ball from a 7-day streak still shows over any skin while your streak is alive.</p>`:''}</section>`;
+      ${shown.map(x=>{const o=invHas(ME.uid,x.id);return `<button class="lk-it r-${x.r} ${cur===x.id&&o?'on':''} ${o?'':'lock'}" style="--rc:${RAR[x.r].c}" data-act="lkEq" data-k="${k}" data-v="${x.id}" ${o?'':'disabled'} title="${esc(x.d)}">${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${o?RAR[x.r].n:'Locked · '+RAR[x.r].n}</small>${x.ex&&!o?`<small class="ex">${x.need?'Own '+x.need+' cosmetics':'Complete the team set'}</small>`:''}</button>`}).join('')}</div>
+      ${list.length?'':`<p class="empty">No ${kk[1].toLowerCase()} yet. Open packs in the <a href="#shop">Shop</a> to find them.</p>`}${list.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${list.length-N})</button>`:''}${k==='ball'?`<p class="hint">The golden ball from a 7-day streak still shows over any skin while your streak is alive.</p>`:''}</section>`+col;
   }else{
     body=`<section class="card"><div class="qh"><h3>Boosts & perks</h3></div><div class="lk-list">${ITEMS.filter(x=>x.k==='perk'||x.k==='tboost').map(x=>`<div class="lk-row">${itemArt(x.id,42)}<span><b>${esc(x.n)}</b><small class="muted">${esc(x.d)}</small></span><b class="lk-n">${invLeft(ME.uid,x.id)}</b></div>`).join('')}</div>
       <p class="muted">Token boosts go on a Pick ’em or player prop pick from the pick itself, before the game starts. Perks show up in the game they belong to.</p></section>`;
@@ -3649,7 +3722,7 @@ function picksHTML(){
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(betResult(b,gm[id])==='open'?+b.stake||0:0),0);
   const avail=Math.round((bal-0)*100)/100;
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid,1)}${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
   const card=g=>{
     const id=gid(g),o=oddsFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
@@ -3900,7 +3973,7 @@ function spreadHTML(){
   const open=gs.filter(g=>!gDone(g)||mine[gid(g)]).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||a.h.localeCompare(b.h));
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(atsResult(b,gm[id])==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid,1)}${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
   const nm2=(x,g)=>x.s==='h'?g.h:g.a,lnTxt=x=>fmtLine(x.s==='h'?+x.line:-x.line);
   const card=g=>{
     const id=gid(g),L=spreadFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
@@ -4005,7 +4078,7 @@ function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
   const staked=Object.values(mine).reduce((a,b)=>a+(propResult(b,gm)==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid,1)}${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, your tokens come back.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, your tokens come back.</div></section>`;
   const mkChips=`<div class="chips bf-mk" role="group" aria-label="Stat type">${['ALL',...PP_GROUPS].map(v=>`<button class="chip" data-act="ppM" data-v="${v}" aria-pressed="${UI.pm===v}">${v==='ALL'?'All stats':v}</button>`).join('')}</div>`;
   const all=propCands().filter(x=>bfOK(x.game)&&(UI.pm==='ALL'||PP_MK[x.m].g===UI.pm));
   const shown=all.slice(0,UI.ppN);
@@ -6925,6 +6998,7 @@ document.addEventListener('click',async e=>{
   else if(a==='meEdit'){UI.meEdit=!UI.meEdit;render()}
   else if(a==='goLocker'){const c=$('#cfm');if(c&&!c.hidden&&typeof closeConfirm==='function')closeConfirm();location.hash='#shop'}
   else if(a==='lkTab'){UI.lk=t.dataset.v;render()}
+  else if(a==='pkAd'){if(((invOf(ME.uid).fr||{}).ad)===TODAY()){say('Come back tomorrow for another free pack.');return}adPlay(()=>packOpen('rookie','ad'))}
   else if(a==='lkC'){UI.lkC=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkK'){UI.lkK=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkOwn'){UI.lkOwn=!UI.lkOwn;UI.lkN=30;render()}
