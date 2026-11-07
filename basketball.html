@@ -2051,6 +2051,12 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .pp-gl{display:flex;align-items:center;gap:6px}.pp-gl i{font-style:normal;font-size:.7rem;color:var(--muted)}
 .pp-gm b{font-size:.82rem;white-space:nowrap}.pp-gm small{font-size:.7rem;color:var(--muted);white-space:nowrap}.pp-gm small em{font-style:normal;color:#3DDC84;font-weight:700}
 .pp-gh{scroll-margin-top:80px;margin-top:6px}
+/* v273 props: one card per player, line chips */
+.pp-mk{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;padding-bottom:2px;scrollbar-width:none}.pp-mk::-webkit-scrollbar{display:none}
+.pp-mc{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;gap:2px;position:relative;padding:7px 11px;border-radius:12px;border:1px solid var(--line);background:var(--surface2,#0f1d36);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.pp-mc span{font:700 .64rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.pp-mc b{font-size:.95rem}
+.pp-mc.on{border-color:#FFC23D;background:linear-gradient(180deg,rgba(255,194,61,.16),rgba(255,194,61,.04));box-shadow:0 0 0 1px #FFC23D inset}.pp-mc.on span{color:#FFC23D}
+.pp-mc i{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#3DDC84;box-shadow:0 0 6px #3DDC84}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2505,7 +2511,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v272 · Nov 7';
+const APP_BUILD='v273 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4157,7 +4163,7 @@ function propsHTML(){
   const mkChips=`<div class="chips bf-mk" role="group" aria-label="Stat type">${['ALL',...PP_GROUPS].map(v=>`<button class="chip" data-act="ppM" data-v="${v}" aria-pressed="${UI.pm===v}">${v==='ALL'?'All stats':v}</button>`).join('')}</div>`;
   const all=propCands().filter(x=>bfOK(x.game)&&(UI.pm==='ALL'||PP_MK[x.m].g===UI.pm));
   const shown=all.slice(0,UI.ppN);
-  const card=x=>{
+  const card=(x,grp)=>{
     const id=x.id,b=mine[id],M=PP_MK[x.m],locked=started(x.game),ui=UI.pp[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,t,odd)=>`<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="ppSide" data-id="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}><b>${t} ${fmtN(x.line)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${Math.round((sd==='o'?x.po:1-x.po)*100)}% chance</small></button>`;
     const room=bal+(b?+b.stake:0),od=side==='o'?x.over:side==='u'?x.under:0;let foot='';
@@ -4172,7 +4178,7 @@ function propsHTML(){
     if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'pc:'+x.k))foot+=`<p class="bx-tag cbx">Your ${esc(x.name)} card adds +${cardPct(ME.uid,'pc:'+x.k)}% if it hits</p>`;
     return `<article class="gm bt-g pp"><div class="gm-h"><span>${esc(fmtDate(x.game.d))} · vs ${esc(x.opp)}</span>${x.game.dv?`<span class="gm-k p">${esc(x.game.dv)}</span>`:''}</div>
       <button class="pp-who" type="button" data-act="player" data-id="${esc(x.k)}" aria-label="${esc(x.name)}, open player profile">${slogo(x.school,30)}<div><b>${esc(x.name)}</b>${ME.uid?cardTag(ME.uid,'pc:'+x.k):''}<small class="muted">${esc(x.school)} · ${esc(x.pos)}</small></div><span class="pp-go" aria-hidden="true">›</span></button>
-      <div class="pp-m">${esc(M.l)}</div>
+      ${grp&&grp.length>1?`<div class="pp-mk" role="group" aria-label="${esc(x.name)} lines">${grp.map(y=>`<button class="pp-mc${y===x?' on':''}" data-act="ppSel" data-k="${esc(x.k)}" data-id="${esc(y.id)}" aria-pressed="${y===x}"><span>${esc(PP_MK[y.m].l)}</span><b>${fmtN(y.line)}</b>${mine[y.id]?'<i aria-label="picked"></i>':''}</button>`).join('')}</div>`:`<div class="pp-m">${esc(M.l)}</div>`}
       <div class="bt-row">${btn('o','Over',x.over)}${btn('u','Under',x.under)}</div>
       <div class="pp-stat muted">Avg <b>${fmtN(x.mean)}</b> · last 3 <b>${fmtN(x.rc)}</b> · over ${fmtN(x.line)} in <b>${x.hits}</b> of ${x.n} games</div>${foot}</article>`};
   const stagedList=can?Object.entries(UI.pp).filter(([id,u])=>{const x=pm[id],b=mine[id];return x&&u&&u.s&&!started(x.game)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}).map(([id])=>pm[id]):[];
@@ -4198,7 +4204,11 @@ function propsHTML(){
     const pick=`<div class="pp-games" role="group" aria-label="Choose a game">${gl.map(x=>`<button class="pp-gm${x===cur?' on':''}" data-act="ppG" data-v="${esc(x.id)}" aria-pressed="${x===cur}"><span class="pp-gl">${slogo(x.g.a,26)}<i>at</i>${slogo(x.g.h,26)}</span><b>${esc(abbr(x.g.a))} at ${esc(abbr(x.g.h))}</b><small>${esc(fmtDate(x.g.d))} · ${x.n} ${x.n===1?'line':'lines'}${x.mine?` · <em>${x.mine} picked</em>`:''}</small></button>`).join('')}</div>`;
     const L=all.filter(x=>gid(x.game)===cur.id).sort((a,b)=>a.school===b.school?0:a.school===cur.g.a?-1:1);
     ppPick=`<div class="qh"><h3>Pick a game</h3><span class="muted">${gl.length} ${gl.length===1?'game':'games'} with lines</span></div>${pick}`;
-    body=`<div class="qh pp-gh"><h3>${esc(cur.g.a)} at ${esc(cur.g.h)}</h3><span class="muted">${esc(fmtDate(cur.g.d))}${cur.g.time?' · '+esc(cur.g.time):''} · ${L.length} lines</span></div><div class="gm-grid">${L.map(card).join('')}</div>`;
+    /* v273: one card per player (like Sleeper): the main line shows, the player's other lines are chips to switch to */
+    const byP=[],pi={};L.forEach(x=>{if(!pi[x.k]){pi[x.k]=[];byP.push(pi[x.k])}pi[x.k].push(x)});
+    UI.ppSel=UI.ppSel||{};
+    const cards=byP.map(grp=>{const k=grp[0].k,sel=grp.find(y=>y.id===UI.ppSel[k])||grp.find(y=>UI.pp[y.id]&&UI.pp[y.id].s)||grp.find(y=>mine[y.id])||grp[0];return card(sel,grp)});
+    body=`<div class="qh pp-gh"><h3>${esc(cur.g.a)} at ${esc(cur.g.h)}</h3><span class="muted">${esc(fmtDate(cur.g.d))}${cur.g.time?' · '+esc(cur.g.time):''} · ${byP.length} players · ${L.length} lines</span></div><div class="gm-grid">${cards.join('')}</div>`;
   }
   return boardCard+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+allBar+ppPick+body+histCard;
 }
@@ -7133,6 +7143,7 @@ document.addEventListener('click',async e=>{
   else if(a==='atClear'){UI.at={};render()}
   else if(a==='bfClear'){UI.bf={dv:'',w:'',sc:''};UI.ppN=24;render()}
   else if(a==='ppM'){UI.pm=t.dataset.v;UI.ppN=24;render()}
+  else if(a==='ppSel'){UI.ppSel=Object.assign({},UI.ppSel,{[t.dataset.k]:t.dataset.id});render(true)}
   else if(a==='ppG'){UI.ppG=t.dataset.v;render();const h=document.querySelector('.pp-gh');if(h&&h.getBoundingClientRect().top>innerHeight*.6)h.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(a==='ppMore'){UI.ppN+=24;render()}
   else if(a==='ppSide'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{s:t.dataset.s});render()}
