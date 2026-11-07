@@ -2553,7 +2553,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v285 · Nov 7';
+const APP_BUILD='v286 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3524,8 +3524,8 @@ const PACKS={
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:13,e:5,l:1.5,m:.5},g:''},
   player:{n:'Pro pack',c:5,tok:400,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
   champs:{n:'Champion pack',c:10,tok:1200,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'},
-  /* v285 God pack: cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
-  god:{n:'God pack',c:5,tok:3000,usd:'$19.99',odds:{r:40,e:35,l:17,m:8},g:'l',cos:1}};
+  /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
+  god:{n:'Hall of Fame pack',c:5,tok:3000,usd:'$19.99',odds:{r:40,e:35,l:17,m:8},g:'l',cos:1}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return +((invOf(u).it||{})[id])||0};
 const cosOwnCount=u=>{const it=invOf(u).it||{};let n=0;for(const id in it){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&+it[id]>0)n++}return n};
