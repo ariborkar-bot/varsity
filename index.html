@@ -2494,7 +2494,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v270 · Nov 7';
+const APP_BUILD='v271 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3123,7 +3123,7 @@ function buildBrackets(){
     df.rounds.forEach((r,ri)=>{out.push({name:r.name,games:r.games.map(([p,q])=>{
       const side=z=>z.from?(()=>{const g=out[z.from[0]].games[z.from[1]];return g.win?{n:g.win,s:g.winS}:{n:null,s:null,tbd:1}})():z;
       const A=side(p),B=side(q);let hs=null,as=null,win=null,winS=null;
-      if(A.n&&B.n){const g=res(A.n,B.n);if(g){const ah=g.h===A.n;hs=ah?g.hs:g.as;as=ah?g.as:g.hs;if(hs!==as){win=(hs>as)?A.n:B.n;winS=(hs>as)?A.s:B.s}}}
+      if(A.n&&B.n){const g=res(A.n,B.n);if(g){const ah=g.h===A.n,sA=ah?g.hs:g.as,sB=ah?g.as:g.hs;as=sA;hs=sB;if(sA!==sB){win=(sA>sB)?A.n:B.n;winS=(sA>sB)?A.s:B.s}}}   /* a = A, h = B: each side shows its own score (v271 fix: they were swapped on the card) */
       return {w:0,d:r.d,k:'P',a:A.n,h:B.n,sa:A.s,sh:B.s,hs,as,win,winS,r:A.bye&&!A.n?'':''}
     })})});
     /* byes: seed placeholders have no real name; show them as the seed */
