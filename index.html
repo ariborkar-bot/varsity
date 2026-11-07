@@ -2104,6 +2104,8 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .av.avf.f_plat{box-shadow:inset 0 0 0 3.5px #DCE3EC,0 0 8px rgba(255,255,255,.4)!important}
 .av.avf.f_letter{box-shadow:inset 0 0 0 2.5px #7A1F2B,inset 0 0 0 5px #E3B23C!important}
 .av.avf.f_check{box-shadow:inset 0 0 0 2px #1B1B1F,inset 0 0 0 4.5px #fff!important}
+.lk-god .lk-art,.pko-pack.lk-god .pko-pk{background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.35),transparent 45%),conic-gradient(from 200deg,#FF4F6D,#FFC23D,#3DDC84,#26F0FF,#7A4DFF,#FF4FE0,#FF4F6D);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.lk-god{border-color:#FFC23D!important;box-shadow:0 0 0 1px rgba(255,194,61,.5),0 10px 30px -10px rgba(255,79,224,.5)!important}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2551,7 +2553,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v284 · Nov 7';
+const APP_BUILD='v285 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3520,8 +3522,10 @@ const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
 const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','theme','coin','icon','share','walkup','crest','lineup','field','jersey'];
 const PACKS={
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:13,e:5,l:1.5,m:.5},g:''},
-  player:{n:'Player pack',c:5,tok:400,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
-  champs:{n:'Champs pack',c:10,tok:1200,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'}};
+  player:{n:'Pro pack',c:5,tok:400,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
+  champs:{n:'Champion pack',c:10,tok:1200,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'},
+  /* v285 God pack: cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
+  god:{n:'God pack',c:5,tok:3000,usd:'$19.99',odds:{r:40,e:35,l:17,m:8},g:'l',cos:1}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return +((invOf(u).it||{})[id])||0};
 const cosOwnCount=u=>{const it=invOf(u).it||{};let n=0;for(const id in it){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&+it[id]>0)n++}return n};
@@ -3655,7 +3659,7 @@ function invLeft(u,id){const v=invOf(u),own=invHas(u,id);
 const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)};
 /* free packs: the starter pack, plus one Rookie pack for every 7 days you play the daily challenge */
 function freePacks(u){const v=invOf(u),fr=v.fr||{},d=+fgRec(u).days||0;return (fr.st?0:1)+Math.max(0,Math.floor(d/7)-(+fr.d7||0))}
-function rollRarity(odds,floor){const ord=RAR_ORD;let x=fcRnd(10000)/100,acc=0,r='c';for(const k of ord){acc+=odds[k];if(x<acc){r=k;break}}
+function rollRarity(odds,floor){const ord=RAR_ORD;let x=fcRnd(10000)/100,acc=0,r=ord.find(k=>odds[k]>0)||'c';for(const k of ord){acc+=odds[k]||0;if(x<acc){r=k;break}}
   if(floor&&ord.indexOf(r)<ord.indexOf(floor))r=floor;return r}
 /* ---------- Player and team cards (v246) ----------
    A pack slot is a card 30% of the time: a random real player (65%) or team (35%), in the slot's rarity. Every player and team
@@ -3681,8 +3685,8 @@ function cardInfo(id){if(id.startsWith('tc:')){const t=id.slice(3);return {team:
 function cardArt(id,r,s=54){const c=cardInfo(id),R=RAR[r]||RAR.c;
   return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${c.team?slogo(c.school,Math.round(s*.5)):av(c.name,c.school,Math.round(s*.46))}<i>${c.team?'TEAM':'PLAYER'}</i></span>`}
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
-function rollItem(r){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
-  const P=use.length&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
+function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
+  const P=use.length&&!(cosOnly&&cos.length)&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
 async function packOpen(type,how,day){
   const P=PACKS[type];if(!P)return;
   if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
@@ -3694,8 +3698,8 @@ async function packOpen(type,how,day){
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
-    if(fcRnd(100)<CARD_CHANCE){const cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
-    const id=rollItem(r);
+    if(!P.cos&&fcRnd(100)<CARD_CHANCE){const cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
+    const id=rollItem(r,!!P.cos);
     const was=+it[id]||0,isDup=isCos(id)&&was>0;if(isDup)dup+=RAR[r].dup;else it[id]=was+1;got.push({id,r,dup:isDup})}
   const patch={it,n:(+v.n||0)+1};if(gotCard)patch.cards=cards;
   if(how==='tok')patch.sp=(+v.sp||0)+P.tok;
@@ -3793,7 +3797,7 @@ function viewShop(){
     const prizes=fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('');
     body=prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free Rookie pack every day</b><small class="muted">${adDone?'You got today’s pack. A new one is ready tomorrow.':'Watch a short sponsor video and open a Rookie pack. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       <div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
-      <p class="muted">${P.c} random items, each with a 30% chance to be a player or team card${P.g?`, at least one ${RAR[P.g].n.toLowerCase()} or better`:''}.</p>
+      <p class="muted">${P.cos?`${P.c} cosmetics, Rare or better only, at least one ${RAR[P.g].n.toLowerCase()} or better.`:`${P.c} random items, each with a 30% chance to be a player or team card${P.g?`, at least one ${RAR[P.g].n.toLowerCase()} or better`:''}.`}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">Each item rolls these odds${P.g?`; the last item is at least ${RAR[P.g].n}`:''}. Duplicate cosmetics turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button>
       <button class="btn ghost lk-usd" disabled title="Coming soon">${P.usd} · Coming soon</button></article>`).join('')}</div>
@@ -4545,7 +4549,7 @@ const fgDay2=()=>{const d=new Date(TODAY()+'T12:00:00Z');d.setUTCDate(d.getUTCDa
 const fgStreak=u=>{const k=fgRec(u).sk;return k&&(k.last===TODAY()||k.last===fgYest()||(k.last===fgDay2()&&typeof invLeft==='function'&&invLeft(u,'p_freeze')>0))?+k.n||0:0};   /* a streak freeze covers one missed day */
 const fgGold=u=>!!u&&fgStreak(u)>=FG_GOLD;
 const fgDay=u=>{const d=fgRec(u).dd;return d&&d.d===TODAY()?d:null};
-/* daily leaderboard prizes (v256): when a day ends, 1st place gets a Player pack, 2nd and 3rd a Rookie pack.
+/* daily leaderboard prizes (v256): when a day ends, 1st place gets a Pro pack (key 'player'), 2nd and 3rd a Rookie pack.
    Each day's best is kept in fg.dh[date]={b,t} so finished days can be ranked; claims are inv.fr.lb[date]. */
 const FG_LB_START='2026-11-07',FG_LB_BACK=7,FG_LB_PRIZE=['player','rookie','rookie'];
 const fgDayOf=(u,day)=>{const r=fgRec(u),h=(r.dh||{})[day];if(h)return {best:+h.b||0,t:+h.t||0};const d=r.dd;return d&&d.d===day?{best:+d.best||0,t:+d.t||0}:null};
