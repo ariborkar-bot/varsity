@@ -2027,6 +2027,47 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 @keyframes pkoFlash{from{opacity:1}to{opacity:0}}
 .pko-btns{display:flex;gap:10px;justify-content:center}
 @media (prefers-reduced-motion:reduce){.pko-c,.pko-in3,.pko-shine,.pko-burst,.pko-aura{animation:none!important;transition:none!important}}
+
+.fg-prize{margin:6px 0 10px;padding:9px 12px;border-radius:12px;background:linear-gradient(120deg,rgba(242,190,44,.16),rgba(122,77,255,.12));font-size:.85rem}.fg-prize a{color:#FFC23D}
+.lk-prize{background:linear-gradient(120deg,rgba(242,190,44,.22),rgba(255,79,109,.10)),var(--surface)!important;border-color:#F2BE2C!important}
+/* v256 pack opening: rip, lift-spin-land flips, sparks, rarity background glow */
+.pko{isolation:isolate}
+.pko-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s ease;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--gc,#7A4DFF) 55%,transparent),color-mix(in srgb,var(--gc,#7A4DFF) 18%,transparent) 45%,transparent 75%)}
+.pko.glow .pko-bg{opacity:1;animation:pkoBg 2.4s ease-in-out infinite}
+@keyframes pkoBg{50%{filter:brightness(1.35)}}
+.pko.pulse .pko-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,var(--gc),transparent 65%);animation:pkoPulse .9s ease-out forwards}
+@keyframes pkoPulse{0%{opacity:.95;transform:scale(.4)}100%{opacity:0;transform:scale(1.6)}}
+.pko-rays{position:absolute;left:50%;top:50%;width:180vmax;height:180vmax;margin:-90vmax;opacity:0;transition:opacity .8s;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--gc) 30%,transparent) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 10%,transparent 55%);mask:radial-gradient(circle,#000 10%,transparent 55%)}
+.pko.rays .pko-rays{opacity:1;animation:pkoSpin 18s linear infinite}
+@keyframes pkoSpin{to{transform:rotate(360deg)}}
+.pko-pack{display:flex;flex-direction:column;align-items:center;gap:14px;cursor:pointer;outline:none}
+.pko-pk{position:relative;width:170px;height:240px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;box-shadow:0 24px 60px -12px rgba(0,0,0,.8),inset 0 0 0 2px rgba(255,255,255,.18);overflow:hidden;animation:pkoIn .5s cubic-bezier(.2,.9,.3,1.3) both,pkoWob 1.1s .5s ease-in-out infinite}
+.pko-pack.lk-rookie .pko-pk{background:linear-gradient(135deg,#2F6BFF,#1C3E91)}.pko-pack.lk-player .pko-pk{background:linear-gradient(135deg,#7A4DFF,#2A0E6B)}.pko-pack.lk-champs .pko-pk{background:radial-gradient(circle at 30% 25%,#FFF6C8,#F2BE2C 45%,#9C6F00);color:#2A1C00}
+.pko-pk b{font:900 italic 1.3rem var(--f-display,inherit);text-transform:uppercase;position:relative}.pko-pk small{font-weight:700;opacity:.8;position:relative}
+.pko-pk span{position:absolute;font:900 italic 9rem var(--f-display,inherit);opacity:.12;bottom:-30px;right:-10px}
+.pko-pk::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);transform:translateX(-120%);animation:pkoShine 1.8s .3s ease-in-out infinite}
+.pko-tear{position:absolute;left:0;right:0;top:22px;border-top:2px dashed rgba(255,255,255,.45)}
+@keyframes pkoIn{from{opacity:0;transform:scale(.5) rotate(-10deg)}}
+@keyframes pkoWob{0%,100%{transform:rotate(0)}20%{transform:rotate(-3deg)}40%{transform:rotate(3deg)}60%{transform:rotate(-2deg)}80%{transform:rotate(1deg)}}
+.pko-pack.rip .pko-pk{animation:pkoRip .56s ease-in forwards}
+.pko-pack.rip .pko-hint{opacity:0}
+@keyframes pkoRip{0%{transform:scale(1)}30%{transform:scale(1.12) rotate(-4deg);filter:brightness(1.4)}55%{transform:scale(1.18) rotate(4deg);filter:brightness(2)}100%{transform:scale(1.9);opacity:0;filter:brightness(3) blur(4px)}}
+.pko.open .pko-c{animation:pkoDeal2 .55s cubic-bezier(.2,.9,.3,1.25) both;animation-delay:calc(var(--i)*90ms)}
+@keyframes pkoDeal2{from{opacity:0;transform:translateY(-120px) scale(.3) rotate(calc(var(--i)*14deg - 30deg))}}
+.pko-in3{transition:none!important}
+.pko-c.fl .pko-in3{animation:pkoFlip .62s cubic-bezier(.25,.8,.35,1) forwards}
+.pko-c.fl.spin .pko-in3{animation:pkoFlipBig .95s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes pkoFlip{0%{transform:rotateY(0)}45%{transform:translateY(-26px) scale(1.16) rotateY(110deg)}100%{transform:rotateY(180deg)}}
+@keyframes pkoFlipBig{0%{transform:rotateY(0)}20%{transform:translateY(-36px) scale(1.22) rotateY(0) rotateZ(-4deg)}70%{transform:translateY(-30px) scale(1.25) rotateY(500deg)}100%{transform:rotateY(540deg)}}
+.pko-c.land{animation:pkoLand .4s cubic-bezier(.3,1.6,.5,1)!important;z-index:2}
+@keyframes pkoLand{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+.pko-c.fl.r-e .pko-front,.pko-c.fl.r-l .pko-front,.pko-c.fl.r-m .pko-front{box-shadow:0 0 0 2px var(--rc),0 0 30px var(--rc),0 0 70px color-mix(in srgb,var(--rc) 50%,transparent)}
+.pko-c.pre .pko-back{box-shadow:0 0 30px var(--rc);filter:brightness(1.3)}
+.pko-pts{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:3}
+.pko-pts i{position:absolute;left:0;top:0;width:var(--z);height:var(--z);margin:calc(var(--z)/-2);border-radius:50%;background:var(--rc);box-shadow:0 0 8px var(--rc),0 0 2px #fff;animation:pkoPt var(--t) cubic-bezier(.15,.7,.4,1) forwards}
+.pko-pts i:nth-child(3n){border-radius:1px;transform:rotate(45deg);background:#fff}
+@keyframes pkoPt{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),calc(var(--dy) + 30px)) scale(.3)}}
+@media (prefers-reduced-motion:reduce){.pko-pk,.pko-pk::after,.pko-bg,.pko-rays,.pko.open .pko-c,.pko-c.fl .pko-in3,.pko-c.land{animation:none!important}.pko-c.fl .pko-in3{transform:rotateY(180deg)}.pko-c.fl.spin .pko-in3{transform:rotateY(540deg)}}
 </style>
 <header class="mast">
   <div class="wrap mast-in">
@@ -3524,13 +3565,14 @@ function cardArt(id,r,s=54){const c=cardInfo(id),R=RAR[r]||RAR.c;
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollItem(r){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
   const P=use.length&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
-async function packOpen(type,how){
+async function packOpen(type,how,day){
   const P=PACKS[type];if(!P)return;
   if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
   if(ME.mode==='readonly'||ME.mode==='offline'){say('Can’t open packs right now.');return}
   if(how==='tok'&&bank(ME.uid)<P.tok){say(`You need ${P.tok} tokens for the ${P.n}.`);return}
   if(how==='free'&&freePacks(ME.uid)<1){say('No free packs right now.');return}
   if(how==='ad'&&((invOf(ME.uid).fr||{}).ad===TODAY())){say('You already got today’s free pack. Come back tomorrow.');return}
+  if(how==='lb'&&!fgPrizes(ME.uid).some(x=>x.day===day&&x.type===type)){say('That prize was already opened.');return}
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
@@ -3542,34 +3584,57 @@ async function packOpen(type,how){
   if(dup)patch.dup=(+v.dup||0)+dup;
   if(how==='free'){const fr=Object.assign({},v.fr);if(!fr.st)fr.st=NOW();else fr.d7=(+fr.d7||0)+1;patch.fr=fr}
   if(how==='ad'){patch.fr=Object.assign({},v.fr,{ad:TODAY()})}
+  if(how==='lb'){patch.fr=Object.assign({},v.fr,{lb:Object.assign({},(v.fr||{}).lb,{[day]:1})})}
   S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
   try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){say('That did not save. Try again.');return}
   packShow(P,got);
 }
-/* the opening: every card starts face down. Tap one to flip it, or Flip all. Rarer cards hint through the back and burst when they turn */
+/* the opening (v256): the sealed pack shakes and rips open, the cards deal out face down. Tap one to flip it, or Flip all.
+   A flip lifts the card, spins it and lands it with a pop and a spray of sparks in its rarity colour.
+   Epic or better: the whole background glows in that colour (and keeps the best colour seen so far); Legendary+ adds turning light rays. */
 function packShow(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
-  const ORD=['c','u','r','e','l','m'];
+  const ORD=['c','u','r','e','l','m'],calm=matchMedia('(prefers-reduced-motion: reduce)').matches,key=Object.keys(PACKS).find(k=>PACKS[k]===P)||'rookie';
   const face=g=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
       return `${cardArt(g.card,g.r,58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n} ${c.team?'team':'player'} card</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${CARD_PCT[g.r]}% on ${c.team?'Pick ’em picks':'his props'}`}</em>`}
     const x=ITEM[g.id];
     return `${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}`};
-  o.innerHTML=`<div class="pko-in"><h2>${esc(P.n)}</h2><p class="pko-hint">Tap a card to flip it</p><div class="pko-cards">${got.map((g,i)=>`<div class="pko-c r-${g.r}" style="--rc:${RAR[g.r].c};--i:${i}" tabindex="0" role="button" aria-label="Flip card ${i+1}">
-      <div class="pko-in3"><div class="pko-f pko-back"><span>V</span><i class="pko-aura"></i></div><div class="pko-f pko-front">${face(g)}<i class="pko-shine"></i></div></div><i class="pko-burst"></i></div>`).join('')}</div>
+  o.innerHTML=`<div class="pko-bg" aria-hidden="true"><i class="pko-rays"></i></div>
+    <div class="pko-pack lk-${key}" role="button" tabindex="0" aria-label="Open the ${esc(P.n)}"><div class="pko-pk"><i class="pko-tear"></i><b>${esc(P.n)}</b><small>${P.c} items</small><span>V</span></div><p class="pko-hint">Tap to rip it open</p></div>
+    <div class="pko-in" hidden><h2>${esc(P.n)}</h2><p class="pko-hint">Tap a card to flip it</p><div class="pko-cards">${got.map((g,i)=>`<div class="pko-c r-${g.r}" style="--rc:${RAR[g.r].c};--i:${i}" tabindex="0" role="button" aria-label="Flip card ${i+1}">
+      <div class="pko-in3"><div class="pko-f pko-back"><span>V</span><i class="pko-aura"></i></div><div class="pko-f pko-front">${face(g)}<i class="pko-shine"></i></div></div><i class="pko-burst"></i><i class="pko-pts"></i></div>`).join('')}</div>
     <div class="pko-btns"><button class="btn pko-all" type="button">Flip all</button><button class="btn ghost pko-ok" type="button">Done</button></div></div>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
+  const pack=o.querySelector('.pko-pack'),inn=o.querySelector('.pko-in');
+  let ripped=false;const rip=()=>{if(ripped)return;ripped=true;clearTimeout(auto);
+    if(calm){pack.remove();inn.hidden=false;return}
+    pack.classList.add('rip');try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}
+    setTimeout(()=>{pack.remove();inn.hidden=false;o.classList.add('open')},560)};
+  const auto=setTimeout(rip,1600);
+  pack.addEventListener('click',rip);pack.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();rip()}});
   const cards=[...o.querySelectorAll('.pko-c')],allB=o.querySelector('.pko-all'),okB=o.querySelector('.pko-ok');
   const left=()=>cards.filter(c=>!c.classList.contains('fl')).length;
-  const sync=()=>{if(!left()){allB.hidden=true;okB.classList.remove('ghost');okB.textContent='Nice';o.querySelector('.pko-hint').textContent='All cards revealed'}};
-  const flip=c=>{if(c.classList.contains('fl'))return;const r=got[cards.indexOf(c)].r,big=ORD.indexOf(r)>=3;
-    if(big&&!matchMedia('(prefers-reduced-motion: reduce)').matches){c.classList.add('pre');setTimeout(()=>{c.classList.remove('pre');c.classList.add('fl')},r==='m'?700:r==='l'?450:250)}else c.classList.add('fl');
-    if(r==='m')setTimeout(()=>{o.classList.add('flash');setTimeout(()=>o.classList.remove('flash'),500)},700);
-    try{navigator.vibrate&&navigator.vibrate(r==='m'?[40,40,120]:big?[30,30,60]:15)}catch(_){}
-    setTimeout(sync,big?800:450)};
+  const sync=()=>{if(!left()){allB.hidden=true;okB.classList.remove('ghost');okB.textContent='Nice';o.querySelector('.pko-in .pko-hint').textContent='All cards revealed'}};
+  let best=-1;
+  const glow=r=>{const n=ORD.indexOf(r);if(n<3)return;
+    if(n>=best){best=n;o.style.setProperty('--gc',RAR[r].c);o.classList.toggle('rays',n>=4)}
+    o.classList.add('glow');o.classList.remove('pulse');void o.offsetWidth;o.classList.add('pulse')};
+  const sparks=(c,r)=>{if(calm)return;const n=[8,10,14,22,30,40][ORD.indexOf(r)],box=c.querySelector('.pko-pts');let h='';
+    for(let i=0;i<n;i++){const a=Math.PI*2*i/n+Math.random()*.4,d=60+Math.random()*(ORD.indexOf(r)>=3?120:60),z=3+Math.random()*5;
+      h+=`<i style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d)}px;--z:${z.toFixed(1)}px;--t:${(.6+Math.random()*.5).toFixed(2)}s"></i>`}
+    box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},1300)};
+  const flip=c=>{if(c.classList.contains('fl')||c.classList.contains('pre'))return;const r=got[cards.indexOf(c)].r,n=ORD.indexOf(r),big=n>=3;
+    const wait=calm||!big?0:r==='m'?900:r==='l'?650:400;
+    if(wait)c.classList.add('pre');
+    setTimeout(()=>{c.classList.remove('pre');c.classList.add('fl');if(big)c.classList.add('spin');
+      setTimeout(()=>{sparks(c,r);glow(r);c.classList.add('land')},calm?0:big?620:360);
+      if(r==='m')setTimeout(()=>{o.classList.add('flash');setTimeout(()=>o.classList.remove('flash'),600)},calm?0:620);
+      setTimeout(sync,calm?0:big?1000:600)},wait);
+    try{navigator.vibrate&&navigator.vibrate(r==='m'?[40,40,140]:big?[30,30,70]:15)}catch(_){}};
   cards.forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('button'))return;flip(c)});c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip(c)}})});
-  allB.onclick=()=>{cards.filter(c=>!c.classList.contains('fl')).forEach((c,i)=>setTimeout(()=>flip(c),i*260))};
-  const close=()=>{o.remove();document.documentElement.style.overflow='';render()};
-  okB.onclick=close;o.addEventListener('click',e=>{if(e.target===o&&!left())close()});
+  allB.onclick=()=>{cards.filter(c=>!c.classList.contains('fl')&&!c.classList.contains('pre')).forEach((c,i)=>setTimeout(()=>flip(c),i*300))};
+  const close=()=>{clearTimeout(auto);o.remove();document.documentElement.style.overflow='';render()};
+  okB.onclick=close;o.addEventListener('click',e=>{if((e.target===o||e.target.classList.contains('pko-bg'))&&ripped&&!left())close()});
 }
 /* small picture of an item, for packs and the Locker */
 function itemArt(id,s=48){const x=ITEM[id];if(!x)return'';
@@ -3606,8 +3671,9 @@ function viewShop(){
   let body='';
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
-    const adDone=(v.fr||{}).ad===TODAY();
-    body=free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free Rookie pack every day</b><small class="muted">${adDone?'You got today’s pack. A new one is ready tomorrow.':'Watch a short sponsor video and open a Rookie pack. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
+    const adDone=(v.fr||{}).ad===TODAY(),gm=FG_SPORT==='bb'?'Hoops':'Field Goal',ord=['','1st','2nd','3rd'];
+    const prizes=fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('');
+    body=prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free Rookie pack every day</b><small class="muted">${adDone?'You got today’s pack. A new one is ready tomorrow.':'Watch a short sponsor video and open a Rookie pack. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       <div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
       <p class="muted">${P.c} random items, each with a 30% chance to be a player or team card${P.g?`, at least one ${RAR[P.g].n.toLowerCase()} or better`:''}.</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">Each item rolls these odds${P.g?`; the last item is at least ${RAR[P.g].n}`:''}. Duplicate cosmetics turn into tokens.</small></details>
@@ -4331,6 +4397,16 @@ const fgDay2=()=>{const d=new Date(TODAY()+'T12:00:00Z');d.setUTCDate(d.getUTCDa
 const fgStreak=u=>{const k=fgRec(u).sk;return k&&(k.last===TODAY()||k.last===fgYest()||(k.last===fgDay2()&&typeof invLeft==='function'&&invLeft(u,'p_freeze')>0))?+k.n||0:0};   /* a streak freeze covers one missed day */
 const fgGold=u=>!!u&&fgStreak(u)>=FG_GOLD;
 const fgDay=u=>{const d=fgRec(u).dd;return d&&d.d===TODAY()?d:null};
+/* daily leaderboard prizes (v256): when a day ends, 1st place gets a Player pack, 2nd and 3rd a Rookie pack.
+   Each day's best is kept in fg.dh[date]={b,t} so finished days can be ranked; claims are inv.fr.lb[date]. */
+const FG_LB_START='2026-11-07',FG_LB_BACK=7,FG_LB_PRIZE=['player','rookie','rookie'];
+const fgDayOf=(u,day)=>{const r=fgRec(u),h=(r.dh||{})[day];if(h)return {best:+h.b||0,t:+h.t||0};const d=r.dd;return d&&d.d===day?{best:+d.best||0,t:+d.t||0}:null};
+const fmtDay=day=>new Date(day+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'});
+const fgRank=day=>Object.keys(S.picks).map(u=>({u,d:fgDayOf(u,day)})).filter(x=>x.d&&x.d.best>0).sort((a,b)=>b.d.best-a.d.best||(a.d.t||0)-(b.d.t||0));
+function fgPrizes(u){if(!u)return[];const out=[],cl=((invOf(u).fr||{}).lb)||{},d=new Date(TODAY()+'T12:00:00Z');
+  for(let i=1;i<=FG_LB_BACK;i++){d.setUTCDate(d.getUTCDate()-1);const day=d.toISOString().slice(0,10);if(day<FG_LB_START)break;if(cl[day])continue;
+    const pl=fgRank(day).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({day,place:pl+1,type:FG_LB_PRIZE[pl]})}
+  return out}
 const fgTriesLeft=()=>{const d=fgDay(ME.uid)||{};return Math.max(0,FG_TRIES+(+d.x||0)-(+d.tries||0))};
 function fgHTML(){
   const my=ME.uid?fgRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',bb=FG_SPORT==='bb',M=UI.fgm==='free'?'free':'daily';
@@ -4343,6 +4419,7 @@ function fgHTML(){
     const rows=Object.keys(S.picks).map(u=>({u,d:fgDay(u)})).filter(x=>x.d&&(+x.d.best||0)>0).sort((a,b)=>b.d.best-a.d.best||(a.d.t||0)-(b.d.t||0)).map(x=>({u:x.u,v:x.d.best+' pts · '+fgTime(x.d.t)}));
     const sk=ME.uid?fgStreak(ME.uid):0,gold=sk>=FG_GOLD;
     body=`<p class="fg-note"><b>Today’s course is the same for everyone.</b> ${FG_TRIES} tries a day, your best counts. Play every day for <b>+${FG_DAY_PAY} tokens</b>, and a ${FG_GOLD}-day streak turns your ball gold until the streak breaks.</p>
+      <p class="fg-prize">🏆 When the day ends, <b>1st place wins a ${esc(PACKS.player.n)}</b> and <b>2nd and 3rd win a ${esc(PACKS.rookie.n)}</b>.${can&&fgPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
       <div class="fc-bar" style="grid-template-columns:repeat(3,1fr)"><div><small>Your best today</small><b>${d&&d.best?d.best:'–'}</b></div><div><small>Tries left</small><b>${left} of ${FG_TRIES}</b></div><div><small>Streak</small><b>${sk} ${sk===1?'day':'days'}</b></div></div>
       <div class="fg-gold ${gold?'on':''}"><span class="fg-gb" aria-hidden="true"></span><span>${gold?`<b>Golden ball active.</b> Play every day to keep it.`:`<b>Golden ball:</b> ${Math.min(sk,FG_GOLD)} of ${FG_GOLD} days`}</span>${gold?'':`<i style="--p:${Math.min(1,sk/FG_GOLD)}"></i>`}</div>
       <div class="fc-deal"><button class="btn" data-act="fgPlay" data-v="daily" ${can&&!left?'disabled':''}>${can&&!left?'Back tomorrow':'Play today’s challenge'}</button>${can&&!left&&invLeft(ME.uid,'p_try')>0?`<button class="btn ghost" data-act="perkTry">Use an extra try (${invLeft(ME.uid,'p_try')})</button>`:''}</div>`;
@@ -4516,7 +4593,7 @@ async function fgSave(g){
   if(g.saved)return;g.saved=true;
   if(!(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'))return;
   const my=fgRec(ME.uid),t=Math.round(g.t*10)/10;let patch;
-  if(g.mode==='daily'){const d=fgDay(ME.uid)||{d:TODAY(),tries:1},b=+d.best||0,dd={d:TODAY(),tries:+d.tries||1,best:Math.max(b,g.score),t:g.score>b?t:(+d.t||0)};patch={dd}}
+  if(g.mode==='daily'){const d=fgDay(ME.uid)||{d:TODAY(),tries:1},b=+d.best||0,dd={d:TODAY(),tries:+d.tries||1,best:Math.max(b,g.score),t:g.score>b?t:(+d.t||0)};patch={dd,dh:{[TODAY()]:{b:dd.best,t:dd.t}}}}
   else patch={best:Math.max(+my.best||0,g.score),t:g.score>(+my.best||0)?t:(+my.t||0),lt:Math.max(+my.lt||0,t),runs:(+my.runs||0)+1,tot:(+my.tot||0)+g.score,at:NOW()};
   S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:{...my,...patch}};
   try{await upsert('picks/'+ME.uid,{fg:patch})}catch(_){}
@@ -7004,7 +7081,7 @@ document.addEventListener('click',async e=>{
   else if(a==='lkOwn'){UI.lkOwn=!UI.lkOwn;UI.lkN=30;render()}
   else if(a==='lkMore'){UI.lkN=(UI.lkN||30)+30;render()}
   else if(a==='pkOpen'){const k=t.dataset.v,h=t.dataset.h,P=PACKS[k];if(!P)return;
-    if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random items. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h)}
+    if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random items. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h,t.dataset.d)}
   else if(a==='lkEq'){const k=t.dataset.k,v=t.dataset.v;if(v&&!invHas(ME.uid,v))return;if(t.closest('.pko')){t.closest('.pko').querySelectorAll(`.pko-eq[data-k="${k}"]`).forEach(x=>{x.textContent='Equip';x.disabled=false});t.textContent='Equipped ✓';t.disabled=true}const inv=invOf(ME.uid),eq=Object.assign({},inv.eq,{[k]:v});
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},inv,{eq})});if(!t.closest('.pko'))render();upsert('picks/'+ME.uid,{inv:{eq}}).catch(()=>say('That did not save.'))}
   else if(a==='bxSet'){const kind=t.dataset.kind,id=t.dataset.id,f=t.dataset.f,coll=kind==='pp'?'props':'bets',cur=kind==='pp'?propsOf(ME.uid):betsOf(ME.uid),b=cur[id];if(!b)return;
