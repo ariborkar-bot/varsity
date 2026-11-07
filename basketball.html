@@ -2498,7 +2498,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v268 · Nov 7';
+const APP_BUILD='v269 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4416,6 +4416,12 @@ function fgPrizes(u){if(!u)return[];const out=[],cl=((invOf(u).fr||{}).lb)||{},d
   for(let i=1;i<=FG_LB_BACK;i++){d.setUTCDate(d.getUTCDate()-1);const day=d.toISOString().slice(0,10);if(day<FG_LB_START)break;if(cl[day])continue;
     const pl=fgRank(day).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({day,place:pl+1,type:FG_LB_PRIZE[pl]})}
   return out}
+/* v269: out of daily tries -> watch an ad for one more (once a day, dd.adt), then a 4th+ try for $0.99 (shown as Coming soon: no real-money purchases yet) */
+const FG_TRY_USD='$0.99';
+const fgAdUsed=()=>!!((fgDay(ME.uid)||{}).adt);
+function fgAdTry(after){if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline')return;const d=fgDay(ME.uid)||{d:TODAY(),tries:0,best:0,t:0};if(d.adt)return;
+  const dd=Object.assign({},d,{d:TODAY(),x:(+d.x||0)+1,adt:1}),my=fgRec(ME.uid);S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:{...my,dd}};upsert('picks/'+ME.uid,{fg:{dd}}).catch(()=>{});say('+1 try for today’s challenge');if(after)after()}
+const fgMoreBtns=()=>fgAdUsed()?`<button type="button" class="btn ghost fgm-usd" disabled title="Coming soon">1 more try · ${FG_TRY_USD} · Coming soon</button>`:`<button type="button" class="btn fgm-ad" data-act="fgAdTry">▶ Watch an ad for 1 more try</button>`;
 const fgTriesLeft=()=>{const d=fgDay(ME.uid)||{};return Math.max(0,FG_TRIES+(+d.x||0)-(+d.tries||0))};
 function fgHTML(){
   const my=ME.uid?fgRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',bb=FG_SPORT==='bb',M=UI.fgm==='free'?'free':'daily';
@@ -4431,7 +4437,7 @@ function fgHTML(){
       <p class="fg-prize">🏆 When the day ends, <b>1st place wins a ${esc(PACKS.player.n)}</b> and <b>2nd and 3rd win a ${esc(PACKS.rookie.n)}</b>.${can&&fgPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
       <div class="fc-bar" style="grid-template-columns:repeat(3,1fr)"><div><small>Your best today</small><b>${d&&d.best?d.best:'–'}</b></div><div><small>Tries left</small><b>${left} of ${FG_TRIES}</b></div><div><small>Streak</small><b>${sk} ${sk===1?'day':'days'}</b></div></div>
       <div class="fg-gold ${gold?'on':''}"><span class="fg-gb" aria-hidden="true"></span><span>${gold?`<b>Golden ball active.</b> Play every day to keep it.`:`<b>Golden ball:</b> ${Math.min(sk,FG_GOLD)} of ${FG_GOLD} days`}</span>${gold?'':`<i style="--p:${Math.min(1,sk/FG_GOLD)}"></i>`}</div>
-      <div class="fc-deal">${can&&!left?'<button class="btn" data-act="fgPlay" data-v="free">Play Unlimited</button>':'<button class="btn" data-act="fgPlay" data-v="daily">Play today’s challenge</button>'}${can&&!left&&invLeft(ME.uid,'p_try')>0?`<button class="btn ghost" data-act="perkTry">Use an extra try (${invLeft(ME.uid,'p_try')})</button>`:''}</div>`;
+      <div class="fc-deal">${can&&!left?fgMoreBtns()+'<button class="btn ghost" data-act="fgPlay" data-v="free">Play Unlimited</button>':'<button class="btn" data-act="fgPlay" data-v="daily">Play today’s challenge</button>'}${can&&!left&&invLeft(ME.uid,'p_try')>0?`<button class="btn ghost" data-act="perkTry">Use an extra try (${invLeft(ME.uid,'p_try')})</button>`:''}</div>`;
     board=mgBoard('Today’s leaderboard',rows,'No one has played today’s course yet. Be the first.');
   }else{
     const rows=Object.keys(S.picks).map(u=>({u,b:+fgRec(u).best||0,t:+fgRec(u).t||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b||b.t-a.t).map(x=>({u:x.u,v:x.b+' pts · '+fgTime(x.t)}));
@@ -4440,7 +4446,7 @@ function fgHTML(){
       <div class="fc-deal"><button class="btn" data-act="fgPlay" data-v="free">Play</button></div>`;
     board=mgBoard('All-time best runs',rows,'No one is on the board yet. Play a run to be first.');
   }
-  return `<section class="card fg-card"><div class="fg-hero" aria-hidden="true">${bb?'🏀':'🏈'}</div><h3>${name}</h3>${seg}${body}${how}${can?'':'<p class="hint">Sign in to save your scores and get on the leaderboards.</p>'}</section>`+board;
+  return `<section class="card fg-card"><div class="fg-hero" aria-hidden="true">${bb?'🏀':'🏈'}</div><h3>${name}</h3>${seg}${body}${can?'':'<p class="hint">Sign in to save your scores and get on the leaderboards.</p>'}</section>`+board;
 }
 const fgTime=s=>{s=Math.max(0,s||0);const m=Math.floor(s/60),r=s-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)};
 /* Field Goal / Hoops zones: a new look as the run goes on, like Geometry Dash levels. Colours fade between zones (fgMix).
@@ -4606,6 +4612,14 @@ function fgOver(){
   if((!g.revived||invLeft(ME.uid,'p_revive')>0)&&ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'){g.offer=true;fgOffer(true);return}
   fgSave(g);
 }
+function fgOut(){const g=FG;if(!g)return;let o=g.el.querySelector('.fgx-more');
+  const want=g.st==='over'&&!g.offer&&g.mode==='daily'&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft()&&performance.now()-g.tEnd>300;
+  if(!want){if(o)o.remove();return}if(o)return;
+  o=document.createElement('div');o.className='fgx-rv fgx-more';
+  o.innerHTML=(fgAdUsed()?`<button type="button" class="rvx" disabled>1 more try · ${FG_TRY_USD} · Coming soon</button>`:'<button type="button" class="rvw">▶ Watch an ad for 1 more try</button>')+'<button type="button" class="rve">Play Unlimited</button>';
+  g.el.appendChild(o);o.style.top=(g.H*.3+160*g.s)+'px';
+  const w=o.querySelector('.rvw');if(w)w.onclick=()=>adPlay(()=>fgAdTry(()=>{o.remove();fgReset()}));
+  o.querySelector('.rve').onclick=()=>{o.remove();g.mode='free';UI.fgm='free';fgReset()}}
 function fgOffer(on){
   const g=FG;if(!g)return;let o=g.el.querySelector('.fgx-rv');
   if(!on){if(o)o.remove();return}
@@ -4629,7 +4643,7 @@ async function fgSave(g){
   if(g.saved)return;g.saved=true;
   if(!(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'))return;
   const my=fgRec(ME.uid),t=Math.round(g.t*10)/10;let patch;
-  if(g.mode==='daily'){const d=fgDay(ME.uid)||{d:TODAY(),tries:1},b=+d.best||0,dd={d:TODAY(),tries:+d.tries||1,best:Math.max(b,g.score),t:g.score>b?t:(+d.t||0)};patch={dd,dh:{[TODAY()]:{b:dd.best,t:dd.t}}}}
+  if(g.mode==='daily'){const d=fgDay(ME.uid)||{d:TODAY(),tries:1},b=+d.best||0,dd={...d,d:TODAY(),tries:+d.tries||1,best:Math.max(b,g.score),t:g.score>b?t:(+d.t||0)};patch={dd,dh:{[TODAY()]:{b:dd.best,t:dd.t}}}}
   else patch={best:Math.max(+my.best||0,g.score),t:g.score>(+my.best||0)?t:(+my.t||0),lt:Math.max(+my.lt||0,t),runs:(+my.runs||0)+1,tot:(+my.tot||0)+g.score,at:NOW()};
   S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:{...my,...patch}};
   try{await upsert('picks/'+ME.uid,{fg:patch})}catch(_){}
@@ -4835,9 +4849,10 @@ function fgDraw(){
   if(g.st==='ready')fgReady(c,g,W,H,s,bb,top);
   else if(false)msg(bb?'Tap to tip off':'Tap to kick off',(g.gold?'✨ Golden ball · '+fgStreak(ME.uid)+'-day streak\n':'')+(g.mode==='daily'?'Daily challenge · try '+(Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1))+' of '+FG_TRIES+'\n':'')+(bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts'));
   else if(g.paused&&g.st==='play'){msg(g.invP?'Revived!':'Paused','Tap to keep going');}
-  else if(g.st==='over'){const dly=g.mode==='daily',my=ME.uid?fgRec(ME.uid):{},d=ME.uid?fgDay(ME.uid):null,best=dly?(d&&d.best):my.best,line1=`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}`;
+  if(g.st==='over'||g.el.querySelector('.fgx-more'))fgOut();
+  if(g.st==='over'){const dly=g.mode==='daily',my=ME.uid?fgRec(ME.uid):{},d=ME.uid?fgDay(ME.uid):null,best=dly?(d&&d.best):my.best,line1=`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}`;
     if(g.offer)msg(bb?'Brick!':'No good!',line1+'\nKeep this run going?');
-    else{const out=dly&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft();msg(g.newBest&&g.score>0?(dly?'New best today!':'New best!'):(bb?'Brick!':'No good!'),`${line1}\n${best?(dly?'Best today: ':'Best: ')+best+' pts':''}\n${out?'Daily tries used. Tap for Unlimited':dly?'Tap to try again ('+fgTriesLeft()+' left)':'Tap to try again'}`)}}
+    else{const out=dly&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft();msg(g.newBest&&g.score>0?(dly?'New best today!':'New best!'):(bb?'Brick!':'No good!'),`${line1}\n${best?(dly?'Best today: ':'Best: ')+best+' pts':''}\n${out?'Daily tries used':dly?'Tap to try again ('+fgTriesLeft()+' left)':'Tap to try again'}`)}}
 }
 /* ---- Ring Chaser: fill a lineup one random school at a time.
    Spin a school, pick one of its players for an open spot, spin again (the same school can come up again).
@@ -7191,6 +7206,7 @@ document.addEventListener('click',async e=>{
     const nx=b.bx===f?null:f;if(nx&&invLeft(ME.uid,nx==='b'?'t_boost':'t_insure')<1){say('You don’t have one of those. Open packs in the Locker.');return}
     const d=S.picks[ME.uid]=Object.assign({},S.picks[ME.uid]);d[coll]=Object.assign({},d[coll],{[id]:Object.assign({},b,{bx:nx||undefined})});render();
     await act(()=>upsert('picks/'+ME.uid,{[coll]:{[id]:{bx:nx}}}),nx?(nx==='b'?'+25% boost on':'Insurance on'):'Boost removed')}
+  else if(a==='fgAdTry'){if(fgAdUsed())return;adPlay(()=>{fgAdTry();render()})}
   else if(a==='perkTry'){const d=fgDay(ME.uid)||{d:TODAY(),tries:0,best:0,t:0},dd=Object.assign({},d,{d:TODAY(),x:(+d.x||0)+1}),my=fgRec(ME.uid);
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{fg:Object.assign({},my,{dd})});upsert('picks/'+ME.uid,{fg:{dd}}).catch(()=>{});await invUse('p_try');say('Extra try added');render()}
   else if(a==='perkRedraw'){const w=CURW(),inv=invOf(ME.uid),fcx=Object.assign({},inv.fcx,{[w]:fcX(ME.uid,w)+1});await invUse('p_redraw',{fcx});say('+1 redraw this game');render()}
