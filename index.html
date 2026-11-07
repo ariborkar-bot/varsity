@@ -2044,6 +2044,13 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .mast-tick::after{display:none!important}
 .mt-i{text-shadow:none!important}
 #create-form:has(input[value=pk]:checked) .ro-wrap{display:none}
+/* v270 player props: game picker */
+.pp-games{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:thin}
+.pp-gm{flex:0 0 auto;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:132px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font:inherit;text-align:center}
+.pp-gm:hover{border-color:#5B8CFF}.pp-gm.on{border-color:#FFC23D;box-shadow:0 0 0 2px rgba(255,194,61,.35);background:linear-gradient(180deg,rgba(255,194,61,.12),transparent),var(--surface)}
+.pp-gl{display:flex;align-items:center;gap:6px}.pp-gl i{font-style:normal;font-size:.7rem;color:var(--muted)}
+.pp-gm b{font-size:.82rem;white-space:nowrap}.pp-gm small{font-size:.7rem;color:var(--muted);white-space:nowrap}.pp-gm small em{font-style:normal;color:#3DDC84;font-weight:700}
+.pp-gh{scroll-margin-top:80px;margin-top:6px}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2487,7 +2494,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v269 · Nov 7';
+const APP_BUILD='v270 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4172,6 +4179,7 @@ function bfBar(extra){
   const any=f.dv||f.w||f.sc;
   return `<section class="card bf-bar">${sel('dv','Division','All divisions',dvs.map(d=>[d,d]))}${sel('w','Week','All weeks',ws.map(w=>['' +w,'Week '+w]))}${sel('sc','School','All schools',scs.map(s=>[s,s]))}${any?'<button class="btn sm ghost" data-act="bfClear">Clear filters</button>':''}${extra||''}</section>`;
 }
+const abbr=n=>!n?'TBD':n.length<=11?n:n.split(/\s+/).map(w=>w[0]).join('').slice(0,4).toUpperCase();
 function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
@@ -4209,11 +4217,21 @@ function propsHTML(){
   const board=Object.keys(S.picks).filter(u=>Object.keys(propsOf(u)).length).map(u=>{const r=Object.values(propsOf(u)).map(b=>propResult(b,gm));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w);
   if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid))board.push({u:ME.uid,w:0,l:0});
   const boardCard=tokBoard();   /* one leaderboard: total tokens (owner, v239) */
-  let body='';
+  let body='',ppPick='';
   if(!propCands().length)body='<p class="empty">No player lines yet. They appear once the next games are set and players have three games of stats.</p>';
   else if(!all.length)body='<p class="empty">No lines match those filters. Try clearing them.</p>';
-  else body=wkOrder(shown.map(x=>x.game)).map(w=>{const L=shown.filter(x=>x.w===w);return `<div class="qh"><h3>Week ${w} player lines</h3><span class="muted">${all.filter(x=>x.w===w).length} lines</span></div><div class="gm-grid">${L.map(card).join('')}</div>`}).join('')+(all.length>shown.length?`<button class="btn ghost bt-more" data-act="ppMore">Show more (${all.length-shown.length} left)</button>`:'');
-  return boardCard+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+allBar+body+histCard;
+  else{
+    /* v270: pick a game, then see that game's player lines (no long scroll through every line) */
+    const gl=[],seen={};all.forEach(x=>{const id=gid(x.game);if(!seen[id]){seen[id]={id,g:x.game,n:0,mine:0};gl.push(seen[id])}seen[id].n++;if(mine[x.id])seen[id].mine++});
+    gl.sort((a,b)=>(a.g.d+(a.g.t||KICK))<(b.g.d+(b.g.t||KICK))?-1:1);
+    const glOpen=gl.filter(x=>!started(x.g)||x.mine);gl.length=0;gl.push(...(glOpen.length?glOpen:gl.slice()));
+    const cur=gl.find(x=>x.id===UI.ppG)||gl.find(x=>!started(x.g))||gl[0];
+    const pick=`<div class="pp-games" role="group" aria-label="Choose a game">${gl.map(x=>`<button class="pp-gm${x===cur?' on':''}" data-act="ppG" data-v="${esc(x.id)}" aria-pressed="${x===cur}"><span class="pp-gl">${slogo(x.g.a,26)}<i>at</i>${slogo(x.g.h,26)}</span><b>${esc(abbr(x.g.a))} at ${esc(abbr(x.g.h))}</b><small>${esc(fmtDate(x.g.d))} · ${x.n} ${x.n===1?'line':'lines'}${x.mine?` · <em>${x.mine} picked</em>`:''}</small></button>`).join('')}</div>`;
+    const L=all.filter(x=>gid(x.game)===cur.id).sort((a,b)=>a.school===b.school?0:a.school===cur.g.a?-1:1);
+    ppPick=`<div class="qh"><h3>Pick a game</h3><span class="muted">${gl.length} ${gl.length===1?'game':'games'} with lines</span></div>${pick}`;
+    body=`<div class="qh pp-gh"><h3>${esc(cur.g.a)} at ${esc(cur.g.h)}</h3><span class="muted">${esc(fmtDate(cur.g.d))}${cur.g.time?' · '+esc(cur.g.time):''} · ${L.length} lines</span></div><div class="gm-grid">${L.map(card).join('')}</div>`;
+  }
+  return boardCard+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+allBar+ppPick+body+histCard;
 }
 
 /* ---- Mock drafts: practice against AI teams, or join other people's mock draft ---- */
@@ -7150,6 +7168,7 @@ document.addEventListener('click',async e=>{
   else if(a==='atClear'){UI.at={};render()}
   else if(a==='bfClear'){UI.bf={dv:'',w:'',sc:''};UI.ppN=24;render()}
   else if(a==='ppM'){UI.pm=t.dataset.v;UI.ppN=24;render()}
+  else if(a==='ppG'){UI.ppG=t.dataset.v;render();const h=document.querySelector('.pp-gh');if(h&&h.getBoundingClientRect().top>innerHeight*.6)h.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(a==='ppMore'){UI.ppN+=24;render()}
   else if(a==='ppSide'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{s:t.dataset.s});render()}
   else if(a==='ppStake'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{stake:+t.dataset.v});render()}
