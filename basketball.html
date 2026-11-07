@@ -1420,6 +1420,12 @@ select option{background:#0B1730;color:#EAF0F8}
 .lk-kinds{display:flex;flex-wrap:wrap;gap:6px}.lk-it .ex{font-size:.62rem;color:#FFD36B}
 .ch-m.bu .nc{color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important;animation:none!important;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 .pko-m .pko-front{box-shadow:0 0 0 2px #FF4F6D,0 0 24px #FF4F6D,0 0 48px rgba(255,177,61,.6);animation:pkoMy 1.4s ease-in-out infinite}@keyframes pkoMy{50%{box-shadow:0 0 0 2px #FFB13D,0 0 30px #FFB13D,0 0 60px rgba(255,79,109,.7)}}
+.tcard{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:8px;border:2px solid var(--rc);background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--rc) 35%,#13213a),#0a1324 80%);box-shadow:0 0 10px color-mix(in srgb,var(--rc) 45%,transparent);flex:none;position:relative;overflow:hidden}
+.tcard i{font:900 .48rem/1 var(--f-display,inherit);letter-spacing:.08em;color:var(--rc);font-style:normal}.tcard .av{flex:none}.tc-m{animation:pkoMy 1.4s ease-in-out infinite}
+.cb-tag{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:99px;font:800 .6rem/1.2 var(--f-display,inherit);letter-spacing:.04em;color:#0b1220;background:linear-gradient(90deg,#3DDC84,#4FD8FF);vertical-align:middle}
+.bt-t .cb-tag{margin:4px 0 0}.bx-tag.cbx{color:#3DDC84}
+.lk-tiers{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.lk-tiers li{display:flex;justify-content:space-between;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:.8rem}
+.lk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:10px}.lk-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;border:1px solid var(--line);border-left:3px solid var(--rc);background:var(--surface2);color:inherit;font:inherit;text-align:left}.lk-card span{display:flex;flex-direction:column;gap:2px;min-width:0}.lk-card small{font-size:.72rem}
 /* v243 cosmetics: banners, name colours, card backs, chat bubbles */
 .ia-bn,.ia-cb{border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#22324f,#141f33);border:1px solid rgba(255,255,255,.12)}
 .ia-nc{border-radius:10px;background:var(--surface,#14213a);border:1px solid var(--line);font-weight:900;font-family:var(--f-display,inherit)}
@@ -2246,7 +2252,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v245 · Nov 6';
+const APP_BUILD='v246 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2770,9 +2776,9 @@ const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
   const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u);
-  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(b.bx==='b'?1.25:1);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
+  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(40,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
-  Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(b.bx==='b'?1.25:1);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
+  Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(40,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   return Math.round(t*100)/100;
 }
 const tk=n=>(Math.round(n*10)/10).toLocaleString()+' tokens';
@@ -3141,6 +3147,34 @@ const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)};
 function freePacks(u){const v=invOf(u),fr=v.fr||{},d=+fgRec(u).days||0;return (fr.st?0:1)+Math.max(0,Math.floor(d/7)-(+fr.d7||0))}
 function rollRarity(odds,floor){const ord=RAR_ORD;let x=fcRnd(10000)/100,acc=0,r='c';for(const k of ord){acc+=odds[k];if(x<acc){r=k;break}}
   if(floor&&ord.indexOf(r)<ord.indexOf(floor))r=floor;return r}
+/* ---------- Player and team cards (v246) ----------
+   A pack slot is a card 30% of the time: a real player (65%) or a team (35%) of the slot's rarity. Rarity comes from how good
+   they are (players: season fantasy points, plus last season's hidden rank in basketball preseason; teams: Pick 'em rating).
+   Stored as picks/<uid>.inv.cards = {'pc:<player key>' | 'tc:<school>': rarity at the time you pulled it}.
+   Owning a team's card boosts a winning Pick 'em pick on that team; a player's card boosts his winning props.
+   The boost is saved on the pick when you lock it in (bets/props[id].cb, percent), so it can't change afterwards. */
+const CARD_PCT={c:5,u:8,r:12,e:18,l:25,m:40},CARD_CHANCE=30;
+let _cp=null;
+function cardPools(){
+  if(_cp&&_cp.rev===_rev)return _cp;
+  const BR=window.BB_RANK||{};
+  const pl=players().filter(p=>!p.sample&&!/x$/.test(p.key)).map(p=>({id:'pc:'+p.key,v:(agg(p,'season').v||0)+(+BR[p.key]||0)})).sort((a,b)=>b.v-a.v);
+  const cutP=[[10,'m'],[40,'l'],[150,'e'],[450,'r'],[1100,'u'],[1e9,'c']],cutT=[[2,'m'],[6,'l'],[14,'e'],[30,'r'],[60,'u'],[1e9,'c']];
+  const tier=(i,cut)=>cut.find(([n])=>i<n)[1];
+  const R=ratings(),BP=window.BB_PRIOR||{},tv=t=>R[t]!==undefined?R[t]:BP[t]!==undefined?1500+BP[t]*20:1400,tm=SD_SCHOOLS.slice().sort((a,b)=>tv(b)-tv(a)||a.localeCompare(b));
+  const rar={},byR={p:{},t:{}};
+  pl.forEach((x,i)=>{const r=tier(i,cutP);rar[x.id]=r;(byR.p[r]=byR.p[r]||[]).push(x.id)});
+  tm.forEach((t,i)=>{const r=tier(i,cutT),id='tc:'+t;rar[id]=r;(byR.t[r]=byR.t[r]||[]).push(id)});
+  _cp={rev:_rev,rar,byR,nP:pl.length,nT:tm.length};return _cp}
+const cardsOf=u=>invOf(u).cards||{};
+const cardR=(u,id)=>{const r=cardsOf(u)[id];return RAR[r]?r:''};
+const cardPct=(u,id)=>{const r=cardR(u,id);return r?CARD_PCT[r]:0};
+function rollCard(r){const P=cardPools(),team=fcRnd(100)<35,pool=(team?P.byR.t:P.byR.p)[r]||(team?P.byR.p:P.byR.t)[r];return pool&&pool.length?pool[fcRnd(pool.length)]:''}
+function cardInfo(id){if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
+  const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
+function cardArt(id,r,s=54){const c=cardInfo(id),R=RAR[r]||RAR.c;
+  return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${c.team?slogo(c.school,Math.round(s*.5)):av(c.name,c.school,Math.round(s*.46))}<i>${c.team?'TEAM':'PLAYER'}</i></span>`}
+const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollItem(r){const pool=ITEMS.filter(x=>x.r===r&&!x.ex),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
   const P=use.length&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
 async function packOpen(type,how){
@@ -3150,9 +3184,12 @@ async function packOpen(type,how){
   if(how==='tok'&&bank(ME.uid)<P.tok){say(`You need ${P.tok} tokens for the ${P.n}.`);return}
   if(how==='free'&&freePacks(ME.uid)<1){say('No free packs right now.');return}
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
-  for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');const id=rollItem(r);
+  const cards=Object.assign({},v.cards);let gotCard=false;
+  for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
+    if(fcRnd(100)<CARD_CHANCE){const cid=rollCard(r);if(cid){const isDup=!!cards[cid];if(isDup)dup+=RAR[r].dup;else{cards[cid]=r;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
+    const id=rollItem(r);
     const was=+it[id]||0,isDup=isCos(id)&&was>0;if(isDup)dup+=RAR[r].dup;else it[id]=was+1;got.push({id,r,dup:isDup})}
-  const patch={it,n:(+v.n||0)+1};
+  const patch={it,n:(+v.n||0)+1};if(gotCard)patch.cards=cards;
   if(how==='tok')patch.sp=(+v.sp||0)+P.tok;
   if(dup)patch.dup=(+v.dup||0)+dup;
   if(how==='free'){const fr=Object.assign({},v.fr);if(!fr.st)fr.st=NOW();else fr.d7=(+fr.d7||0)+1;patch.fr=fr}
@@ -3163,7 +3200,9 @@ async function packOpen(type,how){
 /* the opening: cards flip one by one, glowing in their rarity colour */
 function packShow(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
-  o.innerHTML=`<div class="pko-in"><h2>${esc(P.n)}</h2><div class="pko-cards">${got.map((g,i)=>{const x=ITEM[g.id],R=RAR[g.r];
+  o.innerHTML=`<div class="pko-in"><h2>${esc(P.n)}</h2><div class="pko-cards">${got.map((g,i)=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
+    return `<div class="pko-c ${g.r==='m'?'pko-m':''}" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${cardArt(g.card,g.r,58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n} ${c.team?'team':'player'} card</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${CARD_PCT[g.r]}% on ${c.team?'Pick ’em picks':'his props'}`}</em></div></div>`}
+    const x=ITEM[g.id];
     return `<div class="pko-c ${g.r==='m'?'pko-m':''}" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}</div></div>`}).join('')}</div>
     <button class="btn" type="button">Nice</button></div>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
@@ -3190,22 +3229,33 @@ const eqOf=(u,k)=>{if(!u||!S.picks||!S.picks[u])return '';const x=(invOf(u).eq||
 const nmC=(u,txt)=>{const c=eqOf(u,'name'),b=eqOf(u,'badge');return (c?`<span class="nc ${c}" style="${cosStyle(c)}">${txt}</span>`:txt)+(b?bdgHTML(b):'')};
 function viewLocker(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>Locker</h2><p>Open packs to collect banners, frames, name colours, titles, badges, card backs, chat bubbles, ball skins, perks and token boosts. Hit collection milestones and finish team sets for exclusive items. Everything here is free to earn with tokens and daily play.</p></div>`;
+  const head=`<div class="head"><h2>Locker</h2><p>Open packs to collect player and team cards that boost your picks, plus banners, frames, name colours, titles, badges, card backs, chat bubbles, ball skins, perks and token boosts. Hit collection milestones and finish team sets for exclusive items. Everything here is free to earn with tokens and daily play.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to open packs and keep items.</p>';
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
-  const tab=['packs','cos','boost'].includes(UI.lk)?UI.lk:'packs';
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Locker">${[['packs','Packs'],['cos','Cosmetics'],['boost','Boosts & perks']].map(([k,l])=>`<button class="chip" data-act="lkTab" data-v="${k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const tab=['packs','cards','cos','boost'].includes(UI.lk)?UI.lk:'packs';
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Locker">${[['packs','Packs'],['cards','Cards'],['cos','Cosmetics'],['boost','Boosts & perks']].map(([k,l])=>`<button class="chip" data-act="lkTab" data-v="${k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
   const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div></section>`;
   let body='';
   if(tab==='packs'){
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
     body=free+`<div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
-      <p class="muted">${P.c} random items${P.g?`, at least one ${RAR[P.g].n.toLowerCase()} or better`:''}.</p>
+      <p class="muted">${P.c} random items, each with a 30% chance to be a player or team card${P.g?`, at least one ${RAR[P.g].n.toLowerCase()} or better`:''}.</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">Each item rolls these odds${P.g?`; the last item is at least ${RAR[P.g].n}`:''}. Duplicate cosmetics turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button>
       <button class="btn ghost lk-usd" disabled title="Coming soon">${P.usd} · Coming soon</button></article>`).join('')}</div>
       <p class="muted lk-note">Items have no cash value and can’t be traded. Real-money packs will go through the App Store or Google Play.</p>`;
+  }else if(tab==='cards'){
+    const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=UI.lkC==='t'?'t':'p',N=UI.lkN||30;
+    const ids=Object.keys(mine).filter(id=>(T==='t')===id.startsWith('tc:')).sort((a,b)=>ord[mine[a]]-ord[mine[b]]||cardInfo(a).name.localeCompare(cardInfo(b).name));
+    const nP=Object.keys(mine).filter(i=>i.startsWith('pc:')).length,nT=Object.keys(mine).length-nP;
+    const tiers=RAR_ORD.slice().reverse().map(r=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>+${CARD_PCT[r]}%</b></li>`).join('');
+    body=`<section class="card"><div class="qh"><h3>Player & team cards</h3><span class="muted">${nP+nT} owned</span></div>
+      <p class="muted">Packs can hold real player and team cards. Own a team’s card and your winning Pick ’em picks on that team pay more. Own a player’s card and his winning props pay more. Better players and teams are rarer.</p>
+      <ul class="lk-tiers">${tiers}</ul><small class="muted">Boost on the winnings, added on top of a +25% token boost. It is saved on the pick when you lock it in.</small></section>
+      <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button></div>
+      ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=mine[id],R=RAR[r];return `<${c.key?'button type="button" data-act="player" data-id="'+esc(c.key)+'"':'div'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,64)}<span><b>${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">${R.n} · +${CARD_PCT[r]}%</small></span></${c.key?'button':'div'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
+        :`<p class="empty">No ${T==='t'?'team':'player'} cards yet. Open packs to pull some.</p>`}</section>`;
   }else if(tab==='cos'){
     const dflt={ball:`<span class="ia ia-ball" style="width:48px;height:48px"></span>`,frame:`<span class="ia ia-frame" style="width:48px;height:48px"><i></i></span>`,
       banner:`<span class="ia ia-bn" style="width:77px;height:48px"></span>`,name:`<span class="ia ia-nc" style="width:77px;height:48px;font-size:20px">Aa</span>`,
@@ -3284,7 +3334,7 @@ function picksHTML(){
   const card=g=>{
     const id=gid(g),o=oddsFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
-      return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small></button>`};
+      return `<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="pkSide" data-g="${esc(id)}" data-s="${sd}" ${locked||!can?'disabled':''}>${slogo(n,28)}<b>${esc(n)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${pr}% to win</small>${ME.uid?cardTag(ME.uid,'tc:'+n):''}</button>`};
     const od=side?o[side]:0,room=avail+(b?+b.stake:0);
     let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play Pick ’em.</p>';
@@ -3297,6 +3347,7 @@ function picksHTML(){
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span>${b?`<button class="btn sm ghost" data-act="pkDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a team to pick the winner.</p>';
     if(b&&!locked)foot+=bxChips('pk',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
+    if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'tc:'+(side==='h'?g.h:g.a)))foot+=`<p class="bx-tag cbx">Your ${esc(side==='h'?g.h:g.a)} card adds +${cardPct(ME.uid,'tc:'+(side==='h'?g.h:g.a))}% if it wins</p>`;
     return `<article class="gm bt-g ${res==='won'||res==='lost'?'res-'+res:''}"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
   /* history and the board */
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:betResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
@@ -3643,8 +3694,9 @@ function propsHTML(){
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span>${b?`<button class="btn sm ghost" data-act="ppDrop" data-id="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under.</p>';
     if(b&&!locked)foot+=bxChips('pp',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
+    if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'pc:'+x.k))foot+=`<p class="bx-tag cbx">Your ${esc(x.name)} card adds +${cardPct(ME.uid,'pc:'+x.k)}% if it hits</p>`;
     return `<article class="gm bt-g pp"><div class="gm-h"><span>${esc(fmtDate(x.game.d))} · vs ${esc(x.opp)}</span>${x.game.dv?`<span class="gm-k p">${esc(x.game.dv)}</span>`:''}</div>
-      <button class="pp-who" type="button" data-act="player" data-id="${esc(x.k)}" aria-label="${esc(x.name)}, open player profile">${slogo(x.school,30)}<div><b>${esc(x.name)}</b><small class="muted">${esc(x.school)} · ${esc(x.pos)}</small></div><span class="pp-go" aria-hidden="true">›</span></button>
+      <button class="pp-who" type="button" data-act="player" data-id="${esc(x.k)}" aria-label="${esc(x.name)}, open player profile">${slogo(x.school,30)}<div><b>${esc(x.name)}</b>${ME.uid?cardTag(ME.uid,'pc:'+x.k):''}<small class="muted">${esc(x.school)} · ${esc(x.pos)}</small></div><span class="pp-go" aria-hidden="true">›</span></button>
       <div class="pp-m">${esc(M.l)}</div>
       <div class="bt-row">${btn('o','Over',x.over)}${btn('u','Under',x.under)}</div>
       <div class="pp-stat muted">Avg <b>${fmtN(x.mean)}</b> · last 3 <b>${fmtN(x.rc)}</b> · over ${fmtN(x.line)} in <b>${x.hits}</b> of ${x.n} games</div>${foot}</article>`};
@@ -6177,7 +6229,7 @@ document.addEventListener('click',async e=>{
   else if(a==='ppAll'){const today=TODAY(),pm=propMap(),cur=propsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pp).forEach(([id,u])=>{const x=pm[id],old=cur[id];if(!x||!u||!u.s||started(x.game))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;
-      const keep=old&&old.s===u.s;nb[id]={k:x.k,m:x.m,w:x.w,g:x.g,s:u.s,stake,line:keep?+old.line:x.line,odds:keep?+old.odds:(u.s==='o'?x.over:x.under),at:NOW(),...(old&&old.bx?{bx:old.bx}:{})}});
+      const keep=old&&old.s===u.s;nb[id]={k:x.k,m:x.m,w:x.w,g:x.g,s:u.s,stake,line:keep?+old.line:x.line,odds:keep?+old.odds:(u.s==='o'?x.over:x.under),at:NOW(),...(old&&old.bx?{bx:old.bx}:{}),...(cardPct(ME.uid,'pc:'+x.k)?{cb:cardPct(ME.uid,'pc:'+x.k)}:{})}});
     if(!n){say('Pick Over or Under first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:nb}),n+(n===1?' pick':' picks')+' locked in')){UI.pp={};render()}}
@@ -6203,7 +6255,7 @@ document.addEventListener('click',async e=>{
   else if(a==='pkClear'){UI.pk={};render()}
   else if(a==='pkAll'){const today=TODAY(),gm=gameMap(),cur=betsOf(ME.uid),nb={...cur};let n=0,need=0;
     Object.entries(UI.pk).forEach(([id,u])=>{const g=gm[id],old=cur[id];if(!g||!u||!u.s||started(g)||gDone(g))return;
-      const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;nb[id]={s:u.s,stake,odds:oddsFor(g)[u.s],w:g.w,at:NOW(),...(old&&old.bx?{bx:old.bx}:{})}});
+      const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;const cb=cardPct(ME.uid,'tc:'+(u.s==='h'?g.h:g.a));nb[id]={s:u.s,stake,odds:oddsFor(g)[u.s],w:g.w,at:NOW(),...(old&&old.bx?{bx:old.bx}:{}),...(cb?{cb}:{})}});
     if(!n){say('Pick a team first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),n+(n===1?' pick':' picks')+' locked in')){UI.pk={};render()}}
@@ -6211,7 +6263,7 @@ document.addEventListener('click',async e=>{
     const cur=betsOf(ME.uid),old=cur[id],ui=UI.pk[id]||{},s=ui.s||(old&&old.s);if(!s){say('Tap a team first.');return}
     const room=bank(ME.uid)+(old?+old.stake:0),stake=Math.min(ui.stake||(old&&old.stake)||5,Math.floor(room));
     if(stake<1){say('Not enough tokens.');return}
-    const o=oddsFor(g),nb={...cur,[id]:{s,stake,odds:o[s],w:g.w,at:NOW(),...(old&&old.bx?{bx:old.bx}:{})}};
+    const o=oddsFor(g),cb=cardPct(ME.uid,'tc:'+(s==='h'?g.h:g.a)),nb={...cur,[id]:{s,stake,odds:o[s],w:g.w,at:NOW(),...(old&&old.bx?{bx:old.bx}:{}),...(cb?{cb}:{})}};
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:nb,...fcKeep()}),'Pick locked in: '+(s==='h'?g.h:g.a)+' for '+stake+' tokens')){delete UI.pk[id];render()}}
     else if(a==='copy')copyText(t.dataset.code,'Invite code copied','#code');
     else if(a==='smsInv'){const g=S.groups[t.dataset.gid];if(g)smsInvite(g)}
@@ -6226,6 +6278,7 @@ document.addEventListener('click',async e=>{
   else if(a==='meEdit'){UI.meEdit=!UI.meEdit;render()}
   else if(a==='goLocker'){const c=$('#cfm');if(c&&!c.hidden&&typeof closeConfirm==='function')closeConfirm();location.hash='#locker'}
   else if(a==='lkTab'){UI.lk=t.dataset.v;render()}
+  else if(a==='lkC'){UI.lkC=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkK'){UI.lkK=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkOwn'){UI.lkOwn=!UI.lkOwn;UI.lkN=30;render()}
   else if(a==='lkMore'){UI.lkN=(UI.lkN||30)+30;render()}
