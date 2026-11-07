@@ -2297,7 +2297,7 @@ const keepOnly=(st,ks)=>{const o=zeroStat();ks.forEach(k=>o[k]=st[k]||0);return 
 (()=>{const by=new Map(mpP.map(p=>[p.key,p])),done=new Set();
   /* v274: which side (offense/defense) each school has box-score stats for, per game. If MaxPreps has no offensive stats for a school that
      week (Bishop's weeks 10-11), its two-way players' offense cards get no game there instead of a 0 line. */
-  const side={};for(const q of mpP)q.games.forEach((g,i)=>{if(!g)return;const k=q.school+'|'+i,o=side[k]||(side[k]={o:0,d:0});if(OFFK.some(x=>g.stat[x]))o.o=1;if(DEFK.some(x=>g.stat[x]))o.d=1});
+  const side={};for(const q of mpP)q.games.forEach((g,i)=>{if(!g)return;const k=q.school+'|'+i,o=side[k]||(side[k]={o:0,d:0,no:0,nd:0});if(OFFK.some(x=>g.stat[x]))o.no++;if(DEFK.some(x=>g.stat[x]))o.nd++;o.o=o.no>=3;o.d=o.nd>=3});   /* 3+ players = a real box score (one hand-entered line doesn't count) */
   for(const p of mpP){if(!p.tw||done.has(p.key))continue;const d=by.get(p.twin||(/[od]$/.test(p.key)?p.key.slice(0,-1)+(p.key.endsWith('o')?'d':'o'):''));if(!d)continue;
   p.twin=d.key;d.twin=p.key;done.add(p.key);done.add(d.key);
   for(const x of [p,d]){const ks=x.pos==='DEF'?DEFK:OFFK;x.games=x.games.map(g=>g&&{...g,stat:keepOnly(g.stat,ks)})}
@@ -2516,7 +2516,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v275 · Nov 7';
+const APP_BUILD='v276 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
