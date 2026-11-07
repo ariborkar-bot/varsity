@@ -1412,13 +1412,14 @@ select option{background:#0B1730;color:#EAF0F8}
 .bdg{display:inline-flex;vertical-align:-3px;margin-left:5px;width:1.05em;height:1.05em;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--m2) 70%,transparent))}.bdg svg{width:100%;height:100%}
 .ia-bd,.ia-ti{border-radius:10px;background:var(--surface,#14213a);border:1px solid var(--line)}
 .ti{display:inline-block;font:800 .62rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:999px;border:1px solid currentColor;margin-left:6px;vertical-align:middle;white-space:nowrap}
-.ia-ti .ti{margin:0;font-size:.58rem}.ti.r-c{color:#9FB0CC}.ti.r-r{color:#6AA6FF}.ti.r-e{color:#C7A6FF;box-shadow:0 0 8px rgba(180,140,255,.35)}.ti.r-l{color:#FFD36B;box-shadow:0 0 10px rgba(255,194,61,.45);background:rgba(255,194,61,.08)}
+.ia-ti .ti{margin:0;font-size:.58rem}.ti.r-c{color:#9FB0CC}.ti.r-u{color:#3DDC84}.ti.r-m{color:#FF6F86;box-shadow:0 0 12px rgba(255,79,109,.55);background:linear-gradient(90deg,rgba(255,79,109,.15),rgba(255,177,61,.15))}.ti.r-r{color:#6AA6FF}.ti.r-e{color:#C7A6FF;box-shadow:0 0 8px rgba(180,140,255,.35)}.ti.r-l{color:#FFD36B;box-shadow:0 0 10px rgba(255,194,61,.45);background:rgba(255,194,61,.08)}
 .me-id .ti{margin:4px 6px 2px 0;display:inline-block}
 .lk-col{display:flex;flex-direction:column;gap:10px}.lk-bar{height:10px;border-radius:99px;background:var(--surface2,#1c2a44);overflow:hidden}.lk-bar>i{display:block;height:100%;background:linear-gradient(90deg,#4C8DFF,#B48CFF,#FFC23D);border-radius:99px}
 .lk-ms{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}.lk-ms>div{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:12px;border:1px solid var(--line);text-align:center;font-size:.7rem}.lk-ms>div.got{border-color:#FFC23D;box-shadow:0 0 0 1px rgba(255,194,61,.3)}.lk-ms>div:not(.got){opacity:.7}
 .lk-sets{display:flex;flex-direction:column;gap:6px}.lk-set{display:flex;align-items:center;gap:10px;font-size:.8rem}.lk-set .lk-bar{flex:1;height:7px}.lk-sw{width:22px;height:22px;border-radius:6px;flex:none}
 .lk-kinds{display:flex;flex-wrap:wrap;gap:6px}.lk-it .ex{font-size:.62rem;color:#FFD36B}
 .ch-m.bu .nc{color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important;animation:none!important;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.pko-m .pko-front{box-shadow:0 0 0 2px #FF4F6D,0 0 24px #FF4F6D,0 0 48px rgba(255,177,61,.6);animation:pkoMy 1.4s ease-in-out infinite}@keyframes pkoMy{50%{box-shadow:0 0 0 2px #FFB13D,0 0 30px #FFB13D,0 0 60px rgba(255,79,109,.7)}}
 /* v243 cosmetics: banners, name colours, card backs, chat bubbles */
 .ia-bn,.ia-cb{border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#22324f,#141f33);border:1px solid rgba(255,255,255,.12)}
 .ia-nc{border-radius:10px;background:var(--surface,#14213a);border:1px solid var(--line);font-weight:900;font-family:var(--f-display,inherit)}
@@ -2234,7 +2235,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v244 · Nov 6';
+const APP_BUILD='v245 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3024,45 +3025,46 @@ function pklHTML(){
      n: packs opened }
    Token boosts sit on the pick itself (bets/props[id].bx = 'b' +25% winnings, 'i' insured: stake back if wrong), so a boost is used
    exactly when a pick carries it. Pack odds are shown before you open or buy (Apple requires this for random items). */
-const RAR={c:{n:'Common',c:'#9FB0CC',dup:10},r:{n:'Rare',c:'#4C8DFF',dup:25},e:{n:'Epic',c:'#B48CFF',dup:60},l:{n:'Legendary',c:'#FFC23D',dup:150}};
+const RAR={c:{n:'Common',c:'#9FB0CC',dup:10},u:{n:'Uncommon',c:'#3DDC84',dup:15},r:{n:'Rare',c:'#4C8DFF',dup:25},e:{n:'Epic',c:'#B48CFF',dup:60},l:{n:'Legendary',c:'#FFC23D',dup:150},m:{n:'Mythical',c:'#FF4F6D',dup:400}};
+const RAR_ORD=['c','u','r','e','l','m'];
 const ITEMS=[
   /* ball skins for Field Goal / Hoops */
   {id:'b_chrome',k:'ball',r:'r',n:'Chrome ball',d:'Mirror finish.'},{id:'b_neon',k:'ball',r:'r',n:'Neon ball',d:'Glowing seams.'},
   {id:'b_lava',k:'ball',r:'e',n:'Lava ball',d:'Molten cracks.'},{id:'b_ice',k:'ball',r:'c',n:'Ice ball',d:'Frosted glass.'},
-  {id:'b_camo',k:'ball',r:'c',n:'Camo ball',d:'Earth tones.'},{id:'b_throw',k:'ball',r:'c',n:'Throwback ball',d:'Old-school white.'},
-  {id:'b_rainbow',k:'ball',r:'l',n:'Rainbow ball',d:'Colors shift as it spins.'},
+  {id:'b_camo',k:'ball',r:'u',n:'Camo ball',d:'Earth tones.'},{id:'b_throw',k:'ball',r:'c',n:'Throwback ball',d:'Old-school white.'},
+  {id:'b_rainbow',k:'ball',r:'m',n:'Rainbow ball',d:'Colors shift as it spins.'},
   /* profile frames: a ring around your avatar everywhere */
-  {id:'f_neon',k:'frame',r:'r',n:'Neon frame',d:'Glow ring.'},{id:'f_letter',k:'frame',r:'c',n:'Varsity letter frame',d:'Two-tone ring.'},
+  {id:'f_neon',k:'frame',r:'r',n:'Neon frame',d:'Glow ring.'},{id:'f_letter',k:'frame',r:'u',n:'Varsity letter frame',d:'Two-tone ring.'},
   {id:'f_fire',k:'frame',r:'e',n:'On fire frame',d:'Orange flame ring.'},{id:'f_check',k:'frame',r:'c',n:'Checkered frame',d:'Race flag ring.'},
-  {id:'f_plat',k:'frame',r:'e',n:'Platinum frame',d:'Shiny silver ring.'},{id:'f_gold',k:'frame',r:'l',n:'Gold frame',d:'Solid gold ring.'},
+  {id:'f_plat',k:'frame',r:'e',n:'Platinum frame',d:'Shiny silver ring.'},{id:'f_gold',k:'frame',r:'m',n:'Gold frame',d:'Solid gold ring.'},
   /* profile banners: behind your name on your profile and on every leaderboard */
-  {id:'bn_field',k:'banner',r:'c',n:'Gridiron banner',d:'Turf and yard lines.'},{id:'bn_hard',k:'banner',r:'c',n:'Hardwood banner',d:'Gym floor.'},
-  {id:'bn_pin',k:'banner',r:'c',n:'Pinstripe banner',d:'Classic stripes.'},{id:'bn_camo',k:'banner',r:'c',n:'Camo banner',d:'Earth tones.'},
+  {id:'bn_field',k:'banner',r:'c',n:'Gridiron banner',d:'Turf and yard lines.'},{id:'bn_hard',k:'banner',r:'u',n:'Hardwood banner',d:'Gym floor.'},
+  {id:'bn_pin',k:'banner',r:'u',n:'Pinstripe banner',d:'Classic stripes.'},{id:'bn_camo',k:'banner',r:'c',n:'Camo banner',d:'Earth tones.'},
   {id:'bn_sunset',k:'banner',r:'r',n:'Sunset banner',d:'Golden hour.'},{id:'bn_lights',k:'banner',r:'r',n:'Stadium lights banner',d:'Friday night glow.'},
   {id:'bn_ice',k:'banner',r:'r',n:'Ice banner',d:'Frosted blue.'},{id:'bn_flame',k:'banner',r:'e',n:'Flames banner',d:'Hot streak.'},
   {id:'bn_galaxy',k:'banner',r:'e',n:'Galaxy banner',d:'Stars and nebula.'},{id:'bn_neon',k:'banner',r:'e',n:'Neon banner',d:'Glowing lines.'},
-  {id:'bn_gold',k:'banner',r:'l',n:'Gold rush banner',d:'Brushed gold.'},{id:'bn_champ',k:'banner',r:'l',n:'Champions banner',d:'Confetti and trophies.'},
+  {id:'bn_gold',k:'banner',r:'m',n:'Gold rush banner',d:'Brushed gold.'},{id:'bn_champ',k:'banner',r:'m',n:'Champions banner',d:'Confetti and trophies.'},
   /* name colours: your name in chat, leaderboards and matchups */
   {id:'nc_sky',k:'name',r:'c',n:'Sky name',d:'Light blue name.'},{id:'nc_lime',k:'name',r:'c',n:'Lime name',d:'Bright green name.'},
-  {id:'nc_orange',k:'name',r:'c',n:'Orange name',d:'Bright orange name.'},{id:'nc_pink',k:'name',r:'r',n:'Pink name',d:'Hot pink name.'},
+  {id:'nc_orange',k:'name',r:'c',n:'Orange name',d:'Bright orange name.'},{id:'nc_pink',k:'name',r:'u',n:'Pink name',d:'Hot pink name.'},
   {id:'nc_ice',k:'name',r:'r',n:'Ice name',d:'Frosted blue fade.'},{id:'nc_fire',k:'name',r:'e',n:'Fire name',d:'Red to gold fade.'},
   {id:'nc_neon',k:'name',r:'e',n:'Neon name',d:'Glowing name.'},{id:'nc_gold',k:'name',r:'l',n:'Gold name',d:'Shimmering gold.'},
-  {id:'nc_rainbow',k:'name',r:'l',n:'Rainbow name',d:'Every colour, moving.'},
+  {id:'nc_rainbow',k:'name',r:'m',n:'Rainbow name',d:'Every colour, moving.'},
   /* 5 Card Draw card backs */
-  {id:'cb_navy',k:'cback',r:'c',n:'Navy card back',d:'Deep navy with silver.'},{id:'cb_red',k:'cback',r:'c',n:'Crimson card back',d:'Red with white.'},
-  {id:'cb_green',k:'cback',r:'c',n:'Forest card back',d:'Green with gold.'},{id:'cb_steel',k:'cback',r:'r',n:'Steel card back',d:'Brushed metal.'},
+  {id:'cb_navy',k:'cback',r:'c',n:'Navy card back',d:'Deep navy with silver.'},{id:'cb_red',k:'cback',r:'u',n:'Crimson card back',d:'Red with white.'},
+  {id:'cb_green',k:'cback',r:'u',n:'Forest card back',d:'Green with gold.'},{id:'cb_steel',k:'cback',r:'r',n:'Steel card back',d:'Brushed metal.'},
   {id:'cb_teal',k:'cback',r:'r',n:'Teal card back',d:'Ocean teal.'},{id:'cb_sunset',k:'cback',r:'e',n:'Sunset card back',d:'Orange to purple.'},
   {id:'cb_carbon',k:'cback',r:'e',n:'Carbon card back',d:'Carbon fibre weave.'},{id:'cb_gold',k:'cback',r:'l',n:'Gold foil card back',d:'Shining gold foil.'},
   {id:'cb_holo',k:'cback',r:'l',n:'Holo card back',d:'Rainbow hologram.'},
   /* league chat bubbles */
   {id:'bu_mint',k:'bubble',r:'c',n:'Mint bubble',d:'Soft green.'},{id:'bu_sky',k:'bubble',r:'c',n:'Sky bubble',d:'Soft blue.'},
-  {id:'bu_slate',k:'bubble',r:'c',n:'Slate bubble',d:'Dark grey.'},{id:'bu_sunset',k:'bubble',r:'r',n:'Sunset bubble',d:'Orange fade.'},
+  {id:'bu_slate',k:'bubble',r:'u',n:'Slate bubble',d:'Dark grey.'},{id:'bu_sunset',k:'bubble',r:'r',n:'Sunset bubble',d:'Orange fade.'},
   {id:'bu_grape',k:'bubble',r:'r',n:'Grape bubble',d:'Purple fade.'},{id:'bu_neon',k:'bubble',r:'e',n:'Neon bubble',d:'Glowing outline.'},
   {id:'bu_fire',k:'bubble',r:'e',n:'Fire bubble',d:'Red to orange.'},{id:'bu_gold',k:'bubble',r:'l',n:'Gold bubble',d:'Gold with shine.'},
   /* minigame perks (used up when used) */
   {id:'p_revive',k:'perk',r:'c',n:'Extra revive',d:'A second revive in one Field Goal / Hoops run.'},
   {id:'p_try',k:'perk',r:'r',n:'Extra daily try',d:'One more daily challenge try today.'},
-  {id:'p_redraw',k:'perk',r:'c',n:'Extra redraw',d:'One more 5 Card Draw redraw this week.'},
+  {id:'p_redraw',k:'perk',r:'u',n:'Extra redraw',d:'One more 5 Card Draw redraw this week.'},
   {id:'p_freeze',k:'perk',r:'r',n:'Streak freeze',d:'Miss one day without losing your daily streak.'},
   /* token boosts (put one on a pick before the game starts) */
   {id:'t_boost',k:'tboost',r:'r',n:'+25% boost',d:'A winning pick pays 25% more.'},
@@ -3081,20 +3083,20 @@ const PALS=[
 const BN_PATS=[
   ['fade','Fade','c',(a,b,d)=>`linear-gradient(135deg,${a},${d})`],
   ['split','Two-tone','c',(a,b,d)=>`linear-gradient(115deg,${a} 0 55%,${b} 55% 100%)`],
-  ['pin','Pinstripe','c',(a,b,d)=>`repeating-linear-gradient(90deg,${a} 0 11px,${b} 11px 12px)`],
-  ['stripe','Stripes','r',(a,b,d)=>`repeating-linear-gradient(135deg,${a} 0 14px,${b} 14px 22px)`],
+  ['pin','Pinstripe','u',(a,b,d)=>`repeating-linear-gradient(90deg,${a} 0 11px,${b} 11px 12px)`],
+  ['stripe','Stripes','u',(a,b,d)=>`repeating-linear-gradient(135deg,${a} 0 14px,${b} 14px 22px)`],
   ['chev','Chevron','r',(a,b,d)=>`linear-gradient(135deg,${b} 25%,transparent 25%) -14px 0/28px 28px,linear-gradient(225deg,${b} 25%,transparent 25%) -14px 0/28px 28px,linear-gradient(315deg,${b} 25%,transparent 25%) 0 0/28px 28px,linear-gradient(45deg,${b} 25%,${a} 25%) 0 0/28px 28px`],
   ['dots','Halftone','r',(a,b,d)=>`radial-gradient(${b} 2px,transparent 2.5px) 0 0/12px 12px,linear-gradient(135deg,${a},${d})`],
   ['check','Checker','e',(a,b,d)=>`repeating-conic-gradient(${a} 0 25%,${b} 0 50%) 0 0/24px 24px`],
   ['field','Home field','e',(a,b,d)=>`repeating-linear-gradient(90deg,transparent 0 22px,${b} 22px 24px),linear-gradient(180deg,${a},${d})`],
-  ['carbon','Carbon stripe','e',(a,b,d)=>`linear-gradient(90deg,transparent 0 46%,${a} 46% 54%,transparent 54%),repeating-linear-gradient(45deg,#1d2025 0 4px,#2b2f36 4px 8px)`],
+  ['carbon','Carbon stripe','l',(a,b,d)=>`linear-gradient(90deg,transparent 0 46%,${a} 46% 54%,transparent 54%),repeating-linear-gradient(45deg,#1d2025 0 4px,#2b2f36 4px 8px)`],
   ['glow','Spotlight','l',(a,b,d)=>`radial-gradient(ellipse at 50% -20%,${b} 0,transparent 55%),radial-gradient(ellipse at 10% 120%,${a} 0,transparent 50%),linear-gradient(180deg,${d},${a})`]];
-const FR_STY=[['q','Quarters','c',(a,b)=>`conic-gradient(${a} 0 25%,${b} 0 50%,${a} 0 75%,${b} 0)`],['spin','Swirl','r',(a,b)=>`conic-gradient(${a},${b},${a})`],['rim','Trim','e',(a,b)=>`conic-gradient(${b} 0 8%,${a} 0 42%,${b} 0 58%,${a} 0 92%,${b} 0)`]];
+const FR_STY=[['q','Quarters','u',(a,b)=>`conic-gradient(${a} 0 25%,${b} 0 50%,${a} 0 75%,${b} 0)`],['spin','Swirl','r',(a,b)=>`conic-gradient(${a},${b},${a})`],['rim','Trim','e',(a,b)=>`conic-gradient(${b} 0 8%,${a} 0 42%,${b} 0 58%,${a} 0 92%,${b} 0)`]];
 const TITLES=[
-  ['Rookie','c'],['Bench Warmer','c'],['Walk-On','c'],['Water Boy','c'],['Practice Squad','c'],['Sixth Man','c'],['Film Room','c'],['Two-a-Days','c'],['Friday Night','c'],['Student Section','c'],
+  ['Rookie','c'],['Bench Warmer','c'],['Walk-On','c'],['Water Boy','c'],['Practice Squad','c'],['Sixth Man','u'],['Film Room','u'],['Two-a-Days','u'],['Friday Night','u'],['Student Section','u'],['Varsity','u'],['Spark Plug','u'],
   ['Starter','r'],['Team Captain','r'],['Playmaker','r'],['Sharpshooter','r'],['Lockdown','r'],['Iron Man','r'],['Gym Rat','r'],['Ball Hawk','r'],['Road Warrior','r'],['Clutch','r'],['Hometown Hero','r'],['Glass Cleaner','r'],
   ['All-League','e'],['All-CIF','e'],['Pick ’em Prophet','e'],['Draft Guru','e'],['Card Shark','e'],['Field Goal Ace','e'],['Bucket Getter','e'],['Undefeated','e'],['Stat Sheet','e'],['Scout','e'],['Big Game Hunter','e'],
-  ['MVP','l'],['Franchise Player','l'],['Hall of Famer','l'],['GOAT','l'],['Dynasty','l'],['Section Champ','l'],['Legend','l']];
+  ['MVP','l'],['Franchise Player','l'],['Hall of Famer','l'],['GOAT','m'],['Dynasty','m'],['Section Champ','l'],['Legend','m'],['Untouchable','m']];
 const BADGE_IC={
   star:['Star','M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],bolt:['Bolt','M13 2L4 14h7l-1 8 9-12h-7z'],crown:['Crown','M3 18h18l-2-10-5 4-2-6-2 6-5-4z'],
   flame:['Flame','M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 5 1-2 1-5 0-9z'],shield:['Shield','M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z'],trophy:['Trophy','M7 4h10v4a5 5 0 0 1-10 0zM5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4M10 14h4v3h3v3H7v-3h3z'],
@@ -3104,7 +3106,7 @@ const BADGE_IC={
   anchor:['Anchor','M12 5a2 2 0 1 0 0-4a2 2 0 1 0 0 4M12 5v16M5 13a7 7 0 0 0 14 0M8 9h8'],skull:['Skull','M12 2a8 8 0 0 0-8 8c0 3 2 5 3 6v4h10v-4c1-1 3-3 3-6a8 8 0 0 0-8-8zM9 11h.01M15 11h.01'],
   paw:['Paw','M12 13c-3 0-5 3-5 5s2 3 5 3 5-1 5-3-2-5-5-5zM6 10a2 2 0 1 0 0-4a2 2 0 1 0 0 4M18 10a2 2 0 1 0 0-4a2 2 0 1 0 0 4M9 6a2 2 0 1 0 0-4a2 2 0 1 0 0 4M15 6a2 2 0 1 0 0-4a2 2 0 1 0 0 4'],
   rocket:['Rocket','M12 2c4 3 5 8 4 12h-8C7 10 8 5 12 2zM8 14l-3 4h4M16 14l3 4h-4M10 18l2 4 2-4'],heart:['Heart','M12 21C5 15 2 11 2 7a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 4-3 8-10 14z']};
-const METALS=[['bronze','Bronze','c','#CD7F32','#7a4518'],['silver','Silver','r','#E3E7EC','#7d8794'],['gold','Gold','e','#FFD36B','#a8761c'],['diamond','Diamond','l','#9FF3FF','#3a7bd5']];
+const METALS=[['bronze','Bronze','c','#CD7F32','#7a4518'],['silver','Silver','u','#E3E7EC','#7d8794'],['gold','Gold','r','#FFD36B','#a8761c'],['plat','Platinum','e','#D9E4F5','#8fa3c8'],['diamond','Diamond','l','#9FF3FF','#3a7bd5'],['inferno','Inferno','m','#FF4F6D','#FFB13D']];
 const SOLID_NC=[['white','White','#FFFFFF'],['silver','Silver','#C9CFD6'],['red','Red','#FF4B4B'],['crimson','Crimson','#E0314B'],['orange2','Tangerine','#FF8A3D'],['yellow','Yellow','#FFE14D'],['lime2','Electric lime','#C8F526'],['green','Green','#3DDC84'],['mint','Mint','#5FE0B7'],['teal','Teal','#2EC4C4'],['cyan','Cyan','#4FD8FF'],['blue','Blue','#4C8DFF'],['indigo','Indigo','#7C83FF'],['violet','Violet','#B48CFF'],['magenta','Magenta','#FF4FE0'],['rose','Rose','#FF7AA8'],['peach','Peach','#FFB38A'],['sand','Sand','#E9D6A8'],['copper','Copper','#E08A4E'],['olive','Olive','#B5C25A']];
 (function(){
   const add=x=>ITEMS.push(x);
@@ -3115,10 +3117,10 @@ const SOLID_NC=[['white','White','#FFFFFF'],['silver','Silver','#C9CFD6'],['red'
     add({id:`cb_p_${k}`,k:'cback',r:'c',n:`${n} card back`,d:`Card back in ${n}.`,cb:[b,a,d,b],set:k});
     add({id:`cb_s_${k}`,k:'cback',r:'e',n:`${n} striped card back`,d:`Striped card back in ${n}.`,cb:[b,a,d,b],cbs:1,set:k});
     add({id:`bu_p_${k}`,k:'bubble',r:'c',n:`${n} bubble`,d:`Chat bubble in ${n}.`,bu:[a,b],set:k});
-    add({id:`bu_g_${k}`,k:'bubble',r:'r',n:`${n} fade bubble`,d:`Faded chat bubble in ${n}.`,bu:[a,b],bug:d,set:k});
+    add({id:`bu_g_${k}`,k:'bubble',r:'u',n:`${n} fade bubble`,d:`Faded chat bubble in ${n}.`,bu:[a,b],bug:d,set:k});
     add({id:`bd_set_${k}`,k:'badge',r:'l',ex:1,n:`${n} crest`,d:`Own every ${n} item to earn this crest.`,ic:'shield',m:[a,b],set:k});
   }
-  for(const [k,n,c] of SOLID_NC)add({id:`nc_s_${k}`,k:'name',r:'c',n:`${n} name`,d:`${n} name.`,col:c});
+  SOLID_NC.forEach(([k,n,c],i)=>add({id:`nc_s_${k}`,k:'name',r:i%2?'u':'c',n:`${n} name`,d:`${n} name.`,col:c}));
   TITLES.forEach(([t,r],i)=>add({id:`ti_${i}`,k:'title',r,n:t,d:`Shows “${t}” under your name.`}));
   for(const [ik,[inm]] of Object.entries(BADGE_IC))for(const [mk,mn,r,c1,c2] of METALS)add({id:`bd_${ik}_${mk}`,k:'badge',r,n:`${mn} ${inm}`,d:`${mn} ${inm.toLowerCase()} next to your name.`,ic:ik,m:[c1,c2]});
   /* collection milestones (exclusive, never in packs) */
@@ -3126,14 +3128,14 @@ const SOLID_NC=[['white','White','#FFFFFF'],['silver','Silver','#C9CFD6'],['red'
     [100,'mx_100','banner','Hall of Fame banner',{bg:'radial-gradient(ellipse at 50% -10%,rgba(255,236,170,.9),transparent 55%),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 9px),linear-gradient(180deg,#3a2705,#0b0a12)'}],
     [150,'mx_150','name','Prism name',{grad:'linear-gradient(90deg,#9FF3FF,#B48CFF,#FF7AA8,#FFD36B,#9FF3FF)',anim:1}],[250,'mx_250','badge','Diamond Crown',{ic:'crown',m:['#9FF3FF','#3a7bd5']}],
     [400,'mx_400','title','Completionist',{}],[600,'mx_600','cback','Prism card back',{cb:['#fff','#7c5cff','#14062e','#fff'],holo:1}]])
-    add(Object.assign({id,k,r:'l',ex:1,need,n,d:`Own ${need} cosmetics to unlock.`},extra));
+    add(Object.assign({id,k,r:'m',ex:1,need,n,d:`Own ${need} cosmetics to unlock.`},extra));
 })();
 const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
 const COS_K=['ball','frame','banner','name','cback','bubble','title','badge'];
 const PACKS={
-  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$3.99',odds:{c:70,r:24,e:5,l:1},g:''},
-  player:{n:'Player pack',c:5,tok:400,usd:'$6.99',odds:{c:55,r:33,e:10,l:2},g:'r'},
-  champs:{n:'Champs pack',c:10,tok:1200,usd:'$24.99',odds:{c:45,r:35,e:15,l:5},g:'e'}};
+  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$3.99',odds:{c:55,u:28,r:12,e:4,l:.9,m:.1},g:''},
+  player:{n:'Player pack',c:5,tok:400,usd:'$6.99',odds:{c:40,u:30,r:19,e:8,l:2.5,m:.5},g:'r'},
+  champs:{n:'Champs pack',c:10,tok:1200,usd:'$24.99',odds:{c:28,u:30,r:24,e:12,l:5,m:1},g:'e'}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return +((invOf(u).it||{})[id])||0};
 const cosOwnCount=u=>{const it=invOf(u).it||{};let n=0;for(const id in it){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&+it[id]>0)n++}return n};
@@ -3160,7 +3162,7 @@ function invLeft(u,id){const v=invOf(u),own=invHas(u,id);
 const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)};
 /* free packs: the starter pack, plus one Rookie pack for every 7 days you play the daily challenge */
 function freePacks(u){const v=invOf(u),fr=v.fr||{},d=+fgRec(u).days||0;return (fr.st?0:1)+Math.max(0,Math.floor(d/7)-(+fr.d7||0))}
-function rollRarity(odds,floor){const ord=['c','r','e','l'];let x=fcRnd(10000)/100,acc=0,r='c';for(const k of ord){acc+=odds[k];if(x<acc){r=k;break}}
+function rollRarity(odds,floor){const ord=RAR_ORD;let x=fcRnd(10000)/100,acc=0,r='c';for(const k of ord){acc+=odds[k];if(x<acc){r=k;break}}
   if(floor&&ord.indexOf(r)<ord.indexOf(floor))r=floor;return r}
 function rollItem(r){const pool=ITEMS.filter(x=>x.r===r&&!x.ex),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
   const P=use.length&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
@@ -3185,7 +3187,7 @@ async function packOpen(type,how){
 function packShow(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
   o.innerHTML=`<div class="pko-in"><h2>${esc(P.n)}</h2><div class="pko-cards">${got.map((g,i)=>{const x=ITEM[g.id],R=RAR[g.r];
-    return `<div class="pko-c" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}</div></div>`}).join('')}</div>
+    return `<div class="pko-c ${g.r==='m'?'pko-m':''}" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}</div></div>`}).join('')}</div>
     <button class="btn" type="button">Nice</button></div>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
   const close=()=>{o.remove();document.documentElement.style.overflow='';render()};
@@ -3244,7 +3246,7 @@ function viewLocker(){
       <div class="lk-sets">${sets.map(t=>`<div class="lk-set"><span class="lk-sw" style="background:linear-gradient(135deg,${t.a} 50%,${t.b} 50%)"></span><span style="min-width:120px">${esc(t.pn)}</span><span class="lk-bar"><i style="width:${(t.have/t.tot*100).toFixed(0)}%"></i></span><small class="muted">${t.have}/${t.tot}</small><span style="${invHas(ME.uid,'bd_set_'+t.pk)?'':'opacity:.3;filter:grayscale(1)'}">${bdgHTML('bd_set_'+t.pk,18)}</span></div>`).join('')}</div>
       <small class="muted">Collect every item in a team’s colours (${(SET_IDS[PALS[0][0]]||[]).length} items) to earn its crest badge.</small></section>`;
     const kinds=`<div class="lk-kinds" role="group" aria-label="Cosmetic type">${KINDS.map(([x,l])=>{const L=ITEMS.filter(i=>i.k===x);return `<button class="chip" data-act="lkK" data-v="${x}" aria-pressed="${x===k}">${l} <small class="muted">${L.filter(i=>invHas(ME.uid,i.id)).length}/${L.length}</small></button>`}).join('')}</div>`;
-    const ord={l:0,e:1,r:2,c:3};
+    const ord={m:0,l:1,e:2,r:3,u:4,c:5};
     let list=ITEMS.filter(x=>x.k===k).sort((p,q)=>(invHas(ME.uid,q.id)-invHas(ME.uid,p.id))||(ord[p.r]-ord[q.r]));
     if(onlyOwn)list=list.filter(x=>invHas(ME.uid,x.id));
     const shown=list.slice(0,N);
