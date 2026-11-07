@@ -1387,8 +1387,26 @@ select option{background:#0B1730;color:#EAF0F8}
 .pkl-more summary{cursor:pointer;list-style:none}.pkl-more[open] summary{margin-bottom:10px}
 @media (max-width:520px){.pkl-h,.pkl-r{grid-template-columns:24px minmax(0,1fr) 58px 64px 40px;font-size:.78rem}.pkl-r small{display:none}}
 
+/* avatars (v240) */
+.av.av3w{background:radial-gradient(circle at 50% 30%,#2c4677,#13213A 75%);overflow:hidden;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.av3i{width:100%;height:100%;object-fit:cover;display:block}
+.me-av{display:inline-flex;border-radius:50%;text-decoration:none}
+.ave .seg{margin:8px 0 12px}
+.ave-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:760px){.ave-grid{grid-template-columns:300px minmax(0,1fr)}}
+.ave-3d{display:flex;flex-direction:column;align-items:center;gap:4px;background:radial-gradient(circle at 50% 35%,#24406f,#0B1626 70%);border-radius:18px;padding:8px}
+.ave-3d canvas{width:100%;max-width:300px;height:340px;touch-action:none;cursor:grab}
+.ave-badge{display:flex;justify-content:center;padding:18px;background:var(--surface2);border-radius:18px}.av.big{display:inline-flex;align-items:center;justify-content:center}
+.ave-opts h4{margin:12px 0 6px;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.ave-row{display:flex;flex-wrap:wrap;gap:8px}
+.ave-o{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:700 .8rem var(--f-body,inherit);cursor:pointer;text-transform:capitalize}
+.ave-o.sw{width:40px;height:40px;padding:0;border-radius:50%;border:2px solid rgba(255,255,255,.25)}
+.ave-o.on{border-color:#FFC23D;box-shadow:0 0 0 2px rgba(255,194,61,.45)}.ave-o.lock{opacity:.35;cursor:default;position:relative}
+.ave-o.lock::after{content:"";position:absolute;right:-2px;top:-2px;width:12px;height:12px;border-radius:50%;background:#3A4A6B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 11V8a5 5 0 0 1 10 0v3' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E") center/8px no-repeat}
+.ave-num{max-width:140px;margin-top:10px}
+
 /* Locker (v240) */
-.me-lk{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;margin-bottom:14px}.me-lk>span:nth-child(2){flex:1;display:flex;flex-direction:column}.me-lk>b{font-size:1.6rem;color:var(--muted)}
+.me-lk{display:flex!important;flex-direction:row!important;text-align:left;align-items:center;gap:14px;text-decoration:none;color:inherit;margin-bottom:14px}.me-lk>span:nth-child(2){flex:1;display:flex;flex-direction:column}.me-lk>b{font-size:1.6rem;color:var(--muted)}
 .lk-top{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lk-top>div{display:flex;flex-direction:column}
 .lk-free{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;border-color:#FFC23D;background:linear-gradient(90deg,rgba(255,194,61,.14),transparent)}.lk-free>div{display:flex;flex-direction:column}
 .lk-packs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
@@ -1865,7 +1883,9 @@ const LOGO_ALIAS={'Army and Navy Academy':'Army-Navy','Central Union':'Central',
 const logoFor=s=>{const L=window.SCHOOL_LOGOS||{};return L[s]||L[LOGO_ALIAS[s]]||''};
 const slogo=(s,size=18)=>{const u=logoFor(s);return u?`<img class="slogo" src="${u}" alt="" width="${size}" height="${size}">`:''};
 const _pwRim=(name,seed)=>{try{const i=weekTop().list.findIndex(x=>x.p.name===name&&(x.p.school===seed||x.p.key===seed));return i<0?'':i===0?' rim-g':' rim-s'}catch(_){return''}};
-const av=(name,seed,size=40)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);const fr=seed&&typeof frameOf==='function'&&S.picks&&S.picks[seed]?frameOf(seed):'';return `<span class="av${_pwRim(name,seed)}${fr?' avf '+fr:''}" style="--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px" aria-hidden="true">${esc(ini)}${u?`<img class="avl" src="${u}" alt="">`:''}</span>`};
+const av=(name,seed,size=40)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);const fr=seed&&typeof frameOf==='function'&&S.picks&&S.picks[seed]?frameOf(seed):'';const cu=seed&&S.profiles&&S.profiles[seed]&&S.profiles[seed].avt&&typeof avCustom==='function'?avCustom(seed,size,name):'';
+  if(typeof cu==='string'&&cu)return `<span class="av av3w${fr?' avf '+fr:''}" style="width:${size}px;height:${size}px" aria-hidden="true">${cu}</span>`;
+  return `<span class="av${_pwRim(name,seed)}${fr?' avf '+fr:''}" style="--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px${cu?';background:'+cu.bg:''}" aria-hidden="true">${cu&&cu.ic?`<svg viewBox="0 0 24 24" width="${Math.round(size*.52)}" height="${Math.round(size*.52)}" aria-hidden="true"><path d="${AV_IC[cu.ic]}" fill="#fff"/></svg>`:esc(ini)}${u&&!cu?`<img class="avl" src="${u}" alt="">`:''}</span>`};
 /* position filters: offense by position, defense by group (DB covers CB, S and plain DB) */
 const FILTERS=['ALL','QB','RB','WR','TE','DEF','DL','LB','DB','K'];
 const FLABEL={ALL:'All'};
@@ -2179,7 +2199,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v240 · Nov 6';
+const APP_BUILD='v241 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3047,8 +3067,8 @@ function viewLocker(){
   const head=`<div class="head"><h2>Locker</h2><p>Open packs for ball skins, profile frames, minigame perks and token boosts. Everything here is free to earn with tokens and daily play.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to open packs and keep items.</p>';
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
-  const tab=['packs','cos','boost'].includes(UI.lk)?UI.lk:'packs';
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Locker">${[['packs','Packs'],['cos','Cosmetics'],['boost','Boosts & perks']].map(([k,l])=>`<button class="chip" data-act="lkTab" data-v="${k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const tab=['packs','avatar','cos','boost'].includes(UI.lk)?UI.lk:'packs';
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Locker">${[['packs','Packs'],['avatar','Avatar'],['cos','Cosmetics'],['boost','Boosts & perks']].map(([k,l])=>`<button class="chip" data-act="lkTab" data-v="${k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
   const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div></section>`;
   let body='';
   if(tab==='packs'){
@@ -3060,6 +3080,7 @@ function viewLocker(){
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button>
       <button class="btn ghost lk-usd" disabled title="Coming soon">${P.usd} · Coming soon</button></article>`).join('')}</div>
       <p class="muted lk-note">Items have no cash value and can’t be traded. Real-money packs will go through the App Store or Google Play.</p>`;
+  }else if(tab==='avatar'){body=avEditorHTML();
   }else if(tab==='cos'){
     const sec=(k,label,none)=>{const list=ITEMS.filter(x=>x.k===k);const cur=k==='ball'?eq.ball:eq.frame;
       return `<section class="card"><div class="qh"><h3>${label}</h3><span class="muted">${list.filter(x=>invHas(ME.uid,x.id)).length} of ${list.length}</span></div><div class="lk-grid">
@@ -3081,6 +3102,174 @@ function bxChips(kind,id,b){
   if(!b.bx&&!nb&&!ni)return '';
   const chip=(f,id2,label,n)=>`<button class="chip bx ${b.bx===f?'on':''}" data-act="bxSet" data-kind="${kind}" data-id="${esc(id)}" data-f="${f}" aria-pressed="${b.bx===f}" ${b.bx===f||n?'':'disabled'}>${label}${b.bx===f?' · on':` (${n})`}</button>`;
   return `<div class="bx-row">${chip('b','t_boost','+25% boost',nb)}${chip('i','t_insure','Insurance',ni)}</div>`}
+/* ---------- Avatars (v240): a badge avatar or a 3D athlete, saved on your profile (profiles/<uid>.avt) ----------
+   avt = {m:'badge'|'3d', bg, ic, skin, hair, hc, hw, acc, kicks, c1, c2, num}
+   Basic options are free; the rest come from Locker packs (items with k:'av' or k:'badge').
+   The 3D avatar is drawn by a tiny WebGL renderer below (no library). Small pictures of it (leaderboards, chat, standings)
+   are snapshots made once per look and kept in memory (AVC). */
+const AV_SKIN=['#F6D3B3','#E8B48A','#C98E62','#A86B43','#7A4A2B','#4E2F1C'];
+const AV_HC={black:'#1b1714',brown:'#5a3720',blonde:'#d9b26a',red:'#9c3b1e',grey:'#9aa0a8',blue:'#2F6BFF',pink:'#FF5FB0',green:'#2FBF71'};
+const AV_COL=['#1F4FBF','#B3122E','#0E7A3E','#5B2A86','#E46A12','#111318','#E3B23C','#FFFFFF'];
+const AV_BG={blue:'linear-gradient(135deg,#2F6BFF,#1C3E91)',red:'linear-gradient(135deg,#E5484D,#8A1D22)',green:'linear-gradient(135deg,#2FBF71,#0E5A30)',purple:'linear-gradient(135deg,#8B5CF6,#3B1C80)',orange:'linear-gradient(135deg,#FF8A3D,#B24A05)',slate:'linear-gradient(135deg,#3A4A6B,#141E33)',
+  g_sunset:'linear-gradient(135deg,#FF5E7A,#FFB15A)',g_ocean:'linear-gradient(135deg,#26C6DA,#1C3E91)',g_galaxy:'radial-gradient(circle at 30% 25%,#C8F7FF,#7A4DFF 45%,#14063A)',g_gold:'radial-gradient(circle at 30% 25%,#FFF6C8,#F2BE2C 45%,#9C6F00)'};
+const AV_IC={i_star:'M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.6 6.7 19.4l1.2-6L3.4 9.3l6-.7z',i_flame:'M12 2c1.5 5 7 6.5 7 12a7 7 0 0 1-14 0c0-4 3-5.5 4-9 1.5 3 3 3 3-3z',i_bolt:'M13 2L4 14h7l-1 8 9-12h-7z',i_crown:'M3 18l2-11 5 5 2-7 2 7 5-5 2 11z'};
+/* pack items for avatars */
+ITEMS.push(
+  {id:'a_afro',k:'av',r:'r',n:'Afro',d:'Hair style.',slot:'hair'},{id:'a_mohawk',k:'av',r:'e',n:'Mohawk',d:'Hair style.',slot:'hair'},{id:'a_long',k:'av',r:'r',n:'Long hair',d:'Hair style.',slot:'hair'},
+  {id:'a_dye',k:'av',r:'r',n:'Hair dye',d:'Blue, pink and green hair.',slot:'hc'},
+  {id:'a_cap',k:'av',r:'c',n:'Ball cap',d:'Headwear.',slot:'hw'},{id:'a_beanie',k:'av',r:'c',n:'Beanie',d:'Headwear.',slot:'hw'},{id:'a_crown',k:'av',r:'l',n:'Crown',d:'Headwear.',slot:'hw'},
+  {id:'a_chain',k:'av',r:'r',n:'Gold chain',d:'Accessory.',slot:'acc'},{id:'a_shades',k:'av',r:'r',n:'Shades',d:'Accessory.',slot:'acc'},
+  {id:'a_goldkicks',k:'av',r:'e',n:'Gold kicks',d:'Shoes.',slot:'kicks'},{id:'a_neonkicks',k:'av',r:'r',n:'Neon kicks',d:'Shoes.',slot:'kicks'},
+  {id:'g_sunset',k:'badge',r:'c',n:'Sunset badge',d:'Badge background.',slot:'bg'},{id:'g_ocean',k:'badge',r:'c',n:'Ocean badge',d:'Badge background.',slot:'bg'},
+  {id:'g_galaxy',k:'badge',r:'e',n:'Galaxy badge',d:'Badge background.',slot:'bg'},{id:'g_gold',k:'badge',r:'l',n:'Gold badge',d:'Badge background.',slot:'bg'},
+  {id:'i_star',k:'badge',r:'c',n:'Star icon',d:'Badge icon.',slot:'ic'},{id:'i_flame',k:'badge',r:'c',n:'Flame icon',d:'Badge icon.',slot:'ic'},
+  {id:'i_bolt',k:'badge',r:'r',n:'Bolt icon',d:'Badge icon.',slot:'ic'},{id:'i_crown',k:'badge',r:'e',n:'Crown icon',d:'Badge icon.',slot:'ic'});
+ITEMS.forEach(x=>{ITEM[x.id]=x});
+const AV_DEF={m:'badge',bg:'blue',ic:'',skin:2,hair:'fade',hc:'black',hw:'',acc:'',kicks:'',c1:'#1F4FBF',c2:'#FFFFFF',num:'1'};
+const avtOf=u=>Object.assign({},AV_DEF,((S.profiles[u]||{}).avt)||{});
+/* an option is usable if it's free or you own the item */
+const avOwn=(u,id)=>!id||!ITEM[id]||invHas(u,id)>0;
+/* ---- tiny WebGL renderer ---- */
+const AV3={};
+function av3Mats(){
+  const M={
+    mul(a,b){const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s}return o},
+    id(){const o=new Float32Array(16);o[0]=o[5]=o[10]=o[15]=1;return o},
+    tr(x,y,z){const o=M.id();o[12]=x;o[13]=y;o[14]=z;return o},
+    sc(x,y,z){const o=M.id();o[0]=x;o[5]=y;o[10]=z;return o},
+    ry(a){const o=M.id(),c=Math.cos(a),s=Math.sin(a);o[0]=c;o[2]=-s;o[8]=s;o[10]=c;return o},
+    rx(a){const o=M.id(),c=Math.cos(a),s=Math.sin(a);o[5]=c;o[6]=s;o[9]=-s;o[10]=c;return o},
+    rz(a){const o=M.id(),c=Math.cos(a),s=Math.sin(a);o[0]=c;o[1]=s;o[4]=-s;o[5]=c;return o},
+    persp(f,asp,n,fa){const o=new Float32Array(16),t=1/Math.tan(f/2);o[0]=t/asp;o[5]=t;o[10]=(fa+n)/(n-fa);o[11]=-1;o[14]=2*fa*n/(n-fa);return o},
+    look(e,c){const z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]],zl=Math.hypot(...z);z[0]/=zl;z[1]/=zl;z[2]/=zl;const x=[z[2],0,-z[0]],xl=Math.hypot(...x);x[0]/=xl;x[2]/=xl;const y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+      const o=M.id();o[0]=x[0];o[4]=x[1];o[8]=x[2];o[1]=y[0];o[5]=y[1];o[9]=y[2];o[2]=z[0];o[6]=z[1];o[10]=z[2];o[12]=-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]);o[13]=-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]);o[14]=-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]);return o}};
+  return M}
+function av3Geo(){
+  const G={};
+  const sph=(la,lo,top)=>{const p=[],n=[],u=[];const pmax=top?Math.PI/2:Math.PI;
+    for(let i=0;i<la;i++)for(let j=0;j<lo;j++){const t0=i/la*pmax,t1=(i+1)/la*pmax,f0=j/lo*2*Math.PI,f1=(j+1)/lo*2*Math.PI;
+      const v=(t,f)=>[Math.sin(t)*Math.sin(f),Math.cos(t),Math.sin(t)*Math.cos(f)];
+      for(const [t,f] of [[t0,f0],[t1,f0],[t1,f1],[t0,f0],[t1,f1],[t0,f1]]){const q=v(t,f);p.push(...q);n.push(...q);u.push(0,0)}}
+    return{p,n,u}};
+  const cyl=(s)=>{const p=[],n=[],u=[];for(let j=0;j<s;j++){const a0=j/s*2*Math.PI,a1=(j+1)/s*2*Math.PI,x0=Math.sin(a0),z0=Math.cos(a0),x1=Math.sin(a1),z1=Math.cos(a1);
+      for(const [x,y,z] of [[x0,-.5,z0],[x1,-.5,z1],[x1,.5,z1],[x0,-.5,z0],[x1,.5,z1],[x0,.5,z0]]){p.push(x,y,z);n.push(x,0,z);u.push(0,0)}
+      for(const yy of [.5,-.5])for(const [x,z] of [[0,0],[x0,z0],[x1,z1]]){p.push(x,yy,z);n.push(0,yy*2,0);u.push(0,0)}}return{p,n,u}};
+  const box=()=>{const p=[],n=[],u=[];const F=[[[1,0,0],[0,1,0],[0,0,1]],[[-1,0,0],[0,1,0],[0,0,-1]],[[0,1,0],[0,0,1],[1,0,0]],[[0,-1,0],[0,0,-1],[1,0,0]],[[0,0,1],[0,1,0],[-1,0,0]],[[0,0,-1],[0,1,0],[1,0,0]]];
+    for(const [nn,a,b] of F){const c=k=>[nn[0]*.5+a[0]*k[0]*.5+b[0]*k[1]*.5,nn[1]*.5+a[1]*k[0]*.5+b[1]*k[1]*.5,nn[2]*.5+a[2]*k[0]*.5+b[2]*k[1]*.5];
+      for(const k of [[-1,-1],[1,-1],[1,1],[-1,-1],[1,1],[-1,1]]){p.push(...c(k));n.push(...nn);u.push(0,0)}}return{p,n,u}};
+  const quad=()=>({p:[-.5,-.5,0,.5,-.5,0,.5,.5,0,-.5,-.5,0,.5,.5,0,-.5,.5,0],n:[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1],u:[0,1,1,1,1,0,0,1,1,0,0,0]});
+  G.sph=sph(14,22);G.hemi=sph(8,22,true);G.cyl=cyl(22);G.box=box();G.quad=quad();return G}
+function av3Init(cv){
+  const gl=cv.getContext('webgl',{antialias:true,premultipliedAlpha:false,preserveDrawingBuffer:true,alpha:true});if(!gl)return null;
+  const vs=`attribute vec3 aP;attribute vec3 aN;attribute vec2 aU;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vN;varying vec2 vU;void main(){gl_Position=uMVP*vec4(aP,1.0);vN=mat3(uM)*aN;vU=aU;}`;
+  const fs=`precision mediump float;varying vec3 vN;varying vec2 vU;uniform vec3 uC;uniform float uT;uniform sampler2D uS;uniform float uG;void main(){vec3 n=normalize(vN);float d=max(dot(n,normalize(vec3(.5,.8,.9))),0.0);float b=max(dot(n,normalize(vec3(-.6,.2,-.7))),0.0);
+    vec3 c=uC*(0.42+0.62*d)+uC*0.18*b;float sp=pow(max(dot(reflect(-normalize(vec3(.5,.8,.9)),n),vec3(0,0,1)),0.0),24.0)*uG;c+=vec3(sp);
+    if(uT>0.5){vec4 t=texture2D(uS,vU);if(t.a<0.15)discard;c=t.rgb*(0.55+0.5*d);}gl_FragColor=vec4(c,1.0);}`;
+  const sh=(t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s};
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return null;
+  const G=av3Geo(),B={};
+  for(const k in G){const g=G[k],mk=a=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(a),gl.STATIC_DRAW);return b};B[k]={p:mk(g.p),n:mk(g.n),u:mk(g.u),c:g.p.length/3}}
+  const L={aP:gl.getAttribLocation(pr,'aP'),aN:gl.getAttribLocation(pr,'aN'),aU:gl.getAttribLocation(pr,'aU'),uMVP:gl.getUniformLocation(pr,'uMVP'),uM:gl.getUniformLocation(pr,'uM'),uC:gl.getUniformLocation(pr,'uC'),uT:gl.getUniformLocation(pr,'uT'),uS:gl.getUniformLocation(pr,'uS'),uG:gl.getUniformLocation(pr,'uG')};
+  return{gl,pr,B,L,M:av3Mats(),tex:gl.createTexture()}}
+const hex3=h=>{h=String(h||'#888').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]};
+/* the figure: a chibi athlete made of spheres, cylinders and boxes. a = look config, yaw = turn angle */
+function av3Draw(R,a,yaw,W,H,por){
+  const {gl,pr,B,L,M}=R;gl.viewport(0,0,W,H);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.useProgram(pr);
+  const P=M.persp(.62,W/H,.1,50),V=por?M.look([0,1.42,3.3],[0,1.22,0]):M.look([0,1.15,6.2],[0,.95,0]),PV=M.mul(P,V),root=M.ry(yaw);
+  const skin=AV_SKIN[a.skin|0]||AV_SKIN[2],hc=AV_HC[a.hc]||AV_HC.black,c1=a.c1||'#1F4FBF',c2=a.c2||'#FFFFFF',bb=typeof FG_SPORT!=='undefined'&&FG_SPORT==='bb';
+  const kick=a.kicks==='a_goldkicks'?'#F2BE2C':a.kicks==='a_neonkicks'?'#26F0FF':'#F4F4F6';
+  const draw=(g,m,col,gloss,tex)=>{const b=B[g],mm=M.mul(root,m);gl.uniformMatrix4fv(L.uMVP,false,M.mul(PV,mm));gl.uniformMatrix4fv(L.uM,false,mm);gl.uniform3fv(L.uC,hex3(col));gl.uniform1f(L.uG,gloss||0);gl.uniform1f(L.uT,tex?1:0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,b.p);gl.enableVertexAttribArray(L.aP);gl.vertexAttribPointer(L.aP,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,b.n);gl.enableVertexAttribArray(L.aN);gl.vertexAttribPointer(L.aN,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,b.u);gl.enableVertexAttribArray(L.aU);gl.vertexAttribPointer(L.aU,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,b.c)};
+  const T=(x,y,z,sx,sy,sz,rz,rx)=>{let m=M.tr(x,y,z);if(rz)m=M.mul(m,M.rz(rz));if(rx)m=M.mul(m,M.rx(rx));return M.mul(m,M.sc(sx,sy,sz))};
+  /* legs, shorts, shoes */
+  for(const s of [-1,1]){draw('cyl',T(s*.2,-.55,0,.13,.6,.13),skin);draw('box',T(s*.21,-.9,.08,.26,.16,.42),kick,.4);draw('box',T(s*.21,-.98,.08,.27,.04,.43),'#d0d3da')}
+  draw('cyl',T(0,-.12,0,.46,.42,.36),c1,.15);draw('box',T(0,-.12,.33,.05,.38,.02),c2);
+  /* torso (jersey) and trim */
+  draw('cyl',T(0,.48,0,.5,.85,.38),c1,.2);draw('cyl',T(0,.9,0,.44,.06,.33),c2);
+  draw('cyl',T(0,.1,0,.5,.06,.38),c2);
+  /* arms: tank-top arms (basketball) or sleeves (football) */
+  for(const s of [-1,1]){if(!bb)draw('cyl',T(s*.6,.68,0,.2,.32,.2,s*.35),c1,.15);draw('cyl',T(s*.68,.38,0,.12,.55,.12,s*.22),skin);draw('sph',T(s*.75,.08,0,.13,.13,.13),skin)}
+  if(bb)for(const s of [-1,1])draw('sph',T(s*.52,.82,0,.17,.14,.17),skin);
+  /* neck and head */
+  draw('cyl',T(0,1.0,0,.17,.2,.17),skin);draw('sph',T(0,1.48,0,.55,.55,.52),skin,.08);
+  for(const s of [-1,1]){draw('sph',T(s*.19,1.5,.46,.07,.08,.04),'#1b1714');draw('sph',T(s*.55,1.45,0,.08,.12,.08),skin)}
+  draw('box',T(0,1.3,.49,.16,.03,.02),'#7a2e2e');
+  /* hair */
+  const hair=a.hair||'fade';
+  if(hair==='fade')draw('hemi',T(0,1.6,-.02,.565,.42,.54),hc);
+  else if(hair==='buzz')draw('hemi',T(0,1.62,-.01,.56,.32,.53),hc);
+  else if(hair==='a_afro'){draw('sph',T(0,1.9,-.16,.76,.56,.62),hc);draw('hemi',T(0,1.62,-.02,.58,.36,.55),hc)}
+  else if(hair==='a_mohawk'){draw('hemi',T(0,1.6,-.02,.56,.3,.53),hc);draw('box',T(0,2.0,-.05,.12,.32,.8),hc)}
+  else if(hair==='a_long'){draw('hemi',T(0,1.6,-.03,.6,.46,.57),hc);draw('cyl',T(0,1.25,-.22,.5,.75,.32),hc)}
+  /* headwear */
+  if(a.hw==='band')draw('cyl',T(0,1.68,0,.58,.1,.55),c2);
+  else if(a.hw==='a_cap'){draw('hemi',T(0,1.7,0,.6,.42,.57),c1);draw('box',T(0,1.72,.56,.6,.04,.38),c1)}
+  else if(a.hw==='a_beanie'){draw('hemi',T(0,1.64,0,.6,.62,.57),c2);draw('cyl',T(0,1.68,0,.61,.12,.58),c1);draw('sph',T(0,2.28,0,.13,.13,.13),c1)}
+  else if(a.hw==='a_crown'){draw('cyl',T(0,2.05,0,.42,.22,.4),'#F2BE2C',.9);for(let k=0;k<6;k++){const an=k/6*Math.PI*2;draw('sph',T(Math.sin(an)*.4,2.2,Math.cos(an)*.38,.07,.1,.07),'#FFE38A',.9)}}
+  /* accessories */
+  if(a.acc==='a_chain'){for(let k=0;k<14;k++){const an=(k/13-.5)*2.4;draw('sph',T(Math.sin(an)*.3,.86-Math.cos(an)*.18+.18,.33+Math.cos(an)*.03,.04,.04,.04),'#F2BE2C',.9)}}
+  if(a.acc==='a_shades'){for(const s of [-1,1])draw('box',T(s*.2,1.52,.5,.26,.14,.04),'#0b0b10',.9);draw('box',T(0,1.55,.51,.16,.03,.03),'#0b0b10')}
+  /* jersey number: a textured quad on the chest */
+  const nc=document.createElement('canvas');nc.width=nc.height=128;const x=nc.getContext('2d');x.font='900 92px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.lineWidth=10;x.strokeStyle=c1;x.fillStyle=c2;
+  const num=String(a.num||'').slice(0,2);x.strokeText(num,64,70);x.fillText(num,64,70);
+  gl.bindTexture(gl.TEXTURE_2D,R.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,nc);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.uniform1i(L.uS,0);if(num)draw('quad',T(0,.5,.385,.5,.5,1),'#ffffff',0,true);
+}
+/* snapshots for small avatars: one hidden canvas, a picture per look */
+const AVC={};let avQ=new Map(),avQT=0;
+const avKey=a=>JSON.stringify([a.skin,a.hair,a.hc,a.hw,a.acc,a.kicks,a.c1,a.c2,a.num]);
+function avSnap(a){const k=avKey(a);if(AVC[k])return AVC[k];if(!avQ.has(k)){avQ.set(k,a);if(!avQT)avQT=setTimeout(avFlush,30)}return ''}
+function avFlush(){avQT=0;if(!AV3.off){const c=document.createElement('canvas');c.width=c.height=160;AV3.off=av3Init(c);AV3.offc=c}
+  const R=AV3.off;if(!R){avQ.clear();return}
+  for(const [k,a] of avQ){av3Draw(R,a,-.3,160,160,true);try{AVC[k]=AV3.offc.toDataURL('image/png')}catch(_){AVC[k]='x'}}
+  avQ.clear();if(typeof render==='function'&&!document.querySelector('.pko,#adov'))render(true)}
+/* the small avatar used everywhere for people with an avatar set */
+function avCustom(u,size,name){
+  const p=S.profiles[u];if(!p||!p.avt)return '';const a=avtOf(u);
+  if(a.m==='3d'){const src=avSnap(a);if(src&&src!=='x')return `<img class="av3i" src="${src}" alt="">`;}
+  const bg=AV_BG[a.bg]&&avOwn(u,a.bg.startsWith('g_')?a.bg:'')?AV_BG[a.bg]:AV_BG.blue,ic=a.ic&&AV_IC[a.ic]&&avOwn(u,a.ic)?a.ic:'';
+  return {bg,ic}}
+/* live 3D preview in the editor: drag to turn it, it turns slowly by itself */
+function av3Live(cv,get){
+  const R=av3Init(cv);if(!R){cv.replaceWith(Object.assign(document.createElement('p'),{className:'muted',textContent:'3D needs WebGL, which this browser has turned off.'}));return}
+  let yaw=-.4,drag=null,last=performance.now(),idle=0;const dpr=Math.min(2,devicePixelRatio||1);
+  const size=()=>{const r=cv.getBoundingClientRect();cv.width=Math.max(1,r.width*dpr);cv.height=Math.max(1,r.height*dpr)};size();
+  cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:yaw};cv.setPointerCapture(e.pointerId)});
+  cv.addEventListener('pointermove',e=>{if(drag){yaw=drag.y+(e.clientX-drag.x)/80;idle=0}});
+  cv.addEventListener('pointerup',()=>{drag=null});
+  const loop=t=>{if(!cv.isConnected)return;const dt=(t-last)/1000;last=t;idle+=dt;if(!drag&&idle>1.5)yaw+=dt*.6;av3Draw(R,get(),yaw,cv.width,cv.height);requestAnimationFrame(loop)};requestAnimationFrame(loop)}
+function avEditorHTML(){
+  const u=ME.uid,a=avtOf(u),pr=myProfile()||{};
+  const sw=(slot,list,cur,labelFn,isColor)=>`<div class="ave-row" role="group" aria-label="${slot}">${list.map(([v,item,label,css])=>{const own=avOwn(u,item);
+    return `<button class="ave-o ${isColor?'sw':''} ${String(cur)===String(v)?'on':''} ${own?'':'lock'}" data-act="avSet" data-k="${slot}" data-v="${esc(String(v))}" ${own?'':'disabled'} aria-pressed="${String(cur)===String(v)}" title="${esc(label)}${own?'':' (from packs)'}"${css?` style="${css}"`:''}>${isColor?'':esc(label)}</button>`}).join('')}</div>`;
+  const mode=`<div class="seg pr-seg" role="group" aria-label="Avatar type">${[['badge','Badge'],['3d','3D athlete']].map(([v,l])=>`<button data-act="avSet" data-k="m" data-v="${v}" aria-pressed="${a.m===v}">${l}</button>`).join('')}</div>`;
+  const prev=a.m==='3d'?`<div class="ave-3d"><canvas id="av3c" aria-label="Your 3D avatar. Drag to turn it."></canvas><small class="muted">Drag to turn</small></div>`
+    :`<div class="ave-badge"><span class="av big" style="background:${AV_BG[a.bg]||AV_BG.blue};width:120px;height:120px;font-size:44px">${a.ic&&AV_IC[a.ic]?`<svg viewBox="0 0 24 24" width="60" height="60" aria-hidden="true"><path d="${AV_IC[a.ic]}" fill="#fff"/></svg>`:esc(String(pr.name||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase())}</span></div>`;
+  let opts='';
+  if(a.m==='badge'){
+    opts=`<h4>Background</h4>${sw('bg',Object.keys(AV_BG).map(k=>[k,k.startsWith('g_')?k:'',ITEM[k]?ITEM[k].n:k,`background:${AV_BG[k]}`]),a.bg,0,true)}
+      <h4>Center</h4>${sw('ic',[['', '', 'Initials'],...Object.keys(AV_IC).map(k=>[k,k,ITEM[k].n.replace(' icon','')])],a.ic)}`;
+  }else{
+    const hcs=Object.keys(AV_HC).map(k=>[k,['blue','pink','green'].includes(k)?'a_dye':'',k,`background:${AV_HC[k]}`]);
+    opts=`<h4>Skin</h4>${sw('skin',AV_SKIN.map((c,i)=>[i,'','Tone '+(i+1),`background:${c}`]),a.skin,0,true)}
+      <h4>Hair</h4>${sw('hair',[['fade','','Fade'],['buzz','','Buzz'],['bald','','Bald'],['a_afro','a_afro','Afro'],['a_long','a_long','Long'],['a_mohawk','a_mohawk','Mohawk']],a.hair)}
+      <h4>Hair color</h4>${sw('hc',hcs,a.hc,0,true)}
+      <h4>Headwear</h4>${sw('hw',[['','','None'],['band','','Headband'],['a_cap','a_cap','Cap'],['a_beanie','a_beanie','Beanie'],['a_crown','a_crown','Crown']],a.hw)}
+      <h4>Extras</h4>${sw('acc',[['','','None'],['a_chain','a_chain','Gold chain'],['a_shades','a_shades','Shades']],a.acc)}
+      <h4>Shoes</h4>${sw('kicks',[['','','White'],['a_neonkicks','a_neonkicks','Neon'],['a_goldkicks','a_goldkicks','Gold']],a.kicks)}
+      <h4>Jersey</h4>${sw('c1',AV_COL.map(c=>[c,'',c,`background:${c}`]),a.c1,0,true)}<h4>Numbers and trim</h4>${sw('c2',AV_COL.map(c=>[c,'',c,`background:${c}`]),a.c2,0,true)}
+      <label class="fld ave-num"><span>Number</span><input id="av-num" inputmode="numeric" maxlength="2" value="${esc(String(a.num||''))}" data-act="avNum"></label>`;
+  }
+  return `<section class="card ave"><div class="qh"><h3>Your avatar</h3><span class="muted">Shows on leaderboards, standings and chat</span></div>${mode}<div class="ave-grid">${prev}<div class="ave-opts">${opts}</div></div>
+    <p class="muted">Locked options come from Locker packs.</p></section>`;
+}
+async function avSave(patch){const u=ME.uid,cur=((S.profiles[u]||{}).avt)||{},next=Object.assign({},AV_DEF,cur,patch);
+  S.profiles[u]=Object.assign({},S.profiles[u],{avt:next});_rev++;
+  try{await upsert('profiles/'+u,{avt:next})}catch(_){say('That did not save.')}}
 function mgBoard(title,rows,empty){
   if(!rows.length)return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div><p class="muted">${empty||'No one is on the board yet. Lock in a pick to be first.'}</p></section>`;
   const more=!!UI.mgMore,top=more?rows:rows.slice(0,3),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>`<div class="bt-h ${x.u===ME.uid?'me':''}"><span><span class="rk">${i+1}</span> <b>${esc(nm(x.u)+(x.u===ME.uid?' (you)':''))}</b></span><b>${x.v}</b></div>`;
@@ -4626,6 +4815,9 @@ async function sendChat(){
   await act(()=>upsert('groups/'+g.id,{chat:{[mid]:{u:ME.uid,t:txt,at:NOW()}}}));
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.target&&e.target.id==='chat-in'){e.preventDefault();sendChat()}});
+let AVNT=0;document.addEventListener('input',e=>{if(e.target&&e.target.id==='av-num'){const v=e.target.value.replace(/\D/g,'').slice(0,2);e.target.value=v;
+  const p=S.profiles[ME.uid];if(p){p.avt=Object.assign({},AV_DEF,p.avt||{},{num:v})}clearTimeout(AVNT);AVNT=setTimeout(()=>avSave({num:v}),600)}});
+document.addEventListener('click',e=>{const l=e.target.closest&&e.target.closest('[data-lk]');if(l)UI.lk=l.dataset.lk},true);
 /* The Weekly: an automatic recap of the last finished week in a league (top score, biggest win, closest game, best player) */
 function recapData(g){
   const ids=Object.keys(g.members).sort(),cw=CURW(),sw=startWeek(g),w=cw-1;
@@ -4995,7 +5187,7 @@ function viewMe(){
   return head+`
   <a class="card me-lk" href="#locker"><span class="ia ia-perk tboost" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16v13H4zM9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>Locker</b><small class="muted">${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' to open · ':''}Packs, skins, frames and boosts</small></span><b aria-hidden="true">›</b></a>
   <section class="card me-pro">
-    <div class="me-top">${av(pr.name,pr.school,56)}<div class="me-id"><h3>${esc(pr.name)}</h3><span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
+    <div class="me-top"><a href="#locker" data-lk="avatar" class="me-av" aria-label="Edit your avatar">${av(pr.name,ME.uid,64)}</a><div class="me-id"><h3>${esc(pr.name)}</h3><span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
     ${UI.meEdit?`<div class="pform">
         <label class="fld"><span>Name</span><input id="me-name" maxlength="40" value="${esc(pr.name)}" autocomplete="off" data-act="meName"></label>
         <label class="fld"><span>School</span><select id="me-school" data-act="meSchool">${(SD_SCHOOLS.includes(pr.school)?SD_SCHOOLS:[...SD_SCHOOLS,pr.school]).map(s=>`<option ${s===pr.school?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
@@ -5837,6 +6029,7 @@ function render(bg){
   /* redraws keep your place (10-0 respins used to jump the page up ~60 px: the description line showed for a moment, then folded away) */
   const y0=scrollY;
   $('#main').innerHTML=html;
+  {const c3=document.getElementById('av3c');if(c3&&typeof av3Live==='function')av3Live(c3,()=>avtOf(ME.uid))}
   infoIcons();   /* fold the page description behind its "i" now, not after the browser has laid the page out with it showing */
   if(scrollY!==y0)window.scrollTo(0,y0);
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
@@ -6073,6 +6266,7 @@ document.addEventListener('click',async e=>{
   else if(a==='meEdit'){UI.meEdit=!UI.meEdit;render()}
   else if(a==='goLocker'){const c=$('#cfm');if(c&&!c.hidden&&typeof closeConfirm==='function')closeConfirm();location.hash='#locker'}
   else if(a==='lkTab'){UI.lk=t.dataset.v;render()}
+  else if(a==='avSet'){const k=t.dataset.k;let v=t.dataset.v;if(k==='skin')v=+v;await avSave({[k]:v});render()}
   else if(a==='pkOpen'){const k=t.dataset.v,h=t.dataset.h,P=PACKS[k];if(!P)return;
     if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random items. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h)}
   else if(a==='lkEq'){const k=t.dataset.k,v=t.dataset.v;if(v&&!invHas(ME.uid,v))return;const inv=invOf(ME.uid),eq=Object.assign({},inv.eq,{[k]:v});
