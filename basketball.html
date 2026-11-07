@@ -2106,6 +2106,15 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .av.avf.f_check{box-shadow:inset 0 0 0 2px #1B1B1F,inset 0 0 0 4.5px #fff!important}
 .lk-god .lk-art,.pko-pack.lk-god .pko-pk{background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.35),transparent 45%),conic-gradient(from 200deg,#FF4F6D,#FFC23D,#3DDC84,#26F0FF,#7A4DFF,#FF4FE0,#FF4F6D);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 .lk-god{border-color:#FFC23D!important;box-shadow:0 0 0 1px rgba(255,194,61,.5),0 10px 30px -10px rgba(255,79,224,.5)!important}
+.pr-big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 6px}
+.pr-bt{display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.pr-bt:hover{transform:translateY(-1px)}.pr-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:1.3rem;background:rgba(255,255,255,.06);flex:none}
+.pr-tx{display:flex;flex-direction:column;min-width:0;gap:2px}.pr-tx b{font:900 italic 1.05rem/1.05 var(--f-display,inherit);text-transform:uppercase;letter-spacing:.02em}.pr-tx small{font-size:.72rem;color:var(--muted);line-height:1.2}
+.pr-bt[aria-pressed=true]{border-color:#FFC23D;background:linear-gradient(135deg,rgba(255,194,61,.22),rgba(242,154,29,.08)),var(--surface);box-shadow:0 8px 22px -10px rgba(255,170,40,.7)}
+.pr-bt[aria-pressed=true] .pr-ic{background:linear-gradient(135deg,#FFE08A,#F29A1D)}.pr-bt[aria-pressed=true] b{color:#FFC23D}
+@media (max-width:420px){.pr-bt{padding:10px;gap:8px}.pr-ic{width:34px;height:34px;font-size:1.1rem}.pr-tx b{font-size:.95rem}.pr-tx small{font-size:.66rem}}
+.chip.allin{background:linear-gradient(135deg,#FF4F6D,#FF9A1F)!important;color:#fff!important;border-color:transparent!important;font-weight:900!important;text-transform:uppercase;letter-spacing:.04em;box-shadow:0 4px 14px -4px rgba(255,79,109,.7)}
+.chip.allin[aria-pressed=true]{box-shadow:0 0 0 2px #fff,0 4px 14px -4px rgba(255,79,109,.8)}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2564,7 +2573,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v286 · Nov 7';
+const APP_BUILD='v287 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3899,8 +3908,8 @@ function picksHTML(){
     else if(gDone(g)&&b)foot=`<p class="bt-fin ${res}"><b>${res==='won'?'Correct':res==='lost'?'Wrong':'Push'}</b> · Final ${esc(g.a)} ${g.as}, ${esc(g.h)} ${g.hs} · ${res==='won'?'+'+tk(b.stake*(b.odds-1)):res==='push'?'stake back':'-'+tk(b.stake)}</p>`
     else if(locked)foot=b?`<p class="muted">Locked: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Pick ’em is closed for this game.</p>';
     else if(side){
-      const chips=[5,10,25,50].filter(v=>v<=room).concat(room>0&&![5,10,25,50].includes(Math.floor(room))?[Math.floor(room)]:[]);
-      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pk" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
+      const chips=[5,10,25,50].filter(v=>v<=room);
+      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="pkStake" data-g="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pk" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span>${b?`<button class="btn sm ghost" data-act="pkDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a team to pick the winner.</p>';
     if(b&&!locked)foot+=bxChips('pk',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
@@ -4156,7 +4165,7 @@ function spreadHTML(){
     else if(locked)foot=b?`<p class="muted">Locked: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room);
-      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="atStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="at" data-g="${esc(id)}" data-o="${ATS_PAY}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
+      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="atStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="atStake" data-g="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="at" data-g="${esc(id)}" data-o="${ATS_PAY}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*ATS_PAY)}</b></span>${b?`<button class="btn sm ghost" data-act="atDrop" data-g="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap a side to take the points.</p>';
     return `<article class="gm bt-g ${res==='won'||res==='lost'?'res-'+res:''}"><div class="gm-h"><span>${esc(fmtDate(g.d))}</span>${g.dv?`<span class="gm-k p">${esc(g.dv)}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div>${foot}</article>`};
@@ -4263,7 +4272,7 @@ function propsHTML(){
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'';
     else if(locked)foot=b?`<p class="muted">Locked: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
     else if(side){const chips=[5,10,25,50].filter(v=>v<=room);
-      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="ppStake" data-id="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pp" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
+      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="ppStake" data-id="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="ppStake" data-id="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pp" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span>${b?`<button class="btn sm ghost" data-act="ppDrop" data-id="${esc(id)}">Remove</button>`:''}</div>`}
     else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under.</p>';
     if(b&&!locked)foot+=bxChips('pp',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
@@ -4292,7 +4301,9 @@ function propsHTML(){
     const gl=[],seen={};all.forEach(x=>{const id=gid(x.game);if(!seen[id]){seen[id]={id,g:x.game,n:0,mine:0};gl.push(seen[id])}seen[id].n++;if(mine[x.id])seen[id].mine++});
     gl.sort((a,b)=>(a.g.d+(a.g.t||KICK))<(b.g.d+(b.g.t||KICK))?-1:1);
     const glOpen=gl.filter(x=>!started(x.g)||x.mine);gl.length=0;gl.push(...(glOpen.length?glOpen:gl.slice()));
-    const cur=gl.find(x=>x.id===UI.ppG)||gl.find(x=>!started(x.g))||gl[0];
+    const myS=(myProfile()||{}).school,mine1=myS&&gl.find(x=>!started(x.g)&&(x.g.h===myS||x.g.a===myS));
+    if(mine1){const i=gl.indexOf(mine1);gl.splice(i,1);gl.unshift(mine1)}   /* v287: your own school's game comes first */
+    const cur=gl.find(x=>x.id===UI.ppG)||mine1||gl.find(x=>!started(x.g))||gl[0];
     const pick=`<div class="pp-games" role="group" aria-label="Choose a game">${gl.map(x=>`<button class="pp-gm${x===cur?' on':''}" data-act="ppG" data-v="${esc(x.id)}" aria-pressed="${x===cur}"><span class="pp-gl">${slogo(x.g.a,26)}<i>at</i>${slogo(x.g.h,26)}</span><b>${esc(abbr(x.g.a))} at ${esc(abbr(x.g.h))}</b><small>${esc(fmtDate(x.g.d))} · ${x.n} ${x.n===1?'line':'lines'}${x.mine?` · <em>${x.mine} picked</em>`:''}</small></button>`).join('')}</div>`;
     const L=all.filter(x=>gid(x.game)===cur.id).sort((a,b)=>a.school===b.school?0:a.school===cur.g.a?-1:1);
     ppPick=`<div class="qh"><h3>Pick a game</h3><span class="muted">${gl.length} ${gl.length===1?'game':'games'} with lines</span></div>${pick}`;
@@ -5298,7 +5309,7 @@ function rcoWgBar(d,on){
   const canOffer=d.st==='wait'||(d.st==='live'&&rcoFresh(d));
   if(!canOffer||!ME.uid)return d.wg&&d.wg.st==='no'?`<p class="rco-wg muted">Playing for fun, no tokens.</p>`:'';
   const bal=bank(ME.uid);
-  return `<div class="rco-wg pick">${d.wg&&d.wg.st==='no'?'<small class="muted">Your last wager was turned down.</small>':''}${UI.rcoWgPick?`<p>Bet tokens on this game:</p><div class="chips">${RCO_WG.map(v=>`<button class="chip" data-act="rcoWg" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}<button class="chip" data-act="rcoWgPick">Cancel</button></div><small class="muted">Your opponent has to accept. Winner takes the tokens.</small>`:`<button class="btn sm ghost" data-act="rcoWgPick">🪙 Wager tokens</button>`}</div>`;
+  return `<div class="rco-wg pick">${d.wg&&d.wg.st==='no'?'<small class="muted">Your last wager was turned down.</small>':''}${UI.rcoWgPick?`<p>Bet tokens on this game:</p><div class="chips">${RCO_WG.map(v=>`<button class="chip" data-act="rcoWg" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}${bal>=1?`<button class="chip allin" data-act="rcoWg" data-v="${Math.floor(bal)}">All in · ${Math.floor(bal)}</button>`:''}<button class="chip" data-act="rcoWgPick">Cancel</button></div><small class="muted">Your opponent has to accept. Winner takes the tokens.</small>`:`<button class="btn sm ghost" data-act="rcoWgPick">🪙 Wager tokens</button>`}</div>`;
 }
 function rcoRmBar(d,on){
   const rm=d.rm,bal=bank(ME.uid);
@@ -5308,7 +5319,7 @@ function rcoRmBar(d,on){
   if(rm&&!rm.no)return `<div class="rco-wg ask them"><p>${esc(on)} wants a rematch${rm.amt?` for <b>${rm.amt} tokens</b>`:''}!</p><div class="btns"><button class="btn sm" data-act="rcoRmYes" ${rm.amt&&bal<rm.amt?'disabled':''}>Accept</button><button class="btn sm ghost" data-act="rcoRmNo">No thanks</button></div>${rm.amt&&bal<rm.amt?'<small class="muted">You don’t have enough tokens.</small>':''}</div>`;
   const last=rcoWgOn(d);
   return `<div class="rco-rm">${rm&&rm.no&&rm.by===ME.uid?`<small class="muted">${esc(on)} said no to the rematch.</small>`:''}<div class="btns" style="justify-content:center"><button class="btn" data-act="rcoRm" data-v="0">🔁 Rematch</button>${last?`<button class="btn ghost" data-act="rcoRm" data-v="${last}" ${bal<last?'disabled':''}>🔁 Run it back for ${last}</button>`:''}</div>
-    ${UI.rcoRmPick?`<div class="chips" style="justify-content:center">${RCO_WG.map(v=>`<button class="chip" data-act="rcoRm" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}<button class="chip" data-act="rcoRmPick">Cancel</button></div>`:`<button class="btn sm ghost" data-act="rcoRmPick">🪙 Rematch with a wager</button>`}</div>`;
+    ${UI.rcoRmPick?`<div class="chips" style="justify-content:center">${RCO_WG.map(v=>`<button class="chip" data-act="rcoRm" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}${bal>=1?`<button class="chip allin" data-act="rcoRm" data-v="${Math.floor(bal)}">All in · ${Math.floor(bal)}</button>`:''}<button class="chip" data-act="rcoRmPick">Cancel</button></div>`:`<button class="btn sm ghost" data-act="rcoRmPick">🪙 Rematch with a wager</button>`}</div>`;
 }
 function rcoShare(){
   const o=UI.rco;if(!o||!o.d||!o.d.code)return;const code=o.d.code;
@@ -5364,11 +5375,12 @@ function rcoHTML(){
 }
 function viewMini(){
   if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='leagues';UI.lgk='pk';setTimeout(()=>{location.hash='#groups'},0)}
+  if(!UI.mtab||UI.mtab==='predict')UI.mtab=propCands().length?'props':'picks';   /* v287: Predict opens on Player props (Pick 'em when there are no lines yet) */
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-wrap"><a class="tok-box shop-box" href="#shop" aria-label="Shop: open packs"><small>Shop</small><b><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b></a><button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${coinIc(ME.uid)}${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button></div>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI or a real person, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':PT==='pkl'?'Pick the winner of every game each game. The friend with the best accuracy tops your league.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','82-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
-  const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['predict','Predict'],['draw','5 Card Draw'],['sim','82-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${v===T}">${l}</button>`).join('')}</div>`;
+  const sub=T==='predict'?`<div class="pr-big" role="group" aria-label="Predict">${[['props','Player props','Over or under on player stats','📊'],['picks','Pick ’em','Pick the winners of the games','🏆']].map(([v,l,d,ic])=>`<button class="pr-bt" data-act="mtab" data-v="${v}" aria-pressed="${PT===v}"><span class="pr-ic" aria-hidden="true">${ic}</span><span class="pr-tx"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
 }
@@ -7212,7 +7224,7 @@ document.addEventListener('click',async e=>{
   else if(a==='sxTr'){UI.sx.tr=t.dataset.v;render()}
   else if(a==='info'){const h=t.closest('.head'),pop=h&&h.querySelector('.ib-pop');if(pop){pop.hidden=!pop.hidden;t.setAttribute('aria-expanded',String(!pop.hidden))}}
   else if(a==='lgSet'){UI.lgSet=!UI.lgSet;render()}
-  else if(a==='mtab'){UI.mtab=t.dataset.v;render()}
+  else if(a==='mtab'){UI.mtab=t.dataset.v==='predict'?(propCands().length?'props':'picks'):t.dataset.v;render()}
   else if(a==='ltab'){UI.ltab=t.dataset.v;render()}
   else if(a==='fgPlay'){if(t.dataset.v==='free'&&UI.fgm!=='free'){UI.fgm='free';render()}fgOpen(t.dataset.v)}
   else if(a==='fgm'){UI.fgm=t.dataset.v;UI.mgMore=false;render()}
