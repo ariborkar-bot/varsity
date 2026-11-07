@@ -1752,6 +1752,11 @@ html,body{overflow-x:clip;max-width:100%}
 .rc-p:active{transform:scale(.99)}.rc-p .rc-rk{color:var(--muted);font-weight:800;text-align:center}
 .rc-who{min-width:0;display:flex;flex-direction:column;gap:2px}.rc-who b{overflow-wrap:anywhere;line-height:1.15}.rc-who small{color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .rc-pts{text-align:right}.rc-pts b{display:block;font:800 1.05rem/1 var(--f-display,inherit)}.rc-pts small{color:var(--muted);font-size:.7rem}
+.rc-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start}.rc-two .rc-slots{grid-template-columns:1fr}.rc-two .rc-quit{align-self:flex-start}
+.rc-two .rc-who>b,.rc-two .rc-who>small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:620px){.rc-two{gap:6px}.rc-two>.card{padding:10px!important;gap:8px}.rc-two .qh{flex-direction:column;align-items:flex-start;gap:2px}.rc-two .qh h3{font-size:.95rem}
+ .rc-two .rc-slot{grid-template-columns:30px minmax(0,1fr)!important;gap:6px;padding:6px;min-height:44px}.rc-two .rc-slot .av{display:none}.rc-two .rc-sl{font-size:.62rem;padding:4px 0}
+ .rc-two .rc-who>.rc-st{display:none}.rc-two .rc-who b{font-size:.78rem}.rc-two .rc-who small{font-size:.68rem}}
 .rc-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
 .rc-slot{display:grid;grid-template-columns:40px 30px minmax(0,1fr);align-items:center;gap:8px;padding:7px 8px;border-radius:12px;border:1px dashed var(--line,#22344B);min-height:48px}
 .rc-slot:not(.on){grid-template-columns:40px minmax(0,1fr)}.rc-slot.on{border-style:solid;background:var(--surface2,#16253A)}
@@ -1763,6 +1768,21 @@ html,body{overflow-x:clip;max-width:100%}
 .rc-vs small{display:block;color:var(--muted);font-size:.72rem}.rc-vs b{font:900 1.6rem/1.1 var(--f-display,inherit)}.rc-vs>span{color:var(--muted);font-weight:800}
 .rc-ai{display:grid;grid-template-columns:auto 30px minmax(0,1fr);align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:rgba(230,91,40,.12);border:1px solid rgba(230,91,40,.35);margin-bottom:8px}
 .rc-tag{font:800 .7rem/1 var(--f-body,inherit);padding:5px 7px;border-radius:8px;background:#E65B28;color:#fff}
+/* Ring Chaser online */
+.rco-modes{display:grid;gap:8px;max-width:360px;margin:0 auto}
+.rco-join{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;max-width:360px;margin:10px auto 0}
+.rco-in{min-width:0;padding:10px 12px;border-radius:12px;border:1px solid var(--line,#22344B);background:var(--surface2,#16253A);color:inherit;font:800 1.05rem/1 var(--f-display,inherit);letter-spacing:.2em;text-transform:uppercase;text-align:center}
+.rco-code{display:flex;justify-content:center;gap:8px;margin:12px 0}
+.rco-code span{width:46px;height:58px;display:grid;place-items:center;border-radius:12px;background:var(--surface2,#16253A);border:1px solid rgba(255,194,61,.5);font:900 2rem/1 var(--f-display,inherit);color:#FFC23D}
+.rco-live{font:800 .62rem/1 var(--f-body,inherit);padding:4px 7px;border-radius:8px;background:#1FA463;color:#fff;vertical-align:middle;text-transform:uppercase;letter-spacing:.06em}
+.rco-opp{background:rgba(47,107,255,.14);border-color:rgba(47,107,255,.45)}.rco-opp .rc-tag{background:#2F6BFF;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rco-clock{margin-left:auto;font:900 1.2rem/1 var(--f-display,inherit);padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.25);font-variant-numeric:tabular-nums}
+.rco-them{opacity:.85}.rco-them .rco-dot{margin-left:auto}
+.rco-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#1FA463;animation:rcodot 1s ease-in-out infinite alternate;vertical-align:middle}
+@keyframes rcodot{to{opacity:.25;transform:scale(.7)}}
+.rco-pulse{animation:rcpulse .6s ease-in-out infinite alternate}
+.rco-afk{margin-top:10px;padding:10px;border-radius:12px;border:1px solid rgba(255,194,61,.45);background:rgba(255,194,61,.08);text-align:center}.rco-afk p{margin:0 0 8px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Field Goal game: full-screen layer */
 .fgx{position:fixed;inset:0;z-index:90;background:#0b1626;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .fgx canvas{display:block;width:100%;height:100%}
@@ -2254,7 +2274,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v250 · Nov 6';
+const APP_BUILD='v251 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4330,20 +4350,27 @@ async function rcPick(key){
   if(!rcOpen(m.me).length)return rcFinish();
   rcSpin();
 }
-function rcSlots(t,who){return `<div class="rc-slots">${RC_SLOTS.map(s=>{const p=pByKey(t.sl[s.k]);return `<div class="rc-slot ${p?'on':''}"><span class="rc-sl">${s.label}</span>${p?`${av(p.name,p.school,30)}<span class="rc-who"><b>${esc(p.name)}</b><small>${esc(p.school)} · <b class="rc-v">${f1(rcAvg(p))}</b></small><small class="rc-st">${esc(rcLine(p))}</small></span>`:`<span class="rc-who muted">Open</span>`}</div>`}).join('')}</div>`}
+function rcSlots(t,who){return `<div class="rc-slots">${RC_SLOTS.map(s=>{const p=pByKey(t.sl[s.k]);return `<div class="rc-slot ${p?'on':''}"><span class="rc-sl">${s.label}</span>${p?`${av(p.name,p.school,30)}<span class="rc-who"><b>${esc(p.name)}</b><small><b class="rc-v">${f1(rcAvg(p))}</b> · ${esc(p.school)}</small><small class="rc-st">${esc(rcLine(p))}</small></span>`:`<span class="rc-who muted">Open</span>`}</div>`}).join('')}</div>`}
 function rcHTML(){
+  if(UI.rco)return rcoHTML();
+  rcoResume();
   const m=UI.rc,my=ME.uid?rcRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const rows=Object.keys(S.picks).map(u=>({u,b:+rcRec(u).bpg||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)}));
   const board=mgBoard('Highest Ring Chaser team totals',rows);
   const ready=rcPool().length>=RC_SLOTS.length*2&&rcPool().some(p=>p._rcv>0);
   const rec=`${+my.w||0}-${+my.l||0}${+my.t?'-'+my.t:''}`;
-  const myBar=my.runs?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Record vs AI</small><b>${rec}</b></div><div><small>Best lineup</small><b>${f1(my.bpg||0)}</b></div></div>`:'';
+  const on=my.on||{},orec=`${+on.w||0}-${+on.l||0}${+on.t?'-'+on.t:''}`,hasOn=(+on.w||0)+(+on.l||0)+(+on.t||0)>0;
+  const myBar=my.runs||hasOn?`<div class="fc-bar" style="grid-template-columns:repeat(${hasOn?3:2},1fr)"><div><small>Record vs AI</small><b>${rec}</b></div>${hasOn?`<div><small>Online record</small><b>${orec}</b></div>`:''}<div><small>Best lineup</small><b>${f1(my.bpg||0)}</b></div></div>`:'';
+  const bz=UI.rcoBusy?'disabled':'';
+  const play=`<div class="rco-modes"><button class="btn" data-act="rcStart" ${bz}>🤖 Play the AI</button><button class="btn" data-act="rcoFind" ${bz}>🌐 Find an opponent</button><button class="btn ghost" data-act="rcoParty" ${bz}>🎉 Create a party</button></div>
+    <div class="rco-join"><label class="sr-only" for="rcCode">Party code</label><input id="rcCode" class="rco-in" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Party code" value="${esc(UI.rcCode||'')}"><button class="btn ghost" type="button" data-act="rcoJoin" ${bz}>Join a party</button></div>
+    ${UI.rcoBusy?'<p class="hint">Connecting…</p>':''}`;
   if(!m)return `<section class="card rc-card"><div class="fg-hero" aria-hidden="true">💍</div><h3>Ring Chaser</h3>
-    <p class="muted">You and the AI each build a lineup one random school at a time: ${RC_SLOTS.map(s=>s.label).join(', ')}. Spin a school, take one of its players for an open spot, then the AI spins and picks. The same school can come up more than once. Players show their per-game averages, and the lineup with more fantasy points per game wins.</p>
-    ${myBar}<div class="fc-deal">${ready?'<button class="btn" data-act="rcStart">Play the AI</button>':'<p class="hint">Ring Chaser opens once players have stats.</p>'}</div>${can?'':'<p class="hint">Sign in to save your record.</p>'}</section>`+board;
+    <p class="muted">You and the AI (or a friend) each build a lineup one random school at a time: ${RC_SLOTS.map(s=>s.label).join(', ')}. Spin a school, take one of its players for an open spot, then the AI spins and picks. The same school can come up more than once. Players show their per-game averages, and the lineup with more fantasy points per game wins. Play the AI, find a real opponent online, or create a party and send a friend the code.</p>
+    ${myBar}<div class="fc-deal">${ready?play:'<p class="hint">Ring Chaser opens once players have stats.</p>'}</div>${can?'':'<p class="hint">Sign in to save your record and play online.</p>'}</section>`+board;
   const score=`<div class="rc-vs"><div class="${m.done&&m.res==='w'?'win':''}"><small>You · pts/game</small><b>${f1(m.done?m.total:rcSum(m.me))}</b></div><span>vs</span><div class="${m.done&&m.res==='l'?'win':''}"><small>AI · pts/game</small><b>${f1(m.done?m.aiTotal:rcSum(m.ai))}</b></div></div>`;
-  const teams=`<section class="card"><div class="qh"><h3>Your lineup</h3>${m.done?'':'<button class="btn sm ghost" data-act="rcQuit">Quit</button>'}</div>${rcSlots(m.me)}</section>
-    <section class="card"><div class="qh"><h3>AI lineup</h3><span class="muted">${f1(rcSum(m.ai))} pts/game</span></div>${rcSlots(m.ai)}</section>`;
+  const teams=`<div class="rc-two"><section class="card"><div class="qh"><h3>Your lineup</h3><span class="muted">${f1(rcSum(m.me))} pts/game</span></div>${rcSlots(m.me)}${m.done?'':'<button class="btn sm ghost rc-quit" data-act="rcQuit">Quit</button>'}</section>
+    <section class="card"><div class="qh"><h3>AI lineup</h3><span class="muted">${f1(rcSum(m.ai))} pts/game</span></div>${rcSlots(m.ai)}</section></div>`;
   if(m.done)return `<section class="card rc-card"><div class="qh"><h3>${m.res==='w'?'You win! 💍':m.res==='l'?'The AI wins':'It’s a tie'}</h3></div>${score}
     <p class="muted" style="text-align:center">${m.res==='w'?'Your lineup averages more fantasy points per game than the AI’s.':m.res==='l'?'The AI’s lineup averages more fantasy points per game. Run it back?':'Same total, down to the decimal.'}${m.newBest?' New best lineup!':''}</p>
     <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn" data-act="rcStart">Play again</button><button class="btn ghost" data-act="rcQuit">Done</button></div></section>`+teams+board;
@@ -4359,10 +4386,222 @@ function rcHTML(){
   }
   return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser</h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${score}${aiNote}${pick}</section>`+teams;
 }
+/* ---- Ring Chaser online: you against a real person, same draft as against the AI.
+   Find an opponent = join the oldest open public match, or open one and wait for someone.
+   Create a party = a private match with a 5-letter code a friend types in (Join a party).
+   A match is one doc in 'rcm' (bb_rcm in basketball): host, guest, st (wait/live/done/gone), turn t (host on even turns),
+   spin {t,s} = the school spun this turn, sl {uid:{slot:playerKey}}, last = the latest pick, stuck {uid:true}.
+   Only the player whose turn it is writes; their phone spins the school. Joining goes through rc_claim()
+   so two people never get the same match. Server rules: tools/sql/ring_chaser_online.sql ---- */
+const RCO_COLL='rcm',RCO_CLOCK=30,RCO_AFK=75,RCO_KEY='vs-rco-'+FG_SPORT;
+const RCO_ABC='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const rcoCode=()=>Array.from({length:5},()=>RCO_ABC[Math.floor(Math.random()*RCO_ABC.length)]).join('');
+const rcoOpp=d=>d.host===ME.uid?d.guest:d.host;
+const rcoWho=(d,t)=>t%2===0?d.host:d.guest;
+/* the same {me,ai} shape the AI game uses, so rcFits/rcUsed/rcSum work unchanged ("ai" = your opponent) */
+const rcoView=d=>({me:{sl:Object.assign({},(d.sl||{})[ME.uid])},ai:{sl:Object.assign({},(d.sl||{})[rcoOpp(d)])}});
+const rcoOut=(d,u)=>!!(d.stuck||{})[u]||!rcOpen({sl:(d.sl||{})[u]||{}}).length;
+const rcoFirst=u=>esc(String(nm(u)).split(/\s+/)[0]||'Opponent');
+function rcoCan(){
+  if(ME.mode==='offline'){say('Can’t connect to Varsity right now. Check your connection and try again.');return false}
+  if(ME.mode==='readonly'){say('You have view-only access.');return false}
+  if(!ME.uid||ME.mode==='guest'||needJoin('play Ring Chaser online'))return false;
+  return true;
+}
+/* join a match: by party code, or (no code) the oldest open public match. mine = your own waiting public match */
+async function rcoClaim(code,mine){
+  if(SB){const {data,error}=await SB.rpc('rc_claim',{p_coll:(FG_SPORT==='bb'?'bb_':'')+RCO_COLL,p_code:code||null,p_mine:mine||null});if(error)throw error;return data||null}
+  /* demo / preview files: the same rules on the local store */
+  const now=NOW(),all=(await DB.collection(RCO_COLL).get()).docs.map(x=>Object.assign({},x.data(),{id:x.id}));
+  let mc=null;
+  if(mine){const m=all.find(x=>x.id===mine);if(!m)return null;if(m.st!=='wait')return mine;mc=+m.c}
+  const ok=all.filter(x=>x.st==='wait'&&x.host!==ME.uid&&(code?x.code===String(code).trim().toUpperCase()&&+x.hb>now-120000:x.pub===true&&+x.hb>now-30000&&(mc==null||+x.c<mc))).sort((a,b)=>a.c-b.c);
+  if(!ok.length)return null;
+  await DB.doc(RCO_COLL+'/'+ok[0].id).update({guest:ME.uid,st:'live',at:now});
+  if(mine)await DB.doc(RCO_COLL+'/'+mine).update({st:'gone'});
+  return ok[0].id;
+}
+function rcoStop(){const o=UI.rco;if(!o)return;if(o.unsub)o.unsub();clearInterval(o.iv);UI.rco=null}
+function rcoListen(id){
+  rcoStop();UI.rc=null;
+  const o=UI.rco={id,d:null,seen:NOW(),spinT:-1,hbAt:NOW(),claimAt:NOW()};
+  try{localStorage.setItem(RCO_KEY,JSON.stringify({id,at:NOW()}))}catch(_){}
+  o.unsub=DB.doc(RCO_COLL+'/'+id).onSnapshot(s=>{if(UI.rco===o)rcoGot(o,s.exists?s.data():null)},()=>{});
+  o.iv=setInterval(()=>rcoTick(o),500);
+  render();
+}
+function rcoForget(){try{localStorage.removeItem(RCO_KEY)}catch(_){}}
+/* back in Ring Chaser after a reload or after the app was closed: pick the match back up (for up to an hour) */
+function rcoResume(){
+  if(UI.rco||UI.rcoTried||!ME.uid||ME.mode==='guest'||ME.mode==='offline')return;UI.rcoTried=true;
+  let s=null;try{s=JSON.parse(localStorage.getItem(RCO_KEY)||'null')}catch(_){}
+  if(s&&s.id&&NOW()-s.at<36e5)setTimeout(()=>{if(!UI.rco)rcoListen(s.id)},0);
+}
+function rcoGot(o,d){
+  if(!d){rcoStop();rcoForget();say('That match has ended.');render();return}
+  if(d.host!==ME.uid&&d.guest!==ME.uid){rcoStop();rcoForget();render();return}
+  const p=o.d;o.d=d;
+  if(!p||p.t!==d.t||p.st!==d.st){o.seen=NOW();o.afk=false}
+  if(d.st==='done'||d.st==='gone')rcoSave(o);
+  else if(d.st==='live')rcoSpin(o);
+  if(!o.anim)render(true);
+}
+/* your turn: your phone spins a school and saves it, so a reload can't re-roll it */
+function rcoSpin(o){
+  const d=o.d;if(d.st!=='live'||rcoWho(d,d.t)!==ME.uid||(d.spin&&d.spin.t===d.t)||o.spinT===d.t)return;
+  o.spinT=d.t;
+  const m=rcoView(d),all=rcSchools(),ok=all.filter(sc=>rcFits(m,m.me,sc).length);
+  if(!ok.length){rcoMove(o,null);return}
+  const school=ok[Math.floor(Math.random()*ok.length)],t=d.t;
+  o.anim=true;render();
+  let i=0;
+  const tick=()=>{if(UI.rco!==o)return;i++;const el=document.querySelector('.rc-school.spin');
+    if(i<9&&el){const sc=all[Math.floor(Math.random()*all.length)];el.innerHTML=`${slogo(sc,44)}<div><small>Spinning…</small><b>${esc(sc)}</b></div>`;setTimeout(tick,55+i*10)}
+    else{o.anim=false;o.pickAt=NOW();render(true)}};
+  setTimeout(tick,40);
+  upsert(RCO_COLL+'/'+o.id,{spin:{t,s:school}}).catch(()=>{o.spinT=-1;o.anim=false;say('Lost connection. Trying again…')});
+}
+/* save a pick (key) or, with no key, "no school has a player for your open spots" */
+async function rcoMove(o,key){
+  const d=o.d;if(!d||d.st!=='live'||rcoWho(d,d.t)!==ME.uid||o.busy)return;
+  const me=ME.uid,opp=rcoOpp(d),m=rcoView(d),patch={at:NOW()};
+  if(key){
+    const p=pByKey(key);if(!p||!d.spin||d.spin.t!==d.t||p.school!==d.spin.s||rcUsed(m).has(p.key))return;
+    const s=rcSlotFor(m.me,p);if(!s)return;
+    m.me.sl[s.k]=p.key;patch.sl={[me]:{[s.k]:p.key}};patch.last={u:me,key:p.key,school:p.school,slot:s.label,t:d.t};
+  }else{patch.stuck={[me]:true};patch.last={u:me,skip:true,t:d.t}}
+  const outMe=!key||!rcOpen(m.me).length,outOpp=rcoOut(d,opp);
+  if(outMe&&outOpp)patch.st='done';
+  else patch.t=d.t+(outOpp?2:1);   /* skip the turn of a player who is already full or stuck */
+  o.busy=true;render(true);
+  try{await upsert(RCO_COLL+'/'+o.id,patch)}catch(_){o.spinT=-1;say('That pick did not save. Try again.')}
+  o.busy=false;render(true);
+}
+function rcoTick(o){
+  if(UI.rco!==o){clearInterval(o.iv);return}
+  const d=o.d;if(!d)return;
+  if(d.st==='wait'&&d.host===ME.uid){
+    if(NOW()-o.hbAt>10000){o.hbAt=NOW();upsert(RCO_COLL+'/'+o.id,{hb:NOW()}).catch(()=>{})}
+    /* still searching: join anyone who opened a match before you did (or learn that someone joined yours) */
+    if(d.pub&&!o.claiming&&NOW()-o.claimAt>4000){o.claimAt=NOW();o.claiming=true;
+      rcoClaim(null,o.id).then(id=>{o.claiming=false;if(id&&id!==o.id&&(UI.rco===o||!UI.rco))rcoListen(id)},()=>{o.claiming=false})}
+    const w=document.querySelector('.rco-wait');if(w)w.textContent=fmtWait(NOW()-o.seen);
+    return;
+  }
+  if(d.st!=='live')return;
+  const mine=rcoWho(d,d.t)===ME.uid,el=document.querySelector('.rco-clock');
+  if(mine&&d.spin&&d.spin.t===d.t&&!o.anim){
+    const left=Math.max(0,Math.ceil(RCO_CLOCK-(NOW()-(o.pickAt||o.seen))/1000));
+    if(el)el.textContent=left+'s';
+    /* out of time: take the best player on the list */
+    if(left<=0&&!o.busy){const m=rcoView(d),list=rcFits(m,m.me,d.spin.s);if(list.length)rcoMove(o,list[0].key)}
+  }else if(!mine){
+    const afk=NOW()-o.seen>RCO_AFK*1000;
+    if(afk!==!!o.afk){o.afk=afk;render(true)}
+  }
+}
+const fmtWait=ms=>{const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+async function rcoNew(pub){
+  if(!rcoCan()||UI.rcoBusy)return;UI.rcoBusy=true;render();
+  try{
+    if(pub){const id=await rcoClaim(null,null);if(id){UI.rcoBusy=false;rcoListen(id);return}}
+    const ref=await DB.collection(RCO_COLL).add({host:ME.uid,guest:null,st:'wait',pub:!!pub,code:pub?null:rcoCode(),c:NOW(),hb:NOW(),at:NOW(),t:0,sl:{}});
+    UI.rcoBusy=false;rcoListen(ref.id);
+  }catch(e){UI.rcoBusy=false;say(SB?'Online play isn’t switched on yet. Try again later.':'Could not start. Try again.');render()}
+}
+async function rcoJoin(){
+  const code=String(UI.rcCode||'').trim().toUpperCase();
+  if(!rcoCan())return;if(code.length<5){say('Type the 5-character party code.');return}
+  UI.rcoBusy=true;render();
+  try{const id=await rcoClaim(code,null);UI.rcoBusy=false;if(!id){say('No open party with that code. Check it and try again.');render();return}UI.rcCode='';rcoListen(id)}
+  catch(_){UI.rcoBusy=false;say('Could not join. Try again.');render()}
+}
+async function rcoLeave(){
+  const o=UI.rco;if(!o)return;const d=o.d;
+  if(d&&d.st==='live'){
+    if(!confirm('Leave the match? It counts as a loss.'))return;
+    try{await upsert(RCO_COLL+'/'+o.id,{st:'gone',left:ME.uid,at:NOW()})}catch(_){say('Could not leave. Try again.');return}
+    await rcoRecord(o.id,'l',0);
+  }else if(d&&d.st==='wait'&&d.host===ME.uid){upsert(RCO_COLL+'/'+o.id,{st:'gone'}).catch(()=>{})}
+  rcoStop();rcoForget();render();
+}
+async function rcoClaimWin(){
+  const o=UI.rco;if(!o||!o.d||o.d.st!=='live')return;
+  try{await upsert(RCO_COLL+'/'+o.id,{st:'done',win:ME.uid,at:NOW()})}catch(_){say('Could not save. Try again.')}
+}
+/* the match is over: work out your result and add it to your online record once */
+function rcoSave(o){
+  if(o.res!==undefined)return;const d=o.d,me=ME.uid,m=rcoView(d);
+  o.total=rcSum(m.me);o.oppTotal=rcSum(m.ai);
+  if(d.st==='gone')o.res=!d.guest?null:d.left===me?'l':'w';
+  else if(d.win)o.res=d.win===me?'w':'l';
+  else o.res=o.total>o.oppTotal?'w':o.total<o.oppTotal?'l':'t';
+  rcoForget();
+  if(o.res&&!(d.st==='gone'&&d.left===me))rcoRecord(o.id,o.res,d.st==='done'&&!d.win&&!rcOpen(m.me).length?o.total:0);
+  if(d.st==='gone'&&!d.guest&&!o.claiming){rcoStop();render()}
+}
+async function rcoRecord(id,res,total){
+  if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline')return;
+  const my=rcRec(ME.uid);if(my.oid===id)return;   /* already counted */
+  const on=Object.assign({w:0,l:0,t:0},my.on);on[res]=(+on[res]||0)+1;
+  const o={on,oid:id,at:NOW()};if(total>(+my.bpg||0))o.bpg=total;
+  if(total)UI.rco&&(UI.rco.newBest=total>(+my.bpg||0));
+  await act(()=>upsert('picks/'+ME.uid,{rc:o}),res==='w'?'Win saved':res==='l'?'Loss saved':'Tie saved');
+}
+function rcoShare(){
+  const o=UI.rco;if(!o||!o.d||!o.d.code)return;const code=o.d.code;
+  const txt=`Play me in Ring Chaser on Varsity! Open Minigames → Ring Chaser → Join a party and type the code ${code}. ${SITE_URL}`;
+  if(navigator.share)navigator.share({text:txt}).catch(()=>{});
+  else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>say('Invite copied'),()=>say('Your code is '+code));
+  else say('Your code is '+code);
+}
+function rcoHTML(){
+  const o=UI.rco,d=o.d;
+  if(!d)return `<section class="card rc-card"><div class="fg-hero" aria-hidden="true">💍</div><h3>Connecting…</h3><div class="fc-deal"><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
+  if(d.st==='wait')return d.pub
+    ?`<section class="card rc-card rco-lobby"><div class="fg-hero rco-pulse" aria-hidden="true">🔎</div><h3>Looking for an opponent…</h3>
+      <p class="muted" style="text-align:center">You’ll be matched with the next person who taps Find an opponent. Keep this screen open. <b class="rco-wait">0:00</b></p>
+      <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn ghost" data-act="rcoLeave">Cancel</button><button class="btn ghost" data-act="rcoAi">Play the AI instead</button></div></section>`
+    :`<section class="card rc-card rco-lobby"><div class="fg-hero" aria-hidden="true">🎉</div><h3>Your party</h3>
+      <p class="muted" style="text-align:center">Send this code to a friend. They open Ring Chaser, tap Join a party and type it in.</p>
+      <div class="rco-code" aria-label="Party code ${esc(d.code)}">${esc(d.code).split('').map(c=>`<span>${c}</span>`).join('')}</div>
+      <p class="muted" style="text-align:center"><span class="rco-dot"></span> Waiting for your friend to join… <b class="rco-wait">0:00</b></p>
+      <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn" data-act="rcoShare">Send invite</button><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
+  const m=rcoView(d),opp=rcoOpp(d),on=nm(opp),over=d.st!=='live',myTurn=!over&&rcoWho(d,d.t)===ME.uid;
+  const a=over&&o.total!=null?o.total:rcSum(m.me),b=over&&o.oppTotal!=null?o.oppTotal:rcSum(m.ai);
+  const score=`<div class="rc-vs"><div class="${over&&o.res==='w'?'win':''}"><small>You · pts/game</small><b>${f1(a)}</b></div><span>vs</span><div class="${over&&o.res==='l'?'win':''}"><small>${esc(on)} · pts/game</small><b>${f1(b)}</b></div></div>`;
+  const teams=`<div class="rc-two"><section class="card"><div class="qh"><h3>Your lineup</h3><span class="muted">${f1(rcSum(m.me))} pts/game</span></div>${rcSlots(m.me)}${over?'':'<button class="btn sm ghost rc-quit" data-act="rcoLeave">Leave</button>'}</section>
+    <section class="card"><div class="qh"><h3>${esc(on)}’s lineup</h3><span class="muted">${f1(rcSum(m.ai))} pts/game</span></div>${rcSlots(m.ai)}</section></div>`;
+  if(over){
+    const why=d.st==='gone'?(d.left===ME.uid?'You left the match.':esc(on)+' left the match, so the win is yours.'):d.win?(d.win===ME.uid?esc(on)+' stopped playing, so the win is yours.':'You ran out of time, so '+esc(on)+' takes the win.'):o.res==='w'?'Your lineup averages more fantasy points per game.':o.res==='l'?esc(on)+'’s lineup averages more fantasy points per game. Run it back?':'Same total, down to the decimal.';
+    return `<section class="card rc-card"><div class="qh"><h3>${o.res==='w'?'You win! 💍':o.res==='l'?esc(on)+' wins':'It’s a tie'}</h3></div>${score}
+    <p class="muted" style="text-align:center">${why}${o.newBest?' New best lineup!':''}</p>
+    <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn" data-act="rcoFind">Find another opponent</button>${d.code?'<button class="btn ghost" data-act="rcoParty">New party</button>':''}<button class="btn ghost" data-act="rcoDone">Done</button></div></section>`+teams;
+  }
+  const open=rcOpen(m.me),need=[...new Set(open.map(s=>s.label))].join(', ');
+  const L=d.last,lp=L&&L.u===opp&&L.key&&pByKey(L.key);
+  const oppNote=lp?`<div class="rc-ai rco-opp"><span class="rc-tag">${rcoFirst(opp)}</span>${av(lp.name,lp.school,30)}<span class="rc-who"><small>${esc(on)} spun ${esc(L.school)} and took</small><b>${esc(lp.name)} <span class="muted">· ${L.slot} · ${f1(rcAvg(lp))}</span></b><small class="rc-st">${esc(rcLine(lp))}</small></span></div>`
+    :L&&L.u===opp&&L.skip?`<div class="rc-ai rco-opp"><span class="rc-tag">${rcoFirst(opp)}</span><span class="rc-who"><small>No school had a player for ${esc(on)}’s open spots, so their lineup is done.</small></span></div>`:'';
+  let body='';
+  if(myTurn){
+    const spun=d.spin&&d.spin.t===d.t&&!o.anim;
+    if(!spun)body=`<div class="rc-school spin">${slogo(d.spin&&d.spin.t===d.t?d.spin.s:'',44)}<div><small>Spinning…</small><b>Your turn</b></div></div>`;
+    else{const list=rcFits(m,m.me,d.spin.s);
+      body=`<div class="rc-school">${slogo(d.spin.s,44)}<div><small>Your school</small><b>${esc(d.spin.s)}</b></div><span class="rco-clock" title="Time left to pick">${RCO_CLOCK}s</span></div>
+      <p class="muted rc-need">Your turn. Pick one player for: <b>${esc(need)}</b>. Best per game first. If time runs out you get the top player.</p>
+      <div class="rc-list">${list.map((p,i)=>{const s=rcSlotFor(m.me,p);return `<button class="rc-p" data-act="rcoPick" data-id="${esc(p.key)}" ${o.busy?'disabled':''}><span class="rc-rk">${i+1}</span>${av(p.name,p.school,36)}<span class="rc-who"><b>${esc(p.name)}</b><small>${pb(p.pos,p.sub)} ${agg(p,'season').n} games</small><small class="rc-st">${esc(rcLine(p))}</small></span><span class="rc-pts"><b>${f1(rcAvg(p))}</b><small>pts/g · ${s?s.label:''}</small></span></button>`}).join('')}</div>`}
+  }else{
+    const sp=d.spin&&d.spin.t===d.t?d.spin.s:null;
+    body=`<div class="rc-school rco-them">${sp?slogo(sp,44):''}<div><small>${esc(on)}’s turn</small><b>${sp?esc(sp):'Spinning…'}</b></div><span class="rco-dot"></span></div>
+      <p class="muted rc-need">${sp?esc(on)+' is picking a player from '+esc(sp)+'.':'Waiting for '+esc(on)+' to spin.'}${open.length?' You still need: <b>'+esc(need)+'</b>.':' Your lineup is full.'}</p>
+      ${o.afk?`<div class="rco-afk"><p>${esc(on)} hasn’t moved in a while.</p><div class="btns" style="justify-content:center"><button class="btn sm" data-act="rcoClaimWin">Take the win</button><button class="btn sm ghost" data-act="rcoWaitMore">Keep waiting</button></div></div>`:''}`;
+  }
+  return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser <span class="rco-live">Online</span></h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${score}${oppNote}${body}</section>`+teams;
+}
 function viewMini(){
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','pkl','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
-  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':PT==='pkl'?'Pick the winner of every game each game. The friend with the best accuracy tops your league.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI or a real person, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':PT==='pkl'?'Pick the winner of every game each game. The friend with the best accuracy tops your league.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','82-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['pkl','Pick ’em league'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
@@ -4838,6 +5077,8 @@ async function sendChat(){
   await act(()=>upsert('groups/'+g.id,{chat:{[mid]:{u:ME.uid,t:txt,at:NOW()}}}));
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.target&&e.target.id==='chat-in'){e.preventDefault();sendChat()}});
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='rcCode'){const v=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5);if(v!==e.target.value)e.target.value=v;UI.rcCode=v}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='rcCode'){e.preventDefault();rcoJoin()}});
 /* The Weekly: an automatic recap of the last finished week in a league (top score, biggest win, closest game, best player) */
 function recapData(g){
   const ids=Object.keys(g.members).sort(),cw=CURW(),sw=startWeek(g),w=cw-1;
@@ -6183,7 +6424,17 @@ document.addEventListener('click',async e=>{
   else if(a==='fgPlay')fgOpen(t.dataset.v);
   else if(a==='fgm'){UI.fgm=t.dataset.v;UI.mgMore=false;render()}
   else if(a==='fgb'){UI.fgb=t.dataset.v;UI.mgMore=false;render()}
-  else if(a==='rcStart')rcStart();
+  else if(a==='rcStart'){rcoStop();rcStart()}
+  else if(a==='rcoFind'){if(UI.rco){rcoStop();rcoForget()}rcoNew(true)}
+  else if(a==='rcoParty'){if(UI.rco){rcoStop();rcoForget()}rcoNew(false)}
+  else if(a==='rcoJoin')rcoJoin();
+  else if(a==='rcoPick'){if(UI.rco)rcoMove(UI.rco,t.dataset.id)}
+  else if(a==='rcoLeave')rcoLeave();
+  else if(a==='rcoAi'){rcoLeave();rcStart()}
+  else if(a==='rcoShare')rcoShare();
+  else if(a==='rcoClaimWin')rcoClaimWin();
+  else if(a==='rcoWaitMore'){if(UI.rco){UI.rco.seen=NOW();UI.rco.afk=false;render()}}
+  else if(a==='rcoDone'){rcoStop();rcoForget();render()}
   else if(a==='rcPick')rcPick(t.dataset.id);
   else if(a==='rcQuit'){UI.rc=null;render()}
   else if(a==='team'){UI.ttab='sched';location.hash='#team/'+encodeURIComponent(t.dataset.t)}

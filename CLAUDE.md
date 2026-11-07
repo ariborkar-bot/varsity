@@ -54,6 +54,7 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - 5 Card Draw: using the last redraw locks the hand automatically (`fcAutoLock`, after the new card's reveal; v233), no confirm box.
 - 5 Card Draw: one hand per week for good (v234). `fcDeal` reads `picks/<uid>` from the server before dealing; if a hand exists for the week it is restored instead (and if the read fails, nothing is dealt). The Deal button waits for `S.loaded.picks` ("Loading your hand…"). Preview files (demo mode) don't keep data, so a reload there still starts fresh.
 - Minigames tab row fits on phones (v235): under 620 px `.gm-tabs` is a 5-column grid (full names, two lines where needed), so no sideways scrolling to find Ring Chaser / Field Goal / Hoops. Checked at 320, 375 and 393 px.
+- Ring Chaser (v249): Your lineup and AI lineup sit side by side (`.rc-two`, also on phones: under 620 px slots are one column, no avatar or stat line, points shown before the school).
 - Over/Under player names open the player card. Join forms start with no position and require one for players.
 - Basketball preseason: `PRE()` still counts everyone as one 0.0 game for ranking, but game counts show 0; Simulate says when it opens instead of "Not enough players".
 - Declined for now (do not do without asking): hiding "Admin sign in", intro shown once ever, bigger tap targets, 12 px minimum text, shorter Minigames tab labels, Simulate leaderboard wording, "VARSITY 05" yard numbers, Stats list loading more at once.
@@ -95,3 +96,9 @@ Use Claude in Chrome. `javascript_tool` output is cut off at about 1 KB and bloc
 
 ## Marketing
 - Six TikTok/Reels videos (Nov 5) and the tools that made them are on branch `marketing-videos` (`tools/marketing/`, read its README). Player names in videos 1-6 are made up; video 7 ("6 ways to play", Nov 6) uses real players at the owner's request (Darian Webb, Hezekiah Manuel, top 5 Card Draw hand); the owner was told California needs consent (a parent's for minors) to use names in ads. Music is synthesized.
+
+## v250 (Nov 6): Ring Chaser online
+- Ring Chaser main card: Play the AI, Find an opponent (`rcoNew(true)`), Create a party (`rcoNew(false)`, 5-letter code from `RCO_ABC`, Send invite shares it) and a code box + Join a party (`rcoJoin`).
+- A match is one doc in `rcm` (`bb_rcm` in basketball): host, guest, st wait/live/done/gone, turn `t` (host on even turns), `spin {t,s}`, `sl {uid:{slot:key}}`, `last`, `stuck`. Only the player whose turn it is writes; their phone spins the school and saves it (a reload can't re-roll). 30 s pick clock (`RCO_CLOCK`) then the top player is taken; if the other player is idle 75 s (`RCO_AFK`) you can Take the win. Leaving a live match is a loss. Online record is `picks/<uid>.rc.on {w,l,t}` (`oid` = last counted match); full lineups also count for Best lineup. A match in progress is picked back up after a reload for an hour (localStorage `vs-rco-fb`/`vs-rco-bb`).
+- Joining goes through the `rc_claim` RPC (code join, or oldest open public match; a searcher only joins matches opened before theirs, so two searchers never grab each other). Demo/preview files run the same rules locally.
+- **Needs `tools/sql/ring_chaser_online.sql` run in the Supabase SQL editor** (policies for rcm/bb_rcm + rc_claim). Until then online buttons say online play isn't switched on yet; Play the AI is unaffected.
