@@ -262,7 +262,7 @@ def transform(s, mp, games, seeds, teams, prior):
             GAMES_JS % dict(games=json.dumps(g2, separators=(',', ':')), prior=PRIOR, first=PRIOR + 1, weeks=weeks,
                             start=START.isoformat(), sy=START.year, sm=START.month - 1, sd=START.day,
                             prior_ratings=json.dumps(prior, separators=(',', ':')), rank=json.dumps(rank, separators=(',', ':')), top10=json.dumps(top10)))
-    s = rep(s, " The top 4 seeds in the 12-team divisions (II, III, IV) have a first-round bye.", " This bracket is a projection from last season's scoring until the real brackets are posted.")
+    s = rep(s, '<span class="muted">CIF San Diego Section playoffs</span></div>${bracketHTML(d)}', '<span class="muted">Projected from last season</span></div>${bracketHTML(d)}')
     s = rep(s, 'const WEEKS=12;', 'const WEEKS=%d;' % weeks)
     # preseason: nobody has played, so every player counts as one game of 0.0 (lists, pools and cards stay full).
     # This switches itself off as soon as any real stat line exists.

@@ -2516,7 +2516,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v274 · Nov 7';
+const APP_BUILD='v275 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3125,7 +3125,7 @@ function buildBrackets(){
 function playoffsHTML(){
   const brs=buildBrackets(),d=brs.find(b=>b.div===UI.gdiv)||brs[0];
   return `<div class="chips gm-divs" role="group" aria-label="Division">${brs.map(b=>`<button class="chip" data-act="gdiv" data-v="${esc(b.div)}" aria-pressed="${b===d}">${esc(b.div)}</button>`).join('')}</div>
-    <section class="card"><div class="qh"><h3>${esc(d.div)}</h3><span class="muted">CIF San Diego Section playoffs</span></div>${bracketHTML(d)}<p class="muted" style="margin-top:10px">Higher seed hosts. Winners move ahead as final scores come in. This bracket is a projection from last season's scoring until the real brackets are posted.</p></section>`;
+    <section class="card"><div class="qh"><h3>${esc(d.div)}</h3><span class="muted">Projected from last season</span></div>${bracketHTML(d)}</section>`;
 }
 function standTab(){
   const gs=(GAMES&&GAMES.games)||[],schools=[...new Set(gs.flatMap(g=>[g.h,g.a]))].filter(n=>SD_SCHOOLS.includes(n)).sort();
