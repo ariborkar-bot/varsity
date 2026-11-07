@@ -1382,11 +1382,11 @@ select option{background:#0B1730;color:#EAF0F8}
 
 .pkl-st{display:flex;flex-direction:column}.pkl-h,.pkl-r{display:grid;grid-template-columns:28px minmax(0,1fr) 70px 86px 50px;gap:8px;align-items:center;padding:8px 4px;border-top:1px solid var(--line);font-size:.85rem}
 .pkl-h{border-top:0;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}.pkl-r.me{background:color-mix(in srgb,#2F6BFF 12%,transparent);border-radius:10px}
-.pkl-n{display:flex;align-items:center;gap:8px;min-width:0}.pkl-n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pkl-r .rk{grid-area:auto!important;font-weight:800;color:var(--muted)}.pkl-n{display:flex;align-items:center;gap:8px;min-width:0}.pkl-n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pkl-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}.pkl-bar>div:first-child{display:flex;flex-direction:column}
 .pkl-t.ok{border-color:#2fbf71!important;box-shadow:0 0 0 2px rgba(47,191,113,.35)}.pkl-t.no{border-color:#e5484d!important;opacity:.85}.pkl-sc{font-weight:800;font-size:1.1rem}
 .pkl-more summary{cursor:pointer;list-style:none}.pkl-more[open] summary{margin-bottom:10px}
-@media (max-width:520px){.pkl-h,.pkl-r{grid-template-columns:24px minmax(0,1fr) 58px 64px 40px;font-size:.78rem}.pkl-r small{display:none}}
+@media (max-width:520px){.pkl-h,.pkl-r{grid-template-columns:22px minmax(0,1fr) 62px 46px 40px;gap:6px;font-size:.8rem}.pkl-h{font-size:.6rem;letter-spacing:.03em}.pkl-h span,.pkl-r>*{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pkl-r small{display:none}}
 
 /* Locker (v240) */
 .me-lk{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;margin-bottom:14px}.me-lk>span:nth-child(2){flex:1;display:flex;flex-direction:column}.me-lk>b{font-size:1.6rem;color:var(--muted)}
@@ -2497,7 +2497,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v260 · Nov 7';
+const APP_BUILD='v261 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5133,11 +5133,12 @@ function rcoHTML(){
   return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser <span class="rco-live">Online</span></h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${score}${rcoWgBar(d,on)}${oppNote}${body}</section>`+teams;
 }
 function viewMini(){
-  const T0=UI.mtab==='spread'?'props':['picks','draw','props','pkl','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
+  if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='pkl';setTimeout(()=>{location.hash='#groups'},0)}
+  const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-wrap"><a class="tok-box shop-box" href="#shop" aria-label="Shop: open packs"><small>Shop</small><b><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b></a><button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${coinIc(ME.uid)}${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button></div>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI or a real person, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':PT==='pkl'?'Pick the winner of every game each game. The friend with the best accuracy tops your league.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','82-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
-  const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['pkl','Pick ’em league'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
+  const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
 }
@@ -5669,8 +5670,9 @@ function matchupsHTML(g){
 const groupDanger=(coll,g,word)=>{const own=g.ownerId===ME.uid;return `<div class="card danger-row"><div><b>${own?'Delete '+word:'Leave '+word}</b><p class="muted">${own?'You started '+esc(g.name)+'. Deleting it removes it for every member, with all its lineups and standings.':'Takes you out of '+esc(g.name)+'. You can rejoin later with the invite code.'}</p></div><button class="btn danger" data-act="${own?'delGroup':'leaveGroup'}" data-coll="${coll}" data-id="${esc(g.id)}">${own?'Delete '+word:'Leave '+word}</button></div>`};
 /* Leagues tab: My leagues and Mock Draft (moved here from Minigames) */
 function viewGroups(){
-  const L=UI.ltab==='mock'?'mock':'leagues';
-  const seg=`<div class="chips gm-tabs lgx-tabs" role="group" aria-label="Leagues">${[['leagues','My leagues'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="ltab" data-v="${v}" aria-pressed="${v===L}">${l}</button>`).join('')}</div>`;
+  const L=UI.ltab==='mock'?'mock':UI.ltab==='pkl'?'pkl':'leagues';
+  const seg=`<div class="chips gm-tabs lgx-tabs" role="group" aria-label="Leagues">${[['leagues','My leagues'],['pkl','Pick ’em league'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="ltab" data-v="${v}" aria-pressed="${v===L}">${l}</button>`).join('')}</div>`;
+  if(L==='pkl')return `<div class="head"><h2>Pick ’em league</h2><p>Play with your friends: pick the winner of every game each game. Highest percentage correct wins.</p></div>`+seg+pklHTML();
   if(L==='mock')return `<div class="head"><h2>Mock Draft</h2><p>Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.</p></div>`+seg+mockHTML();
   const h=viewGroups0(),i=h.indexOf('</div>',h.indexOf('<div class="head"'));
   return h.indexOf('<div class="head"')===0&&i>0?h.slice(0,i+6)+seg+h.slice(i+6):seg+h;
@@ -6282,7 +6284,7 @@ function useAd(){if(!USE.doc)return;const k=useDay();USE.doc.ads[k]=(+USE.doc.ad
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{USE.lastAct=Date.now()},{passive:true,capture:true}));
 /* which part of the app is on screen: the tab, plus the sub-tab for Stats, Leagues and Minigames */
 const useTab=()=>{try{if(typeof FG!=='undefined'&&FG)return 'mg:fgplay';const d=$('#drawer');if(d&&!d.hidden)return 'player';const v=UI.view;
-  if(v==='minigames')return 'mg:'+(UI.mtab||'picks');if(v==='groups')return UI.ltab==='mock'?'mock':'leagues';if(v==='league')return 'stats:'+(UI.stab||'players');return v}catch(_){return 'other'}};
+  if(v==='minigames')return 'mg:'+(UI.mtab||'picks');if(v==='groups')return UI.ltab==='mock'?'mock':UI.ltab==='pkl'?'pkl':'leagues';if(v==='league')return 'stats:'+(UI.stab||'players');return v}catch(_){return 'other'}};
 setInterval(()=>{if(!useOn())return;if(!USE.doc){if(++USE.tick%8===0)useLoad();return}
   const k=useDay(),t=useTab();if(t==='admin'||t==='desk')return;
   if(t!==USE.tab){USE.tab=t;const c=USE.doc.tc[k]||(USE.doc.tc[k]={});c[t]=(+c[t]||0)+1;USE.dirty=true}
@@ -7096,7 +7098,7 @@ document.addEventListener('click',async e=>{
   else if(a==='pklSel'){UI.pkli=t.dataset.v;UI.pkls={};UI.pklw=null;render()}
   else if(a==='pklNew'){UI.pklNew=!UI.pklNew;render()}
   else if(a==='pklWk'){UI.pklw=+t.dataset.w;render()}
-  else if(a==='pklInv'){const g=S.fgroups[t.dataset.gid];if(g){const bb=FG_SPORT==='bb',m=`Join my ${bb?'basketball':'football'} Pick ’em league "${g.name}" on Varsity. Pick every game each game and see who’s most accurate.\n\nOpen ${SITE_URL}#minigames, go to Predict, then Pick ’em league, and enter code ${g.code}`;
+  else if(a==='pklInv'){const g=S.fgroups[t.dataset.gid];if(g){const bb=FG_SPORT==='bb',m=`Join my ${bb?'basketball':'football'} Pick ’em league "${g.name}" on Varsity. Pick every game each game and see who’s most accurate.\n\nOpen ${SITE_URL}#groups, tap Pick ’em league, and enter code ${g.code}`;
       const phone=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);if(phone)location.href='sms:?&body='+encodeURIComponent(m);else copyText(m,'Invite message copied. Paste it into a text.')}}
   else if(a==='pklPick'){const id=t.dataset.g,sd=t.dataset.s,cur=(UI.pkls||{})[id]||pklOf(ME.uid)[id];UI.pkls=Object.assign({},UI.pkls);if(cur===sd&&!pklOf(ME.uid)[id])delete UI.pkls[id];else if(pklOf(ME.uid)[id]===sd)delete UI.pkls[id];else UI.pkls[id]=sd;render(true)}
   else if(a==='pklFav'){const cw=CURW(),mine=pklOf(ME.uid);UI.pkls=Object.assign({},UI.pkls);
