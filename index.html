@@ -2030,6 +2030,21 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 
 .fg-prize{margin:6px 0 10px;padding:9px 12px;border-radius:12px;background:linear-gradient(120deg,rgba(242,190,44,.16),rgba(122,77,255,.12));font-size:.85rem}.fg-prize a{color:#FFC23D}
 .lk-prize{background:linear-gradient(120deg,rgba(242,190,44,.22),rgba(255,79,109,.10)),var(--surface)!important;border-color:#F2BE2C!important}
+
+/* v258: tokens + Shop in the header */
+.hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
+.hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.hdr-tokn{display:inline-flex;align-items:center;gap:5px}.hdr-tokn b{font-variant-numeric:tabular-nums}
+.hdr-shop{background:linear-gradient(135deg,#FFC23D,#F29A1D);color:#2A1700;border-color:transparent}
+.hdr-shop svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linejoin:round}
+.hdr-shop.on{box-shadow:0 0 0 2px #fff}
+.hdr-tok:hover,.hdr-shop:hover{filter:brightness(1.1)}
+@media (max-width:759px){.hdr-tok,.hdr-shop{height:34px;padding:0 10px;font-size:.82rem}.mast-r{gap:6px!important}.mast-mini{gap:6px!important}}
+@media (max-width:420px){.hdr-shop span{display:none}.hdr-shop{padding:0 9px}.mast .brand h1{font-size:1.25rem}}
+@media (max-width:359px){.mast-r .wk,.mast-mini .wk{display:none}}
+@media (min-width:760px){.mast .sport-opt span,.mast .hdr-shop span,.mast .brand h1{display:none}.mast .sport-opt{padding:6px 9px}.mast-in{gap:12px!important}.mast-in .mast-r{gap:8px!important}.mast-in .tabs{min-width:0}.mast-in .tabs a{padding-inline:12px!important}}
+@media (min-width:760px) and (max-width:1149px){.mast-in .tabs a span{display:none}}
+@media (min-width:760px) and (max-width:899px){.mast .wk{display:none}}
 /* v256 pack opening: rip, lift-spin-land flips, sparks, rarity background glow */
 .pko{isolation:isolate}
 .pko-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s ease;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--gc,#7A4DFF) 55%,transparent),color-mix(in srgb,var(--gc,#7A4DFF) 18%,transparent) 45%,transparent 75%)}
@@ -2077,6 +2092,7 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
     </a>
     <div class="mast-r">
       <div class="sport-sw" role="group" aria-label="Sport"><a class="sport-opt on" href="index.html" title="Football" aria-label="Football"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 19.8C2.6 14 6 6.2 14.6 4.4c2.5-.5 4.4-.3 5.2-.2.2.8.4 2.7-.2 5.2C17.8 18 10 21.4 4.2 19.8z"/><path d="M9.2 14.8l5.6-5.6M11.4 10.4l2.2 2.2M9.4 12.4l2.2 2.2M13.2 8.6l2.2 2.2"/></svg></i><span>Football</span></a><a class="sport-opt" href="basketball.html" title="Basketball" aria-label="Basketball"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.3 3.2 3.3 9.6 0 12.8M18.4 5.6c-3.3 3.2-3.3 9.6 0 12.8"/></svg></i><span>Basketball</span></a></div>
+      <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens"><span class="hdr-tokn"></span></button><a class="hdr-shop" href="#shop" aria-label="Shop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a></div>
       <div class="wk"><span class="live"></span><span id="wk">Week 10</span></div>
       <button class="bell" id="gear" aria-label="Settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
@@ -2093,6 +2109,7 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 </header>
 <div class="mast-mini" id="mastMini" aria-hidden="true">
   <button class="mm-brand" type="button" data-act="toTop" aria-label="Back to top" tabindex="-1"><img src="logo.png" alt=""><b>Varsity</b></button>
+  <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens" tabindex="-1"><span class="hdr-tokn"></span></button><a class="hdr-shop" href="#shop" aria-label="Shop" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a></div>
   <div class="wk mm-wk"><span class="live"></span><span id="wk2"></span></div>
   <button class="bell mm-gear" id="gear2" type="button" aria-label="Settings" aria-haspopup="menu" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div>
@@ -2457,7 +2474,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v257 · Nov 7';
+const APP_BUILD='v258 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6796,6 +6813,10 @@ function chrome(v){
   const n=computeNotes().length,bc=$('#bcount');if(bc){bc.textContent=n;bc.hidden=!n}
   const wk=$('#wk');if(wk)wk.textContent='Week '+CURW();
   const wk2=$('#wk2');if(wk2)wk2.textContent='Week '+CURW();
+  /* tokens + Shop in the header on every tab (v258) */
+  try{const on=!!(ME.uid&&ME.mode!=='guest'),h=on?coinIc(ME.uid)+'<b>'+(Math.floor(bank(ME.uid)*10)/10).toLocaleString()+'</b>':'';
+    document.querySelectorAll('.hdr-tk').forEach(e=>{e.hidden=!on});document.querySelectorAll('.hdr-tokn').forEach(e=>{if(e.innerHTML!==h)e.innerHTML=h});
+    document.querySelectorAll('.hdr-shop').forEach(a=>a.classList.toggle('on',v==='shop'))}catch(_){}
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
   infoIcons();
 }
