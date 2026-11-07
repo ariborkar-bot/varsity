@@ -2253,7 +2253,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v247 · Nov 6';
+const APP_BUILD='v248 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2777,9 +2777,9 @@ const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
   const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u);
-  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(45,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
+  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(100,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
-  Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(45,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
+  Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(100,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   return Math.round(t*100)/100;
 }
 const tk=n=>(Math.round(n*10)/10).toLocaleString()+' tokens';
@@ -3150,7 +3150,7 @@ function rollRarity(odds,floor){const ord=RAR_ORD;let x=fcRnd(10000)/100,acc=0,r
    Stored as picks/<uid>.inv.cards = {'pc:<player key>' | 'tc:<school>': rarity at the time you pulled it}.
    Owning a team's card boosts a winning Pick 'em pick on that team; a player's card boosts his winning props.
    The boost is saved on the pick when you lock it in (bets/props[id].cb, percent), so it can't change afterwards. */
-const CARD_PCT={c:7,u:10,r:15,e:20,l:30,m:45},CARD_CHANCE=30;
+const CARD_PCT={c:10,u:15,r:25,e:50,l:75,m:100},CARD_CHANCE=30;
 let _cp=null;
 function cardPools(){
   if(_cp&&_cp.rev===_rev)return _cp;
