@@ -2498,7 +2498,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v265 · Nov 7';
+const APP_BUILD='v266 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4421,7 +4421,7 @@ function fgHTML(){
   const my=ME.uid?fgRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',bb=FG_SPORT==='bb',M=UI.fgm==='free'?'free':'daily';
   const name=bb?'Hoops':'Field Goal',goalW=bb?'hoop':'goal';
   const seg=`<div class="chips fg-seg" role="group" aria-label="${name} mode">${[['daily','Daily challenge'],['free','Unlimited']].map(([v,l])=>`<button class="chip" data-act="fgm" data-v="${v}" aria-pressed="${M===v}">${l}</button>`).join('')}</div>`;
-  const how=`<p class="muted">Tap to lift the ball, let go to drop. Fly it through the ${bb?'hoops':'uprights'}: a normal ${goalW} is <b>1 point</b>, a narrow gold one is <b>3</b>.${bb?'':' Over the top of the uprights is no good: no points, but you keep going.'} Hit anything else and the run is over, but you can watch a short ad once a run to keep going.</p><p class="muted">Last long enough and it gets harder: moving ${bb?'hoops':'goals'}, defenders, and gusts of wind. Grab power-ups (shield, 2x points, magnet, slow-mo) and fly through the dead centre for a <b>${bb?'Swish':'Perfect'}</b>: +1, and chain 3, 6 or 10 in a row for <b>x2, x3, x4</b>.</p>`;
+  const how=`<p class="muted">Tap to lift the ball, let go to drop. Fly it through the ${bb?'hoops':'uprights'}: a normal ${goalW} is <b>1 point</b>, a narrow gold one is <b>3</b>.${bb?'':' Over the top of the uprights is no good: no points, but you keep going.'} Hit anything else and the run is over, but you can watch a short ad once a run to keep going.</p><p class="muted">Last long enough and it gets harder: moving ${bb?'hoops':'goals'} and gusts of wind. Grab power-ups (shield, 2x points, magnet, slow-mo) and fly through the dead centre for a <b>${bb?'Swish':'Perfect'}</b>: +1, and chain 3, 6 or 10 in a row for <b>x2, x3, x4</b>.</p>`;
   let body,board;
   if(M==='daily'){
     const d=ME.uid?fgDay(ME.uid):null,left=can?fgTriesLeft():FG_TRIES;
@@ -4548,7 +4548,8 @@ function fgStep(k){
   if(g.st==='ready'){g.y=g.H*.45+Math.sin(performance.now()/300)*8;g.rot=0;return}
   if(g.st!=='play'){if(g.y<ground-12*s){g.vy+=0.5*s*k;g.y+=g.vy*k}return}
   g.t=(performance.now()-g.t0)/1000;
-  const speed=s*(2.8+Math.min(2.2,g.t/40))*(g.t<g.pw.sl?.62:1);   /* speeds up slowly the longer you last (slow-mo cuts it) */
+  if(g.t<g.pw.sl)k*=.55;   /* slow-mo: everything moves at a bit over half speed (forward, rising and falling) */
+  const speed=s*(2.8+Math.min(2.2,g.t/40));   /* speeds up slowly the longer you last */
   if(g.wind&&g.t>=g.wind.a){if(g.t<g.wind.b)g.vy+=g.wind.d*.1*s*k;else g.wind=null}
   g.vy=Math.min(g.vy+0.42*s*k,11*s);g.y+=g.vy*k;
   if(g.t<g.pw.mg){const q=g.posts.find(p=>!p.done&&p.x>g.x-10*s&&p.x-g.x<170*s);if(q){g.y+=(q.c-g.y)*Math.min(1,.07*k);g.vy*=Math.pow(.9,k)}}g.rot=Math.max(-.5,Math.min(1.2,g.vy/(10*s)));
@@ -4571,8 +4572,7 @@ function fgStep(k){
     if(!small&&n>=10&&n-g.lastMv>1&&rr()<(n<25?.15:n<45?.25:.33)){const a=gap*(.14+rr()*.08);pst.c0=Math.max(top+gap/2+a,Math.min(bot-gap/2-a,c));pst.c=pst.c0;pst.amp=a;pst.w=1.1+rr()*.9;pst.ph=rr()*6.28;g.lastMv=n}
     g.posts.push(pst);
     const mx=g.W+30*s-(g.sp||g.W*.12)/2,my=(prev+(pst.c0??c))/2;
-    if(n>=18&&!pst.amp&&g.posts.length>1&&rr()<(n<40?.12:.18))g.items.push({k:'hz',x:mx,y0:my,y:my,amp:(70+rr()*40)*s,w:1.3+rr()*.6,ph:rr()*6.28});
-    else if(n>=7&&rr()<(n<30?.11:.15)&&!g.items.some(it=>it.k!=='hz'&&it.x>g.W*.4)){const z=rr(),kk=z<.3?'sh':z<.6?'x2':z<.8?'mg':'sl';g.items.push({k:kk,x:mx,y0:my,y:my})}
+    if(n>=7&&rr()<(n<30?.11:.15)&&!g.items.some(it=>it.k!=='hz'&&it.x>g.W*.4)){const z=rr(),kk=z<.3?'sh':z<.6?'x2':z<.8?'mg':'sl';g.items.push({k:kk,x:mx,y0:my,y:my})}
     if(n>=25&&!g.wind&&rr()<.09){const a=g.t+1.4;g.wind={at:g.t,a,b:a+2.6,d:rr()<.5?-1:1}}
     g.next=g.sp=(230+g.rnd()*60)*s;
   }
@@ -4646,6 +4646,48 @@ function fgTry(){
   }
   S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:{...my,...patch}};
   upsert('picks/'+ME.uid,{fg:patch}).catch(()=>{});
+}
+/* v266 start screen: title, your numbers, how to play, the power-ups, and a pulsing tip-off button. The ball bobs with its flight path shown. */
+function fgReady(c,g,W,H,s,bb,top){
+  const now=performance.now()/1000,dly=g.mode==='daily',my=ME.uid?fgRec(ME.uid):{},d=ME.uid?fgDay(ME.uid):null,sk=ME.uid?fgStreak(ME.uid):0;
+  const rr=(x,y,w,h,r)=>{c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h)};
+  const fit=(txt,font,max,px)=>{let f=px;c.font=font.replace('#',Math.round(f));while(c.measureText(txt).width>max&&f>8){f-=1;c.font=font.replace('#',Math.round(f))}return f};
+  /* dim the field a little so the screen reads */
+  const vg=c.createLinearGradient(0,0,0,H);vg.addColorStop(0,'rgba(3,8,22,.78)');vg.addColorStop(.42,'rgba(3,8,22,.25)');vg.addColorStop(.62,'rgba(3,8,22,.35)');vg.addColorStop(1,'rgba(3,8,22,.85)');c.fillStyle=vg;c.fillRect(0,0,W,H);
+  /* flight path preview: the arc one tap makes */
+  c.save();c.fillStyle='rgba(255,255,255,.55)';let px=g.x,py=g.y,vy=-7.2*s;for(let i=0;i<34;i++){px+=3.4*s;vy+=.42*s;py+=vy;if(i%2===0){c.globalAlpha=.65*(1-i/34);c.beginPath();c.arc(px+22*s,py,2.4*s,0,7);c.fill()}}c.restore();
+  const cx=W/2,mw=Math.min(W-32,400);
+  /* title */
+  const ty=top+64*s,title=bb?'HOOPS':'FIELD GOAL';c.save();c.textAlign='center';
+  fit(title,'900 italic #px system-ui,sans-serif',mw,58*s);
+  const tg=c.createLinearGradient(0,ty-48*s,0,ty+6*s);tg.addColorStop(0,'#FFF3C4');tg.addColorStop(.55,'#FFC23D');tg.addColorStop(1,'#E8891C');
+  c.lineWidth=8*s;c.strokeStyle='rgba(0,0,0,.55)';c.strokeText(title,cx,ty);c.shadowColor='rgba(255,194,61,.65)';c.shadowBlur=24*s+Math.sin(now*2.4)*8*s;c.fillStyle=tg;c.fillText(title,cx,ty);c.shadowBlur=0;
+  /* shine sweeping across the title */
+  const tw=c.measureText(title).width,sx=cx-tw/2+((now*.45)%1.6-.3)*tw;c.globalCompositeOperation='source-atop';const sh=c.createLinearGradient(sx-30*s,0,sx+30*s,0);sh.addColorStop(0,'rgba(255,255,255,0)');sh.addColorStop(.5,'rgba(255,255,255,.75)');sh.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=sh;c.fillText(title,cx,ty);c.globalCompositeOperation='source-over';
+  /* mode pill */
+  const ml=dly?'DAILY CHALLENGE · TRY '+Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1)+' OF '+FG_TRIES:'UNLIMITED';c.font=`800 ${Math.round(12*s)}px system-ui,sans-serif`;const mlw=c.measureText(ml).width+26*s;
+  rr(cx-mlw/2,ty+14*s,mlw,24*s,12*s);c.fillStyle=dly?'rgba(255,194,61,.18)':'rgba(47,107,255,.25)';c.fill();c.strokeStyle=dly?'#FFC23D':'#5B8CFF';c.lineWidth=1.5;c.stroke();c.fillStyle=dly?'#FFD66B':'#BFD3FF';c.fillText(ml,cx,ty+30.5*s);
+  if(g.gold){c.fillStyle='#FFD54A';c.font=`800 ${Math.round(12*s)}px system-ui,sans-serif`;c.fillText('✨ GOLDEN BALL · '+sk+'-DAY STREAK',cx,ty+56*s)}
+  c.restore();
+  /* your numbers */
+  const best=dly?(d&&d.best)||0:(+my.best||0),stats=[[dly?'BEST TODAY':'BEST RUN',best?best+' pts':'–'],[dly?'TRIES LEFT':'TOTAL PTS',dly?String(fgTriesLeft()):String(+my.tot||0)],['STREAK',sk+(sk===1?' day':' days')]];
+  const sy=ty+(g.gold?70:50)*s,bw=(mw-16*s)/3;stats.forEach(([l,v],i)=>{const x=cx-mw/2+i*(bw+8*s);c.save();rr(x,sy,bw,48*s,12*s);c.fillStyle='rgba(5,12,30,.72)';c.fill();c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=1;c.stroke();
+    c.textAlign='center';c.fillStyle='#98A8BA';c.font=`800 ${Math.round(9.5*s)}px system-ui,sans-serif`;c.fillText(l,x+bw/2,sy+17*s);c.fillStyle='#fff';fit(v,'900 #px system-ui,sans-serif',bw-12*s,19*s);c.fillText(v,x+bw/2,sy+38*s);c.restore()});
+  /* how to play + power-ups, in the lower part so the ball stays in view */
+  const ch=Math.min(196*s,H*.3),cy=Math.max(g.y+60*s,H-ch-96*s);c.save();rr(cx-mw/2,cy,mw,ch,16*s);c.fillStyle='rgba(5,12,30,.8)';c.fill();c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=1;c.stroke();
+  const rows=[['👆','Tap to rise, let go to fall'],[bb?'🏀':'🏈','Fly '+(bb?'through the hoops':'between the uprights')+' · gold = 3 pts'],['🎯','Dead centre = '+(bb?'SWISH':'PERFECT')+' +1 · chain for x4']];
+  c.textAlign='left';const lh=Math.min(26*s,(ch-78*s)/3);rows.forEach(([ic,tx],i)=>{const y=cy+22*s+i*lh;c.font=`${Math.round(15*s)}px system-ui,sans-serif`;c.fillStyle='#fff';c.fillText(ic,cx-mw/2+16*s,y+5*s);c.fillStyle='#EAF0F8';fit(tx,'700 #px system-ui,sans-serif',mw-60*s,13*s);c.fillText(tx,cx-mw/2+44*s,y+5*s)});
+  const py2=cy+22*s+3*lh+6*s;c.strokeStyle='rgba(255,255,255,.1)';c.beginPath();c.moveTo(cx-mw/2+14*s,py2-8*s);c.lineTo(cx+mw/2-14*s,py2-8*s);c.stroke();
+  c.textAlign='center';c.fillStyle='#98A8BA';c.font=`800 ${Math.round(9.5*s)}px system-ui,sans-serif`;c.fillText('POWER-UPS ON THE COURSE',cx,py2+6*s);
+  const ks=['sh','x2','mg','sl'],pw=(mw-20*s)/4;ks.forEach((kk,i)=>{const P=FG_PW[kk],x=cx-mw/2+10*s+pw*i+pw/2,y=py2+30*s+Math.sin(now*3+i)*2*s,R=12*s;
+    c.shadowColor=P.c;c.shadowBlur=10*s;c.strokeStyle=P.c;c.lineWidth=2.5*s;c.beginPath();c.arc(x,y,R,0,7);c.stroke();c.shadowBlur=0;
+    c.fillStyle=P.c;c.textBaseline='middle';c.font=`900 ${Math.round((kk==='x2'?11:12)*s)}px system-ui,sans-serif`;c.fillText(P.t,x,y+1*s);c.textBaseline='alphabetic';
+    c.fillStyle='#cfd9e6';fit(P.n,'700 #px system-ui,sans-serif',pw-6*s,10.5*s);c.fillText(P.n,x,y+R+14*s)});
+  c.restore();
+  /* pulsing tip-off button */
+  const pulse=1+Math.sin(now*4)*.04,bwid=Math.min(mw,280*s),bh=50*s,by=Math.min(H-bh-26*s,cy+ch+18*s);c.save();c.translate(cx,by+bh/2);c.scale(pulse,pulse);
+  const bg=c.createLinearGradient(0,-bh/2,0,bh/2);bg.addColorStop(0,'#FFD66B');bg.addColorStop(1,'#F29A1D');c.shadowColor='rgba(255,194,61,.7)';c.shadowBlur=22*s;rr(-bwid/2,-bh/2,bwid,bh,bh/2);c.fillStyle=bg;c.fill();c.shadowBlur=0;
+  c.fillStyle='#2A1700';c.textAlign='center';c.textBaseline='middle';c.font=`900 italic ${Math.round(19*s)}px system-ui,sans-serif`;c.fillText(bb?'TAP TO TIP OFF':'TAP TO KICK OFF',0,1*s);c.restore();
 }
 function fgDraw(){
   const g=FG,c=g.cx,W=g.W,H=g.H,s=g.s,ground=H-Math.round(56*s),bb=FG_SPORT==='bb';
@@ -4775,8 +4817,8 @@ function fgDraw(){
   /* scoreboard: points in the middle, clock on the left */
   const top=Math.max(14,(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0)+14);
   c.textAlign='center';c.fillStyle='#fff';c.strokeStyle='rgba(0,0,0,.5)';c.lineWidth=5;c.font=`900 ${Math.round(44*s)}px system-ui,sans-serif`;
-  c.strokeText(g.score,W/2,top+40*s);c.fillText(g.score,W/2,top+40*s);
-  c.textAlign='left';c.font=`800 ${Math.round(17*s)}px system-ui,sans-serif`;c.lineWidth=4;const tt='⏱ '+fgTime(g.t);c.strokeText(tt,14,top+20*s);c.fillText(tt,14,top+20*s);
+  if(g.st!=='ready'){c.strokeText(g.score,W/2,top+40*s);c.fillText(g.score,W/2,top+40*s);
+  c.textAlign='left';c.font=`800 ${Math.round(17*s)}px system-ui,sans-serif`;c.lineWidth=4;const tt='⏱ '+fgTime(g.t);c.strokeText(tt,14,top+20*s);c.fillText(tt,14,top+20*s)}
   if(g.st!=='ready'){const zn=zl[g.zone];c.font=`800 ${Math.round(12*s)}px system-ui,sans-serif`;c.lineWidth=3;const zt='ZONE '+(g.zone+1);c.strokeText(zt,14,top+40*s);c.fillStyle=zn.acc;c.fillText(zt,14,top+40*s);c.fillStyle='#fff'}
   if(g.st!=='ready'){const m=fgMult(g.combo);if(m>1){c.textAlign='center';c.font=`900 italic ${Math.round(16*s)}px system-ui,sans-serif`;c.lineWidth=4;c.strokeStyle='rgba(0,0,0,.55)';const ct='COMBO x'+m;c.strokeText(ct,W/2,top+64*s);c.fillStyle='#FFC23D';c.fillText(ct,W/2,top+64*s)}
     let hx=W-30*s;for(const kk of ['sh','x2','mg','sl']){const P=FG_PW[kk],on=kk==='sh'?g.pw.sh>0:g.t<g.pw[kk];if(!on)continue;const R=14*s,cy=top+62*s;
@@ -4790,7 +4832,8 @@ function fgDraw(){
   const msg=(a,b)=>{c.fillStyle='rgba(5,12,30,.78)';const w=Math.min(W-40,330),h=b?150*s:96*s,x=(W-w)/2,y=g.st==='over'?H*.3:H*.58;c.beginPath();c.roundRect?c.roundRect(x,y,w,h,18):c.rect(x,y,w,h);c.fill();
     c.fillStyle='#fff';c.textAlign='center';c.font=`900 ${Math.round(26*s)}px system-ui,sans-serif`;c.fillText(a,W/2,y+42*s);
     if(b){c.font=`700 ${Math.round(15*s)}px system-ui,sans-serif`;b.split('\n').forEach((l,i)=>c.fillText(l,W/2,y+74*s+i*24*s))}};
-  if(g.st==='ready')msg(bb?'Tap to tip off':'Tap to kick off',(g.gold?'✨ Golden ball · '+fgStreak(ME.uid)+'-day streak\n':'')+(g.mode==='daily'?'Daily challenge · try '+(Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1))+' of '+FG_TRIES+'\n':'')+(bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts'));
+  if(g.st==='ready')fgReady(c,g,W,H,s,bb,top);
+  else if(false)msg(bb?'Tap to tip off':'Tap to kick off',(g.gold?'✨ Golden ball · '+fgStreak(ME.uid)+'-day streak\n':'')+(g.mode==='daily'?'Daily challenge · try '+(Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1))+' of '+FG_TRIES+'\n':'')+(bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts'));
   else if(g.paused&&g.st==='play'){msg(g.invP?'Revived!':'Paused','Tap to keep going');}
   else if(g.st==='over'){const dly=g.mode==='daily',my=ME.uid?fgRec(ME.uid):{},d=ME.uid?fgDay(ME.uid):null,best=dly?(d&&d.best):my.best,line1=`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}`;
     if(g.offer)msg(bb?'Brick!':'No good!',line1+'\nKeep this run going?');
