@@ -412,8 +412,8 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     s = rep(s, "left:{off:SIM_RESPINS,def:SIM_RESPINS}", "left:{off:SIM_RESPINS,def:0}")
     s = rep(s, "Draw a full 12-player team, use up to ${SIM_RESPINS} offense and ${SIM_RESPINS} defense respins to swap out players,",
             "Draw a 7-player team, use up to ${SIM_RESPINS} respins to swap out players,")
-    s = rep(s, "You get 12 spots: 1 QB, 1 RB, 2 WR, 1 TE and 1 FLEX (RB, WR or TE) on offense, then 2 DL, 2 LB and 2 DB on defense. Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins for offense and ${SIM_RESPINS} for defense to swap any player for a new one.",
-            "You get 7 spots: PG, SG, SF, PF and C, plus a G (PG or SG) and a PF/C (SF, PF or C). Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one.")
+    s = rep(s, "12 random players, 6 on offense and 6 on defense. ${SIM_RESPINS} respins per side to swap anyone.",
+            "7 random players: PG, SG, SF, PF, C, G and PF/C. ${SIM_RESPINS} respins to swap anyone.")
     s = rep(s, "<div><small>Offense respins</small><b>${m.left.off}</b></div><div><small>Defense respins</small><b>${m.left.def}</b></div>",
             "<div><small>Respins</small><b>${m.left.off}</b></div>")
     s = rep(s, "You have ${m.left.off} offense and ${m.left.def} defense ${", "You have ${m.left.off} ${")

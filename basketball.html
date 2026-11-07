@@ -2505,7 +2505,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v271 · Nov 7';
+const APP_BUILD='v272 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3202,12 +3202,12 @@ function fcHTML(){
   const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
   const lrow=x=>`<li class="${x.u===ME.uid?'me':''}"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w).h||[]).map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':'game '+w}</small></span></li>`;
   return `<section class="card fc-hero ${eqOf(ME.uid,'cback')?'cb '+eqOf(ME.uid,'cback')+cbCls(eqOf(ME.uid,'cback')):''}" style="${eqOf(ME.uid,'cback')?cosStyle(eqOf(ME.uid,'cback')):''}"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">Game ${cw}</span></div>
-    <p class="muted">Every game you are dealt 5 random players from the app and get ${FC_REDRAWS} redraws. A redraw swaps one card for a new player. You do not have to use them: lock in your hand whenever you like, and any unused redraws are saved for next game (you can hold up to ${FC_BANK_MAX} saved). Your hand scores the game’s fantasy points from those 5. Everyone in Varsity is on the same leaderboard.</p>
+    <p class="muted">5 random players a game, ${FC_REDRAWS} redraws to swap cards. Your hand scores their fantasy points for the game. Unused redraws carry over (up to ${FC_BANK_MAX}).</p>
     ${wk.length>1?`<div class="chips" role="group" aria-label="Game">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">Game ${n}</button>`).join('')}</div>`:''}
     ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&bank?`<small>${bank} saved from before</small>`:''}${w===cw&&!lkd&&invLeft(ME.uid,'p_redraw')>0?`<button class="btn sm ghost fc-x" data-act="perkRedraw">+1 redraw (${invLeft(ME.uid,'p_redraw')})</button>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> ${left?`${Math.min(FC_BANK_MAX,left)} unused ${left===1?'redraw is':'redraws are'} saved for next game.`:'No redraws left to save.'}</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand${left?` · save ${Math.min(FC_BANK_MAX,left)} ${left===1?'redraw':'redraws'}`:''}</button></div>`):''}`
       :w!==cw?'<p class="hint">You had no hand that game.</p>'
       :can&&!S.loaded.picks?`<div class="fc-deal"><p class="muted">Loading your hand…</p></div>`
-      :can?`<div class="fc-deal"><p>You have not been dealt a hand for game ${cw} yet. Once dealt, your 5 cards are yours for the game.</p><button class="btn" data-act="fcDeal">Deal me in</button></div>`
+      :can?`<div class="fc-deal"><p>Your game ${cw} hand is waiting.</p><button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
     <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS}">Game ${w}</button><button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
@@ -4005,7 +4005,7 @@ function viewSim(){
   const myBest=(my.bppg||my.best)?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best team</small><b>${my.bppg?f1(my.bppg)+'<u class="ppg-u">PPG</u>':'Build one to rank'}</b></div><div><small>Teams built</small><b>${my.runs||1}</b></div></div>`:'';
   const rows=Object.keys(S.picks).map(u=>({u,b:+simRec(u).bppg||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b).map(x=>({u:x.u,v:f1(x.b)+' PPG'}));
   const board=mgBoard('Best teams · points per game',rows);
-  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">You get 7 spots: PG, SG, SF, PF and C, plus a G (PG or SG) and a PF/C (SF, PF or C). Everyone is drawn at random from the app, and you get ${SIM_RESPINS} respins to swap any player for a new one. Aim for the highest total.</p>${myBest}${SIM_SLOTS.every(sl=>simPool(sl,new Set()).length)?'<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div>':'<p class="hint sim-wait">Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.</p>'}</section>${board}`;
+  if(!m)return head+`<section class="card fc-hero"><div class="qh"><h3>Build your team</h3></div><p class="muted">7 random players: PG, SG, SF, PF, C, G and PF/C. ${SIM_RESPINS} respins to swap anyone. Highest total wins.</p>${myBest}${SIM_SLOTS.every(sl=>simPool(sl,new Set()).length)?'<div class="fc-deal"><button class="btn" data-act="simStart">Deal my team</button></div>':'<p class="hint sim-wait">Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.</p>'}</section>${board}`;
   const total=m.c.reduce((t,k)=>t+(pByKey(k)?simTot(pByKey(k)):0),0);
   const dealing=m.flip==='deal',busy=dealing||(m.flip&&m.flip.i!=null);
   const HASDEF=false,tab='off',unitTot=u=>m.c.reduce((t,k,i)=>t+(SIM_UNIT(SIM_SLOTS[i].k)===u&&pByKey(k)?simTot(pByKey(k)):0),0),unitN=u=>SIM_SLOTS.filter(x=>SIM_UNIT(x.k)===u).length;
@@ -4451,8 +4451,8 @@ function fgHTML(){
     const d=ME.uid?fgDay(ME.uid):null,left=can?fgTriesLeft():FG_TRIES;
     const rows=Object.keys(S.picks).map(u=>({u,d:fgDay(u)})).filter(x=>x.d&&(+x.d.best||0)>0).sort((a,b)=>b.d.best-a.d.best||(a.d.t||0)-(b.d.t||0)).map(x=>({u:x.u,v:x.d.best+' pts · '+fgTime(x.d.t)}));
     const sk=ME.uid?fgStreak(ME.uid):0,gold=sk>=FG_GOLD;
-    body=`<p class="fg-note"><b>Today’s course is the same for everyone.</b> ${FG_TRIES} tries a day, your best counts. Play every day for <b>+${FG_DAY_PAY} tokens</b>, and a ${FG_GOLD}-day streak turns your ball gold until the streak breaks.</p>
-      <p class="fg-prize">🏆 When the day ends, <b>1st place wins a ${esc(PACKS.player.n)}</b> and <b>2nd and 3rd win a ${esc(PACKS.rookie.n)}</b>.${can&&fgPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
+    body=`<p class="fg-note">Same course for everyone · ${FG_TRIES} tries, best counts · <b>+${FG_DAY_PAY} tokens</b> a day.</p>
+      <p class="fg-prize">🏆 Daily prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)}${can&&fgPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
       <div class="fc-bar" style="grid-template-columns:repeat(3,1fr)"><div><small>Your best today</small><b>${d&&d.best?d.best:'–'}</b></div><div><small>Tries left</small><b>${left} of ${FG_TRIES}</b></div><div><small>Streak</small><b>${sk} ${sk===1?'day':'days'}</b></div></div>
       <div class="fg-gold ${gold?'on':''}"><span class="fg-gb" aria-hidden="true"></span><span>${gold?`<b>Golden ball active.</b> Play every day to keep it.`:`<b>Golden ball:</b> ${Math.min(sk,FG_GOLD)} of ${FG_GOLD} days`}</span>${gold?'':`<i style="--p:${Math.min(1,sk/FG_GOLD)}"></i>`}</div>
       <div class="fc-deal">${can&&!left?fgMoreBtns()+'<button class="btn ghost" data-act="fgPlay" data-v="free">Play Unlimited</button>':'<button class="btn" data-act="fgPlay" data-v="daily">Play today’s challenge</button>'}${can&&!left&&invLeft(ME.uid,'p_try')>0?`<button class="btn ghost" data-act="perkTry">Use an extra try (${invLeft(ME.uid,'p_try')})</button>`:''}</div>`;
@@ -4955,7 +4955,7 @@ function rcHTML(){
     <div class="rco-join"><label class="sr-only" for="rcCode">Party code</label><input id="rcCode" class="rco-in" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Party code" value="${esc(UI.rcCode||'')}"><button class="btn ghost" type="button" data-act="rcoJoin" ${bz}>Join a party</button></div>
     ${UI.rcoBusy?'<p class="hint">Connecting…</p>':''}`;
   if(!m)return `<section class="card rc-card"><div class="fg-hero" aria-hidden="true">💍</div><h3>Ring Chaser</h3>
-    <p class="muted">You and the AI (or a friend) each build a lineup one random school at a time: ${RC_SLOTS.map(s=>s.label).join(', ')}. Spin a school, take one of its players for an open spot, then the AI spins and picks. The same school can come up more than once. Players show their per-game averages, and the lineup with more fantasy points per game wins. Play the AI, find a real opponent online, or create a party and send a friend the code.</p>
+    <p class="muted">Take turns spinning a random school and picking one of its players. Best lineup by points per game wins.</p>
     ${myBar}<div class="fc-deal">${ready?play:'<p class="hint">Ring Chaser opens once players have stats.</p>'}</div>${can?'':'<p class="hint">Sign in to save your record and play online.</p>'}</section>`+board;
   const score=`<div class="rc-vs"><div class="${m.done&&m.res==='w'?'win':''}"><small>You · pts/game</small><b>${f1(m.done?m.total:rcSum(m.me))}</b></div><span>vs</span><div class="${m.done&&m.res==='l'?'win':''}"><small>AI · pts/game</small><b>${f1(m.done?m.aiTotal:rcSum(m.ai))}</b></div></div>`;
   const teams=`<div class="rc-two"><section class="card"><div class="qh"><h3>Your lineup</h3><span class="muted">${f1(rcSum(m.me))} pts/game</span></div>${rcSlots(m.me)}${m.done?'':'<button class="btn sm ghost rc-quit" data-act="rcQuit">Quit</button>'}</section>
