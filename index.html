@@ -982,6 +982,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .gm-seed{font:800 .62rem var(--f-body);color:var(--muted);margin-right:5px}
 .gm-f{font-size:.72rem;color:var(--muted)}
 .br{display:grid;grid-template-columns:repeat(var(--cols),minmax(220px,1fr));gap:18px;overflow-x:auto;padding-bottom:6px}
+.br-col.now h4{color:#FFC23D}.br-col.now h4::after{content:' · This week';color:#FFC23D;font-size:.7rem}
 .br-col h4{margin:0 0 10px;font:800 .82rem var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:#BFD3FF}
 .br-games{display:flex;flex-direction:column;justify-content:space-around;gap:var(--gap);height:calc(100% - 30px)}
 @media (max-width:759px){.br{grid-template-columns:repeat(var(--cols),78vw);scroll-snap-type:x mandatory}.br-col{scroll-snap-align:start}.gm-grid{grid-template-columns:1fr}}
@@ -2474,7 +2475,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v258 · Nov 7';
+const APP_BUILD='v259 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2919,8 +2920,10 @@ function gameCard(g,opts={}){
     ${g.r?`<div class="gm-f">${esc(g.r)}</div>`:''}
   </article>`;
 }
-function bracketHTML(b){
-  return `<div class="br" style="--cols:${b.rounds.length}">${b.rounds.map((r,ri)=>`<div class="br-col"><h4>${esc(r.name)}</h4><div class="br-games" style="--gap:${Math.pow(2,ri)*10}px">${r.games.map(g=>gameCard(g)).join('')}</div></div>`).join('')}</div>`;
+/* the round being played now: the first round whose games are today or later (v259). The bracket opens scrolled to it. */
+function brCur(b){const t=TODAY(),i=b.rounds.findIndex(r=>r.games.some(g=>g.d&&g.d>=t));return i<0?b.rounds.length-1:i}
+function bracketHTML(b){const cur=brCur(b),d0=((b.rounds[cur]||{}).games||[{}])[0].d,soon=d0&&(new Date(d0+'T12:00:00Z')-new Date(TODAY()+'T12:00:00Z'))<=7*864e5&&d0>=TODAY();
+  return `<div class="br" style="--cols:${b.rounds.length}">${b.rounds.map((r,ri)=>`<div class="br-col${ri===cur?' cur'+(soon?' now':''):''}"><h4>${esc(r.name)}</h4><div class="br-games" style="--gap:${Math.pow(2,ri)*10}px">${r.games.map(g=>gameCard(g)).join('')}</div></div>`).join('')}</div>`;
 }
 function viewSched(head){
   if(!GAMES||!GAMES.games||!GAMES.games.length)return head+`<p class="empty">The schedule and scores are being loaded. Check back soon.</p>`;
@@ -6845,6 +6848,7 @@ function render(bg){
   if(scrollY!==y0)window.scrollTo(0,y0);
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
   /* week chip rows open scrolled to the selected week (the current week by default), not to Week 1 */
+  document.querySelectorAll('#main .br').forEach(b=>{const c=b.querySelector('.br-col.cur');if(c&&b.scrollWidth>b.clientWidth)b.scrollLeft=c.offsetLeft-b.firstElementChild.offsetLeft});
   document.querySelectorAll('#main .gm-wks,#main .wks,#main .gm-tabs').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
   chrome(v);
 }
@@ -7942,7 +7946,7 @@ const __introRun=()=>{
   const anims=[];const A=(n,k,o)=>{const a=n.animate(k,Object.assign({fill:'both'},o));a.playbackRate=RATE;anims.push(a);return a};
   let done=false,timers=[],raf=0;
   /* the whole intro plays RATE times faster: every animation gets that playback rate and every scheduled event is moved up to match */
-  const RATE=3.2;
+  const RATE=2.5;   /* v259: was 3.2, slowed a little (owner: too fast, looked glitchy) */
   const at=(ms,f)=>timers.push(setTimeout(f,ms/RATE));
   const finish=()=>{if(done)return;done=true;timers.forEach(clearTimeout);cancelAnimationFrame(raf);
     /* draw the app behind the intro first, then fade, so the fade never stutters while the app builds */
