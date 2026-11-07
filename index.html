@@ -1661,6 +1661,9 @@ html,body{overflow-x:clip;max-width:100%}
 .rc-ai{display:grid;grid-template-columns:auto 30px minmax(0,1fr);align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:rgba(230,91,40,.12);border:1px solid rgba(230,91,40,.35);margin-bottom:8px}
 .rc-tag{font:800 .7rem/1 var(--f-body,inherit);padding:5px 7px;border-radius:8px;background:#E65B28;color:#fff}
 /* Ring Chaser online */
+.rco-wg{margin:10px auto 0;max-width:420px;padding:10px 12px;border-radius:12px;border:1px solid var(--line,#22344B);text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.rco-wg p{margin:0}.rco-wg .chips{justify-content:center}.rco-wg.on{display:block;border-color:rgba(255,194,61,.55);background:rgba(255,194,61,.1)}.rco-wg.ask.them{border-color:rgba(47,107,255,.55);background:rgba(47,107,255,.12)}
+.rco-wg.pick{border-style:dashed}.rco-rm{display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:10px}.rco-won{color:#3DDC84}.rco-lost{color:#FF6B6B}
 .rco-modes{display:grid;gap:8px;max-width:360px;margin:0 auto}
 .rco-join{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;max-width:360px;margin:10px auto 0}
 .rco-in{min-width:0;padding:10px 12px;border-radius:12px;border:1px solid var(--line,#22344B);background:var(--surface2,#16253A);color:inherit;font:800 1.05rem/1 var(--f-display,inherit);letter-spacing:.2em;text-transform:uppercase;text-align:center}
@@ -2169,7 +2172,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v251 · Nov 6';
+const APP_BUILD='v252 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2700,7 +2703,7 @@ const betsOf=u=>((S.picks[u]||{}).bets)||{};
 const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g});return m};
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
-  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0);
+  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+(+rcRec(u).wn||0);
   Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
@@ -4020,6 +4023,13 @@ const rcoWho=(d,t)=>t%2===0?d.host:d.guest;
 const rcoView=d=>({me:{sl:Object.assign({},(d.sl||{})[ME.uid])},ai:{sl:Object.assign({},(d.sl||{})[rcoOpp(d)])}});
 const rcoOut=(d,u)=>!!(d.stuck||{})[u]||!rcOpen({sl:(d.sl||{})[u]||{}}).length;
 const rcoFirst=u=>esc(String(nm(u)).split(/\s+/)[0]||'Opponent');
+/* token wagers (v252): d.wg={by,amt,st:'ask'|'ok'|'no'}. A wager can be offered in a party lobby or before the first pick;
+   the game waits (no spins or picks) while one is waiting for an answer. Winner +amt, loser -amt, tie 0, leaving = loss.
+   Settled in each player's own picks/<uid>.rc.wn (running total, added in bank()), once per match (rc.oid). */
+const RCO_WG=[5,10,25,50,100];
+const rcoWgOn=d=>d&&d.wg&&d.wg.st==='ok'?+d.wg.amt||0:0;
+const rcoWgAsk=d=>!!(d&&d.wg&&d.wg.st==='ask');
+const rcoFresh=d=>!d.last&&!Object.values(d.sl||{}).some(x=>x&&Object.keys(x).length);
 function rcoCan(){
   if(ME.mode==='offline'){say('Can’t connect to Varsity right now. Check your connection and try again.');return false}
   if(ME.mode==='readonly'){say('You have view-only access.');return false}
@@ -4062,11 +4072,12 @@ function rcoGot(o,d){
   if(!p||p.t!==d.t||p.st!==d.st){o.seen=NOW();o.afk=false}
   if(d.st==='done'||d.st==='gone')rcoSave(o);
   else if(d.st==='live')rcoSpin(o);
+  if(d.next&&d.next.id&&d.rm&&d.rm.by===ME.uid&&!o.following){o.following=true;rcoFollow(d.next)}
   if(!o.anim)render(true);
 }
 /* your turn: your phone spins a school and saves it, so a reload can't re-roll it */
 function rcoSpin(o){
-  const d=o.d;if(d.st!=='live'||rcoWho(d,d.t)!==ME.uid||(d.spin&&d.spin.t===d.t)||o.spinT===d.t)return;
+  const d=o.d;if(rcoWgAsk(d))return;if(d.st!=='live'||rcoWho(d,d.t)!==ME.uid||(d.spin&&d.spin.t===d.t)||o.spinT===d.t)return;
   o.spinT=d.t;
   const m=rcoView(d),all=rcSchools(),ok=all.filter(sc=>rcFits(m,m.me,sc).length);
   if(!ok.length){rcoMove(o,null);return}
@@ -4081,7 +4092,7 @@ function rcoSpin(o){
 }
 /* save a pick (key) or, with no key, "no school has a player for your open spots" */
 async function rcoMove(o,key){
-  const d=o.d;if(!d||d.st!=='live'||rcoWho(d,d.t)!==ME.uid||o.busy)return;
+  const d=o.d;if(!d||d.st!=='live'||rcoWho(d,d.t)!==ME.uid||o.busy||rcoWgAsk(d))return;
   const me=ME.uid,opp=rcoOpp(d),m=rcoView(d),patch={at:NOW()};
   if(key){
     const p=pByKey(key);if(!p||!d.spin||d.spin.t!==d.t||p.school!==d.spin.s||rcUsed(m).has(p.key))return;
@@ -4108,6 +4119,7 @@ function rcoTick(o){
   }
   if(d.st!=='live')return;
   const mine=rcoWho(d,d.t)===ME.uid,el=document.querySelector('.rco-clock');
+  if(rcoWgAsk(d)){o.seen=NOW();return}
   if(mine&&d.spin&&d.spin.t===d.t&&!o.anim){
     const left=Math.max(0,Math.ceil(RCO_CLOCK-(NOW()-(o.pickAt||o.seen))/1000));
     if(el)el.textContent=left+'s';
@@ -4139,7 +4151,7 @@ async function rcoLeave(){
   if(d&&d.st==='live'){
     if(!confirm('Leave the match? It counts as a loss.'))return;
     try{await upsert(RCO_COLL+'/'+o.id,{st:'gone',left:ME.uid,at:NOW()})}catch(_){say('Could not leave. Try again.');return}
-    await rcoRecord(o.id,'l',0);
+    await rcoRecord(o.id,'l',0,rcoWgOn(d));
   }else if(d&&d.st==='wait'&&d.host===ME.uid){upsert(RCO_COLL+'/'+o.id,{st:'gone'}).catch(()=>{})}
   rcoStop();rcoForget();render();
 }
@@ -4155,20 +4167,82 @@ function rcoSave(o){
   else if(d.win)o.res=d.win===me?'w':'l';
   else o.res=o.total>o.oppTotal?'w':o.total<o.oppTotal?'l':'t';
   rcoForget();
-  if(o.res&&!(d.st==='gone'&&d.left===me))rcoRecord(o.id,o.res,d.st==='done'&&!d.win&&!rcOpen(m.me).length?o.total:0);
+  if(o.res&&!(d.st==='gone'&&d.left===me))rcoRecord(o.id,o.res,d.st==='done'&&!d.win&&!rcOpen(m.me).length?o.total:0,rcoWgOn(d));
   if(d.st==='gone'&&!d.guest&&!o.claiming){rcoStop();render()}
 }
-async function rcoRecord(id,res,total){
+async function rcoRecord(id,res,total,wg){
   if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline')return;
   const my=rcRec(ME.uid);if(my.oid===id)return;   /* already counted */
   const on=Object.assign({w:0,l:0,t:0},my.on);on[res]=(+on[res]||0)+1;
   const o={on,oid:id,at:NOW()};if(total>(+my.bpg||0))o.bpg=total;
+  if(wg&&res!=='t')o.wn=(+my.wn||0)+(res==='w'?wg:-wg);
   if(total)UI.rco&&(UI.rco.newBest=total>(+my.bpg||0));
-  await act(()=>upsert('picks/'+ME.uid,{rc:o}),res==='w'?'Win saved':res==='l'?'Loss saved':'Tie saved');
+  await act(()=>upsert('picks/'+ME.uid,{rc:o}),(res==='w'?'Win saved':res==='l'?'Loss saved':'Tie saved')+(wg&&res!=='t'?` · ${res==='w'?'+':'-'}${wg} tokens`:''));
+}
+async function rcoWgOffer(amt){
+  const o=UI.rco,d=o&&o.d;if(!d)return;amt=+amt;
+  if(!(amt>0)){if(d.wg&&d.wg.by===ME.uid&&d.wg.st==='ask')upsert(RCO_COLL+'/'+o.id,{wg:null}).catch(()=>{});UI.rcoWgPick=false;render(true);return}
+  if(!(d.st==='wait'||(d.st==='live'&&rcoFresh(d)))){say('Wagers can only be made before the first pick.');return}
+  if(bank(ME.uid)<amt){say(`You need ${amt} tokens for that wager.`);return}
+  UI.rcoWgPick=false;
+  try{await upsert(RCO_COLL+'/'+o.id,{wg:{by:ME.uid,amt,st:'ask',at:NOW()}})}catch(_){say('Could not send the wager. Try again.')}
+}
+async function rcoWgAnswer(yes){
+  const o=UI.rco,d=o&&o.d;if(!d||!rcoWgAsk(d)||d.wg.by===ME.uid)return;
+  if(yes&&bank(ME.uid)<+d.wg.amt){say(`You need ${d.wg.amt} tokens to accept.`);return}
+  try{await upsert(RCO_COLL+'/'+o.id,{wg:Object.assign({},d.wg,{st:yes?'ok':'no'})})}catch(_){say('Could not answer. Try again.')}
+}
+/* rematch: one player asks (optionally for tokens), the other accepts. The accepter opens a new private match and
+   writes its code on the old one (d.next); the asker's phone joins it with that code. */
+async function rcoRematch(amt){
+  const o=UI.rco,d=o&&o.d;if(!d||d.st==='live'||!d.guest)return;amt=+amt||0;
+  if(amt&&bank(ME.uid)<amt){say(`You need ${amt} tokens for that wager.`);return}
+  try{await upsert(RCO_COLL+'/'+o.id,{rm:{by:ME.uid,amt,at:NOW()}})}catch(_){say('Could not ask for a rematch. Try again.')}
+}
+async function rcoRematchCancel(){const o=UI.rco;if(!o)return;upsert(RCO_COLL+'/'+o.id,{rm:null}).catch(()=>{})}
+async function rcoRematchAnswer(yes){
+  const o=UI.rco,d=o&&o.d;if(!d||!d.rm||d.rm.by===ME.uid||d.next)return;
+  if(!yes){upsert(RCO_COLL+'/'+o.id,{rm:Object.assign({},d.rm,{no:true})}).catch(()=>{});return}
+  const amt=+d.rm.amt||0;if(amt&&bank(ME.uid)<amt){say(`You need ${amt} tokens to accept.`);return}
+  try{
+    const code=rcoCode(),doc={host:ME.uid,guest:null,st:'wait',pub:false,code,rem:rcoOpp(d),c:NOW(),hb:NOW(),at:NOW(),t:0,sl:{}};
+    if(amt)doc.wg={by:d.rm.by,amt,st:'ok',at:NOW()};
+    const ref=await DB.collection(RCO_COLL).add(doc);
+    await upsert(RCO_COLL+'/'+o.id,{next:{id:ref.id,code}});
+    rcoListen(ref.id);
+  }catch(_){say('Could not start the rematch. Try again.')}
+}
+async function rcoFollow(n){
+  for(let i=0;i<6;i++){
+    try{const id=await rcoClaim(n.code,null);if(id){rcoListen(id);return}}catch(_){}
+    await new Promise(r=>setTimeout(r,1200));
+  }
+  say('Could not join the rematch.');if(UI.rco)UI.rco.following=false;
+}
+function rcoWgBar(d,on){
+  const o=UI.rco,amt=d.wg?+d.wg.amt:0;
+  if(rcoWgOn(d))return `<p class="rco-wg on">🪙 <b>${amt} tokens</b> on the line. Winner takes them.</p>`;
+  if(rcoWgAsk(d))return d.wg.by===ME.uid
+    ?`<div class="rco-wg ask"><p>You offered a <b>${amt}-token</b> wager. Waiting for ${esc(on)} to answer…</p><div class="btns"><button class="btn sm ghost" data-act="rcoWg" data-v="0">Cancel wager</button></div></div>`
+    :`<div class="rco-wg ask them"><p>${esc(on)} wants to play for <b>${amt} tokens</b>. Winner takes them.</p><div class="btns"><button class="btn sm" data-act="rcoWgYes" ${bank(ME.uid)<amt?'disabled':''}>Accept</button><button class="btn sm ghost" data-act="rcoWgNo">Play for fun</button></div>${bank(ME.uid)<amt?'<small class="muted">You don’t have enough tokens.</small>':''}</div>`;
+  const canOffer=d.st==='wait'||(d.st==='live'&&rcoFresh(d));
+  if(!canOffer||!ME.uid)return d.wg&&d.wg.st==='no'?`<p class="rco-wg muted">Playing for fun, no tokens.</p>`:'';
+  const bal=bank(ME.uid);
+  return `<div class="rco-wg pick">${d.wg&&d.wg.st==='no'?'<small class="muted">Your last wager was turned down.</small>':''}${UI.rcoWgPick?`<p>Bet tokens on this game:</p><div class="chips">${RCO_WG.map(v=>`<button class="chip" data-act="rcoWg" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}<button class="chip" data-act="rcoWgPick">Cancel</button></div><small class="muted">Your opponent has to accept. Winner takes the tokens.</small>`:`<button class="btn sm ghost" data-act="rcoWgPick">🪙 Wager tokens</button>`}</div>`;
+}
+function rcoRmBar(d,on){
+  const rm=d.rm,bal=bank(ME.uid);
+  if(!d.guest||d.st==='wait')return '';
+  if(d.next)return `<p class="hint" style="text-align:center">Starting the rematch…</p>`;
+  if(rm&&!rm.no&&rm.by===ME.uid)return `<div class="rco-wg ask"><p>Rematch${rm.amt?` for <b>${rm.amt} tokens</b>`:''} sent. Waiting for ${esc(on)}…</p><div class="btns"><button class="btn sm ghost" data-act="rcoRmCancel">Cancel</button></div></div>`;
+  if(rm&&!rm.no)return `<div class="rco-wg ask them"><p>${esc(on)} wants a rematch${rm.amt?` for <b>${rm.amt} tokens</b>`:''}!</p><div class="btns"><button class="btn sm" data-act="rcoRmYes" ${rm.amt&&bal<rm.amt?'disabled':''}>Accept</button><button class="btn sm ghost" data-act="rcoRmNo">No thanks</button></div>${rm.amt&&bal<rm.amt?'<small class="muted">You don’t have enough tokens.</small>':''}</div>`;
+  const last=rcoWgOn(d);
+  return `<div class="rco-rm">${rm&&rm.no&&rm.by===ME.uid?`<small class="muted">${esc(on)} said no to the rematch.</small>`:''}<div class="btns" style="justify-content:center"><button class="btn" data-act="rcoRm" data-v="0">🔁 Rematch</button>${last?`<button class="btn ghost" data-act="rcoRm" data-v="${last}" ${bal<last?'disabled':''}>🔁 Run it back for ${last}</button>`:''}</div>
+    ${UI.rcoRmPick?`<div class="chips" style="justify-content:center">${RCO_WG.map(v=>`<button class="chip" data-act="rcoRm" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}<button class="chip" data-act="rcoRmPick">Cancel</button></div>`:`<button class="btn sm ghost" data-act="rcoRmPick">🪙 Rematch with a wager</button>`}</div>`;
 }
 function rcoShare(){
   const o=UI.rco;if(!o||!o.d||!o.d.code)return;const code=o.d.code;
-  const txt=`Play me in Ring Chaser on Varsity! Open Minigames → Ring Chaser → Join a party and type the code ${code}. ${SITE_URL}`;
+  const w=o.d.wg&&o.d.wg.amt?` for ${o.d.wg.amt} tokens`:'';const txt=`Play me in Ring Chaser on Varsity${w}! Open Minigames → Ring Chaser → Join a party and type the code ${code}. ${SITE_URL}`;
   if(navigator.share)navigator.share({text:txt}).catch(()=>{});
   else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>say('Invite copied'),()=>say('Your code is '+code));
   else say('Your code is '+code);
@@ -4176,6 +4250,7 @@ function rcoShare(){
 function rcoHTML(){
   const o=UI.rco,d=o.d;
   if(!d)return `<section class="card rc-card"><div class="fg-hero" aria-hidden="true">💍</div><h3>Connecting…</h3><div class="fc-deal"><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
+  if(d.st==='wait'&&d.rem)return `<section class="card rc-card rco-lobby"><div class="fg-hero" aria-hidden="true">🔁</div><h3>Rematch with ${esc(nm(d.rem))}</h3>${rcoWgOn(d)?`<p class="rco-wg on">🪙 <b>${rcoWgOn(d)} tokens</b> on the line.</p>`:''}<p class="muted" style="text-align:center"><span class="rco-dot"></span> Waiting for ${esc(nm(d.rem))} to join… <b class="rco-wait">0:00</b></p><div class="btns" style="justify-content:center;margin-top:8px"><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
   if(d.st==='wait')return d.pub
     ?`<section class="card rc-card rco-lobby"><div class="rco-radar" aria-hidden="true"><i></i><i></i><i></i><em></em><span>💍</span></div><h3>Looking for an opponent<span class="rco-dots" aria-hidden="true"></span></h3>
       <p class="muted" style="text-align:center">You’ll be matched with the next person who taps Find an opponent. Keep this screen open. <b class="rco-wait">0:00</b></p>
@@ -4183,7 +4258,7 @@ function rcoHTML(){
     :`<section class="card rc-card rco-lobby"><div class="fg-hero" aria-hidden="true">🎉</div><h3>Your party</h3>
       <p class="muted" style="text-align:center">Send this code to a friend. They open Ring Chaser, tap Join a party and type it in.</p>
       <div class="rco-code" aria-label="Party code ${esc(d.code)}">${esc(d.code).split('').map(c=>`<span>${c}</span>`).join('')}</div>
-      <p class="muted" style="text-align:center"><span class="rco-dot"></span> Waiting for your friend to join… <b class="rco-wait">0:00</b></p>
+      <p class="muted" style="text-align:center"><span class="rco-dot"></span> Waiting for your friend to join… <b class="rco-wait">0:00</b></p>${rcoWgBar(d,'your friend')}
       <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn" data-act="rcoShare">Send invite</button><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
   const m=rcoView(d),opp=rcoOpp(d),on=nm(opp),over=d.st!=='live',myTurn=!over&&rcoWho(d,d.t)===ME.uid;
   const a=over&&o.total!=null?o.total:rcSum(m.me),b=over&&o.oppTotal!=null?o.oppTotal:rcSum(m.ai);
@@ -4193,8 +4268,8 @@ function rcoHTML(){
   if(over){
     const why=d.st==='gone'?(d.left===ME.uid?'You left the match.':esc(on)+' left the match, so the win is yours.'):d.win?(d.win===ME.uid?esc(on)+' stopped playing, so the win is yours.':'You ran out of time, so '+esc(on)+' takes the win.'):o.res==='w'?'Your lineup averages more fantasy points per game.':o.res==='l'?esc(on)+'’s lineup averages more fantasy points per game. Run it back?':'Same total, down to the decimal.';
     return `<section class="card rc-card"><div class="qh"><h3>${o.res==='w'?'You win! 💍':o.res==='l'?esc(on)+' wins':'It’s a tie'}</h3></div>${score}
-    <p class="muted" style="text-align:center">${why}${o.newBest?' New best lineup!':''}</p>
-    <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn" data-act="rcoFind">Find another opponent</button>${d.code?'<button class="btn ghost" data-act="rcoParty">New party</button>':''}<button class="btn ghost" data-act="rcoDone">Done</button></div></section>`+teams;
+    <p class="muted" style="text-align:center">${why}${o.newBest?' New best lineup!':''}${rcoWgOn(d)&&o.res&&o.res!=='t'?` <b class="${o.res==='w'?'rco-won':'rco-lost'}">${o.res==='w'?'+':'-'}${rcoWgOn(d)} tokens</b>`:''}</p>
+    ${rcoRmBar(d,on)}<div class="btns" style="justify-content:center;margin-top:8px"><button class="btn ghost" data-act="rcoFind">Find another opponent</button>${d.code?'<button class="btn ghost" data-act="rcoParty">New party</button>':''}<button class="btn ghost" data-act="rcoDone">Done</button></div></section>`+teams;
   }
   const open=rcOpen(m.me),need=[...new Set(open.map(s=>s.label))].join(', ');
   const L=d.last,lp=L&&L.u===opp&&L.key&&pByKey(L.key);
@@ -4214,7 +4289,8 @@ function rcoHTML(){
       <p class="muted rc-need">${sp?esc(on)+' is picking a player from '+esc(sp)+'.':'Waiting for '+esc(on)+' to spin.'}${open.length?' You still need: <b>'+esc(need)+'</b>.':' Your lineup is full.'}</p>
       ${o.afk?`<div class="rco-afk"><p>${esc(on)} hasn’t moved in a while.</p><div class="btns" style="justify-content:center"><button class="btn sm" data-act="rcoClaimWin">Take the win</button><button class="btn sm ghost" data-act="rcoWaitMore">Keep waiting</button></div></div>`:''}`;
   }
-  return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser <span class="rco-live">Online</span></h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${score}${oppNote}${body}</section>`+teams;
+  if(rcoWgAsk(d))body=`<p class="muted rc-need">The game starts once the wager is answered.</p>`;
+  return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser <span class="rco-live">Online</span></h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${score}${rcoWgBar(d,on)}${oppNote}${body}</section>`+teams;
 }
 function viewMini(){
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','pkl','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
@@ -6062,6 +6138,15 @@ document.addEventListener('click',async e=>{
   else if(a==='rcoClaimWin')rcoClaimWin();
   else if(a==='rcoWaitMore'){if(UI.rco){UI.rco.seen=NOW();UI.rco.afk=false;render()}}
   else if(a==='rcoDone'){rcoStop();rcoForget();render()}
+  else if(a==='rcoWgPick'){UI.rcoWgPick=!UI.rcoWgPick;render(true)}
+  else if(a==='rcoWg')rcoWgOffer(t.dataset.v);
+  else if(a==='rcoWgYes')rcoWgAnswer(true);
+  else if(a==='rcoWgNo')rcoWgAnswer(false);
+  else if(a==='rcoRm'){UI.rcoRmPick=false;rcoRematch(t.dataset.v)}
+  else if(a==='rcoRmPick'){UI.rcoRmPick=!UI.rcoRmPick;render(true)}
+  else if(a==='rcoRmCancel')rcoRematchCancel();
+  else if(a==='rcoRmYes')rcoRematchAnswer(true);
+  else if(a==='rcoRmNo')rcoRematchAnswer(false);
   else if(a==='rcPick')rcPick(t.dataset.id);
   else if(a==='rcQuit'){UI.rc=null;render()}
   else if(a==='team'){UI.ttab='sched';location.hash='#team/'+encodeURIComponent(t.dataset.t)}
