@@ -2498,7 +2498,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v264 · Nov 7';
+const APP_BUILD='v265 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4445,21 +4445,21 @@ function fgHTML(){
   return `<section class="card fg-card"><div class="fg-hero" aria-hidden="true">${bb?'🏀':'🏈'}</div><h3>${name}</h3>${seg}${body}${how}${can?'':'<p class="hint">Sign in to save your scores and get on the leaderboards.</p>'}</section>`+board;
 }
 const fgTime=s=>{s=Math.max(0,s||0);const m=Math.floor(s/60),r=s-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)};
-/* Field Goal / Hoops zones: a new look every few points, like Geometry Dash levels. Colours fade between zones (fgMix).
-   at = score where the zone starts; fx: lights (stadium glows), snow, stars, glow (neon lines), sun */
+/* Field Goal / Hoops zones: a new look as the run goes on, like Geometry Dash levels. Colours fade between zones (fgMix).
+   at = seconds into the run where the zone starts (v265: was points); fx: lights (stadium glows), snow, stars, glow (neon lines), sun */
 const FG_ZONES={
  fb:[{n:'Day Game',at:0,f1:'#2b7535',f2:'#2f7d3a',ln:'#ffffff',side:'#1d4f26',sky:'#000000',skyA:0,acc:'#9be37a',lights:0,snow:0,stars:0,glow:0,sun:0},
-     {n:'Golden Hour',at:8,f1:'#5d7a2a',f2:'#678530',ln:'#fff2d6',side:'#3f4f1a',sky:'#ff7a3d',skyA:.55,acc:'#ffb15a',lights:0,snow:0,stars:0,glow:0,sun:1},
-     {n:'Friday Night Lights',at:18,f1:'#163f22',f2:'#1a4a28',ln:'#e9f3ff',side:'#0d2614',sky:'#030914',skyA:.75,acc:'#7fd0ff',lights:1,snow:0,stars:.3,glow:0,sun:0},
-     {n:'Snow Bowl',at:30,f1:'#a9c2b0',f2:'#b9d0c0',ln:'#2d4a8f',side:'#7f9a88',sky:'#d9e6f2',skyA:.35,acc:'#d6ecff',lights:.4,snow:1,stars:0,glow:0,sun:0},
-     {n:'Neon Turf',at:45,f1:'#07060f',f2:'#0d0b1c',ln:'#26f0ff',side:'#05040b',sky:'#ff2bd6',skyA:.18,acc:'#ff4fe0',lights:0,snow:0,stars:.2,glow:1,sun:0},
-     {n:'Space Bowl',at:65,f1:'#0b0920',f2:'#120f2c',ln:'#b9a8ff',side:'#06051a',sky:'#000000',skyA:.5,acc:'#c9b8ff',lights:0,snow:0,stars:1,glow:.5,sun:0}],
+     {n:'Golden Hour',at:15,f1:'#5d7a2a',f2:'#678530',ln:'#fff2d6',side:'#3f4f1a',sky:'#ff7a3d',skyA:.55,acc:'#ffb15a',lights:0,snow:0,stars:0,glow:0,sun:1},
+     {n:'Friday Night Lights',at:35,f1:'#163f22',f2:'#1a4a28',ln:'#e9f3ff',side:'#0d2614',sky:'#030914',skyA:.75,acc:'#7fd0ff',lights:1,snow:0,stars:.3,glow:0,sun:0},
+     {n:'Snow Bowl',at:60,f1:'#a9c2b0',f2:'#b9d0c0',ln:'#2d4a8f',side:'#7f9a88',sky:'#d9e6f2',skyA:.35,acc:'#d6ecff',lights:.4,snow:1,stars:0,glow:0,sun:0},
+     {n:'Neon Turf',at:90,f1:'#07060f',f2:'#0d0b1c',ln:'#26f0ff',side:'#05040b',sky:'#ff2bd6',skyA:.18,acc:'#ff4fe0',lights:0,snow:0,stars:.2,glow:1,sun:0},
+     {n:'Space Bowl',at:130,f1:'#0b0920',f2:'#120f2c',ln:'#b9a8ff',side:'#06051a',sky:'#000000',skyA:.5,acc:'#c9b8ff',lights:0,snow:0,stars:1,glow:.5,sun:0}],
  bb:[{n:'Home Gym',at:0,b1:'#0b1a33',b2:'#14284a',floor:'#c98a4b',fl:'#00000030',ln:'#ffffff',sky:'#000000',skyA:0,acc:'#ffb36b',lights:0,snow:0,stars:0,glow:0,sun:0},
-     {n:'Sunset Blacktop',at:8,b1:'#3b1d5c',b2:'#ff8a4c',floor:'#3a3a40',fl:'#ffffff26',ln:'#ffd27a',sky:'#ff5e7a',skyA:.25,acc:'#ffb15a',lights:0,snow:0,stars:0,glow:0,sun:1},
-     {n:'Arena Lights',at:18,b1:'#02040a',b2:'#0c1430',floor:'#b8763c',fl:'#00000038',ln:'#ffffff',sky:'#000000',skyA:.3,acc:'#7fd0ff',lights:1,snow:0,stars:.25,glow:0,sun:0},
-     {n:'Ice Court',at:30,b1:'#8fb6d9',b2:'#dbe9f6',floor:'#e9f4fb',fl:'#7aa0c030',ln:'#2d6fd6',sky:'#ffffff',skyA:.15,acc:'#d6ecff',lights:.3,snow:1,stars:0,glow:0,sun:0},
-     {n:'Neon Streetball',at:45,b1:'#07060f',b2:'#1a0b2e',floor:'#111018',fl:'#ff2bd640',ln:'#26f0ff',sky:'#ff2bd6',skyA:.15,acc:'#ff4fe0',lights:0,snow:0,stars:.2,glow:1,sun:0},
-     {n:'Zero Gravity',at:65,b1:'#000000',b2:'#170f35',floor:'#1b1640',fl:'#b9a8ff30',ln:'#b9a8ff',sky:'#000000',skyA:0,acc:'#c9b8ff',lights:0,snow:0,stars:1,glow:.5,sun:0}]};
+     {n:'Sunset Blacktop',at:15,b1:'#3b1d5c',b2:'#ff8a4c',floor:'#3a3a40',fl:'#ffffff26',ln:'#ffd27a',sky:'#ff5e7a',skyA:.25,acc:'#ffb15a',lights:0,snow:0,stars:0,glow:0,sun:1},
+     {n:'Arena Lights',at:35,b1:'#02040a',b2:'#0c1430',floor:'#b8763c',fl:'#00000038',ln:'#ffffff',sky:'#000000',skyA:.3,acc:'#7fd0ff',lights:1,snow:0,stars:.25,glow:0,sun:0},
+     {n:'Ice Court',at:60,b1:'#8fb6d9',b2:'#dbe9f6',floor:'#e9f4fb',fl:'#7aa0c030',ln:'#2d6fd6',sky:'#ffffff',skyA:.15,acc:'#d6ecff',lights:.3,snow:1,stars:0,glow:0,sun:0},
+     {n:'Neon Streetball',at:90,b1:'#07060f',b2:'#1a0b2e',floor:'#111018',fl:'#ff2bd640',ln:'#26f0ff',sky:'#ff2bd6',skyA:.15,acc:'#ff4fe0',lights:0,snow:0,stars:.2,glow:1,sun:0},
+     {n:'Zero Gravity',at:130,b1:'#000000',b2:'#170f35',floor:'#1b1640',fl:'#b9a8ff30',ln:'#b9a8ff',sky:'#000000',skyA:0,acc:'#c9b8ff',lights:0,snow:0,stars:1,glow:.5,sun:0}]};
 const fgZoneAt=sc=>{const zl=FG_ZONES[FG_SPORT==='bb'?'bb':'fb'];let i=0;zl.forEach((z,k)=>{if(sc>=z.at)i=k});return i};
 const fgHex=h=>{h=h.replace('#','');if(h.length===6)h+='ff';return [0,2,4,6].map(i=>parseInt(h.slice(i,i+2),16))};
 const fgLerpC=(a,b,k)=>{const x=fgHex(a),y=fgHex(b),m=x.map((v,i)=>Math.round(v+(y[i]-v)*k));return `rgba(${m[0]},${m[1]},${m[2]},${(m[3]/255).toFixed(3)})`};
@@ -4650,7 +4650,7 @@ function fgTry(){
 function fgDraw(){
   const g=FG,c=g.cx,W=g.W,H=g.H,s=g.s,ground=H-Math.round(56*s),bb=FG_SPORT==='bb';
   /* zones, like Geometry Dash: the look changes as your score climbs (fgZone), fading from one theme to the next */
-  const zl=FG_ZONES[bb?'bb':'fb'],zi=fgZoneAt(g.score);
+  const zl=FG_ZONES[bb?'bb':'fb'],zi=fgZoneAt(g.st==='ready'?0:g.t);
   if(g.zone==null){g.zone=zi;g.zprev=zi;g.zat=-9999}
   if(zi!==g.zone){g.zprev=g.zone;g.zone=zi;g.zat=performance.now()}
   const zk=Math.min(1,(performance.now()-g.zat)/900),P=fgMix(zl[g.zprev],zl[g.zone],zk);
