@@ -1428,6 +1428,11 @@ select option{background:#0B1730;color:#EAF0F8}
 .lk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:10px}.lk-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;border:1px solid var(--line);border-left:3px solid var(--rc);background:var(--surface2);color:inherit;font:inherit;text-align:left}.lk-card span{display:flex;flex-direction:column;gap:2px;min-width:0}.lk-card small{font-size:.72rem}
 .bu.bu_rainbow{background:linear-gradient(90deg,#FF3B30,#FFC23D,#2FBF71,#2F6BFF,#B48CFF,#FF3B30)!important;background-size:200% 100%!important;animation:ncShine 3s linear infinite;border-color:#fff!important;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 .lk-card .lk-vers,.lk-vers{display:flex;flex-direction:row;gap:3px;margin-top:3px}@media (max-width:480px){.lk-tiers{grid-template-columns:repeat(2,1fr)}}.lk-vers i{width:10px;height:10px;border-radius:3px;border:1.5px solid var(--rc);opacity:.35}.lk-vers i.on{background:var(--rc);opacity:1}
+.tok-wrap{display:flex;gap:8px;align-items:stretch;flex:none}.shop-box{text-decoration:none}.shop-box b{display:flex;align-items:center;justify-content:center;height:100%}
+.me-lks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.me-lks .me-lk{margin:0;flex-direction:row}
+.lk-mys{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1.5px dashed var(--line);font:900 1.2rem var(--f-display,inherit);color:var(--muted,#8FA3C3)}.lk-mys.sm{width:18px;height:18px;font-size:.7rem;border-radius:5px}
+.pko-eq{margin-top:4px;padding:4px 10px!important;font-size:.7rem!important}.lk-top .btn{align-self:center}
+@media (max-width:420px){.me-lks{grid-template-columns:1fr}}
 /* v243 cosmetics: banners, name colours, card backs, chat bubbles */
 .ia-bn,.ia-cb{border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#22324f,#141f33);border:1px solid rgba(255,255,255,.12)}
 .ia-nc{border-radius:10px;background:var(--surface,#14213a);border:1px solid var(--line);font-weight:900;font-family:var(--f-display,inherit)}
@@ -3217,11 +3222,11 @@ function packShow(P,got){
   o.innerHTML=`<div class="pko-in"><h2>${esc(P.n)}</h2><div class="pko-cards">${got.map((g,i)=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
     return `<div class="pko-c ${g.r==='m'?'pko-m':''}" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${cardArt(g.card,g.r,58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n} ${c.team?'team':'player'} card</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${CARD_PCT[g.r]}% on ${c.team?'Pick ’em picks':'his props'}`}</em></div></div>`}
     const x=ITEM[g.id];
-    return `<div class="pko-c ${g.r==='m'?'pko-m':''}" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}</div></div>`}).join('')}</div>
-    <button class="btn" type="button">Nice</button></div>`;
+    return `<div class="pko-c ${g.r==='m'?'pko-m':''}" style="--rc:${R.c};--d:${i*0.35+0.3}s"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front">${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}</div></div>`}).join('')}</div>
+    <button class="btn pko-ok" type="button">Nice</button></div>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
   const close=()=>{o.remove();document.documentElement.style.overflow='';render()};
-  o.querySelector('.btn').onclick=close;o.addEventListener('click',e=>{if(e.target===o)close()});
+  o.querySelector('.pko-ok').onclick=close;o.addEventListener('click',e=>{if(e.target===o)close()});
   try{navigator.vibrate&&navigator.vibrate([20,60,20])}catch(_){}
 }
 /* small picture of an item, for packs and the Locker */
@@ -3241,16 +3246,13 @@ const ballOf=u=>{const b=(invOf(u).eq||{}).ball;return b&&invHas(u,b)?b:''};
 const eqOf=(u,k)=>{if(!u||!S.picks||!S.picks[u])return '';const x=(invOf(u).eq||{})[k];return x&&invHas(u,x)?x:''};
 /* a name in someone's name colour (chat, leaderboards, matchups) */
 const nmC=(u,txt)=>{const c=eqOf(u,'name'),b=eqOf(u,'badge');return (c?`<span class="nc ${c}" style="${cosStyle(c)}">${txt}</span>`:txt)+(b?bdgHTML(b):'')};
-function viewLocker(){
+function viewShop(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>Locker</h2><p>Open packs to collect player and team cards that boost your picks, plus banners, frames, name colours, titles, badges, card backs, chat bubbles, ball skins, perks and token boosts. Hit collection milestones and finish team sets for exclusive items. Everything here is free to earn with tokens and daily play.</p></div>`;
-  if(!can)return head+'<p class="empty">Sign in to open packs and keep items.</p>';
-  const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
-  const tab=['packs','cards','cos','boost'].includes(UI.lk)?UI.lk:'packs';
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Locker">${[['packs','Packs'],['cards','Cards'],['cos','Cosmetics'],['boost','Boosts & perks']].map(([k,l])=>`<button class="chip" data-act="lkTab" data-v="${k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
-  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div></section>`;
+  const head=`<div class="head"><h2>Shop</h2><p>Open packs for player and team cards that boost your picks, and cosmetics for your profile. Everything here is earned with tokens and daily play.</p></div>`;
+  if(!can)return head+'<p class="empty">Sign in to open packs.</p>';
+  const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid);
+  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
   let body='';
-  if(tab==='packs'){
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
     body=free+`<div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
@@ -3259,6 +3261,18 @@ function viewLocker(){
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button>
       <button class="btn ghost lk-usd" disabled title="Coming soon">${P.usd} · Coming soon</button></article>`).join('')}</div>
       <p class="muted lk-note">Items have no cash value and can’t be traded. Real-money packs will go through the App Store or Google Play.</p>`;
+  return head+top+body;
+}
+function viewLocker(){
+  const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const head=`<div class="head"><h2>My Locker</h2><p>Everything you have pulled from packs. Tap a cosmetic to equip it. Player and team cards boost your picks automatically. Packs are in the Shop.</p></div>`;
+  if(!can)return head+'<p class="empty">Sign in to keep your items.</p>';
+  const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
+  const tab=['cards','cos','boost'].includes(UI.lk)?UI.lk:'cos';
+  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['boost','Boosts & perks']].map(([k,l])=>`<button class="chip" data-act="lkTab" data-v="${k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div><a class="btn sm" href="#shop">Shop${fp?` · ${fp} free`:''}</a></section>`;
+  let body='';
+  if(false){
   }else if(tab==='cards'){
     const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=UI.lkC==='t'?'t':'p',N=UI.lkN||30;
     const best=id=>cardR(ME.uid,id);
@@ -3278,25 +3292,25 @@ function viewLocker(){
       cback:`<span class="ia ia-cb" style="width:36px;height:48px"><b>V</b></span>`,bubble:`<span class="ia ia-bu" style="width:72px;height:48px"><span class="bu">hey!</span></span>`,
       title:`<span class="ia ia-ti" style="width:91px;height:48px"><span class="muted">—</span></span>`,badge:`<span class="ia ia-bd" style="width:48px;height:48px"><span class="muted">—</span></span>`};
     const KINDS=[['banner','Banners','No banner'],['frame','Frames','No frame'],['name','Name colours','Standard'],['title','Titles','No title'],['badge','Badges','No badge'],['cback','Card backs','Standard'],['bubble','Chat bubbles','Standard'],['ball','Ball skins','Standard ball']];
-    const kk=KINDS.find(x=>x[0]===UI.lkK)||KINDS[0],k=kk[0],cur=eq[k],onlyOwn=!!UI.lkOwn,N=UI.lkN||30;
+    const kk=KINDS.find(x=>x[0]===UI.lkK)||KINDS[0],k=kk[0],cur=eq[k],onlyOwn=true,N=UI.lkN||30;
     const own=cosOwnCount(ME.uid),MS=ITEMS.filter(x=>x.ex&&x.need).sort((p,q)=>p.need-q.need),next=MS.find(x=>own<x.need);
     const sets=PALS.map(([pk,pn,a,b2])=>{const ids=SET_IDS[pk]||[],have=ids.filter(i=>invHas(ME.uid,i)).length;return {pk,pn,a,b:b2,have,tot:ids.length}}).sort((p,q)=>q.have/q.tot-p.have/p.tot).slice(0,4);
     const col=`<section class="card lk-col"><div class="qh"><h3>Your collection</h3><span class="muted">${own} of ${COS_TOTAL}</span></div>
       <div class="lk-bar"><i style="width:${Math.min(100,own/COS_TOTAL*100).toFixed(1)}%"></i></div>
-      <small class="muted">${next?`${next.need-own} more to unlock <b>${esc(next.n)}</b>.`:'Every milestone unlocked.'} Milestone items are never in packs.</small>
-      <div class="lk-ms">${MS.map(x=>`<div class="${own>=x.need?'got':''}">${itemArt(x.id,36)}<b>${esc(x.n)}</b><small class="muted">${own>=x.need?'Unlocked':'Own '+x.need}</small></div>`).join('')}</div>
+      <small class="muted">${next?`${next.need-own} more to unlock the next mystery reward.`:'Every milestone unlocked.'} Milestone items are never in packs.</small>
+      <div class="lk-ms">${MS.map(x=>own>=x.need?`<div class="got">${itemArt(x.id,36)}<b>${esc(x.n)}</b><small class="muted">Unlocked</small></div>`:`<div><span class="lk-mys">?</span><b>Mystery reward</b><small class="muted">Own ${x.need}</small></div>`).join('')}</div>
       <div class="qh"><h3 style="font-size:.95rem">Team sets</h3><span class="muted">${PALS.length} sets</span></div>
-      <div class="lk-sets">${sets.map(t=>`<div class="lk-set"><span class="lk-sw" style="background:linear-gradient(135deg,${t.a} 50%,${t.b} 50%)"></span><span style="min-width:120px">${esc(t.pn)}</span><span class="lk-bar"><i style="width:${(t.have/t.tot*100).toFixed(0)}%"></i></span><small class="muted">${t.have}/${t.tot}</small><span style="${invHas(ME.uid,'bd_set_'+t.pk)?'':'opacity:.3;filter:grayscale(1)'}">${bdgHTML('bd_set_'+t.pk,18)}</span></div>`).join('')}</div>
-      <small class="muted">Collect every item in a team’s colours (${(SET_IDS[PALS[0][0]]||[]).length} items) to earn its crest badge.</small></section>`;
-    const kinds=`<div class="lk-kinds" role="group" aria-label="Cosmetic type">${KINDS.map(([x,l])=>{const L=ITEMS.filter(i=>i.k===x);return `<button class="chip" data-act="lkK" data-v="${x}" aria-pressed="${x===k}">${l} <small class="muted">${L.filter(i=>invHas(ME.uid,i.id)).length}/${L.length}</small></button>`}).join('')}</div>`;
+      <div class="lk-sets">${sets.map(t=>`<div class="lk-set"><span class="lk-sw" style="background:linear-gradient(135deg,${t.a} 50%,${t.b} 50%)"></span><span style="min-width:120px">${esc(t.pn)}</span><span class="lk-bar"><i style="width:${(t.have/t.tot*100).toFixed(0)}%"></i></span><small class="muted">${t.have}/${t.tot}</small>${invHas(ME.uid,'bd_set_'+t.pk)?bdgHTML('bd_set_'+t.pk,18):'<span class="lk-mys sm">?</span>'}</div>`).join('')}</div>
+      <small class="muted">Collect every item in a team’s colours (${(SET_IDS[PALS[0][0]]||[]).length} items) to earn a secret reward.</small></section>`;
+    const kinds=`<div class="lk-kinds" role="group" aria-label="Cosmetic type">${KINDS.map(([x,l])=>{const L=ITEMS.filter(i=>i.k===x);return `<button class="chip" data-act="lkK" data-v="${x}" aria-pressed="${x===k}">${l} <small class="muted">${L.filter(i=>invHas(ME.uid,i.id)).length} found</small></button>`}).join('')}</div>`;
     const ord={m:0,l:1,e:2,r:3,u:4,c:5};
     let list=ITEMS.filter(x=>x.k===k).sort((p,q)=>(invHas(ME.uid,q.id)-invHas(ME.uid,p.id))||(ord[p.r]-ord[q.r]));
     if(onlyOwn)list=list.filter(x=>invHas(ME.uid,x.id));
     const shown=list.slice(0,N);
-    body=col+`<section class="card"><div class="qh"><h3>${kk[1]}</h3><button class="chip" data-act="lkOwn" aria-pressed="${onlyOwn}">Owned only</button></div>${kinds}
+    body=col+`<section class="card"><div class="qh"><h3>${kk[1]}</h3><span class="muted">${list.length} found</span></div>${kinds}
       <div class="lk-grid"><button class="lk-it ${!cur||!invHas(ME.uid,cur)?'on':''}" data-act="lkEq" data-k="${k}" data-v="">${dflt[k]}<b>${kk[2]}</b><small class="muted">Default</small></button>
       ${shown.map(x=>{const o=invHas(ME.uid,x.id);return `<button class="lk-it ${cur===x.id&&o?'on':''} ${o?'':'lock'}" data-act="lkEq" data-k="${k}" data-v="${x.id}" ${o?'':'disabled'} title="${esc(x.d)}">${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${o?RAR[x.r].n:'Locked · '+RAR[x.r].n}</small>${x.ex&&!o?`<small class="ex">${x.need?'Own '+x.need+' cosmetics':'Complete the team set'}</small>`:''}</button>`}).join('')}</div>
-      ${list.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${list.length-N})</button>`:''}${k==='ball'?`<p class="hint">The golden ball from a 7-day streak still shows over any skin while your streak is alive.</p>`:''}</section>`;
+      ${list.length?'':`<p class="empty">No ${kk[1].toLowerCase()} yet. Open packs in the <a href="#shop">Shop</a> to find them.</p>`}${list.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${list.length-N})</button>`:''}${k==='ball'?`<p class="hint">The golden ball from a 7-day streak still shows over any skin while your streak is alive.</p>`:''}</section>`;
   }else{
     body=`<section class="card"><div class="qh"><h3>Boosts & perks</h3></div><div class="lk-list">${ITEMS.filter(x=>x.k==='perk'||x.k==='tboost').map(x=>`<div class="lk-row">${itemArt(x.id,42)}<span><b>${esc(x.n)}</b><small class="muted">${esc(x.d)}</small></span><b class="lk-n">${invLeft(ME.uid,x.id)}</b></div>`).join('')}</div>
       <p class="muted">Token boosts go on a Pick ’em or player prop pick from the pick itself, before the game starts. Perks show up in the game they belong to.</p></section>`;
@@ -4600,7 +4614,7 @@ function rcoHTML(){
 }
 function viewMini(){
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','pkl','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
-  const tkn=ME.uid&&ME.mode!=='guest'?`<button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button>`:'';
+  const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-wrap"><a class="tok-box shop-box" href="#shop" aria-label="Shop: open packs"><small>Shop</small><b><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b></a><button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button></div>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI or a real person, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like points, rebounds and assists. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each game, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':PT==='pkl'?'Pick the winner of every game each game. The friend with the best accuracy tops your league.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['picks','Predict'],['draw','5 Card Draw'],['sim','82-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${(v==='picks'?'predict':v)===T}">${l}</button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="seg pr-seg" role="group" aria-label="Predict">${[['picks','Pick ’em'],['pkl','Pick ’em league'],['props','Player props']].map(([v,l])=>`<button data-act="mtab" data-v="${v}" aria-pressed="${PT===v}">${l}</button>`).join('')}</div>`:'';
@@ -5439,7 +5453,8 @@ function viewMe(){
   }else ranks=`<p class="hint">No approved games for this period yet. Your rank and breakdown appear as soon as games are posted.</p>`;
   const wk=UI.meEntry.week;
   return head+`
-  <a class="card me-lk" href="#locker"><span class="ia ia-perk tboost" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16v13H4zM9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>Locker</b><small class="muted">${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' to open · ':''}Packs, skins, frames and boosts</small></span><b aria-hidden="true">›</b></a>
+  <div class="me-lks"><a class="card me-lk" href="#locker"><span class="ia ia-perk tboost" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16v13H4zM9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>My Locker</b><small class="muted">Equip what you’ve pulled</small></span><b aria-hidden="true">›</b></a>
+  <a class="card me-lk" href="#shop"><span class="ia ia-perk perk" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>Shop</b><small class="muted">${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' · ':''}Packs</small></span><b aria-hidden="true">›</b></a></div>
   <section class="card me-pro ${eqOf(ME.uid,'banner')?'has-bn':''}">${eqOf(ME.uid,'banner')?`<div class="me-bn bn ${eqOf(ME.uid,'banner')}" style="${cosStyle(eqOf(ME.uid,'banner'))}" aria-hidden="true"></div>`:''}
     <div class="me-top">${av(pr.name,pr.school,56)}<div class="me-id"><h3>${nmC(ME.uid,esc(pr.name))}</h3>${titleOf(ME.uid)?`<span class="ti r-${ITEM[eqOf(ME.uid,'title')].r}">${esc(titleOf(ME.uid))}</span>`:''}<span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
     ${UI.meEdit?`<div class="pform">
@@ -6214,7 +6229,7 @@ document.addEventListener('click',async e=>{
 });
 
 /* ---------- render ---------- */
-const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk','privacy','locker'];
+const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk','privacy','locker','shop'];
 const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
 function bannerHTML(){
   const b=[];
@@ -6271,7 +6286,7 @@ function render(bg){
   if(HOLD)return;
   T10S=null;POTW_C=null;
   if(location.hash==='#simulate'){UI.mtab='sim';history.replaceState(null,'','#minigames')}
-  const V={locker:viewLocker,team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,scoring:viewScoring,privacy:viewPrivacy,admin:viewAdmin};
+  const V={shop:viewShop,locker:viewLocker,team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,scoring:viewScoring,privacy:viewPrivacy,admin:viewAdmin};
   let v=UI.view;
   const html=V[v]();
   if(bg===true&&html===LAST_HTML&&v===LAST_V){chrome(v);return}
@@ -6384,7 +6399,7 @@ document.addEventListener('click',async e=>{
     c.innerHTML=`<div class="gcard tok-sheet" role="dialog" aria-modal="true" aria-labelledby="tk-t"><h2 id="tk-t">Get tokens</h2>
       <div class="tok-bal"><small>You have</small><b>${Math.floor(bank(ME.uid)*10)/10}</b><small>tokens</small></div>
       <button type="button" class="tok-opt" data-act="adWatch" ${l?'':'disabled'}><span class="tok-ic" aria-hidden="true">▶</span><span><b>Watch a short sponsor spot</b><small>+${ADS.reward} tokens · ${l?l+' left today':'back tomorrow'}</small></span></button>
-      <button type="button" class="tok-opt" data-act="goLocker"><span class="tok-ic" aria-hidden="true">▣</span><span><b>Open packs in the Locker</b><small>${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' waiting · ':''}Ball skins, frames, perks, boosts</small></span></button>
+      <button type="button" class="tok-opt" data-act="goLocker"><span class="tok-ic" aria-hidden="true">▣</span><span><b>Open packs in the Shop</b><small>${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' waiting · ':''}Ball skins, frames, perks, boosts</small></span></button>
       ${rwHTML()}
       ${(()=>{const r=tokRows(),i=r.findIndex(x=>x.u===ME.uid);return r.length?`<div class="rw"><div class="rw-h"><b>Token leaderboard</b><small class="muted">${i>=0?'You are #'+(i+1)+' of '+r.length:''}</small></div><ul>${r.slice(0,5).map((x,k)=>`<li class="${x.u===ME.uid?'me':''}"><span class="rw-c">${k+1}</span><span>${esc(x.u===ME.uid?'You':nm(x.u))}</span><b>${(Math.floor(x.t*10)/10).toLocaleString()}</b></li>`).join('')}</ul></div>`:''})()}
       <p class="muted">Tokens are free, are shared by every game in Minigames, and have no cash value.</p>
@@ -6523,7 +6538,7 @@ document.addEventListener('click',async e=>{
   else if(a==='copyRank'){const me=meP(),info=me&&myRanks(me);if(info)copyText(rankText(info,me),'Copied. Paste it anywhere.')}
   else if(a==='meSide'){UI.meSide=t.dataset.v;render()}
   else if(a==='meEdit'){UI.meEdit=!UI.meEdit;render()}
-  else if(a==='goLocker'){const c=$('#cfm');if(c&&!c.hidden&&typeof closeConfirm==='function')closeConfirm();location.hash='#locker'}
+  else if(a==='goLocker'){const c=$('#cfm');if(c&&!c.hidden&&typeof closeConfirm==='function')closeConfirm();location.hash='#shop'}
   else if(a==='lkTab'){UI.lk=t.dataset.v;render()}
   else if(a==='lkC'){UI.lkC=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkK'){UI.lkK=t.dataset.v;UI.lkN=30;render()}
@@ -6531,8 +6546,8 @@ document.addEventListener('click',async e=>{
   else if(a==='lkMore'){UI.lkN=(UI.lkN||30)+30;render()}
   else if(a==='pkOpen'){const k=t.dataset.v,h=t.dataset.h,P=PACKS[k];if(!P)return;
     if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random items. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h)}
-  else if(a==='lkEq'){const k=t.dataset.k,v=t.dataset.v;if(v&&!invHas(ME.uid,v))return;const inv=invOf(ME.uid),eq=Object.assign({},inv.eq,{[k]:v});
-    S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},inv,{eq})});render();upsert('picks/'+ME.uid,{inv:{eq}}).catch(()=>say('That did not save.'))}
+  else if(a==='lkEq'){const k=t.dataset.k,v=t.dataset.v;if(v&&!invHas(ME.uid,v))return;if(t.closest('.pko')){t.closest('.pko').querySelectorAll(`.pko-eq[data-k="${k}"]`).forEach(x=>{x.textContent='Equip';x.disabled=false});t.textContent='Equipped ✓';t.disabled=true}const inv=invOf(ME.uid),eq=Object.assign({},inv.eq,{[k]:v});
+    S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},inv,{eq})});if(!t.closest('.pko'))render();upsert('picks/'+ME.uid,{inv:{eq}}).catch(()=>say('That did not save.'))}
   else if(a==='bxSet'){const kind=t.dataset.kind,id=t.dataset.id,f=t.dataset.f,coll=kind==='pp'?'props':'bets',cur=kind==='pp'?propsOf(ME.uid):betsOf(ME.uid),b=cur[id];if(!b)return;
     const gm=gameMap();if(kind==='pk'&&gm[id]&&started(gm[id])){say('That game has started.');return}if(kind==='pp'&&propMap()[id]&&started(propMap()[id].game)){say('That game has started.');return}
     const nx=b.bx===f?null:f;if(nx&&invLeft(ME.uid,nx==='b'?'t_boost':'t_insure')<1){say('You don’t have one of those. Open packs in the Locker.');return}
