@@ -2032,6 +2032,17 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .fg-prize{margin:6px 0 10px;padding:9px 12px;border-radius:12px;background:linear-gradient(120deg,rgba(242,190,44,.16),rgba(122,77,255,.12));font-size:.85rem}.fg-prize a{color:#FFC23D}
 .lk-prize{background:linear-gradient(120deg,rgba(242,190,44,.22),rgba(255,79,109,.10)),var(--surface)!important;border-color:#F2BE2C!important}
 
+
+/* v260: Get tokens fits the screen and scrolls inside; X to close. Header ticker is solid so the words are easy to read. */
+#cfm .gcard{max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.tok-sheet{position:relative}
+.tok-sheet .rw ul{max-height:none;overflow:visible}
+.tok-x{position:sticky;top:0;align-self:flex-end;flex:none;margin:-10px -10px -56px 0;z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.9);color:#fff;font:700 1.05rem/1 inherit;cursor:pointer;display:grid;place-items:center}
+.tok-x:hover{background:#13284D}
+.tok-sheet .gbtns{position:sticky;bottom:-1px;background:linear-gradient(transparent,var(--surface,#0B1730) 35%);padding-top:14px;margin-bottom:-4px}
+.mast-tick{background:rgba(3,14,8,.92)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)!important;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)!important}
+.mast-tick::after{display:none!important}
+.mt-i{text-shadow:none!important}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2486,7 +2497,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v259 · Nov 7';
+const APP_BUILD='v260 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6912,7 +6923,7 @@ document.addEventListener('click',async e=>{
   else if(a==='consent')openGate();
   else if(a==='adWatch'){if(!$('#cfm').hidden)closeConfirm();adPlay()}
   else if(a==='tokOpen'){const c=$('#cfm');const l=adLeft(ME.uid);
-    c.innerHTML=`<div class="gcard tok-sheet" role="dialog" aria-modal="true" aria-labelledby="tk-t"><h2 id="tk-t">Get tokens</h2>
+    c.innerHTML=`<div class="gcard tok-sheet" role="dialog" aria-modal="true" aria-labelledby="tk-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="tk-t">Get tokens</h2>
       <div class="tok-bal"><small>You have</small><b>${Math.floor(bank(ME.uid)*10)/10}</b><small>tokens</small></div>
       <button type="button" class="tok-opt" data-act="adWatch" ${l?'':'disabled'}><span class="tok-ic" aria-hidden="true">▶</span><span><b>Watch a short sponsor spot</b><small>+${ADS.reward} tokens · ${l?l+' left today':'back tomorrow'}</small></span></button>
       <button type="button" class="tok-opt" data-act="goLocker"><span class="tok-ic" aria-hidden="true">▣</span><span><b>Open packs in the Shop</b><small>${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' waiting · ':''}Ball skins, frames, perks, boosts</small></span></button>
