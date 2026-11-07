@@ -2532,7 +2532,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v280 · Nov 7';
+const APP_BUILD='v281 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3476,10 +3476,17 @@ let _cosT=0;const cosTotal=()=>_cosT||(_cosT=ITEMS.filter(x=>!x.ex&&COS_K.includ
 const SET_IDS={};ITEMS.forEach(x=>{if(x.set&&!x.ex)(SET_IDS[x.set]=SET_IDS[x.set]||[]).push(x.id)});
 function cosEarned(u,id){const x=ITEM[id];if(!x||!x.ex)return false;if(x.need)return cosOwnCount(u)>=x.need;if(x.set){const it=invOf(u).it||{};return SET_IDS[x.set].every(i=>+it[i]>0)}return false}
 /* inline looks for generated items (hand-made ones use CSS classes) */
+/* v281: name colours stay readable on the dark app: any dark colour in a name is lightened (mixed with white) until it reads, so team-colour
+   fades like navy→maroon no longer fade into the background */
+const ncLift=c=>{const m=/^#([0-9a-f]{6})$/i.exec(c);if(!m)return c;let [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16));
+  const L=(r,g,b)=>{const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(r)+.7152*f(g)+.0722*f(b)};
+  let k=0;while(L(r+(255-r)*k,g+(255-g)*k,b+(255-b)*k)<.28&&k<.9)k+=.05;
+  const h=v=>Math.round(v).toString(16).padStart(2,'0');return '#'+h(r+(255-r)*k)+h(g+(255-g)*k)+h(b+(255-b)*k)};
+const ncLiftAll=str=>String(str).replace(/#[0-9a-f]{6}\b/gi,ncLift);
 function cosStyle(id){const x=ITEM[id];if(!x)return '';
   if(x.k==='banner'&&x.bg)return `background:${x.bg}`;
   if(x.k==='frame'&&x.cg)return `background:${x.cg}`;
-  if(x.k==='name'){if(x.col)return `color:${x.col}`;if(x.grad)return `background-image:${x.grad};-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent${x.anim?';background-size:200% 100%;animation:ncShine 3s linear infinite':''}`}
+  if(x.k==='name'){if(x.col)return `color:${ncLift(x.col)};text-shadow:0 1px 2px rgba(0,0,0,.55)`;if(x.grad)return `filter:drop-shadow(0 1px 1px rgba(0,0,0,.55));background-image:${ncLiftAll(x.grad)};-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent${x.anim?';background-size:200% 100%;animation:ncShine 3s linear infinite':''}`}
   if(x.k==='cback'&&x.cb)return `--cbA:${x.cb[0]};--cbB:${x.cb[1]};--cbC:${x.cb[2]};--cbG:${x.cb[3]}`;
   if(x.k==='bubble'&&x.bu)return `background:${x.bug?`linear-gradient(135deg,${x.bu[0]},${x.bug})`:`color-mix(in srgb,${x.bu[0]} 38%,#0b1220)`};border-color:${x.bu[1]};color:#fff`;
   return ''}
