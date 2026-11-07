@@ -2070,6 +2070,9 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .rank-cta-t{display:flex;flex-direction:column;flex:1;min-width:0}.rank-cta-t b{font:900 italic 1.05rem/1.1 var(--f-display,inherit);text-transform:uppercase;letter-spacing:.02em}.rank-cta-t small{font-size:.78rem;opacity:.8;font-weight:600}
 .rank-cta-go{font-size:1.3rem;font-weight:900}
 @media (prefers-reduced-motion:reduce){.rank-cta::after{animation:none;display:none}}
+.pkl-lr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pkl-lr>div{background:var(--surface2,#0f1d36);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.pkl-lr small{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700}.pkl-lr b{font:900 1.5rem/1.1 var(--f-display,inherit)}
+.pkl-last{border-color:#3DDC84!important;background:linear-gradient(180deg,rgba(61,220,132,.08),transparent),var(--surface)!important}.pkl-next{margin:10px 0 0;color:#FFC23D;font-weight:800}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2528,7 +2531,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v277 · Nov 7';
+const APP_BUILD='v278 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3253,12 +3256,18 @@ function pklHTML(inL){
       <div class="lg-row"><input id="pkl-name" maxlength="32" placeholder="League name, like Lunch Table Picks" autocomplete="off" aria-label="League name"><button class="btn" type="submit">Create</button></div></form>
     <form class="card lg-form" id="pkl-join"><h3>Join a Pick ’em league</h3><p class="muted">Enter the code a friend sent you.</p>
       <div class="lg-row"><input id="pkl-code" maxlength="12" placeholder="Invite code" autocomplete="off" aria-label="Invite code"><button class="btn" type="submit">Join</button></div></form></div>`;
-  const how=`<p class="muted">Every game, pick the winner of every game. A game you skip counts as a miss once it’s final. Your picks count in all your Pick ’em leagues. No tokens involved: it’s pure bragging rights.</p>`;
+  const how=`<p class="muted">Pick every game, one week at a time. Best percentage wins.</p>`;
   const L=myPKL(),g=L.find(x=>x.id===UI.pkli)||L[0];
   if(!g)return `<section class="card"><h3>Pick ’em league</h3>${how}</section>${can?forms:'<p class="hint">Sign in to start or join a Pick ’em league.</p>'}`;
-  const all=(GAMES&&GAMES.games)||[],cw=CURW(),sw=Math.min(cw,pklWeekOf(g.createdAt)),w=Math.min(cw,Math.max(sw,+UI.pklw||cw));
+  /* v278: week by game. The league starts with the first week that still had games to play when it was made; the open week is the first one
+     with a game not yet final. Finished games show your result; the open week is where you pick. */
+  const all=(GAMES&&GAMES.games)||[],cw=CURW(),cday=g.createdAt?new Date(g.createdAt).toISOString().slice(0,10):'0000';
+  const wks=[...new Set(all.map(x=>x.w))].sort((a,b)=>a-b),sw0=pklWeekOf(g.createdAt);
+  const sw=wks.find(x=>x>=Math.min(sw0,cw)&&all.some(y=>y.w===x&&y.d>=cday))||wks.find(x=>x>=sw0)||cw;
+  const openW=wks.find(x=>x>=sw&&all.some(y=>y.w===x&&!gDone(y)))||wks[wks.length-1]||cw;UI.pklOpenW=openW;
+  const w=Math.min(openW,Math.max(sw,+UI.pklw||openW));
   const wk=all.filter(x=>x.w===w).sort((a,b)=>(a.d+(a.t||KICK))<(b.d+(b.t||KICK))?-1:1);
-  const span=all.filter(x=>x.w>=sw&&x.w<=cw);
+  const span=all.filter(x=>x.w>=sw&&x.w<=openW&&x.d>=cday);
   const mine=pklOf(ME.uid),stage=UI.pkls||{};
   const pickOf=x=>stage[gid(x)]||mine[gid(x)];
   const open=wk.filter(x=>!started(x)&&!gDone(x)),picked=wk.filter(x=>pickOf(x)).length,openLeft=open.filter(x=>!pickOf(x)).length,dirty=Object.keys(stage).length;
@@ -3271,13 +3280,16 @@ function pklHTML(inL){
   const sel=L.length>1?`<div class="chips" role="group" aria-label="Your Pick ’em leagues">${L.map(x=>`<button class="chip" data-act="pklSel" data-v="${esc(x.id)}" aria-pressed="${x.id===g.id}">${esc(x.name)}</button>`).join('')}<button class="chip" data-act="pklNew">+ New</button></div>`:'';
   const head=`<section class="card"><div class="qh"><h3>${esc(g.name)}</h3><span class="muted">${Object.keys(g.members).length} ${Object.keys(g.members).length===1?'player':'players'}</span></div>${how}
     <div class="lg-inv"><span class="lbl">Invite code</span><code id="pkl-code-${esc(g.id)}">${esc(g.code)}</code><button class="btn sm" data-act="copy" data-code="${esc(g.code)}">Copy</button><button class="btn sm lg-sms" data-act="pklInv" data-gid="${esc(g.id)}">Text invite</button></div></section>`;
-  const weeks=`<div class="wks" role="group" aria-label="Game">${Array.from({length:cw-sw+1},(_,i)=>sw+i).map(x=>`<button class="chip" data-act="pklWk" data-w="${x}" aria-pressed="${x===w}">Game ${x}</button>`).join('')}</div>`;
+  const weeks=`<div class="wks" role="group" aria-label="Game">${wks.filter(x=>x>=sw&&x<=openW).map(x=>`<button class="chip" data-act="pklWk" data-w="${x}" aria-pressed="${x===w}">Game ${x}${x===openW?' •':''}</button>`).join('')}</div>`;
   const card=x=>{const id=gid(x),p=pickOf(x),lock=started(x)||gDone(x),done=gDone(x),win=done?(x.hs>x.as?'h':x.hs<x.as?'a':''):'';
     const btn=(sd,team)=>{const on=p===sd,res=done&&on?(win===sd?'ok':win?'no':''):'';return `<button class="bt-t pkl-t ${on?'on':''} ${res}" data-act="pklPick" data-g="${esc(id)}" data-s="${sd}" ${lock||!can?'disabled':''} aria-pressed="${on}">${slogo(team,30)}<b>${esc(team)}</b>${done?`<span class="pkl-sc">${sd==='h'?x.hs:x.as}</span>`:''}</button>`};
     return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(x.d))}${lock&&!done?' · locked':''}</span>${done?`<span class="pill ${p?(win&&p===win?'final':'live'):'live'}">${!p?'Missed':win===p?'Right':win?'Wrong':'Tie'}</span>`:!p&&!lock?'<span class="pill live">Pick needed</span>':''}</div><div class="bt-row">${btn('a',x.a)}<span class="bt-at">at</span>${btn('h',x.h)}</div></article>`};
-  const bar=w===cw&&can&&wk.length?`<div class="pkl-bar"><div><b>${picked} of ${wk.length} picked</b><small class="muted">${openLeft?openLeft+' open '+(openLeft===1?'game still needs a pick':'games still need a pick'):'Every open game is picked'}</small></div>
+  const bar=w===openW&&can&&wk.length?`<div class="pkl-bar"><div><b>${picked} of ${wk.length} picked</b><small class="muted">${openLeft?openLeft+' open '+(openLeft===1?'game still needs a pick':'games still need a pick'):'Every open game is picked'}</small></div>
     <div class="btns" style="margin:0">${openLeft?'<button class="btn sm ghost" data-act="pklFav">Pick favorites for the rest</button>':''}<button class="btn sm" data-act="pklSave" ${dirty?'':'disabled'}>${dirty?'Lock in '+dirty+(dirty===1?' pick':' picks'):'Saved'}</button></div></div>`:'';
-  return (L.length>1&&!inL?sel:'')+head+stand+`<section class="card"><div class="qh"><h3>Game ${w}</h3><span class="muted">${wk.length} ${wk.length===1?'game':'games'}</span></div>${weeks}${bar}</section>`
+  const lw=wks.filter(x=>x>=sw&&x<openW).pop();let last='';
+  if(lw&&ME.uid&&g.members[ME.uid]){const lg=all.filter(x=>x.w===lw&&x.d>=cday),rs=Object.keys(g.members).map(u=>({u,r:pklRec(u,lg)})).sort((a,b)=>b.r.pct-a.r.pct||b.r.c-a.r.c),me=rs.find(x=>x.u===ME.uid),rk=rs.findIndex(x=>x.u===ME.uid)+1;
+    if(me&&me.r.n)last=`<section class="card pkl-last"><div class="qh"><h3>Game ${lw} results</h3><span class="muted">Final</span></div><div class="pkl-lr"><div><small>Your record</small><b>${me.r.c}-${me.r.n-me.r.c}</b></div><div><small>Correct</small><b>${pc(me.r)}</b></div><div><small>League rank</small><b>${rk} of ${rs.length}</b></div></div>${me.r.m?`<p class="muted">${me.r.m} ${me.r.m===1?'game':'games'} missed (no pick).</p>`:''}${w===openW?`<p class="pkl-next">Game ${openW} picks are open ↓</p>`:''}</section>`}
+  return (L.length>1&&!inL?sel:'')+head+last+stand+`<section class="card"><div class="qh"><h3>Game ${w}${w===openW?' picks':''}</h3><span class="muted">${wk.length} ${wk.length===1?'game':'games'}</span></div>${weeks}${bar}</section>`
     +(wk.length?`<div class="bt-grid">${wk.map(card).join('')}</div>`:'<p class="empty">No games this game.</p>')+(UI.pklNew||L.length<2?`<details class="card pkl-more" ${UI.pklNew?'open':''}><summary><b>Start or join another Pick ’em league</b></summary>${forms}</details>`:'');
 }
 /* ---------- The Locker: packs, items, boosts (v240) ----------
@@ -7284,7 +7296,7 @@ document.addEventListener('click',async e=>{
   else if(a==='pklInv'){const g=S.fgroups[t.dataset.gid];if(g){const bb=FG_SPORT==='bb',m=`Join my ${bb?'basketball':'football'} Pick ’em league "${g.name}" on Varsity. Pick every game each game and see who’s most accurate.\n\nOpen ${SITE_URL}#groups, tap Join with code, and enter ${g.code}`;
       const phone=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);if(phone)location.href='sms:?&body='+encodeURIComponent(m);else copyText(m,'Invite message copied. Paste it into a text.')}}
   else if(a==='pklPick'){const id=t.dataset.g,sd=t.dataset.s,cur=(UI.pkls||{})[id]||pklOf(ME.uid)[id];UI.pkls=Object.assign({},UI.pkls);if(cur===sd&&!pklOf(ME.uid)[id])delete UI.pkls[id];else if(pklOf(ME.uid)[id]===sd)delete UI.pkls[id];else UI.pkls[id]=sd;render(true)}
-  else if(a==='pklFav'){const cw=CURW(),mine=pklOf(ME.uid);UI.pkls=Object.assign({},UI.pkls);
+  else if(a==='pklFav'){const cw=UI.pklOpenW||CURW(),mine=pklOf(ME.uid);UI.pkls=Object.assign({},UI.pkls);
     ((GAMES&&GAMES.games)||[]).filter(x=>x.w===cw&&!started(x)&&!gDone(x)&&!mine[gid(x)]&&!UI.pkls[gid(x)]).forEach(x=>{UI.pkls[gid(x)]=oddsFor(x).ph>=.5?'h':'a'});render()}
   else if(a==='pklSave'){const gm=gameMap(),st=Object.entries(UI.pkls||{}).filter(([id])=>gm[id]&&!started(gm[id])&&!gDone(gm[id]));if(!st.length){UI.pkls={};render();return}
     const patch=Object.fromEntries(st);
