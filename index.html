@@ -2115,6 +2115,16 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 @media (max-width:420px){.pr-bt{padding:10px;gap:8px}.pr-ic{width:34px;height:34px;font-size:1.1rem}.pr-tx b{font-size:.95rem}.pr-tx small{font-size:.66rem}}
 .chip.allin{background:linear-gradient(135deg,#FF4F6D,#FF9A1F)!important;color:#fff!important;border-color:transparent!important;font-weight:900!important;text-transform:uppercase;letter-spacing:.04em;box-shadow:0 4px 14px -4px rgba(255,79,109,.7)}
 .chip.allin[aria-pressed=true]{box-shadow:0 0 0 2px #fff,0 4px 14px -4px rgba(255,79,109,.8)}
+.mg-tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:4px 0 12px}
+.mg-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:0;padding:10px 4px 9px;border-radius:16px;border:1.5px solid color-mix(in srgb,var(--tc) 40%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 22%,transparent),color-mix(in srgb,var(--tc) 6%,transparent)),var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.mg-tile:hover{transform:translateY(-2px);box-shadow:0 8px 18px -10px var(--tc)}
+.mg-ti{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:1.25rem;background:color-mix(in srgb,var(--tc) 30%,rgba(0,0,0,.25));box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+.mg-tile b{font:800 .72rem/1.1 var(--f-display,inherit);letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.mg-tile[aria-pressed=true]{border-color:#FFC23D;background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 45%,transparent),color-mix(in srgb,var(--tc) 14%,transparent)),var(--surface);box-shadow:0 0 0 2px rgba(255,194,61,.35),0 10px 22px -10px var(--tc)}
+.mg-tile[aria-pressed=true] .mg-ti{background:linear-gradient(135deg,#FFE08A,#F29A1D);animation:mgBob 1.8s ease-in-out infinite}
+@keyframes mgBob{50%{transform:translateY(-2px) scale(1.05)}}
+@media (max-width:420px){.mg-tiles{gap:5px}.mg-tile{padding:8px 2px 7px;border-radius:13px}.mg-ti{width:32px;height:32px;font-size:1.05rem}.mg-tile b{font-size:.6rem}}
+@media (prefers-reduced-motion:reduce){.mg-tile[aria-pressed=true] .mg-ti{animation:none}}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2562,7 +2572,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v288 · Nov 7';
+const APP_BUILD='v289 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5403,7 +5413,8 @@ function viewMini(){
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-wrap"><a class="tok-box shop-box" href="#shop" aria-label="Shop: open packs"><small>Shop</small><b><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b></a><button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${coinIc(ME.uid)}${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button></div>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI or a real person, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':PT==='pkl'?'Pick the winner of every game each week. The friend with the best accuracy tops your league.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
-  const tabs=`<div class="chips gm-tabs" role="group" aria-label="Minigames">${[['predict','Predict'],['draw','5 Card Draw'],['sim','10-0'],['rc','Ring Chaser'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal']].map(([v,l])=>`<button class="chip" data-act="mtab" data-v="${v}" aria-pressed="${v===T}">${l}</button>`).join('')}</div>`;
+  /* v289: game tiles with an icon and a colour each (gold glow on the one you're in) */
+  const tabs=`<div class="mg-tiles" role="group" aria-label="Minigames">${[['predict','Predict','🎯','#2F6BFF'],['draw','5 Card Draw','🃏','#7A4DFF'],['sim','10-0','⚡','#FF4F6D'],['rc','Ring Chaser','💍','#3DDC84'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal',FG_SPORT==='bb'?'🏀':'🏈','#FF9A1F']].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="mtab" data-v="${v}" aria-pressed="${v===T}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="pr-big" role="group" aria-label="Predict">${[['props','Player props','Over or under on player stats','📊'],['picks','Pick ’em','Pick the winners of the games','🏆']].map(([v,l,d,ic])=>`<button class="pr-bt" data-act="mtab" data-v="${v}" aria-pressed="${PT===v}"><span class="pr-ic" aria-hidden="true">${ic}</span><span class="pr-tx"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
