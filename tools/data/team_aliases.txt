@@ -10,3 +10,5 @@ Academy of Our Lady of Peace=Our Lady of Peace
 Preuss=Preuss UCSD
 The Preuss School=Preuss UCSD
 Francis Parker School=Francis Parker
+Southwest SD=Southwest San Diego
+San Diego Southwest=Southwest San Diego
