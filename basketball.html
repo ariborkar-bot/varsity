@@ -1684,7 +1684,7 @@ html,body{overflow-x:clip;max-width:100%}
 .adm-ann{border-radius:12px;padding:12px 14px;background:#E7EDFF;color:#23308F;font-weight:600}.adm-ann.warn{background:#FFF1E0;color:#8A4A00}
 .adm-pre{white-space:pre-wrap;background:#F7F8FC;border-radius:10px;padding:14px;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#1C2033;margin:0}
 .ann-note .pill{background:#2F6BFF;color:#fff;border-color:transparent}.ann-note.warn .pill{background:#FFC23D;color:#0B1626}.ann-note button{margin-left:auto}
-@media (max-width:759px){.adm-side nav{overflow-x:auto;justify-content:flex-start;scrollbar-width:none}.adm-side nav::-webkit-scrollbar{display:none}.adm-side nav .adm-nav{flex:0 0 64px}}
+@media (max-width:759px){.adm .adm-dnav,.adm .adm-side-foot{display:none!important}.adm .adm-side .adm-mnav{display:flex!important}.adm-mnav .adm-nav{flex:1 1 0}.adm .adm-top .adm-crumb{display:none}}
 
 .adm{position:fixed;inset:0;z-index:2000;display:grid;grid-template-columns:232px 1fr;background:#F4F6FB;color:#1C2033;font:400 14px/1.45 Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;letter-spacing:0;text-transform:none}
 .adm *{box-sizing:border-box}.adm h1,.adm h3,.adm b,.adm button,.adm select,.adm input,.adm th,.adm td,.adm th button{text-transform:none!important;letter-spacing:0!important;font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif!important;font-style:normal}.adm h1,.adm h3{letter-spacing:0;text-transform:none;margin:0;color:#1C2033}
@@ -1693,6 +1693,15 @@ html,body{overflow-x:clip;max-width:100%}
 .adm-logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#F26B3A,#F59E3B);color:#fff;display:grid;place-items:center;font-weight:800}
 .adm-side nav{display:flex;flex-direction:column;gap:4px}.adm-nav{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:10px;border:0;background:none;color:inherit;font:500 14px/1 inherit;cursor:pointer;text-decoration:none;text-align:left}
 .adm-nav svg{width:19px;height:19px;flex:none}.adm-s{display:none}.adm-nav:hover{background:rgba(255,255,255,.06);color:#fff}.adm-nav.on{background:#F26B3A;color:#fff;box-shadow:0 6px 16px rgba(242,107,58,.35)}
+.adm-grp{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}.adm-gl{font-size:11px;font-weight:700;text-transform:uppercase!important;letter-spacing:.08em!important;color:#7D83A6;padding:6px 12px 4px}
+.adm-nav{position:relative}.adm-bdg{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#E0455B;color:#fff;font:700 11px/20px Inter,system-ui,sans-serif;font-style:normal;text-align:center}.adm-bdg.dot{min-width:9px;width:9px;height:9px;padding:0;position:absolute;top:6px;right:calc(50% - 16px)}
+.adm-mnav{display:none!important}.adm-crumb{display:flex;align-items:center;gap:4px;color:#8A90A6;font-size:13px;white-space:nowrap}.adm-crumb svg{width:14px;height:14px}.adm-crumb b{color:#1C2033;font-weight:700}
+.adm-sheet{position:fixed;inset:0;z-index:5;background:rgba(14,17,36,.45);display:flex;align-items:flex-end;justify-content:center}
+.adm-sh{background:#F4F6FB;width:100%;max-width:560px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.adm-sh-h{display:flex;align-items:center;justify-content:space-between;padding:0 4px 6px}.adm-sh-h b{font-size:18px}.adm-sh .adm-gl{color:#8A90A6;padding:10px 4px 6px}
+.adm-sh-g{display:grid;grid-template-columns:1fr 1fr;gap:8px}.adm-sh-i{display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border-radius:12px;border:1px solid #E4E7EF;background:#fff;color:#1C2033;cursor:pointer;min-width:0;position:relative}
+.adm-sh-i svg{width:20px;height:20px;flex:none;color:#F26B3A}.adm-sh-i span{display:flex;flex-direction:column;min-width:0}.adm-sh-i b{font-size:14px}.adm-sh-i small{font-size:11.5px;color:#8A90A6;line-height:1.3}
+.adm-sh-i.on{border-color:#F26B3A;box-shadow:0 0 0 2px rgba(242,107,58,.25)}.adm-sh-i .adm-bdg{position:absolute;top:8px;right:8px}.adm-sh-i.lock{width:100%;margin-top:14px}.adm-sh-i.lock svg{color:#4A5068}
 .adm-side-foot{margin-top:auto;display:flex;flex-direction:column;gap:4px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
 .adm-main{overflow:auto;padding:0 max(28px,env(safe-area-inset-right)) 40px max(28px,env(safe-area-inset-left));-webkit-overflow-scrolling:touch}.adm-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:16px;padding:calc(16px + env(safe-area-inset-top)) 0 16px;background:#F4F6FB;box-shadow:0 -40px 0 #F4F6FB}
 .adm-search{flex:1;min-width:0;max-width:460px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E4E7EF;border-radius:10px;padding:0 12px;color:#8A90A6}.adm-search svg{width:17px;height:17px}
@@ -2127,6 +2136,15 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 @media (prefers-reduced-motion:reduce){.mg-tile[aria-pressed=true] .mg-ti{animation:none}}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
+/* v290: tokens + Shop stand out: gold-rimmed token chip with a green + (get more), Shop glows and has a shine sweep */
+.mast .hdr-tok,.mast-mini .hdr-tok{border:2px solid #FFC23D!important;background:linear-gradient(180deg,rgba(40,28,4,.85),rgba(10,14,30,.85))!important;box-shadow:0 0 12px rgba(255,194,61,.45),inset 0 1px 0 rgba(255,255,255,.15);padding-right:5px!important;color:#FFE08A!important}
+.hdr-tokn b{color:#FFF3C4;font-size:1.02em;text-shadow:0 1px 0 rgba(0,0,0,.4)}
+.hdr-plus{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:linear-gradient(180deg,#4BE38E,#1FB866);color:#04220F;font:900 17px/1 system-ui,sans-serif;margin-left:3px;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
+.mast .hdr-shop,.mast-mini .hdr-shop{position:relative;overflow:hidden;border:2px solid #FFE08A!important;font-weight:900;animation:hdrShopGlow 2.4s ease-in-out infinite}
+.hdr-shop::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-20deg);animation:hdrShine 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes hdrShopGlow{0%,100%{box-shadow:0 0 8px rgba(255,180,40,.55)}50%{box-shadow:0 0 18px 3px rgba(255,190,50,.9)}}
+@keyframes hdrShine{0%,55%{left:-60%}85%,100%{left:130%}}
+@media (prefers-reduced-motion:reduce){.mast .hdr-shop,.mast-mini .hdr-shop,.hdr-shop::after{animation:none}}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .hdr-tokn{display:inline-flex;align-items:center;gap:5px}.hdr-tokn b{font-variant-numeric:tabular-nums}
 .hdr-shop{background:linear-gradient(135deg,#FFC23D,#F29A1D);color:#2A1700;border-color:transparent}
@@ -2134,9 +2152,12 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .hdr-shop.on{box-shadow:0 0 0 2px #fff}
 .hdr-tok:hover,.hdr-shop:hover{filter:brightness(1.1)}
 @media (max-width:759px){.hdr-tok,.hdr-shop{height:34px;padding:0 10px;font-size:.82rem}.mast-r{gap:6px!important}.mast-mini{gap:6px!important}}
-@media (max-width:420px){.hdr-shop span{display:none}.hdr-shop{padding:0 9px}.mast .brand h1{font-size:1.25rem}}
+@media (min-width:760px) and (max-width:819px){.mast .hdr-shop span{display:none}}
+@media (max-width:420px){.mast-r .wk,.mast-mini .wk{display:none}}
+@media (max-width:359px){.hdr-shop span{display:none}.hdr-shop{padding:0 9px}}
+@media (max-width:420px){.mast .brand h1{font-size:1.25rem}}
 @media (max-width:359px){.mast-r .wk,.mast-mini .wk{display:none}}
-@media (min-width:760px){.mast .sport-opt span,.mast .hdr-shop span,.mast .brand h1{display:none}.mast .sport-opt{padding:6px 9px}.mast-in{gap:12px!important}.mast-in .mast-r{gap:8px!important}.mast-in .tabs{min-width:0}.mast-in .tabs a{padding-inline:12px!important}}
+@media (min-width:760px){.mast .sport-opt span,.mast .brand h1{display:none}.mast .sport-opt{padding:6px 9px}.mast-in{gap:12px!important}.mast-in .mast-r{gap:8px!important}.mast-in .tabs{min-width:0}.mast-in .tabs a{padding-inline:12px!important}}
 @media (min-width:760px) and (max-width:1149px){.mast-in .tabs a span{display:none}}
 @media (min-width:760px) and (max-width:899px){.mast .wk{display:none}}
 /* v256 pack opening: rip, lift-spin-land flips, sparks, rarity background glow */
@@ -2196,7 +2217,7 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
     </a>
     <div class="mast-r">
       <div class="sport-sw" role="group" aria-label="Sport"><a class="sport-opt" href="index.html" title="Football" aria-label="Football"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 19.8C2.6 14 6 6.2 14.6 4.4c2.5-.5 4.4-.3 5.2-.2.2.8.4 2.7-.2 5.2C17.8 18 10 21.4 4.2 19.8z"/><path d="M9.2 14.8l5.6-5.6M11.4 10.4l2.2 2.2M9.4 12.4l2.2 2.2M13.2 8.6l2.2 2.2"/></svg></i><span>Football</span></a><a class="sport-opt on" href="basketball.html" title="Basketball" aria-label="Basketball"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.3 3.2 3.3 9.6 0 12.8M18.4 5.6c-3.3 3.2-3.3 9.6 0 12.8"/></svg></i><span>Basketball</span></a></div>
-      <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens"><span class="hdr-tokn"></span></button><a class="hdr-shop" href="#shop" aria-label="Shop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a></div>
+      <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens"><span class="hdr-tokn"></span><span class="hdr-plus" aria-hidden="true">+</span></button><a class="hdr-shop" href="#shop" aria-label="Shop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a></div>
       <div class="wk"><span class="live"></span><span id="wk">Game 10</span></div>
       <button class="bell" id="gear" aria-label="Settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
@@ -2213,7 +2234,7 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 </header>
 <div class="mast-mini" id="mastMini" aria-hidden="true">
   <button class="mm-brand" type="button" data-act="toTop" aria-label="Back to top" tabindex="-1"><img src="logo.png" alt=""><b>Varsity</b></button>
-  <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens" tabindex="-1"><span class="hdr-tokn"></span></button><a class="hdr-shop" href="#shop" aria-label="Shop" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a></div>
+  <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens" tabindex="-1"><span class="hdr-tokn"></span><span class="hdr-plus" aria-hidden="true">+</span></button><a class="hdr-shop" href="#shop" aria-label="Shop" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a></div>
   <div class="wk mm-wk"><span class="live"></span><span id="wk2"></span></div>
   <button class="bell mm-gear" id="gear2" type="button" aria-label="Settings" aria-haspopup="menu" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div>
@@ -2583,7 +2604,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v289 · Nov 7';
+const APP_BUILD='v290 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6678,6 +6699,9 @@ const ADM_NAV=[['overview','Overview','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4
   ['games','Games','M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a5 5 0 0 1 5 5v2a4 4 0 0 1-7 2.5L13.5 14h-3L9 15.5A4 4 0 0 1 2 13v-2a5 5 0 0 1 5-5z'],['leagues','Leagues','M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4'],
   ['health','Data health','M22 12h-4l-3 9L9 3l-3 9H2'],['errors','Error log','M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'],['announce','Announcements','M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8'],
   ['weekly','Weekly report','M8 2v4M16 2v4M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],['tools','Accounts & tools','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z']];
+const ADM_GROUPS=[['Dashboard',['overview','weekly']],['People',['users','growth','engagement','leagues']],['App',['usage','games','sponsors']],['Problems',['errors','health']],['Manage',['announce','tools']]];
+const ADM_DESC={overview:'Big numbers and alerts',weekly:'Last 7 days in one page',users:'Everyone who signed up',growth:'Sign-ups, retention, funnel',engagement:'Who plays what, busy times',leagues:'League health and drafts',usage:'Time spent per tab',games:'Scores and schedule',sponsors:'Videos, tokens, rewards',errors:'App crashes and bugs',health:'Missing scores and stats',announce:'Banner for all users',tools:'Admin accounts, resets'};
+const ADM_MAIN=['overview','users','usage','errors'];
 const admIco=(d,c='')=>`<svg viewBox="0 0 24 24" class="${c}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const admAgo=t=>{if(!t)return'never';const m=Math.round((Date.now()-new Date(t))/6e4);if(m<1)return'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<24)return h+(h===1?' hour ago':' hours ago');const d=Math.round(h/24);return d<31?d+(d===1?' day ago':' days ago'):adWhen(t).split(',')[0]};
 function admSpark(v,c){const W=120,H=34,mx=Math.max(1,...v),n=v.length,pts=v.map((x,i)=>[i/(Math.max(1,n-1))*W,H-3-(x/mx)*(H-8)]);
@@ -6696,14 +6720,24 @@ function admDonut(parts){const tot=parts.reduce((a,p)=>a+p[1],0)||1,R=52,C=2*Mat
 function admHTML(){
   if(DASH.use===null&&!DASH.loading)dashLoad();
   const P=UI.admp||'overview',loading=AD.rows===null||DASH.use===null;
-  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',announce:'Announce',weekly:'Weekly',tools:'Tools'},nav=ADM_NAV.map(([k,l,d])=>`<button class="adm-nav ${P===k?'on':''}" data-admp="${k}" aria-current="${P===k?'page':'false'}" aria-label="${l}">${admIco(d)}<span class="adm-l">${l}</span><span class="adm-s">${SH[k]}</span></button>`).join('');
+  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',announce:'Announce',weekly:'Weekly',tools:'Tools'};
+  /* v290: sidebar grouped into sections, problem counts as badges, phones get 4 main tabs + a More sheet with every page */
+  const NV=k=>ADM_NAV.find(x=>x[0]===k);let BDG={};
+  const grpOf=k=>(ADM_GROUPS.find(g=>g[1].includes(k))||['',[]])[0];
+  const item=(k,cls='')=>{const [,l,d]=NV(k),b=BDG[k];return `<button class="adm-nav ${cls} ${P===k?'on':''}" data-admp="${k}" aria-current="${P===k?'page':'false'}" aria-label="${l}${b?' ('+b+')':''}" title="${ADM_DESC[k]||''}">${admIco(d)}<span class="adm-l">${l}</span><span class="adm-s">${SH[k]}</span>${b?`<em class="adm-bdg">${b>99?'99+':b}</em>`:''}</button>`};
+  const nav=()=>ADM_GROUPS.map(([g,ks])=>`<div class="adm-grp"><div class="adm-gl">${g}</div>${ks.map(k=>item(k)).join('')}</div>`).join('');
+  const mob=()=>ADM_MAIN.map(k=>item(k,'adm-mt')).join('')+`<button class="adm-nav adm-mt ${!ADM_MAIN.includes(P)?'on':''}" data-admmenu="1" aria-label="More admin pages">${admIco('M4 6h16M4 12h16M4 18h16')}<span class="adm-s">${ADM_MAIN.includes(P)?'More':SH[P]||'More'}</span>${Object.entries(BDG).some(([k,v])=>v&&!ADM_MAIN.includes(k))?'<em class="adm-bdg dot"></em>':''}</button>`;
+  const sheet=()=>UI.admMenu?`<div class="adm-sheet" data-admmenu="0"><div class="adm-sh" role="dialog" aria-label="All admin pages"><div class="adm-sh-h"><b>All pages</b><button class="adm-ibtn" data-admmenu="0" aria-label="Close">${admIco('M18 6L6 18M6 6l12 12')}</button></div>
+    ${ADM_GROUPS.map(([g,ks])=>`<div class="adm-gl">${g}</div><div class="adm-sh-g">${ks.map(k=>{const [,l,d]=NV(k),b=BDG[k];return `<button class="adm-sh-i ${P===k?'on':''}" data-admp="${k}">${admIco(d)}<span><b>${l}</b><small>${ADM_DESC[k]}</small></span>${b?`<em class="adm-bdg">${b}</em>`:''}</button>`}).join('')}</div>`).join('')}
+    <button class="adm-sh-i lock" data-ad="lock">${admIco('M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z')}<span><b>Lock admin</b><small>Ask for the PIN again</small></span></button></div></div>`:'';
+  const crumb=()=>`<div class="adm-crumb"><span>${grpOf(P)}</span>${admIco('M9 6l6 6-6 6')}<b>${(NV(P)||[0,'Overview'])[1]}</b></div>`;
   const shell=body=>`<div class="adm" role="region" aria-label="Admin dashboard">
-    <aside class="adm-side"><div class="adm-brand"><span class="adm-logo">V</span><b>Varsity</b><small>Admin</small></div><nav>${nav}</nav>
+    <aside class="adm-side"><div class="adm-brand"><span class="adm-logo">V</span><b>Varsity</b><small>Admin</small></div><nav class="adm-dnav">${nav()}</nav><nav class="adm-mnav">${mob()}</nav>
       <div class="adm-side-foot"><button class="adm-nav" data-ad="lock">${admIco('M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z')}<span>Lock admin</span></button></div></aside>
-    <main class="adm-main"><header class="adm-top"><label class="adm-search">${admIco('M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3')}<input id="dash-q" type="search" placeholder="Search users by name, email or school" value="${esc(DASH.q)}"></label>
+    <main class="adm-main"><header class="adm-top">${crumb()}<label class="adm-search">${admIco('M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3')}<input id="dash-q" type="search" placeholder="Search users by name, email or school" value="${esc(DASH.q)}"></label>
       <div class="adm-top-r"><button class="adm-ibtn" data-dash="reload" title="Refresh">${admIco('M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5')}</button><span class="adm-me"><span class="adm-av">${esc(((S.profiles[ME.uid]||{}).name||'A').slice(0,1).toUpperCase())}</span><span class="adm-me-n">${esc((S.profiles[ME.uid]||{}).name||'Admin')}</span></span><a class="adm-exit" href="#me" data-admexit="1" aria-label="Exit admin and go back to the app">${admIco('M18 6L6 18M6 6l12 12')}<span>Exit</span></a></div></header>
       ${ME.mode==='demo'?'<div class="adm-demo">Preview file: no real users here. The live site shows your real users.</div>':''}${DASH.err?`<div class="adm-demo err">${esc(DASH.err)}</div>`:''}
-      ${body}</main></div>`;
+      ${body}</main>${sheet()}</div>`;
   if(loading)return shell('<div class="adm-card"><p class="adm-mut">Loading…</p></div>');
   const D=dashData(),K=D.k,rngLbl=DASH.rng==='all'?'All time':'Last '+DASH.rng+' days';
   const pct=(a,b)=>b?Math.round((a-b)/b*100):null,dl=(a,b)=>{const p=pct(a,b);return p===null?'<span class="adm-dl">new</span>':`<span class="adm-dl ${p>=0?'up':'dn'}">${p>=0?'↑':'↓'} ${Math.abs(p)}%</span>`};
@@ -6735,7 +6769,7 @@ function admHTML(){
   const sel=`<span class="adm-chip">${rngLbl}</span>`;
   const tabBars=list=>{const mx=Math.max(1,...list.map(x=>x.t)),tot=D.tabList.reduce((a,x)=>a+x.t,0)||1;return `<div class="adm-hb adm-tb">${list.map(x=>`<div><span>${esc(x.n)}</span><span class="adm-hbt"><i style="width:${x.t/mx*100}%;background:${x.mg?'#22B07D':'#5B5FEF'}"></i></span><b>${fmtDur(x.t)}</b><em>${Math.round(x.t/tot*100)}%</em></div>`).join('')||'<p class="adm-mut">No tab data yet. It starts collecting the day this ships.</p>'}</div>`};
   const rc=k=>D.pool.filter(r=>!r.is_admin&&(k?(r.p&&r.p.role)===k:!(r.p&&['player','fan'].includes(r.p.role)))).length,roles=[['Players',rc('player'),'#F26B3A'],['Fans',rc('fan'),'#5B5FEF'],['No profile',rc(''),'#C9CEDA']].filter(p=>p[1]>0);
-  const X=dashData2(D),ext=admPages(P,D,K,X,kpi,title,sel,hbars,dl);
+  const X=dashData2(D);try{BDG={errors:X.errs.filter(e=>Date.now()-new Date(e.t)<7*864e5).length,health:X.health.noScore.length,leagues:X.lg.filter(x=>x.health==='Stuck').length}}catch(_){}const ext=admPages(P,D,K,X,kpi,title,sel,hbars,dl);
   let body='';
   if(ext)body=ext;
   else if(P==='overview')body=title('Overview','How Varsity is doing: users, time on the app and sponsor videos.')+admAlerts(X)+kpis+`<div class="adm-grid">
@@ -6774,7 +6808,8 @@ function admHTML(){
     <div class="adm-card adm-span3"><div class="adm-ch"><h3>Top schools</h3><span class="adm-chip">Users</span></div>${hbars(D.schools,'#F26B3A')}</div></div>`}
   return shell(body);
 }
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-admp]');if(!b||!ME.admin)return;const p=b.dataset.admp;if(p==='tools'){UI.adtab='accounts';render();window.scrollTo(0,0);return}UI.admp=p;DASH.show=20;render();const m=document.querySelector('.adm-main');if(m)m.scrollTop=0});
+document.addEventListener('click',e=>{const mm=e.target.closest&&e.target.closest('[data-admmenu]');if(mm&&ME.admin){if(mm.dataset.admmenu==='0'&&e.target.closest('.adm-sh')&&!e.target.closest('.adm-ibtn'))return;UI.admMenu=mm.dataset.admmenu==='1';render();return}});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-admp]');if(!b||!ME.admin)return;UI.admMenu=false;const p=b.dataset.admp;if(p==='tools'){UI.adtab='accounts';render();window.scrollTo(0,0);return}UI.admp=p;DASH.show=20;render();const m=document.querySelector('.adm-main');if(m)m.scrollTop=0});
 const TAB_NAMES={me:'Me',games:'Games','stats:players':'Stats · Players','stats:stats':'Stats · Stats',leagues:'Leagues',mock:'Mock Draft',team:'Team pages',player:'Player cards',scoring:'Scoring',account:'Account',privacy:'Privacy',simulate:'82-0',
   'mg:picks':'Pick ’em','mg:props':'Player props','mg:draw':'5 Card Draw','mg:sim':'82-0','mg:rc':'Ring Chaser','mg:fg':'FGH menu','mg:fgplay':'FGH (playing)'};
 const tabName=key=>{const [app,t]=key.includes('|')?key.split('|'):['fb',key];let n=TAB_NAMES[t]||t;return app==='bb'?n.replace('FGH','Hoops')+' · basketball':n.replace('FGH','Field Goal')};
