@@ -1379,12 +1379,14 @@ select option{background:#0B1730;color:#EAF0F8}
 .adbtn b{font-weight:800;letter-spacing:.02em}.adbtn small{font-weight:700;opacity:.78;font-size:.74rem}
 .adbtn:disabled{filter:grayscale(.7) brightness(.8);cursor:not-allowed;box-shadow:none}
 
+.me-top{display:flex;align-items:center;gap:14px;margin-bottom:12px}.me-id{flex:1;min-width:0}.me-id h3{margin:0;overflow-wrap:anywhere}.me-pro .pform{margin:4px 0 12px}.me-pro .big{margin:10px 0}.me-cmp{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.me-cmp h4{margin:0 0 10px;font:800 1.05rem var(--f-display,inherit);text-transform:uppercase;letter-spacing:.02em}
 .rw{text-align:left;margin:14px 0 6px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface2)}
 .rw-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
 .rw ul{list-style:none;margin:0;padding:0;max-height:220px;overflow:auto}
 .rw li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line);font-size:.86rem}
 .rw li:first-child{border-top:0}.rw li b{color:var(--muted);font-size:.8rem}
 .rw-c{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.7rem;font-weight:900}
+.rw li.me span:nth-child(2){font-weight:800}.rw li.me .rw-c{border-color:#2F6BFF;color:#2F6BFF}
 .rw li.ok .rw-c{background:#2fbf71;border-color:#2fbf71;color:#fff}.rw li.ok span:nth-child(2){color:var(--muted);text-decoration:line-through}.rw li.ok b{color:#2fbf71}
 #adov{position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:rgba(2,6,16,.86);backdrop-filter:blur(6px);padding:18px}
 #adov .adc{width:min(420px,100%);background:var(--surface,#0f1b36);border:1px solid var(--line,#24365e);border-radius:22px;padding:18px;display:grid;gap:14px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.6)}
@@ -2126,7 +2128,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v237 · Nov 6';
+const APP_BUILD='v238 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2607,7 +2609,7 @@ const gDone=g=>g.hs!=null&&g.as!=null;
 const TOK0=100;
 /* Rewarded sponsor spots: watch a short sponsor message, earn tokens. Sponsors are plain data below (no ad network, no tracking).
    Swap the placeholder for a real sponsor: name, a line, an optional image and an optional link. */
-const ADS={reward:25,perDay:5,secs:10,sponsors:[{name:'FOGO',line:'Face-off timing and leaderboards.',video:'ads/fogo.mp4',img:'',url:''}]};   /* video: a short mp4 in ads/; the Collect button unlocks when it ends */
+const ADS={reward:20,perDay:5,secs:10,sponsors:[{name:'FOGO',line:'Face-off timing and leaderboards.',video:'ads/fogo.mp4',img:'',url:''}]};   /* video: a short mp4 in ads/; the Collect button unlocks when it ends */
 const adDay=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const adOf=u=>((S.picks[u]||{}).ad)||{};
 const adLeft=u=>Math.max(0,ADS.perDay-(adOf(u).d===adDay()?+adOf(u).n||0:0));
@@ -2681,6 +2683,10 @@ const rwList=()=>[
   ['fg','Play '+(FG_SPORT==='bb'?'Hoops':'Field Goal'),()=>!!(S.picks[ME.uid]||{}).fg],
   ['ad','Watch a sponsor spot',()=>adBonus(ME.uid)>0]];
 const rwOf=u=>((S.picks[u]||{}).rw)||{};
+/* total token leaderboard: everyone's whole balance (picks, props, sponsors, rewards, daily challenge) */
+function tokRows(){const ids=new Set(Object.keys(S.picks).filter(u=>S.profiles[u]));if(ME.uid&&ME.mode!=='guest')ids.add(ME.uid);
+  return [...ids].map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t)}
+const tokBoard=()=>mgBoard('Token leaderboard',tokRows().map(x=>({u:x.u,v:(Math.floor(x.t*10)/10).toLocaleString()+' tokens'})),'No one is on the board yet.');
 const rwBonus=u=>RW_PAY*rwList().filter(([k])=>rwOf(u)[k]).length;
 let rwPend='';
 function rwClaim(){
@@ -2917,9 +2923,7 @@ function picksHTML(){
   const openBets=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id]})).filter(x=>x.g&&!gDone(x.g)).sort((a,b)=>a.g.d<b.g.d?-1:a.g.d>b.g.d?1:0);
   const myCard=openBets.length?`<section class="card bt-mine"><div class="qh"><h3>Your picks</h3><span class="muted">${openBets.length} locked in · ${tk(openBets.reduce((t,x)=>t+(+x.b.stake||0),0))} wagered</span></div>${openBets.map(x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
     return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)}</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${started(x.g)?' · locked':''}</small></span></span><span class="bt-pay"><b>${tk(x.b.stake*x.b.odds)}</b><small class="muted">${tk(x.b.stake)} at ${(+x.b.odds).toFixed(2)}x</small></span></div>`}).join('')}</section>`:'';
-  const board=Object.keys(S.picks).filter(u=>Object.keys(betsOf(u)).length).map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t);
-  if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid)){board.push({u:ME.uid,t:bank(ME.uid)});board.sort((a,b)=>b.t-a.t)}
-  const boardCard=mgBoard('Token leaders',board.map(x=>({u:x.u,v:n1(x.t)})));
+  const boardCard=tokBoard();
   /* lock in everything at once */
   const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&!started(g)&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||5)};
@@ -4756,19 +4760,18 @@ function viewMe(){
   }else ranks=`<p class="hint">No approved games for this period yet. Your rank and breakdown appear as soon as games are posted.</p>`;
   const wk=UI.meEntry.week;
   return head+`
-  <div class="two">
-    <section class="card"><h3>Your profile</h3>
-      <div class="pform">
+  <section class="card me-pro">
+    <div class="me-top">${av(pr.name,pr.school,56)}<div class="me-id"><h3>${esc(pr.name)}</h3><span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
+    ${UI.meEdit?`<div class="pform">
         <label class="fld"><span>Name</span><input id="me-name" maxlength="40" value="${esc(pr.name)}" autocomplete="off" data-act="meName"></label>
         <label class="fld"><span>School</span><select id="me-school" data-act="meSchool">${(SD_SCHOOLS.includes(pr.school)?SD_SCHOOLS:[...SD_SCHOOLS,pr.school]).map(s=>`<option ${s===pr.school?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
         <label class="fld"><span>Position</span><select id="me-pos" data-act="mePos">${POSITIONS.map(x=>`<option ${x===pr.pos?'selected':''}>${x}</option>`).join('')}</select></label>
-      </div>
+      </div>`:''}
       ${meSides().length>1?`<div class="side-sw"><small>You play both ways. Pick which profile to view. Each one has its own stats and rankings.</small><div class="chips" role="group" aria-label="Profile">${meSides().map(p=>`<button class="chip" data-act="meSide" data-v="${esc(p.key)}" aria-pressed="${me.key===p.key}">${esc(p.pos==='DEF'?(p.sub||'DEF'):p.pos)}</button>`).join('')}</div></div>`:''}
-      <div class="tools bare">${scopeSel('scope3',UI.rank==='prev')}${rankSw()}</div>
       ${info?`<div class="big"><div><span class="lbl">${UI.scope==='season'?'Season pts':'Week pts'}</span><b>${f1(info.a.v)}</b></div><div><span class="lbl">Games</span><b>${info.a.n}</b></div><div><span class="lbl">Per game</span><b>${f1(info.a.v/info.a.n)}</b></div></div>`:''}
-    </section>
-    <section class="card"><h3>How you compare</h3>${ranks}</section>
-  </div>
+      <div class="tools bare">${scopeSel('scope3',UI.rank==='prev')}${rankSw()}</div>
+    <div class="me-cmp"><h4>How you compare</h4>${ranks}</div>
+  </section>
   ${weekCard}
   ${avgCard}
   ${schoolBoard}
@@ -5269,7 +5272,7 @@ function admHTML(){
     <div class="adm-grid"><div class="adm-card adm-span2"><div class="adm-ch"><h3>Minutes on the app</h3>${sel}</div>${admBars(D.days,D.time.map(x=>Math.round(x/60)),{c:'#5B5FEF',label:'Minutes per day'})}</div>
     <div class="adm-card"><div class="adm-ch"><h3>Devices</h3></div>${admDonut([['Phones',D.dev.phone||0,'#F26B3A'],['Computers',D.dev.desktop||0,'#5B5FEF']].filter(p=>p[1]))}</div>
     <div class="adm-card adm-span3"><div class="adm-ch"><h3>Visits per day</h3>${sel}</div>${admBars(D.days,D.ses,{c:'#22B07D',label:'Visits per day'})}</div></div>`;
-  else if(P==='sponsors')body=title('Sponsor videos','Watched through Get tokens. Each finished video pays 25 tokens, up to 5 a day.')+`<div class="adm-kpis">${kpi('M4 5h16v14H4zM10 9l5 3-5 3z','#E0455B','Videos watched',K.ads.toLocaleString(),dl(K.ads,D.prev.ads),D.ads)}${kpi('M4 5h16v14H4z','#5B5FEF','All time',K.adsAll.toLocaleString(),'',D.ads)}${kpi('M16 11a4 4 0 1 0-8 0','#22B07D','Watchers',D.users.filter(u=>u.a).length,'',D.ads)}${kpi('M12 7v5','#F26B3A','Per watcher',f1(K.ads/Math.max(1,D.users.filter(u=>u.a).length)),'',D.ads)}</div>
+  else if(P==='sponsors')body=title('Sponsor videos','Watched through Get tokens. Each finished video pays '+ADS.reward+' tokens, up to '+ADS.perDay+' a day.')+`<div class="adm-kpis">${kpi('M4 5h16v14H4zM10 9l5 3-5 3z','#E0455B','Videos watched',K.ads.toLocaleString(),dl(K.ads,D.prev.ads),D.ads)}${kpi('M4 5h16v14H4z','#5B5FEF','All time',K.adsAll.toLocaleString(),'',D.ads)}${kpi('M16 11a4 4 0 1 0-8 0','#22B07D','Watchers',D.users.filter(u=>u.a).length,'',D.ads)}${kpi('M12 7v5','#F26B3A','Per watcher',f1(K.ads/Math.max(1,D.users.filter(u=>u.a).length)),'',D.ads)}</div>
     <div class="adm-grid"><div class="adm-card adm-span3"><div class="adm-ch"><h3>Videos per day</h3>${sel}</div>${admBars(D.days,D.ads,{c:'#E0455B',label:'Sponsor videos per day'})}</div>
     <div class="adm-card adm-span3"><div class="adm-ch"><h3>Top watchers</h3>${sel}</div>${hbars(D.users.filter(u=>u.a).sort((a,b)=>b.a-a.a).slice(0,10).map(u=>[u.name,u.a]),'#E0455B')}</div></div>`;
   else if(P==='games'){const tt=k=>{const x=D.tabList.filter(t=>t.mg&&((k==='mg:fg'&&/Field Goal|Hoops/.test(t.n))||t.n.startsWith(({'mg:picks':'Pick','mg:props':'Player props','mg:draw':'5 Card','mg:sim':'10-0','mg:rc':'Ring'})[k]||'~')));return x.reduce((a,y)=>a+y.t,0)};
@@ -5372,7 +5375,7 @@ function admPages(P,D,K,X,kpi,title,sel,hbars,dl){
       <div class="adm-card"><div class="adm-ch"><h3>Weekly groups</h3><span class="adm-chip">% back each week</span></div><div class="adm-tw"><table class="adm-t adm-coh"><thead><tr><th>Joined week of</th><th class="n">People</th><th class="n">W1</th><th class="n">W2</th><th class="n">W3</th><th class="n">W4</th></tr></thead><tbody>
       ${X.cohorts.map(c=>`<tr><td>${+c.w.slice(5,7)}/${+c.w.slice(8)}</td><td class="n">${c.n}</td>${c.cells.map(v=>v==null?'<td class="n adm-mut">—</td>':`<td class="n"><span class="adm-cell" style="background:rgba(34,176,125,${(.1+v*.8).toFixed(2)})">${Math.round(v*100)}%</span></td>`).join('')}</tr>`).join('')}</tbody></table></div></div></div>`}
   if(P==='sponsors'){const st=X.as.reduce((a,b)=>a+b,0),fin=K.ads;
-    return title('Sponsors and tokens','Sponsor videos started and finished, and the token economy. Each finished video pays 25 tokens, up to 5 a day.')+`<div class="adm-kpis">
+    return title('Sponsors and tokens','Sponsor videos started and finished, and the token economy. Each finished video pays '+ADS.reward+' tokens, up to '+ADS.perDay+' a day.')+`<div class="adm-kpis">
       ${kpi('M4 5h16v14H4zM10 9l5 3-5 3z','#E0455B','Videos finished',fin.toLocaleString(),dl(fin,D.prev.ads),D.ads)}
       ${kpi('M5 12l5 5L20 7','#22B07D','Finish rate',st?Math.round(fin/st*100)+'%':'—',`<span class="adm-dl">${st.toLocaleString()} started</span>`,X.as)}
       ${kpi('M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6','#F59E3B','Tokens from sponsors',Math.round(X.tok.fromAds).toLocaleString(),'<span class="adm-dl">all time</span>',D.ads)}
@@ -5706,6 +5709,7 @@ document.addEventListener('click',async e=>{
       <div class="tok-bal"><small>You have</small><b>${Math.floor(bank(ME.uid)*10)/10}</b><small>tokens</small></div>
       <button type="button" class="tok-opt" data-act="adWatch" ${l?'':'disabled'}><span class="tok-ic" aria-hidden="true">▶</span><span><b>Watch a short sponsor spot</b><small>+${ADS.reward} tokens · ${l?l+' left today':'back tomorrow'}</small></span></button>
       ${rwHTML()}
+      ${(()=>{const r=tokRows(),i=r.findIndex(x=>x.u===ME.uid);return r.length?`<div class="rw"><div class="rw-h"><b>Token leaderboard</b><small class="muted">${i>=0?'You are #'+(i+1)+' of '+r.length:''}</small></div><ul>${r.slice(0,5).map((x,k)=>`<li class="${x.u===ME.uid?'me':''}"><span class="rw-c">${k+1}</span><span>${esc(x.u===ME.uid?'You':nm(x.u))}</span><b>${(Math.floor(x.t*10)/10).toLocaleString()}</b></li>`).join('')}</ul></div>`:''})()}
       <p class="muted">Tokens are free, are shared by every game in Minigames, and have no cash value.</p>
       <div class="gbtns"><button class="btn ghost" data-c="no">Close</button></div></div>`;
     c.hidden=false;const b=c.querySelector('.tok-opt');if(b)b.focus()}
@@ -5831,6 +5835,7 @@ document.addEventListener('click',async e=>{
   }
   else if(a==='copyRank'){const me=meP(),info=me&&myRanks(me);if(info)copyText(rankText(info,me),'Copied. Paste it anywhere.')}
   else if(a==='meSide'){UI.meSide=t.dataset.v;render()}
+  else if(a==='meEdit'){UI.meEdit=!UI.meEdit;render()}
   else if(a==='pshare'){
     const p=pByKey(t.dataset.id);if(!p)return;const fn='varsity-'+String(p.name).toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.png';
     try{const blob=await playerCardBlob(p);if(!blob)throw new Error('no image');
