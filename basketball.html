@@ -2073,6 +2073,7 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .pkl-lr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pkl-lr>div{background:var(--surface2,#0f1d36);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;display:flex;flex-direction:column;gap:2px}
 .pkl-lr small{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700}.pkl-lr b{font:900 1.5rem/1.1 var(--f-display,inherit)}
 .pkl-last{border-color:#3DDC84!important;background:linear-gradient(180deg,rgba(61,220,132,.08),transparent),var(--surface)!important}.pkl-next{margin:10px 0 0;color:#FFC23D;font-weight:800}
+.pkl-pct{font-size:.72rem;color:var(--muted);font-weight:700}.pkl-t.on .pkl-pct{color:#FFC23D}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2531,7 +2532,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v278 · Nov 7';
+const APP_BUILD='v279 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3250,6 +3251,8 @@ const myPKL=()=>Object.values(S.fgroups).filter(g=>g&&g.kind==='pk'&&g.members&&
 const pklOf=u=>((S.picks[u]||{}).pkl)||{};
 const pklWeekOf=at=>{if(!at)return 1;const d=new Date(at),w=Math.floor((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-W1)/864e5/7)+1;return Math.max(1,w)};
 function pklRec(u,games){let c=0,n=0,m=0;const P=pklOf(u);for(const g of games){if(!gDone(g)||g.hs===g.as)continue;n++;const p=P[gid(g)];if(!p){m++;continue}if((p==='h')===(g.hs>g.as))c++}return{c,n,m,pct:n?c/n:0}}
+/* playoff seed of a team (from the brackets), for playoff games */
+let _poSeed=null;const poSeed=n=>{if(!_poSeed){_poSeed={};PO_DEFS.forEach(d=>d.rounds.forEach(r=>r.games.forEach(([p,q])=>[p,q].forEach(z=>{if(z&&z.n&&!z.from&&z.s)_poSeed[z.n]=z.s}))))}return _poSeed[n]||null};
 function pklHTML(inL){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const forms=`<div class="two"><form class="card lg-form" id="pkl-create"><h3>Start a Pick ’em league</h3><p class="muted">Name it, then send the code to your friends.</p>
@@ -3282,7 +3285,7 @@ function pklHTML(inL){
     <div class="lg-inv"><span class="lbl">Invite code</span><code id="pkl-code-${esc(g.id)}">${esc(g.code)}</code><button class="btn sm" data-act="copy" data-code="${esc(g.code)}">Copy</button><button class="btn sm lg-sms" data-act="pklInv" data-gid="${esc(g.id)}">Text invite</button></div></section>`;
   const weeks=`<div class="wks" role="group" aria-label="Game">${wks.filter(x=>x>=sw&&x<=openW).map(x=>`<button class="chip" data-act="pklWk" data-w="${x}" aria-pressed="${x===w}">Game ${x}${x===openW?' •':''}</button>`).join('')}</div>`;
   const card=x=>{const id=gid(x),p=pickOf(x),lock=started(x)||gDone(x),done=gDone(x),win=done?(x.hs>x.as?'h':x.hs<x.as?'a':''):'';
-    const btn=(sd,team)=>{const on=p===sd,res=done&&on?(win===sd?'ok':win?'no':''):'';return `<button class="bt-t pkl-t ${on?'on':''} ${res}" data-act="pklPick" data-g="${esc(id)}" data-s="${sd}" ${lock||!can?'disabled':''} aria-pressed="${on}">${slogo(team,30)}<b>${esc(team)}</b>${done?`<span class="pkl-sc">${sd==='h'?x.hs:x.as}</span>`:''}</button>`};
+    const ph=oddsFor(x).ph,btn=(sd,team)=>{const on=p===sd,res=done&&on?(win===sd?'ok':win?'no':''):'';return `<button class="bt-t pkl-t ${on?'on':''} ${res}" data-act="pklPick" data-g="${esc(id)}" data-s="${sd}" ${lock||!can?'disabled':''} aria-pressed="${on}">${slogo(team,30)}<b>${x.k==='P'&&poSeed(team)?`<small class="gm-seed">${poSeed(team)}</small>`:''}${esc(team)}</b>${done?`<span class="pkl-sc">${sd==='h'?x.hs:x.as}</span>`:`<small class="pkl-pct">${Math.round((sd==='h'?ph:1-ph)*100)}% to win</small>`}</button>`};
     return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(x.d))}${lock&&!done?' · locked':''}</span>${done?`<span class="pill ${p?(win&&p===win?'final':'live'):'live'}">${!p?'Missed':win===p?'Right':win?'Wrong':'Tie'}</span>`:!p&&!lock?'<span class="pill live">Pick needed</span>':''}</div><div class="bt-row">${btn('a',x.a)}<span class="bt-at">at</span>${btn('h',x.h)}</div></article>`};
   const bar=w===openW&&can&&wk.length?`<div class="pkl-bar"><div><b>${picked} of ${wk.length} picked</b><small class="muted">${openLeft?openLeft+' open '+(openLeft===1?'game still needs a pick':'games still need a pick'):'Every open game is picked'}</small></div>
     <div class="btns" style="margin:0">${openLeft?'<button class="btn sm ghost" data-act="pklFav">Pick favorites for the rest</button>':''}<button class="btn sm" data-act="pklSave" ${dirty?'':'disabled'}>${dirty?'Lock in '+dirty+(dirty===1?' pick':' picks'):'Saved'}</button></div></div>`:'';
