@@ -2058,6 +2058,18 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .pp-mc.on{border-color:#FFC23D;background:linear-gradient(180deg,rgba(255,194,61,.16),rgba(255,194,61,.04));box-shadow:0 0 0 1px #FFC23D inset}.pp-mc.on span{color:#FFC23D}
 .pp-mc i{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#3DDC84;box-shadow:0 0 6px #3DDC84}
 .vt.inj{background:#e5484d;color:#fff;border-color:transparent;margin-right:4px;font-weight:800}
+.shp{position:fixed;inset:0;z-index:430;background:rgba(2,6,16,.92);display:grid;place-items:center;padding:16px;overflow:auto}
+.shp-in{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:440px;width:100%}
+.shp-in img{max-width:100%;max-height:68vh;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.6);-webkit-touch-callout:default;user-select:auto}
+.shp-tip{margin:0;color:#BFD3FF;font-size:.85rem;text-align:center}.shp-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.rank-cta{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:16px;cursor:pointer;font:inherit;text-align:left;color:#2A1700;background:linear-gradient(135deg,#FFE08A,#FFC23D 45%,#F29A1D);box-shadow:0 8px 24px -8px rgba(255,170,40,.7),inset 0 1px 0 rgba(255,255,255,.6)}
+.rank-cta::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);transform:translateX(-120%);animation:rkShine 3.2s ease-in-out infinite}
+@keyframes rkShine{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.rank-cta:hover{filter:brightness(1.05);transform:translateY(-1px)}.rank-cta:active{transform:scale(.98)}
+.rank-cta-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(42,23,0,.12);flex:none}
+.rank-cta-t{display:flex;flex-direction:column;flex:1;min-width:0}.rank-cta-t b{font:900 italic 1.05rem/1.1 var(--f-display,inherit);text-transform:uppercase;letter-spacing:.02em}.rank-cta-t small{font-size:.78rem;opacity:.8;font-weight:600}
+.rank-cta-go{font-size:1.3rem;font-weight:900}
+@media (prefers-reduced-motion:reduce){.rank-cta::after{animation:none;display:none}}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2505,7 +2517,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v276 · Nov 7';
+const APP_BUILD='v277 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6124,7 +6136,7 @@ function viewMe(){
   if(info){
     const mc=(label,c)=>`<div class="metric"><small>${label}</small><b>#${c.rank}</b><small>of ${c.of} ${c.of===1?'player':'players'}</small></div>`;
     ranks=`<div class="metric-grid">${mc('Among '+me.pos+'s at '+esc(me.school),info.school.pos)}${mc('Overall at '+esc(me.school),info.school.all)}${mc('Among '+me.pos+'s in the section',info.section.pos)}${mc('Overall in the section',info.section.all)}</div>
-      <div class="btns"><button class="btn sm" data-act="share">Save rank card</button><button class="btn sm ghost" data-act="copyRank">Copy as text</button></div>`;
+      <button class="rank-cta" type="button" data-act="share"><span class="rank-cta-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><rect x="5" y="2.5" width="14" height="19" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 15l2 2 4-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="rank-cta-t"><b>Save your rank card</b><small>Show it off on your story</small></span><span class="rank-cta-go" aria-hidden="true">→</span></button>`;
     const brow=(x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who"><b>${esc(x.p.name)}${x.p.key===me.key?' (you)':''}</b><i>${pb(x.p.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(x.p.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b><small>${subV(x.a)}</small></span></div>`;
     const schPos=info.pool.filter(x=>x.p.school===me.school&&x.p.pos===me.pos),secPos=info.pool.filter(x=>x.p.pos===me.pos);
     const sl=[...schPos].sort((p,q)=>metric(q.a)-metric(p.a)),si=sl.findIndex(x=>x.p.key===me.key);
@@ -6347,6 +6359,21 @@ function maybeInitSeen(){
 function rankText(info,me){
   const per=UI.scope==='season'?'this season':'in week '+UI.scope;
   return `I’m #${info.section.all.rank} of ${info.section.all.of} in the San Diego section on Varsity with ${f1(info.a.v)} fantasy points ${per}, and #${info.school.all.rank} of ${info.school.all.of} at ${me.school}.`;
+}
+/* v277: show the finished card as a real picture first. Phones: press and hold it to Save to Photos, or tap Save / Share (a fresh tap, so the
+   share sheet gets the image with its preview). Computers: Download saves the PNG. */
+function cardPreview(blob,fn,title){
+  document.querySelector('.shp')&&document.querySelector('.shp').remove();
+  const url=URL.createObjectURL(blob),phone=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),o=document.createElement('div');o.className='shp';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',title||'Card');
+  let file=null;try{file=new File([blob],fn,{type:'image/png',lastModified:Date.now()})}catch(_){}
+  const canShare=!!(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}));
+  o.innerHTML=`<div class="shp-in"><img src="${url}" alt="${esc(title||'Card')}"><p class="shp-tip">${phone?'Press and hold the picture to save it to Photos':'Your card is ready'}</p>
+    <div class="shp-btns">${canShare?'<button class="btn shp-sh" type="button">Save / Share</button>':''}<button class="btn ${canShare?'ghost':''} shp-dl" type="button">Download</button><button class="btn ghost shp-x" type="button">Close</button></div></div>`;
+  document.body.appendChild(o);
+  const close=()=>{o.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+  o.querySelector('.shp-x').onclick=close;o.addEventListener('click',e=>{if(e.target===o)close()});
+  const sh=o.querySelector('.shp-sh');if(sh)sh.onclick=async()=>{try{await navigator.share({files:[file],title:title||'Varsity'})}catch(_){}};
+  o.querySelector('.shp-dl').onclick=async()=>{if(DL){try{await DL.save({filename:fn,data:blob});say('Saved to your device')}catch(_){}}else{const l=document.createElement('a');l.href=url;l.download=fn;document.body.appendChild(l);l.click();l.remove();say('Saved')}};
 }
 function cardBlob(info,me){
   {const sk=ME.uid&&eqOf(ME.uid,'share');if(sk&&SHARE[sk.slice(3)])return shareDraw(sk.slice(3),me,info)}
@@ -7299,27 +7326,13 @@ document.addEventListener('click',async e=>{
     if(await act(()=>upsert('picks/'+ME.uid,{pkl:patch}),st.length+(st.length===1?' pick':' picks')+' locked in')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{pkl:Object.assign({},pklOf(ME.uid),patch)});UI.pkls={};render()}}
   else if(a==='pshare'){
     const p=pByKey(t.dataset.id);if(!p)return;const fn='varsity-'+String(p.name).toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.png';
-    try{const blob=await playerCardBlob(p);if(!blob)throw new Error('no image');
-      let file=null;try{file=new File([blob],fn,{type:'image/png'})}catch(_){}
-      if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(err){if(err&&err.name==='AbortError')return}}
-      if(DL){await DL.save({filename:fn,data:blob});say('Player card saved to your device')}
-      else{const u=URL.createObjectURL(blob),l=document.createElement('a');l.href=u;l.download=fn;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);say('Player card saved')}
-    }catch(err){if(!(err&&err.code==='declined'))say('Could not make the card. Try again.')}
+    try{const blob=await playerCardBlob(p);if(!blob)throw new Error('no image');cardPreview(blob,fn,p.name)}catch(err){say('Could not make the card. Try again.')}
   }
   else if(a==='share'){
     const me=meP(),info=me&&myRanks(me);if(!info)return;
     try{
-      const blob=await cardBlob(info,me);if(!blob)throw new Error('no image');
-      let file=null;try{file=new File([blob],'varsity-rank.png',{type:'image/png'})}catch(_){}
-      /* phones: the share sheet has "Save Image", which puts the picture straight into Photos */
-      if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        try{await navigator.share({files:[file]});return}
-        catch(err){if(err&&err.name==='AbortError')return}
-      }
-      /* computers (and anything that cannot share files): save the PNG to the device */
-      if(DL){await DL.save({filename:'varsity-rank.png',data:blob});say('Rank card saved to your device')}
-      else copyText(rankText(info,me),'Saving images is not available here, so your rank was copied as text.');
-    }catch(err){if(!(err&&err.code==='declined'))say('Could not save the card. Try Copy as text.')}
+      const blob=await cardBlob(info,me);if(!blob)throw new Error('no image');cardPreview(blob,'varsity-rank.png','Your rank card');
+    }catch(err){say('Could not make the card. Try again.')}
   }
   else if(a==='meDel'){
     const w=t.dataset.w,cur=((S.games[ME.uid]||{}).weeks)||{},next={...cur};delete next[w];
