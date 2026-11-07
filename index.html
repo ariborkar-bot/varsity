@@ -2057,6 +2057,7 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .pp-mc span{font:700 .64rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.pp-mc b{font-size:.95rem}
 .pp-mc.on{border-color:#FFC23D;background:linear-gradient(180deg,rgba(255,194,61,.16),rgba(255,194,61,.04));box-shadow:0 0 0 1px #FFC23D inset}.pp-mc.on span{color:#FFC23D}
 .pp-mc i{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#3DDC84;box-shadow:0 0 6px #3DDC84}
+.vt.inj{background:#e5484d;color:#fff;border-color:transparent;margin-right:4px;font-weight:800}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2283,10 +2284,14 @@ const keepOnly=(st,ks)=>{const o=zeroStat();ks.forEach(k=>o[k]=st[k]||0);return 
   mpP.push(...add)})();
 /* two-way players: if he was on the field at all (offense or defense), the game counts for both of his cards.
    A side with no stats that week gets a 0 line, so it counts as a game played worth 0 points. */
-(()=>{const by=new Map(mpP.map(p=>[p.key,p])),done=new Set();for(const p of mpP){if(!p.tw||done.has(p.key))continue;const d=by.get(p.twin||(/[od]$/.test(p.key)?p.key.slice(0,-1)+(p.key.endsWith('o')?'d':'o'):''));if(!d)continue;
+(()=>{const by=new Map(mpP.map(p=>[p.key,p])),done=new Set();
+  /* v274: which side (offense/defense) each school has box-score stats for, per week. If MaxPreps has no offensive stats for a school that
+     week (Bishop's weeks 10-11), its two-way players' offense cards get no game there instead of a 0 line. */
+  const side={};for(const q of mpP)q.games.forEach((g,i)=>{if(!g)return;const k=q.school+'|'+i,o=side[k]||(side[k]={o:0,d:0});if(OFFK.some(x=>g.stat[x]))o.o=1;if(DEFK.some(x=>g.stat[x]))o.d=1});
+  for(const p of mpP){if(!p.tw||done.has(p.key))continue;const d=by.get(p.twin||(/[od]$/.test(p.key)?p.key.slice(0,-1)+(p.key.endsWith('o')?'d':'o'):''));if(!d)continue;
   p.twin=d.key;d.twin=p.key;done.add(p.key);done.add(d.key);
   for(const x of [p,d]){const ks=x.pos==='DEF'?DEFK:OFFK;x.games=x.games.map(g=>g&&{...g,stat:keepOnly(g.stat,ks)})}
-  for(let i=0;i<WEEKS;i++){const a=p.games[i],b=d.games[i];if(a&&!b)d.games[i]={stat:zeroStat(),ver:'maxpreps',zero:1};else if(b&&!a)p.games[i]={stat:zeroStat(),ver:'maxpreps',zero:1}}}})();
+  for(let i=0;i<WEEKS;i++){const a=p.games[i],b=d.games[i],sd=side[p.school+'|'+i]||{},need=x=>x.pos==='DEF'?sd.d:sd.o;if(a&&!b&&need(d))d.games[i]={stat:zeroStat(),ver:'maxpreps',zero:1};else if(b&&!a&&need(p))p.games[i]={stat:zeroStat(),ver:'maxpreps',zero:1}}}})();
 const sampleP=RAW.map((r,i)=>({key:'s'+i,name:r[0],school:r[1],pos:r[2],sub:['CB','S'].includes(r[3])?'DB':(r[3]||r[2]),sample:true,games:[]}));
 sampleP.forEach((p,i)=>{
   const r=rng(i*7919+101),t=.75+r()*.6,bye=1+hash(p.school)%9;
@@ -2500,7 +2505,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v273 · Nov 7';
+const APP_BUILD='v274 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2857,7 +2862,11 @@ const bigV=a=>f1(a.v);
 const subV=a=>UI.rank==='prev'?(a.w?`week ${a.w} game`:'no games'):UI.scope!=='season'?'this week':`${f1(a.n?a.v/a.n:0)} per game`;
 const scopeSel=(id,off)=>`<label class="fld"><span>Scoring period</span><select id="${id}" data-act="scope" ${off?'disabled title="Previous ranks by each player’s last game"':''}>${['season',...Array.from({length:WEEKS},(_,i)=>i+1)].map(v=>`<option value="${v}" ${String(UI.scope)===String(v)?'selected':''}>${v==='season'?'Season total':'Week '+v+(v===CURW()?' (current)':'')}</option>`).join('')}</select></label>`;
 const rankSw=()=>`<div class="fld"><span>Rank by</span><div class="chips" role="group" aria-label="Rank by">${[['total','Total'],['prev','Previous']].map(([v,l])=>`<button class="chip" data-act="rank" data-v="${v}" aria-pressed="${UI.rank===v}">${l}</button>`).join('')}</div></div>`;
-const vtag=(p,a)=>p.mp?(p.tw?'<span class="vt tw">'+(p.pos==='DEF'?'2-way · D':'2-way · O')+'</span>':'')+'<span class="vt mp">Verified</span>':p.sample?'':(a.unv?'<span class="vt un">unverified</span>':(a.ver?'<span class="vt ok">verified</span>':''));
+/* v274 injuries (owner): name|school -> {until: last week he misses, or 99 for the season}. Shown as an OUT tag; no props while out. */
+const INJ={"Khai Agbayani|Bishop's":{until:99,note:'Out for the season'},"Jackson Binn|Bishop's":{until:13,note:'Out for week 13'}};
+const injOf=(p,w)=>{const x=p&&INJ[p.name+'|'+p.school];return x&&(w==null?CURW()+1:w)<=x.until?x:null};
+const injTag=p=>{const x=injOf(p,Math.max(CURW(),CURW()+1));return x?`<span class="vt inj" title="${esc(x.note)}">OUT</span>`:''};
+const vtag=(p,a)=>injTag(p)+p.mp?(p.tw?'<span class="vt tw">'+(p.pos==='DEF'?'2-way · D':'2-way · O')+'</span>':'')+'<span class="vt mp">Verified</span>':p.sample?'':(a.unv?'<span class="vt un">unverified</span>':(a.ver?'<span class="vt ok">verified</span>':''));
 const trTag=p=>{if(UI.scope!=='season')return'';const t=trend(p);return t?`<em class="tr ${t.d>=0?'up':'dn'}" title="Last game compared with the earlier average">${t.d>=0?'▲':'▼'} ${f1(Math.abs(t.d))}</em>`:''};
 
 
@@ -4127,6 +4136,7 @@ const PP_MK={
   sack:{l:'Sacks',g:'Defense',pos:['DEF'],min:.4,f:s=>s.sack},
   dInt:{l:'Interceptions (defense)',g:'Interceptions',pos:['DEF'],min:.25,f:s=>s.dInt}
 };
+const PP_ALWAYS=["JoJo Bryant|Bishop's"];   /* players who always get their lines, even outside their team's top players (owner) */
 const PP_TOP={passYd:1,passTD:1,int:1,rushYd:2,rec:2,recYd:2,td:2,tkl:2,sack:1,dInt:1};
 const PP_GROUPS=['Passing','Rushing','Receiving','Touchdowns','Interceptions','Defense'];
 const _erf=x=>{const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x))};
@@ -4148,6 +4158,7 @@ function propCands(){
   gs.forEach(g=>{[[g.h,g.a],[g.a,g.h]].forEach(([sc,opp])=>{
     const rows={};
     (by[sc]||[]).forEach(p=>{
+      if(injOf(p,g.w))return;
       const played=p.games.map((x,i)=>x&&i+1<g.w?x.stat:null).filter(Boolean);
       if(played.length<3)return;
       Object.entries(PP_MK).forEach(([m,M])=>{
@@ -4158,7 +4169,7 @@ function propCands(){
         (rows[m]=rows[m]||[]).push({id:g.w+'|'+p.key+'|'+m,k:p.key,m,w:g.w,g:gid(g),game:g,school:sc,opp,name:p.name,pos:p.pos,line,mean,rc,n,hits:vals.filter(v=>v>line).length,over:_dec(po),under:_dec(1-po),po,mu});
       });
     });
-    Object.entries(rows).forEach(([m,a])=>{a.sort((x,y)=>y.mean-x.mean);list.push(...a.slice(0,PP_TOP[m]||1))});
+    Object.entries(rows).forEach(([m,a])=>{a.sort((x,y)=>y.mean-x.mean);const top=a.slice(0,PP_TOP[m]||1);list.push(...top,...a.filter(x=>!top.includes(x)&&PP_ALWAYS.includes(x.name+'|'+x.school)))});
   })});
   const mo=Object.keys(PP_MK);
   list.sort((a,b)=>a.w-b.w||(a.game.d<b.game.d?-1:a.game.d>b.game.d?1:0)||a.game.h.localeCompare(b.game.h)||a.school.localeCompare(b.school)||mo.indexOf(a.m)-mo.indexOf(b.m)||b.mean-a.mean);
