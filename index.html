@@ -2487,7 +2487,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v266 · Nov 7';
+const APP_BUILD='v267 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4457,13 +4457,11 @@ function fgHTML(){
       <div class="fc-deal">${can&&!left?'<button class="btn" data-act="fgPlay" data-v="free">Play Unlimited</button>':'<button class="btn" data-act="fgPlay" data-v="daily">Play today’s challenge</button>'}${can&&!left&&invLeft(ME.uid,'p_try')>0?`<button class="btn ghost" data-act="perkTry">Use an extra try (${invLeft(ME.uid,'p_try')})</button>`:''}</div>`;
     board=mgBoard('Today’s leaderboard',rows,'No one has played today’s course yet. Be the first.');
   }else{
-    const B=UI.fgb==='tot'?'tot':'best';
-    const rows=Object.keys(S.picks).map(u=>({u,b:+fgRec(u).best||0,t:+fgRec(u).t||0,tot:+fgRec(u).tot||0,r:+fgRec(u).runs||0})).filter(x=>B==='tot'?x.tot>0:x.b>0)
-      .sort((a,b)=>B==='tot'?b.tot-a.tot||b.b-a.b:b.b-a.b||b.t-a.t).map(x=>({u:x.u,v:B==='tot'?x.tot.toLocaleString()+' pts · '+x.r+' runs':x.b+' pts · '+fgTime(x.t)}));
-    body=`<p class="fg-note">Play as many runs as you like. Every point you score adds to your all-time total.</p>
-      ${my.best?`<div class="fc-bar" style="grid-template-columns:repeat(3,1fr)"><div><small>Your best</small><b>${my.best}</b></div><div><small>Total points</small><b>${(+my.tot||0).toLocaleString()}</b></div><div><small>Runs</small><b>${my.runs||1}</b></div></div>`:''}
+    const rows=Object.keys(S.picks).map(u=>({u,b:+fgRec(u).best||0,t:+fgRec(u).t||0})).filter(x=>x.b>0).sort((a,b)=>b.b-a.b||b.t-a.t).map(x=>({u:x.u,v:x.b+' pts · '+fgTime(x.t)}));
+    body=`<p class="fg-note">Play as many runs as you like. Your best run goes on the leaderboard.</p>
+      ${my.best?`<div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best</small><b>${my.best}</b></div><div><small>Runs</small><b>${my.runs||1}</b></div></div>`:''}
       <div class="fc-deal"><button class="btn" data-act="fgPlay" data-v="free">Play</button></div>`;
-    board=`<div class="chips fg-bseg" role="group" aria-label="Leaderboard">${[['best','Best run'],['tot','Total points']].map(([v,l])=>`<button class="chip" data-act="fgb" data-v="${v}" aria-pressed="${B===v}">${l}</button>`).join('')}</div>`+mgBoard(B==='tot'?'All-time total points':'All-time best runs',rows,'No one is on the board yet. Play a run to be first.');
+    board=mgBoard('All-time best runs',rows,'No one is on the board yet. Play a run to be first.');
   }
   return `<section class="card fg-card"><div class="fg-hero" aria-hidden="true">${bb?'🏀':'🏈'}</div><h3>${name}</h3>${seg}${body}${how}${can?'':'<p class="hint">Sign in to save your scores and get on the leaderboards.</p>'}</section>`+board;
 }
@@ -4693,7 +4691,7 @@ function fgReady(c,g,W,H,s,bb,top){
   if(g.gold){c.fillStyle='#FFD54A';c.font=`800 ${Math.round(12*s)}px system-ui,sans-serif`;c.fillText('✨ GOLDEN BALL · '+sk+'-DAY STREAK',cx,ty+56*s)}
   c.restore();
   /* your numbers */
-  const best=dly?(d&&d.best)||0:(+my.best||0),stats=[[dly?'BEST TODAY':'BEST RUN',best?best+' pts':'–'],[dly?'TRIES LEFT':'TOTAL PTS',dly?String(fgTriesLeft()):String(+my.tot||0)],['STREAK',sk+(sk===1?' day':' days')]];
+  const best=dly?(d&&d.best)||0:(+my.best||0),stats=[[dly?'BEST TODAY':'BEST RUN',best?best+' pts':'–'],[dly?'TRIES LEFT':'RUNS',dly?String(fgTriesLeft()):String(+my.runs||0)],['STREAK',sk+(sk===1?' day':' days')]];
   const sy=ty+(g.gold?70:50)*s,bw=(mw-16*s)/3;stats.forEach(([l,v],i)=>{const x=cx-mw/2+i*(bw+8*s);c.save();rr(x,sy,bw,48*s,12*s);c.fillStyle='rgba(5,12,30,.72)';c.fill();c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=1;c.stroke();
     c.textAlign='center';c.fillStyle='#98A8BA';c.font=`800 ${Math.round(9.5*s)}px system-ui,sans-serif`;c.fillText(l,x+bw/2,sy+17*s);c.fillStyle='#fff';fit(v,'900 #px system-ui,sans-serif',bw-12*s,19*s);c.fillText(v,x+bw/2,sy+38*s);c.restore()});
   /* how to play + power-ups, in the lower part so the ball stays in view */
