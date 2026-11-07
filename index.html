@@ -121,7 +121,6 @@ input[type=number]{width:100%}
 .ch-rc.on{border-color:#2F6BFF;background:color-mix(in srgb,#2F6BFF 22%,var(--surface))}.ch-ra{color:var(--muted);padding:2px 9px}
 .ch-pk{display:inline-flex;gap:3px;flex-wrap:wrap}.ch-pk button{font-size:1rem;padding:2px 7px}
 .ch-sys{max-width:100%;align-self:stretch;background:color-mix(in srgb,#FFC23D 10%,var(--surface));border-color:color-mix(in srgb,#FFC23D 40%,var(--line))}
-.ch-q{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 8px;padding-bottom:2px}.ch-q::-webkit-scrollbar{display:none}.ch-q .chip{flex:0 0 auto;white-space:nowrap;font-size:.78rem}
 .wk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:8px}
 .wk-it{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
 .wk-it small{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}.wk-it b{font-size:1rem}.wk-it span{font-size:.8rem}
@@ -1653,6 +1652,11 @@ html,body{overflow-x:clip;max-width:100%}
 .fgx-x{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(5,12,30,.6);color:#fff;font:700 20px/1 system-ui;cursor:pointer}
 body.fg-on{overflow:hidden}
 .fg-card{text-align:center}.fg-seg,.fg-bseg{justify-content:center;margin:6px 0 10px}.fg-seg .chip,.fg-bseg .chip{flex:1 1 0}.fg-note{margin:4px 0 10px;font-size:.9rem}
+.fg-gold{position:relative;display:flex;align-items:center;gap:10px;justify-content:center;margin:10px 0 4px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);font-size:.85rem;overflow:hidden}
+.fg-gold i{position:absolute;left:0;bottom:0;height:3px;width:calc(var(--p)*100%);background:#FFC23D}
+.fg-gold.on{border-color:#FFC23D;background:linear-gradient(90deg,rgba(255,194,61,.18),rgba(255,194,61,.05))}
+.fg-gb{width:22px;height:22px;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 30%,#fff6c8,#ffd23f 45%,#b8860b);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.fg-gold:not(.on) .fg-gb{filter:grayscale(1);opacity:.55}.fg-gold.on .fg-gb{box-shadow:0 0 12px rgba(255,210,63,.8)}
 .fgx-rv{position:absolute;left:50%;transform:translateX(-50%);width:min(330px,calc(100% - 40px));display:grid;gap:8px;z-index:2}
 .fgx-rv button{border:0;border-radius:14px;padding:14px 12px;font:800 1rem var(--f-body,system-ui);cursor:pointer}
 .fgx-rv .rvw{background:#FFC23D;color:#1B1600}.fgx-rv .rve{background:rgba(5,12,30,.78);color:#fff}.fg-hero{font-size:3rem;line-height:1;margin:4px 0 6px}
@@ -2122,7 +2126,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v236 · Nov 6';
+const APP_BUILD='v237 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2653,7 +2657,7 @@ const betsOf=u=>((S.picks[u]||{}).bets)||{};
 const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g});return m};
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
-  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u);
+  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0);
   Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
@@ -2675,7 +2679,6 @@ const rwList=()=>[
   ['sim','Simulate a 10-0 season',()=>!!(S.picks[ME.uid]||{}).sim],
   ['rc','Play Ring Chaser',()=>!!(S.picks[ME.uid]||{}).rc],
   ['fg','Play '+(FG_SPORT==='bb'?'Hoops':'Field Goal'),()=>!!(S.picks[ME.uid]||{}).fg],
-  ['daily','Play a daily challenge',()=>!!(((S.picks[ME.uid]||{}).fg||{}).dd)],
   ['ad','Watch a sponsor spot',()=>adBonus(ME.uid)>0]];
 const rwOf=u=>((S.picks[u]||{}).rw)||{};
 const rwBonus=u=>RW_PAY*rwList().filter(([k])=>rwOf(u)[k]).length;
@@ -3489,7 +3492,12 @@ const fgRim=(p,s)=>({rx:Math.max(10*s,p.gap*.13),ry:p.gap/2+5*s});
 /* Field Goal: how tall the uprights stand above the crossbar. Over their tops is still open air (you keep flying), but it's no good: no points */
 const fgUp=(p,s)=>Math.min(p.gap*.6,115*s);
 const fgRec=u=>((S.picks[u]||{}).fg)||{};
-const FG_TRIES=3;
+const FG_TRIES=3,FG_DAY_PAY=5,FG_GOLD=7;
+/* daily challenge streak: fg.sk = {last: day played, n: days in a row, best}. It is still alive if you played today or yesterday.
+   7 days in a row turns the ball gold, and it stays gold every day until the streak breaks. */
+const fgYest=()=>{const d=new Date(TODAY()+'T12:00:00Z');d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10)};
+const fgStreak=u=>{const k=fgRec(u).sk;return k&&(k.last===TODAY()||k.last===fgYest())?+k.n||0:0};
+const fgGold=u=>!!u&&fgStreak(u)>=FG_GOLD;
 const fgDay=u=>{const d=fgRec(u).dd;return d&&d.d===TODAY()?d:null};
 const fgTriesLeft=()=>Math.max(0,FG_TRIES-(+(fgDay(ME.uid)||{}).tries||0));
 function fgHTML(){
@@ -3501,8 +3509,10 @@ function fgHTML(){
   if(M==='daily'){
     const d=ME.uid?fgDay(ME.uid):null,left=can?fgTriesLeft():FG_TRIES;
     const rows=Object.keys(S.picks).map(u=>({u,d:fgDay(u)})).filter(x=>x.d&&(+x.d.best||0)>0).sort((a,b)=>b.d.best-a.d.best||(a.d.t||0)-(b.d.t||0)).map(x=>({u:x.u,v:x.d.best+' pts · '+fgTime(x.d.t)}));
-    body=`<p class="fg-note"><b>Today’s course is the same for everyone.</b> ${FG_TRIES} tries a day, your best counts. A new course every day at midnight.</p>
-      <div class="fc-bar" style="grid-template-columns:repeat(2,1fr)"><div><small>Your best today</small><b>${d&&d.best?d.best:'–'}</b></div><div><small>Tries left</small><b>${left} of ${FG_TRIES}</b></div></div>
+    const sk=ME.uid?fgStreak(ME.uid):0,gold=sk>=FG_GOLD;
+    body=`<p class="fg-note"><b>Today’s course is the same for everyone.</b> ${FG_TRIES} tries a day, your best counts. Play every day for <b>+${FG_DAY_PAY} tokens</b>, and a ${FG_GOLD}-day streak turns your ball gold until the streak breaks.</p>
+      <div class="fc-bar" style="grid-template-columns:repeat(3,1fr)"><div><small>Your best today</small><b>${d&&d.best?d.best:'–'}</b></div><div><small>Tries left</small><b>${left} of ${FG_TRIES}</b></div><div><small>Streak</small><b>${sk} ${sk===1?'day':'days'}</b></div></div>
+      <div class="fg-gold ${gold?'on':''}"><span class="fg-gb" aria-hidden="true"></span><span>${gold?`<b>Golden ball active.</b> Play every day to keep it.`:`<b>Golden ball:</b> ${Math.min(sk,FG_GOLD)} of ${FG_GOLD} days`}</span>${gold?'':`<i style="--p:${Math.min(1,sk/FG_GOLD)}"></i>`}</div>
       <div class="fc-deal"><button class="btn" data-act="fgPlay" data-v="daily" ${can&&!left?'disabled':''}>${can&&!left?'Back tomorrow':'Play today’s challenge'}</button></div>`;
     board=mgBoard('Today’s leaderboard',rows,'No one has played today’s course yet. Be the first.');
   }else{
@@ -3569,7 +3579,7 @@ function fgOpen(mode){
   fgReset();
   const flap=e=>{if(e){if(e.target.closest&&e.target.closest('.fgx-x,.fgx-rv'))return;e.preventDefault()}
     if(g.paused&&g.st==='play'){g.paused=false;if(g.invP){g.inv=performance.now()+g.invP;g.invP=0}g.t0=performance.now()-g.t*1000;g.last=performance.now();g.vy=-g.s*7.2;return}
-    if(g.st==='ready'){g.st='play';g.t0=performance.now();if(g.mode==='daily')fgTry()}
+    if(g.st==='ready'){g.st='play';g.t0=performance.now();if(g.mode==='daily'){fgTry();g.gold=fgGold(ME.uid)}}
     if(g.st==='play'){g.vy=-g.s*7.2}
     else if(g.st==='over'&&!g.offer&&performance.now()-g.tEnd>600){if(g.mode==='daily'&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft())return;fgReset()}};
   g.flap=flap;
@@ -3585,7 +3595,7 @@ function fgOpen(mode){
 function fgReset(){
   const g=FG;g.s=Math.max(.8,Math.min(1.35,g.H/700));   /* scale everything to the screen height */
   g.st='ready';g.y=g.H*.45;g.vy=0;g.x=Math.min(g.W*.28,140);g.score=0;g.goals=0;g.posts=[];g.dist=0;g.t=0;g.rot=0;g.paused=false;g.next=g.W*.12;g.sp=0;g.n=0;g.yl=0;g.zone=null;
-  g.rnd=g.mode==='daily'?fgSeed(hash('fg|'+FG_SPORT+'|'+TODAY())):Math.random;g.revived=false;g.offer=false;g.saved=false;g.inv=0;fgOffer(false);
+  g.gold=fgGold(ME.uid);g.rnd=g.mode==='daily'?fgSeed(hash('fg|'+FG_SPORT+'|'+TODAY())):Math.random;g.revived=false;g.offer=false;g.saved=false;g.inv=0;fgOffer(false);
 }
 function fgClose(fromPop){
   const g=FG;if(!g)return;if(g.st==='over'&&!g.saved)fgSave(g);FG=null;cancelAnimationFrame(g.raf);removeEventListener('resize',g.onR);removeEventListener('keydown',g.key);document.removeEventListener('visibilitychange',g.vis);
@@ -3669,9 +3679,14 @@ async function fgSave(g){
 /* a daily try counts as soon as the run starts, so quitting a bad run doesn't give it back */
 function fgTry(){
   if(!(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'))return;
-  const my=fgRec(ME.uid),d=fgDay(ME.uid)||{d:TODAY(),tries:0,best:0,t:0},dd={...d,d:TODAY(),tries:(+d.tries||0)+1};
-  S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:{...my,dd}};
-  upsert('picks/'+ME.uid,{fg:{dd}}).catch(()=>{});
+  const my=fgRec(ME.uid),d=fgDay(ME.uid)||{d:TODAY(),tries:0,best:0,t:0},dd={...d,d:TODAY(),tries:(+d.tries||0)+1},patch={dd};
+  if(!(+d.tries)){   /* first try today: +5 tokens and the streak grows (or starts again) */
+    const k=my.sk||{},n=k.last===TODAY()?+k.n||1:k.last===fgYest()?(+k.n||0)+1:1;
+    patch.sk={last:TODAY(),n,best:Math.max(+k.best||0,n)};patch.days=(+my.days||0)+1;
+    setTimeout(()=>say(`+${FG_DAY_PAY} tokens for today’s challenge · ${n}-day streak${n===FG_GOLD?' · Golden ball unlocked!':''}`),400);
+  }
+  S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:{...my,...patch}};
+  upsert('picks/'+ME.uid,{fg:patch}).catch(()=>{});
 }
 function fgDraw(){
   const g=FG,c=g.cx,W=g.W,H=g.H,s=g.s,ground=H-Math.round(56*s),bb=FG_SPORT==='bb';
@@ -3755,21 +3770,25 @@ function fgDraw(){
       if(p.miss){c.lineWidth=4;c.strokeStyle=`rgba(0,0,0,${.6*p.flash})`;c.strokeText('NO GOOD',p.x,t+28*s);c.fillStyle=`rgba(255,90,90,${p.flash})`;c.fillText('NO GOOD',p.x,t+28*s)}
       else{c.fillStyle=`rgba(255,213,74,${p.flash})`;c.fillText('+'+p.pts,p.x,p.c)}p.flash=Math.max(0,p.flash-.025)}
   }
+  /* golden ball sparkle trail */
+  if(g.gold&&g.st!=='ready'){c.save();for(let i=1;i<=7;i++){const a=(1-i/8)*.7,tx=g.x-i*9*s,ty=g.y+Math.sin((g.dist/14)+i)*4*s;c.globalAlpha=a;c.fillStyle=i%2?'#FFD54A':'#fff6c8';c.beginPath();c.arc(tx,ty,(5-i*.5)*s,0,7);c.fill()}c.restore()}
   /* ball */
   c.save();c.translate(g.x,g.y);c.rotate(g.rot);if((performance.now()<g.inv||g.invP)&&!(g.paused&&!g.invP))c.globalAlpha=.45+.45*Math.sin(performance.now()/60);
   if(bb){const r=17*s;c.rotate(g.st==='ready'?performance.now()/900:g.dist/(r*2.2)-g.rot);   /* a basketball spins as it flies */
-    const gr=c.createRadialGradient(-r*.35,-r*.4,r*.08,0,0,r*1.05);gr.addColorStop(0,'#ffa75a');gr.addColorStop(.55,'#ee6a1f');gr.addColorStop(1,'#b8470f');
-    c.fillStyle=gr;c.beginPath();c.arc(0,0,r,0,7);c.fill();
+    const G=g.gold,gr=c.createRadialGradient(-r*.35,-r*.4,r*.08,0,0,r*1.05);gr.addColorStop(0,G?'#fff6c8':'#ffa75a');gr.addColorStop(.55,G?'#f2be2c':'#ee6a1f');gr.addColorStop(1,G?'#9c6f00':'#b8470f');
+    if(G){c.shadowColor='rgba(255,210,63,.9)';c.shadowBlur=18*s}
+    c.fillStyle=gr;c.beginPath();c.arc(0,0,r,0,7);c.fill();c.shadowBlur=0;c.shadowColor='transparent';
     c.save();c.beginPath();c.arc(0,0,r,0,7);c.clip();
-    c.fillStyle='rgba(90,30,0,.22)';for(const [px,py] of FG_PEB)c.fillRect(px*r,py*r,1.3*s,1.3*s);   /* pebbled leather */
-    c.strokeStyle='#1c0c03';c.lineWidth=2.1*s;c.lineCap='round';
+    c.fillStyle=G?'rgba(110,70,0,.25)':'rgba(90,30,0,.22)';for(const [px,py] of FG_PEB)c.fillRect(px*r,py*r,1.3*s,1.3*s);   /* pebbled leather */
+    c.strokeStyle=G?'#5c3d00':'#1c0c03';c.lineWidth=2.1*s;c.lineCap='round';
     c.beginPath();c.moveTo(-r,0);c.lineTo(r,0);c.moveTo(0,-r);c.lineTo(0,r);c.stroke();
     c.beginPath();c.arc(-r*1.32,0,r*1.02,-.98,.98);c.stroke();c.beginPath();c.arc(r*1.32,0,r*1.02,Math.PI-.98,Math.PI+.98);c.stroke();
     c.restore();
-    c.strokeStyle='#1c0c03';c.lineWidth=1.8*s;c.beginPath();c.arc(0,0,r,0,7);c.stroke();
+    c.strokeStyle=G?'#5c3d00':'#1c0c03';c.lineWidth=1.8*s;c.beginPath();c.arc(0,0,r,0,7);c.stroke();
     c.rotate(-(g.st==='ready'?performance.now()/900:g.dist/(r*2.2)-g.rot));   /* the shine stays on top-left while the ball turns */
     c.fillStyle='rgba(255,255,255,.28)';c.beginPath();c.ellipse(-r*.38,-r*.45,r*.38,r*.2,-.6,0,7);c.fill()}
-  else{c.scale(1.25,1.25);c.fillStyle='#8a4b22';c.beginPath();c.ellipse(0,0,16*s,10*s,0,0,7);c.fill();c.strokeStyle='#5a2e12';c.lineWidth=1.5*s;c.stroke();
+  else{c.scale(1.25,1.25);if(g.gold){const fg=c.createRadialGradient(-5*s,-4*s,1*s,0,0,17*s);fg.addColorStop(0,'#fff6c8');fg.addColorStop(.5,'#f2be2c');fg.addColorStop(1,'#9c6f00');c.fillStyle=fg;c.shadowColor='rgba(255,210,63,.9)';c.shadowBlur=16*s}else c.fillStyle='#8a4b22';
+    c.beginPath();c.ellipse(0,0,16*s,10*s,0,0,7);c.fill();c.shadowBlur=0;c.shadowColor='transparent';c.strokeStyle=g.gold?'#7a5500':'#5a2e12';c.lineWidth=1.5*s;c.stroke();
     c.strokeStyle='#fff';c.lineWidth=2*s;c.beginPath();c.moveTo(-6*s,0);c.lineTo(6*s,0);c.stroke();c.lineWidth=1.4*s;for(let i=-4;i<=4;i+=2.7){c.beginPath();c.moveTo(i*s,-3*s);c.lineTo(i*s,3*s);c.stroke()}
     c.beginPath();c.moveTo(-15*s,-2*s);c.lineTo(-11*s,-3*s);c.moveTo(-15*s,2*s);c.lineTo(-11*s,3*s);c.moveTo(15*s,-2*s);c.lineTo(11*s,-3*s);c.moveTo(15*s,2*s);c.lineTo(11*s,3*s);c.stroke()}
   c.restore();
@@ -3788,7 +3807,7 @@ function fgDraw(){
   const msg=(a,b)=>{c.fillStyle='rgba(5,12,30,.78)';const w=Math.min(W-40,330),h=b?150*s:96*s,x=(W-w)/2,y=g.st==='over'?H*.3:H*.58;c.beginPath();c.roundRect?c.roundRect(x,y,w,h,18):c.rect(x,y,w,h);c.fill();
     c.fillStyle='#fff';c.textAlign='center';c.font=`900 ${Math.round(26*s)}px system-ui,sans-serif`;c.fillText(a,W/2,y+42*s);
     if(b){c.font=`700 ${Math.round(15*s)}px system-ui,sans-serif`;b.split('\n').forEach((l,i)=>c.fillText(l,W/2,y+74*s+i*24*s))}};
-  if(g.st==='ready')msg(bb?'Tap to tip off':'Tap to kick off',(g.mode==='daily'?'Daily challenge · try '+(Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1))+' of '+FG_TRIES+'\n':'')+(bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts'));
+  if(g.st==='ready')msg(bb?'Tap to tip off':'Tap to kick off',(g.gold?'✨ Golden ball · '+fgStreak(ME.uid)+'-day streak\n':'')+(g.mode==='daily'?'Daily challenge · try '+(Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1))+' of '+FG_TRIES+'\n':'')+(bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts'));
   else if(g.paused&&g.st==='play'){msg(g.invP?'Revived!':'Paused','Tap to keep going');}
   else if(g.st==='over'){const dly=g.mode==='daily',my=ME.uid?fgRec(ME.uid):{},d=ME.uid?fgDay(ME.uid):null,best=dly?(d&&d.best):my.best,line1=`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}`;
     if(g.offer)msg(bb?'Brick!':'No good!',line1+'\nKeep this run going?');
@@ -4341,8 +4360,7 @@ function tradesHTML(g){
 }
 /* ---------- league chat: messages live on the league itself (groups/<id>.chat), so every member sees them ---------- */
 const CHAT_MAX=300,CHAT_SHOW=50,CHAT_RX=['👍','😂','🔥','💀','👀','🏆'];
-/* quick messages under the chat box: one tap fills the box (you can still edit before sending) */
-const CHAT_QUICK=['Good luck this week 🤝','Your lineup is in trouble 👀','See you in the playoffs','Rematch next season?','Who wants to trade?','GG'];
+
 function chatLogHTML(g){
   const msgs=Object.entries(g.chat||{}).map(([id,m])=>m&&m.t?Object.assign({id},m):null).filter(Boolean).sort((a,b)=>(a.at||0)-(b.at||0)).slice(-CHAT_SHOW);
   const when=at=>{try{return new Date(at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}catch(_){return ''}};
@@ -4406,7 +4424,7 @@ function chatHTML(g){
   if(ME.mode==='guest'||!g.members[ME.uid])return '';
   return `<section class="card ch-card"><div class="qh"><h3>League chat</h3><span class="muted">${Object.keys(g.members).length} ${Object.keys(g.members).length===1?'member':'members'}</span></div>
     <ul class="ch-log" id="chat-log" aria-live="polite">${chatLogHTML(g)}</ul>
-    ${ME.mode==='readonly'?'':`<div class="ch-q" role="group" aria-label="Quick messages">${CHAT_QUICK.map(q=>`<button class="chip" data-act="chatQuick" data-v="${esc(q)}">${esc(q)}</button>`).join('')}</div><div class="ch-form" id="chat-form"><input id="chat-in" maxlength="${CHAT_MAX}" placeholder="Message your league" aria-label="Message your league" autocomplete="off" enterkeyhint="send" value="${esc(UI.chatDraft||'')}"><button class="btn" type="button" data-act="chatSend">Send</button></div>`}
+    ${ME.mode==='readonly'?'':`<div class="ch-form" id="chat-form"><input id="chat-in" maxlength="${CHAT_MAX}" placeholder="Message your league" aria-label="Message your league" autocomplete="off" enterkeyhint="send" value="${esc(UI.chatDraft||'')}"><button class="btn" type="button" data-act="chatSend">Send</button></div>`}
     ${Object.keys(g.chat||{}).length>CHAT_SHOW?`<p class="muted">Showing the latest ${CHAT_SHOW} messages.</p>`:''}</section>`;
 }
 function matchupsHTML(g){
@@ -6522,7 +6540,6 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
         if(Object.keys(patch).length)await saveLineup(g,patch,'Team cleared')})}
     else if(a==='lgSub')openSub(t.dataset.slot)
     else if(a==='chatSend')sendChat();
-    else if(a==='chatQuick'){const el=document.getElementById('chat-in');if(el){el.value=t.dataset.v;UI.chatDraft=el.value;el.focus()}}
     else if(a==='chatRxPick'){UI.chatRx=UI.chatRx===t.dataset.id?null:t.dataset.id;refreshChat()}
     else if(a==='chatRx'){const g=curGroup(),id=t.dataset.id,e=t.dataset.e,m=g&&(g.chat||{})[id];if(!m||!g.members[ME.uid])return;
       const cur=(m.r||{})[ME.uid],nx=cur===e?null:e;UI.chatRx=null;
