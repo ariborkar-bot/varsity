@@ -1407,6 +1407,17 @@ select option{background:#0B1730;color:#EAF0F8}
 .ia-ball.b_chrome{background:radial-gradient(circle at 32% 28%,#fff,#c9d3e0 35%,#5e6a7c)}.ia-ball.b_neon{background:radial-gradient(circle at 40% 35%,#2a1a50,#07060f 70%);box-shadow:0 0 12px rgba(255,79,224,.7),inset 0 0 0 2px #26f0ff}
 .ia-ball.b_lava{background:radial-gradient(circle at 34% 30%,#ffb36b,#e5481b 50%,#5a1200)}.ia-ball.b_ice{background:radial-gradient(circle at 34% 30%,#f4fbff,#9dd2f2 45%,#3d7fb0)}
 .ia-ball.b_camo{background:repeating-linear-gradient(125deg,#4B5320 0 6px,#2F3517 6px 11px,#6B6F3A 11px 15px)}.ia-ball.b_throw{background:radial-gradient(circle at 34% 30%,#fff,#e9eef5 50%,#aeb9c9);box-shadow:inset 0 0 0 2px #c8102e}
+.av.avf.gfr{box-shadow:0 0 0 3px var(--fr1),0 0 0 5.5px var(--fr2)}.av.avf.gfr-g{box-shadow:0 0 0 3px var(--fr1),0 0 0 5.5px var(--fr2),0 0 12px var(--fr1)}
+.cb-s.ia-cb,.fc-hero.cb-s .fc-mys,.fc-hero.cb-s .fc-cover{background:repeating-linear-gradient(135deg,var(--cbB) 0 9px,var(--cbC) 9px 18px)!important}
+.bdg{display:inline-flex;vertical-align:-3px;margin-left:5px;width:1.05em;height:1.05em;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--m2) 70%,transparent))}.bdg svg{width:100%;height:100%}
+.ia-bd,.ia-ti{border-radius:10px;background:var(--surface,#14213a);border:1px solid var(--line)}
+.ti{display:inline-block;font:800 .62rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:999px;border:1px solid currentColor;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.ia-ti .ti{margin:0;font-size:.58rem}.ti.r-c{color:#9FB0CC}.ti.r-r{color:#6AA6FF}.ti.r-e{color:#C7A6FF;box-shadow:0 0 8px rgba(180,140,255,.35)}.ti.r-l{color:#FFD36B;box-shadow:0 0 10px rgba(255,194,61,.45);background:rgba(255,194,61,.08)}
+.me-id .ti{margin:4px 6px 2px 0;display:inline-block}
+.lk-col{display:flex;flex-direction:column;gap:10px}.lk-bar{height:10px;border-radius:99px;background:var(--surface2,#1c2a44);overflow:hidden}.lk-bar>i{display:block;height:100%;background:linear-gradient(90deg,#4C8DFF,#B48CFF,#FFC23D);border-radius:99px}
+.lk-ms{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}.lk-ms>div{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:12px;border:1px solid var(--line);text-align:center;font-size:.7rem}.lk-ms>div.got{border-color:#FFC23D;box-shadow:0 0 0 1px rgba(255,194,61,.3)}.lk-ms>div:not(.got){opacity:.7}
+.lk-sets{display:flex;flex-direction:column;gap:6px}.lk-set{display:flex;align-items:center;gap:10px;font-size:.8rem}.lk-set .lk-bar{flex:1;height:7px}.lk-sw{width:22px;height:22px;border-radius:6px;flex:none}
+.lk-kinds{display:flex;flex-wrap:wrap;gap:6px}.lk-it .ex{font-size:.62rem;color:#FFD36B}
 /* v243 cosmetics: banners, name colours, card backs, chat bubbles */
 .ia-bn,.ia-cb{border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#22324f,#141f33);border:1px solid rgba(255,255,255,.12)}
 .ia-nc{border-radius:10px;background:var(--surface,#14213a);border:1px solid var(--line);font-weight:900;font-family:var(--f-display,inherit)}
@@ -1908,7 +1919,7 @@ const LOGO_ALIAS={'Army and Navy Academy':'Army-Navy','Central Union':'Central',
 const logoFor=s=>{const L=window.SCHOOL_LOGOS||{};return L[s]||L[LOGO_ALIAS[s]]||''};
 const slogo=(s,size=18)=>{const u=logoFor(s);return u?`<img class="slogo" src="${u}" alt="" width="${size}" height="${size}">`:''};
 const _pwRim=(name,seed)=>{try{const i=weekTop().list.findIndex(x=>x.p.name===name&&(x.p.school===seed||x.p.key===seed));return i<0?'':i===0?' rim-g':' rim-s'}catch(_){return''}};
-const av=(name,seed,size=40)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);const fr=seed&&typeof frameOf==='function'&&S.picks&&S.picks[seed]?frameOf(seed):'';return `<span class="av${_pwRim(name,seed)}${fr?' avf '+fr:''}" style="--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px" aria-hidden="true">${esc(ini)}${u?`<img class="avl" src="${u}" alt="">`:''}</span>`};
+const av=(name,seed,size=40)=>{const ini=String(name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';const u=logoFor(seed);const fr=seed&&typeof frameOf==='function'&&S.picks&&S.picks[seed]?frameOf(seed):'';return `<span class="av${_pwRim(name,seed)}${fr?' avf '+fr+(typeof ITEM!=='undefined'&&ITEM[fr]&&ITEM[fr].fc?' gfr'+(ITEM[fr].glow?' gfr-g':''):''):''}" style="${fr&&typeof ITEM!=='undefined'&&ITEM[fr]&&ITEM[fr].fc?`--fr1:${ITEM[fr].fc[0]};--fr2:${ITEM[fr].fc[1]};`:''}--h:${hash(seed||name)%360};width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px" aria-hidden="true">${esc(ini)}${u?`<img class="avl" src="${u}" alt="">`:''}</span>`};
 /* position filters: offense by position, defense by group (DB covers CB, S and plain DB) */
 const FILTERS=['ALL','QB','RB','WR','TE','DEF','DL','LB','DB','K'];
 const FLABEL={ALL:'All'};
@@ -2222,7 +2233,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v243 · Nov 6';
+const APP_BUILD='v244 · Nov 6';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2950,7 +2961,7 @@ function fcHTML(){
   const byS=UI.fcb==='season',rows=all.sort((a,b)=>(byS?b.s-a.s:b.t-a.t)||(b.t-a.t)).map((x,i)=>Object.assign(x,{r:i+1}));
   const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
   const lrow=x=>`<li class="${x.u===ME.uid?'me':''}"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w).h||[]).map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':'week '+w}</small></span></li>`;
-  return `<section class="card fc-hero ${eqOf(ME.uid,'cback')?'cb '+eqOf(ME.uid,'cback'):''}"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">Week ${cw}</span></div>
+  return `<section class="card fc-hero ${eqOf(ME.uid,'cback')?'cb '+eqOf(ME.uid,'cback')+cbCls(eqOf(ME.uid,'cback')):''}" style="${eqOf(ME.uid,'cback')?cosStyle(eqOf(ME.uid,'cback')):''}"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">Week ${cw}</span></div>
     <p class="muted">Every week you are dealt 5 random players from the app and get ${FC_REDRAWS} redraws. A redraw swaps one card for a new player. You do not have to use them: lock in your hand whenever you like, and any unused redraws are saved for next week (you can hold up to ${FC_BANK_MAX} saved). Your hand scores the week’s fantasy points from those 5. Everyone in Varsity is on the same leaderboard.</p>
     ${wk.length>1?`<div class="chips" role="group" aria-label="Week">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">Week ${n}</button>`).join('')}</div>`:''}
     ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&bank?`<small>${bank} saved from before</small>`:''}${w===cw&&!lkd&&invLeft(ME.uid,'p_redraw')>0?`<button class="btn sm ghost fc-x" data-act="perkRedraw">+1 redraw (${invLeft(ME.uid,'p_redraw')})</button>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> ${left?`${Math.min(FC_BANK_MAX,left)} unused ${left===1?'redraw is':'redraws are'} saved for next week.`:'No redraws left to save.'}</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand${left?` · save ${Math.min(FC_BANK_MAX,left)} ${left===1?'redraw':'redraws'}`:''}</button></div>`):''}`
@@ -3055,14 +3066,91 @@ const ITEMS=[
   /* token boosts (put one on a pick before the game starts) */
   {id:'t_boost',k:'tboost',r:'r',n:'+25% boost',d:'A winning pick pays 25% more.'},
   {id:'t_insure',k:'tboost',r:'e',n:'Insurance',d:'A losing pick gives your tokens back.'}];
+/* v244: generated colourways. Every team palette comes in many banner patterns, frames, name colours, card backs and chat bubbles,
+   plus titles and badges. Items with ex:1 are never in packs: they unlock from collection milestones and team sets (see cosEarned). */
+const PALS=[
+  ['scarlet','Scarlet & Gray','#C8102E','#A7A8AA','#3a0a12'],['navygold','Navy & Gold','#14244A','#E3B23C','#070d1c'],['royal','Royal & White','#1D3FA8','#F2F4F8','#081436'],
+  ['maroon','Maroon & Gold','#6B1A2B','#D8A630','#24070e'],['forest','Forest & Gold','#0F5A34','#E0B04A','#03180d'],['blackorange','Black & Orange','#151515','#F26B1D','#000000'],
+  ['purple','Purple & Gold','#4B1F87','#F2C14E','#160830'],['teal','Teal & Black','#0E8C8C','#101418','#021c1c'],['kelly','Kelly & White','#178A3C','#F4F4F2','#05250f'],
+  ['cardinal','Cardinal & White','#9D2235','#F7F2EA','#2c060c'],['columbia','Columbia & Navy','#7BAFD4','#13294B','#081428'],['burgundy','Burgundy & Silver','#7A1F3D','#C0C5CE','#250812'],
+  ['crimson','Crimson & Cream','#9E1B32','#F1E6C8','#2a0510'],['orangenavy','Orange & Navy','#F47A20','#0C2340','#05101e'],['greenyellow','Green & Yellow','#1E5631','#FFD100','#07180d'],
+  ['blacksilver','Black & Silver','#1A1A1D','#C9CFD6','#050506'],['redblack','Red & Black','#D2202F','#111111','#1c0306'],['powder','Powder & Gold','#9CC8E8','#D9A93A','#14263a'],
+  ['pinkblack','Pink & Black','#FF4F9A','#141414','#250514'],['mintnavy','Mint & Navy','#5FE0B7','#13294B','#06161c'],['lavender','Lavender & Silver','#B49CFF','#D7DCE3','#1c1236'],
+  ['copper','Copper & Black','#C46A2E','#141210','#1e0d04'],['sky','Sky & Sand','#5FB4FF','#E9D6A8','#0b2238'],['volt','Volt & Black','#C8F526','#111111','#141a02']];
+const BN_PATS=[
+  ['fade','Fade','c',(a,b,d)=>`linear-gradient(135deg,${a},${d})`],
+  ['split','Two-tone','c',(a,b,d)=>`linear-gradient(115deg,${a} 0 55%,${b} 55% 100%)`],
+  ['pin','Pinstripe','c',(a,b,d)=>`repeating-linear-gradient(90deg,${a} 0 11px,${b} 11px 12px)`],
+  ['stripe','Stripes','r',(a,b,d)=>`repeating-linear-gradient(135deg,${a} 0 14px,${b} 14px 22px)`],
+  ['chev','Chevron','r',(a,b,d)=>`linear-gradient(135deg,${b} 25%,transparent 25%) -14px 0/28px 28px,linear-gradient(225deg,${b} 25%,transparent 25%) -14px 0/28px 28px,linear-gradient(315deg,${b} 25%,transparent 25%) 0 0/28px 28px,linear-gradient(45deg,${b} 25%,${a} 25%) 0 0/28px 28px`],
+  ['dots','Halftone','r',(a,b,d)=>`radial-gradient(${b} 2px,transparent 2.5px) 0 0/12px 12px,linear-gradient(135deg,${a},${d})`],
+  ['check','Checker','e',(a,b,d)=>`repeating-conic-gradient(${a} 0 25%,${b} 0 50%) 0 0/24px 24px`],
+  ['field','Home field','e',(a,b,d)=>`repeating-linear-gradient(90deg,transparent 0 22px,${b} 22px 24px),linear-gradient(180deg,${a},${d})`],
+  ['carbon','Carbon stripe','e',(a,b,d)=>`linear-gradient(90deg,transparent 0 46%,${a} 46% 54%,transparent 54%),repeating-linear-gradient(45deg,#1d2025 0 4px,#2b2f36 4px 8px)`],
+  ['glow','Spotlight','l',(a,b,d)=>`radial-gradient(ellipse at 50% -20%,${b} 0,transparent 55%),radial-gradient(ellipse at 10% 120%,${a} 0,transparent 50%),linear-gradient(180deg,${d},${a})`]];
+const FR_STY=[['q','Quarters','c',(a,b)=>`conic-gradient(${a} 0 25%,${b} 0 50%,${a} 0 75%,${b} 0)`],['spin','Swirl','r',(a,b)=>`conic-gradient(${a},${b},${a})`],['rim','Trim','e',(a,b)=>`conic-gradient(${b} 0 8%,${a} 0 42%,${b} 0 58%,${a} 0 92%,${b} 0)`]];
+const TITLES=[
+  ['Rookie','c'],['Bench Warmer','c'],['Walk-On','c'],['Water Boy','c'],['Practice Squad','c'],['Sixth Man','c'],['Film Room','c'],['Two-a-Days','c'],['Friday Night','c'],['Student Section','c'],
+  ['Starter','r'],['Team Captain','r'],['Playmaker','r'],['Sharpshooter','r'],['Lockdown','r'],['Iron Man','r'],['Gym Rat','r'],['Ball Hawk','r'],['Road Warrior','r'],['Clutch','r'],['Hometown Hero','r'],['Glass Cleaner','r'],
+  ['All-League','e'],['All-CIF','e'],['Pick ’em Prophet','e'],['Draft Guru','e'],['Card Shark','e'],['Field Goal Ace','e'],['Bucket Getter','e'],['Undefeated','e'],['Stat Sheet','e'],['Scout','e'],['Big Game Hunter','e'],
+  ['MVP','l'],['Franchise Player','l'],['Hall of Famer','l'],['GOAT','l'],['Dynasty','l'],['Section Champ','l'],['Legend','l']];
+const BADGE_IC={
+  star:['Star','M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],bolt:['Bolt','M13 2L4 14h7l-1 8 9-12h-7z'],crown:['Crown','M3 18h18l-2-10-5 4-2-6-2 6-5-4z'],
+  flame:['Flame','M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 5 1-2 1-5 0-9z'],shield:['Shield','M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z'],trophy:['Trophy','M7 4h10v4a5 5 0 0 1-10 0zM5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4M10 14h4v3h3v3H7v-3h3z'],
+  football:['Football','M5 19C3 13 7 5 19 5c2 6-2 14-14 14zM9 15l6-6M10 11l1 1M12 9l1 1M11 13l1 1'],hoop:['Hoop','M4 6h16v3H4zM6 9l2 10M18 9l-2 10M8 13h8M7 16h10'],target:['Target','M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10M12 11a1 1 0 1 0 0 2a1 1 0 1 0 0-2'],
+  medal:['Medal','M8 2l4 6 4-6M12 22a6 6 0 1 0 0-12a6 6 0 1 0 0 12'],diamond:['Diamond','M6 3h12l4 6-10 12L2 9z'],wing:['Wings','M2 8c4 0 7 2 10 6 3-4 6-6 10-6-2 6-6 9-10 9S4 14 2 8z'],
+  whistle:['Whistle','M3 10h11a5 5 0 1 1-5 5H3zM14 10l6-4'],clock:['Clock','M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7v5l3 3'],mountain:['Peak','M2 20l7-12 4 6 3-4 6 10z'],
+  anchor:['Anchor','M12 5a2 2 0 1 0 0-4a2 2 0 1 0 0 4M12 5v16M5 13a7 7 0 0 0 14 0M8 9h8'],skull:['Skull','M12 2a8 8 0 0 0-8 8c0 3 2 5 3 6v4h10v-4c1-1 3-3 3-6a8 8 0 0 0-8-8zM9 11h.01M15 11h.01'],
+  paw:['Paw','M12 13c-3 0-5 3-5 5s2 3 5 3 5-1 5-3-2-5-5-5zM6 10a2 2 0 1 0 0-4a2 2 0 1 0 0 4M18 10a2 2 0 1 0 0-4a2 2 0 1 0 0 4M9 6a2 2 0 1 0 0-4a2 2 0 1 0 0 4M15 6a2 2 0 1 0 0-4a2 2 0 1 0 0 4'],
+  rocket:['Rocket','M12 2c4 3 5 8 4 12h-8C7 10 8 5 12 2zM8 14l-3 4h4M16 14l3 4h-4M10 18l2 4 2-4'],heart:['Heart','M12 21C5 15 2 11 2 7a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 4-3 8-10 14z']};
+const METALS=[['bronze','Bronze','c','#CD7F32','#7a4518'],['silver','Silver','r','#E3E7EC','#7d8794'],['gold','Gold','e','#FFD36B','#a8761c'],['diamond','Diamond','l','#9FF3FF','#3a7bd5']];
+const SOLID_NC=[['white','White','#FFFFFF'],['silver','Silver','#C9CFD6'],['red','Red','#FF4B4B'],['crimson','Crimson','#E0314B'],['orange2','Tangerine','#FF8A3D'],['yellow','Yellow','#FFE14D'],['lime2','Electric lime','#C8F526'],['green','Green','#3DDC84'],['mint','Mint','#5FE0B7'],['teal','Teal','#2EC4C4'],['cyan','Cyan','#4FD8FF'],['blue','Blue','#4C8DFF'],['indigo','Indigo','#7C83FF'],['violet','Violet','#B48CFF'],['magenta','Magenta','#FF4FE0'],['rose','Rose','#FF7AA8'],['peach','Peach','#FFB38A'],['sand','Sand','#E9D6A8'],['copper','Copper','#E08A4E'],['olive','Olive','#B5C25A']];
+(function(){
+  const add=x=>ITEMS.push(x);
+  for(const [k,n,a,b,d] of PALS){
+    for(const [pk,pn,r,f] of BN_PATS)add({id:`bn_${pk}_${k}`,k:'banner',r,n:`${n} ${pn}`,d:`${pn} banner in ${n}.`,bg:f(a,b,d),set:k});
+    for(const [fk,fn,r,f] of FR_STY)add({id:`fr_${fk}_${k}`,k:'frame',r,n:`${n} ${fn} frame`,d:`${fn} ring in ${n}.`,cg:f(a,b),fc:fk==='rim'?[b,a]:[a,b],set:k});
+    add({id:`nc_g_${k}`,k:'name',r:'r',n:`${n} name`,d:`Name fades ${n}.`,grad:`linear-gradient(90deg,${a},${b})`,set:k});
+    add({id:`cb_p_${k}`,k:'cback',r:'c',n:`${n} card back`,d:`Card back in ${n}.`,cb:[b,a,d,b],set:k});
+    add({id:`cb_s_${k}`,k:'cback',r:'e',n:`${n} striped card back`,d:`Striped card back in ${n}.`,cb:[b,a,d,b],cbs:1,set:k});
+    add({id:`bu_p_${k}`,k:'bubble',r:'c',n:`${n} bubble`,d:`Chat bubble in ${n}.`,bu:[a,b],set:k});
+    add({id:`bu_g_${k}`,k:'bubble',r:'r',n:`${n} fade bubble`,d:`Faded chat bubble in ${n}.`,bu:[a,b],bug:d,set:k});
+    add({id:`bd_set_${k}`,k:'badge',r:'l',ex:1,n:`${n} crest`,d:`Own every ${n} item to earn this crest.`,ic:'shield',m:[a,b],set:k});
+  }
+  for(const [k,n,c] of SOLID_NC)add({id:`nc_s_${k}`,k:'name',r:'c',n:`${n} name`,d:`${n} name.`,col:c});
+  TITLES.forEach(([t,r],i)=>add({id:`ti_${i}`,k:'title',r,n:t,d:`Shows “${t}” under your name.`}));
+  for(const [ik,[inm]] of Object.entries(BADGE_IC))for(const [mk,mn,r,c1,c2] of METALS)add({id:`bd_${ik}_${mk}`,k:'badge',r,n:`${mn} ${inm}`,d:`${mn} ${inm.toLowerCase()} next to your name.`,ic:ik,m:[c1,c2]});
+  /* collection milestones (exclusive, never in packs) */
+  for(const [need,id,k,n,extra] of [[25,'mx_25','title','Collector',{}],[50,'mx_50','frame','Collector frame',{cg:'conic-gradient(#9FF3FF,#B48CFF,#FF7AA8,#FFD36B,#9FF3FF)',fc:['#9FF3FF','#B48CFF'],glow:1}],
+    [100,'mx_100','banner','Hall of Fame banner',{bg:'radial-gradient(ellipse at 50% -10%,rgba(255,236,170,.9),transparent 55%),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 9px),linear-gradient(180deg,#3a2705,#0b0a12)'}],
+    [150,'mx_150','name','Prism name',{grad:'linear-gradient(90deg,#9FF3FF,#B48CFF,#FF7AA8,#FFD36B,#9FF3FF)',anim:1}],[250,'mx_250','badge','Diamond Crown',{ic:'crown',m:['#9FF3FF','#3a7bd5']}],
+    [400,'mx_400','title','Completionist',{}],[600,'mx_600','cback','Prism card back',{cb:['#fff','#7c5cff','#14062e','#fff'],holo:1}]])
+    add(Object.assign({id,k,r:'l',ex:1,need,n,d:`Own ${need} cosmetics to unlock.`},extra));
+})();
 const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
+const COS_K=['ball','frame','banner','name','cback','bubble','title','badge'];
 const PACKS={
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$3.99',odds:{c:70,r:24,e:5,l:1},g:''},
   player:{n:'Player pack',c:5,tok:400,usd:'$6.99',odds:{c:55,r:33,e:10,l:2},g:'r'},
   champs:{n:'Champs pack',c:10,tok:1200,usd:'$24.99',odds:{c:45,r:35,e:15,l:5},g:'e'}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
-const invHas=(u,id)=>+((invOf(u).it||{})[id])||0;
-const COS_K=['ball','frame','banner','name','cback','bubble'];
+const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return +((invOf(u).it||{})[id])||0};
+const cosOwnCount=u=>{const it=invOf(u).it||{};let n=0;for(const id in it){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&+it[id]>0)n++}return n};
+const COS_TOTAL=ITEMS.filter(x=>!x.ex&&COS_K.includes(x.k)).length;
+const SET_IDS={};ITEMS.forEach(x=>{if(x.set&&!x.ex)(SET_IDS[x.set]=SET_IDS[x.set]||[]).push(x.id)});
+function cosEarned(u,id){const x=ITEM[id];if(!x||!x.ex)return false;if(x.need)return cosOwnCount(u)>=x.need;if(x.set){const it=invOf(u).it||{};return SET_IDS[x.set].every(i=>+it[i]>0)}return false}
+/* inline looks for generated items (hand-made ones use CSS classes) */
+function cosStyle(id){const x=ITEM[id];if(!x)return '';
+  if(x.k==='banner'&&x.bg)return `background:${x.bg}`;
+  if(x.k==='frame'&&x.cg)return `background:${x.cg}`;
+  if(x.k==='name'){if(x.col)return `color:${x.col}`;if(x.grad)return `background-image:${x.grad};-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent${x.anim?';background-size:200% 100%;animation:ncShine 3s linear infinite':''}`}
+  if(x.k==='cback'&&x.cb)return `--cbA:${x.cb[0]};--cbB:${x.cb[1]};--cbC:${x.cb[2]};--cbG:${x.cb[3]}`;
+  if(x.k==='bubble'&&x.bu)return `background:${x.bug?`linear-gradient(135deg,${x.bu[0]},${x.bug})`:`color-mix(in srgb,${x.bu[0]} 38%,#0b1220)`};border-color:${x.bu[1]};color:#fff`;
+  return ''}
+const cbCls=id=>{const x=ITEM[id];return x?(x.cbs?' cb-s':'')+(x.holo?' cb_holo':''):''};
+function bdgHTML(id,sz){const x=ITEM[id];if(!x||x.k!=='badge')return '';const ic=BADGE_IC[x.ic];if(!ic)return '';
+  return `<span class="bdg" style="--m1:${x.m[0]};--m2:${x.m[1]}${sz?`;width:${sz}px;height:${sz}px`:''}" title="${esc(x.n)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ic[1]}" fill="color-mix(in srgb,var(--m1) 30%,transparent)" stroke="var(--m1)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg></span>`}
+const titleOf=u=>{const t=eqOf(u,'title');return t?ITEM[t].n:''};
 const isCos=id=>{const x=ITEM[id];return !!x&&COS_K.includes(x.k)};
 /* consumables left: owned minus used. Token boosts count the picks that carry them. */
 function invLeft(u,id){const v=invOf(u),own=invHas(u,id);
@@ -3073,7 +3161,8 @@ const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)};
 function freePacks(u){const v=invOf(u),fr=v.fr||{},d=+fgRec(u).days||0;return (fr.st?0:1)+Math.max(0,Math.floor(d/7)-(+fr.d7||0))}
 function rollRarity(odds,floor){const ord=['c','r','e','l'];let x=fcRnd(10000)/100,acc=0,r='c';for(const k of ord){acc+=odds[k];if(x<acc){r=k;break}}
   if(floor&&ord.indexOf(r)<ord.indexOf(floor))r=floor;return r}
-function rollItem(r){const pool=ITEMS.filter(x=>x.r===r);return pool[fcRnd(pool.length)].id}
+function rollItem(r){const pool=ITEMS.filter(x=>x.r===r&&!x.ex),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
+  const P=use.length&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
 async function packOpen(type,how){
   const P=PACKS[type];if(!P)return;
   if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
@@ -3105,21 +3194,23 @@ function packShow(P,got){
 /* small picture of an item, for packs and the Locker */
 function itemArt(id,s=48){const x=ITEM[id];if(!x)return'';
   if(x.k==='ball')return `<span class="ia ia-ball ${id}" style="width:${s}px;height:${s}px"></span>`;
-  if(x.k==='frame')return `<span class="ia ia-frame ${id}" style="width:${s}px;height:${s}px"><i></i></span>`;
-  if(x.k==='banner')return `<span class="ia ia-bn bn ${id}" style="width:${Math.round(s*1.6)}px;height:${s}px"></span>`;
-  if(x.k==='name')return `<span class="ia ia-nc" style="width:${Math.round(s*1.6)}px;height:${s}px;font-size:${Math.round(s*.42)}px"><span class="nc ${id}">Aa</span></span>`;
-  if(x.k==='cback')return `<span class="ia ia-cb cb ${id}" style="width:${Math.round(s*.74)}px;height:${s}px"><b>V</b></span>`;
-  if(x.k==='bubble')return `<span class="ia ia-bu" style="width:${Math.round(s*1.5)}px;height:${s}px"><span class="bu ${id}">hey!</span></span>`;
+  if(x.k==='frame')return `<span class="ia ia-frame ${id}" style="width:${s}px;height:${s}px;${cosStyle(id)}"><i></i></span>`;
+  if(x.k==='banner')return `<span class="ia ia-bn bn ${id}" style="width:${Math.round(s*1.6)}px;height:${s}px;${cosStyle(id)}"></span>`;
+  if(x.k==='name')return `<span class="ia ia-nc" style="width:${Math.round(s*1.6)}px;height:${s}px;font-size:${Math.round(s*.42)}px"><span class="nc ${id}" style="${cosStyle(id)}">Aa</span></span>`;
+  if(x.k==='cback')return `<span class="ia ia-cb cb ${id}${cbCls(id)}" style="width:${Math.round(s*.74)}px;height:${s}px;${cosStyle(id)}"><b>V</b></span>`;
+  if(x.k==='bubble')return `<span class="ia ia-bu" style="width:${Math.round(s*1.5)}px;height:${s}px"><span class="bu ${id}" style="${cosStyle(id)}">hey!</span></span>`;
+  if(x.k==='title')return `<span class="ia ia-ti" style="width:${Math.round(s*1.9)}px;height:${s}px"><span class="ti r-${x.r}">${esc(x.n)}</span></span>`;
+  if(x.k==='badge')return `<span class="ia ia-bd" style="width:${s}px;height:${s}px">${bdgHTML(id,Math.round(s*.62))}</span>`;
   const ic={p_revive:'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l3 3M15 15l3 3M6 18l3-3M15 9l3-3',p_try:'M12 5v14M5 12h14',p_redraw:'M4 4v6h6M20 20v-6h-6M5 15a7 7 0 0 0 12 3M19 9A7 7 0 0 0 7 6',p_freeze:'M12 2v20M4 6l16 12M20 6L4 18',t_boost:'M13 2L4 14h7l-1 8 9-12h-7z',t_insure:'M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z'}[id]||'M12 12h.01';
   return `<span class="ia ia-perk ${x.k}" style="width:${s}px;height:${s}px"><svg viewBox="0 0 24 24" width="${Math.round(s*.55)}" height="${Math.round(s*.55)}" aria-hidden="true"><path d="${ic}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`}
 const frameOf=u=>{const f=(invOf(u).eq||{}).frame;return f&&invHas(u,f)?f:''};
 const ballOf=u=>{const b=(invOf(u).eq||{}).ball;return b&&invHas(u,b)?b:''};
 const eqOf=(u,k)=>{if(!u||!S.picks||!S.picks[u])return '';const x=(invOf(u).eq||{})[k];return x&&invHas(u,x)?x:''};
 /* a name in someone's name colour (chat, leaderboards, matchups) */
-const nmC=(u,txt)=>{const c=eqOf(u,'name');return c?`<span class="nc ${c}">${txt}</span>`:txt};
+const nmC=(u,txt)=>{const c=eqOf(u,'name'),b=eqOf(u,'badge');return (c?`<span class="nc ${c}" style="${cosStyle(c)}">${txt}</span>`:txt)+(b?bdgHTML(b):'')};
 function viewLocker(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>Locker</h2><p>Open packs for banners, frames, name colours, card backs, chat bubbles, ball skins, perks and token boosts. Everything here is free to earn with tokens and daily play.</p></div>`;
+  const head=`<div class="head"><h2>Locker</h2><p>Open packs to collect banners, frames, name colours, titles, badges, card backs, chat bubbles, ball skins, perks and token boosts. Hit collection milestones and finish team sets for exclusive items. Everything here is free to earn with tokens and daily play.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to open packs and keep items.</p>';
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
   const tab=['packs','cos','boost'].includes(UI.lk)?UI.lk:'packs';
@@ -3138,12 +3229,28 @@ function viewLocker(){
   }else if(tab==='cos'){
     const dflt={ball:`<span class="ia ia-ball" style="width:48px;height:48px"></span>`,frame:`<span class="ia ia-frame" style="width:48px;height:48px"><i></i></span>`,
       banner:`<span class="ia ia-bn" style="width:77px;height:48px"></span>`,name:`<span class="ia ia-nc" style="width:77px;height:48px;font-size:20px">Aa</span>`,
-      cback:`<span class="ia ia-cb" style="width:36px;height:48px"><b>V</b></span>`,bubble:`<span class="ia ia-bu" style="width:72px;height:48px"><span class="bu">hey!</span></span>`};
-    const sec=(k,label,none)=>{const list=ITEMS.filter(x=>x.k===k);const cur=eq[k];
-      return `<section class="card"><div class="qh"><h3>${label}</h3><span class="muted">${list.filter(x=>invHas(ME.uid,x.id)).length} of ${list.length}</span></div><div class="lk-grid">
-        <button class="lk-it ${!cur||!invHas(ME.uid,cur)?'on':''}" data-act="lkEq" data-k="${k}" data-v="">${dflt[k]}<b>${none}</b><small class="muted">Default</small></button>
-        ${list.map(x=>{const own=invHas(ME.uid,x.id);return `<button class="lk-it ${cur===x.id&&own?'on':''} ${own?'':'lock'}" data-act="lkEq" data-k="${k}" data-v="${x.id}" ${own?'':'disabled'}>${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${own?RAR[x.r].n:'Locked · '+RAR[x.r].n}</small></button>`}).join('')}</div></section>`};
-    body=sec('banner','Profile banners','No banner')+sec('frame','Profile frames','No frame')+sec('name','Name colours','Standard')+sec('cback','5 Card Draw card backs','Standard')+sec('bubble','Chat bubbles','Standard')+sec('ball','Ball skins (Field Goal & Hoops)','Standard ball')+`<p class="hint">The golden ball from a 7-day streak still shows over any skin while your streak is alive.</p>`;
+      cback:`<span class="ia ia-cb" style="width:36px;height:48px"><b>V</b></span>`,bubble:`<span class="ia ia-bu" style="width:72px;height:48px"><span class="bu">hey!</span></span>`,
+      title:`<span class="ia ia-ti" style="width:91px;height:48px"><span class="muted">—</span></span>`,badge:`<span class="ia ia-bd" style="width:48px;height:48px"><span class="muted">—</span></span>`};
+    const KINDS=[['banner','Banners','No banner'],['frame','Frames','No frame'],['name','Name colours','Standard'],['title','Titles','No title'],['badge','Badges','No badge'],['cback','Card backs','Standard'],['bubble','Chat bubbles','Standard'],['ball','Ball skins','Standard ball']];
+    const kk=KINDS.find(x=>x[0]===UI.lkK)||KINDS[0],k=kk[0],cur=eq[k],onlyOwn=!!UI.lkOwn,N=UI.lkN||30;
+    const own=cosOwnCount(ME.uid),MS=ITEMS.filter(x=>x.ex&&x.need).sort((p,q)=>p.need-q.need),next=MS.find(x=>own<x.need);
+    const sets=PALS.map(([pk,pn,a,b2])=>{const ids=SET_IDS[pk]||[],have=ids.filter(i=>invHas(ME.uid,i)).length;return {pk,pn,a,b:b2,have,tot:ids.length}}).sort((p,q)=>q.have/q.tot-p.have/p.tot).slice(0,4);
+    const col=`<section class="card lk-col"><div class="qh"><h3>Your collection</h3><span class="muted">${own} of ${COS_TOTAL}</span></div>
+      <div class="lk-bar"><i style="width:${Math.min(100,own/COS_TOTAL*100).toFixed(1)}%"></i></div>
+      <small class="muted">${next?`${next.need-own} more to unlock <b>${esc(next.n)}</b>.`:'Every milestone unlocked.'} Milestone items are never in packs.</small>
+      <div class="lk-ms">${MS.map(x=>`<div class="${own>=x.need?'got':''}">${itemArt(x.id,36)}<b>${esc(x.n)}</b><small class="muted">${own>=x.need?'Unlocked':'Own '+x.need}</small></div>`).join('')}</div>
+      <div class="qh"><h3 style="font-size:.95rem">Team sets</h3><span class="muted">${PALS.length} sets</span></div>
+      <div class="lk-sets">${sets.map(t=>`<div class="lk-set"><span class="lk-sw" style="background:linear-gradient(135deg,${t.a} 50%,${t.b} 50%)"></span><span style="min-width:120px">${esc(t.pn)}</span><span class="lk-bar"><i style="width:${(t.have/t.tot*100).toFixed(0)}%"></i></span><small class="muted">${t.have}/${t.tot}</small><span style="${invHas(ME.uid,'bd_set_'+t.pk)?'':'opacity:.3;filter:grayscale(1)'}">${bdgHTML('bd_set_'+t.pk,18)}</span></div>`).join('')}</div>
+      <small class="muted">Collect every item in a team’s colours (${(SET_IDS[PALS[0][0]]||[]).length} items) to earn its crest badge.</small></section>`;
+    const kinds=`<div class="lk-kinds" role="group" aria-label="Cosmetic type">${KINDS.map(([x,l])=>{const L=ITEMS.filter(i=>i.k===x);return `<button class="chip" data-act="lkK" data-v="${x}" aria-pressed="${x===k}">${l} <small class="muted">${L.filter(i=>invHas(ME.uid,i.id)).length}/${L.length}</small></button>`}).join('')}</div>`;
+    const ord={l:0,e:1,r:2,c:3};
+    let list=ITEMS.filter(x=>x.k===k).sort((p,q)=>(invHas(ME.uid,q.id)-invHas(ME.uid,p.id))||(ord[p.r]-ord[q.r]));
+    if(onlyOwn)list=list.filter(x=>invHas(ME.uid,x.id));
+    const shown=list.slice(0,N);
+    body=col+`<section class="card"><div class="qh"><h3>${kk[1]}</h3><button class="chip" data-act="lkOwn" aria-pressed="${onlyOwn}">Owned only</button></div>${kinds}
+      <div class="lk-grid"><button class="lk-it ${!cur||!invHas(ME.uid,cur)?'on':''}" data-act="lkEq" data-k="${k}" data-v="">${dflt[k]}<b>${kk[2]}</b><small class="muted">Default</small></button>
+      ${shown.map(x=>{const o=invHas(ME.uid,x.id);return `<button class="lk-it ${cur===x.id&&o?'on':''} ${o?'':'lock'}" data-act="lkEq" data-k="${k}" data-v="${x.id}" ${o?'':'disabled'} title="${esc(x.d)}">${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${o?RAR[x.r].n:'Locked · '+RAR[x.r].n}</small>${x.ex&&!o?`<small class="ex">${x.need?'Own '+x.need+' cosmetics':'Complete the team set'}</small>`:''}</button>`}).join('')}</div>
+      ${list.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${list.length-N})</button>`:''}${k==='ball'?`<p class="hint">The golden ball from a 7-day streak still shows over any skin while your streak is alive.</p>`:''}</section>`;
   }else{
     body=`<section class="card"><div class="qh"><h3>Boosts & perks</h3></div><div class="lk-list">${ITEMS.filter(x=>x.k==='perk'||x.k==='tboost').map(x=>`<div class="lk-row">${itemArt(x.id,42)}<span><b>${esc(x.n)}</b><small class="muted">${esc(x.d)}</small></span><b class="lk-n">${invLeft(ME.uid,x.id)}</b></div>`).join('')}</div>
       <p class="muted">Token boosts go on a Pick ’em or player prop pick from the pick itself, before the game starts. Perks show up in the game they belong to.</p></section>`;
@@ -3161,7 +3268,7 @@ function bxChips(kind,id,b){
   return `<div class="bx-row">${chip('b','t_boost','+25% boost',nb)}${chip('i','t_insure','Insurance',ni)}</div>`}
 function mgBoard(title,rows,empty){
   if(!rows.length)return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div><p class="muted">${empty||'No one is on the board yet. Lock in a pick to be first.'}</p></section>`;
-  const more=!!UI.mgMore,top=more?rows:rows.slice(0,3),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>{const bn=eqOf(x.u,'banner');return `<div class="bt-h ${x.u===ME.uid?'me':''} ${bn?'bn bn-row '+bn:''}"><span><span class="rk">${i+1}</span> <b>${nmC(x.u,esc(nm(x.u)))}${x.u===ME.uid?' (you)':''}</b></span><b>${x.v}</b></div>`};
+  const more=!!UI.mgMore,top=more?rows:rows.slice(0,3),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>{const bn=eqOf(x.u,'banner');return `<div class="bt-h ${x.u===ME.uid?'me':''} ${bn?'bn bn-row '+bn:''}" style="${bn?cosStyle(bn):''}"><span><span class="rk">${i+1}</span> <b>${nmC(x.u,esc(nm(x.u)))}${x.u===ME.uid?' (you)':''}</b></span><b>${x.v}</b></div>`};
   return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${!more&&meI>=3?`<div class="bt-gap muted">···</div>${line(rows[meI],meI)}`:''}${rows.length>3?`<button class="btn sm ghost bt-more" data-act="mgMore">${more?'Show less':'Show more ('+(rows.length-3)+')'}</button>`:''}</section>`;
 }
 const n1=v=>Math.round(v*10)/10;
@@ -4685,7 +4792,7 @@ function chatLogHTML(g){
     const pick=UI.chatRx===m.id?`<span class="ch-pk">${CHAT_RX.map(e=>`<button data-act="chatRx" data-id="${esc(m.id)}" data-e="${e}" aria-label="React ${e}">${e}</button>`).join('')}</span>`:'';
     return (chips||can)?`<div class="ch-rx">${chips}${can?`<button class="ch-ra" data-act="chatRxPick" data-id="${esc(m.id)}" aria-label="Add a reaction">${UI.chatRx===m.id?'×':'+'}</button>`:''}${pick}</div>`:''};
   const row=m=>m.k==='recap'?`<li class="ch-m ch-sys"><div class="ch-h"><b>📰 ${esc(m.u===ME.uid?'You':nm(m.u))} shared the weekly recap</b><small class="muted">${esc(when(m.at))}</small></div><p>${esc(m.t)}</p>${rx(m)}</li>`
-    :`<li class="ch-m ${m.u===ME.uid?'me':''} ${eqOf(m.u,'bubble')?'bu '+eqOf(m.u,'bubble'):''}"><div class="ch-h"><b>${nmC(m.u,esc(m.u===ME.uid?'You':nm(m.u)))}</b><small class="muted">${esc(when(m.at))}</small>${m.u===ME.uid&&ME.mode!=='readonly'?`<button class="ch-x" data-act="chatDel" data-id="${esc(m.id)}" aria-label="Delete message">Delete</button>`:''}</div><p>${esc(m.t)}</p>${rx(m)}</li>`;
+    :`<li class="ch-m ${m.u===ME.uid?'me':''} ${eqOf(m.u,'bubble')?'bu '+eqOf(m.u,'bubble'):''}" style="${eqOf(m.u,'bubble')?cosStyle(eqOf(m.u,'bubble')):''}"><div class="ch-h"><b>${nmC(m.u,esc(m.u===ME.uid?'You':nm(m.u)))}</b>${titleOf(m.u)?`<span class="ti r-${ITEM[eqOf(m.u,'title')].r}">${esc(titleOf(m.u))}</span>`:''}<small class="muted">${esc(when(m.at))}</small>${m.u===ME.uid&&ME.mode!=='readonly'?`<button class="ch-x" data-act="chatDel" data-id="${esc(m.id)}" aria-label="Delete message">Delete</button>`:''}</div><p>${esc(m.t)}</p>${rx(m)}</li>`;
   return msgs.map(row).join('')||'<li class="hint">No messages yet. Say hi to your league.</li>';
 }
 /* new messages show up even while you are typing in the chat box: only the message list is redrawn, never the box */
@@ -5072,8 +5179,8 @@ function viewMe(){
   const wk=UI.meEntry.week;
   return head+`
   <a class="card me-lk" href="#locker"><span class="ia ia-perk tboost" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16v13H4zM9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>Locker</b><small class="muted">${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' to open · ':''}Packs, skins, frames and boosts</small></span><b aria-hidden="true">›</b></a>
-  <section class="card me-pro ${eqOf(ME.uid,'banner')?'has-bn':''}">${eqOf(ME.uid,'banner')?`<div class="me-bn bn ${eqOf(ME.uid,'banner')}" aria-hidden="true"></div>`:''}
-    <div class="me-top">${av(pr.name,pr.school,56)}<div class="me-id"><h3>${nmC(ME.uid,esc(pr.name))}</h3><span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
+  <section class="card me-pro ${eqOf(ME.uid,'banner')?'has-bn':''}">${eqOf(ME.uid,'banner')?`<div class="me-bn bn ${eqOf(ME.uid,'banner')}" style="${cosStyle(eqOf(ME.uid,'banner'))}" aria-hidden="true"></div>`:''}
+    <div class="me-top">${av(pr.name,pr.school,56)}<div class="me-id"><h3>${nmC(ME.uid,esc(pr.name))}</h3>${titleOf(ME.uid)?`<span class="ti r-${ITEM[eqOf(ME.uid,'title')].r}">${esc(titleOf(ME.uid))}</span>`:''}<span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
     ${UI.meEdit?`<div class="pform">
         <label class="fld"><span>Name</span><input id="me-name" maxlength="40" value="${esc(pr.name)}" autocomplete="off" data-act="meName"></label>
         <label class="fld"><span>School</span><select id="me-school" data-act="meSchool">${(SD_SCHOOLS.includes(pr.school)?SD_SCHOOLS:[...SD_SCHOOLS,pr.school]).map(s=>`<option ${s===pr.school?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
@@ -6151,6 +6258,9 @@ document.addEventListener('click',async e=>{
   else if(a==='meEdit'){UI.meEdit=!UI.meEdit;render()}
   else if(a==='goLocker'){const c=$('#cfm');if(c&&!c.hidden&&typeof closeConfirm==='function')closeConfirm();location.hash='#locker'}
   else if(a==='lkTab'){UI.lk=t.dataset.v;render()}
+  else if(a==='lkK'){UI.lkK=t.dataset.v;UI.lkN=30;render()}
+  else if(a==='lkOwn'){UI.lkOwn=!UI.lkOwn;UI.lkN=30;render()}
+  else if(a==='lkMore'){UI.lkN=(UI.lkN||30)+30;render()}
   else if(a==='pkOpen'){const k=t.dataset.v,h=t.dataset.h,P=PACKS[k];if(!P)return;
     if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random items. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h)}
   else if(a==='lkEq'){const k=t.dataset.k,v=t.dataset.v;if(v&&!invHas(ME.uid,v))return;const inv=invOf(ME.uid),eq=Object.assign({},inv.eq,{[k]:v});
