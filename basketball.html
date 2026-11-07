@@ -2093,6 +2093,17 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .champ-fw{position:absolute;width:6px;height:6px;border-radius:50%;opacity:0;box-shadow:0 0 0 0 var(--c);animation:chFw 1.1s ease-out both}
 @keyframes chFw{0%{opacity:1;box-shadow:0 0 0 0 var(--c),0 0 0 0 var(--c)}100%{opacity:0;box-shadow:0 0 0 60px transparent,0 0 30px 50px transparent}}
 @media (prefers-reduced-motion:reduce){.champ *{animation:none!important}}
+/* v284: frame rings are drawn INSIDE the avatar circle (inset), so nothing around them (table cells, cards, rows, Safari) can ever cut the ring off.
+   Only the soft outer glow sits outside. */
+.av.avf{outline:0!important;margin:3px!important}
+.av.avf.gfr{box-shadow:inset 0 0 0 2.5px var(--fr2),inset 0 0 0 5px var(--fr1)!important}
+.av.avf.gfr-g{box-shadow:inset 0 0 0 2.5px var(--fr2),inset 0 0 0 5px var(--fr1),0 0 10px var(--fr1)!important}
+.av.avf.f_neon{box-shadow:inset 0 0 0 3.5px #26F0FF,0 0 10px rgba(255,79,224,.6)!important}
+.av.avf.f_fire{box-shadow:inset 0 0 0 3.5px #FF7A1A,0 0 10px rgba(255,90,30,.6)!important}
+.av.avf.f_gold{box-shadow:inset 0 0 0 3.5px #F2BE2C,0 0 10px rgba(255,210,63,.6)!important}
+.av.avf.f_plat{box-shadow:inset 0 0 0 3.5px #DCE3EC,0 0 8px rgba(255,255,255,.4)!important}
+.av.avf.f_letter{box-shadow:inset 0 0 0 2.5px #7A1F2B,inset 0 0 0 5px #E3B23C!important}
+.av.avf.f_check{box-shadow:inset 0 0 0 2px #1B1B1F,inset 0 0 0 4.5px #fff!important}
 /* v258: tokens + Shop in the header */
 .hdr-tk{display:flex;align-items:center;gap:6px}.hdr-tk[hidden]{display:none}
 .hdr-tok,.hdr-shop{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -2551,7 +2562,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v283 · Nov 7';
+const APP_BUILD='v284 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
