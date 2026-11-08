@@ -153,7 +153,8 @@ input[type=number]{width:100%}
 .fc-ppg{display:flex;align-items:baseline;gap:4px;justify-content:center;flex-wrap:wrap;font:700 .78rem/1.2 var(--f-body);color:#9FB4E0;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.06)}.fc-ppg b{font:900 1rem/1 var(--f-display);color:#FFD27A}.fc-ppg small{color:var(--muted);font-size:.68rem}
 .sim-ch{display:flex;align-items:center;justify-content:center;padding:9px;border-radius:12px;font:900 .85rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase}
 .sim-pos{display:inline-flex;align-items:center;gap:6px;font:900 1.15rem/1 var(--f-display);letter-spacing:.06em;padding:6px 12px;border-radius:10px;background:var(--pc);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}.sim-pos i{font:800 .62rem/1 var(--f-body);font-style:normal;background:rgba(0,0,0,.28);padding:2px 5px;border-radius:6px;letter-spacing:.04em}
-.sim-sch{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;max-height:380px;overflow:auto;padding:2px}.sim-sc{display:flex;align-items:center;gap:8px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);min-height:44px}.sim-sc span{flex:1;min-width:0;font-weight:700;font-size:.86rem}.sim-sc[hidden]{display:none}.sim-sc:hover{border-color:#FFC23D}
+.sim-sch{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;max-height:380px;overflow:auto;padding:2px}.sim-sc{display:flex;align-items:center;gap:8px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);min-height:44px}.sim-sc span{flex:1;min-width:0;font-weight:700;font-size:.86rem}.sim-sc[hidden]{display:none}.sim-sc:hover{border-color:#FFC23D}.sim-sc[aria-pressed="true"]{border-color:#FFC23D;background:rgba(255,194,61,.16);box-shadow:0 0 0 2px rgba(255,194,61,.45)}
+.sim-sch{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.sim-gobar{position:sticky;bottom:calc(72px + env(safe-area-inset-bottom));z-index:3;background:var(--surface);padding:8px 0}.sim-go2{flex:1}
 .sim-heads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .sim-ch{display:flex;align-items:center;justify-content:center;padding:9px;border-radius:12px;font:900 .85rem/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase}
 .sim-ch.off{background:rgba(47,107,255,.18);color:#9DB8FF;border:1px solid rgba(47,107,255,.5)}.sim-ch.def{background:rgba(244,63,94,.16);color:#FFA3B3;border:1px solid rgba(244,63,94,.5)}
@@ -2623,7 +2624,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v294 · Nov 7';
+const APP_BUILD='v296 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3877,8 +3878,8 @@ async function shopBuy(id){const x=ITEM[id],pr=x&&SHOP_PRICE[x.r];
 
 /* Gifts: picks/<sender>.gft = {id:{to, a: tokens | i: item id, at, m: note}}. Everyone's picks docs are readable, so the
    receiver's balance and items are worked out from the senders' docs: bank() adds tokens in and takes tokens out,
-   invHas() adds items in and takes items out (a gifted item you had equipped comes off). 500 tokens a day max. */
-const GIFT_DAY=500,GIFT_AMTS=[10,25,50,100,250];
+   invHas() adds items in and takes items out (a gifted item you had equipped comes off). No limit on how many tokens you send (up to your balance). */
+const GIFT_DAY=1e9,GIFT_AMTS=[10,25,50,100,250,500];
 var _gIn={at:0,m:{},d:{}};
 function gBuild(){if(!_gIn)_gIn={at:0,m:{},d:{}};if(Date.now()-_gIn.at<1500)return;const m={},d={};
   for(const [from,p] of Object.entries(S.picks||{})){const g=p&&p.gft;if(!g)continue;
@@ -3895,29 +3896,39 @@ const GF={to:'',kind:'t',a:25,i:'',m:'',q:''};
 function giftSheet(){const c=$('#cfm'),fr=giftFriends(),q=GF.q.trim().toLowerCase();
   const found=q.length>1?Object.keys(S.profiles).filter(u=>u!==ME.uid&&!fr.includes(u)&&(S.profiles[u].name||'').toLowerCase().includes(q)).slice(0,8):[];
   const mine=ITEMS.filter(x=>!x.ex&&COS_K.includes(x.k)&&invHas(ME.uid,x.id)>0).sort((a,b)=>RAR_ORD.indexOf(b.r)-RAR_ORD.indexOf(a.r));
-  const left=Math.max(0,Math.min(GIFT_DAY-giftSentToday(ME.uid),Math.floor(bank(ME.uid)))),who=u=>`<button type="button" class="chip gf-who" data-act="gfTo" data-v="${esc(u)}" aria-pressed="${GF.to===u}">${av(nm(u),u,22,u)}${esc(nm(u))}</button>`;
+  const left=Math.max(0,Math.floor(bank(ME.uid))),who=u=>`<button type="button" class="chip gf-who" data-act="gfTo" data-v="${esc(u)}" aria-pressed="${GF.to===u}">${av(nm(u),u,22,u)}${esc(nm(u))}</button>`;
   const sent=giftsOut(ME.uid).sort((a,b)=>b.at-a.at).slice(0,4),got=giftsIn(ME.uid).sort((a,b)=>b.at-a.at).slice(0,4);
   const ln=x=>x.a?`${x.a} tokens`:esc((ITEM[x.i]||{}).n||'an item');
   c.innerHTML=`<div class="gcard tok-sheet gf-sheet" role="dialog" aria-modal="true" aria-labelledby="gf-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="gf-t">Send a gift</h2>
     <div class="gf-sec"><b>To</b>${fr.length?`<div class="chips gf-ppl">${fr.map(who).join('')}</div>`:'<small class="muted">Your league mates show here.</small>'}
       <label class="fld"><span>Or find someone by name</span><input id="gf-q" type="search" value="${esc(GF.q)}" placeholder="Name" autocomplete="off"></label>${found.length?`<div class="chips gf-ppl">${found.map(who).join('')}</div>`:''}</div>
     <div class="gf-sec"><b>Gift</b><div class="chips"><button type="button" class="chip" data-act="gfKind" data-v="t" aria-pressed="${GF.kind==='t'}">Tokens</button><button type="button" class="chip" data-act="gfKind" data-v="i" aria-pressed="${GF.kind==='i'}">An item</button></div>
-      ${GF.kind==='t'?`<div class="chips">${GIFT_AMTS.map(n=>`<button type="button" class="chip" data-act="gfAmt" data-v="${n}" aria-pressed="${GF.a===n}" ${n>left?'disabled':''}>${n}</button>`).join('')}</div><small class="muted">You can send ${left} more today (up to ${GIFT_DAY} a day).</small>`
+      ${GF.kind==='t'?`<div class="chips">${GIFT_AMTS.map(n=>`<button type="button" class="chip" data-act="gfAmt" data-v="${n}" aria-pressed="${GF.a===n}" ${n>left?'disabled':''}>${n}</button>`).join('')}<button type="button" class="chip allin" data-act="gfAmt" data-v="${left}" ${left<1?'disabled':''}>All · ${left}</button></div><label class="fld"><span>Or type any amount</span><input id="gf-a" type="number" inputmode="numeric" min="1" max="${left}" step="1" value="${GF.a||''}" placeholder="Tokens"></label><small class="muted">You have ${left} tokens to give.</small>`
         :mine.length?`<label class="fld"><span>Item (it leaves your Locker)</span><select id="gf-i"><option value="">Choose an item</option>${mine.map(x=>`<option value="${x.id}" ${GF.i===x.id?'selected':''}>${esc(x.n)} · ${RAR[x.r].n}</option>`).join('')}</select></label>`:'<small class="muted">You don’t have any cosmetics to give yet.</small>'}</div>
     <label class="fld"><span>Note (optional)</span><input id="gf-m" maxlength="60" value="${esc(GF.m)}" placeholder="Good luck this game!"></label>
     <div class="gbtns"><button class="btn ghost" data-c="no">Cancel</button><button class="btn" data-act="gfSend" ${GF.to&&(GF.kind==='t'?GF.a<=left:GF.i)?'':'disabled'}>Send${GF.to?' to '+esc(nm(GF.to)):''}</button></div>
     ${got.length||sent.length?`<div class="rw"><div class="rw-h"><b>Recent gifts</b></div><ul>${got.map(x=>`<li><span class="rw-c">↓</span><span>${esc(nm(x.from))} sent you ${ln(x)}</span></li>`).join('')}${sent.map(x=>`<li><span class="rw-c">↑</span><span>You sent ${esc(nm(x.to))} ${ln(x)}</span></li>`).join('')}</ul></div>`:''}</div>`;
   c.hidden=false;const qi=$('#gf-q');if(qi&&GF._focus){qi.focus();qi.setSelectionRange(qi.value.length,qi.value.length)}GF._focus=false}
+
+/* Gift pop-up: gifts you haven't seen yet open on top of everything when you open the app. Seen time saved in picks/<uid>.gsn. */
+var _gPop=false;
+function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
+  const seen=+((S.picks[ME.uid]||{}).gsn)||0,nw=giftsIn(ME.uid).filter(x=>(+x.at||0)>seen).sort((a,b)=>a.at-b.at);if(!nw.length)return;
+  const c=$('#cfm');if(!c||!c.hidden)return;_gPop=true;const last=nw[nw.length-1].at;
+  const ln=x=>x.a?`<b>${Math.floor(x.a)} tokens</b>`:`<b>${esc((ITEM[x.i]||{}).n||'an item')}</b>`;
+  c.innerHTML=`<div class="gcard tok-sheet gf-pop" role="dialog" aria-modal="true" aria-labelledby="gp-t"><div class="gp-ic">🎁</div><h2 id="gp-t">${nw.length>1?'You got '+nw.length+' gifts!':'You got a gift!'}</h2>
+    <ul class="gp-l">${nw.slice(-6).map(x=>`<li>${av(nm(x.from),x.from,28,x.from)}<span><b>${esc(nm(x.from))}</b> sent you ${ln(x)}${x.m?`<small class="muted">“${esc(x.m)}”</small>`:''}</span></li>`).join('')}</ul>
+    <div class="gbtns"><button class="btn" data-act="gpOk" data-at="${last}">Awesome!</button></div></div>`;c.hidden=false}
 async function giftSend(){const to=GF.to;if(!to||!S.profiles[to]){say('Pick who it’s for.');return}
   const id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),x={to,at:NOW()};if(GF.m.trim())x.m=GF.m.trim().slice(0,60);
-  if(GF.kind==='t'){const left=Math.min(GIFT_DAY-giftSentToday(ME.uid),bank(ME.uid));if(!(GF.a>0)||GF.a>left){say('You can’t send that many tokens right now.');return}x.a=GF.a}
+  if(GF.kind==='t'){const left=Math.floor(bank(ME.uid));if(!(GF.a>=1)||GF.a>left){say('You can’t send that many tokens right now.');return}x.a=Math.floor(GF.a)}
   else{if(!GF.i||invHas(ME.uid,GF.i)<1){say('Pick an item you own.');return}x.i=GF.i}
   const ok=await act(()=>upsert('picks/'+ME.uid,{gft:{[id]:x}}),`Gift sent to ${nm(to)}`);
   if(ok){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{gft:Object.assign({},(S.picks[ME.uid]||{}).gft,{[id]:x})});_gIn.at=0;GF.i='';GF.m='';closeConfirm();render()}}
 
 /* League trophy: the league's owner designs it (shape, metal, base, engraving) for TRO_TOK tokens once; edits after that are free.
    Saved on the league doc as trophy={sh,mt,bs,nm,by,at}; shown at the top of the league with the current leader. */
-const TRO_TOK=1000;
+const TRO_TOK=500;
 const TRO_SH=()=>[['cup','Cup'],['ball',FG_SPORT==='bb'?'Basketball':'Football'],['star','Star'],['shield','Shield'],['ring','Ring']];
 const TRO_MT={gold:['Gold','#FFD25A','#B07A10'],silver:['Silver','#EEF2F6','#8C99A8'],bronze:['Bronze','#E3A66A','#8A5320'],plat:['Platinum','#D7ECF7','#6F97B5'],ruby:['Ruby','#FF6F81','#9E1B2E'],emerald:['Emerald','#55E39A','#13774A'],onyx:['Onyx','#6B7486','#1A1E27']};
 const TRO_BS={walnut:['Walnut','#6B4426','#3E2614'],black:['Black','#2A2F3A','#12151C'],marble:['Marble','#ECEAE4','#B9B5AB']};
@@ -3953,7 +3964,7 @@ async function troSave(){const g=S.groups[TR.gid];if(!g||g.ownerId!==ME.uid){say
   if(!paid){const patch={sp:(+v.sp||0)+TRO_TOK,tro:Object.assign({},v.tro,{[g.id]:1})};S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
     try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){say('That did not save. Try again.');return}}
   const ok=await act(()=>upsert('groups/'+g.id,{trophy:t}),'Trophy saved');if(ok){S.groups[g.id]=Object.assign({},g,{trophy:t});closeConfirm();render()}}
-document.addEventListener('input',e=>{const t=e.target;if(t.id==='gf-q'){GF.q=t.value;GF._focus=true;giftSheet()}else if(t.id==='gf-m')GF.m=t.value;else if(t.id==='tr-nm'){TR.nm=t.value;const pv=document.querySelector('.tro-prev');if(pv)pv.innerHTML=trophySVG(TR,170)}});
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='gf-q'){GF.q=t.value;GF._focus=true;giftSheet()}else if(t.id==='gf-m')GF.m=t.value;else if(t.id==='gf-a'){GF.a=+t.value;const b=document.querySelector('[data-act=gfSend]'),l=Math.floor(bank(ME.uid));if(b)b.disabled=!(GF.to&&GF.a>=1&&GF.a<=l);document.querySelectorAll('[data-act=gfAmt]').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.v===GF.a)))}else if(t.id==='tr-nm'){TR.nm=t.value;const pv=document.querySelector('.tro-prev');if(pv)pv.innerHTML=trophySVG(TR,170)}});
 document.addEventListener('change',e=>{if(e.target.id==='gf-i'){GF.i=e.target.value;giftSheet()}});
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,v=t.dataset.v;
   if(a==='ntPhone')ntPhoneAsk();
@@ -3963,6 +3974,7 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   else if(a==='gfTo'){GF.to=GF.to===v?'':v;giftSheet()}
   else if(a==='gfKind'){GF.kind=v;giftSheet()}
   else if(a==='gfAmt'){GF.a=+v;giftSheet()}
+  else if(a==='gpOk'){const at=+t.dataset.at||NOW();closeConfirm();S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{gsn:at});upsert('picks/'+ME.uid,{gsn:at}).catch(()=>{})}
   else if(a==='gfSend')giftSend();
   else if(a==='troOpen'){const g=S.groups[t.dataset.gid];if(!g)return;Object.assign(TR,{gid:g.id,sh:'cup',mt:'gold',bs:'walnut',nm:''},g.trophy||{});troSheet()}
   else if(a==='troSet'){TR[t.dataset.k]=v;troSheet()}
@@ -3981,7 +3993,7 @@ function viewShop(){
     const prizes=fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('')
       +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, game ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('');
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
-    const extras=shopHTML()+`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Tokens or a cosmetic to a friend. Up to ${GIFT_DAY} tokens a day.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
+    const extras=shopHTML()+`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
     body=prizes+extras+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free Rookie pack every day</b><small class="muted">${adDone?'You got today’s pack. A new one is ready tomorrow.':'Watch a short sponsor video and open a Rookie pack. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       <div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
@@ -4303,8 +4315,8 @@ function simPickHTML(m){
   const list=simSchools();
   return `<section class="card"><div class="qh"><h3>Choose your school</h3></div><p class="muted">Pick a team to play as. Your drafted players boost that school, and then the season is simulated using their real schedule.</p>
     <input class="bt-amt" style="width:100%;border-radius:12px;margin:8px 0" id="sim-q" type="search" placeholder="Search schools" autocomplete="off" aria-label="Search schools">
-    <div class="sim-sch">${list.map((n,i)=>`<button class="sim-sc" data-act="simPick" data-s="${esc(n)}" data-n="${esc(n.toLowerCase())}">${slogo(n,26)}<span>${esc(n)}</span><small class="muted">#${i+1}</small></button>`).join('')}</div>
-    <div class="btns"><button class="btn ghost" data-act="simBack">Back</button></div></section>`;
+    <div class="sim-sch">${list.map((n,i)=>`<button class="sim-sc" data-act="simPick" data-s="${esc(n)}" data-n="${esc(n.toLowerCase())}" aria-pressed="false">${slogo(n,26)}<span>${esc(n)}</span><small class="muted">#${i+1}</small></button>`).join('')}</div>
+    <div class="btns sim-gobar"><button class="btn ghost" data-act="simBack">Back</button><button class="btn sim-go2" id="sim-go2" data-act="simGoPick" disabled>Tap a school to choose it</button></div></section>`;
 }
 function viewSim(){
   const m=UI.sim,my=ME.uid?simRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
@@ -7279,7 +7291,6 @@ document.addEventListener('submit',async e=>{
   catch(_){er.textContent='Could not check the PIN. Try again.';er.hidden=false}
   btn.disabled=false;
 });
-document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.sim-sc');if(!b)return;e.preventDefault();try{document.activeElement.blur()}catch(_){}dirty=false;simRun(b.dataset.s);window.scrollTo(0,0)},true);
 document.addEventListener('input',e=>{if(e.target.id==='sim-q'){const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.sim-sc').forEach(b=>{b.hidden=!!q&&!b.dataset.n.includes(q)})}});
 document.addEventListener('input',e=>{const t=e.target;if(!t.classList||!t.classList.contains('bt-amt')||t.id==='sim-q')return;
   const room=+t.dataset.room||0;let v=Math.floor(+t.value);if(!(v>=1))v=0;const st=Math.min(v,room),B=({at:UI.at,pp:UI.pp})[t.dataset.k]||UI.pk,id=t.dataset.g;
@@ -7394,7 +7405,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{lbTokClaim()}catch(_){}try{dlyClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{lbTokClaim()}catch(_){}try{dlyClaim()}catch(_){}try{giftPopup()}catch(_){}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
   /* a refresh that lands mid-swipe waits until the finger is up and the page has stopped scrolling */
@@ -8389,7 +8400,9 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     else if(a==='simReset'){UI.sim=null;render()}
     else if(a==='simSeason'){if(UI.sim&&UI.sim.season){say('This team already played its season. Build another team to play again.');return}if(UI.sim){UI.sim.stage='pick';render();window.scrollTo(0,0)}}
     else if(a==='simBack'){if(UI.sim){UI.sim.stage=UI.sim.season?'season':null;render()}}
-    else if(a==='simPick'){try{document.activeElement.blur()}catch(_){}simRun(t.dataset.s);window.scrollTo(0,0)}
+    else if(a==='simPick'){document.querySelectorAll('.sim-sc[aria-pressed="true"]').forEach(x=>x.setAttribute('aria-pressed','false'));t.setAttribute('aria-pressed','true');
+      const go=$('#sim-go2');if(go){go.disabled=false;go.dataset.s=t.dataset.s;go.textContent='▶ Play as '+t.dataset.s}}
+    else if(a==='simGoPick'){if(!t.dataset.s)return;try{document.activeElement.blur()}catch(_){}simRun(t.dataset.s);window.scrollTo(0,0)}
     else if(a==='simAgain'){}   /* v288: one season per team */
     else if(a==='fcLock')fcLock()
     else if(a==='fcWeek'){UI.fcw=+t.dataset.v;render()}
