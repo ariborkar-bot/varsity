@@ -2598,7 +2598,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v292 · Nov 7';
+const APP_BUILD='v293 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3135,7 +3135,7 @@ const betsOf=u=>((S.picks[u]||{}).bets)||{};
 const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g});return m};
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
-  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+(+rcRec(u).wn||0);
+  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+(+rcRec(u).wn||0);
   Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(100,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(100,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
@@ -3261,7 +3261,7 @@ const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -4622,6 +4622,16 @@ function fcWeekDone(w){const gs=((GAMES&&GAMES.games)||[]).filter(g=>g.w===w);if
 const fcLbWeeks=()=>{const out=[];for(let w=WEEKS;w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
 function fcPrizes(u){if(!u)return[];const cl=((invOf(u).fr||{}).fc)||{},out=[];
   for(const w of fcLbWeeks()){if(cl[w])continue;const pl=fcRank(w).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({w,place:pl+1,type:FG_LB_PRIZE[pl]})}return out}
+/* v293: daily login bonus. +50 tokens the first time you open Varsity each day (Pacific time), claimed automatically.
+   picks/<uid>.dly = {d: last day claimed, n: days claimed}; bank() adds DLY_PAY*n. Two phones on the same day write the same value. */
+const DLY_PAY=50;
+function dlyOf(u){return ((S.picks[u]||{}).dly)||{}}
+function dlyBonus(u){return DLY_PAY*(+dlyOf(u).n||0)}
+let dlyPend='';
+function dlyClaim(){if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks)return;
+  const o=dlyOf(ME.uid),t=TODAY();if(o.d===t||dlyPend===t)return;dlyPend=t;const nx={d:t,n:(+o.n||0)+1};
+  S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{dly:nx});
+  upsert('picks/'+ME.uid,{dly:nx}).then(()=>{say(`+${DLY_PAY} tokens · daily bonus. Come back tomorrow for more.`);render(true)},()=>{dlyPend='';S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{dly:o})})}
 function lbtOf(u){return ((S.picks[u]||{}).lbt)||{}}
 function lbtBonus(u){return Object.values(lbtOf(u)).reduce((a,v)=>a+(+v||0),0)}
 function lbTokDue(u){const have=lbtOf(u),out=[],d=new Date(TODAY()+'T12:00:00Z');
@@ -7137,7 +7147,7 @@ document.addEventListener('click',async e=>{
   else if(a==='rstFc'||a==='rstBets'||a==='rstAts'||a==='rstAll'){
     if(VA||!ME.uid)return;const all=a==='rstAll',what=all?'all three games':a==='rstFc'?'5 Card Draw':a==='rstBets'?'Pick ’em':'Player props';
     if(!confirm('Reset your own '+what+'? Your hand, picks and tokens for it are cleared so you can replay. Other people are not affected.'))return;
-    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{}),...(Object.keys(rwOf(ME.uid)).length?{rw:rwOf(ME.uid)}:{}),...(Object.keys(lbtOf(ME.uid)).length?{lbt:lbtOf(ME.uid)}:{}),...((S.picks[ME.uid]||{}).inv?{inv:(S.picks[ME.uid]||{}).inv}:{})};
+    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{}),...(Object.keys(rwOf(ME.uid)).length?{rw:rwOf(ME.uid)}:{}),...(Object.keys(lbtOf(ME.uid)).length?{lbt:lbtOf(ME.uid)}:{}),...(dlyOf(ME.uid).n?{dly:dlyOf(ME.uid)}:{}),...((S.picks[ME.uid]||{}).inv?{inv:(S.picks[ME.uid]||{}).inv}:{})};
     if(await act(()=>setDoc('picks/'+ME.uid,nx),what+' reset. Play it again from the Games tab.')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],nx);UI.pk={};UI.at={};UI.fcDeal=null;UI.fcAnim=null;render()}}
   else if(a==='lock'){try{await SB.rpc('admin_lock')}catch(_){}ME.admin=false;AD.rows=null;AD.sel=null;render()}
   else if(a==='saveSchool'){const v=$('#ad-school').value.trim();await act(()=>upsert('profiles/'+id,{school:v}),'School saved')}
@@ -7234,7 +7244,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{lbTokClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{lbTokClaim()}catch(_){}try{dlyClaim()}catch(_){}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
   /* a refresh that lands mid-swipe waits until the finger is up and the page has stopped scrolling */
@@ -7324,6 +7334,7 @@ document.addEventListener('click',async e=>{
   else if(a==='tokOpen'){const c=$('#cfm');const l=adLeft(ME.uid);
     c.innerHTML=`<div class="gcard tok-sheet" role="dialog" aria-modal="true" aria-labelledby="tk-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="tk-t">Get tokens</h2>
       <div class="tok-bal"><small>You have</small><b>${Math.floor(bank(ME.uid)*10)/10}</b><small>tokens</small></div>
+      <div class="tok-opt" style="cursor:default"><span class="tok-ic" aria-hidden="true">☀</span><span><b>Daily bonus: +${DLY_PAY} tokens</b><small>${dlyOf(ME.uid).d===TODAY()?'Collected today ✓ · come back tomorrow':'Added when you open Varsity each day'}</small></span></div>
       <button type="button" class="tok-opt" data-act="adWatch" ${l?'':'disabled'}><span class="tok-ic" aria-hidden="true">▶</span><span><b>Watch a short sponsor spot</b><small>+${ADS.reward} tokens · ${l?l+' left today':'back tomorrow'}</small></span></button>
       <button type="button" class="tok-opt" data-act="goLocker"><span class="tok-ic" aria-hidden="true">▣</span><span><b>Open packs in the Shop</b><small>${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' waiting · ':''}Ball skins, frames, perks, boosts</small></span></button>
       ${rwHTML()}
