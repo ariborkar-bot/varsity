@@ -793,7 +793,8 @@ select option{background:#0B1730;color:#EAF0F8}
 .lg-add:hover{color:#fff}
 .lg-tbl{width:100%;border-collapse:collapse}.lg-tbl th{text-align:left;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:6px 8px}
 .lg-tbl td{padding:10px 8px;border-top:1px solid var(--line);white-space:nowrap}.lg-tbl tr[data-act]{cursor:pointer}.lg-tbl tr[data-act]:hover td{background:var(--surface2)}
-.lg-tbl tr.sel td{background:#13284D}.lg-tbl td.rk{font:900 1.2rem var(--f-display);width:2rem}
+.lg-tbl tr.sel td{background:#13284D}.po-card .po-rd{margin-top:14px}.po-rd h4{margin:0 0 6px;font:800 .95rem var(--f-display);text-transform:uppercase;letter-spacing:.05em}.po-g{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px}.po-g.me{border-color:var(--gold,#F2B84B)}.po-g>span:last-of-type{text-align:right}.po-g .sc{font-weight:800;text-align:center;white-space:nowrap}.po-g .win b,.po-g .win{font-weight:900}.po-g .win{color:var(--gold,#F2B84B)}.po-w{grid-column:1/-1;text-align:center;color:var(--muted)}.po-sd{font-style:normal;font-weight:800;font-size:.7rem;background:var(--surface2);border-radius:6px;padding:1px 6px;margin-right:6px}.po-seeds{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.po-s{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border-radius:999px;padding:4px 10px;font-size:.85rem}.po-s b{font-weight:900}.po-s small{font-size:.65rem;font-weight:800;color:var(--gold,#F2B84B)}.po-s.me{outline:1px solid var(--gold,#F2B84B)}.po-champ{margin:8px 0;padding:10px 12px;border-radius:12px;background:linear-gradient(90deg,rgba(242,184,75,.22),transparent);display:flex;flex-direction:column}.po-champ b{font:900 1.3rem var(--f-display)}.po-tag{font-style:normal;font-size:.62rem;font-weight:900;margin-left:6px;padding:1px 6px;border-radius:6px;background:var(--surface2);color:var(--gold,#F2B84B)}.lg-tbl tr.po-cut td{border-bottom:2px dashed var(--gold,#F2B84B)}.po-proj,.po-by{margin:6px 0}
+.lg-tbl td.rk{font:900 1.2rem var(--f-display);width:2rem}
 .lg-tm{display:flex;align-items:center;gap:10px}.lg-tm b{max-width:14ch;overflow:hidden;text-overflow:ellipsis}
 .lg-tm em{font:800 .62rem var(--f-body);font-style:normal;background:var(--accent);color:var(--accent-ink);padding:3px 7px;border-radius:999px}
 .lg-foot{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--line);border-radius:14px}
@@ -2592,7 +2593,13 @@ function authHTML(){
     <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button>'}<a class="link" href="#privacy" data-priv>Privacy</a></div>
   </div>`;
 }
-function openAuth(){if(!SB){say('Couldn’t open sign-in. Try again in a moment.');return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
+/* v322 (owner): no "couldn't open sign-in" popups. If the login library never loaded, quietly try to load it again and reload once it is there. */
+function libRetry(){if(SB||!NEEDS_SERVER||window.__lr)return;let n=0;try{n=+sessionStorage.getItem('vs-lr')||0}catch(_){}if(n>=3)return;window.__lr=true;
+  (async()=>{for(const u of ['vendor/supabase.min.js?r='+Date.now(),'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js','https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js']){
+    await new Promise(r=>{const el=document.createElement('script');el.src=u;el.onload=el.onerror=()=>r();document.head.appendChild(el);setTimeout(r,8000)});
+    const ok=!!(window.supabase&&window.supabase.createClient);if(ok){try{sessionStorage.setItem('vs-lr',String(n+1))}catch(_){}location.reload();return}}
+    window.__lr=false})()}
+function openAuth(){if(!SB){libRetry();return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
 document.addEventListener('click',e=>{
   if(e.target.closest&&e.target.closest('[data-priv]')){setTimeout(()=>{if(ME.mode==='guest'&&location.hash==='#privacy')closeGate()},0);return}
   const b=e.target.closest&&e.target.closest('[data-au]');if(!b)return;e.preventDefault();
@@ -2694,7 +2701,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v321 · Nov 8';
+const APP_BUILD='v322 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2874,8 +2881,8 @@ const startWeek=g=>{const c=g&&g.createdAt;if(!c)return 1;const d=new Date(c),w=
 function records(g){
   const ids=Object.keys(g.members).sort();
   const rec=Object.fromEntries(ids.map(i=>[i,{w:0,l:0,t:0,pf:0}]));
-  const cw=CURW();
-  for(let w=startWeek(g);w<cw;w++){
+  const cw=CURW(),endW=poOn(g)?Math.min(cw,PO_W0):cw;
+  for(let w=startWeek(g);w<endW;w++){
     for(const [a,b] of pairings(ids,w)){
       if(!a||!b){const x=a||b;if(x)rec[x].pf+=lineupWeek(g.id,x,w);continue}
       const sa=lineupWeek(g.id,a,w),sb=lineupWeek(g.id,b,w);
@@ -3009,10 +3016,11 @@ function computeNotes(){
   const cw=CURW();
   for(const g of myGroups()){
     for(let w=Math.max(1,seen.week||cw);w<cw;w++){
-      const pr=pairings(Object.keys(g.members).sort(),w).find(([a,b])=>a===ME.uid||b===ME.uid);
+      const pr=lgPairs(g,w).find(([a,b])=>a===ME.uid||b===ME.uid);
       if(!pr)continue;
       const opp=pr[0]===ME.uid?pr[1]:pr[0];
       if(!opp)continue;
+      if(w>=PO_W0){const gx=poGameOf(poBuild(g),ME.uid,w);if(!gx||!gx.done)continue;notes.push({c:'results',t:NOW(),k:gx.win===ME.uid?'up':'dn',text:`${g.name} playoffs, week ${w}: ${gx.win===ME.uid?'you beat':'you lost to'} ${nm(opp)}, ${f1(lineupWeek(g.id,ME.uid,w))} to ${f1(lineupWeek(g.id,opp,w))}${gx.win===ME.uid?(gx.round===poBuild(g).rounds.length-1?'. You are the league champion.':'. You advance.'):'.'}`});continue}
       const a=lineupWeek(g.id,ME.uid,w),b=lineupWeek(g.id,opp,w);
       notes.push({c:'results',t:NOW(),k:a>b?'up':a<b?'dn':'join',text:`Week ${w} in ${g.name}: ${a>b?'you beat':a<b?'you lost to':'you tied with'} ${nm(opp)}, ${f1(a)} to ${f1(b)}.`});
     }
@@ -3087,7 +3095,7 @@ function myRanks(me){
 let tt;
 function say(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>{t.hidden=true},3200)}
 async function act(fn,ok){
-  if(ME.mode==='offline'){say('That didn’t save. Try again in a moment.');return false}
+  if(ME.mode==='offline'){libRetry();return false}
   if(ME.mode==='readonly'){say('You have view-only access. Ask the owner for contributor access.');return false}
   try{await fn();if(ok)say(ok);return true}
   catch(e){say(e&&e.code==='invalid_argument'?'You do not have permission to do that.':'That did not save. Try again.');return false}
@@ -4184,9 +4192,9 @@ function trophySVG(t,sz){t=t||{};const M=TRO_MT[t.mt]||TRO_MT.gold,B=TRO_BS[t.bs
     ${top}<path d="M38 80h44l6 12H32z" fill="${B[1]}"/><rect x="26" y="92" width="68" height="18" rx="2" fill="${B[2]}"/><rect x="36" y="96" width="48" height="10" rx="1" fill="${M[1]}"/><text x="60" y="104" text-anchor="middle" font-size="7" font-weight="800" font-family="system-ui,sans-serif" fill="${M[2]}">${esc((t.nm||'CHAMPION').slice(0,16).toUpperCase())}</text></svg>`}
 function trophyCard(g,st){const t=g.trophy,own=g.ownerId===ME.uid;
   if(!t)return own?`<section class="card tro-card tro-none"><div><b>Give your league a trophy</b><small class="muted">Design the trophy your champion plays for: shape, metal, base and engraving. ${TRO_TOK.toLocaleString()} tokens, edits free after.</small></div><button class="btn" data-act="troOpen" data-gid="${esc(g.id)}">Design trophy</button></section>`:'';
-  const lead=st&&st[0];
+  const lead=st&&st[0],poc=(()=>{try{const x=poBuild(g);return x&&x.champion}catch(_){return null}})();
   return `<section class="card tro-card"><div class="tro-art">${trophySVG(t,110)}</div><div class="tro-tx"><span class="lbl">League trophy</span><h3>${esc(t.nm||g.name)}</h3>
-    <p class="muted">${lead?`Leader: <b>${nmC(lead.uid,esc(lead.uid===ME.uid?'You':nm(lead.uid)))}</b> · ${lead.rec.w}-${lead.rec.l}`:'No leader yet'}. The champion keeps it on their profile.</p>${own?`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">Edit trophy</button>`:''}</div></section>`}
+    <p class="muted">${poc?`Champion: <b>${nmC(poc,esc(poc===ME.uid?'You':nm(poc)))}</b>`:lead?`Leader: <b>${nmC(lead.uid,esc(lead.uid===ME.uid?'You':nm(lead.uid)))}</b> · ${lead.rec.w}-${lead.rec.l}`:'No leader yet'}. The champion keeps it on their profile.</p>${own?`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">Edit trophy</button>`:''}</div></section>`}
 const TR={gid:'',sh:'cup',mt:'gold',bs:'walnut',nm:''};
 function troSheet(){const g=S.groups[TR.gid];if(!g){closeConfirm();return}const paid=!!(g.trophy||((invOf(ME.uid).tro||{})[g.id]));
   const ch=(k,list)=>list.map(([v,l])=>`<button type="button" class="chip" data-act="troSet" data-k="${k}" data-v="${v}" aria-pressed="${TR[k]===v}">${esc(l)}</button>`).join('');
@@ -4944,6 +4952,7 @@ function lgSettingsHTML(g){
     ${row('Roster',esc(rosterText(g.roster||ROSTER_DEFAULT)))}
     ${bud?'':row('Draft',di.status==='done'?'Complete':di.status==='live'?'Live now':'Not started')+(clk?row('Pick clock',clk>=60&&clk%60===0?clk/60+' min':clk+' sec'):'')}
     ${row('Teams',Object.keys(g.members).filter(u=>g.members[u]).length)}
+    ${LG_PO?row('Playoffs',poOn(g)?'Top '+poSize(Object.keys(g.members).length)+' · weeks '+(PO_F-(PO_SPEC[poSize(Object.keys(g.members).length)].length-1))+'-'+PO_F:startWeek(g)>PO_MINSTART?'None (league started after week '+PO_MINSTART+')':'Needs 2+ teams'):''}
     ${row('Commissioner',esc(nm(g.ownerId))+(g.ownerId===ME.uid?' (you)':''))}
     <details class="ls-sc"><summary>Scoring rules</summary>${sc}</details></section>`;
 }
@@ -5758,7 +5767,7 @@ const rcoWgOn=d=>d&&d.wg&&d.wg.st==='ok'?+d.wg.amt||0:0;
 const rcoWgAsk=d=>!!(d&&d.wg&&d.wg.st==='ask');
 const rcoFresh=d=>!d.last&&!Object.values(d.sl||{}).some(x=>x&&Object.keys(x).length);
 function rcoCan(){
-  if(ME.mode==='offline'){say('That didn’t work. Try again in a moment.');return false}
+  if(ME.mode==='offline'){libRetry();return false}
   if(ME.mode==='readonly'){say('You have view-only access.');return false}
   if(!ME.uid||ME.mode==='guest'||needJoin('play Ring Chaser online'))return false;
   return true;
@@ -6298,10 +6307,72 @@ function compareHTML(){
 
 /* ---------- lineup groups with weekly matchups ---------- */
 function standingsOf(g){
-  const rec=records(g);
+  const rec=records(g),po=poOn(g);
   return Object.keys(g.members).map(uid=>({uid,rec:rec[uid],t:slotPts(g.id,uid,UI.scope),wk:lineupWeek(g.id,uid,CURW())}))
-    .sort((a,b)=>(b.rec.w-a.rec.w)||(b.rec.t-a.rec.t)||(b.t-a.t));
+    .sort((a,b)=>(b.rec.w-a.rec.w)||(b.rec.t-a.rec.t)||(po?(b.rec.pf-a.rec.pf):0)||(b.t-a.t)||(a.uid<b.uid?-1:1));
 }
+/* ---------- v322 (owner): football fantasy playoffs ----------
+   Regular season = the weeks from the league's start through week 9. Then a single-elimination playoff that ends in week 12, the
+   first round of the real San Diego playoffs: quarterfinals week 10, semifinals week 11, championship week 12.
+   13 or fewer teams: top 6 (seeds 1-2 get a first-round bye). 14 or more: top 8, no byes. Smaller leagues: 4 teams (4-5 players) or 2 (2-3).
+   A matchup is only decided once every player in both lineups has a stat line (or is known not to have played); a tie goes to the higher seed.
+   Needs a league that started by week 7 (three regular-season weeks); newer leagues keep the old round-robin standings. Basketball: off. */
+const LG_PO=true,PO_W0=10,PO_F=12,PO_MINSTART=7;
+const poSize=m=>m>=14?8:m>=6?6:m>=4?4:m>=2?2:0;
+const PO_SPEC={
+  8:[[[1,8],[4,5],[2,7],[3,6]],[['W0.0','W0.1'],['W0.2','W0.3']],[['W1.0','W1.1']]],
+  6:[[[3,6],[4,5]],[[1,'W0.1'],[2,'W0.0']],[['W1.0','W1.1']]],
+  4:[[[1,4],[2,3]],[['W0.0','W0.1']]],
+  2:[[[1,2]]]};
+const poOn=g=>!!(LG_PO&&g&&g.members&&Object.keys(g.members).length>=2&&startWeek(g)<=PO_MINSTART);
+/* has this player's week finished for scoring: his team's game is final and he has a line (or his team has a real box score without him = did not play); no game that week counts as in */
+function lgPlIn(p,w){if(!p)return true;
+  const gs=(GAMES&&GAMES.games)||[];if(!gs.some(x=>x.w===w))return false;
+  const gm=gs.find(x=>x.w===w&&(x.h===p.school||x.a===p.school));if(!gm)return true;
+  if(!gDone(gm))return false;
+  return !!(p.games&&p.games[w-1])||(fcBox(w)[p.school]||0)>=3}
+function lgReady(g,uid,w){const ro=lineupAt(g.id,uid,w);return slotsFor(g.id).every(s=>lgPlIn(pByKey(ro[s.k]),w))}
+let _poC={};
+function poBuild(g){if(!poOn(g))return null;
+  const cw=CURW(),ck=g.id+'|'+_rev+'|'+cw+'|'+Object.keys(g.members).length;if(_poC[ck])return _poC[ck];
+  if(Object.keys(_poC).length>40)_poC={};
+  const ids=Object.keys(g.members),q=poSize(ids.length),rec=records(g);
+  const rank=ids.slice().sort((a,b)=>(rec[b].w-rec[a].w)||(rec[b].t-rec[a].t)||(rec[b].pf-rec[a].pf)||(a<b?-1:1));
+  const seeds=rank.slice(0,q),sd=u=>seeds.indexOf(u)+1;
+  const locked=cw>PO_W0-1&&ids.every(u=>lgReady(g,u,PO_W0-1));
+  const spec=PO_SPEC[q],R=spec.length,win={},rounds=[];
+  spec.forEach((gs,ri)=>{const w=PO_F-(R-1-ri);
+    const games=gs.map((pr,gi)=>{const res=x=>typeof x==='number'?seeds[x-1]:(win[x]||null),a=res(pr[0]),b=res(pr[1]);
+      const gm={id:ri+'.'+gi,w,a,b,round:ri};
+      if(a&&b&&locked&&w<=cw){gm.sa=lineupWeek(g.id,a,w);gm.sb=lineupWeek(g.id,b,w);gm.ready=lgReady(g,a,w)&&lgReady(g,b,w);
+        if(gm.ready){gm.done=true;gm.win=gm.sa>gm.sb?a:gm.sb>gm.sa?b:(sd(a)<sd(b)?a:b);gm.tie=gm.sa===gm.sb;win['W'+gm.id]=gm.win}}
+      return gm});
+    rounds.push({w,n:ri===R-1?'Championship':ri===R-2?'Semifinals':'Quarterfinals',games})});
+  const inR1=new Set();(spec[0]||[]).forEach(pr=>pr.forEach(x=>{if(typeof x==='number')inR1.add(x)}));
+  const byes=q===6?seeds.filter((u,i)=>!inR1.has(i+1)):[];
+  const fin=rounds[R-1].games[0],out={q,seeds,rounds,byes,locked,rank,rec,champion:fin&&fin.done?fin.win:null,sd};
+  return _poC[ck]=out}
+/* games of one week for a league: the round-robin matchups, or the playoff games from week 10 on (only pairs that are known) */
+function lgPairs(g,w){const po=poBuild(g);
+  if(po&&w>=PO_W0){const out=[];po.rounds.filter(r=>r.w===w).forEach(r=>r.games.forEach(x=>{if(x.a&&x.b)out.push([x.a,x.b])}));if(w===PO_W0)po.byes.forEach(u=>out.push([u,null]));return out}
+  return pairings(Object.keys(g.members).sort(),w)}
+/* the playoff game one member plays in a given week, or null */
+const poGameOf=(po,uid,w)=>{if(!po)return null;for(const r of po.rounds)if(r.w===w)for(const x of r.games)if(x.a===uid||x.b===uid)return x;return null};
+function poHTML(g){const po=poBuild(g);if(!po)return '';
+  const cw=CURW(),nm2=u=>u?nmC(u,esc(u===ME.uid?'You':nm(u))):'<span class="muted">TBD</span>',tag=u=>u?`<em class="po-sd">${po.sd(u)}</em>`:'';
+  const rule=`Top ${po.q} after week ${PO_W0-1}${po.byes.length?`, seeds 1-${po.byes.length} get a bye`:''}. ${po.rounds.map(r=>r.n+' week '+r.w).join(', ')}. A matchup counts once every player in both lineups has stats; a tie goes to the higher seed.`;
+  const pill=po.champion?'<span class="pill final">Champion crowned</span>':cw>=PO_W0?'<span class="pill live">Live</span>':`<span class="pill">Starts week ${PO_W0}</span>`;
+  const seedsRow=`<div class="po-seeds">${po.seeds.map((u,i)=>`<span class="po-s ${u===ME.uid?'me':''}"><b>${i+1}</b>${esc(u===ME.uid?'You':nm(u))}${po.byes.includes(u)?'<small>BYE</small>':''}</span>`).join('')}</div>`;
+  const rnd=r=>`<div class="po-rd"><h4>${r.n} <small class="muted">Week ${r.w}</small></h4>${r.games.map(x=>{
+      const st=x.done?'':x.a&&x.b&&po.locked&&r.w<=cw?'<small class="po-w">Waiting for stats</small>':x.a&&x.b&&po.locked?'<small class="po-w">Not played yet</small>':'';
+      const sc=x.sa!=null?`<span class="sc">${f1(x.sa)} – ${f1(x.sb)}</span>`:'<span class="sc">vs</span>';
+      return `<div class="po-g ${(x.a===ME.uid||x.b===ME.uid)?'me':''}"><span class="${x.done&&x.win===x.a?'win':''}">${tag(x.a)}${nm2(x.a)}</span>${sc}<span class="${x.done&&x.win===x.b?'win':''}">${tag(x.b)}${nm2(x.b)}</span>${st}</div>`}).join('')}</div>`;
+  const byeRow=po.byes.length?`<p class="muted po-by">First-round bye: ${po.byes.map(u=>esc(u===ME.uid?'You':nm(u))).join(', ')}.</p>`:'';
+  return `<section class="card po-card"><div class="qh"><h3>Playoffs</h3>${pill}</div>
+    ${po.champion?`<div class="po-champ"><span class="lbl">League champion</span><b>${nmC(po.champion,esc(po.champion===ME.uid?'You':nm(po.champion)))}</b></div>`:''}
+    <p class="muted">${esc(rule)}</p>
+    ${po.locked?'':`<p class="po-proj muted">${cw>=PO_W0?'Seeds lock when every week '+(PO_W0-1)+' lineup has its stats.':'Projected seeds, they can still change.'}</p>`}
+    ${seedsRow}${byeRow}${po.rounds.map(rnd).join('')}</section>`}
 /* ---------- league formats ----------
    draft:  traditional snake draft, every player belongs to one team, open spots refill from free agents after the draft
    budget: salary cap like Premier League fantasy, any number of teams can own the same player */
@@ -6526,10 +6597,11 @@ function recapData(g){
   if(ids.length<2||w<sw)return null;
   const sc={};ids.forEach(u=>sc[u]=lineupWeek(g.id,u,w));
   if(!ids.some(u=>sc[u]>0))return null;
-  const games=pairings(ids,w).filter(([a,b])=>a&&b).map(([a,b])=>({a,b,sa:sc[a],sb:sc[b],m:Math.abs(sc[a]-sc[b])}));
-  const top=ids.reduce((x,u)=>sc[u]>sc[x]?u:x,ids[0]);
+  const prs=lgPairs(g,w),part=new Set(prs.flat().filter(Boolean));if(part.size<2)return null;
+  const games=prs.filter(([a,b])=>a&&b).map(([a,b])=>({a,b,sa:sc[a],sb:sc[b],m:Math.abs(sc[a]-sc[b])}));
+  const pids=ids.filter(u=>part.has(u)),top=pids.reduce((x,u)=>sc[u]>sc[x]?u:x,pids[0]);
   const big=games.slice().sort((x,y)=>y.m-x.m)[0],close=games.filter(x=>x.sa||x.sb).sort((x,y)=>x.m-y.m)[0];
-  let star=null;for(const u of ids){const ro=lineupAt(g.id,u,w);for(const sl of slotsFor(g.id)){const p=pByKey(ro[sl.k]);if(!p||!p.games[w-1])continue;const v=pts(p.games[w-1].stat);if(!star||v>star.v)star={p,v,u}}}
+  let star=null;for(const u of pids){const ro=lineupAt(g.id,u,w);for(const sl of slotsFor(g.id)){const p=pByKey(ro[sl.k]);if(!p||!p.games[w-1])continue;const v=pts(p.games[w-1].stat);if(!star||v>star.v)star={p,v,u}}}
   const win=x=>x.sa>=x.sb?[x.a,x.b,x.sa,x.sb]:[x.b,x.a,x.sb,x.sa];
   return{w,top,ts:sc[top],big:big&&win(big),close:close&&close!==big?win(close):null,star};
 }
@@ -6562,16 +6634,16 @@ function matchupsHTML(g){
   const ids=Object.keys(g.members).sort(),cw=CURW();
   if(ids.length<2)return '';
   const sw=startWeek(g),w=Math.min(Math.max(sw,UI.mw||cw),cw);
-  const prs=pairings(ids,w);
+  const prs=lgPairs(g,w);
   const side=(u,r)=>`<span class="side ${r?'r':''}">${crestOr(u,34)}<b>${nmC(u,esc(nm(u)))}${u===ME.uid?' (you)':''}</b></span>`;
   const rows=prs.map(([a,b])=>{
     if(!a||!b){const x=a||b;return `<div class="mu">${side(x)}<span class="sc">${f1(lineupWeek(g.id,x,w))}</span><span></span><span class="bye">Bye week</span></div>`}
-    const sa=lineupWeek(g.id,a,w),sb=lineupWeek(g.id,b,w),done=w<cw;
+    const px=w>=PO_W0?poGameOf(poBuild(g),a,w):null,sa=lineupWeek(g.id,a,w),sb=lineupWeek(g.id,b,w),done=px?!!px.done:w<cw;
     return `<div class="mu"><span class="${done&&sa>sb?'win':''}">${side(a)}</span><span class="sc">${f1(sa)} – ${f1(sb)}</span><span class="${done&&sb>sa?'win':''}">${side(b,true)}</span></div>`;
   }).join('');
   return `<section class="card"><div class="qh"><h3>All matchups</h3><span class="pill ${w<cw?'final':'live'}">${w<cw?'Final':'In progress'}</span></div>
     <div class="wks" role="group" aria-label="Week">${Array.from({length:cw-sw+1},(_,i)=>sw+i).map(x=>`<button class="chip" data-act="mweek" data-w="${x}" aria-pressed="${x===w}">Wk ${x}</button>`).join('')}</div>
-    <div>${rows}</div><p class="muted">Each week you face one other member. The higher lineup total wins.</p></section>`;
+    <div>${rows||'<p class="muted">No matchups this week.</p>'}</div><p class="muted">${w>=PO_W0&&poBuild(g)?'These are playoff games. Open the Playoffs card for the full bracket.':'Each week you face one other member. The higher lineup total wins.'}</p></section>`;
 }
 const groupDanger=(coll,g,word)=>{const own=g.ownerId===ME.uid;return `<div class="card danger-row"><div><b>${own?'Delete '+word:'Leave '+word}</b><p class="muted">${own?'You started '+esc(g.name)+'. Deleting it removes it for every member, with all its lineups and standings.':'Takes you out of '+esc(g.name)+'. You can rejoin later with the invite code.'}</p></div><button class="btn danger" data-act="${own?'delGroup':'leaveGroup'}" data-coll="${coll}" data-id="${esc(g.id)}">${own?'Delete '+word:'Leave '+word}</button></div>`};
 /* Leagues tab: My leagues and Mock Draft (moved here from Minigames) */
@@ -6619,18 +6691,20 @@ function viewGroups0(){
   const st=standingsOf(g),myI=st.findIndex(x=>x.uid===ME.uid),me=st[myI];
   const ord=n=>n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:(n%10<4?n%10:0)]);
   /* this week's matchup */
-  const pr=pairings(ids,cw).find(p=>p.includes(ME.uid));
+  const po=poBuild(g),poW=po&&cw>=PO_W0,pr=lgPairs(g,cw).find(p=>p.includes(ME.uid));
   const opp=pr?(pr[0]===ME.uid?pr[1]:pr[0]):null;
   const mySc=lineupWeek(g.id,ME.uid,cw),opSc=opp?lineupWeek(g.id,opp,cw):0;
   const side=(u,sc,r)=>`<div class="lg-side ${r?'r':''}">${crestOr(u,52)}<b>${nmC(u,esc(u===ME.uid?'You':nm(u)))}</b><small>${(()=>{const x=st.find(y=>y.uid===u);return x?`${x.rec.w}-${x.rec.l}${x.rec.t?'-'+x.rec.t:''}`:''})()}</small><span class="lg-sc">${f1(sc)}</span></div>`;
-  const matchup=ids.length<2?`<section class="card lg-vs wait"><div><h3>Week ${cw} matchup</h3><p class="muted">You need at least one opponent. Send your friends the invite code <b class="lg-code">${esc(g.code)}</b> and matchups start right away.</p></div><div class="lg-wbtn"><button class="btn" data-act="smsInv" data-gid="${esc(g.id)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Text invite</button><button class="btn ghost" data-act="copy" data-code="${esc(g.code)}">Copy invite code</button></div></section>`
-    :`<section class="card lg-vs"><div class="qh"><h3>Week ${cw} matchup</h3><span class="pill live">This week</span></div>
+  const poGm=poW?poGameOf(po,ME.uid,cw):null,poRd=poGm?po.rounds[poGm.round].n:'',poIn=poW&&po.seeds.includes(ME.uid);
+  const poMsg=!poW?'':poIn?(poGm&&poGm.a&&poGm.b?'':po.byes.includes(ME.uid)&&cw===PO_W0?'You have a first-round bye. Your next game is week '+(PO_W0+1)+'.':poGm?'Waiting for your opponent to be decided.':'Your season is over.'):'Your team missed the playoffs. Follow the bracket below.';
+  const matchup=poW&&!(pr&&opp)?`<section class="card lg-vs wait"><div><h3>Week ${cw} · Playoffs</h3><p class="muted">${esc(poMsg)}</p></div></section>`:ids.length<2?`<section class="card lg-vs wait"><div><h3>Week ${cw} matchup</h3><p class="muted">You need at least one opponent. Send your friends the invite code <b class="lg-code">${esc(g.code)}</b> and matchups start right away.</p></div><div class="lg-wbtn"><button class="btn" data-act="smsInv" data-gid="${esc(g.id)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Text invite</button><button class="btn ghost" data-act="copy" data-code="${esc(g.code)}">Copy invite code</button></div></section>`
+    :`<section class="card lg-vs"><div class="qh"><h3>${poW?'Week '+cw+' · '+esc(poRd):'Week '+cw+' matchup'}</h3><span class="pill live">${poW?(poGm&&poGm.done?'Final':poGm&&poGm.ready===false?'Waiting for stats':'Playoffs'):'This week'}</span></div>
       <div class="lg-vsrow">${side(ME.uid,mySc)}<span class="lg-v">VS</span>${opp?side(opp,opSc,true):`<div class="lg-side r"><b>Bye week</b><small>No opponent this week</small></div>`}</div>
       <p class="muted">Projected: <b>You ${f1(lineupProj(g.id,ME.uid))}</b>${opp?` · <b>${esc(nm(opp))} ${f1(lineupProj(g.id,opp))}</b>`:''}. Scores fill in as week ${cw} box scores are posted.</p></section>`;
   const standings=`<section class="card"><div class="qh"><h3>Standings</h3><span class="muted">${ids.length} ${ids.length===1?'team':'teams'}</span></div>
     <div class="scroll"><table class="lg-tbl"><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>${UI.scope==='season'?'Season':'Wk '+UI.scope}</th></tr></thead><tbody>
-    ${st.map((x,i)=>`<tr class="${x.uid===ME.uid?'me':''} ${x.uid===mem?'sel':''} ${eqOf(x.uid,'banner')?'bn bn-tr '+eqOf(x.uid,'banner'):''}" style="${eqOf(x.uid,'banner')?cosStyle(eqOf(x.uid,'banner')):''}" data-act="member" data-m="${esc(x.uid)}" tabindex="0"><td class="rk">${i+1}</td><td><span class="lg-tm">${crestOr(x.uid,30)}<b>${nmC(x.uid,esc(nm(x.uid)))}</b>${x.uid===ME.uid?'<em>you</em>':''}</span></td><td>${x.rec.w}-${x.rec.l}${x.rec.t?'-'+x.rec.t:''}</td><td>${f1(x.rec.pf)}</td><td><b>${f1(x.t)}</b></td></tr>`).join('')}
-    </tbody></table></div><p class="muted">Records count finished weeks since the league started. Tap a team to see its lineup.</p></section>`;
+    ${st.map((x,i)=>`<tr class="${x.uid===ME.uid?'me':''} ${po&&i===po.q-1?'po-cut':''} ${x.uid===mem?'sel':''} ${eqOf(x.uid,'banner')?'bn bn-tr '+eqOf(x.uid,'banner'):''}" style="${eqOf(x.uid,'banner')?cosStyle(eqOf(x.uid,'banner')):''}" data-act="member" data-m="${esc(x.uid)}" tabindex="0"><td class="rk">${i+1}</td><td><span class="lg-tm">${crestOr(x.uid,30)}<b>${nmC(x.uid,esc(nm(x.uid)))}</b>${x.uid===ME.uid?'<em>you</em>':''}${po&&po.seeds.includes(x.uid)?`<em class="po-tag">${po.byes.includes(x.uid)?'BYE':'PO'}</em>`:''}</span></td><td>${x.rec.w}-${x.rec.l}${x.rec.t?'-'+x.rec.t:''}</td><td>${f1(x.rec.pf)}</td><td><b>${f1(x.t)}</b></td></tr>`).join('')}
+    </tbody></table></div><p class="muted">${po?`Records count the regular season (through week ${PO_W0-1}). The top ${po.q} make the playoffs.`:'Records count finished weeks since the league started.'} Tap a team to see its lineup.</p></section>`;
   const own=g.ownerId===ME.uid;
   return `${topRow}
     <section class="lg-hero">
@@ -6644,6 +6718,7 @@ function viewGroups0(){
     </section>
     ${trophyCard(g,st)}
     ${UI.lgSet?lgSettingsHTML(g):''}
+    ${poHTML(g)}
     ${draftRoomHTML(g)}
     ${matchup}
     <div class="lg-grid">
@@ -8477,7 +8552,7 @@ async function boot(){
     try{const v=JSON.parse(sessionStorage.getItem('varsity-viewas')||'null');if(v&&v.uid&&ME.admin&&ME.mode==='live'&&v.uid!==ME.uid){VA={uid:v.uid,name:v.name||'this member',real:ME.uid};ME.uid=v.uid;ME.mode='readonly'}else sessionStorage.removeItem('varsity-viewas')}catch(_){}
     SB.auth.onAuthStateChange((ev,s)=>{if((ev==='SIGNED_IN'&&s&&s.user.id!==(VA?VA.real:ME.uid))||(ev==='SIGNED_OUT'&&ME.uid))location.reload();if(ev==='PASSWORD_RECOVERY')setTimeout(newPassword,300)});
   }else if(NEEDS_SERVER){
-    DB=memDb();ME.uid=null;ME.mode='offline';ME.admin=false;
+    DB=memDb();ME.uid=null;ME.mode='offline';ME.admin=false;setTimeout(libRetry,1500);
   }else{
     DB=memDb();ME.uid='me';ME.admin=true;ME.mode='demo';
     try{const p=JSON.parse(localStorage.getItem('gsd-demo-profile')||'null');if(p)await DB.doc('profiles/me').set(p)}catch(_){}
