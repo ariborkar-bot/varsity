@@ -1,0 +1,278 @@
+Palo Verde Valley|C. Robinson|an9db9c9|0,0,1,16
+Palo Verde Valley|C. Robinson|4sr673e7|0,0,0,23,0,0,0,0,0,4
+Palo Verde Valley|C. Richards|o7o8tngi|0,0,0,56,0,0,0,0,0,9
+Palo Verde Valley|D. Parrish|82lrq8v1|0,0,0,26,0,0,0,0,0,5
+Palo Verde Valley|C. Lainez|g3i2u5uq|0,0,0,10,0,0,0,0,0,10,0,0,0,1,1
+Palo Verde Valley|A. Walker|qf7lj7od|0,0,0,81,1,0,0,0,0,10
+Palo Verde Valley|I. Luna|ulb1in21|0,0,0,15,0,0,0,0,0,8
+Palo Verde Valley|Z. Davis / Cano|abfb59kp|0,0,0,28,0,0,0,0,0,5
+Palo Verde Valley|A. Rodriguez|qiu46j77|0,0,0,124,2,0,0,0,0,2
+Palo Verde Valley|A. Barron|b3aujkta|0,0,0,0,0,0,0,0,0,7,1,0,1
+Palo Verde Valley|R. Espinoza|g467iett|0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,2
+Palo Verde Valley|S. Lefefe|o97h0lp3|0,0,0,0,0,0,0,0,0,6
+Palo Verde Valley|R. Brandenburg|d64c1d3u|0,0,0,0,0,0,0,0,0,1
+Palo Verde Valley|M. Ramirez|u69dsjs6|0,0,0,0,0,0,0,0,0,6
+Palo Verde Valley|A. Gomez|b31268n9|0,0,0,0,0,0,0,0,0,2
+Palo Verde Valley|W. Dill|gdhcagbu|0,0,0,0,0,0,0,0,0,13,5
+Palo Verde Valley|M. Soto|767ce0hn|0,0,0,0,0,0,0,0,0,6
+Palo Verde Valley|D. Gregory|esvutsun|0,0,0,0,0,0,0,0,0,1
+Palo Verde Valley|C. Rodriguez|v8q8a9l7|0,0,0,0,0,0,0,0,0,3
+Palo Verde Valley|A. Ramirez|anvk22vn|0,0,0,0,0,0,0,0,0,6
+Palo Verde Valley|S. Rangel|nfcsmbuv|0,0,0,0,0,0,0,0,0,6
+Palo Verde Valley|T. Vaughn|tsr4d20a|0,0,0,0,0,0,0,0,0,5
+Hoover|H. Manuel|gm1pccq8|236,3,0,57
+Hoover|X. Perea Larroque|10c1b4dk|0,0,0,26,0,0,0,0,0,3
+Hoover|J. Cunningham|f01ep5if|0,0,0,113,2,2,15,0,0,1
+Hoover|J. Stewart|6i55sopm|0,0,0,0,0,10,123,1,0,1,0,1
+Hoover|A. Abdallah|rub9pr1i|0,0,0,0,0,5,63,1,0,1
+Hoover|R. Grant Jr.|2o7da59l|0,0,0,0,0,1,29,1
+Hoover|J. Johnson|t97igq0b|0,0,0,0,0,1,6
+Hoover|J. Groom|cc17bu9t|0,0,0,0,0,0,0,0,0,7,2,1
+Hoover|K. Moore|hj0ch5c9|0,0,0,0,0,0,0,0,0,5,1
+Hoover|V. Trujillo|isubiv3n|0,0,0,0,0,0,0,0,0,2
+Hoover|A. Punefu|362llcu0|0,0,0,0,0,0,0,0,0,2
+Hoover|A. Medina|i2psll8e|0,0,0,0,0,0,0,0,0,1
+Hoover|J. Leger|b9s9jpoj|0,0,0,0,0,0,0,0,0,6
+Hoover|P. Ivory|eqds6v1p|0,0,0,0,0,0,0,0,0,7
+Hoover|J. Trent|u7g8kgah|0,0,0,0,0,0,0,0,0,3,1
+Hoover|W. Etienne|4i9hcqg0|0,0,0,0,0,0,0,0,0,2
+Hoover|J. Ochoa|c55mfd1o|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5
+Olympian|I. Mena|ou9sp7m9|185,1,1,139
+Olympian|J. Blackmon|ejg4759s|0,0,0,30
+Olympian|W. Ignacio|l18o3mg2|0,0,0,84,0,2,17
+Olympian|A. Smith|3m23m85r|0,0,0,0,0,5,101
+Olympian|J. Sandoval|4pf5utlj|0,0,0,0,0,2,16
+Olympian|G. Gonzalez|mt0i4u0b|0,0,0,0,0,2,16
+Olympian|G. Ware|19f972ht|0,0,0,0,0,2,35
+Olympian|J. Rivera|tjsapidh|0,0,0,0,0,0,0,0,0,9,1
+Bonita Vista|A. Lorenz|q1m695j2|69,1,0,-3
+Bonita Vista|C. Margetts|rf3hplpe|0,0,0,32,1,4,24,1,0,3
+Bonita Vista|T. Moore|5rgi90s1|0,0,0,87,1
+Bonita Vista|J. Kyle Rosario|24qqhqsi|0,0,0,-2
+Bonita Vista|A. Cortes|ksunqrde|0,0,0,2,0,0,0,0,0,4
+Bonita Vista|E. Ituarte|gurnpbkb|0,0,0,33,0,0,0,0,0,6,0,1
+Bonita Vista|L. Cortez Raulli|79b9v4cr|0,0,0,0,0,2,10
+Bonita Vista|A. Torrentes|nmfvp329|0,0,0,0,0,3,39,0,0,3
+Bonita Vista|M. Romo|39mihji9|0,0,0,0,0,2,6
+Bonita Vista|C. Holden|r48mclnk|0,0,0,0,0,0,0,0,0,3
+Bonita Vista|D. Hatton|mn4n8bq7|0,0,0,0,0,0,0,0,0,3
+Bonita Vista|I. Jimenez|vd8v3kvt|0,0,0,0,0,0,0,0,0,8
+Bonita Vista|E. Armenta|hf5ra0qs|0,0,0,0,0,0,0,0,0,4
+Bonita Vista|L. Yaomoto|ludvfcoo|0,0,0,0,0,0,0,0,0,9
+Bonita Vista|D. De La Fuente|iulrtfkf|0,0,0,0,0,0,0,0,0,8
+Bonita Vista|J. Lipford|bof8f9qo|0,0,0,0,0,0,0,0,0,6,0,0,1
+Bonita Vista|S. Robles|pmcbksdj|0,0,0,0,0,0,0,0,0,4
+Bonita Vista|J. Garcia|2fhcv3i1|0,0,0,0,0,0,0,0,0,3
+Bonita Vista|C. Finch|r63j2j6i|0,0,0,0,0,0,0,0,0,4
+Fallbrook|M. McDonald|08davjgp|0,0,0,0,0,0,0,0,0,5,0,1,0,1,1
+Fallbrook|H. Rabbets|vk9ldnl9|0,0,0,0,0,0,0,0,0,2
+Fallbrook|I. Scott|cmg1e6ir|0,0,0,0,0,0,0,0,0,1
+Fallbrook|A. Flores|hs67ecgj|0,0,0,0,0,0,0,0,0,1
+Fallbrook|W. Puikunas|nga90fbm|0,0,0,0,0,0,0,0,0,1
+Fallbrook|N. Moss|ddfis4cv|0,0,0,0,0,0,0,0,0,9
+Fallbrook|K. Clapp|nlfei92n|0,0,0,0,0,0,0,0,0,2
+Fallbrook|B. Merry|2th4uk96|0,0,0,0,0,0,0,0,0,5
+Fallbrook|T. Clapp|tr269pa2|0,0,0,0,0,0,0,0,0,2
+Fallbrook|E. Quezada|glhbkhtg|0,0,0,0,0,0,0,0,0,7
+Fallbrook|G. Herrera|35sm5se2|0,0,0,0,0,0,0,0,0,1
+Fallbrook|J. Diaz-perez|6cljhij0|0,0,0,0,0,0,0,0,0,3,1
+Fallbrook|C. Steenhard Harnett|6hllr5c4|0,0,0,0,0,0,0,0,0,8
+Fallbrook|M. Mendoza|9ogpn2iv|0,0,0,0,0,0,0,0,0,8
+Fallbrook|K. Collings|edcc6pko|0,0,0,0,0,0,0,0,0,5,0,0,1
+Fallbrook|A. Alva|n5ltk8dm|0,0,0,0,0,0,0,0,0,0,0,0,0,1
+Morse|H. Griffin|9bscvbgf|80,2
+Morse|C. Simmons|7ttcs31m|13,1,0,41,1
+Morse|M. Islas|pn1o6kna|0,0,0,34
+Morse|D. Eleby|687sna03|0,0,0,279,4,3,75,2
+Morse|M. Williams|jebflsva|0,0,0,29,1
+Morse|P. Franklin IV|dnmmfup1|0,0,0,0,0,1,5
+Morse|A. Martinez|d3r39c1h|0,0,0,0,0,1,13,1
+Morse|T. McNair|r4chv34n|0,0,0,0,0,1
+Morse|F. Avitia|5im3rmkl|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,41,0,1
+Coastal Academy|C. Terpstra|ru0bkpqf|332,4,2,39,1,0,0,0,0,17
+Coastal Academy|H. Hawkins|2v3uad42|0,0,0,0,0,7,149,2
+Coastal Academy|M. Klein|jaua1pn3|0,0,0,3,0,4,42,0,0,4,1
+Coastal Academy|C. Beckman|8nh2blf7|0,0,0,0,0,1,4
+Coastal Academy|K. Woytek|5q0snfs3|0,0,0,0,0,8,118,1
+Coastal Academy|N. Perez|gqr5uk3u|0,0,0,0,0,1,19,1
+Coastal Academy|G. Smith|4fhuuraq|0,0,0,0,0,0,0,0,0,3,0,1,0,0,0,0,0,0,0,0,1,0,1
+Coastal Academy|R. Knight|ssoec8mv|0,0,0,0,0,0,0,0,0,9
+Coastal Academy|L. Zbiec|eru89l90|0,0,0,0,0,0,0,0,0,1
+Coastal Academy|L. Dutton|o4u71dgt|0,0,0,0,0,0,0,0,0,4
+Coastal Academy|J. Jones|2pmqsiq4|0,0,0,0,0,0,0,0,0,1
+Coastal Academy|A. Haas|39nsfe6d|0,0,0,0,0,0,0,0,0,4
+Coastal Academy|M. Buscemi|qdt6vq3r|0,0,0,0,0,0,0,0,0,2
+Coastal Academy|L. Omundson|fipci5p9|0,0,0,0,0,0,0,0,0,5
+Coastal Academy|A. Filbrun|a3pad58r|0,0,0,0,0,0,0,0,0,5
+Coastal Academy|R. Francis|o1ela1u0|0,0,0,0,0,0,0,0,0,1
+Coastal Academy|I. Prieto|6he896be|0,0,0,0,0,0,0,0,0,5
+Coastal Academy|M. Torres|j80o6pca|0,0,0,0,0,0,0,0,0,3
+Coastal Academy|M. Radovanic|mhpb3id4|0,0,0,0,0,0,0,0,0,4
+Coastal Academy|R. Kowalewsky|h4bg43i9|0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,3,1,0,1
+Coastal Academy|C. Shank|jt1e5cu4|0,0,0,0,0,0,0,0,0,4
+Chula Vista|I. Orta|5635ln1o|144,1,1
+Chula Vista|J. Davies|klvthc33|0,0,0,64,2,0,0,0,0,1
+Chula Vista|G. Ruiz|9jloh0cp|0,0,0,109,2,3,30,1
+Chula Vista|A. Richardson|0dfv4ag6|0,0,0,48
+Chula Vista|J. Clark|6vogp4qm|0,0,0,0,0,5,114,0,0,4,0,1
+Chula Vista|D. Luque|84p3c07m|0,0,0,0,0,0,0,0,0,5
+Chula Vista|A. White|cr7arq9c|0,0,0,0,0,0,0,0,0,1,0,1
+Chula Vista|C. Ceja|947o2351|0,0,0,0,0,0,0,0,0,5
+Chula Vista|A. Francis|fkq8s590|0,0,0,0,0,0,0,0,0,6
+Chula Vista|O. Miranda-alarid|k1st0sdk|0,0,0,0,0,0,0,0,0,3
+Chula Vista|E. Iwatt|i7tbhck3|0,0,0,0,0,0,0,0,0,4,1
+Chula Vista|S. Molina|agicfvgu|0,0,0,0,0,0,0,0,0,2
+Chula Vista|M. Mitchell|6ve10rlj|0,0,0,0,0,0,0,0,0,2
+Chula Vista|A. Ayala|t7pic0nk|0,0,0,0,0,0,0,0,0,3
+Chula Vista|C. Balagtas|onrkt7dn|0,0,0,0,0,0,0,0,0,3
+Chula Vista|A. Noriega|iejqieu2|0,0,0,0,0,0,0,0,0,2
+Chula Vista|A. Amador|isb58fcm|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3
+Escondido Charter|S. Greene|vlgio1pr|246,3,0,11
+Escondido Charter|G. Jones|cutfvqje|58,1
+Escondido Charter|K. Seavello|46u1k7eb|0,0,0,0,0,4,67,1
+Escondido Charter|A. Ricciardi|rc4qbt4s|0,0,0,5,0,3,63
+Escondido Charter|O. Nave|vth5ak66|0,0,0,12,0,0,0,0,0,5
+Escondido Charter|L. Friedrich|liqf9pfu|0,0,0,10,0,0,0,0,0,0,0,1
+Escondido Charter|J. Bolsakov|tct0ne0f|0,0,0,46,1
+Escondido Charter|B. Owens|ek342nt5|0,0,0,31,1
+Escondido Charter|E. Sheeder|n8ec2a72|0,0,0,0,0,1,10
+Escondido Charter|S. Hinrichs|k3i71ucq|0,0,0,0,0,9,164,3
+Escondido Charter|B. Lund|dth61883|0,0,0,0,0,0,0,0,0,3
+Escondido Charter|C. Ivicevic|6uermb3j|0,0,0,0,0,0,0,0,0,5,0,1
+Escondido Charter|O. Smith|1blm3uub|0,0,0,0,0,0,0,0,0,7
+Escondido Charter|G. Tubbs|f379jpgt|0,0,0,0,0,0,0,0,0,1
+Escondido Charter|C. Craig|lrnrinbg|0,0,0,0,0,0,0,0,0,4
+Escondido Charter|B. Henderson|6gfmam7b|0,0,0,0,0,0,0,0,0,3
+Escondido Charter|T. Heaton|8pe6dgsj|0,0,0,0,0,0,0,0,0,2
+Escondido Charter|J. Perna|s9cuk0su|0,0,0,0,0,0,0,0,0,3
+Escondido Charter|J. Scates|134v0g70|0,0,0,0,0,0,0,0,0,7
+Escondido Charter|D. Powers|nmlekgso|0,0,0,0,0,0,0,0,0,5
+Classical Academy|D. Gonzalez|pdolbbvj|17,0,3,229,2
+Classical Academy|C. Howard|mpa8va9j|0,0,0,1
+Classical Academy|T. Winter|qj9tvu81|0,0,0,1,0,2,11
+Classical Academy|C. Beeson|22u9tmna|0,0,0,6
+Classical Academy|E. Paulson|nt4j46up|0,0,0,11,0,1,6
+Classical Academy|B. Kintzele|loirvbgh|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+Rancho Buena Vista|V. Piercy|8vbpd9ai|151,1,0,27,1
+Rancho Buena Vista|E. Perfect|jd5nc2k1|0,0,0,38
+Rancho Buena Vista|K. Gutierrez|s3sbij79|0,0,0,46,0,0,0,0,1
+Rancho Buena Vista|A. Mills|71lurpcg|0,0,0,0,0,5,82
+Rancho Buena Vista|M. Imoto|mobaoenl|0,0,0,0,0,2,28,1
+Rancho Buena Vista|M. Smith|bpmeqvir|0,0,0,0,0,1,11
+Rancho Buena Vista|S. Richard|kj68o3il|0,0,0,0,0,1,2
+Rancho Buena Vista|I. Simmons|lfhntk90|0,0,0,0,0,4,28
+Rancho Buena Vista|A. Kipfer|3jodcsv9|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,82,0,5
+Rancho Buena Vista|J. Cruz|2847hed2|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2
+West Hills|E. Dill|muotasic|84,0,0,114,1
+West Hills|M. Leath|6jq7cj38|0,0,0,81,1,1,32,0,0,4,0,0,1
+West Hills|E. Dorris|bjhaqmg5|0,0,0,19,1
+West Hills|C. Rosolino|d9v2tal2|0,0,0,5,0,3,42,0,0,5
+West Hills|E. Lee-Fields|i37kfe3i|0,0,0,10,0,1,8,0,0,12
+West Hills|A. Torres|3lpfmlop|0,0,0,0,0,1,2,0,0,1
+West Hills|B. Connell|96bkhs9b|0,0,0,0,0,0,0,0,0,1
+West Hills|N. Lewis|esuglofs|0,0,0,0,0,0,0,0,0,1
+West Hills|S. Miller|cqmj803a|0,0,0,0,0,0,0,0,0,4,1,0,0,1
+West Hills|R. Hamilton|kd1ps0jl|0,0,0,0,0,0,0,0,0,1
+West Hills|S. Creech|b477hjri|0,0,0,0,0,0,0,0,0,1
+West Hills|E. Magnarelli|t214bib8|0,0,0,0,0,0,0,0,0,3
+West Hills|K. Fernandez|o8iavkng|0,0,0,0,0,0,0,0,0,1
+West Hills|Z. Waters|v6mehett|0,0,0,0,0,0,0,0,0,5,2
+West Hills|A. Finley|8r5hibb1|0,0,0,0,0,0,0,0,0,1
+West Hills|B. Robertson|uk6ktmeg|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,1,1,96,0,3
+Santana|L. Braaksma|rmdgj7di|39,0,0,23,1
+Santana|E. Miller|nvhh9ieq|85,0,1
+Santana|J. Mayers|b5vk0569|0,0,0,10,0,0,0,0,0,1
+Santana|J. Pehl|opojibah|0,0,0,3,0,1,7
+Santana|K. Thornton|0ushp0uk|0,0,0,32,0,4,47,0,0,5
+Santana|D. Timanus|80g9s5vg|0,0,0,0,0,1,-1,0,0,5
+Santana|B. Varner|281kumos|0,0,0,0,0,1,15,0,0,0,0,0,0,0,0,0,1
+Santana|D. Goar|k39d82k4|0,0,0,0,0,5,22
+Santana|E. Smith|s4n714n1|0,0,0,0,0,1,34
+Santana|B. Knight|72g9dilg|0,0,0,0,0,0,0,0,0,5
+Santana|A. Markevicz|771sv6gp|0,0,0,0,0,0,0,0,0,1
+Santana|C. Galarneau|moima9oq|0,0,0,0,0,0,0,0,0,2
+Santana|S. Waider|f1tdo89n|0,0,0,0,0,0,0,0,0,2
+Santana|Y. Isse|nlbr5cit|0,0,0,0,0,0,0,0,0,1
+Santana|A. Terry|1k6vipvl|0,0,0,0,0,0,0,0,0,4
+Santana|D. Johnson|2rusivf5|0,0,0,0,0,0,0,0,0,1
+Santana|E. Toth|g5lnbgcc|0,0,0,0,0,0,0,0,0,1
+Santana|T. Morehouse|1lpc2flu|0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,150,0,4
+Santana|R. Miller|rjtnmgee|0,0,0,0,0,0,0,0,0,1
+El Capitan|D. Montijo|shmdi7bl|86,0,0,2
+El Capitan|H. Passanisi|dqn2u0hs|29,1
+El Capitan|M. Darnell|uvejsroa|0,0,0,46,1
+El Capitan|A. Mattar|p3ul5cpp|0,0,0,41,2
+El Capitan|E. Arzu|r03fb1qg|0,0,0,64
+El Capitan|M. Castillo|6hf7oo8l|0,0,0,93,1
+El Capitan|M. Valencia Ii|almaoe4q|0,0,0,22,1,2,58
+El Capitan|C. Lachappa|pfp1n3k4|0,0,0,0,0,2,37,1
+El Capitan|B. Linder|q69uhd5r|0,0,0,0,0,1,20
+El Capitan|R. Silva|8obofu73|0,0,0,0,0,0,0,0,0,12,0,1
+El Capitan|S. Whitmore|tt15f6eg|0,0,0,0,0,0,0,0,0,5
+El Capitan|B. Jimenez|0u9uhk2r|0,0,0,0,0,0,0,0,0,3
+El Capitan|B. Vermilya|p0aj3qrm|0,0,0,0,0,0,0,0,0,1
+El Capitan|Q. White|s64eg8pc|0,0,0,0,0,0,0,0,0,3,1
+El Capitan|D. Alduenda|eoitkvib|0,0,0,0,0,0,0,0,0,9
+El Capitan|F. Seymour|tg5qfkor|0,0,0,0,0,0,0,0,0,5
+El Capitan|E. Soule|vqgf6t4f|0,0,0,0,0,0,0,0,0,8,0,0,0,1
+El Capitan|D. Schmidt|eo95d10j|0,0,0,0,0,0,0,0,0,1
+El Capitan|M. Sanchez|c9tquaso|0,0,0,0,0,0,0,0,0,5,1
+El Capitan|K. Ludlum|nsk7qp6v|0,0,0,0,0,0,0,0,0,1
+El Capitan|D. Megginson|p2iglsq4|0,0,0,0,0,0,0,0,0,1
+El Capitan|C. Kidd|gs8n5rj2|0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,68,0,3
+El Capitan|R. Powers|7qia6kp8|0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,6
+El Capitan|D. Painter|d4np05vd|0,0,0,0,0,0,0,0,0,1
+El Capitan|G. Silva|csmfm151|0,0,0,0,0,0,0,0,0,2
+Mater Dei Catholic|J. Anderson|l1spru3c|7,0,0,32
+Mater Dei Catholic|J. Blondin|7j7a8ivo|80,2,0,83
+Mater Dei Catholic|A. Wilson|6uevserq|0,0,0,14,1,0,0,0,0,5,0,1,0,0,1
+Mater Dei Catholic|X. Vitela|3f09rl8u|0,0,0,18,0,0,0,0,0,5
+Mater Dei Catholic|J. Fontenot|2u656lr0|0,0,0,19
+Mater Dei Catholic|Q. Willams|li2l5gft|0,0,0,70,3,1,18
+Mater Dei Catholic|K. Jordan|h2o3o6ou|0,0,0,11,0,4,48,1
+Mater Dei Catholic|B. Howard- Collins|9qantciu|0,0,0,33,1
+Mater Dei Catholic|D. Mendoza|01vfc7a5|0,0,0,0,0,2,16,1,0,3,0,1
+Mater Dei Catholic|K. Alfred|cm9el3k9|0,0,0,0,0,1,11
+Mater Dei Catholic|N. Orozco|le5l7kuj|0,0,0,0,0,0,0,0,0,2
+Mater Dei Catholic|J. Fitzpatrick|vfn1ifvk|0,0,0,0,0,0,0,0,0,1
+Mater Dei Catholic|T. Tauanuu|qlj92kr8|0,0,0,0,0,0,0,0,0,1
+Mater Dei Catholic|R. Pizarro|mrri2njl|0,0,0,0,0,0,0,0,0,2
+Mater Dei Catholic|P. Latu|ug4jafqe|0,0,0,0,0,0,0,0,0,1
+Mater Dei Catholic|T. Ragland|oeme7r6a|0,0,0,0,0,0,0,0,0,5
+Mater Dei Catholic|V. Nava|q5ncnk3e|0,0,0,0,0,0,0,0,0,3,0,1
+Mater Dei Catholic|R. Siababa|8ijkqhf7|0,0,0,0,0,0,0,0,0,6,1
+Mater Dei Catholic|R. Perez|gl8crjo9|0,0,0,0,0,0,0,0,0,1
+Mater Dei Catholic|J. Rodriguez Jr.|bhp4gk5d|0,0,0,0,0,0,0,0,0,4
+Mater Dei Catholic|L. Heraldez|4enr3238|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6
+El Camino|A. Spencer|jnt9j0ls|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3
+Westview|J. Munford|b8jnodn8|257,0,0,-51
+Westview|E. Davis|atm3hhlb|32
+Westview|C. Klingkammer|0cu2uijk|0,0,0,26,1,5,44,0,0,2
+Westview|M. Miranda|8o0vae8t|0,0,0,1,0,7,58,0,0,2
+Westview|E. Quiogue|6gvlh08m|0,0,0,0,0,3,31
+Westview|M. Davis|lvg070vm|0,0,0,0,0,3,78,0,0,6
+Westview|S. Sterns|ng8dm9id|0,0,0,0,0,1,32,0,0,4
+Westview|R. Marsh|6h6kmppj|0,0,0,0,0,1,14
+Westview|K. Lopez|s2m1nurl|0,0,0,0,0,1,10
+Westview|J. Vargas|1u1pgto9|0,0,0,0,0,3,22,0,0,6
+Westview|L. Cahill|87n1221j|0,0,0,0,0,0,0,0,0,5
+Westview|M. Fabian|vvvltj67|0,0,0,0,0,0,0,0,0,10
+Westview|D. Lloyd|7jtpmk8t|0,0,0,0,0,0,0,0,0,3
+Westview|D. Walsh|ko4up1pt|0,0,0,0,0,0,0,0,0,3
+Westview|G. Bibler|gk3h9fcr|0,0,0,0,0,0,0,0,0,8
+Westview|C. Ison|6ndriss7|0,0,0,0,0,0,0,0,0,12
+Westview|B. Osquist|27vb22bb|0,0,0,0,0,0,0,0,0,2
+Westview|L. Luong|64uim1k2|0,0,0,0,0,0,0,0,0,1
+Westview|E. Kouassi|d477mfpk|0,0,0,0,0,0,0,0,0,2
+Westview|A. Conrad|4r3slfkn|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+Ramona|R. Shaw|2a1bkf5j|274,3,3,-11,1
+Ramona|R. Peck|j3lh28nr|0,0,0,0,0,2,56
+Ramona|Z. Pascual|0ivr0nd9|0,0,0,15,0,1,8
+Ramona|K. McElwee|otbgd6mp|0,0,0,15
+Ramona|M. Silva|r52svrr9|0,0,0,2
+Ramona|S. Swanson|kcmvppf6|0,0,0,0,0,1,4
+Ramona|J. Howard|v2vinjn7|0,0,0,0,0,4,39
+Ramona|T. Kelly|ropo0ghc|0,0,0,0,0,1,10
+Ramona|L. Cavaness|lpb5ulb0|0,0,0,0,0,3,34
+Ramona|N. Bedia|n42l1375|0,0,0,0,0,7,123,3
+Ramona|N. Korsbjerg|eis56nga|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1

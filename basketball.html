@@ -1428,6 +1428,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .bt-t .cb-tag{margin:4px 0 0}.bx-tag.cbx{color:#3DDC84}
 .lk-tiers{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.lk-tiers li{display:flex;justify-content:space-between;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:.8rem}
 .lk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:10px}.lk-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;border:1px solid var(--line);border-left:3px solid var(--rc);background:var(--surface2);color:inherit;font:inherit;text-align:left}.lk-card span{display:flex;flex-direction:column;gap:2px;min-width:0}.lk-card small{font-size:.72rem}
+.sx-avr{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;scrollbar-width:thin}.sx-avc{flex:0 0 112px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:10px 6px;border-radius:12px;border:1px solid var(--line);background:var(--surface2)}.sx-avc>small:first-child{font-weight:800;letter-spacing:.06em;color:#FFC23D}.sx-avc b{font-size:.8rem;line-height:1.15}.sx-avc small{font-size:.68rem}.sx-avc em{font-style:normal;font-weight:800;color:var(--ink)}
 .bnd-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-bottom:8px}.bnd-s{display:flex;align-items:center;gap:10px;text-align:left;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface2)}.bnd-s>span{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.bnd-s[aria-pressed="true"]{border-color:#FFC23D;box-shadow:0 0 0 2px rgba(255,194,61,.35)}.bnd-s.dn{border-color:#2EC27E;background:rgba(46,194,126,.1)}
 .bnd-b{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}.bnd-b u{display:block;height:100%;background:linear-gradient(90deg,#FFC23D,#FF8A3D);text-decoration:none}.bnd-s.dn .bnd-b u{background:#2EC27E}
 .bnd-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:8px}.bnd-c{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:8px 4px;border-radius:12px;border:1px solid var(--rc);background:var(--surface2);opacity:.6}.bnd-c.on{opacity:1}.bnd-c b{font-size:.78rem;line-height:1.15}.bnd-e{display:flex;align-items:center;justify-content:center;border:2px dashed #566;border-radius:8px;font-size:1.6rem;color:#778}
@@ -2627,7 +2628,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v297 · Nov 7';
+const APP_BUILD='v298 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5786,6 +5787,11 @@ function sxSpark(gs){
   return `<svg class="sx-sp" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${pts_}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".45"/><polyline points="${v.slice(-3).map((x,j)=>X(n-3+j).toFixed(1)+','+Y(x).toFixed(1)).join(' ')}" fill="none" stroke="#FFC23D" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${X(n-1).toFixed(1)}" cy="${Y(v[n-1]).toFixed(1)}" r="2.6" fill="#FFC23D"/></svg>`;
 }
 const sxWho=(p,extra,l3)=>`${av(p.name,p.school,34)}<span class="sx-who">${T10W(p,`<b>${esc(p.name)}</b>`)}<small>${pb(p.pos,p.sub)}<span>${esc(p.school)}</span>${extra||''}</small>${l3?`<em class="sx-l3">${esc(l3)}</em>`:''}</span>`;
+function sxAllV(D){
+  const P=FILTERS.filter(x=>x!=='ALL'),L=P.map(pos=>{const r=D.rows.filter(x=>posMatch(x.p,pos)&&x.fp>0).sort((a,b)=>b.fp-a.fp)[0];return r?{pos,x:r}:null}).filter(Boolean);
+  if(!L.length)return '';
+  return `<section class="card sx-card sx-av"><div class="qh"><h3>First Team All-Varsity</h3><span class="muted">best at each position, fantasy pts</span></div>
+    <div class="sx-avr">${L.map(({pos,x})=>`<button type="button" class="sx-avc" data-act="player" data-id="${esc(x.p.key)}"><small>${pos}</small>${av(x.p.name,x.p.school,40)}<b>${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><em>${f1(x.fp)}</em></button>`).join('')}</div></section>`}
 function sxLeaders(D){
   const P=FILTERS.filter(x=>x!=='ALL'),pos=P.includes(UI.sx.pos)?UI.sx.pos:P[0];
   const fl=sxFields(pos).filter(k=>D.rows.some(x=>posMatch(x.p,pos)&&x.tot[k]>0));
@@ -5833,7 +5839,7 @@ function statsHTML(){
   const best=D.lines.reduce((m,x)=>x.v>m.v?x:m,D.lines[0]),avg=D.lines.reduce((a,x)=>a+x.v,0)/D.lines.length;
   const tile=(v,l,act)=>`<div class="sx-tile">${act?`<button class="sx-tb" data-act="player" data-id="${esc(act)}">`:'<div class="sx-tb">'}<b>${v}</b><small>${l}</small>${act?'</button>':'</div>'}</div>`;
   return `<div class="sx-tiles">${tile(D.rows.length.toLocaleString(),'players with stats')}${tile(D.lines.length.toLocaleString(),'box score lines')}${tile(f1(avg),'avg pts per game')}${tile(f1(best.v),'best game · '+esc(best.p.name),best.p.key)}</div>
-    ${sxLeaders(D)}
+    ${sxAllV(D)}${sxLeaders(D)}
     <div class="sx-two">${sxForm(D)}${sxBest(D)}</div>
     ${sxTeams(D)}`;
 }
