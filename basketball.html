@@ -2399,6 +2399,7 @@ const NOW=()=>Date.now();
 const WEEKS=14;
 const PTS={pts:1,reb:1.2,ast:1.5,stl:3,blk:3,tov:-2,tpm:0};
 const KEYS=Object.keys(PTS);
+const BEST_L='Best game',GAME_L='Game',GAME_H='Game';
 const KM=Object.fromEntries(KEYS.map(k=>[k.toLowerCase(),k]));
 const LABEL={pts:'Points',reb:'Rebounds',ast:'Assists',stl:'Steals',blk:'Blocks',tov:'Turnovers',tpm:'3-pointers made'};
 const FIELDS=Object.fromEntries(['PG','SG','SF','PF','C'].map(p=>[p,['pts','reb','ast','stl','blk','tov','tpm']]));
@@ -2454,7 +2455,9 @@ const T10=p=>(isT10(p)?'<em class="top10">TOP 10</em>':'')+POTWT(p);
 const T10W=(p,h)=>isT10(p)||isPOTW(p)?`<span class="nmt">${h}${isT10(p)?'<em class="top10">TOP 10</em>':''}${POTWT(p)}</span>`:h;
 const gtag=p=>p&&p.gr?`<span class="gr">${GRL[p.gr]}</span>`:'';
 const mpP=MP?MP.players.map(p=>({key:'mp'+p.id,gr:p.g||0,name:p.n,school:p.s,pos:p.p,sub:['CB','S'].includes(p.u)?'DB':(p.u||p.p),mp:true,tw:!!p.tw,sample:false,
-  games:Array.from({length:WEEKS},(_,i)=>{const l=p.w[i+1];return l?{stat:Object.fromEntries(KEYS.map((k,j)=>[k,l[j]||0])),ver:'maxpreps'}:null})})):[];
+  games:Array.from({length:WEEKS},(_,i)=>{const gl=p.gm&&p.gm[i+1]&&p.gm[i+1].length?p.gm[i+1]:null;let l=p.w[i+1];if(gl)l=KEYS.map((k,j)=>gl.reduce((a,r)=>a+(+r.s[j]||0),0));
+  /* a week holds the SUM of the player's games that week; n = how many games (basketball can play twice a week), gl = each game's own line */
+  return l?{stat:Object.fromEntries(KEYS.map((k,j)=>[k,l[j]||0])),ver:'maxpreps',n:gl?gl.length:(l[KEYS.length]||1),gl:gl?gl.map(r=>({d:r.d,o:r.o,stat:Object.fromEntries(KEYS.map((k,j)=>[k,+r.s[j]||0]))})):null}:null})})):[];
 /* two-way players: if he was on the field at all (offense or defense), the game counts for both of his cards.
    A side with no stats that week gets a 0 line, so it counts as a game played worth 0 points. */
 /* No cross-crediting: an offense card scores only offense, a defense card only defense.
@@ -2696,7 +2699,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v311 · Nov 8';
+const APP_BUILD='v312 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2739,13 +2742,16 @@ function agg(p,scope){
   const g=scoped(p,scope);
   if(!g.length&&!p.sample&&PRE())return{n:1,s:sum([]),v:0,unv:false,ver:false};
   const s=sum(g.map(x=>x.stat));
-  return{n:g.length,s,v:Math.round(g.reduce((a,x)=>a+pts(x.stat),0)*10)/10,unv:g.some(x=>x.ver==='self'),ver:g.length>0&&g.every(x=>x.ver==='verified')};
+  return{n:g.reduce((a,x)=>a+(x.n||1),0),s,v:Math.round(g.reduce((a,x)=>a+pts(x.stat),0)*10)/10,unv:g.some(x=>x.ver==='self'),ver:g.length>0&&g.every(x=>x.ver==='verified')};
 }
 const metric=a=>a.v;
 /* "Previous" ranks everyone by their most recent game instead of their running total (it ignores the scoring period) */
 function lastAgg(p){let i=p.games.length-1;while(i>=0&&!p.games[i])i--;
   if(i<0)return{n:0,s:sum([]),v:0,unv:false,ver:false,w:0};
-  const x=p.games[i];return{n:1,s:sum([x.stat]),v:Math.round(pts(x.stat)*10)/10,unv:x.ver==='self',ver:x.ver==='verified',w:i+1}}
+  const x=p.games[i],y=x.gl&&x.gl.length?x.gl[x.gl.length-1]:x;return{n:1,s:sum([y.stat]),v:Math.round(pts(y.stat)*10)/10,unv:x.ver==='self',ver:x.ver==='verified',w:i+1}}
+/* best single game (a week's line when no per-game lines exist) and games played */
+const bestG=p=>p.games.reduce((m,x)=>x?Math.max(m,...(x.gl&&x.gl.length?x.gl:[x]).map(y=>pts(y.stat))):m,0);
+const gamesP=p=>p.games.reduce((a,x)=>a+(x?(x.n||1):0),0);
 const aggR=p=>UI.rank==='prev'?lastAgg(p):agg(p,UI.scope);
 function trend(p){
   const g=p.games.map((x,i)=>x?{w:i+1,v:pts(x.stat)}:null).filter(Boolean);
@@ -4893,7 +4899,7 @@ async function playerCardBlob(p){
   let fs=150;g.font=F(800,fs);const nm=String(p.name).toUpperCase();while(g.measureText(nm).width>W-140&&fs>70){fs-=6;g.font=F(800,fs)}
   g.fillStyle='#fff';g.fillText(nm,W/2,y+110);
   g.fillStyle='#B4C2D2';g.font=B(500,44);g.fillText(`${p.school} · ${p.pos==='DEF'&&p.sub?p.sub:p.pos}${classOf(p.name,p.school)?' · '+GRL[classOf(p.name,p.school)]:''}`,W/2,y+190);
-  const a=agg(p,'season'),gs=p.games.filter(Boolean),best=gs.length?Math.max(...gs.map(x=>pts(x.stat))):0;
+  const a=agg(p,'season'),gs=p.games.filter(Boolean),best=bestG(p);
   const pool=players().filter(x=>x.mp&&x.pos===p.pos).map(x=>agg(x,'season').v).sort((m,n)=>n-m),rk=pool.findIndex(v=>v<=a.v)+1;
   g.fillStyle='#FFC23D';g.font=F(800,260);g.fillText(f1(a.v),W/2,y+470);
   g.fillStyle='#98A8BA';g.font=F(800,46);g.fillText('SEASON FANTASY POINTS',W/2,y+535);
@@ -6902,23 +6908,26 @@ const noGameWk=(school,w)=>{const gs=(GAMES&&GAMES.games)||[];return gs.some(g=>
 /* two-way players have two cards (offense and defense) so each side scores on its own; this finds the other one */
 const twinOf=p=>p&&p.tw&&p.twin?pByKey(p.twin):null;
 function drawerHTML(p){
-  const gs=p.games.filter(Boolean),total=gs.reduce((a,x)=>a+pts(x.stat),0),avg=gs.length?total/gs.length:0,best=gs.length?Math.max(...gs.map(x=>pts(x.stat))):0,cw=CURW();
+  const gs=p.games.filter(Boolean),total=gs.reduce((a,x)=>a+pts(x.stat),0),ng=gamesP(p),avg=ng?total/ng:0,best=bestG(p),cw=CURW();
   /* a two-way card shows every game he played: the other side's line is listed too, without points (they count on the other card) */
-  const tw=twinOf(p),side=x=>x.pos==='DEF'?'defense':'offense',played=p.games.map((g,i)=>!!g||!!(tw&&tw.games[i])).filter(Boolean).length;
+  const tw=twinOf(p),side=x=>x.pos==='DEF'?'defense':'offense',played=p.games.map((g,i)=>g?(g.n||1):(tw&&tw.games[i]?1:0)).reduce((a,b)=>a+b,0);
   const other=(i,lead)=>{const t=tw&&tw.games[i];return t&&!t.zero?`<small class="tw-o">${lead?'':'+ '}${esc(side(tw))}: ${line(tw.pos,t.stat)} · ${f1(pts(t.stat))} on ${tw.pos==='DEF'?'DEF':tw.pos} card</small>`:''};
-  const log=p.games.map((g,i)=>({w:i+1,g,i})).reverse().map(({w,g,i})=>g
-    ?`<tr><td>Wk ${w}</td><td>${line(p.pos,g.stat)}${other(i)}</td><td class="n">${f1(pts(g.stat))}</td></tr>`
+  const cum=[];{let c=0;p.games.forEach((g,i)=>{cum[i]=c;if(g)c+=(g.n||1)})}const dt=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+  const log=p.games.map((g,i)=>({w:i+1,g,i})).reverse().map(({w,g,i})=>g&&g.gl&&g.gl.length
+    ?g.gl.map((y,k)=>({y,k})).reverse().map(({y,k})=>`<tr><td>${GAME_L} ${cum[i]+k+1}<small class="muted"> ${esc(dt(y.d))}${y.o?' '+esc(y.o):''}</small></td><td>${line(p.pos,y.stat)}</td><td class="n">${f1(pts(y.stat))}</td></tr>`).join('')
+    :g
+    ?`<tr><td>${GAME_L==='Wk'?'Wk '+w:'Game '+(cum[i]+1)+((g.n||1)>1?'-'+(cum[i]+g.n):'')}</td><td>${line(p.pos,g.stat)}${other(i)}</td><td class="n">${f1(pts(g.stat))}</td></tr>`
     :tw&&tw.games[i]?`<tr><td>Wk ${w}</td><td><span class="muted">No ${esc(side(p))} stats</span>${other(i)}</td><td class="n">—</td></tr>`
-    :`<tr class="dim"><td>Wk ${w}</td><td>${w>=cw&&!noGameWk(p.school,w)?'Not reported yet':'No game'}</td><td class="n">—</td></tr>`).join('');
+    :`<tr class="dim"><td>${GAME_L==='Wk'?'Wk ':'Week '}${w}</td><td>${w>=cw&&!noGameWk(p.school,w)?'Not reported yet':'No game'}</td><td class="n">—</td></tr>`).join('');
   const twNote=tw?`<p class="tw-note"><b>Two-way player</b><button class="btn sm ghost" data-act="player" data-id="${esc(tw.key)}">Open ${tw.pos==='DEF'?'DEF':tw.pos} card</button></p>`:'';
   return `<aside class="dp" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
-    <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${tw?played:gs.length} games</span></div></div></div><div class="dh-btns"><button class="btn sm" data-act="pshare" data-id="${esc(p.key)}">Share</button><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div></div>
-    <div class="big"><div><span class="lbl">Season pts</span><b>${f1(total)}</b></div><div><span class="lbl">Per game</span><b>${f1(avg)}</b></div><div><span class="lbl">Best week</span><b>${f1(best)}</b></div></div>
+    <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${esc(p.school)}, ${tw?played:ng} game${(tw?played:ng)===1?'':'s'}</span></div></div></div><div class="dh-btns"><button class="btn sm" data-act="pshare" data-id="${esc(p.key)}">Share</button><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div></div>
+    <div class="big"><div><span class="lbl">Season pts</span><b>${f1(total)}</b></div><div><span class="lbl">Per game</span><b>${f1(avg)}</b></div><div><span class="lbl">${BEST_L}</span><b>${f1(best)}</b></div></div>
     ${twNote}
     ${projCard(p)}
     ${weekChart(p)}
     <div id="la" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">${lineupAction(p)}</div>
-    <div class="scroll"><table><thead><tr><th>Week</th><th>Stat line</th><th class="n">Pts</th></tr></thead><tbody>${log}</tbody></table></div>
+    <div class="scroll"><table><thead><tr><th>${GAME_H}</th><th>Stat line</th><th class="n">Pts</th></tr></thead><tbody>${log}</tbody></table></div>
   </aside>`;
 }
 function openPlayer(key){
