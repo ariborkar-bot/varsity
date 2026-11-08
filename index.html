@@ -5293,7 +5293,7 @@ function fgOpen(mode){
   document.body.appendChild(el);document.body.classList.add('fg-on');
   const cv=el.querySelector('canvas'),cx=cv.getContext('2d');
   const g=FG={el,cv,cx,st:'ready',raf:0,last:0,mode};
-  const size=()=>{const r=devicePixelRatio||1;g.W=innerWidth;g.H=innerHeight;cv.width=g.W*r;cv.height=g.H*r;cv.style.width=g.W+'px';cv.style.height=g.H+'px';cx.setTransform(r,0,0,r,0,0)};
+  const size=()=>{const r=devicePixelRatio||1,oh=g.H;g.W=innerWidth;g.H=innerHeight;if(oh&&oh!==g.H&&g.posts)fgRescale(g,oh);cv.width=g.W*r;cv.height=g.H*r;cv.style.width=g.W+'px';cv.style.height=g.H+'px';cx.setTransform(r,0,0,r,0,0)};
   size();g.onR=size;addEventListener('resize',size);
   fgReset();
   const flap=e=>{if(e){if(e.target.closest&&e.target.closest('.fgx-x,.fgx-rv'))return;e.preventDefault()}
@@ -5309,13 +5309,21 @@ function fgOpen(mode){
   el.querySelector('.fgx-x').addEventListener('click',()=>fgClose());
   g.vis=()=>{if(document.hidden&&g.st==='play'){g.paused=true}};document.addEventListener('visibilitychange',g.vis);
   try{history.pushState({fg:1},'',location.href);g.hist=true}catch(_){}
-  g.last=performance.now();const loop=t=>{if(FG!==g)return;fgStep(Math.min(3,(t-g.last)/16.67));g.last=t;fgDraw();g.raf=requestAnimationFrame(loop)};g.raf=requestAnimationFrame(loop);
+  g.last=performance.now();const loop=t=>{if(FG!==g)return;fgStep(Math.max(0,Math.min(3,(t-g.last)/16.67)));g.last=Math.max(t,g.last);fgDraw();g.raf=requestAnimationFrame(loop)};g.raf=requestAnimationFrame(loop);
+}
+/* the screen changed height mid-run (phone toolbar showing/hiding, rotating): move everything with it so nobody dies for it */
+function fgRescale(g,oh){
+  const k=g.H/oh,s=g.s,ground=g.H-Math.round(56*s),top=60*s,bot=ground-30*s;
+  g.y*=k;g.y=Math.max(15*s,Math.min(ground-15*s,g.y));
+  for(const p of g.posts){const lo=top+p.gap/2,hi=bot-p.gap/2,a=p.amp||0;if(p.c0!=null){p.c0=Math.max(lo+a,Math.min(hi-a,p.c0*k));p.c=p.c0}else p.c=Math.max(lo,Math.min(hi,p.c*k))}
+  for(const it of g.items){it.y0=Math.max(top+20*s,Math.min(bot-20*s,it.y0*k));it.y=it.y0}
+  if(g.st==='play'&&!g.paused&&Math.abs(g.H-oh)>60){g.paused=true;g.invP=1800}
 }
 function fgReset(){
   const g=FG;g.s=Math.max(.8,Math.min(1.35,g.H/700));   /* scale everything to the screen height */
   g.st='ready';g.y=g.H*.45;g.vy=0;g.x=Math.min(g.W*.28,140);g.score=0;g.goals=0;g.posts=[];g.dist=0;g.t=0;g.rot=0;g.paused=false;g.next=g.W*.12;g.sp=0;g.n=0;g.yl=0;g.zone=null;
   g.gold=fgGold(ME.uid);g.skin=ballOf(ME.uid);g.rnd=g.mode==='daily'?fgSeed(hash('fg|'+FG_SPORT+'|'+TODAY())):Math.random;g.revived=false;g.offer=false;g.saved=false;g.inv=0;fgOffer(false);
-  g.pw={sh:0,x2:0,mg:0,sl:0};g.items=[];g.combo=0;g.best=0;g.wind=null;g.pops=[];g.lastMv=0;g.lastPw=0;   /* v262 extras */
+  g.pw={sh:0,x2:0,mg:0,sl:0};g.items=[];g.combo=0;g.best=0;g.fire=[];g.fireAcc=0;g.wind=null;g.pops=[];g.lastMv=0;g.lastPw=0;   /* v262 extras */
 }
 function fgClose(fromPop){
   const g=FG;if(!g)return;if(g.st==='over'&&!g.saved)fgSave(g);FG=null;cancelAnimationFrame(g.raf);removeEventListener('resize',g.onR);removeEventListener('keydown',g.key);document.removeEventListener('visibilitychange',g.vis);
@@ -5329,6 +5337,30 @@ window.addEventListener('popstate',()=>{if(FG)fgClose(true)});
    wind gusts from goal 25 (warned first), and a combo for passing dead centre (PERFECT / SWISH: +1 and a x2-x4 multiplier). */
 const FG_PW={sh:{c:'#3DDC84',t:'S',n:'Shield',d:20},x2:{c:'#FFC23D',t:'2x',n:'Double points',d:10},mg:{c:'#FF4F6D',t:'M',n:'Magnet',d:7},sl:{c:'#7AB8FF',t:'SL',n:'Slow-mo',d:6}};
 const fgMult=c=>c>=6?3:c>=3?2:1;   /* 3 perfects in a row = x2, 6 = x3 (max) */
+/* v324: a perfect streak sets the ball on fire. Level = perfects in a row: 1 a few sparks, 3 a real flame trail, 6 a blaze, 10+ an inferno.
+   Embers and a glow join in from level 3; it dies down on its own the moment the streak breaks. */
+const fgLvl=g=>Math.min(14,g.combo||0);
+function fgFireStep(g,k,speed){
+  const s=g.s,L=fgLvl(g),F=g.fire;
+  for(const p of F){p.a+=k;p.x-=speed*k*.85;p.y+=p.vy*k;p.vy-=.012*s*k;p.x+=p.vx*k}
+  for(let i=F.length-1;i>=0;i--)if(F[i].a>F[i].life)F.splice(i,1);
+  if(L<1)return;
+  g.fireAcc+=Math.min(1.1+L*1.1,16)*k;
+  while(g.fireAcc>=1&&F.length<260){g.fireAcc-=1;
+    const sz=(3.5+Math.min(L,10)*1.15)*s*(.65+Math.random()*.7);
+    F.push({x:g.x-(2+Math.random()*7)*s,y:g.y+(Math.random()-.5)*8*s,vx:-(.4+Math.random()*1.2)*s,vy:-(.5+Math.random()*(.9+L*.12))*s,r:sz,a:0,life:16+Math.random()*(12+L*2.2),em:0})}
+  if(L>=3){const n=Math.min(L-2,6)*.35*k;if(Math.random()<n)F.push({x:g.x-Math.random()*10*s,y:g.y-6*s,vx:-(.3+Math.random()*1.4)*s,vy:-(1.4+Math.random()*2.4)*s,r:(1.2+Math.random()*1.3)*s,a:0,life:22+Math.random()*22,em:1})}
+}
+function fgFireDraw(c,g){
+  const s=g.s,L=fgLvl(g),F=g.fire;if(!F||(!F.length&&L<1))return;
+  c.save();c.globalCompositeOperation='lighter';
+  if(L>=1&&g.st==='play'){const R=(24+L*3.4)*s,a=Math.min(.7,.2+L*.05),fl=1+Math.sin(performance.now()/70)*.06,gr=c.createRadialGradient(g.x,g.y,0,g.x,g.y,R*fl);
+    gr.addColorStop(0,`rgba(255,200,80,${a})`);gr.addColorStop(.5,`rgba(255,110,20,${a*.55})`);gr.addColorStop(1,'rgba(255,60,0,0)');c.fillStyle=gr;c.beginPath();c.arc(g.x,g.y,R*fl,0,7);c.fill()}
+  for(const p of F){const t=p.a/p.life,r=p.r*(p.em?1-t:1-t*.75);if(r<=.2)continue;
+    let col;if(p.em)col=`rgba(255,${210-t*90|0},90,${1-t})`;else if(t<.25)col=`rgba(255,${235-t*200|0},${120-t*400|0},${.5-t*.3})`;else if(t<.6)col=`rgba(255,${160-(t-.25)*260|0},25,${.62-t*.4})`;else col=`rgba(${230-(t-.6)*300|0},50,20,${Math.max(0,.55-t*.5)})`;
+    c.fillStyle=col;c.beginPath();c.arc(p.x,p.y,r,0,7);c.fill()}
+  c.restore();
+}
 const fgPop=(g,x,y,txt,col)=>{g.pops.push({x,y,txt,col,t0:performance.now()});if(g.pops.length>8)g.pops.shift()};
 function fgHit(g){   /* a shield takes the hit instead of you */
   if(g.t<g.pw.sh){g.pw.sh=0;g.inv=performance.now()+1100;g.combo=0;g.vy=Math.min(g.vy,0);fgPop(g,g.x,g.y-30*g.s,'SHIELD!','#3DDC84');try{navigator.vibrate&&navigator.vibrate(30)}catch(_){}return false}
@@ -5345,6 +5377,7 @@ function fgStep(k){
   g.vy=Math.min(g.vy+0.42*s*k,11*s);g.y+=g.vy*k;
   if(g.t<g.pw.mg){const q=g.posts.find(p=>!p.done&&p.x>g.x-10*s&&p.x-g.x<170*s);if(q){g.y+=(q.c-g.y)*Math.min(1,.07*k);g.vy*=Math.pow(.9,k)}}g.rot=Math.max(-.5,Math.min(1.2,g.vy/(10*s)));
   g.dist+=speed*k;g.yl=(g.yl+speed*k)%(80*s);
+  fgFireStep(g,k,speed);
   for(const p of g.posts){p.x-=speed*k;if(p.amp)p.c=p.c0+p.amp*Math.sin(g.t*p.w+p.ph)}
   g.posts=g.posts.filter(p=>p.x>-80*s);
   for(const it of g.items){it.x-=speed*k;it.y=it.amp?it.y0+it.amp*Math.sin(g.t*it.w+it.ph):it.y0}
@@ -5355,7 +5388,7 @@ function fgStep(k){
     const gap=(small?132:188)*s*(g.t>60?.94:1),top=60*s,bot=ground-30*s;let c=top+gap/2+g.rnd()*Math.max(10,bot-top-gap);
     /* always possible: the ball only has the frames between two goals to change height (minus the goals' own width), so the next
        opening is kept within what it can climb (steady tapping) or drop (falling) in that time, with room to spare */
-    const prev=g.posts.length?(g.posts[g.posts.length-1].c0??g.posts[g.posts.length-1].c):g.y,F=Math.max(8,((g.sp||g.W*.12)-110*s)/speed);
+    const prev=g.posts.length?(g.posts[g.posts.length-1].c0??g.posts[g.posts.length-1].c):g.H*.45,F=Math.max(8,((g.sp||g.W*.12)-110*s)/speed);
     const climb=3*s*F,drop=.6*Math.min(.21*s*F*F,11*s*F);
     c=Math.max(top+gap/2,Math.min(bot-gap/2,Math.max(prev-climb,Math.min(prev+drop,c))));
     const tm=fgTeam(g.rnd),n=g.n,rr=g.mode==='daily'?fgSeed(hash('fgx|'+FG_SPORT+'|'+TODAY()+'|'+n)):Math.random,pst={x:g.W+30*s,c,gap,small,pts:small?3:1,done:false,tm};
@@ -5386,12 +5419,12 @@ function fgStep(k){
     else hits.push([p.x-cw/2,b,cw,7*s],[p.x-5*s,b,10*s,9999]);
     if(!inv)for(const[hx,hy,hw,hh]of hits){const nx=Math.max(hx,Math.min(g.x,hx+hw)),ny=Math.max(hy,Math.min(g.y,hy+hh));if((g.x-nx)**2+(g.y-ny)**2<r*r*.8&&performance.now()>=g.inv){if(fgHit(g))return fgOver();break}}
     if(!p.done&&p.x<g.x){p.done=true;if(FG_SPORT!=='bb'&&g.y<b-fgUp(p,s)){p.miss=1;p.flash=1;g.combo=0}
-      else{const perf=Math.abs(g.y-p.c)<p.gap*.1;g.combo=perf?g.combo+1:0;g.best=Math.max(g.best,g.combo);const m=fgMult(g.combo)*(g.t<g.pw.x2?2:1),pts=(p.pts+(perf?1:0))*m;
+      else{const perf=Math.abs(g.y-p.c)<p.gap*(FG_SPORT==='bb'?.07:.1);g.combo=perf?g.combo+1:0;g.best=Math.max(g.best,g.combo);if(perf&&(g.combo===3||g.combo===6||g.combo===10))fgPop(g,g.x+40*s,g.y-34*s,g.combo===3?'HEATING UP!':g.combo===6?'ON FIRE!':'INFERNO!',g.combo===3?'#FFC23D':g.combo===6?'#FF8A2B':'#FF4A2B');const m=fgMult(g.combo)*(g.t<g.pw.x2?2:1),pts=(p.pts+(perf?1:0))*m;
         g.score+=pts;g.goals++;p.flash=1;p.got=pts;p.perf=perf;p.mult=m;if(perf)try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}}
   }
 }
 function fgOver(){
-  const g=FG;g.st='over';g.tEnd=performance.now();g.vy=-3*g.s;
+  const g=FG;g.st='over';g.fire=[];g.tEnd=performance.now();g.vy=-3*g.s;
   try{navigator.vibrate&&navigator.vibrate(60)}catch(_){}
   const my=ME.uid?fgRec(ME.uid):{},d=ME.uid?fgDay(ME.uid):null;
   g.newBest=g.mode==='daily'?g.score>(+(d||{}).best||0):g.score>(+my.best||0);
@@ -5589,6 +5622,7 @@ function fgDraw(){
     c.restore()}
   /* golden ball sparkle trail */
   if(g.gold&&g.st!=='ready'){c.save();for(let i=1;i<=7;i++){const a=(1-i/8)*.7,tx=g.x-i*9*s,ty=g.y+Math.sin((g.dist/14)+i)*4*s;c.globalAlpha=a;c.fillStyle=i%2?'#FFD54A':'#fff6c8';c.beginPath();c.arc(tx,ty,(5-i*.5)*s,0,7);c.fill()}c.restore()}
+  if(g.st==='play'||g.st==='over')fgFireDraw(c,g);
   /* ball */
   c.save();c.translate(g.x,g.y);c.rotate(g.rot);if((performance.now()<g.inv||g.invP)&&!(g.paused&&!g.invP))c.globalAlpha=.45+.45*Math.sin(performance.now()/60);
   if(bb){const r=17*s;c.rotate(g.st==='ready'?performance.now()/900:g.dist/(r*2.2)-g.rot);   /* a basketball spins as it flies */
