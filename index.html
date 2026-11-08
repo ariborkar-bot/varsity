@@ -2746,7 +2746,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v335 · Nov 8';
+const APP_BUILD='v336 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6300,10 +6300,10 @@ function sxLeaders(D){
   </section>`;
 }
 function sxForm(D){
-  const up=UI.sx.tr!=='down',all=[...D.form].sort((a,b)=>up?b.d-a.d:a.d-b.d).filter(x=>up?x.d>0:x.d<0),N=UI.sx.tn||10,L=all.slice(0,N);
+  const up=UI.sx.tr!=='down',all=[...D.form].sort((a,b)=>up?b.d-a.d:a.d-b.d).filter(x=>up?x.d>0:x.d<0),L=all.slice(0,5);   /* owner: just 5 people */
   return `<section class="card sx-card"><div class="qh"><h3>${up?'On the rise':'Cooling off'}</h3><div class="pr-seg sx-tr" role="group" aria-label="Trend"><button data-act="sxTr" data-v="up" aria-pressed="${up}">Rising</button><button data-act="sxTr" data-v="down" aria-pressed="${!up}">Cooling</button></div></div>
     <p class="muted sx-note">Last 3 games against the rest of the season, in fantasy points per game.</p>
-    ${L.length?`<ol class="sx-list">${L.map(x=>`<li><button class="sx-li" data-act="player" data-id="${esc(x.p.key)}">${sxWho(x.p)}${sxSpark(x.gs)}<span class="sx-tv ${up?'up':'dn'}"><b>${up?'▲':'▼'} ${f1(Math.abs(x.d))}</b><small>${f1(x.pr)} → ${f1(x.l3)}</small></span></button></li>`).join('')}</ol>${all.length>N?`<button class="btn ghost" data-act="sxMore">Show more (${Math.min(10,all.length-N)} more)</button>`:''}`:'<p class="empty">Not enough games yet to spot a trend.</p>'}
+    ${L.length?`<ol class="sx-list">${L.map(x=>`<li><button class="sx-li" data-act="player" data-id="${esc(x.p.key)}">${sxWho(x.p)}${sxSpark(x.gs)}<span class="sx-tv ${up?'up':'dn'}"><b>${up?'▲':'▼'} ${f1(Math.abs(x.d))}</b><small>${f1(x.pr)} → ${f1(x.l3)}</small></span></button></li>`).join('')}</ol>`:'<p class="empty">Not enough games yet to spot a trend.</p>'}
   </section>`;
 }
 function sxBest(D){
@@ -8223,8 +8223,7 @@ document.addEventListener('click',async e=>{
   else if(a==='sxPos'){UI.sx.pos=t.dataset.v;UI.sx.k='';render()}
   else if(a==='sxK'){UI.sx.k=t.dataset.v;render()}
   else if(a==='sxPer'){UI.sx.per=t.dataset.v==='1';render()}
-  else if(a==='sxTr'){UI.sx.tr=t.dataset.v;UI.sx.tn=10;render()}
-  else if(a==='sxMore'){UI.sx.tn=(UI.sx.tn||10)+10;render()}
+  else if(a==='sxTr'){UI.sx.tr=t.dataset.v;render()}
   else if(a==='info'){const h=t.closest('.head'),pop=h&&h.querySelector('.ib-pop');if(pop){pop.hidden=!pop.hidden;t.setAttribute('aria-expanded',String(!pop.hidden))}}
   else if(a==='lgSet'){UI.lgSet=!UI.lgSet;render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v==='predict'?(propCands().length?'props':'picks'):t.dataset.v;render()}
