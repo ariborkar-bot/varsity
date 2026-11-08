@@ -1275,7 +1275,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .tm-wk{font-size:.74rem;margin:4px 4px 0}
 .tm-row{grid-template-columns:24px minmax(0,1fr) auto!important}.tm-n{font:900 .95rem/1 var(--f-display);color:var(--muted);text-align:center}
 .tm-gl{display:flex;flex-direction:column}.tm-g{display:grid;grid-template-columns:48px minmax(0,1fr) auto 54px;gap:10px;align-items:center;padding:9px 2px;border-top:1px solid var(--line);font-size:.9rem}.tm-g:first-child{border-top:0}
-.tm-gd{color:var(--muted);font-size:.78rem}.tm-go{display:flex;align-items:center;gap:8px;min-width:0}.tm-go>span:not(.tm-lg){min-width:0;line-height:1.15;font-weight:700}.tm-go .tlk{white-space:normal;text-align:left}.tm-lg{flex:none;width:22px;height:22px;display:inline-grid;place-items:center}.tm-po{font-style:normal;font-size:.62rem;font-weight:800;color:#FFC23D;border:1px solid rgba(255,194,61,.5);border-radius:6px;padding:1px 5px}
+.tm-gd{color:var(--muted);font-size:.78rem}.tm-go{display:flex;align-items:center;gap:8px;min-width:0}.tm-go>span:not(.tm-lg){min-width:0;line-height:1.15;font-weight:700}.tm-go .tlk{white-space:normal;text-align:left}.tm-lg{flex:none;width:22px;height:22px;display:inline-grid;place-items:center}.tm-po{display:block;width:max-content;margin-top:3px;font-style:normal;font-size:.62rem;font-weight:800;color:#FFC23D;border:1px solid rgba(255,194,61,.5);border-radius:6px;padding:1px 5px}
 .tm-gs{display:flex;gap:7px;align-items:center;justify-content:flex-end;font-weight:800;white-space:nowrap}.tm-r{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;font-size:.78rem;background:rgba(255,255,255,.1)}
 .tm-g.W .tm-r{background:#1F9D55;color:#fff}.tm-g.L .tm-r{background:#D64545;color:#fff}.tm-rec{text-align:right;color:var(--muted);font-size:.8rem;font-weight:700}
 
@@ -1985,6 +1985,7 @@ button.sx-li:hover{background:rgba(255,255,255,.04)}
 .sx-bg b{display:block;font:800 1.25rem/1 'Barlow Condensed',sans-serif;color:#fff}
 .sx-bg small{display:block;font-size:.66rem;opacity:.65;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sx-team{cursor:default}
+.sx-tl{all:unset;cursor:pointer;display:grid;place-items:center;border-radius:50%}.sx-tn{color:inherit!important;font-weight:inherit;text-decoration:none!important}.sx-tn:hover,.sx-tn:focus-visible{text-decoration:underline!important;text-decoration-color:#FFC23D!important}.sx-li.sx-team{cursor:default}
 .sx-lnk{border:0;background:none;padding:0;color:#8FB3FF;font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .sx-sub{margin-top:16px}
 .sx-share{display:flex;height:14px;border-radius:9px;overflow:hidden;gap:2px;margin-top:8px}
@@ -2745,7 +2746,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v334 · Nov 8';
+const APP_BUILD='v335 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6184,7 +6185,7 @@ function viewTeam(){
   const dt=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
   const grows=gs.map(g=>{const home=g.h===name,opp=home?g.a:g.h,f=home?g.hs:g.as,a=home?g.as:g.hs,done=gDone(g);let res='';
     if(done){if(f>a){rw++;res='W'}else if(f<a){rl++;res='L'}else{rt++;res='T'}}
-    return `<div class="tm-g ${res}"><span class="tm-gd">${esc(dt(g.d)||'Wk '+g.w)}</span><span class="tm-go"><span class="tm-lg">${slogo(opp,22)}</span><span>${tlk(opp)}</span>${g.k==='P'?'<i class="tm-po">Playoffs</i>':''}</span>${done?`<span class="tm-gs"><b class="tm-r">${res}</b> ${f}-${a}</span><span class="tm-rec">${rw}-${rl}${rt?'-'+rt:''}</span>`:`<span class="tm-gs muted">${g.time?esc(g.time):'Upcoming'}</span><span class="tm-rec"></span>`}</div>`}).join('');
+    return `<div class="tm-g ${res}"><span class="tm-gd">${esc(dt(g.d)||'Wk '+g.w)}</span><span class="tm-go"><span class="tm-lg">${slogo(opp,22)}</span><span>${tlk(opp)}${g.k==='P'?'<i class="tm-po">Playoffs</i>':''}</span></span>${done?`<span class="tm-gs"><b class="tm-r">${res}</b> ${f}-${a}</span><span class="tm-rec">${rw}-${rl}${rt?'-'+rt:''}</span>`:`<span class="tm-gs muted">${g.time?esc(g.time):'Upcoming'}</span><span class="tm-rec"></span>`}</div>`}).join('');
   const games=`<section class="card"><div class="qh"><h3>Games</h3><span class="muted">${gs.some(gDone)?'Record '+rec:gs.length+' scheduled'}</span></div>${gs.length?`<div class="tm-gl">${grows}</div>`:'<p class="empty">No games on the schedule.</p>'}</section>`;
   /* roster: every player, best to worst by season fantasy points */
   const rk=k=>((window.BB_RANK||{})[k])||0;
@@ -6299,10 +6300,10 @@ function sxLeaders(D){
   </section>`;
 }
 function sxForm(D){
-  const up=UI.sx.tr!=='down',L=[...D.form].sort((a,b)=>up?b.d-a.d:a.d-b.d).filter(x=>up?x.d>0:x.d<0).slice(0,8);
+  const up=UI.sx.tr!=='down',all=[...D.form].sort((a,b)=>up?b.d-a.d:a.d-b.d).filter(x=>up?x.d>0:x.d<0),N=UI.sx.tn||10,L=all.slice(0,N);
   return `<section class="card sx-card"><div class="qh"><h3>${up?'On the rise':'Cooling off'}</h3><div class="pr-seg sx-tr" role="group" aria-label="Trend"><button data-act="sxTr" data-v="up" aria-pressed="${up}">Rising</button><button data-act="sxTr" data-v="down" aria-pressed="${!up}">Cooling</button></div></div>
     <p class="muted sx-note">Last 3 games against the rest of the season, in fantasy points per game.</p>
-    ${L.length?`<ol class="sx-list">${L.map(x=>`<li><button class="sx-li" data-act="player" data-id="${esc(x.p.key)}">${sxWho(x.p)}${sxSpark(x.gs)}<span class="sx-tv ${up?'up':'dn'}"><b>${up?'▲':'▼'} ${f1(Math.abs(x.d))}</b><small>${f1(x.pr)} → ${f1(x.l3)}</small></span></button></li>`).join('')}</ol>`:'<p class="empty">Not enough games yet to spot a trend.</p>'}
+    ${L.length?`<ol class="sx-list">${L.map(x=>`<li><button class="sx-li" data-act="player" data-id="${esc(x.p.key)}">${sxWho(x.p)}${sxSpark(x.gs)}<span class="sx-tv ${up?'up':'dn'}"><b>${up?'▲':'▼'} ${f1(Math.abs(x.d))}</b><small>${f1(x.pr)} → ${f1(x.l3)}</small></span></button></li>`).join('')}</ol>${all.length>N?`<button class="btn ghost" data-act="sxMore">Show more (${Math.min(10,all.length-N)} more)</button>`:''}`:'<p class="empty">Not enough games yet to spot a trend.</p>'}
   </section>`;
 }
 function sxBest(D){
@@ -6317,7 +6318,7 @@ function sxTeams(D){
   const share=`<div class="sx-share" aria-label="Share of fantasy points by position">${order.map(([k,v])=>`<i class="pos-bg ${k}" style="flex:${v}" title="${k} ${Math.round(v/tot*100)}%"></i>`).join('')}</div>
     <div class="sx-leg">${order.map(([k,v])=>`<span><i class="pos-bg ${k}"></i>${k} <b>${Math.round(v/tot*100)}%</b></span>`).join('')}</div>`;
   return `<section class="card sx-card"><div class="qh"><h3>Top teams</h3><span class="muted">fantasy pts per game</span></div>
-    <ol class="sx-list">${L.map((t,i)=>`<li><div class="sx-li sx-team"><span class="sx-rk">${i+1}</span>${slogo(t.s,30)}<span class="sx-who"><b>${esc(t.s)}</b><small>Top player: <button class="sx-lnk" data-act="player" data-id="${esc(t.top.p.key)}">${esc(t.top.p.name)}</button></small></span><span class="sx-val"><b>${f1(t.pg)}</b><i class="sx-bar"><i style="width:${(t.pg/mx*100).toFixed(1)}%"></i></i></span></div></li>`).join('')}</ol>
+    <ol class="sx-list">${L.map((t,i)=>`<li><div class="sx-li sx-team"><span class="sx-rk">${i+1}</span><button class="sx-tl" data-act="team" data-t="${esc(t.s)}" aria-label="Open ${esc(t.s)}">${slogo(t.s,30)}</button><span class="sx-who"><b><button class="sx-lnk sx-tn" data-act="team" data-t="${esc(t.s)}">${esc(t.s)}</button></b><small>Top player: <button class="sx-lnk" data-act="player" data-id="${esc(t.top.p.key)}">${esc(t.top.p.name)}</button></small></span><span class="sx-val"><b>${f1(t.pg)}</b><i class="sx-bar"><i style="width:${(t.pg/mx*100).toFixed(1)}%"></i></i></span></div></li>`).join('')}</ol>
     <div class="qh sx-sub"><h3>Where the points come from</h3></div>${share}
   </section>`;
 }
@@ -8222,7 +8223,8 @@ document.addEventListener('click',async e=>{
   else if(a==='sxPos'){UI.sx.pos=t.dataset.v;UI.sx.k='';render()}
   else if(a==='sxK'){UI.sx.k=t.dataset.v;render()}
   else if(a==='sxPer'){UI.sx.per=t.dataset.v==='1';render()}
-  else if(a==='sxTr'){UI.sx.tr=t.dataset.v;render()}
+  else if(a==='sxTr'){UI.sx.tr=t.dataset.v;UI.sx.tn=10;render()}
+  else if(a==='sxMore'){UI.sx.tn=(UI.sx.tn||10)+10;render()}
   else if(a==='info'){const h=t.closest('.head'),pop=h&&h.querySelector('.ib-pop');if(pop){pop.hidden=!pop.hidden;t.setAttribute('aria-expanded',String(!pop.hidden))}}
   else if(a==='lgSet'){UI.lgSet=!UI.lgSet;render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v==='predict'?(propCands().length?'props':'picks'):t.dataset.v;render()}
