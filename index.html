@@ -2701,7 +2701,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v323 · Nov 8';
+const APP_BUILD='v324 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6033,6 +6033,7 @@ function rcoHTML(){
   if(rcoWgAsk(d))body=`<p class="muted rc-need">The game starts once the wager is answered.</p>`;
   return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser <span class="rco-live">Online</span></h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${score}${rcoWgBar(d,on)}${oppNote}${body}</section>`+teams;
 }
+
 function viewMini(){
   if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='leagues';UI.lgk='pk';setTimeout(()=>{location.hash='#groups'},0)}
   if(!UI.mtab||UI.mtab==='predict')UI.mtab=propCands().length?'props':'picks';   /* v287: Predict opens on Player props (Pick 'em when there are no lines yet) */
@@ -6041,12 +6042,12 @@ function viewMini(){
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Spin a school, pick a player. Best lineup wins.':T==='fg'?'Tap to keep the ball up and fly through the goals.':T==='sim'?'Draw a full 12-player team and swap players with respins.':T==='mock'?'Practice drafting. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on a player’s stats.':T==='draw'?'Get dealt 5 random players each week and redraw up to '+FC_REDRAWS+'.':PT==='pkl'?'Pick every winner. Best accuracy wins.':'Pick the winners of upcoming games.'}</p></div>${tkn}</div>`;
   /* v289: game tiles with an icon and a colour each (gold glow on the one you're in) */
 const MGI=(()=>{const w=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;return {
-  predict:w('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4"/>'),
-  draw:w('<rect x="3.5" y="5" width="11" height="15" rx="2" transform="rotate(-12 9 12.5)"/><rect x="9.5" y="4" width="11" height="15" rx="2" transform="rotate(10 15 11.5)"/><path d="M15 9.2l1.3 2.2 2.4.5-1.7 1.8.3 2.4-2.3-1.1-2.2 1.2.4-2.5-1.7-1.7 2.4-.4z" fill="currentColor" stroke="none"/>'),
-  sim:w('<path d="M13 2.5L5 13.5h6l-1 8 8-11h-6z"/>'),
-  rc:w('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M19.5 5.5l-3 3M19.5 5.5h-3.2M19.5 5.5v3.2"/>'),
-  fg:w('<path d="M12 22v-9M7 3v6a5 5 0 0 0 10 0V3M5 13h14"/>'),
-  hoop:w('<rect x="4" y="2.5" width="16" height="9" rx="1.5"/><path d="M9 11.5h6v2.2H9z"/><path d="M9.5 13.7l1 6.8M14.5 13.7l-1 6.8M12 13.7v6.8M8.6 17.2h6.8"/>')}})();
+  predict:w('<rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 12.3l2.5 2.5 4.8-5.3"/>'),
+  draw:w('<rect x="3.5" y="6.5" width="10" height="14" rx="2" transform="rotate(-12 8.5 13.5)"/><rect x="10.5" y="3.5" width="10" height="14" rx="2" transform="rotate(12 15.5 10.5)"/>'),
+  sim:w('<path d="M7.5 4h9v5.2a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6H4.5v1.2A3 3 0 0 0 7.8 10M16.5 6h3v1.2a3 3 0 0 1-3.3 2.8M12 13.7V17M8.5 20h7M9.8 17h4.4"/>'),
+  rc:w('<circle cx="12" cy="15" r="5.8"/><path d="M9 6.3L10.4 4h3.2L15 6.3 12 9.2z"/>'),
+  fg:w('<path d="M12 20.5v-8M6 3.5V9a6 6 0 0 0 12 0V3.5"/>'),
+  hoop:w('<circle cx="12" cy="4.6" r="2.6"/><ellipse cx="12" cy="11" rx="7" ry="2"/><path d="M5.4 12l2.6 7M18.6 12l-2.6 7M10 13l.8 6.4M14 13l-.8 6.4"/>')}})();
   const tabs=`<div class="mg-tiles" role="group" aria-label="Minigames">${[['predict','Predict',MGI.predict,'#2F6BFF'],['draw','5 Card Draw',MGI.draw,'#7A4DFF'],['sim','10-0',MGI.sim,'#FF4F6D'],['rc','Ring Chaser',MGI.rc,'#3DDC84'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal',FG_SPORT==='bb'?MGI.hoop:MGI.fg,'#FF9A1F']].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="mtab" data-v="${v}" aria-pressed="${v===T}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="pr-big" role="group" aria-label="Predict">${[['props','Player props','Over or under on player stats','📊'],['picks','Pick ’em','Pick the winners of the games','🏆']].map(([v,l,d,ic])=>`<button class="pr-bt" data-act="mtab" data-v="${v}" aria-pressed="${PT===v}"><span class="pr-ic" aria-hidden="true">${ic}</span><span class="pr-tx"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');

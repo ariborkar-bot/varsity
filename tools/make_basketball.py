@@ -501,6 +501,11 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     j = s.index('  return{doc,collection:col};', i)
     s = s[:j] + "  const bbp=p=>/^profiles(\\/|$)/.test(p)?p:'bb_'+p;\n  return{doc:p=>doc(bbp(p)),collection:c=>col(bbp(c))};" + s[j + len('  return{doc,collection:col};'):]
 
+    # --- opening animation: the football tackle becomes a poster dunk (scene in tools/bb_intro_scene.js) ---
+    i = s.index('  /* 3. the carrier and the defender sprint')
+    j = s.index('  at(T_HIT+1300,finish);\n', i) + len('  at(T_HIT+1300,finish);\n')
+    s = s[:i] + open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bb_intro_scene.js'), encoding='utf-8').read() + s[j:]
+
     # --- look: hardwood instead of grass ------------------------------------------------------------------------
     k = s.rindex('</style>', 0, s.index('<header class="mast">'))
     s = s[:k] + '</style><style id="bb-theme">' + BB_CSS.replace('__COURT__', COURT_URI) + s[k:]
