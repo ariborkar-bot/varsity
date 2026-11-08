@@ -306,7 +306,7 @@ def transform(s, mp, games, seeds, teams, prior):
     s = between(s, 'const RAW=[', '\nfunction gen', 'const RAW=[];')
     s = rep(s, "const avg=tg?tp/tg:21;", "const avg=tg?tp/tg:62;")
     s = rep(s, 'LAM=12,CAP=21', 'LAM=12,CAP=30')
-    s = rep(s, "'<span class=\"vt mp\">Verified</span>'", "'<span class=\"vt mp\">Season avg</span>'")
+    s = rep(s, ":''):p.sample?'':(a.unv", ":'')+'<span class=\"vt mp\">Season avg</span>':p.sample?'':(a.unv")
     s = line_replace(s, 'const SD_SCHOOLS=', 'const SD_SCHOOLS=' + json.dumps(teams) + '.sort((a,b)=>a.localeCompare(b));')
     s = between(s, 'function projLine(p){', '\nfunction projTag',
                 "function projLine(p){\n  const j=proj(p);if(!j.n)return 'No games yet';\n  if(j.info&&j.info.bye)return 'No game this week';\n"

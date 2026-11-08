@@ -2644,7 +2644,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v303 · Nov 7';
+const APP_BUILD='v304 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3027,7 +3027,7 @@ const rankSw=()=>`<div class="fld"><span>Rank by</span><div class="chips" role="
 const INJ={"Khai Agbayani|Bishop's":{until:99,note:'Out for the season'},"Jackson Binn|Bishop's":{until:13,note:'Out for game 13'}};
 const injOf=(p,w)=>{const x=p&&INJ[p.name+'|'+p.school];return x&&(w==null?CURW()+1:w)<=x.until?x:null};
 const injTag=p=>{const x=injOf(p,Math.max(CURW(),CURW()+1));return x?`<span class="vt inj" title="${esc(x.note)}">OUT</span>`:''};
-const vtag=(p,a)=>injTag(p)+p.mp?(p.tw?'<span class="vt tw">'+(p.pos==='DEF'?'2-way · D':'2-way · O')+'</span>':'')+'<span class="vt mp">Season avg</span>':p.sample?'':(a.unv?'<span class="vt un">unverified</span>':(a.ver?'<span class="vt ok">verified</span>':''));
+const vtag=(p,a)=>injTag(p)+(p.mp?(p.tw?'<span class="vt tw">'+(p.pos==='DEF'?'2-way · D':'2-way · O')+'</span>':'')+'<span class="vt mp">Season avg</span>':p.sample?'':(a.unv?'<span class="vt un">unverified</span>':''));
 const trTag=p=>{if(UI.scope!=='season')return'';const t=trend(p);return t?`<em class="tr ${t.d>=0?'up':'dn'}" title="Last game compared with the earlier average">${t.d>=0?'▲':'▼'} ${f1(Math.abs(t.d))}</em>`:''};
 
 
