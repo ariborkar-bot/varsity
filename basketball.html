@@ -423,6 +423,7 @@ tr.dim td{color:var(--muted)}
 .gopts legend{padding:0;margin-bottom:8px}
 .gopt,.gck{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer}
 .gck{background:var(--surface2)}
+.au-age{margin-top:2px;padding:10px 12px;align-items:center}.au-age input{margin:0}.rm-lnk{margin:14px 0 4px;text-align:center}.rm-lnk .link{font-size:13px;opacity:.75}.rm-sheet select{width:100%}
 .gopt:has(input:checked){border-color:var(--ink);background:var(--tint)}
 .gopt input,.gck input{margin:3px 0 0;padding:0;border:0;min-height:0;width:18px;height:18px;accent-color:var(--ink);flex:none}
 .gopt span{display:flex;flex-direction:column;min-width:0}
@@ -2565,7 +2566,7 @@ function supaDb(sb){
   return{doc:p=>doc(bbp(p)),collection:c=>col(bbp(c))};
 }
 /* sign in / create account screen */
-const AUTH={mode:'in',busy:false,msg:'',err:'',step:1,pin:''};
+const AUTH={mode:'in',busy:false,msg:'',err:'',step:1,pin:'',age:false};
 function authHTML(){
   if(AUTH.mode==='admin'){const live=ME.mode==='live'&&ME.uid,two=AUTH.step===2;
     return `<div class="gcard au" role="dialog" aria-modal="true" aria-labelledby="au-t">
@@ -2594,6 +2595,7 @@ function authHTML(){
     <form id="au-form" class="au-form">
       <label class="fld"><span>Email</span><input id="au-email" type="email" autocomplete="email" required></label>
       ${rs?'':`<label class="fld"><span>Password</span><input id="au-pass" type="password" minlength="6" autocomplete="${up?'new-password':'current-password'}" required></label>`}
+      ${up?`<label class="gck au-age"><input type="checkbox" id="au-age" ${AUTH.age?'checked':''} required><span>I am 13 years old or older.</span></label>`:''}
       ${AUTH.err?`<p class="au-err" role="alert">${esc(AUTH.err)}</p>`:''}${AUTH.msg?`<p class="au-ok" role="status">${esc(AUTH.msg)}</p>`:''}
       <button class="btn" type="submit" ${AUTH.busy?'disabled':''}>${AUTH.busy?'One moment…':rs?'Send reset link':up?'Create account':'Sign in'}</button>
     </form>
@@ -2632,9 +2634,11 @@ document.addEventListener('click',async e=>{
   catch(_){AUTH.err='Could not sign in. Try again.';AUTH.step=1}
   AUTH.busy=false;openAuth();
 });
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='au-age')AUTH.age=e.target.checked});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='au-form')return;e.preventDefault();e.stopImmediatePropagation();
   const email=$('#au-email').value.trim(),pw=$('#au-pass')?$('#au-pass').value:'';
+  if(AUTH.mode==='up'){const ag=$('#au-age');AUTH.age=!!(ag&&ag.checked);if(!AUTH.age){AUTH.err='Varsity is for people 13 and older. Tick the box to confirm.';openAuth();$('#au-email').value=email;return}}
   AUTH.busy=true;AUTH.err='';AUTH.msg='';openAuth();$('#au-email').value=email;
   try{
     if(AUTH.mode==='reset'){const {error}=await SB.auth.resetPasswordForEmail(email,{redirectTo:SITE_URL});if(error)throw error;AUTH.msg='Check your email for the reset link.'}
@@ -2700,7 +2704,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v320 · Nov 8';
+const APP_BUILD='v321 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4188,6 +4192,8 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   else if(a==='gfAmt'){GF.a=+v;giftSheet()}
   else if(a==='gpOk'){const at=+t.dataset.at||NOW();closeConfirm();S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{gsn:at});upsert('picks/'+ME.uid,{gsn:at}).catch(()=>{})}
   else if(a==='gfSend')giftSend();
+  else if(a==='remOpen')remSheet(t.dataset.n,t.dataset.s);
+  else if(a==='remSend')remSend();
   else if(a==='troOpen'){const g=S.groups[t.dataset.gid];if(!g)return;Object.assign(TR,{gid:g.id,sh:'cup',mt:'gold',bs:'walnut',nm:''},g.trophy||{});troSheet()}
   else if(a==='troSet'){TR[t.dataset.k]=v;troSheet()}
   else if(a==='troSave')troSave();
@@ -4879,7 +4885,7 @@ function viewPrivacy(){
   return (ME.mode==='guest'?`<p><a class="btn sm" href="#me">← Back to sign in</a></p>`:'')+`<div class="head"><h2>Privacy policy</h2><p>Last updated November 5, 2026.</p></div>`+
   sec('Who we are','<p>Varsity is a free fantasy sports app for San Diego Section high school football and basketball. It has no purchases and no cash prizes. Tokens in the app have no cash value.</p>')+
   sec('What we collect from you','<ul><li><b>Account:</b> your email address and a password (stored by our sign-in provider, Supabase, never in plain text).</li><li><b>Profile:</b> the display name you pick, and if you choose to add them, your school, position and grade.</li><li><b>What you do in the app:</b> leagues you create or join, draft picks, lineups, trades, league chat messages, predictions and token balances.</li><li><b>Device storage:</b> small settings saved in your browser (for example, which sport you last viewed). We do not use advertising trackers.</li></ul>')+
-  sec('Player stats','<p>Player names, schools, positions, grades and game statistics come from publicly reported high school box scores. If you are a player, or a parent or guardian of one, and want a name or stat line removed, contact us and we will remove it.</p>')+
+  sec('Player stats','<p>Player names, schools, positions, grades and game statistics come from publicly reported high school box scores. If you are a player, or a parent or guardian of one, and want a name or stat line removed, contact us and we will remove it.</p><p><button class="btn sm" type="button" data-act="remOpen">Request removal</button></p>')+
   sec('How we use it','<p>Only to run the app: to sign you in, show your leagues and standings, score games and keep leaderboards. We do not sell or rent your information, and we do not share it with advertisers.</p>')+
   sec('Who can see what','<p>Your display name, your leagues’ rosters, standings and chat are visible to the other members of those leagues. Leaderboards show display names. Your email address is never shown to other users.</p>')+
   sec('Where it is stored','<p>Data is stored with Supabase, our database and sign-in provider, in the United States, and protected by access rules so each person can only change their own data and the leagues they belong to.</p>')+
@@ -6981,6 +6987,7 @@ function drawerHTML(p){
     ${weekChart(p)}
     <div id="la" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">${lineupAction(p)}</div>
     <div class="scroll"><table><thead><tr><th>${GAME_H}</th><th>Stat line</th><th class="n">Pts</th></tr></thead><tbody>${log}</tbody></table></div>
+    <p class="rm-lnk"><button class="link" type="button" data-act="remOpen" data-n="${esc(p.name)}" data-s="${esc(p.school)}">Request removal</button></p>
   </aside>`;
 }
 function openPlayer(key){
@@ -7383,10 +7390,10 @@ function dashHTML(){
 const ADM_NAV=[['overview','Overview','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],['usage','App usage','M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z'],['growth','Growth','M3 17l6-6 4 4 8-8M15 7h6v6'],
   ['users','Users','M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21c0-4 4-6 8-6s8 2 8 6'],['engagement','Engagement','M4 20V10M10 20V4M16 20v-7M22 20H2'],['sponsors','Sponsors & tokens','M4 5h16v14H4zM10 9l5 3-5 3z'],
   ['games','Games','M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a5 5 0 0 1 5 5v2a4 4 0 0 1-7 2.5L13.5 14h-3L9 15.5A4 4 0 0 1 2 13v-2a5 5 0 0 1 5-5z'],['leagues','Leagues','M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4'],
-  ['health','Data health','M22 12h-4l-3 9L9 3l-3 9H2'],['errors','Error log','M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'],['announce','Announcements','M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8'],
+  ['health','Data health','M22 12h-4l-3 9L9 3l-3 9H2'],['removals','Removal requests','M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3'],['errors','Error log','M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'],['announce','Announcements','M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8'],
   ['weekly','Weekly report','M8 2v4M16 2v4M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],['tools','Accounts & tools','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z']];
-const ADM_GROUPS=[['Dashboard',['overview','weekly']],['People',['users','growth','engagement','leagues']],['App',['usage','games','sponsors']],['Problems',['errors','health']],['Manage',['announce','tools']]];
-const ADM_DESC={overview:'Big numbers and alerts',weekly:'Last 7 days in one page',users:'Everyone who signed up',growth:'Sign-ups, retention, funnel',engagement:'Who plays what, busy times',leagues:'League health and drafts',usage:'Time spent per tab',games:'Scores and schedule',sponsors:'Videos, tokens, rewards',errors:'App crashes and bugs',health:'Missing scores and stats',announce:'Banner for all users',tools:'Admin accounts, resets'};
+const ADM_GROUPS=[['Dashboard',['overview','weekly']],['People',['users','growth','engagement','leagues']],['App',['usage','games','sponsors']],['Problems',['removals','errors','health']],['Manage',['announce','tools']]];
+const ADM_DESC={overview:'Big numbers and alerts',weekly:'Last 7 days in one page',users:'Everyone who signed up',growth:'Sign-ups, retention, funnel',engagement:'Who plays what, busy times',leagues:'League health and drafts',usage:'Time spent per tab',games:'Scores and schedule',sponsors:'Videos, tokens, rewards',errors:'App crashes and bugs',removals:'Player removal requests',health:'Missing scores and stats',announce:'Banner for all users',tools:'Admin accounts, resets'};
 const ADM_MAIN=['overview','users','usage','errors'];
 const admIco=(d,c='')=>`<svg viewBox="0 0 24 24" class="${c}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const admAgo=t=>{if(!t)return'never';const m=Math.round((Date.now()-new Date(t))/6e4);if(m<1)return'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<24)return h+(h===1?' hour ago':' hours ago');const d=Math.round(h/24);return d<31?d+(d===1?' day ago':' days ago'):adWhen(t).split(',')[0]};
@@ -7406,7 +7413,7 @@ function admDonut(parts){const tot=parts.reduce((a,p)=>a+p[1],0)||1,R=52,C=2*Mat
 function admHTML(){
   if(DASH.use===null&&!DASH.loading)dashLoad();else if(!ADMR.busy&&Date.now()-ADMR.at>60000)setTimeout(admRefresh,0);
   const P=UI.admp||'overview',loading=AD.rows===null||DASH.use===null;
-  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',announce:'Announce',weekly:'Weekly',tools:'Tools'};
+  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',removals:'Removals',announce:'Announce',weekly:'Weekly',tools:'Tools'};
   /* v290: sidebar grouped into sections, problem counts as badges, phones get 4 main tabs + a More sheet with every page */
   const NV=k=>ADM_NAV.find(x=>x[0]===k);let BDG={};
   const grpOf=k=>(ADM_GROUPS.find(g=>g[1].includes(k))||['',[]])[0];
@@ -7457,7 +7464,7 @@ function admHTML(){
   const sel=`<span class="adm-chip">${rngLbl}</span>`;
   const tabBars=list=>{const mx=Math.max(1,...list.map(x=>x.t)),tot=D.tabList.reduce((a,x)=>a+x.t,0)||1;return `<div class="adm-hb adm-tb">${list.map(x=>`<div><span>${esc(x.n)}</span><span class="adm-hbt"><i style="width:${x.t/mx*100}%;background:${x.mg?'#22B07D':'#5B5FEF'}"></i></span><b>${fmtDur(x.t)}</b><em>${Math.round(x.t/tot*100)}%</em></div>`).join('')||'<p class="adm-mut">No tab data yet. It starts collecting the day this ships.</p>'}</div>`};
   const rc=k=>D.pool.filter(r=>!r.is_admin&&(k?(r.p&&r.p.role)===k:!(r.p&&['player','fan'].includes(r.p.role)))).length,roles=[['Players',rc('player'),'#F26B3A'],['Fans',rc('fan'),'#5B5FEF'],['No profile',rc(''),'#C9CEDA']].filter(p=>p[1]>0);
-  const X=dashData2(D);try{BDG={errors:X.errs.filter(e=>Date.now()-new Date(e.t)<7*864e5).length,health:X.health.noScore.length,leagues:X.lg.filter(x=>x.health==='Stuck').length}}catch(_){}const ext=admPages(P,D,K,X,kpi,title,sel,hbars,dl);
+  const X=dashData2(D);try{BDG={removals:remList().filter(r=>r.st!=='done').length,errors:X.errs.filter(e=>Date.now()-new Date(e.t)<7*864e5).length,health:X.health.noScore.length,leagues:X.lg.filter(x=>x.health==='Stuck').length}}catch(_){}const ext=admPages(P,D,K,X,kpi,title,sel,hbars,dl);
   let body='';
   if(ext)body=ext;
   else if(P==='overview')body=title('Overview','How Varsity is doing: users, time on the app and sponsor videos.')+admAlerts(X)+kpis+`<div class="adm-grid">
@@ -7517,7 +7524,10 @@ addEventListener('unhandledrejection',e=>{const r=e.reason;logErr('Promise: '+((
 /* error log and league list for the admin pages (empty in the preview files) */
 async function dashLoadExtra(){if(ME.mode==='demo'){DASH.ex={err:{},leagues:[]};return}
   const err={};try{for(const pre of ['data/users/','bb_data/users/']){const data=await admAll('errors',pre);for(const r of data||[]){const uid=r.coll.slice(pre.length);err[uid]=(err[uid]||[]).concat(((r.data||{}).list)||[])}}}catch(_){}
-  DASH.ex={err,leagues:null}}
+  const rem=[];try{for(const pre of ['data/users/','bb_data/users/']){const data=await admAll('removal',pre);for(const r of data||[]){const uid=r.coll.slice(pre.length);for(const q of ((r.data||{}).list)||[])rem.push(Object.assign({},q,{uid,coll:r.coll}))}}}catch(_){}
+  DASH.ex={err,leagues:null,rem}}
+const remList=()=>((DASH.ex&&DASH.ex.rem)||[]).slice().sort((a,b)=>b.at-a.at);
+async function remDone(coll,id){try{const ref=DB.doc(coll+'/removal'),sn=await ref.get(),list=((sn.exists&&sn.data().list)||[]).map(q=>q.id===id?Object.assign({},q,{st:'done'}):q);await ref.set({list});const q=((DASH.ex&&DASH.ex.rem)||[]).find(x=>x.id===id&&x.coll===coll);if(q)q.st='done';render()}catch(_){say('Could not update that request.')}}
 
 function dashData2(D){
   const today=new Date(),dayMs=864e5,joinDay=r=>r.created_at?new Date(dKey(new Date(r.created_at))):null,actDays=r=>r.u?Object.keys(r.u.days||{}).concat(Object.keys(r.u.ses||{})):[];
@@ -7614,6 +7624,9 @@ function admPages(P,D,K,X,kpi,title,sel,hbars,dl){
       <div class="adm-card"><div class="adm-ch"><h3>Games with no player stats</h3><span class="adm-chip">${H.gaps.length} teams</span></div><div class="adm-list">${H.gaps.slice(0,14).map(x=>`<div><span>${esc(x.sc)}</span><small>week ${x.miss.join(', ')} · ${x.miss.length} of ${x.of}</small></div>`).join('')||'<p class="adm-mut">Every scored game has player stats.</p>'}</div><p class="adm-mut" style="font-size:12px;margin:10px 0 0">Usually the team hasn't entered that box score on MaxPreps yet. Ask Claude to re-check.</p></div>
       <div class="adm-card"><div class="adm-ch"><h3>Schools with no player stats</h3><span class="adm-chip">${H.noStats.length}</span></div><div class="adm-tags">${H.noStats.map(s=>`<span>${esc(s)}</span>`).join('')||'<p class="adm-mut">Every school has stats.</p>'}</div><p class="adm-mut" style="font-size:12px;margin:10px 0 0">Usually these schools never enter stats on MaxPreps.</p></div></div>
     ${warn?'':'<div class="adm-card" style="margin-top:16px"><b>Everything looks complete.</b></div>'}`}
+  if(P==='removals'){const R=remList(),open=R.filter(r=>r.st!=='done'),who={player:'Player',parent:'Parent or guardian',coach:'Coach or staff',other:'Someone else'};
+    return title('Removal requests','Players and parents asking for a name or stat line to come out. Remove them in the data, then mark done.')+`<div class="adm-card"><div class="adm-ch"><h3>${open.length} open · ${R.length-open.length} done</h3></div><div class="adm-tw"><table class="adm-t"><thead><tr><th>When</th><th>Player</th><th>School</th><th>From</th><th class="adm-hs">Reply to</th><th class="adm-hs">Note</th><th></th></tr></thead><tbody>
+      ${R.map(r=>`<tr><td class="adm-mut">${admAgo(r.at)}</td><td><b>${esc(r.n)}</b>${r.sp==='bb'?' <span class="adm-pill b">Basketball</span>':''}</td><td>${esc(r.s||'')}</td><td>${esc(who[r.w]||r.w)}</td><td class="adm-hs">${esc(r.e||'')}</td><td class="adm-hs adm-mut">${esc(r.m||'')}</td><td class="n">${r.st==='done'?'<span class="adm-pill g">Done</span>':`<button class="adm-btn" data-ad="remdone" data-id="${esc(r.id)}" data-coll="${esc(r.coll)}">Mark done</button>`}</td></tr>`).join('')||'<tr><td colspan="7" class="adm-mut">No requests yet.</td></tr>'}</tbody></table></div></div>`}
   if(P==='errors'){const E=X.errs;
     return title('Error log','Crashes and failures on people’s phones and computers, newest first.')+`<div class="adm-kpis">
       ${kpi('M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z','#E0455B','Errors',E.length,`<span class="adm-dl">${DASH.rng==='all'?'all time':'last '+DASH.rng+' days'}</span>`,D.days.map(d=>E.filter(e=>dKey(new Date(e.t))===d).length))}
@@ -7749,6 +7762,7 @@ document.addEventListener('click',async e=>{
   const t=e.target.closest&&e.target.closest('[data-ad]');if(!t||!ME.admin)return;
   const a=t.dataset.ad,id=t.dataset.id;
   if(a==='rm'){e.stopPropagation();admRemove(id);return}
+  if(a==='remdone'){e.stopPropagation();remDone(t.dataset.coll,id);return}
   if(a==='open'){AD.sel=id;UI.adtab='accounts';render();window.scrollTo(0,0)}
   else if(a==='viewas'){const r=(AD.rows||[]).find(x=>x.uid===id),p=S.profiles[id];try{sessionStorage.setItem('varsity-viewas',JSON.stringify({uid:id,name:(p&&p.name)||(r&&r.email)||'this member'}))}catch(_){say('Could not start view-as.');return}location.hash='#league';location.reload()}
   else if(a==='close'){AD.sel=null;render()}
@@ -8333,6 +8347,22 @@ function confirmBox(title,body,label,fn){
 /* v311: a big wager (25+ tokens and half your balance or more, so every All in) asks once before it is locked. Wagers are still final after that. */
 function stakeOk(total,bal){bal=Math.max(1,bal==null?bank(ME.uid):bal);if(!(total>=25&&total*2>=bal))return Promise.resolve(true);
   return new Promise(res=>confirmBox('Lock in '+Math.round(total)+' tokens?',`That is ${Math.min(100,Math.round(total/bal*100))}% of your ${Math.round(bal)} tokens. Wagers can’t be taken back once they are locked in.`,'Lock it in',()=>res(true)))}
+/* v321: removal requests. A player, parent/guardian or coach asks for a name or stat line to come out. Saved in the sender's own doc data/users/<uid>/removal; admins see them under Problems > Removal requests. */
+function remSheet(n,sc){const c=$('#cfm');if(!c)return;
+  if(!ME.uid||ME.mode==='guest'){c.innerHTML=`<div class="gcard tok-sheet" role="dialog" aria-modal="true" aria-labelledby="rm-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="rm-t">Request removal</h2><p class="muted">Sign in to send a request, or use the contact email on the privacy page.</p><div class="gbtns"><button class="btn ghost" data-c="no">Close</button></div></div>`;c.hidden=false;return}
+  c.innerHTML=`<div class="gcard tok-sheet rm-sheet" role="dialog" aria-modal="true" aria-labelledby="rm-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="rm-t">Request removal</h2>
+    <p class="muted">Ask for a player’s name and stats to be taken out of Varsity. We remove them once we check the request.</p>
+    <label class="fld"><span>Player name</span><input id="rm-n" maxlength="60" value="${esc(n||'')}" autocomplete="off"></label>
+    <label class="fld"><span>School</span><input id="rm-s" maxlength="60" value="${esc(sc||'')}" autocomplete="off"></label>
+    <label class="fld"><span>I am</span><select id="rm-w"><option value="player">the player</option><option value="parent">the player’s parent or guardian</option><option value="coach">a coach or school staff</option><option value="other">someone else</option></select></label>
+    <label class="fld"><span>Anything else (optional)</span><input id="rm-m" maxlength="200" autocomplete="off"></label>
+    <label class="fld"><span>Email for a reply</span><input id="rm-e" type="email" maxlength="80" value="${esc(ME.email||'')}" autocomplete="email"></label>
+    <div class="gbtns"><button class="btn ghost" data-c="no">Cancel</button><button class="btn" data-act="remSend">Send request</button></div></div>`;
+  c.hidden=false}
+async function remSend(){const g=id=>(($('#'+id)||{}).value||'').trim(),n=g('rm-n');if(n.length<2){say('Enter the player’s name.');return}
+  const x={id:'r'+Date.now().toString(36),n,s:g('rm-s'),w:g('rm-w')||'player',m:g('rm-m'),e:g('rm-e'),at:NOW(),sp:FG_SPORT,st:'open'};
+  try{const ref=DB.doc('data/users/'+ME.uid+'/removal'),sn=await ref.get(),old=(sn.exists&&sn.data().list)||[];await ref.set({list:old.concat([x]).slice(-20)});closeConfirm();say('Request sent. Thank you.')}
+  catch(_){say('That didn’t send. Try again in a moment.')}}
 function closeConfirm(){cfmFn=null;$('#cfm').hidden=true;$('#cfm').innerHTML=''}
 const stripId=g=>{const o=Object.assign({},g);delete o.id;return o};
 async function leaveGroupDoc(coll,g){
@@ -8668,6 +8698,7 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
       (ME.admin?'<a role="menuitem" href="#admin">Admin systems</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
       '<hr><div class="setv" aria-hidden="true">Version '+APP_BUILD+'</div>'+
       '<a role="menuitem" href="#privacy">Privacy policy</a>'+
+      '<button role="menuitem" data-act="remOpen">Request player removal</button>'+
       (joined||ME.mode==='live'?'<hr><button role="menuitem" class="dz" data-act="delProfile">Delete my account</button>':'')+
       (ME.mode==='live'?'<hr><button role="menuitem" id="sm-out">Sign out'+(ME.email?' <small style="opacity:.6;margin-left:auto">'+esc(ME.email)+'</small>':'')+'</button>':'');
     document.body.appendChild(m);g.setAttribute('aria-expanded','true');
