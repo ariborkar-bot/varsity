@@ -2701,7 +2701,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v324 · Nov 8';
+const APP_BUILD='v325 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3556,7 +3556,7 @@ function fcHTML(){
       <div class="fc-pts"><b>${x?f1(pts(x.stat)):fcDnp(p,w)?'0.0':'—'}</b><small>${x?(FC_DAILY?'game pts':'week '+w+' pts'):fcDnp(p,w)?'did not play':'waiting on game'}</small></div>
       ${w===cw&&can?`<button class="btn sm ${left>0&&!lk&&!lkd&&fcOpen(w)?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!lkd&&fcOpen(w)&&!UI.fcAnim?'':'disabled'}>${lk||!fcOpen(w)?'Locked':'Redraw'}</button>`:''}</div>`}).join(''):'';
   const wk=[...new Set([cw,...Object.keys(fcDoc(ME.uid||'')).map(Number)])].filter(n=>n<=cw).sort((a,b)=>b-a).slice(0,FC_DAILY?7:99),wkOf=(()=>{const g=fcGamesOf(w)[0];return g?g.w:CURW()})();
-  const byW=FC_DAILY&&UI.fcb==='wk',byS=UI.fcb==='season';
+  const byW=false,byS=UI.fcb==='season';
   const all=byW?fcRank(wkOf).map(x=>({u:x.u,t:x.t,s:fcSeason(x.u)})):Object.keys(S.picks).filter(u=>fcHand(u,w)).map(u=>({u,t:fcScore(u,w),s:fcSeason(u)}));
   const rows=all.sort((a,b)=>(byS?b.s-a.s:b.t-a.t)||(b.t-a.t)).map((x,i)=>Object.assign(x,{r:i+1}));
   const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
@@ -3570,7 +3570,7 @@ function fcHTML(){
       :can&&!fcOpen(cw)?(()=>{const nx=dayOf(cw)===TODAY()?fcNextDay():cw;return `<div class="fc-deal"><p>${dayOf(cw)!==TODAY()?'No games today.':'Today’s hand closed at tip-off.'}</p><p class="muted">${nx?'The next hand opens '+fcLabel(nx)+', before the first game.':'No more game days on the schedule.'}</p></div>`})()
       :can?`<div class="fc-deal"><p>Your ${FC_DAILY?fcLabel(cw):'week '+cw} hand is waiting.</p>${FC_DAILY?`<p class="muted">Deal before the first game, ${esc(new Date(fcClose(cw).replace('T',' ')+':00').toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}))}.</p>`:''}<button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
-    <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS&&!byW}">${FC_DAILY?fcLabel(w):'Week '+w}</button>${FC_DAILY?`<button class="chip" data-act="fcBoard" data-v="wk" aria-pressed="${byW}">Week ${wkOf}</button>`:''}<button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
+    <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS&&!byW}">${FC_DAILY?fcLabel(w):'Week '+w}</button><button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
     ${fcWaitNote(FC_DAILY?w:wkOf)}<p class="fg-prize">${FC_DAILY?'Daily':'Weekly'} prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top ${FC_DAILY?25:50}%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
 }
@@ -4101,7 +4101,7 @@ const nmC=(u,txt)=>{const c=eqOf(u,'name'),b=eqOf(u,'badge');return (c?`<span cl
 /* ===================== v294: daily shop, gifts, league trophies ===================== */
 /* Daily shop: 4 cosmetics a day, the same for everyone (seeded by the day and sport), new at midnight Pacific.
    Prices by rarity. One of each per person; items you own show Owned. Bought items go into inv.it, the cost into inv.sp. */
-const SHOP_PRICE={c:80,u:150,r:300,e:600,l:1200,m:2500};
+const SHOP_PRICE={c:80,u:100,r:250,e:600,l:1000,m:2500};
 const SHOP_SLOTS=[['e','e','l','l','m'],['r','e'],['u','r'],['c','u']];
 function shopToday(day){day=day||TODAY();
   let st=hash('shop|'+FG_SPORT+'|'+day)||1;const rnd=()=>{st=(Math.imul(st,1664525)+1013904223)>>>0;return st/4294967296};
