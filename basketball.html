@@ -4,6 +4,20 @@ html,body{overscroll-behavior-y:contain}:root{color-scheme:light;box-sizing:bord
 .sport-opt i{font-style:normal;line-height:1;display:grid}.sport-opt svg{width:19px;height:19px;display:block;transition:transform .25s}.sport-opt:hover svg{transform:rotate(-14deg) scale(1.12)}.sport-opt.on svg{animation:sportpop .7s cubic-bezier(.2,1.7,.4,1);filter:drop-shadow(0 0 4px rgba(255,255,255,.5))}@keyframes sportpop{from{transform:scale(.4) rotate(-120deg)}to{transform:none}}html.cutin,html.cutin body{background:#050b1e}html.cutin::after{content:'';position:fixed;inset:0;z-index:99999;background:#050b1e;pointer-events:none;animation:cutout .32s .05s ease-out forwards}@keyframes cutout{to{opacity:0;visibility:hidden}}
 .sport-opt.on{background:linear-gradient(180deg,#FFC23D,#FF9F1C);color:#1a1200}
 @media (max-width:520px){.sport-opt span{display:none}.sport-opt{padding:6px 9px}}
+
+.cup-sc2,.cup-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.cup-tiles{grid-template-columns:repeat(4,1fr)}
+.cup-sc2>div,.cup-tiles>div{background:rgba(255,255,255,.05);border-radius:10px;padding:8px 6px;text-align:center}
+.cup-sc2 small,.cup-tiles small{display:block;font-size:11px;opacity:.7}.cup-sc2 b{font-size:22px;color:var(--gold,#f5c542)}.cup-tiles b{font-size:16px}
+.cup-top{margin-top:6px}.cup-tr{display:flex;gap:8px;align-items:center;padding:5px 2px;font-size:14px}.cup-tr b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cup-tr.me{color:var(--gold,#f5c542)}
+.cup-vs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:6px;margin:8px 0}.cup-at{align-self:center;opacity:.6;font-size:12px}
+.cup-sd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid transparent;min-width:0}
+.cup-sd b{font-size:14px;line-height:1.15;overflow-wrap:anywhere}.cup-sd.w{border-color:var(--gold,#f5c542);background:rgba(245,197,66,.08)}
+.cup-sv{font-size:26px;font-weight:800;font-family:'Bebas Neue',inherit;color:var(--gold,#f5c542)}.cup-sd small{font-size:11px;opacity:.7}.cup-best{overflow-wrap:anywhere}
+.cup-note{margin:4px 2px 0;font-size:13px}
+.cup-r{display:grid;grid-template-columns:28px 1fr auto 64px;gap:8px;align-items:center;padding:7px 4px;border-top:1px solid rgba(255,255,255,.06)}.cup-r:first-child{border-top:0}
+.cup-r.me{background:rgba(245,197,66,.08);border-radius:8px}.cup-n{display:flex;gap:8px;align-items:center;min-width:0}.cup-n b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cup-r small{text-align:right}
+.cup-o{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;padding:6px 0;font-size:13px;border-top:1px solid rgba(255,255,255,.06)}.cup-o .w{color:var(--gold,#f5c542);font-weight:700}.cup-o span:last-child{text-align:right}.cup-oth summary{cursor:pointer}
+.cup-k{font-weight:800;opacity:.8;text-align:center;min-width:20px}
 </style>
 <title>Varsity Basketball</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -2645,7 +2659,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v305 · Nov 7';
+const APP_BUILD='v306 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2979,7 +2993,7 @@ function extraNotes(at){const out=[],day0=ptAt(0),gm=FG_SPORT==='bb'?'Hoops':'Fi
   /* gifts */
   for(const x of giftsIn(ME.uid))if((x.at||0)>at)out.push({c:'gift',t:x.at,k:'up',text:`${nm(x.from)} sent you ${x.a?x.a+' tokens':((ITEM[x.i]||{}).n||'an item')}${x.m?`: “${x.m}”`:''}`});
   /* prizes waiting */
-  const pz=(typeof fgPrizes==='function'?fgPrizes(ME.uid).length:0)+(typeof fcPrizes==='function'?fcPrizes(ME.uid).length:0);
+  const pz=(typeof fgPrizes==='function'?fgPrizes(ME.uid).length:0)+(typeof fcPrizes==='function'?fcPrizes(ME.uid).length:0)+(typeof cupPrizes==='function'?cupPrizes(ME.uid).length:0);
   if(pz&&day0>at)out.push({c:'prize',t:day0,k:'up',text:`You placed on a leaderboard. ${pz} prize ${pz===1?'pack is':'packs are'} waiting in the Shop.`});
   /* streak about to end (after 5 PM, not played today) */
   const sk=fgStreak(ME.uid),rec=fgRec(ME.uid).sk||{};
@@ -3299,7 +3313,7 @@ const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;for(const k of ['gft','gsn','bnd']){const kv=(S.picks[ME.uid]||{})[k];if(kv)o[k]=kv}const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;for(const k of ['gft','gsn','bnd','cup']){const kv=(S.picks[ME.uid]||{})[k];if(kv)o[k]=kv}const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -3810,6 +3824,7 @@ async function packOpen(type,how,day){
   if(how==='free'&&freePacks(ME.uid)<1){say('No free packs right now.');return}
   if(how==='ad'&&((invOf(ME.uid).fr||{}).ad===TODAY())){say('You already got today’s free pack. Come back tomorrow.');return}
   if(how==='lb'&&!fgPrizes(ME.uid).some(x=>x.day===day&&x.type===type)){say('That prize was already opened.');return}
+  if(how==='cup'&&!cupPrizes(ME.uid).some(x=>String(x.w)===String(day))){say('That prize was already opened.');return}
   if(how==='fclb'&&!fcPrizes(ME.uid).some(x=>String(x.w)===String(day)&&x.type===type)){say('That prize was already opened.');return}
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
@@ -3823,6 +3838,7 @@ async function packOpen(type,how,day){
   if(how==='free'){const fr=Object.assign({},v.fr);if(!fr.st)fr.st=NOW();else fr.d7=(+fr.d7||0)+1;patch.fr=fr}
   if(how==='ad'){patch.fr=Object.assign({},v.fr,{ad:TODAY()})}
   if(how==='lb'){patch.fr=Object.assign({},v.fr,{lb:Object.assign({},(v.fr||{}).lb,{[day]:1})})}
+  if(how==='cup'){patch.fr=Object.assign({},v.fr,{cup:Object.assign({},(v.fr||{}).cup,{[day]:1})})}
   if(how==='fclb'){patch.fr=Object.assign({},v.fr,{fc:Object.assign({},(v.fr||{}).fc,{[day]:1})})}
   S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
   try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){say('That did not save. Try again.');return}
@@ -4043,7 +4059,8 @@ function viewShop(){
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
     const adDone=(v.fr||{}).ad===TODAY(),gm=FG_SPORT==='bb'?'Hoops':'Field Goal',ord=['','1st','2nd','3rd'];
     const prizes=fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('')
-      +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, game ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('');
+      +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, game ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('')
+      +cupPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 Top scorer · ${esc(PACKS[x.type].n)}</b><small class="muted">School Cup, game ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="cup" data-d="${x.w}">Open prize</button></section>`).join('');
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
     const extras=shopHTML()+`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
@@ -4842,12 +4859,102 @@ function lbTokDue(u){const have=lbtOf(u),out=[],d=new Date(TODAY()+'T12:00:00Z')
   for(let i=1;i<=FG_LB_BACK;i++){d.setUTCDate(d.getUTCDate()-1);const day=d.toISOString().slice(0,10);if(day<FG_LB_START)break;if(have['fg|'+day])continue;
     const r=fgRank(day),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fg|'+day,why:'top half in the daily '+(FG_SPORT==='bb'?'Hoops':'Field Goal')+' ('+fmtDay(day)+')'})}
   for(const w of fcLbWeeks()){if(have['fc|'+w])continue;const r=fcRank(w),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fc|'+w,why:'top half in 5 Card Draw, game '+w})}
+  try{cupRewards(u).tok.forEach(w=>{if(!have['cup|'+w])out.push({k:'cup|'+w,amt:CUP_TOK,why:'your school won its School Cup matchup (game '+w+')'})})}catch(_){}
   return out}
 let lbtPend='';
 function lbTokClaim(){if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks)return;
   let due=[];try{due=lbTokDue(ME.uid)}catch(_){return}if(!due.length)return;const sig=due.map(x=>x.k).join(',');if(sig===lbtPend)return;lbtPend=sig;
-  const add={};due.forEach(x=>{add[x.k]=LB_TOK});S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{lbt:Object.assign({},lbtOf(ME.uid),add)});
-  upsert('picks/'+ME.uid,{lbt:add}).then(()=>{say(`+${LB_TOK*due.length} tokens · ${due.length===1?due[0].why:due.length+' leaderboard rewards'}`);render(true)},()=>{lbtPend=''})}
+  const add={};due.forEach(x=>{add[x.k]=x.amt||LB_TOK});S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{lbt:Object.assign({},lbtOf(ME.uid),add)});
+  upsert('picks/'+ME.uid,{lbt:add}).then(()=>{say(`+${due.reduce((a,x)=>a+(x.amt||LB_TOK),0)} tokens · ${due.length===1?due[0].why:due.length+' rewards'}`);render(true)},()=>{lbtPend=''})}
+/* ---------- School Cup (v306) ----------
+   Every signed-in player with a school earns points for it from free, skill-based games only (nothing that costs tokens):
+   5 Card Draw (up to 50 a game: your hand's points against the best 5 players that game), Cup Pick 'em (+2 right, -1 wrong),
+   the daily Field Goal / Hoops (up to 10 a day: 1 point per 4 score) and Ring Chaser wins (+2, against the AI or another school).
+   No cap on total points. A school's weekly score = average of its top 10 active members (a school needs 3 active members to score).
+   Every real game is a matchup between its two schools. Stored in picks/<uid>.cup = {pk:{gameId:'h'|'a'}, rc:{'YYYY-MM-DD':wins}}.
+   Rewards once a game is final: CUP_TOK tokens for every active member of a winning school (picks/<uid>.lbt['cup|w']) and a Pro pack for the
+   top scorer of both schools in a matchup (inv.fr.cup[w], opened from the Shop). */
+const CUP_START=0,CUP_DAY0='2026-11-09',CUP_TOK=175,CUP_TOP=10,CUP_MIN=3,CUP_FC=50,CUP_PK_OK=2,CUP_PK_BAD=-1,CUP_FG=10,CUP_FG_DIV=4,CUP_RC=2,CUP_BACK=4;
+const cupDoc=u=>((S.picks[u]||{}).cup)||{};
+const cupSchool=u=>{const p=S.profiles[u];return (p&&p.school)||''};
+let _cgA=null,_cg=null,_cwk=null;
+function cupGames(){const A=(GAMES&&GAMES.games)||[];if(_cgA!==A||!_cg){_cgA=A;_cg={};A.forEach(g=>{(_cg[g.w]=_cg[g.w]||[]).push(g)});_cwk=Object.keys(_cg).map(Number).sort((a,b)=>a-b).map(w=>{const d=_cg[w].map(g=>g.d).sort();return{w,first:d[0],last:d[d.length-1]}})}return _cg}
+const cupWeeks=()=>{cupGames();return _cwk};
+const cupFirst=()=>{const W=cupWeeks();return Math.max(CUP_START,W.length?W[0].w:1)};
+function cupWkOfDay(day){if(!day||day<CUP_DAY0)return null;const f=cupFirst();for(const x of cupWeeks())if(x.w>=f&&day<=x.last)return x.w;return null}
+function cupCurW(){const f=cupFirst(),t=TODAY(),W=cupWeeks().filter(x=>x.w>=f);if(!W.length)return f;return (W.find(x=>x.last>=t)||W[W.length-1]).w}
+const cupWeekDone=w=>w>=cupFirst()&&fcWeekDone(w);
+const _cb={};
+function cupBest(w,n){const k=w+'|'+n+'|'+_rev;if(_cb[k]!=null)return _cb[k];const a=[];players().forEach(p=>{const x=p.mp&&p.games&&p.games[w-1];if(x)a.push(pts(x.stat))});a.sort((x,y)=>y-x);return _cb[k]=a.slice(0,n).reduce((s,v)=>s+v,0)}
+function cupFc(u,w){const hd=fcHand(u,w);if(!hd)return 0;const b=cupBest(w,(hd.h||[]).length||5);return b>0?Math.round(Math.max(0,Math.min(1,fcScore(u,w)/b))*CUP_FC*10)/10:0}
+function cupPk(u,w){let p=0,n=0;const P=cupDoc(u).pk||{};for(const g of (cupGames()[w]||[])){const k=P[gid(g)];if(!k)continue;n++;if(!gDone(g)||g.hs===g.as)continue;p+=((k==='h')===(g.hs>g.as))?CUP_PK_OK:CUP_PK_BAD}return{p,n}}
+function cupFg(u,w){const h=fgRec(u).dh||{};let p=0,n=0;for(const day in h){if(cupWkOfDay(day)!==w)continue;n++;p+=Math.min(CUP_FG,Math.floor((+h[day].b||0)/CUP_FG_DIV))}return{p,n}}
+function cupRcW(u,w){const r=cupDoc(u).rc||{};let n=0;for(const day in r)if(cupWkOfDay(day)===w)n+=+r[day]||0;return{p:n*CUP_RC,n}}
+function cupPts(u,w){const f=cupFc(u,w),k=cupPk(u,w),g=cupFg(u,w),r=cupRcW(u,w);return{t:Math.round((f+k.p+g.p+r.p)*10)/10,act:!!(fcHand(u,w)||k.n||g.n||r.n),f,pk:k.p,fg:g.p,rc:r.p}}
+const _cm={};
+function cupBoard(w){const c=_cm[w];if(c&&Date.now()-c.at<2000)return c.v;const by={};
+  Object.keys(S.picks).forEach(u=>{const sc=cupSchool(u);if(!sc)return;const pt=cupPts(u,w);if(!pt.act)return;(by[sc]=by[sc]||[]).push({u,t:pt.t})});
+  const v={};Object.entries(by).forEach(([s,l])=>{l.sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1));const top=l.slice(0,CUP_TOP),ok=l.length>=CUP_MIN;v[s]={s,n:l.length,l,ok,score:ok?Math.round(top.reduce((a,x)=>a+x.t,0)/top.length*10)/10:0}});
+  _cm[w]={at:Date.now(),v};return v}
+const cupE=s=>({s,n:0,l:[],ok:false,score:0});
+function cupMatches(w,B){return (cupGames()[w]||[]).filter(g=>g.h&&g.a).sort((a,b)=>(a.d+(a.t||KICK))<(b.d+(b.t||KICK))?-1:1).map(g=>{const a=B[g.a]||cupE(g.a),h=B[g.h]||cupE(g.h);return{g,a,h,win:a.score>h.score?'a':h.score>a.score?'h':''}})}
+/* what you've earned from finished games: tokens (active member of a winning school) and a Pro pack (top scorer at a school that played) */
+function cupRewards(u){const out={tok:[],pk:[]},sc=cupSchool(u);if(!sc)return out;
+  const f=cupFirst(),done=cupWeeks().map(x=>x.w).filter(w=>w>=f&&cupWeekDone(w)).slice(-CUP_BACK);
+  for(const w of done){const B=cupBoard(w),mine=B[sc];if(!mine||!mine.ok)continue;
+    const ms=cupMatches(w,B).filter(m=>m.g.a===sc||m.g.h===sc);if(!ms.length)continue;
+    const won=ms.some(m=>(m.g.a===sc&&m.win==='a')||(m.g.h===sc&&m.win==='h'));
+    if(won&&mine.l.some(x=>x.u===u))out.tok.push(w);
+    if(mine.l[0]&&mine.l[0].u===u&&mine.l[0].t>0)out.pk.push(w)}
+  return out}
+function cupPrizes(u){if(!u)return[];const cl=((invOf(u).fr||{}).cup)||{};try{return cupRewards(u).pk.filter(w=>!cl[w]).map(w=>({w,type:'player'}))}catch(_){return[]}}
+/* a Ring Chaser win against the AI or a player from another school */
+async function cupRcWin(){
+  if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!cupSchool(ME.uid))return;
+  const day=TODAY();if(cupWkOfDay(day)==null)return;
+  const rc=Object.assign({},cupDoc(ME.uid).rc),n=(+rc[day]||0)+1;rc[day]=n;
+  S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{cup:Object.assign({},cupDoc(ME.uid),{rc})});
+  try{await upsert('picks/'+ME.uid,{cup:{rc:{[day]:n}}});say(`+${CUP_RC} School Cup points`)}catch(_){}}
+function cupHTML(){
+  const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',my=can?cupSchool(ME.uid):'';
+  const f=cupFirst(),cw=cupCurW(),W=cupWeeks().filter(x=>x.w>=f&&x.w<=cw).map(x=>x.w);
+  const w=W.includes(+UI.cupw)?+UI.cupw:cw,done=cupWeekDone(w),B=cupBoard(w),ms=cupMatches(w,B);
+  const head=`<section class="card cup-hd"><div class="qh"><h3>School Cup</h3><span class="muted">${done?'Final':'Live'} · Game ${w}</span></div>
+    <p class="muted">Earn points for your school from free games: 5 Card Draw (up to ${CUP_FC}), Cup Pick ’em (+${CUP_PK_OK} right, ${CUP_PK_BAD} wrong), the daily ${FG_SPORT==='bb'?'Hoops':'Field Goal'} (up to ${CUP_FG} a day) and Ring Chaser wins (+${CUP_RC}). Your school’s score is the average of its top ${CUP_TOP} players, and it needs ${CUP_MIN} to count.</p>
+    <p class="muted">When the game ends, every active player at a school that beats its opponent gets <b>${CUP_TOK} tokens</b>, and the top scorer at <b>both</b> schools gets a ${esc(PACKS.player.n)}.</p>
+    <div class="wks" role="group" aria-label="Game">${W.map(x=>`<button class="chip" data-act="cupWk" data-w="${x}" aria-pressed="${x===w}">Game ${x}${x===cw?' •':''}</button>`).join('')}</div></section>`;
+  const nos=!can?`<p class="hint">Sign in to earn points for your school.</p>`:!my?`<section class="card"><b>Pick your school first</b><p class="muted">Your points count for the school on your profile. Add it on the Me tab.</p><a class="btn sm" href="#me">Go to Me</a></section>`:'';
+  let mine='';
+  if(my){const P=cupPts(ME.uid,w),row=B[my],rank=Object.values(B).filter(x=>x.ok).sort((a,b)=>b.score-a.score).findIndex(x=>x.s===my)+1;
+    mine=`<section class="card cup-me"><div class="qh"><h3>${slogo(my,26)} ${esc(my)}</h3><span class="muted">${row&&row.ok?`#${rank} this game`:'Not on the board yet'}</span></div>
+      <div class="cup-sc2"><div><small>School score</small><b>${row&&row.ok?row.score.toFixed(1):'–'}</b></div><div><small>Active players</small><b>${row?row.n:0}</b></div><div><small>Your points</small><b>${P.t.toFixed(1)}</b></div></div>
+      ${row&&!row.ok?`<p class="muted">${CUP_MIN-(row?row.n:0)} more active ${CUP_MIN-(row?row.n:0)===1?'player is':'players are'} needed before ${esc(my)} scores. Tell your classmates.</p>`:''}
+      <div class="cup-tiles"><div><small>5 Card Draw</small><b>${P.f.toFixed(1)}</b></div><div><small>Pick ’em</small><b>${P.pk>0?'+':''}${P.pk}</b></div><div><small>Daily</small><b>${P.fg}</b></div><div><small>Ring Chaser</small><b>${P.rc}</b></div></div>
+      ${row&&row.l.length?`<div class="cup-top"><span class="lbl">Top scorers</span>${row.l.slice(0,5).map((x,i)=>`<div class="cup-tr ${x.u===ME.uid?'me':''}"><span class="cup-k">${i+1}</span><b>${nmC(x.u,esc(nm(x.u)))}${x.u===ME.uid?' (you)':''}</b><span>${x.t.toFixed(1)}</span></div>`).join('')}</div>`:''}</section>`}
+  const mm=my?ms.filter(m=>m.g.a===my||m.g.h===my):[];
+  const side=(x,win)=>`<div class="cup-sd ${win?'w':''}">${slogo(x.s,40)}<b>${esc(x.s)}</b><span class="cup-sv">${x.ok?x.score.toFixed(1):'–'}</span><small>${x.n} active${x.ok?'':' · needs '+CUP_MIN}</small>${x.l[0]?`<small class="cup-best">Top: ${esc(nm(x.l[0].u))} · ${x.l[0].t.toFixed(1)}</small>`:''}</div>`;
+  const mu=my?(mm.length?mm.map(m=>`<section class="card cup-mu"><div class="qh"><h3>Your matchup</h3><span class="muted">${esc(fmtDate(m.g.d))}</span></div>
+      <div class="cup-vs">${side(m.a,m.win==='a')}<span class="cup-at">vs</span>${side(m.h,m.win==='h')}</div>
+      <p class="muted cup-note">${done?(m.win?esc(m[m.win].s)+' wins the matchup.':'Tied. No one wins tokens.'):'Scores update as points come in. The winner is decided when the game is final.'}</p></section>`).join(''):`<section class="card cup-mu"><div class="qh"><h3>Your matchup</h3></div><p class="muted">${esc(my)} has no game this game, so no matchup. Your points still count toward the season.</p></section>`):'';
+  const rows=Object.values(B).filter(x=>x.ok).sort((a,b)=>b.score-a.score||b.n-a.n);
+  const sea={};W.forEach(x=>Object.values(cupBoard(x)).forEach(r=>{if(r.ok){const o=sea[r.s]=sea[r.s]||{s:r.s,score:0,n:0,k:0};o.score+=r.score;o.k++}}));
+  const srows=Object.values(sea).sort((a,b)=>b.score-a.score);
+  const SV=UI.cupv==='season'?'season':'week',list=SV==='season'?srows:rows,all=!!UI.cupAll,shown=all?list:list.slice(0,10);
+  const stand=`<section class="card cup-st"><div class="qh"><h3>Standings</h3><div class="chips" role="group" aria-label="Standings"><button class="chip" data-act="cupV" data-v="week" aria-pressed="${SV==='week'}">Game ${w}</button><button class="chip" data-act="cupV" data-v="season" aria-pressed="${SV==='season'}">Season</button></div></div>
+    ${list.length?`<div class="cup-t">${shown.map((r,i)=>`<div class="cup-r ${r.s===my?'me':''}"><span class="cup-k">${i+1}</span><span class="cup-n">${slogo(r.s,26)}<b>${esc(r.s)}</b></span><b>${r.score.toFixed(1)}</b><small class="muted">${SV==='season'?r.k+(r.k===1?' week':' weeks'):r.n+' active'}</small></div>`).join('')}</div>${list.length>10?`<button class="btn sm ghost bt-more" data-act="cupAll">${all?'Show less':'Show all ('+list.length+')'}</button>`:''}`:`<p class="muted">No school has ${CUP_MIN} active players yet. Be the first.</p>`}</section>`;
+  const others=ms.filter(m=>!mm.includes(m));
+  const oth=others.length?`<details class="card cup-oth"><summary><b>All matchups this game (${ms.length})</b></summary>${ms.map(m=>`<div class="cup-o"><span class="${m.win==='a'?'w':''}">${slogo(m.g.a,20)} ${esc(m.g.a)} <b>${m.a.ok?m.a.score.toFixed(1):'–'}</b></span><small>vs</small><span class="${m.win==='h'?'w':''}">${slogo(m.g.h,20)} ${esc(m.g.h)} <b>${m.h.ok?m.h.score.toFixed(1):'–'}</b></span></div>`).join('')}</details>`:'';
+  /* Cup Pick 'em */
+  const mp=cupDoc(ME.uid).pk||{},stage=UI.cupS||{},gs=(cupGames()[w]||[]).slice().sort((a,b)=>(a.d+(a.t||KICK))<(b.d+(b.t||KICK))?-1:1);
+  const pickOf=g=>stage[gid(g)]||mp[gid(g)],dirty=Object.keys(stage).length;
+  const card=g=>{const id=gid(g),p=pickOf(g),saved=!!mp[id],lock=started(g)||gDone(g)||saved,fin=gDone(g),win=fin?(g.hs>g.as?'h':g.hs<g.as?'a':''):'';
+    const btn=(sd,team)=>{const on=p===sd,res=fin&&on?(win===sd?'ok':win?'no':''):'';return `<button class="bt-t pkl-t ${on?'on':''} ${res}" data-act="cupPick" data-g="${esc(id)}" data-s="${sd}" ${lock||!can?'disabled':''} aria-pressed="${on}">${slogo(team,30)}<b>${esc(team)}</b>${fin?`<span class="pkl-sc">${sd==='h'?g.hs:g.as}</span>`:''}</button>`};
+    return `<article class="gm bt-g"><div class="gm-h"><span>${esc(fmtDate(g.d))}${lock&&!fin?(saved?' · locked in':' · locked'):''}</span>${fin?`<span class="pill ${p&&win&&p===win?'final':'live'}">${!p?'No pick':win===p?'+'+CUP_PK_OK:win?CUP_PK_BAD:'Tie'}</span>`:''}</div><div class="bt-row">${btn('a',g.a)}<span class="bt-at">at</span>${btn('h',g.h)}</div></article>`};
+  const open=gs.filter(g=>!started(g)&&!gDone(g)&&!mp[gid(g)]);
+  const bar=can&&open.length?`<div class="pkl-bar"><div><b>${dirty} selected</b><small class="muted">+${CUP_PK_OK} for a right pick, ${CUP_PK_BAD} for a wrong one. Locked in once saved.</small></div><div class="btns" style="margin:0"><button class="btn sm" data-act="cupSave" ${dirty?'':'disabled'}>${dirty?'Lock in '+dirty+(dirty===1?' pick':' picks'):'Pick games'}</button></div></div>`:'';
+  const pk=`<section class="card"><div class="qh"><h3>Cup Pick ’em · Game ${w}</h3><span class="muted">${gs.length} ${gs.length===1?'game':'games'}</span></div><p class="muted">Free picks that only count for the School Cup. Pick as many games as you like.</p>${bar}</section>`+(gs.length?`<div class="bt-grid">${gs.map(card).join('')}</div>`:'<p class="empty">No games this game.</p>');
+  return nos+mine+mu+stand+oth+pk;
+}
 /* v269: out of daily tries -> watch an ad for one more (once a day, dd.adt), then a 4th+ try for $0.99 (shown as Coming soon: no real-money purchases yet) */
 const FG_TRY_USD='$0.99';
 const fgAdUsed=()=>!!((fgDay(ME.uid)||{}).adt);
@@ -5342,7 +5449,7 @@ async function rcFinish(){
   const my=ME.uid?rcRec(ME.uid):{};m.newBest=m.total>(+my.bpg||0);render();
   if(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'){
     const o={bpg:Math.max(+my.bpg||0,m.total),last:m.total,runs:(+my.runs||0)+1,w:(+my.w||0)+(m.res==='w'),l:(+my.l||0)+(m.res==='l'),t:(+my.t||0)+(m.res==='t'),at:NOW()};
-    await act(()=>upsert('picks/'+ME.uid,{rc:o}),m.res==='w'?'Win saved':m.res==='l'?'Loss saved':'Tie saved');
+    if(await act(()=>upsert('picks/'+ME.uid,{rc:o}),m.res==='w'?'Win saved':m.res==='l'?'Loss saved':'Tie saved')&&m.res==='w')cupRcWin();
   }
   render();
 }
@@ -5549,17 +5656,18 @@ function rcoSave(o){
   else if(d.win)o.res=d.win===me?'w':'l';
   else o.res=o.total>o.oppTotal?'w':o.total<o.oppTotal?'l':'t';
   rcoForget();
-  if(o.res&&!(d.st==='gone'&&d.left===me))rcoRecord(o.id,o.res,d.st==='done'&&!d.win&&!rcOpen(m.me).length?o.total:0,rcoWgOn(d));
+  if(o.res&&!(d.st==='gone'&&d.left===me))rcoRecord(o.id,o.res,d.st==='done'&&!d.win&&!rcOpen(m.me).length?o.total:0,rcoWgOn(d),rcoOpp(d));
   if(d.st==='gone'&&!d.guest&&!o.claiming){rcoStop();render()}
 }
-async function rcoRecord(id,res,total,wg){
+async function rcoRecord(id,res,total,wg,opp){
   if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline')return;
   const my=rcRec(ME.uid);if(my.oid===id)return;   /* already counted */
   const on=Object.assign({w:0,l:0,t:0},my.on);on[res]=(+on[res]||0)+1;
   const o={on,oid:id,at:NOW()};if(total>(+my.bpg||0))o.bpg=total;
   if(wg&&res!=='t')o.wn=(+my.wn||0)+(res==='w'?wg:-wg);
   if(total)UI.rco&&(UI.rco.newBest=total>(+my.bpg||0));
-  await act(()=>upsert('picks/'+ME.uid,{rc:o}),(res==='w'?'Win saved':res==='l'?'Loss saved':'Tie saved')+(wg&&res!=='t'?` · ${res==='w'?'+':'-'}${wg} tokens`:''));
+  const okSave=await act(()=>upsert('picks/'+ME.uid,{rc:o}),(res==='w'?'Win saved':res==='l'?'Loss saved':'Tie saved')+(wg&&res!=='t'?` · ${res==='w'?'+':'-'}${wg} tokens`:''));
+  if(okSave&&res==='w'){const a=cupSchool(ME.uid),b=opp?cupSchool(opp):'';if(!a||a!==b)cupRcWin()}   /* School Cup: not against your own school */
 }
 async function rcoWgOffer(amt){
   const o=UI.rco,d=o&&o.d;if(!d)return;amt=+amt;
@@ -6227,8 +6335,9 @@ const groupDanger=(coll,g,word)=>{const own=g.ownerId===ME.uid;return `<div clas
 /* Leagues tab: My leagues and Mock Draft (moved here from Minigames) */
 function viewGroups(){
   if(UI.ltab==='pkl'){UI.ltab='leagues';UI.lgk='pk'}
-  const L=UI.ltab==='mock'?'mock':'leagues';
-  const seg=`<div class="chips gm-tabs lgx-tabs" role="group" aria-label="Leagues">${[['leagues','My leagues'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="ltab" data-v="${v}" aria-pressed="${v===L}">${l}</button>`).join('')}</div>`;
+  const L=UI.ltab==='mock'?'mock':UI.ltab==='cup'?'cup':'leagues';
+  const seg=`<div class="chips gm-tabs lgx-tabs" role="group" aria-label="Leagues">${[['leagues','My leagues'],['cup','School Cup'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="ltab" data-v="${v}" aria-pressed="${v===L}">${l}</button>`).join('')}</div>`;
+  if(L==='cup')return `<div class="head"><h2>School Cup</h2><p>Your school against every other school. Free games only.</p></div>`+seg+cupHTML();
   if(L==='mock')return `<div class="head"><h2>Mock Draft</h2><p>Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.</p></div>`+seg+mockHTML();
   const h=viewGroups0(),i=h.indexOf('</div>',h.indexOf('<div class="head"'));
   return h.indexOf('<div class="head"')===0&&i>0?h.slice(0,i+6)+seg+h.slice(i+6):seg+h;
@@ -6882,7 +6991,7 @@ function useAd(){if(!USE.doc)return;const k=useDay();USE.doc.ads[k]=(+USE.doc.ad
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{USE.lastAct=Date.now()},{passive:true,capture:true}));
 /* which part of the app is on screen: the tab, plus the sub-tab for Stats, Leagues and Minigames */
 const useTab=()=>{try{if(typeof FG!=='undefined'&&FG)return 'mg:fgplay';const d=$('#drawer');if(d&&!d.hidden)return 'player';const v=UI.view;
-  if(v==='minigames')return 'mg:'+(UI.mtab||'picks');if(v==='groups')return UI.ltab==='mock'?'mock':UI.lgk==='pk'?'pkl':'leagues';if(v==='league')return 'stats:'+(UI.stab||'players');return v}catch(_){return 'other'}};
+  if(v==='minigames')return 'mg:'+(UI.mtab||'picks');if(v==='groups')return UI.ltab==='mock'?'mock':UI.ltab==='cup'?'cup':UI.lgk==='pk'?'pkl':'leagues';if(v==='league')return 'stats:'+(UI.stab||'players');return v}catch(_){return 'other'}};
 setInterval(()=>{if(!useOn())return;if(!USE.doc){if(++USE.tick%8===0)useLoad();return}
   const k=useDay(),t=useTab();if(t==='admin'||t==='desk')return;
   if(t!==USE.tab){USE.tab=t;const c=USE.doc.tc[k]||(USE.doc.tc[k]={});c[t]=(+c[t]||0)+1;USE.dirty=true}
@@ -7377,7 +7486,7 @@ document.addEventListener('click',async e=>{
   else if(a==='rstFc'||a==='rstBets'||a==='rstAts'||a==='rstAll'){
     if(VA||!ME.uid)return;const all=a==='rstAll',what=all?'all three games':a==='rstFc'?'5 Card Draw':a==='rstBets'?'Pick ’em':'Player props';
     if(!confirm('Reset your own '+what+'? Your hand, picks and tokens for it are cleared so you can replay. Other people are not affected.'))return;
-    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{}),...(Object.keys(rwOf(ME.uid)).length?{rw:rwOf(ME.uid)}:{}),...(Object.keys(lbtOf(ME.uid)).length?{lbt:lbtOf(ME.uid)}:{}),...(dlyOf(ME.uid).n?{dly:dlyOf(ME.uid)}:{}),...Object.fromEntries(['gft','gsn','bnd'].filter(k=>(S.picks[ME.uid]||{})[k]).map(k=>[k,S.picks[ME.uid][k]])),...((S.picks[ME.uid]||{}).inv?{inv:(S.picks[ME.uid]||{}).inv}:{})};
+    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{}),...(Object.keys(rwOf(ME.uid)).length?{rw:rwOf(ME.uid)}:{}),...(Object.keys(lbtOf(ME.uid)).length?{lbt:lbtOf(ME.uid)}:{}),...(dlyOf(ME.uid).n?{dly:dlyOf(ME.uid)}:{}),...Object.fromEntries(['gft','gsn','bnd','cup'].filter(k=>(S.picks[ME.uid]||{})[k]).map(k=>[k,S.picks[ME.uid][k]])),...((S.picks[ME.uid]||{}).inv?{inv:(S.picks[ME.uid]||{}).inv}:{})};
     if(await act(()=>setDoc('picks/'+ME.uid,nx),what+' reset. Play it again from the Games tab.')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],nx);UI.pk={};UI.at={};UI.fcDeal=null;UI.fcAnim=null;render()}}
   else if(a==='lock'){try{await SB.rpc('admin_lock')}catch(_){}ME.admin=false;AD.rows=null;AD.sel=null;render()}
   else if(a==='saveSchool'){const v=$('#ad-school').value.trim();await act(()=>upsert('profiles/'+id,{school:v}),'School saved')}
@@ -7740,6 +7849,13 @@ document.addEventListener('click',async e=>{
   else if(a==='pklInv'){const g=S.fgroups[t.dataset.gid];if(g){const bb=FG_SPORT==='bb',m=`Join my ${bb?'basketball':'football'} Pick ’em league "${g.name}" on Varsity. Pick every game each game and see who’s most accurate.\n\nOpen ${SITE_URL}#groups, tap Join with code, and enter ${g.code}`;
       const phone=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);if(phone)location.href='sms:?&body='+encodeURIComponent(m);else copyText(m,'Invite message copied. Paste it into a text.')}}
   else if(a==='pklPick'){const id=t.dataset.g,sd=t.dataset.s,cur=(UI.pkls||{})[id]||pklOf(ME.uid)[id];UI.pkls=Object.assign({},UI.pkls);if(cur===sd&&!pklOf(ME.uid)[id])delete UI.pkls[id];else if(pklOf(ME.uid)[id]===sd)delete UI.pkls[id];else UI.pkls[id]=sd;render(true)}
+  else if(a==='cupWk'){UI.cupw=+t.dataset.w;UI.cupS={};render()}
+  else if(a==='cupV'){UI.cupv=t.dataset.v;render()}
+  else if(a==='cupAll'){UI.cupAll=!UI.cupAll;render()}
+  else if(a==='cupPick'){const id=t.dataset.g,sd=t.dataset.s;UI.cupS=Object.assign({},UI.cupS);if(UI.cupS[id]===sd)delete UI.cupS[id];else UI.cupS[id]=sd;render(true)}
+  else if(a==='cupSave'){const gm=gameMap(),st=Object.entries(UI.cupS||{}).filter(([id])=>gm[id]&&!started(gm[id])&&!gDone(gm[id]));if(!st.length){UI.cupS={};render();return}
+    const patch=Object.fromEntries(st);
+    if(await act(()=>upsert('picks/'+ME.uid,{cup:{pk:patch}}),st.length+(st.length===1?' pick':' picks')+' locked in')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{cup:Object.assign({},cupDoc(ME.uid),{pk:Object.assign({},cupDoc(ME.uid).pk,patch)})});UI.cupS={};render()}}
   else if(a==='pklFav'){const cw=UI.pklOpenW||CURW(),mine=pklOf(ME.uid);UI.pkls=Object.assign({},UI.pkls);
     ((GAMES&&GAMES.games)||[]).filter(x=>x.w===cw&&!started(x)&&!gDone(x)&&!mine[gid(x)]&&!UI.pkls[gid(x)]).forEach(x=>{UI.pkls[gid(x)]=oddsFor(x).ph>=.5?'h':'a'});render()}
   else if(a==='pklSave'){const gm=gameMap(),st=Object.entries(UI.pkls||{}).filter(([id])=>gm[id]&&!started(gm[id])&&!gDone(gm[id]));if(!st.length){UI.pkls={};render();return}

@@ -431,6 +431,7 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     s = rep(s, "Ten regular-season games: their real schedule, with any open weeks filled by similar teams, simulated from team ratings.", "Games follow their real regular-season schedule, simulated from team ratings.")
     s = rep(s, "Lock in this team and play a ${SIM_GAMES}-game season", "Lock in this team and play the season")
     s = rep(s, "const LB_TOK=100,FC_LB_START=12,", "const LB_TOK=100,FC_LB_START=1,")
+    s = rep(s, "const CUP_START=13,", "const CUP_START=0,")
     # the game is called 82-0 in basketball (every label; the football app keeps 10-0)
     s = s.replace("10-0", "82-0")
 
