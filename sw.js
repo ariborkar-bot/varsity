@@ -1,7 +1,7 @@
 /* Varsity service worker: lets the app open from the home screen, and offline.
    The page is always fetched fresh when there is a connection, so updates show up right away;
    the saved copy is only used offline. League data from Supabase is never cached. */
-const CACHE = 'varsity-v310';
+const CACHE = 'varsity-v311';
 const SHELL = ['./', 'manifest.webmanifest', 'logo.png', 'logos.js', 'games.js', 'fonts.css', 'icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/apple-touch-icon-v2.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -36,4 +36,9 @@ self.addEventListener('notificationclick', e => {
     for (const c of cs) if ('focus' in c) return c.focus();
     return self.clients.openWindow ? self.clients.openWindow(url) : null;
   }));
+});
+// v311: closed-app push. Needs a Web Push server (not set up yet); when one sends {title, body, url, tag} this shows it.
+self.addEventListener('push', e => {
+  let d = {}; try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Varsity', { body: d.body || '', tag: d.tag || 'varsity', icon: 'icons/icon-192-v2.png', badge: 'icons/icon-192-v2.png', data: { url: d.url || './' } }));
 });

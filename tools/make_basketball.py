@@ -220,27 +220,6 @@ def rep(s, a, b, count=1):
     return s.replace(a, b)
 
 
-def gameify(s):
-    """Basketball has no one-game-a-week rhythm, so the visible word "week" becomes "game".
-    Only display wording is touched: identifiers such as weeks, .week and set-week stay as they are."""
-    R = [
-        (r"\bBye week\b", "No game"),
-        (r"every game by week", "every game in date order"),
-        (r"\bWk\b", "Game"),
-        (r"\bwk (?=\$\{|'\s*\+)", "game "),
-        (r"just this week(?:’|')s game", "just this game"),
-        (r"\bweek-by-week\b", "game-by-game"),
-        (r"\bweekly (scores|matchups)\b", r"game \1"),
-        (r"\bWeek\b", "Game"),
-        (r"\bweek(?=\s+\$\{|\s*'\s*\+)", "game"),
-        (r"\b((?i:this|next|each|every|that|the|a|per|last|in|from|until|for|of|by|up until|into|current)|Best|Projected|Current) week\b", r"\1 game"),
-        (r"\bweek(?=[’'](?:s)\b)", "game"),
-        (r"\b(finished|Finished|past|later|recent|Stat) weeks\b", lambda m: m.group(1) + " games"),
-    ]
-    for pat, rp in R:
-        s = re.sub(pat, rp, s)
-    return s
-
 def transform(s, mp, games, seeds, teams, prior):
     # --- identity ---------------------------------------------------------------------------------------------
     s = rep(s, '<title>Varsity</title>', '<title>Varsity Basketball</title>')
@@ -325,7 +304,7 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, "p.pos='QB';p.posLabel='QB'", "void 0")
     s = rep(s, "Default roster: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots.", "Default roster: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots.")
     s = rep(s, "const FG_SPORT='fb';", "const FG_SPORT='bb';")
-    s = rep(s, "Over or under on player stats like yards, touchdowns and tackles.", "Over or under on player stats like points, rebounds and assists.")
+    s = rep(s, "Over or under on a player’s stats.", "Over or under on a player’s points, rebounds and assists.")
     s = rep(s, "Build your team opens once players have at least 2 games of stats.", "Build your team opens once the season is underway (it starts Nov 14) and players have at least 2 games of stats.")
     s = rep(s, "Default: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots.", "Default: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots.")
     s = rep(s, "const CAP=70,CAP_FULL=140;", "const CAP=60,CAP_FULL=90;")
@@ -410,10 +389,10 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     s = rep(s, "const tot=Math.max(18,Math.min(84,Math.round(44+8*gauss())));", "const tot=Math.max(80,Math.min(180,Math.round(122+12*gauss())));")
     s = rep(s, 'bonus=Math.max(-8,Math.min(16,z*4.5))', 'bonus=Math.max(-6,Math.min(12,z*3.5))')
     s = rep(s, "left:{off:SIM_RESPINS,def:SIM_RESPINS}", "left:{off:SIM_RESPINS,def:0}")
-    s = rep(s, "Draw a full 12-player team, use up to ${SIM_RESPINS} offense and ${SIM_RESPINS} defense respins to swap out players,",
-            "Draw a 7-player team, use up to ${SIM_RESPINS} respins to swap out players,")
-    s = rep(s, "12 random players, 6 on offense and 6 on defense. ${SIM_RESPINS} respins per side to swap anyone.",
-            "7 random players: PG, SG, SF, PF, C, G and PF/C. ${SIM_RESPINS} respins to swap anyone.")
+    s = rep(s, "Draw a full 12-player team and swap players with ${SIM_RESPINS} respins per side.",
+            "Draw a 7-player team and swap players with ${SIM_RESPINS} respins.")
+    s = rep(s, "12 random players. Highest total wins.",
+            "7 random players: PG, SG, SF, PF, C, G and PF/C. Highest total wins.")
     s = rep(s, "<div><small>Offense respins</small><b>${m.left.off}</b></div><div><small>Defense respins</small><b>${m.left.def}</b></div>",
             "<div><small>Respins</small><b>${m.left.off}</b></div>")
     s = rep(s, "You have ${m.left.off} offense and ${m.left.def} defense ${", "You have ${m.left.off} ${")
@@ -444,7 +423,7 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
     # --- look: hardwood instead of grass ------------------------------------------------------------------------
     k = s.rindex('</style>', 0, s.index('<header class="mast">'))
     s = s[:k] + '</style><style id="bb-theme">' + BB_CSS.replace('__COURT__', COURT_URI) + s[k:]
-    return gameify(s)
+    return s
 
 
 COURT_JS = r"""function simField(tab){

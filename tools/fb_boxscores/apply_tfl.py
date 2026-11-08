@@ -22,7 +22,7 @@ for g in G.values():
             sl,car=k.split('|');names.setdefault(car,slug(sl.replace('-',' ')))
 byid={x['id']:x for x in P};by=defaultdict(list)
 for x in P:by[(x['s'],slug(x['n']))].append(x)
-lines=open(H+'/data/tfl.txt').read().split('\n');labels=lines[0].split('|');rows=[l for l in lines[1:] if l]
+lines=open(next((x for x in sys.argv[1:] if x.endswith('.txt')),H+'/data/tfl.txt')).read().split('\n');labels=lines[0].split('|');rows=[l for l in lines[1:] if l]
 def parse(e):
     """entries are week, tfl, pbu in base 36; a half (0.5) is written 'x.i'"""
     k=0;out=[]
