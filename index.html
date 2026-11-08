@@ -1693,6 +1693,20 @@ html,body{overflow-x:clip;max-width:100%}
 .adm-logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#F26B3A,#F59E3B);color:#fff;display:grid;place-items:center;font-weight:800}
 .adm-side nav{display:flex;flex-direction:column;gap:4px}.adm-nav{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:10px;border:0;background:none;color:inherit;font:500 14px/1 inherit;cursor:pointer;text-decoration:none;text-align:left}
 .adm-nav svg{width:19px;height:19px;flex:none}.adm-s{display:none}.adm-nav:hover{background:rgba(255,255,255,.06);color:#fff}.adm-nav.on{background:#F26B3A;color:#fff;box-shadow:0 6px 16px rgba(242,107,58,.35)}
+/* v294 daily shop, gifts, trophies, phone notifications */
+.sh-card .sh-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+@media (max-width:620px){.sh-card .sh-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sh-it{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:12px 8px;border-radius:14px;border:1px solid var(--line);border-top:3px solid var(--rc);background:radial-gradient(120% 70% at 50% 0%,color-mix(in srgb,var(--rc) 20%,transparent),transparent 70%),var(--surface2)}
+.sh-it b{font-size:.85rem;line-height:1.2}.sh-it small{font-size:.72rem;font-weight:700}.sh-it .btn{margin-top:auto;width:100%}
+.sh-art{min-height:56px;display:grid;place-items:center}.sh-t{color:#FFC93A}.sh-note{margin:10px 0 0;font-size:.8rem}
+.sh-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}@media (max-width:620px){.sh-two{grid-template-columns:1fr}}
+.sh-gift,.sh-tro{display:flex;flex-direction:column;gap:10px}.sh-gift small,.sh-tro small{display:block;margin-top:2px}.sh-tro .btn{align-self:flex-start}
+.gf-sec{display:flex;flex-direction:column;gap:8px;margin:12px 0}.gf-sec>b{font-size:.9rem}.gf-ppl{max-height:140px;overflow:auto}
+.gf-who{display:inline-flex;align-items:center;gap:6px}.gf-who .av{margin:0!important}
+.tro-card{display:flex;align-items:center;gap:16px}.tro-card h3{margin:2px 0 4px}.tro-card p{margin:0 0 8px}.tro-none{justify-content:space-between;flex-wrap:wrap}.tro-none small{display:block}
+.tro-art{flex:none;filter:drop-shadow(0 6px 14px rgba(255,201,58,.25))}.tro-prev{display:grid;place-items:center;padding:8px 0;filter:drop-shadow(0 8px 18px rgba(255,201,58,.3))}
+.tro-sw i{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:-2px}
+.nt-phone{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid #FFC93A;border-radius:14px;background:rgba(255,201,58,.08);margin:6px 0 12px}.nt-phone small{display:block}.nt-on{margin-top:10px}
 .adm-upd{font-size:12px;color:#8A90A6;white-space:nowrap}.adm-ibtn.spin svg{animation:admSpin .8s linear infinite}@keyframes admSpin{to{transform:rotate(360deg)}}
 .adm-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.adm-del{width:32px;height:32px;border-radius:8px;border:1px solid #F3C9CF;background:#FFF5F6;color:#D13A4E;display:inline-grid;place-items:center;cursor:pointer}.adm-del svg{width:16px;height:16px}.adm-del:hover{background:#E0455B;color:#fff;border-color:#E0455B}
 .adm-btn.red{background:#FFF5F6;color:#D13A4E;border-color:#F3C9CF}.adm-btn.red:hover{background:#E0455B;color:#fff}
@@ -2598,7 +2612,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v293 · Nov 7';
+const APP_BUILD='v294 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2916,13 +2930,38 @@ function computeNotes(){
       const w=ch[0],st=p.games[w-1].stat,upd=o[w]!==undefined,more=ch.length>1?` (+${ch.length-1} more)`:'';
       if(/x$/.test(k)&&!pts(st))continue;   /* a two-way player's empty other-side card */
       if(mine.has(k))notes.push({c:'mystats',t:NOW()+1,k:'up',text:`${upd?'Your stat line was updated':'New stat line for you'}: Week ${w}, ${line(p.pos,st)}. ${f1(pts(st))} fantasy points${more}.`});
-      else notes.push({c:'team',t:NOW(),k:'up',text:`${p.name} (${team[k]}) ${upd?'had a stat line updated':'got a new stat line'}: Week ${w}, ${f1(pts(st))} fantasy points${more}.`});
-    }}
+      else notes.push({c:'team',t:NOW(),k:'up',text:`${p.name} (${team[k]}) ${upd?'had a stat line updated':'got a new stat line'}: Week ${w}, ${f1(pts(st))} fantasy points${more}.`,_p:p.name,_v:pts(st),_w:w});
+    }
+    /* v294: stats arrive in one batch, so 4+ player notes become one summary */
+    const tn=notes.filter(x=>x.c==='team');if(tn.length>3){const top=tn.slice().sort((a,b)=>b._v-a._v)[0],wk=Math.max(...tn.map(x=>x._w));
+      for(const x of tn)notes.splice(notes.indexOf(x),1);
+      notes.push({c:'team',t:NOW(),k:'up',text:`Week ${wk} stats are in for ${tn.length} of your players. Top scorer: ${top._p}, ${f1(top._v)} pts. Check your matchups.`})}}
   /* league chat: messages from others since you last looked */
   for(const g of myGroups()){const n=Object.values(g.chat||{}).filter(m=>m&&m.t&&m.u!==ME.uid&&(m.at||0)>at).length;
     if(n)notes.push({c:'chat',t:Math.max(...Object.values(g.chat).filter(m=>m&&m.at).map(m=>m.at)),k:'join',text:`${n} new ${n===1?'message':'messages'} in ${g.name} chat.`})}
+  try{notes.push(...extraNotes(at))}catch(_){}
   return notes.sort((x,y)=>y.t-x.t);
 }
+/* v294: more reasons to come back. Each has its own time so "Mark all as read" clears it until it is new again. */
+function ptAt(h){const d=TODAY();const z=new Date(d+'T12:00:00Z');const off=new Date(z.toLocaleString('en-US',{timeZone:'America/Los_Angeles'}));const diff=z-off;return new Date(d+'T'+String(h).padStart(2,'0')+':00:00Z').getTime()+diff}
+function ptHour(){return new Date(new Date().toLocaleString('en-US',{timeZone:'America/Los_Angeles'})).getHours()}
+function extraNotes(at){const out=[],day0=ptAt(0),gm=FG_SPORT==='bb'?'Hoops':'Field Goal';
+  /* gifts */
+  for(const x of giftsIn(ME.uid))if((x.at||0)>at)out.push({c:'gift',t:x.at,k:'up',text:`${nm(x.from)} sent you ${x.a?x.a+' tokens':((ITEM[x.i]||{}).n||'an item')}${x.m?`: “${x.m}”`:''}`});
+  /* prizes waiting */
+  const pz=(typeof fgPrizes==='function'?fgPrizes(ME.uid).length:0)+(typeof fcPrizes==='function'?fcPrizes(ME.uid).length:0);
+  if(pz&&day0>at)out.push({c:'prize',t:day0,k:'up',text:`You placed on a leaderboard. ${pz} prize ${pz===1?'pack is':'packs are'} waiting in the Shop.`});
+  /* streak about to end (after 5 PM, not played today) */
+  const sk=fgStreak(ME.uid),rec=fgRec(ME.uid).sk||{};
+  if(sk>=2&&rec.last!==TODAY()&&ptHour()>=17&&ptAt(17)>at)out.push({c:'streak',t:ptAt(17),k:'dn',text:`Your ${sk}-day streak ends at midnight. Play today’s ${gm} challenge to keep it.`});
+  /* games starting today you haven't picked (Pick 'em leagues) */
+  if(myPKL().length){const pk=((S.picks[ME.uid]||{}).pkl)||{},todays=((GAMES&&GAMES.games)||[]).filter(g=>g.d===TODAY()&&!gDone(g)),miss=todays.filter(g=>!pk[gid(g)]).length;
+    if(miss&&day0>at)out.push({c:'lock',t:day0+1,k:'dn',text:`${miss} ${miss===1?'game':'games'} you haven’t picked start today. Picks lock at kickoff.`})}
+  /* 5 Card Draw hand not dealt yet this week */
+  if(typeof fcHand==='function'&&!fcHand(ME.uid,CURW())&&ptAt(9)>at&&ptHour()>=9)out.push({c:'lock',t:ptAt(9),k:'join',text:`Your 5 Card Draw hand for ${FG_SPORT==='bb'?'game':'week'} ${CURW()} isn’t dealt yet.`});
+  /* the new daily shop */
+  if(day0>at){const ids=shopToday(),best=ids[0]&&ITEM[ids[0]];if(best)out.push({c:'shop',t:day0+2,k:'join',text:`Today’s shop: ${best.n} (${RAR[best.r].n}) and ${ids.length-1} more. New items every day.`})}
+  return out}
 /* players whose stats you get notified about */
 function meKeys(){if(!ME.uid||!myProfile())return[];const s=new Set(meSides().map(p=>p.key));const m=meP();if(m)s.add(m.key);return[...s]}
 function teamKeys(){const o={};for(const g of myGroups()){const ro=lineupOf(g.id,ME.uid);for(const k of Object.values(ro))if(k&&!o[k])o[k]=g.name}return o}
@@ -3573,11 +3612,11 @@ const PACKS={
   /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
   god:{n:'Hall of Fame pack',c:5,tok:3000,usd:'$19.99',odds:{r:40,e:35,l:17,m:8},g:'l',cos:1}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
-const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return +((invOf(u).it||{})[id])||0};
-const cosOwnCount=u=>{const it=invOf(u).it||{};let n=0;for(const id in it){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&+it[id]>0)n++}return n};
+const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
+const cosOwnCount=u=>{const it=invOf(u).it||{},d=gDelta(u);let n=0;for(const id of new Set([...Object.keys(it),...Object.keys(d)])){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&(+it[id]||0)+(+d[id]||0)>0)n++}return n};
 let _cosT=0;const cosTotal=()=>_cosT||(_cosT=ITEMS.filter(x=>!x.ex&&COS_K.includes(x.k)&&itemSp(x)).length);
 const SET_IDS={};ITEMS.forEach(x=>{if(x.set&&!x.ex)(SET_IDS[x.set]=SET_IDS[x.set]||[]).push(x.id)});
-function cosEarned(u,id){const x=ITEM[id];if(!x||!x.ex)return false;if(x.need)return cosOwnCount(u)>=x.need;if(x.set){const it=invOf(u).it||{};return SET_IDS[x.set].every(i=>+it[i]>0)}return false}
+function cosEarned(u,id){const x=ITEM[id];if(!x||!x.ex)return false;if(x.need)return cosOwnCount(u)>=x.need;if(x.set)return SET_IDS[x.set].every(i=>invHas(u,i)>0);return false}
 /* inline looks for generated items (hand-made ones use CSS classes) */
 /* v281: name colours stay readable on the dark app: any dark colour in a name is lightened (mixed with white) until it reads, so team-colour
    fades like navy→maroon no longer fade into the background */
@@ -3702,7 +3741,7 @@ const isCos=id=>{const x=ITEM[id];return !!x&&COS_K.includes(x.k)};
 function invLeft(u,id){const v=invOf(u),own=invHas(u,id);
   if(id==='t_boost'||id==='t_insure'){const f=id==='t_boost'?'b':'i';let used=0;for(const b of [...Object.values(betsOf(u)),...Object.values(propsOf(u))])if(b&&b.bx===f)used++;return Math.max(0,own-used)}
   return Math.max(0,own-(+((v.use||{})[id])||0))}
-const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)};
+const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)+giftBonus(u)};
 /* free packs: the starter pack, plus one Rookie pack for every 7 days you play the daily challenge */
 function freePacks(u){const v=invOf(u),fr=v.fr||{},d=+fgRec(u).days||0;return (fr.st?0:1)+Math.max(0,Math.floor(d/7)-(+fr.d7||0))}
 function rollRarity(odds,floor){const ord=RAR_ORD;let x=fcRnd(10000)/100,acc=0,r=ord.find(k=>odds[k]>0)||'c';for(const k of ord){acc+=odds[k]||0;if(x<acc){r=k;break}}
@@ -3747,7 +3786,7 @@ async function packOpen(type,how,day){
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
     if(!P.cos&&fcRnd(100)<CARD_CHANCE){const cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     const id=rollItem(r,!!P.cos);
-    const was=+it[id]||0,isDup=isCos(id)&&was>0;if(isDup)dup+=RAR[r].dup;else it[id]=was+1;got.push({id,r,dup:isDup})}
+    const was=Math.max(+it[id]||0,invHas(ME.uid,id)),isDup=isCos(id)&&was>0;if(isDup)dup+=RAR[r].dup;else it[id]=(+it[id]||0)+1;got.push({id,r,dup:isDup})}
   const patch={it,n:(+v.n||0)+1};if(gotCard)patch.cards=cards;
   if(how==='tok')patch.sp=(+v.sp||0)+P.tok;
   if(dup)patch.dup=(+v.dup||0)+dup;
@@ -3832,6 +3871,126 @@ const ballOf=u=>{const b=(invOf(u).eq||{}).ball;return b&&invHas(u,b)?b:''};
 const eqOf=(u,k)=>{if(!u||!S.picks||!S.picks[u])return '';const x=(invOf(u).eq||{})[k];return x&&invHas(u,x)?x:''};
 /* a name in someone's name colour (chat, leaderboards, matchups) */
 const nmC=(u,txt)=>{const c=eqOf(u,'name'),b=eqOf(u,'badge');return (c?`<span class="nc ${c}" style="${cosStyle(c)}">${txt}</span>`:txt)+(b?bdgHTML(b):'')};
+
+/* ===================== v294: daily shop, gifts, league trophies ===================== */
+/* Daily shop: 4 cosmetics a day, the same for everyone (seeded by the day and sport), new at midnight Pacific.
+   Prices by rarity. One of each per person; items you own show Owned. Bought items go into inv.it, the cost into inv.sp. */
+const SHOP_PRICE={c:80,u:150,r:300,e:600,l:1200,m:2500};
+const SHOP_SLOTS=[['e','e','l','l','m'],['r','e'],['u','r'],['c','u']];
+function shopToday(day){day=day||TODAY();
+  let st=hash('shop|'+FG_SPORT+'|'+day)||1;const rnd=()=>{st=(Math.imul(st,1664525)+1013904223)>>>0;return st/4294967296};
+  const pool=ITEMS.filter(x=>!x.ex&&COS_K.includes(x.k)&&itemSp(x)&&SHOP_PRICE[x.r]),out=[];
+  for(const rs of SHOP_SLOTS){const r=rs[Math.floor(rnd()*rs.length)],c=pool.filter(x=>x.r===r&&!out.includes(x.id));if(c.length)out.push(c[Math.floor(rnd()*c.length)].id)}
+  return out}
+function ptLeft(){const n=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Los_Angeles'}));const s=86400-(n.getHours()*3600+n.getMinutes()*60+n.getSeconds());return `${Math.floor(s/3600)}h ${Math.floor(s%3600/60)}m`}
+function shopHTML(){const ids=shopToday(),bal=bank(ME.uid);
+  return `<section class="card sh-card"><div class="qh"><h3>Today’s shop</h3><span class="muted">New items in <b class="sh-t">${ptLeft()}</b></span></div>
+    <div class="sh-grid">${ids.map(id=>{const x=ITEM[id],R=RAR[x.r],pr=SHOP_PRICE[x.r],own=invHas(ME.uid,id)>0;
+      return `<article class="sh-it" style="--rc:${R.c}"><div class="sh-art">${itemArt(id,52)}</div><b>${esc(x.n)}</b><small style="color:${R.c}">${R.n} · ${esc(KIND_N[x.k]||x.k)}</small>
+        <button class="btn sm" data-act="shBuy" data-v="${id}" ${own||bal<pr?'disabled':''}>${own?'Owned':pr.toLocaleString()+' tokens'}</button></article>`}).join('')}</div>
+    <p class="muted sh-note">Same four items for everyone today. Can’t afford one? Every day you open Varsity adds ${DLY_PAY} tokens.</p></section>`}
+const KIND_N={ball:'ball skin',frame:'profile frame',banner:'banner',name:'name colour',cback:'card back',bubble:'chat bubble',title:'title',badge:'badge',theme:'app theme',coin:'token coin',icon:'app icon',share:'share card',walkup:'draft walk-up',crest:'league crest',lineup:'lineup style',field:'field skin',jersey:'jerseys'};
+async function shopBuy(id){const x=ITEM[id],pr=x&&SHOP_PRICE[x.r];
+  if(!x||!shopToday().includes(id)){say('That item left the shop.');return}
+  if(invHas(ME.uid,id)>0){say('You already have it.');return}
+  if(bank(ME.uid)<pr){say(`You need ${pr.toLocaleString()} tokens.`);return}
+  const v=invOf(ME.uid),it=Object.assign({},v.it,{[id]:(+((v.it||{})[id])||0)+1}),patch={it,sp:(+v.sp||0)+pr};
+  S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
+  const ok=await act(()=>upsert('picks/'+ME.uid,{inv:patch}),`${x.n} is yours. Equip it in My Locker.`);if(!ok)S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:v});render()}
+
+/* Gifts: picks/<sender>.gft = {id:{to, a: tokens | i: item id, at, m: note}}. Everyone's picks docs are readable, so the
+   receiver's balance and items are worked out from the senders' docs: bank() adds tokens in and takes tokens out,
+   invHas() adds items in and takes items out (a gifted item you had equipped comes off). 500 tokens a day max. */
+const GIFT_DAY=500,GIFT_AMTS=[10,25,50,100,250];
+var _gIn={at:0,m:{},d:{}};
+function gBuild(){if(!_gIn)_gIn={at:0,m:{},d:{}};if(Date.now()-_gIn.at<1500)return;const m={},d={};
+  for(const [from,p] of Object.entries(S.picks||{})){const g=p&&p.gft;if(!g)continue;
+    for(const [id,x] of Object.entries(g)){if(!x||!x.to||x.to===from)continue;(m[x.to]=m[x.to]||[]).push(Object.assign({id,from},x));
+      if(x.i){(d[x.to]=d[x.to]||{})[x.i]=((d[x.to]||{})[x.i]||0)+1;(d[from]=d[from]||{})[x.i]=((d[from]||{})[x.i]||0)-1}}}
+  _gIn={at:Date.now(),m,d}}
+function giftsIn(u){gBuild();return _gIn.m[u]||[]}
+function giftsOut(u){return Object.entries(((S.picks[u]||{}).gft)||{}).map(([id,x])=>Object.assign({id},x)).filter(x=>x&&x.to)}
+function gDelta(u){gBuild();return _gIn.d[u]||{}}
+function giftBonus(u){let t=0;for(const x of giftsIn(u))t+=+x.a||0;for(const x of giftsOut(u))t-=+x.a||0;return t}
+const giftSentToday=u=>giftsOut(u).filter(x=>x.a&&new Date(x.at).toLocaleDateString('en-CA',{timeZone:'America/Los_Angeles'})===TODAY()).reduce((a,x)=>a+(+x.a||0),0);
+function giftFriends(){const o=new Set();for(const g of [...myGroups(),...myFGroups(),...myPKL()])Object.keys(g.members||{}).forEach(u=>o.add(u));o.delete(ME.uid);return [...o].filter(u=>S.profiles[u]).sort((a,b)=>nm(a).localeCompare(nm(b)))}
+const GF={to:'',kind:'t',a:25,i:'',m:'',q:''};
+function giftSheet(){const c=$('#cfm'),fr=giftFriends(),q=GF.q.trim().toLowerCase();
+  const found=q.length>1?Object.keys(S.profiles).filter(u=>u!==ME.uid&&!fr.includes(u)&&(S.profiles[u].name||'').toLowerCase().includes(q)).slice(0,8):[];
+  const mine=ITEMS.filter(x=>!x.ex&&COS_K.includes(x.k)&&invHas(ME.uid,x.id)>0).sort((a,b)=>RAR_ORD.indexOf(b.r)-RAR_ORD.indexOf(a.r));
+  const left=Math.max(0,Math.min(GIFT_DAY-giftSentToday(ME.uid),Math.floor(bank(ME.uid)))),who=u=>`<button type="button" class="chip gf-who" data-act="gfTo" data-v="${esc(u)}" aria-pressed="${GF.to===u}">${av(nm(u),u,22,u)}${esc(nm(u))}</button>`;
+  const sent=giftsOut(ME.uid).sort((a,b)=>b.at-a.at).slice(0,4),got=giftsIn(ME.uid).sort((a,b)=>b.at-a.at).slice(0,4);
+  const ln=x=>x.a?`${x.a} tokens`:esc((ITEM[x.i]||{}).n||'an item');
+  c.innerHTML=`<div class="gcard tok-sheet gf-sheet" role="dialog" aria-modal="true" aria-labelledby="gf-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="gf-t">Send a gift</h2>
+    <div class="gf-sec"><b>To</b>${fr.length?`<div class="chips gf-ppl">${fr.map(who).join('')}</div>`:'<small class="muted">Your league mates show here.</small>'}
+      <label class="fld"><span>Or find someone by name</span><input id="gf-q" type="search" value="${esc(GF.q)}" placeholder="Name" autocomplete="off"></label>${found.length?`<div class="chips gf-ppl">${found.map(who).join('')}</div>`:''}</div>
+    <div class="gf-sec"><b>Gift</b><div class="chips"><button type="button" class="chip" data-act="gfKind" data-v="t" aria-pressed="${GF.kind==='t'}">Tokens</button><button type="button" class="chip" data-act="gfKind" data-v="i" aria-pressed="${GF.kind==='i'}">An item</button></div>
+      ${GF.kind==='t'?`<div class="chips">${GIFT_AMTS.map(n=>`<button type="button" class="chip" data-act="gfAmt" data-v="${n}" aria-pressed="${GF.a===n}" ${n>left?'disabled':''}>${n}</button>`).join('')}</div><small class="muted">You can send ${left} more today (up to ${GIFT_DAY} a day).</small>`
+        :mine.length?`<label class="fld"><span>Item (it leaves your Locker)</span><select id="gf-i"><option value="">Choose an item</option>${mine.map(x=>`<option value="${x.id}" ${GF.i===x.id?'selected':''}>${esc(x.n)} · ${RAR[x.r].n}</option>`).join('')}</select></label>`:'<small class="muted">You don’t have any cosmetics to give yet.</small>'}</div>
+    <label class="fld"><span>Note (optional)</span><input id="gf-m" maxlength="60" value="${esc(GF.m)}" placeholder="Good luck this week!"></label>
+    <div class="gbtns"><button class="btn ghost" data-c="no">Cancel</button><button class="btn" data-act="gfSend" ${GF.to&&(GF.kind==='t'?GF.a<=left:GF.i)?'':'disabled'}>Send${GF.to?' to '+esc(nm(GF.to)):''}</button></div>
+    ${got.length||sent.length?`<div class="rw"><div class="rw-h"><b>Recent gifts</b></div><ul>${got.map(x=>`<li><span class="rw-c">↓</span><span>${esc(nm(x.from))} sent you ${ln(x)}</span></li>`).join('')}${sent.map(x=>`<li><span class="rw-c">↑</span><span>You sent ${esc(nm(x.to))} ${ln(x)}</span></li>`).join('')}</ul></div>`:''}</div>`;
+  c.hidden=false;const qi=$('#gf-q');if(qi&&GF._focus){qi.focus();qi.setSelectionRange(qi.value.length,qi.value.length)}GF._focus=false}
+async function giftSend(){const to=GF.to;if(!to||!S.profiles[to]){say('Pick who it’s for.');return}
+  const id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),x={to,at:NOW()};if(GF.m.trim())x.m=GF.m.trim().slice(0,60);
+  if(GF.kind==='t'){const left=Math.min(GIFT_DAY-giftSentToday(ME.uid),bank(ME.uid));if(!(GF.a>0)||GF.a>left){say('You can’t send that many tokens right now.');return}x.a=GF.a}
+  else{if(!GF.i||invHas(ME.uid,GF.i)<1){say('Pick an item you own.');return}x.i=GF.i}
+  const ok=await act(()=>upsert('picks/'+ME.uid,{gft:{[id]:x}}),`Gift sent to ${nm(to)}`);
+  if(ok){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{gft:Object.assign({},(S.picks[ME.uid]||{}).gft,{[id]:x})});_gIn.at=0;GF.i='';GF.m='';closeConfirm();render()}}
+
+/* League trophy: the league's owner designs it (shape, metal, base, engraving) for TRO_TOK tokens once; edits after that are free.
+   Saved on the league doc as trophy={sh,mt,bs,nm,by,at}; shown at the top of the league with the current leader. */
+const TRO_TOK=1000;
+const TRO_SH=()=>[['cup','Cup'],['ball',FG_SPORT==='bb'?'Basketball':'Football'],['star','Star'],['shield','Shield'],['ring','Ring']];
+const TRO_MT={gold:['Gold','#FFD25A','#B07A10'],silver:['Silver','#EEF2F6','#8C99A8'],bronze:['Bronze','#E3A66A','#8A5320'],plat:['Platinum','#D7ECF7','#6F97B5'],ruby:['Ruby','#FF6F81','#9E1B2E'],emerald:['Emerald','#55E39A','#13774A'],onyx:['Onyx','#6B7486','#1A1E27']};
+const TRO_BS={walnut:['Walnut','#6B4426','#3E2614'],black:['Black','#2A2F3A','#12151C'],marble:['Marble','#ECEAE4','#B9B5AB']};
+function trophySVG(t,sz){t=t||{};const M=TRO_MT[t.mt]||TRO_MT.gold,B=TRO_BS[t.bs]||TRO_BS.walnut,sh=t.sh||'cup',u='tg'+hash(JSON.stringify(t)+sz);
+  const g=`url(#${u})`;let top='';
+  if(sh==='cup')top=`<path d="M30 14h60v20c0 20-13 34-30 34S30 54 30 34z" fill="${g}"/><path d="M30 20H16c0 14 8 22 18 22M90 20h14c0 14-8 22-18 22" fill="none" stroke="${M[2]}" stroke-width="5"/><rect x="54" y="66" width="12" height="14" fill="${M[2]}"/>`;
+  else if(sh==='ball')top=FG_SPORT==='bb'?`<circle cx="60" cy="42" r="28" fill="${g}"/><path d="M32 42h56M60 14v56M40 22c10 10 10 30 0 40M80 22c-10 10-10 30 0 40" stroke="${M[2]}" stroke-width="3" fill="none"/><rect x="54" y="68" width="12" height="12" fill="${M[2]}"/>`
+    :`<ellipse cx="60" cy="42" rx="34" ry="21" transform="rotate(-25 60 42)" fill="${g}"/><path d="M47 48l26-12M52 39l4 7M58 36l4 7M64 33l4 7" stroke="${M[2]}" stroke-width="3"/><rect x="54" y="64" width="12" height="16" fill="${M[2]}"/>`;
+  else if(sh==='star')top=`<path d="M60 10l9 19 21 3-15 15 4 21-19-10-19 10 4-21-15-15 21-3z" fill="${g}"/><rect x="54" y="62" width="12" height="18" fill="${M[2]}"/>`;
+  else if(sh==='shield')top=`<path d="M60 10l30 10v20c0 18-13 30-30 38-17-8-30-20-30-38V20z" fill="${g}"/><path d="M60 22l18 6v12c0 11-8 19-18 24-10-5-18-13-18-24V28z" fill="none" stroke="${M[2]}" stroke-width="3"/>`;
+  else top=`<circle cx="60" cy="42" r="26" fill="none" stroke="${g}" stroke-width="12"/><path d="M48 18l12-10 12 10z" fill="${M[1]}"/><rect x="54" y="66" width="12" height="14" fill="${M[2]}"/>`;
+  return `<svg class="tro-svg" viewBox="0 0 120 120" width="${sz}" height="${sz}" role="img" aria-label="${esc((t.nm||'League')+' trophy')}"><defs><linearGradient id="${u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".25" stop-color="${M[1]}"/><stop offset="1" stop-color="${M[2]}"/></linearGradient></defs>
+    ${top}<path d="M38 80h44l6 12H32z" fill="${B[1]}"/><rect x="26" y="92" width="68" height="18" rx="2" fill="${B[2]}"/><rect x="36" y="96" width="48" height="10" rx="1" fill="${M[1]}"/><text x="60" y="104" text-anchor="middle" font-size="7" font-weight="800" font-family="system-ui,sans-serif" fill="${M[2]}">${esc((t.nm||'CHAMPION').slice(0,16).toUpperCase())}</text></svg>`}
+function trophyCard(g,st){const t=g.trophy,own=g.ownerId===ME.uid;
+  if(!t)return own?`<section class="card tro-card tro-none"><div><b>Give your league a trophy</b><small class="muted">Design the trophy your champion plays for: shape, metal, base and engraving. ${TRO_TOK.toLocaleString()} tokens, edits free after.</small></div><button class="btn" data-act="troOpen" data-gid="${esc(g.id)}">Design trophy</button></section>`:'';
+  const lead=st&&st[0];
+  return `<section class="card tro-card"><div class="tro-art">${trophySVG(t,110)}</div><div class="tro-tx"><span class="lbl">League trophy</span><h3>${esc(t.nm||g.name)}</h3>
+    <p class="muted">${lead?`Leader: <b>${nmC(lead.uid,esc(lead.uid===ME.uid?'You':nm(lead.uid)))}</b> · ${lead.rec.w}-${lead.rec.l}`:'No leader yet'}. The champion keeps it on their profile.</p>${own?`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">Edit trophy</button>`:''}</div></section>`}
+const TR={gid:'',sh:'cup',mt:'gold',bs:'walnut',nm:''};
+function troSheet(){const g=S.groups[TR.gid];if(!g){closeConfirm();return}const paid=!!(g.trophy||((invOf(ME.uid).tro||{})[g.id]));
+  const ch=(k,list)=>list.map(([v,l])=>`<button type="button" class="chip" data-act="troSet" data-k="${k}" data-v="${v}" aria-pressed="${TR[k]===v}">${esc(l)}</button>`).join('');
+  $('#cfm').innerHTML=`<div class="gcard tok-sheet tro-sheet" role="dialog" aria-modal="true" aria-labelledby="tr-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="tr-t">${esc(g.name)} trophy</h2>
+    <div class="tro-prev">${trophySVG(TR,170)}</div>
+    <div class="gf-sec"><b>Shape</b><div class="chips">${ch('sh',TRO_SH())}</div></div>
+    <div class="gf-sec"><b>Metal</b><div class="chips">${Object.entries(TRO_MT).map(([v,m])=>`<button type="button" class="chip tro-sw" data-act="troSet" data-k="mt" data-v="${v}" aria-pressed="${TR.mt===v}"><i style="background:linear-gradient(135deg,${m[1]},${m[2]})"></i>${m[0]}</button>`).join('')}</div></div>
+    <div class="gf-sec"><b>Base</b><div class="chips">${ch('bs',Object.entries(TRO_BS).map(([v,b])=>[v,b[0]]))}</div></div>
+    <label class="fld"><span>Engraving (up to 16 letters)</span><input id="tr-nm" maxlength="16" value="${esc(TR.nm)}" placeholder="${esc(g.name.slice(0,16))}"></label>
+    <div class="gbtns"><button class="btn ghost" data-c="no">Cancel</button><button class="btn" data-act="troSave" ${!paid&&bank(ME.uid)<TRO_TOK?'disabled':''}>${paid?'Save trophy':'Save · '+TRO_TOK.toLocaleString()+' tokens'}</button></div></div>`;
+  $('#cfm').hidden=false}
+async function troSave(){const g=S.groups[TR.gid];if(!g||g.ownerId!==ME.uid){say('Only the league’s owner can design its trophy.');return}
+  const v=invOf(ME.uid),paid=!!(g.trophy||((v.tro||{})[g.id]));if(!paid&&bank(ME.uid)<TRO_TOK){say(`You need ${TRO_TOK.toLocaleString()} tokens.`);return}
+  const t={sh:TR.sh,mt:TR.mt,bs:TR.bs,nm:(TR.nm||g.name).slice(0,16),by:ME.uid,at:NOW()};
+  if(!paid){const patch={sp:(+v.sp||0)+TRO_TOK,tro:Object.assign({},v.tro,{[g.id]:1})};S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
+    try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){say('That did not save. Try again.');return}}
+  const ok=await act(()=>upsert('groups/'+g.id,{trophy:t}),'Trophy saved');if(ok){S.groups[g.id]=Object.assign({},g,{trophy:t});closeConfirm();render()}}
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='gf-q'){GF.q=t.value;GF._focus=true;giftSheet()}else if(t.id==='gf-m')GF.m=t.value;else if(t.id==='tr-nm'){TR.nm=t.value;const pv=document.querySelector('.tro-prev');if(pv)pv.innerHTML=trophySVG(TR,170)}});
+document.addEventListener('change',e=>{if(e.target.id==='gf-i'){GF.i=e.target.value;giftSheet()}});
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,v=t.dataset.v;
+  if(a==='ntPhone')ntPhoneAsk();
+  else if(a==='ntPhoneOff'){localStorage.setItem('vs-push','off');say('Phone notifications are off');if(UI.notifView==='settings')openNotes()}
+  else if(a==='shBuy')shopBuy(v);
+  else if(a==='gfOpen'){if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}if(t.dataset.to)GF.to=t.dataset.to;giftSheet()}
+  else if(a==='gfTo'){GF.to=GF.to===v?'':v;giftSheet()}
+  else if(a==='gfKind'){GF.kind=v;giftSheet()}
+  else if(a==='gfAmt'){GF.a=+v;giftSheet()}
+  else if(a==='gfSend')giftSend();
+  else if(a==='troOpen'){const g=S.groups[t.dataset.gid];if(!g)return;Object.assign(TR,{gid:g.id,sh:'cup',mt:'gold',bs:'walnut',nm:''},g.trophy||{});troSheet()}
+  else if(a==='troSet'){TR[t.dataset.k]=v;troSheet()}
+  else if(a==='troSave')troSave();
+});
 function viewShop(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const head=`<div class="head"><h2>Shop</h2><p>Open packs for player and team cards that boost your picks, and cosmetics for your profile. Everything here is earned with tokens and daily play.</p></div>`;
@@ -3844,7 +4003,10 @@ function viewShop(){
     const adDone=(v.fr||{}).ad===TODAY(),gm=FG_SPORT==='bb'?'Hoops':'Field Goal',ord=['','1st','2nd','3rd'];
     const prizes=fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('')
       +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, week ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('');
-    body=prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free Rookie pack every day</b><small class="muted">${adDone?'You got today’s pack. A new one is ready tomorrow.':'Watch a short sponsor video and open a Rookie pack. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
+    const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
+    const extras=shopHTML()+`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Tokens or a cosmetic to a friend. Up to ${GIFT_DAY} tokens a day.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
+      <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
+    body=prizes+extras+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free Rookie pack every day</b><small class="muted">${adDone?'You got today’s pack. A new one is ready tomorrow.':'Watch a short sponsor video and open a Rookie pack. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       <div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
       <p class="muted">${P.cos?`${P.c} cosmetics, Rare or better only, at least one ${RAR[P.g].n.toLowerCase()} or better.`:`${P.c} random items, each with a 30% chance to be a player or team card${P.g?`, at least one ${RAR[P.g].n.toLowerCase()} or better`:''}.`}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">Each item rolls these odds${P.g?`; the last item is at least ${RAR[P.g].n}`:''}. Duplicate cosmetics turn into tokens.</small></details>
@@ -6066,6 +6228,7 @@ function viewGroups0(){
       </div>
       <div class="lg-inv"><span class="lbl">Invite code</span><code id="code">${esc(g.code)}</code><button class="btn sm" data-act="copy" data-code="${esc(g.code)}">Copy</button><button class="btn sm lg-sms" data-act="smsInv" data-gid="${esc(g.id)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Text invite</button><button class="btn sm ghost" data-act="lgSet" aria-expanded="${!!UI.lgSet}">League settings</button></div>
     </section>
+    ${trophyCard(g,st)}
     ${UI.lgSet?lgSettingsHTML(g):''}
     ${draftRoomHTML(g)}
     ${matchup}
@@ -6468,14 +6631,36 @@ const NT_KINDS=[
   ['ranks','Group rankings','When you move up or down in a friends group.'],
   ['members','New members','When someone joins a group you are in.'],
   ['verified','Stat line checks','When an admin approves or rejects a stat line you entered.'],
+  ['gift','Gifts','When a friend sends you tokens or an item.'],
+  ['prize','Prizes','When you placed on a leaderboard and a prize pack is waiting.'],
+  ['streak','Streak reminders','In the evening, if your daily challenge streak is about to end.'],
+  ['lock','Picks and hands','Games starting today you haven’t picked, and an undealt 5 Card Draw hand.'],
+  ['shop','Daily shop','Once a day, what’s new in the shop.'],
   ['sound','Draft sounds','The chime when a pick is in and when you are on the clock.']
 ];
+/* v294 phone notifications: shows each new note as a system notification (lock screen / notification centre) while Varsity is open
+   or running in the background. Fully closed apps need a push server (not set up yet). On iPhone it needs Varsity on the Home Screen. */
+const ntPhoneOK=()=>'Notification' in window&&Notification.permission==='granted'&&localStorage.getItem('vs-push')!=='off';
+async function ntPhoneAsk(){if(!('Notification' in window)){say('This browser can’t show notifications. On iPhone, add Varsity to your Home Screen first.');return}
+  if(Notification.permission==='denied'){say('Notifications are blocked. Allow them for Varsity in your phone or browser settings.');return}
+  if(localStorage.getItem('vs-push')==='off'&&Notification.permission==='granted'){localStorage.removeItem('vs-push')}
+  else{const r=await Notification.requestPermission();if(r!=='granted'){say('Notifications stay off.');return}}
+  localStorage.removeItem('vs-pushed');ntPush(true);say('Phone notifications are on');if(UI.notifView==='settings')openNotes()}
+function ntPush(seedOnly){if(!ntPhoneOK()||!ME.uid)return;const p=ntPrefs(),notes=computeNotes().filter(x=>x.c&&p[x.c]!==false),key=n=>n.c+'|'+n.text;
+  let had=null;try{had=JSON.parse(localStorage.getItem('vs-pushed')||'null')}catch(_){}
+  if(!had||seedOnly===true){try{localStorage.setItem('vs-pushed',JSON.stringify(notes.map(key).slice(-300)))}catch(_){}return}
+  const fresh=notes.filter(n=>!had.includes(key(n)));if(!fresh.length)return;
+  try{localStorage.setItem('vs-pushed',JSON.stringify(had.concat(fresh.map(key)).slice(-300)))}catch(_){}
+  const show=n=>{const o={body:n.text,tag:'vs-'+n.c+'-'+hash(n.text),icon:'icons/icon-192-v2.png',badge:'icons/icon-192-v2.png',data:{url:location.href.split('#')[0]}};
+    if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.ready.then(r=>r.showNotification('Varsity',o)).catch(()=>{});else try{new Notification('Varsity',o)}catch(_){}};
+  fresh.slice(0,3).forEach(show)}
+setInterval(()=>{try{ntPush()}catch(_){}},5*60*1000);
 function ntPrefs(){let o={};try{o=JSON.parse(localStorage.getItem('vs-notif')||'{}')}catch(_){}
   const p={};NT_KINDS.forEach(([k])=>{p[k]=k==='sound'?(typeof sndOn==='function'?sndOn():true):o[k]!==false});return p}
 function ntSave(p){const o={};NT_KINDS.forEach(([k])=>{if(k!=='sound')o[k]=!!p[k]});try{localStorage.setItem('vs-notif',JSON.stringify(o));localStorage.setItem('vs-snd',p.sound?'on':'off')}catch(_){}}
 function ntSettingsHTML(){const p=ntPrefs();
   return `<div class="dh"><h2>Notification settings</h2><button class="btn ghost sm" data-act="ntBack">Back</button></div>
-    <p class="muted">Varsity shows these when you open the app. It cannot send alerts to your phone while closed.</p>
+    <div class="nt-phone"><div><b>Phone notifications</b><small class="muted">${ntPhoneOK()?'On. New alerts show on your lock screen while Varsity is open or in the background.':'Get these on your lock screen. On iPhone, add Varsity to your Home Screen first.'}</small></div>${ntPhoneOK()?`<button class="btn ghost sm" data-act="ntPhoneOff">Turn off</button>`:`<button class="btn sm" data-act="ntPhone">Turn on</button>`}</div>
     <ul class="nt-set">${NT_KINDS.map(([k,label,hint])=>`<li><span><b>${esc(label)}</b><small class="muted">${esc(hint)}</small></span><button class="nt-sw" role="switch" aria-checked="${p[k]}" data-act="ntToggle" data-v="${k}"><i></i><span class="sr">${esc(label)}</span></button></li>`).join('')}</ul>
     <p class="muted nt-foot">Changes apply to this device only.</p>`}
 function openNotes(){
@@ -6485,7 +6670,7 @@ function openNotes(){
   d.innerHTML=`<aside class="dp narrow" role="dialog" aria-modal="true" aria-label="Notifications">
     <div class="dh"><h2>Notifications</h2><div class="btns" style="margin:0"><button class="btn ghost sm" data-act="ntSettings">Settings</button><button class="btn ghost sm" data-act="closeNotes" id="nclose">Close</button></div></div>
     ${n.length?`<ul class="nt">${n.map(x=>`<li><span class="ic ${x.k}">${x.k==='up'||x.k==='ok'?'▲':x.k==='dn'||x.k==='rejected'?'▼':'+'}</span><span>${esc(x.text)}</span></li>`).join('')}</ul><button class="btn" data-act="markRead">Mark all as read</button>`:'<p class="empty">Nothing new since you last looked.</p>'}
-    <p class="muted">These show when you open the app. The app cannot send alerts to your phone.</p>
+    ${ntPhoneOK()?'':`<button class="btn ghost sm nt-on" data-act="ntPhone">Get these on your phone</button>`}
   </aside>`;
   d.hidden=false;const c=$('#nclose');if(c)c.focus();
   sheetPush();
@@ -7198,7 +7383,7 @@ function chrome(v){
 
   document.querySelectorAll('.tabs a').forEach(a=>{a.removeAttribute('aria-current');if(a.getAttribute('href')==='#'+(v==='team'?'games':v))a.setAttribute('aria-current','page')});
   
-  const n=computeNotes().length,bc=$('#bcount');if(bc){bc.textContent=n;bc.hidden=!n}
+  const n=computeNotes().length,bc=$('#bcount');if(bc){bc.textContent=n;bc.hidden=!n}try{ntPush()}catch(_){}
   const wk=$('#wk');if(wk)wk.textContent='Week '+CURW();
   const wk2=$('#wk2');if(wk2)wk2.textContent='Week '+CURW();
   /* tokens + Shop in the header on every tab (v258) */
