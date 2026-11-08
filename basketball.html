@@ -2119,9 +2119,6 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pko-c:hover:not(.fl) .pko-in3{transform:translateY(-6px) rotate(-1.5deg)}
 .pko-c:focus-visible .pko-back{outline:2px solid #fff;outline-offset:2px}
 .pko-aura{position:absolute;inset:-2px;border-radius:14px;pointer-events:none;opacity:0}
-.pko-c.r-e .pko-aura,.pko-c.r-l .pko-aura,.pko-c.r-m .pko-aura{opacity:1;box-shadow:inset 0 0 18px var(--rc);animation:pkoAura 1.6s ease-in-out infinite}
-@keyframes pkoAura{50%{box-shadow:inset 0 0 30px var(--rc)}}
-.pko-c.pre .pko-in3{animation:pkoShake .12s linear infinite}
 @keyframes pkoShake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-3px,1px) rotate(-2deg)}50%{transform:translate(2px,-2px) rotate(1deg)}75%{transform:translate(-2px,2px) rotate(2deg)}}
 .pko-shine{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.65) 48%,transparent 62%);transform:translateX(-120%);pointer-events:none}
 .pko-c.fl .pko-shine{animation:pkoShine .9s .45s ease-out forwards}
@@ -2295,12 +2292,49 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pko-c.land{animation:pkoLand .4s cubic-bezier(.3,1.6,.5,1)!important;z-index:2}
 @keyframes pkoLand{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 .pko-c.fl.r-e .pko-front,.pko-c.fl.r-l .pko-front,.pko-c.fl.r-m .pko-front{box-shadow:0 0 0 2px var(--rc),0 0 30px var(--rc),0 0 70px color-mix(in srgb,var(--rc) 50%,transparent)}
-.pko-c.pre .pko-back{box-shadow:0 0 30px var(--rc);filter:brightness(1.3)}
 .pko-pts{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:3}
 .pko-pts i{position:absolute;left:0;top:0;width:var(--z);height:var(--z);margin:calc(var(--z)/-2);border-radius:50%;background:var(--rc);box-shadow:0 0 8px var(--rc),0 0 2px #fff;animation:pkoPt var(--t) cubic-bezier(.15,.7,.4,1) forwards}
 .pko-pts i:nth-child(3n){border-radius:1px;transform:rotate(45deg);background:#fff}
 @keyframes pkoPt{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),calc(var(--dy) + 30px)) scale(.3)}}
 @media (prefers-reduced-motion:reduce){.pko-pk,.pko-pk::after,.pko-bg,.pko-rays,.pko.open .pko-c,.pko-c.fl .pko-in3,.pko-c.land{animation:none!important}.pko-c.fl .pko-in3{transform:rotateY(180deg)}.pko-c.fl.spin .pko-in3{transform:rotateY(540deg)}}
+/* v334 Epic+ reveal: the card flies to the middle on a dark stage, spins, then bursts with a rarity banner (card backs never glow) */
+.pko-c.now .pko-in3{animation:none!important;transform:rotateY(180deg)!important}
+.pks{position:fixed;inset:0;z-index:430;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--rc) 22%,#02060F),#02060F 75%);cursor:pointer;overflow:hidden;opacity:0;animation:pksIn .35s ease-out forwards}
+.pks.out{animation:pksOut .28s ease-in forwards}
+@keyframes pksIn{to{opacity:1}}@keyframes pksOut{from{opacity:1}to{opacity:0}}
+.pks-rays{position:absolute;left:50%;top:50%;width:190vmax;height:190vmax;margin:-95vmax;opacity:0;transition:opacity .5s;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--rc) 42%,transparent) 0 7deg,transparent 7deg 20deg);-webkit-mask:radial-gradient(circle,#000 6%,transparent 52%);mask:radial-gradient(circle,#000 6%,transparent 52%)}
+.pks.rev .pks-rays{opacity:1;animation:pkoSpin 14s linear infinite}
+.pks.rev.r-m .pks-rays{animation-duration:8s}
+.pks-ring{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px;border-radius:50%;border:5px solid var(--rc);box-shadow:0 0 30px var(--rc),inset 0 0 30px var(--rc);opacity:0;pointer-events:none}
+.pks.rev .pks-ring{animation:pksRing 1.1s ease-out forwards}.pks.rev .pks-ring.b{animation-delay:.18s}.pks.rev.r-e .pks-ring.b{display:none}
+@keyframes pksRing{0%{opacity:.95;transform:scale(.4)}100%{opacity:0;transform:scale(11)}}
+.pks-stage{position:relative;width:118px;height:168px;margin:calc(84px*(var(--ss,1.8) - 1)) 0;perspective:900px;opacity:0;animation:pksStage .5s .1s cubic-bezier(.2,.9,.3,1.15) forwards}
+@keyframes pksStage{from{opacity:0;transform:translateY(120px) scale(calc(var(--ss,1.8)*.35)) rotate(-8deg)}to{opacity:1;transform:scale(var(--ss,1.8))}}
+.pks.rev .pks-stage{animation:none;opacity:1;transform:scale(var(--ss,1.8))}
+.pks.rev.r-l .pks-stage,.pks.rev.r-m .pks-stage{animation:pksShake .55s ease-out}
+@keyframes pksShake{0%{transform:scale(calc(var(--ss,1.8)*1.12))}15%{transform:translate(-9px,4px) scale(calc(var(--ss,1.8)*1.1))}30%{transform:translate(8px,-5px) scale(calc(var(--ss,1.8)*1.08))}45%{transform:translate(-6px,3px) scale(calc(var(--ss,1.8)*1.05))}60%{transform:translate(4px,-2px) scale(var(--ss,1.8))}100%{transform:scale(var(--ss,1.8))}}
+.pks-in3{position:absolute;inset:0;transform-style:preserve-3d}
+.pks .pko-f{animation:none!important;transition:none}.pks .pko-back{transform:none!important;overflow:hidden}.pks .pko-front{transform:rotateY(180deg)!important}
+.pks.go.r-e .pks-in3{animation:pksFe 1.05s cubic-bezier(.3,.7,.3,1) forwards}
+.pks.go.r-l .pks-in3{animation:pksFl 1.45s cubic-bezier(.3,.7,.3,1) forwards}
+.pks.go.r-m .pks-in3{animation:pksFm 1.9s cubic-bezier(.3,.7,.3,1) forwards}
+@keyframes pksFe{0%{transform:rotateY(0)}30%{transform:translateY(-24px) scale(1.1) rotateY(150deg)}100%{transform:rotateY(540deg)}}
+@keyframes pksFl{0%{transform:rotateY(0)}25%{transform:translateY(-34px) scale(1.14) rotateY(200deg)}75%{transform:translateY(-30px) scale(1.18) rotateY(760deg)}100%{transform:rotateY(900deg)}}
+@keyframes pksFm{0%{transform:rotateY(0)}20%{transform:translateY(-40px) scale(1.16) rotateY(220deg)}70%{transform:translateY(-36px) scale(1.3) rotateY(1000deg)}100%{transform:rotateY(1260deg)}}
+.pks.rev .pko-front{box-shadow:0 0 0 2px var(--rc),0 0 40px var(--rc),0 0 90px color-mix(in srgb,var(--rc) 55%,transparent);transition:box-shadow .3s}
+.pks.rev::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle,#fff,color-mix(in srgb,var(--rc) 60%,transparent) 45%,transparent 75%);animation:pksFlash .7s ease-out forwards}
+.pks.rev.r-e::after{background:radial-gradient(circle,color-mix(in srgb,var(--rc) 70%,#fff),transparent 60%);animation-duration:.45s}
+@keyframes pksFlash{from{opacity:.95}to{opacity:0}}
+.pks-title{order:-1;font:900 italic 2.8rem var(--f-display,inherit);text-transform:uppercase;letter-spacing:.14em;color:var(--rc);text-shadow:0 0 18px var(--rc),0 0 46px var(--rc);visibility:hidden;text-align:center;padding-left:.14em}
+.pks.r-m .pks-title{background:linear-gradient(90deg,#FF4F6D,#FFC93A,#3DDC84,#2F9BFF,#B05CFF,#FF4F6D);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 16px #fff6);animation:pksRb 2s linear infinite}
+@keyframes pksRb{to{background-position:200% 0}}
+.pks.rev .pks-title{visibility:visible;animation:pksTitle .6s cubic-bezier(.2,1.4,.4,1) both}
+.pks.rev.r-m .pks-title{animation:pksTitle .6s cubic-bezier(.2,1.4,.4,1) both,pksRb 2s linear infinite}
+@keyframes pksTitle{from{opacity:0;transform:scale(2.4) translateY(-20px)}to{opacity:1;transform:none}}
+.pks-sub{font-weight:800;font-size:1.05rem;color:#fff;text-align:center;opacity:0;max-width:90vw}.pks.rev .pks-sub{animation:pksFade .5s .35s both}
+.pks-hint{margin:2px 0 0;color:var(--muted,#98A8BA);font-size:.8rem;opacity:0}.pks.rdy .pks-hint{animation:pksFade .5s both}
+@keyframes pksFade{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pks,.pks-stage,.pks-in3,.pks-ring,.pks-rays,.pks::after,.pks-title{animation:none!important}.pks{opacity:1}.pks-stage{opacity:1;transform:scale(var(--ss,1.8))}}
 </style><style id="bb-theme">
 .bb-pre{display:flex;flex-direction:column;gap:4px;margin:12px 0;border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 0 0,rgba(255,194,61,.14),transparent 60%),var(--card,#132235)}
 .bb-pre b{font:800 1.15rem/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#FFC23D}.bb-pre span{opacity:.8}
@@ -2721,7 +2755,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v333 · Nov 8';
+const APP_BUILD='v334 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4044,17 +4078,32 @@ function packShow(P,got){
     for(let i=0;i<n;i++){const a=Math.PI*2*i/n+Math.random()*.4,d=60+Math.random()*(ORD.indexOf(r)>=3?120:60),z=3+Math.random()*5;
       h+=`<i style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d)}px;--z:${z.toFixed(1)}px;--t:${(.6+Math.random()*.5).toFixed(2)}s"></i>`}
     box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},1300)};
-  const flip=c=>{if(c.classList.contains('fl')||c.classList.contains('pre'))return;const r=got[cards.indexOf(c)].r,n=ORD.indexOf(r),big=n>=3;
-    const wait=calm||!big?0:r==='m'?900:r==='l'?650:400;
-    if(wait)c.classList.add('pre');
-    setTimeout(()=>{c.classList.remove('pre');c.classList.add('fl');if(big)c.classList.add('spin');
-      setTimeout(()=>{sparks(c,r);glow(r);c.classList.add('land')},calm?0:big?620:360);
-      if(r==='m')setTimeout(()=>{o.classList.add('flash');setTimeout(()=>o.classList.remove('flash'),600)},calm?0:620);
-      setTimeout(sync,calm?0:big?1000:600)},wait);
-    try{navigator.vibrate&&navigator.vibrate(r==='m'?[40,40,140]:big?[30,30,70]:15)}catch(_){}};
+  /* Epic and better: a full-screen reveal, one card at a time (queued) */
+  let SQ=Promise.resolve();
+  const spot=(c,r)=>new Promise(done=>{const i=cards.indexOf(c),g=got[i],R=RAR[r],sp=document.createElement('div'),ss=Math.max(1.1,Math.min(1.9,(innerHeight-300)/168,(innerWidth-40)/118));
+    sp.className='pks r-'+r;sp.style.cssText='--rc:'+R.c+';--ss:'+ss.toFixed(2);
+    const fr=c.querySelector('.pko-front').innerHTML.replace(/<button[^>]*pko-eq[\s\S]*?<\/button>/,'').replace(/<i class="pko-shine"><\/i>/,'');
+    const nm=g.card?cardInfo(g.card).name:(ITEM[g.id]||{}).n||'';
+    sp.innerHTML=`<i class="pks-rays"></i><i class="pks-ring"></i><i class="pks-ring b"></i><div class="pks-title">${esc(R.n)}!</div><div class="pks-stage"><div class="pks-in3"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front" style="--rc:${R.c}">${fr}</div></div><i class="pko-pts"></i></div><p class="pks-hint">Tap to continue</p>`;
+    document.body.appendChild(sp);   /* on the page, not inside the scrolling pack screen: a fixed child of a scrolled box moves with it */
+    const T=r==='m'?1900:r==='l'?1450:1050;let ready=false,fin=false;
+    setTimeout(()=>sp.classList.add('go'),650);
+    setTimeout(()=>{sp.classList.add('rev');sparks(sp.querySelector('.pks-stage'),r);if(r!=='e')setTimeout(()=>sparks(sp.querySelector('.pks-stage'),r),180);
+      try{navigator.vibrate&&navigator.vibrate(r==='m'?[40,40,160]:r==='l'?[30,30,100]:[30,20,60])}catch(_){}},650+T);
+    setTimeout(()=>{ready=true;sp.classList.add('rdy')},650+T+900);
+    const end=()=>{if(!ready||fin)return;fin=true;sp.classList.add('out');
+      setTimeout(()=>{sp.remove();c.classList.remove('pre');c.classList.add('now','fl','land');glow(r);setTimeout(sync,50);done()},280)};
+    sp.addEventListener('click',e=>{e.stopPropagation();end()});
+    try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}});
+  const flip=c=>{if(c.classList.contains('fl')||c.classList.contains('pre'))return;const r=got[cards.indexOf(c)].r,n=ORD.indexOf(r);
+    if(n>=3&&!calm){c.classList.add('pre');SQ=SQ.then(()=>spot(c,r));return}
+    c.classList.add('fl');
+    setTimeout(()=>{sparks(c,r);glow(r);c.classList.add('land')},calm?0:360);
+    setTimeout(sync,calm?0:600);
+    try{navigator.vibrate&&navigator.vibrate(n>=3?[30,30,70]:15)}catch(_){}};
   cards.forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('button'))return;flip(c)});c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip(c)}})});
-  allB.onclick=()=>{cards.filter(c=>!c.classList.contains('fl')&&!c.classList.contains('pre')).forEach((c,i)=>setTimeout(()=>flip(c),i*300))};
-  const close=()=>{clearTimeout(auto);o.remove();document.documentElement.style.overflow='';render()};
+  allB.onclick=()=>{cards.filter(c=>!c.classList.contains('fl')&&!c.classList.contains('pre')).sort((a,b)=>ORD.indexOf(got[cards.indexOf(a)].r)-ORD.indexOf(got[cards.indexOf(b)].r)).forEach((c,i)=>setTimeout(()=>flip(c),i*300))};
+  const close=()=>{clearTimeout(auto);document.querySelectorAll('.pks').forEach(x=>x.remove());o.remove();document.documentElement.style.overflow='';render()};
   okB.onclick=close;o.addEventListener('click',e=>{if((e.target===o||e.target.classList.contains('pko-bg'))&&ripped&&!left())close()});
 }
 /* small picture of an item, for packs and the Locker */
@@ -4454,7 +4503,7 @@ async function simFinish(go){
   const pools=SIM_SLOTS.map(sl=>simPool(sl,new Set()).map(simTot)),N=400;let beat=0,sm=0,sq=0;
   for(let n=0;n<N;n++){let t=0;for(const pl of pools)if(pl.length)t+=pl[fcRnd(pl.length)];if(t<total)beat++;sm+=t;sq+=t*t}
   const mean=sm/N,sd=Math.sqrt(Math.max(1,sq/N-mean*mean));
-  m.done=true;m.res={total,max,pct:Math.min(1,total/max),beat:beat/N,best:b,mean,sd};if(go)m.stage='pick';render();if(go)window.scrollTo(0,0);
+  m.done=true;m.res={total,max,pct:Math.min(1,total/max),beat:beat/N,best:b,mean,sd};if(go){m.stage='pick';UI.simQ='';UI.simSel=''}render();if(go)window.scrollTo(0,0);
   if(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'){
     const old=simRec(ME.uid);
     const ppg=Math.round(teamPPG(m.c)*10)/10;
@@ -4550,11 +4599,11 @@ function simSeasonHTML(m){
 </section>`;
 }
 function simPickHTML(m){
-  const list=simSchools();
+  const list=simSchools(),q=(UI.simQ||'').trim().toLowerCase(),sel=UI.simSel||'';   /* search text and the chosen school live in UI, so a background redraw can't wipe them */
   return `<section class="card"><div class="qh"><h3>Choose your school</h3></div><p class="muted">Pick a team to play as. Your drafted players boost that school, and then the season is simulated using their real schedule.</p>
-    <input class="bt-amt" style="width:100%;border-radius:12px;margin:8px 0" id="sim-q" type="search" placeholder="Search schools" autocomplete="off" aria-label="Search schools">
-    <div class="sim-sch">${list.map((n,i)=>`<button class="sim-sc" data-act="simPick" data-s="${esc(n)}" data-n="${esc(n.toLowerCase())}" aria-pressed="false">${slogo(n,26)}<span>${esc(n)}</span><small class="muted">#${i+1}</small></button>`).join('')}</div>
-    <div class="btns sim-gobar"><button class="btn ghost" data-act="simBack">Back</button><button class="btn sim-go2" id="sim-go2" data-act="simGoPick" disabled>Tap a school to choose it</button></div></section>`;
+    <input class="bt-amt" style="width:100%;border-radius:12px;margin:8px 0" id="sim-q" type="search" placeholder="Search schools" autocomplete="off" aria-label="Search schools" value="${esc(UI.simQ||'')}">
+    <div class="sim-sch">${list.map((n,i)=>`<button class="sim-sc" data-act="simPick" data-s="${esc(n)}" data-n="${esc(n.toLowerCase())}" aria-pressed="${n===sel}"${q&&!n.toLowerCase().includes(q)?' hidden':''}>${slogo(n,26)}<span>${esc(n)}</span><small class="muted">#${i+1}</small></button>`).join('')}</div>
+    <div class="btns sim-gobar"><button class="btn ghost" data-act="simBack">Back</button><button class="btn sim-go2" id="sim-go2" data-act="simGoPick" ${sel?`data-s="${esc(sel)}"`:'disabled'}>${sel?'▶ Play as '+esc(sel):'Tap a school to choose it'}</button></div></section>`;
 }
 function viewSim(){
   const m=UI.sim,my=ME.uid?simRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
@@ -7882,13 +7931,13 @@ document.addEventListener('submit',async e=>{
   catch(_){er.textContent='Could not check the PIN. Try again.';er.hidden=false}
   btn.disabled=false;
 });
-document.addEventListener('input',e=>{if(e.target.id==='sim-q'){const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.sim-sc').forEach(b=>{b.hidden=!!q&&!b.dataset.n.includes(q)})}});
+document.addEventListener('input',e=>{if(e.target.id==='sim-q'){UI.simQ=e.target.value;const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.sim-sc').forEach(b=>{b.hidden=!!q&&!b.dataset.n.includes(q)})}});
 document.addEventListener('input',e=>{const t=e.target;if(!t.classList||!t.classList.contains('bt-amt')||t.id==='sim-q')return;
   const room=+t.dataset.room||0;let v=Math.floor(+t.value);if(!(v>=1))v=0;const st=Math.min(v,room),B=({at:UI.at,pp:UI.pp})[t.dataset.k]||UI.pk,id=t.dataset.g;
   B[id]=Object.assign({},B[id],{stake:v||undefined});
   const w=t.closest('article').querySelector('.bt-go b');if(w)w.textContent=tk(st*(+t.dataset.o));
   t.closest('.bt-stk').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(+c.dataset.v===v)))});
-document.addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('bt-amt'))return;
+document.addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('bt-amt')||t.id==='sim-q')return;   /* the 82-0 school search shares the bt-amt look: its blur used to run this wager handler, which redrew the list under your finger so the tap on a school was lost */
   const room=+t.dataset.room||0,B=({at:UI.at,pp:UI.pp})[t.dataset.k]||UI.pk,id=t.dataset.g;let v=Math.floor(+t.value);if(!(v>=1))v=1;if(v>room)v=Math.max(1,room);
   B[id]=Object.assign({},B[id],{stake:v});render()});
 document.addEventListener('input',e=>{if(e.target.id==='ad-q'){AD.q=e.target.value;const pos=e.target.selectionStart;render();const f=$('#ad-q');if(f){f.focus();try{f.setSelectionRange(pos,pos)}catch(_){}}}});
@@ -7979,12 +8028,14 @@ function render(bg){
   if(bg===true&&html===LAST_HTML&&v===LAST_V){chrome(v);return}
   LAST_HTML=html;LAST_V=v;
   /* redraws keep your place (82-0 respins used to jump the page up ~60 px: the description line showed for a moment, then folded away) */
-  const y0=scrollY;
+  const y0=scrollY,cr0=document.querySelector('#main .lk-catrow'),crx=cr0?cr0.scrollLeft:-1;
   $('#main').innerHTML=html;
   infoIcons();   /* fold the page description behind its "i" now, not after the browser has laid the page out with it showing */
   if(scrollY!==y0)window.scrollTo(0,y0);
   const cl=document.getElementById('chat-log');if(cl)cl.scrollTop=cl.scrollHeight;
   /* week chip rows open scrolled to the selected week (the current week by default), not to Week 1 */
+  /* the Locker's category row keeps its sideways position when you pick a category (it used to snap back to the first chip), and the chosen chip is kept in view */
+  {const c=document.querySelector('#main .lk-catrow');if(c){if(crx>=0)c.scrollLeft=crx;const p=c.querySelector('[aria-pressed="true"]');if(p){const L=p.offsetLeft-c.offsetLeft;if(L<c.scrollLeft||L+p.offsetWidth>c.scrollLeft+c.clientWidth)c.scrollLeft=Math.max(0,L-(c.clientWidth-p.offsetWidth)/2)}}}
   document.querySelectorAll('#main .br').forEach(b=>{const c=b.querySelector('.br-col.cur');if(c&&b.scrollWidth>b.clientWidth)b.scrollLeft=c.offsetLeft-b.firstElementChild.offsetLeft});
   document.querySelectorAll('#main .gm-wks,#main .wks,#main .gm-tabs').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
   chrome(v);
@@ -8009,9 +8060,9 @@ let FINGER=false,LASTSCROLL=0;
 addEventListener('touchstart',()=>{FINGER=true},{passive:true,capture:true});
 ['touchend','touchcancel'].forEach(t=>addEventListener(t,()=>{FINGER=false},{passive:true,capture:true}));
 addEventListener('scroll',()=>{LASTSCROLL=Date.now()},{passive:true,capture:true});
-let pdown=false;['pointerdown'].forEach(t=>document.addEventListener(t,()=>{pdown=true},true));['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{pdown=false},true));
-/* a redraw that was held back while typing waits until a tap or click in progress has finished, so the tap is not lost */
-document.addEventListener('focusout',()=>{if(dirty){const go=()=>{if(pdown){setTimeout(go,60);return}if(!typing()){dirty=false;render()}};setTimeout(go,60)}});
+let pdown=false,pup=0;['pointerdown'].forEach(t=>document.addEventListener(t,()=>{pdown=true},true));['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{pdown=false;pup=Date.now()},true));
+/* a redraw that was held back while typing waits until a tap or click in progress has finished (and 450 ms after the finger lifts, because the click arrives just after), so the tap is not lost: tapping a school after searching in 82-0 used to rebuild the list under your finger */
+document.addEventListener('focusout',()=>{if(dirty){const go=()=>{if(pdown||Date.now()-pup<450){setTimeout(go,80);return}if(!typing()){dirty=false;render()}};setTimeout(go,60)}});
 /* the unlocked admin console is left only through its Exit button: Back, swipe-back and other links put you back on #admin */
 let ADM_LEAVE=false;
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-admexit]'))ADM_LEAVE=true},true);
@@ -9046,9 +9097,9 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     else if(a==='simFinish')simFinish()
     else if(a==='simGo')simFinish(true)
     else if(a==='simReset'){UI.sim=null;render()}
-    else if(a==='simSeason'){if(UI.sim&&UI.sim.season){say('This team already played its season. Build another team to play again.');return}if(UI.sim){UI.sim.stage='pick';render();window.scrollTo(0,0)}}
+    else if(a==='simSeason'){if(UI.sim&&UI.sim.season){say('This team already played its season. Build another team to play again.');return}if(UI.sim){UI.sim.stage='pick';UI.simQ='';UI.simSel='';render();window.scrollTo(0,0)}}
     else if(a==='simBack'){if(UI.sim){UI.sim.stage=UI.sim.season?'season':null;render()}}
-    else if(a==='simPick'){document.querySelectorAll('.sim-sc[aria-pressed="true"]').forEach(x=>x.setAttribute('aria-pressed','false'));t.setAttribute('aria-pressed','true');
+    else if(a==='simPick'){UI.simSel=t.dataset.s;document.querySelectorAll('.sim-sc[aria-pressed="true"]').forEach(x=>x.setAttribute('aria-pressed','false'));t.setAttribute('aria-pressed','true');
       const go=$('#sim-go2');if(go){go.disabled=false;go.dataset.s=t.dataset.s;go.textContent='▶ Play as '+t.dataset.s}}
     else if(a==='simGoPick'){if(!t.dataset.s)return;try{document.activeElement.blur()}catch(_){}simRun(t.dataset.s);window.scrollTo(0,0)}
     else if(a==='simAgain'){}   /* v288: one season per team */
