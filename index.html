@@ -2690,7 +2690,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v318 · Nov 8';
+const APP_BUILD='v319 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3559,7 +3559,7 @@ function fcHTML(){
       :can?`<div class="fc-deal"><p>Your ${FC_DAILY?fcLabel(cw):'week '+cw} hand is waiting.</p>${FC_DAILY?`<p class="muted">Deal before the first game, ${esc(new Date(fcClose(cw).replace('T',' ')+':00').toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}))}.</p>`:''}<button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
     <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS&&!byW}">${FC_DAILY?fcLabel(w):'Week '+w}</button>${FC_DAILY?`<button class="chip" data-act="fcBoard" data-v="wk" aria-pressed="${byW}">Week ${wkOf}</button>`:''}<button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
-    ${fcWaitNote(wkOf)}<p class="fg-prize">Weekly prizes${FC_DAILY?' (your days add up)':''}: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
+    ${fcWaitNote(FC_DAILY?w:wkOf)}<p class="fg-prize">${FC_DAILY?'Daily':'Weekly'} prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
 }
 /* ---------- Pick 'em league: friends pick the winner of EVERY game each week; best accuracy wins ----------
@@ -4227,7 +4227,7 @@ function viewShop(){
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
     const adDone=(v.fr||{}).ad===TODAY(),gm=FG_SPORT==='bb'?'Hoops':'Field Goal',ord=['','1st','2nd','3rd'];
     const prizes=fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('')
-      +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, week ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('')
+      +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, ${fcLabel(x.w)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('')
       +bkPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Playoff Bracket Challenge.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="bk" data-d="bk">Open prize</button></section>`).join('')
       +cupPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 Top scorer · ${esc(PACKS[x.type].n)}</b><small class="muted">School Cup, week ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="cup" data-d="${x.w}">Open prize</button></section>`).join('');
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
@@ -5038,14 +5038,21 @@ let _bx={r:-1,s:{}};
 function fcBox(sl){if(_bx.r!==_rev)_bx={r:_rev,s:{}};if(_bx.s[sl])return _bx.s[sl];const m={};players().forEach(p=>{if(p.mp&&fcPts(p,sl))m[p.school]=(m[p.school]||0)+1});return _bx.s[sl]=m}
 const fcDnp=(p,sl)=>{if(!p||fcPts(p,sl))return false;const g=fcGamesOf(sl).find(g=>g.h===p.school||g.a===p.school);return !!g&&gDone(g)&&(fcBox(sl)[p.school]||0)>=3};
 /* hand players with no stat line yet (and not a did-not-play), across every hand that week (all days in basketball) */
-function fcWaiting(w){let n=0;const seen=new Set();for(const u of Object.keys(S.picks))for(const sl of fcSlotsOf(w)){const hd=fcHand(u,sl);if(!hd)continue;for(const k of hd.h||[]){const p=pByKey(k),id=k+'|'+sl;if(p&&!seen.has(id)){seen.add(id);if(!fcPts(p,sl)&&!fcDnp(p,sl))n++}}}return n}
+function fcWaiting(w,only){let n=0;const seen=new Set();for(const u of Object.keys(S.picks))for(const sl of (only!=null?[only]:fcSlotsOf(w))){const hd=fcHand(u,sl);if(!hd)continue;for(const k of hd.h||[]){const p=pByKey(k),id=k+'|'+sl;if(p&&!seen.has(id)){seen.add(id);if(!fcPts(p,sl)&&!fcDnp(p,sl))n++}}}return n}
 /* v315 (owner): prizes and tokens pay out only when every game that week is final AND every player in every hand has a stat line, so the winners are known for sure.
    (Before v315 a missing stat line stopped blocking after the Thursday following the week.) */
 function fcWeekDone(w){const gs=fcIdx().w[w]||[];if(!gs.length)return w<CURW();if(!gs.every(gDone))return false;return fcWaiting(w)===0}
-const fcWaitNote=w=>{const gs=fcIdx().w[w]||[];if(!gs.length||!gs.every(gDone))return '';const n=fcWaiting(w);return n?`<p class="hint">Prizes pay out once every player in every hand has a stat line (a player who didn’t play counts as 0). Waiting on ${n} ${n===1?'player':'players'}.</p>`:''};
-const fcLbWeeks=()=>{const out=[];for(let w=WEEKS;w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
+const fcWaitNote=w=>{const gs=fcGamesOf(w);if(!gs.length||!gs.every(gDone))return '';const n=FC_DAILY?fcWaiting(null,w):fcWaiting(w);return n?`<p class="hint">Prizes pay out once every player in every hand has a stat line (a player who didn’t play counts as 0). Waiting on ${n} ${n===1?'player':'players'}.</p>`:''};
+/* v319 (owner): basketball 5 Card Draw prizes are DAILY: each game day has its own board (that day's hands), paid once every game that day is final and every hand player has a line.
+   The prize unit is the slot (the day number in basketball, the week in football); fcLbWeeks lists the last finished units. The School Cup stays weekly (fcWeekDone / fcRank). */
+const FC_LB_DAYS=7;
+function fcDayDone(s){const gs=fcGamesOf(s);if(!gs.length||!gs.every(gDone))return false;return fcWaiting(null,s)===0}
+const fcPrizeRank=s=>FC_DAILY?Object.keys(S.picks).filter(u=>fcHand(u,s)).map(u=>({u,t:fcScore(u,s)})).sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1)):fcRank(s);
+const fcLbWeeks=()=>{const out=[];
+  if(FC_DAILY){for(const d of Object.keys(fcIdx().d).sort().reverse()){const s=dayNo(d);if(s<FC_LB_START)break;if(fcDayDone(s)){out.push(s);if(out.length>=FC_LB_DAYS)break}}return out}
+  for(let w=WEEKS;w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
 function fcPrizes(u){if(!u)return[];const cl=((invOf(u).fr||{}).fc)||{},out=[];
-  for(const w of fcLbWeeks()){if(cl[w])continue;const pl=fcRank(w).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({w,place:pl+1,type:FG_LB_PRIZE[pl]})}return out}
+  for(const w of fcLbWeeks()){if(cl[w])continue;const pl=fcPrizeRank(w).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({w,place:pl+1,type:FG_LB_PRIZE[pl]})}return out}
 /* v293/v311: daily bonus. +25 tokens the first time you play any game each day (Pacific time), claimed automatically by playMark().
    picks/<uid>.dly = {d: last day claimed, n: days claimed}; bank() adds DLY_PAY*n. Two phones on the same day write the same value. */
 const DLY_PAY=25;   /* v311: 25, paid the first time you play any game each day. Days claimed at the old 50 keep their 50 (dly.t is the running total). */
@@ -5061,7 +5068,7 @@ function lbtBonus(u){return Object.values(lbtOf(u)).reduce((a,v)=>a+(+v||0),0)}
 function lbTokDue(u){const have=lbtOf(u),out=[],d=new Date(TODAY()+'T12:00:00Z');
   for(let i=1;i<=FG_LB_BACK;i++){d.setUTCDate(d.getUTCDate()-1);const day=d.toISOString().slice(0,10);if(day<FG_LB_START)break;if(have['fg|'+day])continue;
     const r=fgRank(day),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fg|'+day,why:'top half in the daily '+(FG_SPORT==='bb'?'Hoops':'Field Goal')+' ('+fmtDay(day)+')'})}
-  for(const w of fcLbWeeks()){if(have['fc|'+w])continue;const r=fcRank(w),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fc|'+w,why:'top half in 5 Card Draw, week '+w})}
+  for(const w of fcLbWeeks()){if(have['fc|'+w])continue;const r=fcPrizeRank(w),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fc|'+w,why:'top half in 5 Card Draw ('+fcLabel(w)+')'})}
   try{if(bkTokDue(u)&&!have['bk'])out.push({k:'bk',why:'top half in the Bracket Challenge'})}catch(_){}
   try{cupRewards(u).tok.forEach(w=>{if(!have['cup|'+w])out.push({k:'cup|'+w,amt:CUP_TOK,why:'your school won its School Cup matchup (week '+w+')'})})}catch(_){}
   return out}
