@@ -2649,7 +2649,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v306 · Nov 8';
+const APP_BUILD='v307 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3643,11 +3643,11 @@ const CREST_SHAPES={shield:'polygon(50% 0,100% 12%,100% 60%,50% 100%,0 60%,0 12%
 const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
 const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','theme','coin','icon','share','walkup','crest','lineup','field','jersey'];
 const PACKS={
-  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:13,e:5,l:1.5,m:.5},g:''},
-  player:{n:'Pro pack',c:5,tok:400,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
-  champs:{n:'Champion pack',c:10,tok:1200,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'},
+  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
+  player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
+  champs:{n:'Champion pack',c:10,tok:1250,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'},
   /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
-  god:{n:'Hall of Fame pack',c:5,tok:3000,usd:'$19.99',odds:{r:40,e:35,l:17,m:8},g:'l',cos:1}};
+  god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:40,e:35,l:17,m:8},g:'l',cos:1}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
 const cosOwnCount=u=>{const it=invOf(u).it||{},d=gDelta(u);let n=0;for(const id of new Set([...Object.keys(it),...Object.keys(d)])){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&(+it[id]||0)+(+d[id]||0)>0)n++}return n};
@@ -4863,7 +4863,11 @@ const lbHalf=(i,n)=>i>=3&&i<Math.floor(n/2);   /* i = 0-based place; top 50% min
 const fcRank=w=>Object.keys(S.picks).filter(u=>fcHand(u,w)).map(u=>({u,t:fcScore(u,w)})).sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1));
 /* a 5 Card Draw week is finished once every game that week has a score and 2 days have passed since the last one (time for stats to come in) */
 function fcWeekDone(w){const gs=((GAMES&&GAMES.games)||[]).filter(g=>g.w===w);if(!gs.length)return w<CURW();if(!gs.every(gDone))return false;
-  const last=gs.map(g=>g.d).sort().pop(),t=new Date(last+'T12:00:00Z');t.setUTCDate(t.getUTCDate()+2);return t.toISOString().slice(0,10)<=TODAY()}
+  /* v307: prizes wait for the Monday after the week's last game, and until every player in every hand has a stat line (a player who never gets one stops blocking on Thursday) */
+  const last=gs.map(g=>g.d).sort().pop(),t=new Date(last+'T12:00:00Z');do{t.setUTCDate(t.getUTCDate()+1)}while(t.getUTCDay()!==1);
+  const mon=t.toISOString().slice(0,10);if(mon>TODAY())return false;
+  t.setUTCDate(t.getUTCDate()+3);if(t.toISOString().slice(0,10)<=TODAY())return true;
+  for(const u of Object.keys(S.picks)){const hd=fcHand(u,w);if(!hd)continue;for(const k of hd.h||[]){const p=pByKey(k);if(p&&!(p.games&&p.games[w-1]))return false}}return true}
 const fcLbWeeks=()=>{const out=[];for(let w=WEEKS;w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
 function fcPrizes(u){if(!u)return[];const cl=((invOf(u).fr||{}).fc)||{},out=[];
   for(const w of fcLbWeeks()){if(cl[w])continue;const pl=fcRank(w).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({w,place:pl+1,type:FG_LB_PRIZE[pl]})}return out}
