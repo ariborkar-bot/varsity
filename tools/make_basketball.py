@@ -375,8 +375,7 @@ def transform(s, mp, games, seeds, teams, prior):
                 "  return `${n(x.pts)} pts · ${n(x.reb)} reb · ${n(x.ast)} ast`}")
     s = rep(s, "const out=['QB','RB','WR','TE','K','DL','LB','DB'].map(pos=>", "const out=['PG','SG','SF','PF','C'].map(pos=>")
     s = rep(s, "pb(['DL','LB','DB'].includes(pos)?'DEF':pos,pos)", "pb(pos,pos)")
-    s = rep(s, "const ORD=['QB','RB','WR','TE','DEF','K'],NAMES={QB:'Quarterbacks',RB:'Running backs',WR:'Receivers',TE:'Tight ends',DEF:'Defense',K:'Kickers'};",
-            "const ORD=['PG','SG','SF','PF','C'],NAMES={PG:'Point guards',SG:'Shooting guards',SF:'Small forwards',PF:'Power forwards',C:'Centers'};")
+    # (v333: the team page roster is one list, best to worst, so it needs no position names)
     s = rep(s, "const SHORT={", "const SHORT={pts:'Pts',reb:'Reb',ast:'Ast',stl:'Stl',blk:'Blk',tov:'TO',tpm:'3PM',")
 
     s = rep(s, "const POSF=['ALL','QB','RB','WR','TE','K','DL','LB','DB'];", "const POSF=['ALL','PG','SG','SF','PF','C'];")
