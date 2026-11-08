@@ -5387,7 +5387,7 @@ function fgStep(k){
   g.next-=speed*k;
   if(g.next<=0){
     g.n++;const small=g.n>2&&(g.n%4===0||g.rnd()<.18);
-    const gap=(small?132:188)*s*(g.t>60?.94:1),top=60*s,bot=ground-30*s;let c=top+gap/2+g.rnd()*Math.max(10,bot-top-gap);
+    const gap=(small?132:FG_SPORT==='bb'?170:188)*s*(g.t>60?.94:1),top=60*s,bot=ground-30*s;let c=top+gap/2+g.rnd()*Math.max(10,bot-top-gap);
     /* always possible: the ball only has the frames between two goals to change height (minus the goals' own width), so the next
        opening is kept within what it can climb (steady tapping) or drop (falling) in that time, with room to spare */
     const prev=g.posts.length?(g.posts[g.posts.length-1].c0??g.posts[g.posts.length-1].c):g.H*.45,F=Math.max(8,((g.sp||g.W*.12)-110*s)/speed);
@@ -5421,7 +5421,7 @@ function fgStep(k){
     else hits.push([p.x-cw/2,b,cw,7*s],[p.x-5*s,b,10*s,9999]);
     if(!inv)for(const[hx,hy,hw,hh]of hits){const nx=Math.max(hx,Math.min(g.x,hx+hw)),ny=Math.max(hy,Math.min(g.y,hy+hh));if((g.x-nx)**2+(g.y-ny)**2<r*r*.8&&performance.now()>=g.inv){if(fgHit(g))return fgOver();break}}
     if(!p.done&&p.x<g.x){p.done=true;if(FG_SPORT!=='bb'&&g.y<b-fgUp(p,s)){p.miss=1;p.flash=1;g.combo=0}
-      else{const perf=Math.abs(g.y-p.c)<p.gap*(FG_SPORT==='bb'?.07:.1);g.combo=perf?g.combo+1:0;g.best=Math.max(g.best,g.combo);if(perf&&(g.combo===3||g.combo===6||g.combo===10))fgPop(g,g.x+40*s,g.y-34*s,g.combo===3?'HEATING UP!':g.combo===6?'ON FIRE!':'INFERNO!',g.combo===3?'#FFC23D':g.combo===6?'#FF8A2B':'#FF4A2B');const m=fgMult(g.combo)*(g.t<g.pw.x2?2:1),pts=(p.pts+(perf?1:0))*m;
+      else{const perf=Math.abs(g.y-p.c)<p.gap*(FG_SPORT==='bb'?.095:.1);g.combo=perf?g.combo+1:0;g.best=Math.max(g.best,g.combo);if(perf&&(g.combo===3||g.combo===6||g.combo===10))fgPop(g,g.x+40*s,g.y-34*s,g.combo===3?'HEATING UP!':g.combo===6?'ON FIRE!':'INFERNO!',g.combo===3?'#FFC23D':g.combo===6?'#FF8A2B':'#FF4A2B');const m=fgMult(g.combo)*(g.t<g.pw.x2?2:1),pts=(p.pts+(perf?1:0))*m;
         g.score+=pts;g.goals++;p.flash=1;p.got=pts;p.perf=perf;p.mult=m;if(perf)try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}}
   }
 }
