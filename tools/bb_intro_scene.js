@@ -34,8 +34,8 @@
   const rimR=pw*.25,rimX=Math.min(W-Math.max(pw*.62,52),wr.right-sr.left+pw*.5);
   const rimY=elTop+pw*.1-LIFT,bw=Math.max(6,pw*.07),bh=pw*.74,bx=rimX+rimR+pw*.07,by=rimY-bh*.58;
   const ex=cbz(.3,.4,.6,1),EX='cubic-bezier(.3,.4,.6,1)',EY='cubic-bezier(.14,.62,.3,1)',GRAV='cubic-bezier(.55,0,.9,.65)';
-  const dunkLeft=rimX-pw*.52,VR=pw*.0058,Df=.75*VR*F,takeLeft=dunkLeft-Df;
-  const RUN_IN=clamp((takeLeft-leftEdge)/VR,700,1400),T_TO=T_RUN+RUN_IN;
+  const dunkLeft=rimX-pw*.52,VR=pw*.0058,Df=Math.min(.75*VR*F,pw*1.75),takeLeft=dunkLeft-Df;   /* take off on screen, so the run-up is seen */
+  const RUN_IN=clamp((takeLeft-leftEdge)/(1.33*Df/F),700,1400),T_TO=T_RUN+RUN_IN;
   const tX=.5*F,fc=ex(tX/F),defLeft=takeLeft+fc*Df;          /* the defender stands where the dunker is passing at tX */
   const Jh=pw*.46,T_DA=T_TO-220,CT=220+tX;                    /* defender timeline starts 220 ms before take-off; CT = contact */
 
