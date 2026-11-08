@@ -2695,12 +2695,12 @@ document.addEventListener('submit',async e=>{
     openName();$('#nm-name').value=name;
   }
 },true);
-async function signOut(){try{await SB.auth.signOut()}catch(_){}try{localStorage.removeItem('gf-browse');sessionStorage.removeItem('varsity-viewas')}catch(_){}location.reload()}
+async function signOut(){try{await pushOff()}catch(_){}try{await SB.auth.signOut()}catch(_){}try{localStorage.removeItem('gf-browse');sessionStorage.removeItem('varsity-viewas')}catch(_){}location.reload()}
 let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v319 · Nov 8';
+const APP_BUILD='v320 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3535,7 +3535,7 @@ function fcHTML(){
       :can?`<div class="fc-deal"><p>Your ${FC_DAILY?fcLabel(cw):'week '+cw} hand is waiting.</p>${FC_DAILY?`<p class="muted">Deal before the first game, ${esc(new Date(fcClose(cw).replace('T',' ')+':00').toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}))}.</p>`:''}<button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
     <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS&&!byW}">${FC_DAILY?fcLabel(w):'Week '+w}</button>${FC_DAILY?`<button class="chip" data-act="fcBoard" data-v="wk" aria-pressed="${byW}">Week ${wkOf}</button>`:''}<button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
-    ${fcWaitNote(FC_DAILY?w:wkOf)}<p class="fg-prize">${FC_DAILY?'Daily':'Weekly'} prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
+    ${fcWaitNote(FC_DAILY?w:wkOf)}<p class="fg-prize">${FC_DAILY?'Daily':'Weekly'} prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top ${FC_DAILY?25:50}%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
 }
 /* ---------- Pick 'em league: friends pick the winner of EVERY game each week; best accuracy wins ----------
@@ -4180,7 +4180,7 @@ document.addEventListener('input',e=>{const t=e.target;if(t.id==='bnd-q'){UI.bnd
 document.addEventListener('change',e=>{if(e.target.id==='gf-i'){GF.i=e.target.value;giftSheet()}});
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,v=t.dataset.v;
   if(a==='ntPhone')ntPhoneAsk();
-  else if(a==='ntPhoneOff'){localStorage.setItem('vs-push','off');say('Phone notifications are off');if(UI.notifView==='settings')openNotes()}
+  else if(a==='ntPhoneOff'){localStorage.setItem('vs-push','off');pushOff();say('Phone notifications are off');if(UI.notifView==='settings')openNotes()}
   else if(a==='shBuy')shopBuy(v);
   else if(a==='gfOpen'){if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}if(t.dataset.to)GF.to=t.dataset.to;giftSheet()}
   else if(a==='gfTo'){GF.to=GF.to===v?'':v;giftSheet()}
@@ -5004,7 +5004,9 @@ function fgPrizes(u){if(!u)return[];const out=[],cl=((invOf(u).fr||{}).lb)||{},d
    and everyone else in the top half of the board +100 tokens. Packs are opened from the Shop; tokens are claimed automatically
    into picks/<uid>.lbt = {'fg|YYYY-MM-DD':100, 'fc|w':100} and added in bank(). */
 const LB_TOK=100,FC_LB_START=1,FC_LB_BACK=3;
-const lbHalf=(i,n)=>i>=3&&i<Math.floor(n/2);   /* i = 0-based place; top 50% minus the three pack places */
+const lbHalf=(i,n)=>i>=3&&i<Math.floor(n/2);
+/* v320 (owner): basketball 5 Card Draw pays tokens only to the top 25% (football and the other boards keep the top half) */
+const FC_TOP=()=>FC_DAILY?.25:.5,lbTopFc=(i,n)=>i>=3&&i<Math.floor(n*FC_TOP());   /* i = 0-based place; top 50% minus the three pack places */
 /* prizes and the Cup run by calendar week: in basketball a week's score is the sum of that week's daily hands */
 const fcWkScore=(u,w)=>Math.round(fcSlotsOf(w).reduce((a,s)=>a+fcScore(u,s),0)*10)/10;
 const fcRank=w=>Object.keys(S.picks).filter(u=>fcSlotsOf(w).some(s=>fcHand(u,s))).map(u=>({u,t:fcWkScore(u,w)})).sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1));
@@ -5044,7 +5046,7 @@ function lbtBonus(u){return Object.values(lbtOf(u)).reduce((a,v)=>a+(+v||0),0)}
 function lbTokDue(u){const have=lbtOf(u),out=[],d=new Date(TODAY()+'T12:00:00Z');
   for(let i=1;i<=FG_LB_BACK;i++){d.setUTCDate(d.getUTCDate()-1);const day=d.toISOString().slice(0,10);if(day<FG_LB_START)break;if(have['fg|'+day])continue;
     const r=fgRank(day),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fg|'+day,why:'top half in the daily '+(FG_SPORT==='bb'?'Hoops':'Field Goal')+' ('+fmtDay(day)+')'})}
-  for(const w of fcLbWeeks()){if(have['fc|'+w])continue;const r=fcPrizeRank(w),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fc|'+w,why:'top half in 5 Card Draw ('+fcLabel(w)+')'})}
+  for(const w of fcLbWeeks()){if(have['fc|'+w])continue;const r=fcPrizeRank(w),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbTopFc(pl,r.length))out.push({k:'fc|'+w,why:(FC_DAILY?'top 25% in 5 Card Draw (':'top half in 5 Card Draw (')+fcLabel(w)+')'})}
   try{if(bkTokDue(u)&&!have['bk'])out.push({k:'bk',why:'top half in the Bracket Challenge'})}catch(_){}
   try{cupRewards(u).tok.forEach(w=>{if(!have['cup|'+w])out.push({k:'cup|'+w,amt:CUP_TOK,why:'your school won its School Cup matchup (week '+w+')'})})}catch(_){}
   return out}
@@ -7020,11 +7022,37 @@ const NT_KINDS=[
 /* v294 phone notifications: shows each new note as a system notification (lock screen / notification centre) while Varsity is open
    or running in the background. Fully closed apps need a push server (not set up yet). On iPhone it needs Varsity on the Home Screen. */
 const ntPhoneOK=()=>'Notification' in window&&Notification.permission==='granted'&&localStorage.getItem('vs-push')!=='off';
+/* v320: closed-app push. This phone subscribes to Web Push (VAPID_PUB is the public key; the private key lives in the GitHub secret VAPID_PRIVATE_KEY),
+   saves the subscription with your alert choices through the push_save function (tools/sql/push.sql), and tools/push/send.mjs sends what is due every 5 minutes.
+   push_save returns when the sender last ran: only if that is recent does this app stop showing its own system notifications (pushSrv), so nothing doubles. */
+const VAPID_PUB='BF4iv6DaX_MbN-6lVO_3PfyuZCt-phrU7E5SpyZZQna89rWg_mlFCD2G_pUxOpndLixM8iQYzGBT5lYesrGKnXU';
+const b64u=s=>{const b=atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(b,c=>c.charCodeAt(0))};
+const pushSrv=()=>{try{return NOW()-(+localStorage.getItem('vs-pushsrv')||0)<36*36e5}catch(_){return false}};
+async function pushSync(force){
+  try{
+    if(!SB||!ME.uid||ME.mode!=='live'||!ntPhoneOK()||!('serviceWorker' in navigator)||!('PushManager' in window)||location.protocol!=='https:')return;
+    if(!force&&NOW()-(+localStorage.getItem('vs-pushsync')||0)<6*36e5)return;
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+    const j=sub.toJSON();
+    const {data,error}=await SB.rpc('push_save',{p_endpoint:j.endpoint,p_sport:FG_SPORT,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_school:(myProfile()||{}).school||'',
+      p_tz:(Intl.DateTimeFormat().resolvedOptions().timeZone)||'America/Los_Angeles',p_cats:pushCats(),p_quiet:quietOf()});
+    if(error)throw error;
+    localStorage.setItem('vs-pushsync',String(NOW()));
+    if(data&&NOW()-Date.parse(data)<45*6e4)localStorage.setItem('vs-pushsrv',String(NOW()));else localStorage.removeItem('vs-pushsrv');
+  }catch(_){}
+}
+async function pushOff(){
+  try{if('serviceWorker' in navigator&&'PushManager' in window){const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
+    if(sub){const ep=sub.endpoint;if(SB&&ME.uid)try{await SB.rpc('push_remove',{p_endpoint:ep})}catch(_){}try{await sub.unsubscribe()}catch(_){}}}}catch(_){}
+  try{localStorage.removeItem('vs-pushsrv');localStorage.removeItem('vs-pushsync')}catch(_){}
+}
 async function ntPhoneAsk(){if(!('Notification' in window)){say('This browser can’t show notifications. On iPhone, add Varsity to your Home Screen first.');return}
   if(Notification.permission==='denied'){say('Notifications are blocked. Allow them for Varsity in your phone or browser settings.');return}
   if(localStorage.getItem('vs-push')==='off'&&Notification.permission==='granted'){localStorage.removeItem('vs-push')}
   else{const r=await Notification.requestPermission();if(r!=='granted'){say('Notifications stay off.');return}}
-  localStorage.removeItem('vs-pushed');ntPush(true);say('Phone notifications are on');if(UI.notifView==='settings')openNotes()}
+  localStorage.removeItem('vs-pushed');ntPush(true);pushSync(true);say('Phone notifications are on');if(UI.notifView==='settings')openNotes()}
 /* v311: phone alerts come in five categories (game start, picks lock, results, chat, Sunday recap) and respect quiet hours (this device).
    Quiet hours hold alerts back: nothing is marked as sent, so they show once quiet hours end. We ask for permission only after your first win. */
 const PUSH_CATS=[['gstart','Game start','On days your school plays.'],['lock','Picks lock','Games you haven’t picked and an undealt hand.'],['results','Results','How your matchups finished.'],['chat','Chat','New messages in your leagues.'],['recap','Sunday recap','Sunday evening, your week in review.']];
@@ -7039,7 +7067,7 @@ function pushAskMaybe(){if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.
   if(!S.loaded.picks||!firstWin(ME.uid)||!$('#cfm').hidden||!$('#gate').hidden)return;
   try{localStorage.setItem('vs-pushasked',String(NOW()))}catch(_){}
   confirmBox('Nice win!','Want a heads-up on your phone for game start, picks lock, results, chat and the Sunday recap? You choose which ones and set quiet hours.','Choose alerts',()=>{UI.notifView='settings';openNotes()})}
-function ntPush(seedOnly){if(!ntPhoneOK()||!ME.uid)return;if(seedOnly!==true&&inQuiet())return;const p=ntPrefs(),pc=pushCats(),notes=computeNotes().filter(x=>x.c&&p[x.c]!==false&&pc[x.c]===true),key=n=>n.c+'|'+n.text;
+function ntPush(seedOnly){if(!ntPhoneOK()||!ME.uid)return;if(seedOnly!==true&&(inQuiet()||pushSrv()))return;const p=ntPrefs(),pc=pushCats(),notes=computeNotes().filter(x=>x.c&&p[x.c]!==false&&pc[x.c]===true),key=n=>n.c+'|'+n.text;
   let had=null;try{had=JSON.parse(localStorage.getItem('vs-pushed')||'null')}catch(_){}
   if(!had||seedOnly===true){try{localStorage.setItem('vs-pushed',JSON.stringify(notes.map(key).slice(-300)))}catch(_){}return}
   const fresh=notes.filter(n=>!had.includes(key(n)));if(!fresh.length)return;
@@ -7053,7 +7081,7 @@ function ntPrefs(){let o={};try{o=JSON.parse(localStorage.getItem('vs-notif')||'
 function ntSave(p){const o={};NT_KINDS.forEach(([k])=>{if(k!=='sound')o[k]=!!p[k]});try{localStorage.setItem('vs-notif',JSON.stringify(o));localStorage.setItem('vs-snd',p.sound?'on':'off')}catch(_){}}
 function ntSettingsHTML(){const p=ntPrefs();
   return `<div class="dh"><h2>Notification settings</h2><button class="btn ghost sm" data-act="ntBack">Back</button></div>
-    <div class="nt-phone"><div><b>Phone notifications</b><small class="muted">${ntPhoneOK()?'On. New alerts show on your lock screen while Varsity is open or in the background.':'Get these on your lock screen. On iPhone, add Varsity to your Home Screen first.'}</small></div>${ntPhoneOK()?`<button class="btn ghost sm" data-act="ntPhoneOff">Turn off</button>`:`<button class="btn sm" data-act="ntPhone">Turn on</button>`}</div>
+    <div class="nt-phone"><div><b>Phone notifications</b><small class="muted">${ntPhoneOK()?(pushSrv()?'On. Alerts reach your lock screen even when Varsity is closed.':'On. New alerts show on your lock screen while Varsity is open or in the background.'):'Get these on your lock screen. On iPhone, add Varsity to your Home Screen first.'}</small></div>${ntPhoneOK()?`<button class="btn ghost sm" data-act="ntPhoneOff">Turn off</button>`:`<button class="btn sm" data-act="ntPhone">Turn on</button>`}</div>
     ${ntPhoneOK()?`<div class="nt-pc"><h3>Phone alerts</h3><ul class="nt-set">${PUSH_CATS.map(([k,label,hint])=>`<li><span><b>${esc(label)}</b><small class="muted">${esc(hint)}</small></span><button class="nt-sw" role="switch" aria-checked="${pushCats()[k]}" data-act="ptToggle" data-v="${k}"><i></i><span class="sr">${esc(label)}</span></button></li>`).join('')}
       <li><span><b>Quiet hours</b><small class="muted">No phone alerts from ${hr12(quietOf().from)} to ${hr12(quietOf().to)}.</small></span><button class="nt-sw" role="switch" aria-checked="${quietOf().on}" data-act="ptQuiet"><i></i><span class="sr">Quiet hours</span></button></li></ul>
       ${quietOf().on?`<div class="nt-q"><label class="fld"><span>From</span><select data-act="ptQ" data-w="from">${Array.from({length:24},(_,h)=>`<option value="${h}" ${h===quietOf().from?'selected':''}>${hr12(h)}</option>`).join('')}</select></label><label class="fld"><span>To</span><select data-act="ptQ" data-w="to">${Array.from({length:24},(_,h)=>`<option value="${h}" ${h===quietOf().to?'selected':''}>${hr12(h)}</option>`).join('')}</select></label></div>`:''}</div>`:''}
@@ -7820,7 +7848,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
@@ -7906,8 +7934,8 @@ document.addEventListener('click',async e=>{
   else if(a==='bell'){UI.notifView=null;openNotes()}
   else if(a==='ntSettings'){UI.notifView='settings';openNotes()}
   else if(a==='ntBack'){UI.notifView=null;openNotes()}
-  else if(a==='ptToggle'){const k=t.dataset.v,o=pushCats();o[k]=!o[k];try{localStorage.setItem('vs-pushcat',JSON.stringify(o))}catch(_){}openNotes()}
-  else if(a==='ptQuiet'){const q=quietOf();q.on=!q.on;try{localStorage.setItem('vs-quiet',JSON.stringify(q))}catch(_){}openNotes()}
+  else if(a==='ptToggle'){const k=t.dataset.v,o=pushCats();o[k]=!o[k];try{localStorage.setItem('vs-pushcat',JSON.stringify(o))}catch(_){}pushSync(true);openNotes()}
+  else if(a==='ptQuiet'){const q=quietOf();q.on=!q.on;try{localStorage.setItem('vs-quiet',JSON.stringify(q))}catch(_){}pushSync(true);openNotes()}
   else if(a==='ntToggle'){const k=t.dataset.v,p=ntPrefs();p[k]=!p[k];ntSave(p);openNotes()}
   else if(a==='markRead'){await act(writeSeen);sheetClose()}
   else if(a==='consent')openGate();
@@ -8185,7 +8213,7 @@ document.addEventListener('click',async e=>{
 });
 document.addEventListener('change',async e=>{
   const t=e.target,a=t.dataset&&t.dataset.act;if(!a)return;
-  if(a==='ptQ'){const q=quietOf();q[t.dataset.w]=+t.value;try{localStorage.setItem('vs-quiet',JSON.stringify(q))}catch(_){}openNotes()}
+  if(a==='ptQ'){const q=quietOf();q[t.dataset.w]=+t.value;try{localStorage.setItem('vs-quiet',JSON.stringify(q))}catch(_){}pushSync(true);openNotes()}
   else if(a==='scope'){UI.scope=t.value==='season'?'season':+t.value;UI.more=false;render()}
   else if(a==='bf'){UI.bf[t.dataset.f]=t.value;UI.ppN=24;render()}
   else if(a==='school'){UI.school=t.value;UI.more=false;$('#lb-list').innerHTML=listHTML()}

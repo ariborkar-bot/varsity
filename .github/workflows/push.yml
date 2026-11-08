@@ -1,0 +1,36 @@
+# Varsity phone notifications: every 5 minutes work out which alerts are due and send them (tools/push/send.mjs).
+# Needs three repository secrets (Settings > Secrets and variables > Actions): SUPABASE_URL, SUPABASE_SERVICE_KEY, VAPID_PRIVATE_KEY.
+name: Send phone notifications
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: 'Dry run (print what would be sent, send nothing)'
+        type: boolean
+        default: false
+concurrency:
+  group: varsity-push
+  cancel-in-progress: false
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tools/push/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: tools/push
+      - run: node send.mjs
+        working-directory: tools/push
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          VAPID_PUBLIC_KEY: BF4iv6DaX_MbN-6lVO_3PfyuZCt-phrU7E5SpyZZQna89rWg_mlFCD2G_pUxOpndLixM8iQYzGBT5lYesrGKnXU
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          DRY: ${{ inputs.dry && '1' || '' }}
