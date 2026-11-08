@@ -2083,9 +2083,12 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .lk-hs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.lk-hs div{display:flex;flex-direction:column}.lk-hs b{font:900 1.35rem/1.1 var(--f-display,inherit)}.lk-hs small{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .lk-shopb{align-self:center}
 @media (max-width:560px){.lk-hero{grid-template-columns:auto minmax(0,1fr)}.lk-shopb{grid-column:1/-1;justify-self:stretch;text-align:center}}
-.lk-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);margin-bottom:14px}
+.lk-seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);margin-bottom:14px}
 .lk-seg button{border:0;background:transparent;padding:10px 6px;border-radius:10px;font:800 .82rem var(--f-display,inherit);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .lk-seg button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px -6px var(--accent)}
+.lk-catrow{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:-2px -2px 12px;padding:2px}.lk-catrow::-webkit-scrollbar{display:none}.lk-catrow .chip{flex:0 0 auto;white-space:nowrap}.lk-catrow .chip small{opacity:.7;margin-left:2px}
+.sh-h{margin:18px 0 8px;font:900 1.1rem var(--f-display,inherit);text-transform:uppercase;letter-spacing:.04em}
+details.lk-col>summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none}details.lk-col>summary::-webkit-details-marker{display:none}details.lk-col[open]>summary{margin-bottom:12px}
 .lk-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
 .lk-cat{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:inherit;text-align:center;cursor:pointer;transition:transform .15s,border-color .15s}
 .lk-cat:hover{transform:translateY(-2px)}.lk-cat.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent);background:color-mix(in srgb,var(--accent) 10%,var(--surface2))}
@@ -4211,7 +4214,7 @@ function viewShop(){
   const head=`<div class="head"><h2>Shop</h2><p>Open packs with tokens.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to open packs.</p>';
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid);
-  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
+  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
   let body='';
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
@@ -4221,15 +4224,14 @@ function viewShop(){
       +bkPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Playoff Bracket Challenge.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="bk" data-d="bk">Open prize</button></section>`).join('')
       +cupPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 Top scorer · ${esc(PACKS[x.type].n)}</b><small class="muted">School Cup, week ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="cup" data-d="${x.w}">Open prize</button></section>`).join('');
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
-    const extras=shopHTML()+`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
+    const extras=`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
-    body=prizes+extras+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free Rookie pack every day</b><small class="muted">${adDone?'You got today’s pack. A new one is ready tomorrow.':'Watch a short sponsor video and open a Rookie pack. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
-      <div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
-      <p class="muted">${P.cos?`${P.c} cosmetics, Rare or better only, at least one ${RAR[P.g].n.toLowerCase()} or better.`:`${P.c} random items, each with a 30% chance to be a player or team card${P.g?`, at least one ${RAR[P.g].n.toLowerCase()} or better`:''}.`}</p>
+    body=prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
+      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>items</small></div><h3>${esc(P.n)}</h3>
+      <p class="muted">${P.cos?'Cosmetics only':'Cosmetics and cards'}${P.g?` · ${RAR[P.g].n} or better guaranteed`:''}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">Each item rolls these odds${P.g?`; the last item is at least ${RAR[P.g].n}`:''}. Duplicate cosmetics turn into tokens.</small></details>
-      <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button>
-      <button class="btn ghost lk-usd" disabled title="Coming soon">${P.usd} · Coming soon</button></article>`).join('')}</div>
-      <p class="muted lk-note">Items have no cash value and can’t be traded. Real-money packs will go through the App Store or Google Play.</p>`;
+      <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button></article>`).join('')}</div>
+      <p class="muted lk-note">Items have no cash value and can’t be traded.</p>`+extras;
   return head+top+body;
 }
 function viewLocker(){
@@ -4239,9 +4241,9 @@ function viewLocker(){
   const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),pct=Math.min(100,ownN/Math.max(1,totN)*100);
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
   const tab=['cards','cos','boost','bnd'].includes(UI.lk)?UI.lk:'cos';
-  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['bnd','Binder'],['boost','Boosts']].map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['boost','Boosts'],['bnd','Binder']].map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
   const top=`<section class="lk-hero"><div class="lk-ring" style="--p:${pct.toFixed(1)}"><b>${pct>0&&pct<1?'<1':Math.floor(pct)}%</b><small>collected</small></div>
-    <div class="lk-hs"><div><b>${ownN}</b><small>cosmetics</small></div><div><b>${cardN}</b><small>cards</small></div><div><b>${+v.n||0}</b><small>packs opened</small></div><div><b>${coinIc(ME.uid)}${Math.round(bal)}</b><small>tokens</small></div></div>
+    <div class="lk-hs"><div><b>${ownN}</b><small>cosmetics</small></div><div><b>${cardN}</b><small>cards</small></div><div><b>${coinIc(ME.uid)}${Math.round(bal)}</b><small>tokens</small></div></div>
     <a class="btn lk-shopb" href="#shop">Shop${fp?` · ${fp} free`:''}</a></section>`;
   let body='';
   if(false){
@@ -4273,20 +4275,20 @@ function viewLocker(){
     const kk=KINDS.find(x=>x[0]===UI.lkK)||KINDS[0],k=kk[0],cur=eq[k],onlyOwn=true,N=UI.lkN||30;
     const own=cosOwnCount(ME.uid),MS=ITEMS.filter(x=>x.ex&&x.need).sort((p,q)=>p.need-q.need),next=MS.find(x=>own<x.need);
     const sets=PALS.map(([pk,pn,a,b2])=>{const ids=SET_IDS[pk]||[],have=ids.filter(i=>invHas(ME.uid,i)).length;return {pk,pn,a,b:b2,have,tot:ids.length}}).sort((p,q)=>q.have/q.tot-p.have/p.tot).slice(0,4);
-    const col=`<section class="card lk-col"><div class="qh"><h3>Your collection</h3><span class="muted">${own} of ${cosTotal()}</span></div>
+    const col=`<details class="card lk-col"><summary><b>Collection and rewards</b><span class="muted">${own} of ${cosTotal()}</span></summary>
       <div class="lk-bar"><i style="width:${Math.min(100,own/cosTotal()*100).toFixed(1)}%"></i></div>
       <small class="muted">${next?`${next.need-own} more to unlock the next mystery reward.`:'Every milestone unlocked.'} Milestone items are never in packs.</small>
       <div class="lk-ms">${MS.map(x=>own>=x.need?`<div class="got">${itemArt(x.id,36)}<b>${esc(x.n)}</b><small class="muted">Unlocked</small></div>`:`<div><span class="lk-mys">?</span><b>Mystery reward</b><small class="muted">Own ${x.need}</small></div>`).join('')}</div>
       <div class="qh"><h3 style="font-size:.95rem">Team sets</h3><span class="muted">${PALS.length} sets</span></div>
       <div class="lk-sets">${sets.map(t=>`<div class="lk-set"><span class="lk-sw" style="background:linear-gradient(135deg,${t.a} 50%,${t.b} 50%)"></span><span style="min-width:120px">${esc(t.pn)}</span><span class="lk-bar"><i style="width:${(t.have/t.tot*100).toFixed(0)}%"></i></span><small class="muted">${t.have}/${t.tot}</small>${invHas(ME.uid,'bd_set_'+t.pk)?bdgHTML('bd_set_'+t.pk,18):'<span class="lk-mys sm">?</span>'}</div>`).join('')}</div>
-      <small class="muted">Collect every item in a team’s colours (${(SET_IDS[PALS[0][0]]||[]).length} items) to earn a secret reward.</small></section>`;
-    const kinds=`<div class="lk-cats" role="group" aria-label="Cosmetic type">${KINDS.map(([x,l])=>{const L=ITEMS.filter(i=>i.k===x&&itemSp(i)),n=L.filter(i=>invHas(ME.uid,i.id)).length,e=eq[x]&&invHas(ME.uid,eq[x])?eq[x]:'';return `<button class="lk-cat ${x===k?'on':''}" data-act="lkK" data-v="${x}" aria-pressed="${x===k}"><span class="lk-cat-a">${e?itemArt(e,30):dflt[x].replace(/width:\d+px;height:\d+px/,'width:30px;height:30px')}</span><b>${l}</b><small>${n} found</small></button>`}).join('')}</div>`;
+      <small class="muted">Collect every item in a team’s colours (${(SET_IDS[PALS[0][0]]||[]).length} items) to earn a secret reward.</small></details>`;
+    const kinds=`<div class="lk-catrow" role="group" aria-label="Cosmetic type">${KINDS.map(([x,l])=>{const n=ITEMS.filter(i=>i.k===x&&itemSp(i)&&invHas(ME.uid,i.id)).length;return `<button class="chip ${n?'has':''}" data-act="lkK" data-v="${x}" aria-pressed="${x===k}">${l}${n?` <small>${n}</small>`:''}</button>`}).join('')}</div>`;
     const ord={m:0,l:1,e:2,r:3,u:4,c:5};
     let list=ITEMS.filter(x=>x.k===k&&itemSp(x)).sort((p,q)=>(invHas(ME.uid,q.id)-invHas(ME.uid,p.id))||(ord[p.r]-ord[q.r]));
     if(onlyOwn)list=list.filter(x=>invHas(ME.uid,x.id));
     const shown=list.slice(0,N);
     const curItem=cur&&invHas(ME.uid,cur)?ITEM[cur]:null;
-    body=`<section class="card lk-catcard">${kinds}</section><section class="card lk-items"><div class="lk-now"><span class="lk-now-a">${curItem?itemArt(cur,64):dflt[k]}</span><div><small class="muted">Equipped ${esc(kk[1].toLowerCase())}</small><b>${curItem?esc(curItem.n):kk[2]}</b>${curItem?`<small style="color:${RAR[curItem.r].c};font-weight:800">${RAR[curItem.r].n}</small>`:''}</div><span class="muted lk-cnt">${list.length} found</span></div>
+    body=`<section class="card lk-items">${kinds}<div class="lk-now"><span class="lk-now-a">${curItem?itemArt(cur,64):dflt[k]}</span><div><small class="muted">Equipped ${esc(kk[1].toLowerCase())}</small><b>${curItem?esc(curItem.n):kk[2]}</b>${curItem?`<small style="color:${RAR[curItem.r].c};font-weight:800">${RAR[curItem.r].n}</small>`:''}</div><span class="muted lk-cnt">${list.length} found</span></div>
       <div class="lk-grid"><button class="lk-it ${!cur||!invHas(ME.uid,cur)?'on':''}" data-act="lkEq" data-k="${k}" data-v="">${dflt[k]}<b>${kk[2]}</b><small class="muted">Default</small></button>
       ${shown.map(x=>{const o=invHas(ME.uid,x.id);return `<button class="lk-it r-${x.r} ${cur===x.id&&o?'on':''} ${o?'':'lock'}" style="--rc:${RAR[x.r].c}" data-act="lkEq" data-k="${k}" data-v="${x.id}" ${o?'':'disabled'} title="${esc(x.d)}">${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${o?RAR[x.r].n:'Locked · '+RAR[x.r].n}</small>${x.ex&&!o?`<small class="ex">${x.need?'Own '+x.need+' cosmetics':'Complete the team set'}</small>`:''}</button>`}).join('')}</div>
       ${list.length?'':`<p class="empty">No ${kk[1].toLowerCase()} yet. Open packs in the <a href="#shop">Shop</a> to find them.</p>`}${list.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${list.length-N})</button>`:''}${k==='ball'?`<p class="hint">The golden ball from a 7-day streak still shows over any skin while your streak is alive.</p>`:''}</section>`+col;
