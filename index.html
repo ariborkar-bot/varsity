@@ -37,6 +37,7 @@ html,body{overscroll-behavior-y:contain}:root{color-scheme:light;box-sizing:bord
 .cup-wo{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;text-align:left;padding:11px 12px;border-radius:12px;border:1px solid var(--tc);background:rgba(255,255,255,.05);color:inherit;cursor:pointer}
 .cup-wo b{display:block;font-size:15px}.cup-wo small{display:block;font-size:12px;opacity:.75}.cup-wo em{font-style:normal;font-weight:800;color:var(--tc);font-size:13px}.cup-wo i{font-style:normal;font-weight:800;color:var(--tc)}
 .cup-rules summary{cursor:pointer;margin-top:10px}
+.cup-how{margin:0}.cup-how>b{display:block;font-size:13px;margin-bottom:8px}.cup-how ol{list-style:none;margin:0;padding:0;counter-reset:ch}.cup-how li{counter-increment:ch;display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:13px;line-height:1.35;color:var(--mut,#98A8BA)}.cup-how li::before{content:counter(ch);flex:none;width:20px;height:20px;border-radius:50%;background:#FFC23D;color:#111;font-weight:900;font-size:12px;display:grid;place-items:center;margin-top:1px}.cup-how li b{color:var(--tx,#fff)}
 
 .lg-tiles{grid-template-columns:repeat(3,1fr)}.lg-tiles .mg-tile{padding:12px 6px 11px}.lg-tiles .mg-tile b{font-size:.82rem}@media (max-width:420px){.lg-tiles .mg-tile b{font-size:.7rem}}
 .lg-sw-wrap{width:100%;position:relative}
@@ -2705,7 +2706,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v331 · Nov 8';
+const APP_BUILD='v332 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5154,9 +5155,12 @@ function cupHTML(){
   const dleft=d=>Math.round((new Date(d+'T12:00:00Z')-new Date(TODAY()+'T12:00:00Z'))/864e5);
   const head=`<section class="card cup-hd"><div class="qh"><h3>Week ${w}</h3><span class="muted">${done?'Final':'Live'}</span></div>
     <div class="wks" role="group" aria-label="Week">${W.map(x=>`<button class="chip" data-act="cupWk" data-w="${x}" aria-pressed="${x===w}">Wk ${x}${x===cw?' •':''}</button>`).join('')}</div>
-    <details class="cup-rules"><summary><b>How points and prizes work</b></summary>
-    <p class="muted">Play free games to earn points for your school. Its score is the average of its top ${CUP_TOP} players (${CUP_MIN} needed).</p>
-    <p class="muted">Winning schools’ active players get <b>${CUP_TOK} tokens</b>. Each school’s top scorer gets a ${esc(PACKS.player.n)}.</p></details></section>`;
+    </section>`;
+  const how=`<section class="card cup-hw"><div class="cup-how"><b>How the School Cup works</b>
+    <ol><li><span>Each week your school plays the school it plays in real life. Higher school score wins.</span></li>
+    <li><span>You earn points for your school by playing the free games: tap <b>Win your team points</b>.</span></li>
+    <li><span>A school’s score is the average of its top ${CUP_TOP} players’ points. It needs ${CUP_MIN} players to count.</span></li>
+    <li><span>Winning schools’ active players get <b>${CUP_TOK} tokens</b>. Each school’s top scorer gets a ${esc(PACKS.player.n)}.</span></li></ol></div></section>`;
   const nos=!can?`<p class="hint">Sign in to earn points for your school.</p>`:!my?`<section class="card"><b>Pick your school first</b><p class="muted">Your points count for the school on your profile. Add it on the Me tab.</p><a class="btn sm" href="#me">Go to Me</a></section>`:'';
   let mine='';
   if(my){const P=cupPts(ME.uid,w),row=B[my],rank=Object.values(B).filter(x=>x.ok).sort((a,b)=>b.score-a.score).findIndex(x=>x.s===my)+1;
@@ -5204,7 +5208,7 @@ function cupHTML(){
   const open=gs.filter(g=>!started(g)&&!gDone(g)&&!mp[gid(g)]);
   const bar=can&&open.length?`<div class="pkl-bar"><div><b>${dirty} selected</b><small class="muted">+${CUP_PK_OK} for a right pick, ${CUP_PK_BAD} for a wrong one. Locked in once saved.</small></div><div class="btns" style="margin:0"><button class="btn sm" data-act="cupSave" ${dirty?'':'disabled'}>${dirty?'Lock in '+dirty+(dirty===1?' pick':' picks'):'Pick games'}</button></div></div>`:'';
   const pk=`<section class="card" id="cup-pk"><div class="qh"><h3>Cup Pick ’em · Week ${w}</h3><span class="muted">${gs.length} ${gs.length===1?'game':'games'}</span></div><p class="muted">Free picks that only count for the School Cup. Pick as many games as you like.</p>${bar}</section>`+(gs.length?`<div class="bt-grid">${gs.map(card).join('')}</div>`:'<p class="empty">No games this week.</p>');
-  return mu+nos+mine+stand+oth+pk;
+  return mu+how+nos+mine+stand+oth+pk;
 }
 /* v269: out of daily tries -> watch an ad for one more (once a day, dd.adt), then a 4th+ try for $0.99 (shown as Coming soon: no real-money purchases yet) */
 const FG_TRY_USD='$0.99';
