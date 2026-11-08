@@ -46,6 +46,13 @@ html,body{overscroll-behavior-y:contain}:root{color-scheme:light;box-sizing:bord
 .lg-menu{margin-top:8px;max-height:60vh;overflow:auto;padding:10px}.lg-sec{display:grid;gap:6px;margin-bottom:10px}.lg-sec:last-child{margin-bottom:0}
 .lg-row2{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2,rgba(255,255,255,.04));color:inherit;text-align:left;cursor:pointer}
 .lg-row2 b{display:block;font-size:15px}.lg-row2 small{display:block;font-size:12px;opacity:.7}.lg-row2.on{border-color:#FFC23D;background:rgba(255,194,61,.1)}.lg-row2 em{font-style:normal;font-size:11px;font-weight:800;color:#FFC23D}.lg-row2 i{font-style:normal;opacity:.6}
+
+.bk-tog{margin:0 0 10px}.bk-chip[aria-pressed=false]{border-color:#FFC23D;color:#FFC23D}.bk-n{background:#FFC23D;color:#1a1200;border-radius:999px;padding:0 6px;font-weight:800;margin-left:4px}
+.bk-g{display:grid;gap:4px;padding:6px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}.bk-g.fin{opacity:.95}
+.bk-t{display:flex;align-items:center;gap:6px;text-align:left;padding:7px 8px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:inherit;font-size:13px;cursor:pointer;min-width:0}
+.bk-t b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bk-t.on{border-color:#FFC23D;background:rgba(255,194,61,.14)}.bk-t.gs b{font-style:italic;opacity:.85}
+.bk-t.ok{border-color:#3DDC84;background:rgba(61,220,132,.16)}.bk-t.no{border-color:#E5483B;background:rgba(229,72,59,.14);text-decoration:line-through}.bk-t.was{border-color:#3DDC84}.bk-t.tbd{opacity:.5;cursor:default}
+.bk-t:disabled{cursor:default}.bk-m{font-size:11px;text-align:right;opacity:.7;font-weight:700}
 </style>
 <title>Varsity Basketball</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -2687,7 +2694,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v309 · Nov 8';
+const APP_BUILD='v310 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3021,7 +3028,7 @@ function extraNotes(at){const out=[],day0=ptAt(0),gm=FG_SPORT==='bb'?'Hoops':'Fi
   /* gifts */
   for(const x of giftsIn(ME.uid))if((x.at||0)>at)out.push({c:'gift',t:x.at,k:'up',text:`${nm(x.from)} sent you ${x.a?x.a+' tokens':((ITEM[x.i]||{}).n||'an item')}${x.m?`: “${x.m}”`:''}`});
   /* prizes waiting */
-  const pz=(typeof fgPrizes==='function'?fgPrizes(ME.uid).length:0)+(typeof fcPrizes==='function'?fcPrizes(ME.uid).length:0)+(typeof cupPrizes==='function'?cupPrizes(ME.uid).length:0);
+  const pz=(typeof fgPrizes==='function'?fgPrizes(ME.uid).length:0)+(typeof fcPrizes==='function'?fcPrizes(ME.uid).length:0)+(typeof cupPrizes==='function'?cupPrizes(ME.uid).length:0)+(typeof bkPrizes==='function'?bkPrizes(ME.uid).length:0);
   if(pz&&day0>at)out.push({c:'prize',t:day0,k:'up',text:`You placed on a leaderboard. ${pz} prize ${pz===1?'pack is':'packs are'} waiting in the Shop.`});
   /* streak about to end (after 5 PM, not played today) */
   const sk=fgStreak(ME.uid),rec=fgRec(ME.uid).sk||{};
@@ -3319,9 +3326,63 @@ function buildBrackets(){
   });
 }
 function playoffsHTML(){
+  const tog=BK_ON?`<div class="chips bk-tog" role="group" aria-label="Playoffs"><button class="chip" data-act="gpo" data-v="br" aria-pressed="${UI.gpo!=='ch'}">Bracket</button><button class="chip bk-chip" data-act="gpo" data-v="ch" aria-pressed="${UI.gpo==='ch'}">Bracket Challenge</button></div>`:'';
+  if(BK_ON&&UI.gpo==='ch')return tog+bkHTML();
   const brs=buildBrackets(),d=brs.find(b=>b.div===UI.gdiv)||brs[0];
-  return `<div class="chips gm-divs" role="group" aria-label="Division">${brs.map(b=>`<button class="chip" data-act="gdiv" data-v="${esc(b.div)}" aria-pressed="${b===d}">${esc(b.div)}</button>`).join('')}</div>
+  return tog+`<div class="chips gm-divs" role="group" aria-label="Division">${brs.map(b=>`<button class="chip" data-act="gdiv" data-v="${esc(b.div)}" aria-pressed="${b===d}">${esc(b.div)}</button>`).join('')}</div>
     <section class="card"><div class="qh"><h3>${esc(d.div)}</h3><span class="muted">Projected from last season</span></div>${bracketHTML(d)}</section>`;
+}
+/* ---------- Playoff Bracket Challenge (v310) ----------
+   Free: pick the winner of every playoff game in every division (Games tab → Playoff bracket → Bracket Challenge). Later rounds use your own
+   earlier picks, like a classic bracket. Points per correct pick: Round 1 = 1, Round 2 / Quarterfinals = 2, Semifinals = 4, Championship = 8
+   (a pick counts if that team really wins that slot, even if it got there differently than you thought). A round locks at the start of its day.
+   Saved in picks/<uid>.bk = {'Division|round|game': teamName}. When every championship is final: 1st a Pro pack, 2nd-3rd a Rookie pack,
+   the rest of the top 50% +100 tokens (inv.fr.bk, lbt.bk). Football only (the basketball bracket is only a projection). */
+const BK_ON=false;
+const bkWt=n=>/champ/i.test(n)?8:/semi/i.test(n)?4:/quarter|round 2/i.test(n)?2:1;
+const bkOf=u=>((S.picks[u]||{}).bk)||{};
+const bkId=(div,ri,gi)=>div+'|'+ri+'|'+gi;
+const bkLocked=r=>NOWPT()>=r.d+'T00:00';
+function bkTrees(u,stage){const P=Object.assign({},u?bkOf(u):{},stage||{}),brs=buildBrackets();
+  return PO_DEFS.map((df,di)=>{const br=brs[di],rounds=[];
+    df.rounds.forEach((r,ri)=>{const games=r.games.map(([p,q],gi)=>{
+      const rg=br.rounds[ri].games[gi],id=bkId(df.div,ri,gi);
+      const side=z=>{if(z.from){const pg=rounds[z.from[0]].games[z.from[1]];if(pg.win)return{n:pg.win,s:pg.winS};const pk=pg.pick;return pk?{n:pk,s:pk===pg.a?pg.sa:pg.sh,guess:1}:{n:null,s:null}}return{n:z.n,s:z.s}};
+      const A=side(p),B=side(q);let pick=P[id]||null;if(pick&&pick!==A.n&&pick!==B.n)pick=null;
+      return{id,a:A.n,h:B.n,sa:A.s,sh:B.s,ga:!!A.guess,gh:!!B.guess,win:rg.win||null,as:rg.as,hs:rg.hs,pick,locked:bkLocked(r),wt:bkWt(r.name)}});
+      rounds.push({name:r.name,d:r.d,games})});
+    return{div:df.div,rounds}})}
+let _bkA=null;
+function bkActual(){if(_bkA&&Date.now()-_bkA.at<1500)return _bkA.v;const m={};let done=true;
+  bkTrees(null).forEach(d=>{d.rounds.forEach(r=>r.games.forEach(g=>{if(g.win)m[g.id]={win:g.win,wt:g.wt}}));const f=d.rounds[d.rounds.length-1].games[0];if(!f.win)done=false});
+  _bkA={at:Date.now(),v:{m,done}};return _bkA.v}
+function bkScore(u){const A=bkActual().m,P=bkOf(u);let p=0,c=0,n=0,f=0;for(const id in P){n++;const a=A[id];if(a){f++;if(a.win===P[id]){p+=a.wt;c++}}}return{p,c,n,f}}
+function bkRank(){return Object.keys(S.picks).filter(u=>Object.keys(bkOf(u)).length&&S.profiles[u]).map(u=>({u,s:bkScore(u)})).sort((a,b)=>b.s.p-a.s.p||b.s.c-a.s.c||b.s.n-a.s.n||(a.u<b.u?-1:1))}
+function bkPrizes(u){if(!u||!BK_ON)return[];try{if(!bkActual().done)return[];if(((invOf(u).fr||{}).bk))return[];const r=bkRank(),i=r.findIndex(x=>x.u===u);return i>=0&&i<3?[{place:i+1,type:i===0?'player':'rookie'}]:[]}catch(_){return[]}}
+function bkTokDue(u){try{if(!BK_ON||!bkActual().done)return false;const r=bkRank(),i=r.findIndex(x=>x.u===u);return i>=0&&lbHalf(i,r.length)}catch(_){return false}}
+function bkFav(){const st=Object.assign({},UI.bkS);for(let k=0;k<6;k++){let add=0;bkTrees(ME.uid,st).forEach(d=>d.rounds.forEach(r=>r.games.forEach(g=>{if(g.locked||g.win||st[g.id]||g.pick||!g.a||!g.h)return;const sa=+g.sa||99,sh=+g.sh||99;st[g.id]=sa<=sh?g.a:g.h;add++})));if(!add)break}UI.bkS=st}
+function bkHTML(){
+  if(!BK_ON)return `<section class="card"><b>Bracket Challenge</b><p class="muted">It opens when the real playoff bracket is set.</p></section>`;
+  const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',stage=UI.bkS||{},T=bkTrees(ME.uid,stage);
+  const d=T.find(x=>x.div===UI.bkdiv)||T[0],sc=can?bkScore(ME.uid):{p:0,c:0,n:0,f:0},rows=bkRank(),mi=can?rows.findIndex(x=>x.u===ME.uid):-1;
+  const saved=can?bkOf(ME.uid):{},dirty=Object.entries(stage).filter(([id,n])=>saved[id]!==n).length;
+  const open=x=>{let k=0;x.rounds.forEach(r=>r.games.forEach(g=>{if(!g.locked&&!g.win&&!g.pick)k++}));return k};
+  const nextR=[].concat(...T.map(x=>x.rounds)).filter(r=>!bkLocked(r)).map(r=>r.d).sort()[0];
+  const sum=`<section class="card bk-hd"><div class="qh"><h3>Bracket Challenge</h3><span class="muted">${bkActual().done?'Final':'Live'}</span></div>
+    <p class="muted">Pick the winner of every playoff game. Later rounds use your earlier picks. Points: Round 1 = 1, Round 2 or Quarterfinals = 2, Semifinals = 4, Championship = 8. A round locks when its day starts.</p>
+    <div class="cup-sc2"><div><small>Your points</small><b>${sc.p}</b></div><div><small>Correct</small><b>${sc.c}/${sc.f}</b></div><div><small>Rank</small><b>${mi>=0?(mi+1)+' of '+rows.length:'–'}</b></div></div>
+    ${nextR?`<p class="muted">Next round locks ${esc(fmtDate(nextR))}.</p>`:''}
+    <p class="muted">When all championships are final: <b>1st</b> ${esc(PACKS.player.n)}, <b>2nd–3rd</b> ${esc(PACKS.rookie.n)}, <b>top 50%</b> +${LB_TOK} tokens. Free to play.${can&&bkPrizes(ME.uid).length?` <a href="#shop"><b>Your prize is waiting →</b></a>`:''}</p></section>`;
+  const chips=`<div class="chips gm-divs" role="group" aria-label="Division">${T.map(x=>`<button class="chip" data-act="bkDiv" data-v="${esc(x.div)}" aria-pressed="${x===d}">${esc(x.div)}${open(x)?` <small class="bk-n">${open(x)}</small>`:''}</button>`).join('')}</div>`;
+  const card=g=>{const lock=g.locked||!!g.win,cur=g.pick;
+    const btn=(n,s,guess)=>{if(!n)return `<div class="bk-t tbd"><b>To be decided</b></div>`;const on=cur===n,res=g.win?(on?(g.win===n?'ok':'no'):(g.win===n?'was':'')):'',sc2=g.win&&g.as!=null?(n===g.a?g.as:g.hs):null;
+      return `<button class="bk-t ${on?'on':''} ${res} ${guess?'gs':''}" data-act="bkPick" data-id="${esc(g.id)}" data-n="${esc(n)}" ${lock||!can?'disabled':''} aria-pressed="${on}">${slogo(n,22)}<b>${s?`<small class="gm-seed">${s}</small>`:''}${esc(n)}</b>${sc2!=null?`<span class="pkl-sc">${sc2}</span>`:''}</button>`};
+    return `<div class="bk-g ${g.win?'fin':lock?'lk':''}">${btn(g.a,g.sa,g.ga)}${btn(g.h,g.sh,g.gh)}<div class="bk-m">${g.win?(g.pick?(g.pick===g.win?'+'+g.wt:'0'):'No pick'):lock?'Locked':g.pick?'Picked':'+'+g.wt}</div></div>`};
+  const br=`<section class="card"><div class="qh"><h3>${esc(d.div)}</h3><span class="muted">${open(d)} to pick</span></div>
+    <div class="br" style="--cols:${d.rounds.length}">${d.rounds.map((r,ri)=>`<div class="br-col"><h4>${esc(r.name)} · ${bkWt(r.name)} pt${bkWt(r.name)===1?'':'s'}</h4><div class="br-games" style="--gap:${Math.pow(2,ri)*10}px">${r.games.map(card).join('')}</div></div>`).join('')}</div></section>`;
+  const bar=can?`<div class="pkl-bar"><div><b>${dirty} unsaved ${dirty===1?'pick':'picks'}</b><small class="muted">You can change picks until their round locks.</small></div><div class="btns" style="margin:0"><button class="btn sm ghost" data-act="bkFav">Fill with higher seeds</button><button class="btn sm" data-act="bkSave" ${dirty?'':'disabled'}>${dirty?'Save '+dirty+(dirty===1?' pick':' picks'):'Saved'}</button></div></div>`:`<p class="hint">Sign in to make bracket picks.</p>`;
+  const board=mgBoard('Bracket leaderboard',rows.map(x=>({u:x.u,v:x.s.p+' pts'})),'No brackets yet. Be the first.');
+  return sum+chips+bar+br+board;
 }
 function standTab(){
   const gs=(GAMES&&GAMES.games)||[],schools=[...new Set(gs.flatMap(g=>[g.h,g.a]))].filter(n=>SD_SCHOOLS.includes(n)).sort();
@@ -3341,7 +3402,7 @@ const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;for(const k of ['gft','gsn','bnd','cup']){const kv=(S.picks[ME.uid]||{})[k];if(kv)o[k]=kv}const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;for(const k of ['gft','gsn','bnd','cup','bk']){const kv=(S.picks[ME.uid]||{})[k];if(kv)o[k]=kv}const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -3852,6 +3913,7 @@ async function packOpen(type,how,day){
   if(how==='free'&&freePacks(ME.uid)<1){say('No free packs right now.');return}
   if(how==='ad'&&((invOf(ME.uid).fr||{}).ad===TODAY())){say('You already got today’s free pack. Come back tomorrow.');return}
   if(how==='lb'&&!fgPrizes(ME.uid).some(x=>x.day===day&&x.type===type)){say('That prize was already opened.');return}
+  if(how==='bk'&&!bkPrizes(ME.uid).some(x=>x.type===type)){say('That prize was already opened.');return}
   if(how==='cup'&&!cupPrizes(ME.uid).some(x=>String(x.w)===String(day))){say('That prize was already opened.');return}
   if(how==='fclb'&&!fcPrizes(ME.uid).some(x=>String(x.w)===String(day)&&x.type===type)){say('That prize was already opened.');return}
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
@@ -3866,6 +3928,7 @@ async function packOpen(type,how,day){
   if(how==='free'){const fr=Object.assign({},v.fr);if(!fr.st)fr.st=NOW();else fr.d7=(+fr.d7||0)+1;patch.fr=fr}
   if(how==='ad'){patch.fr=Object.assign({},v.fr,{ad:TODAY()})}
   if(how==='lb'){patch.fr=Object.assign({},v.fr,{lb:Object.assign({},(v.fr||{}).lb,{[day]:1})})}
+  if(how==='bk'){patch.fr=Object.assign({},v.fr,{bk:1})}
   if(how==='cup'){patch.fr=Object.assign({},v.fr,{cup:Object.assign({},(v.fr||{}).cup,{[day]:1})})}
   if(how==='fclb'){patch.fr=Object.assign({},v.fr,{fc:Object.assign({},(v.fr||{}).fc,{[day]:1})})}
   S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
@@ -4088,6 +4151,7 @@ function viewShop(){
     const adDone=(v.fr||{}).ad===TODAY(),gm=FG_SPORT==='bb'?'Hoops':'Field Goal',ord=['','1st','2nd','3rd'];
     const prizes=fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('')
       +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, game ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('')
+      +bkPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Playoff Bracket Challenge.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="bk" data-d="bk">Open prize</button></section>`).join('')
       +cupPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 Top scorer · ${esc(PACKS[x.type].n)}</b><small class="muted">School Cup, game ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="cup" data-d="${x.w}">Open prize</button></section>`).join('');
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
     const extras=shopHTML()+`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
@@ -4891,6 +4955,7 @@ function lbTokDue(u){const have=lbtOf(u),out=[],d=new Date(TODAY()+'T12:00:00Z')
   for(let i=1;i<=FG_LB_BACK;i++){d.setUTCDate(d.getUTCDate()-1);const day=d.toISOString().slice(0,10);if(day<FG_LB_START)break;if(have['fg|'+day])continue;
     const r=fgRank(day),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fg|'+day,why:'top half in the daily '+(FG_SPORT==='bb'?'Hoops':'Field Goal')+' ('+fmtDay(day)+')'})}
   for(const w of fcLbWeeks()){if(have['fc|'+w])continue;const r=fcRank(w),pl=r.findIndex(x=>x.u===u);if(pl>=0&&lbHalf(pl,r.length))out.push({k:'fc|'+w,why:'top half in 5 Card Draw, game '+w})}
+  try{if(bkTokDue(u)&&!have['bk'])out.push({k:'bk',why:'top half in the Bracket Challenge'})}catch(_){}
   try{cupRewards(u).tok.forEach(w=>{if(!have['cup|'+w])out.push({k:'cup|'+w,amt:CUP_TOK,why:'your school won its School Cup matchup (game '+w+')'})})}catch(_){}
   return out}
 let lbtPend='';
@@ -7547,7 +7612,7 @@ document.addEventListener('click',async e=>{
   else if(a==='rstFc'||a==='rstBets'||a==='rstAts'||a==='rstAll'){
     if(VA||!ME.uid)return;const all=a==='rstAll',what=all?'all three games':a==='rstFc'?'5 Card Draw':a==='rstBets'?'Pick ’em':'Player props';
     if(!confirm('Reset your own '+what+'? Your hand, picks and tokens for it are cleared so you can replay. Other people are not affected.'))return;
-    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{}),...(Object.keys(rwOf(ME.uid)).length?{rw:rwOf(ME.uid)}:{}),...(Object.keys(lbtOf(ME.uid)).length?{lbt:lbtOf(ME.uid)}:{}),...(dlyOf(ME.uid).n?{dly:dlyOf(ME.uid)}:{}),...Object.fromEntries(['gft','gsn','bnd','cup'].filter(k=>(S.picks[ME.uid]||{})[k]).map(k=>[k,S.picks[ME.uid][k]])),...((S.picks[ME.uid]||{}).inv?{inv:(S.picks[ME.uid]||{}).inv}:{})};
+    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{}),...(Object.keys(rwOf(ME.uid)).length?{rw:rwOf(ME.uid)}:{}),...(Object.keys(lbtOf(ME.uid)).length?{lbt:lbtOf(ME.uid)}:{}),...(dlyOf(ME.uid).n?{dly:dlyOf(ME.uid)}:{}),...Object.fromEntries(['gft','gsn','bnd','cup','bk'].filter(k=>(S.picks[ME.uid]||{})[k]).map(k=>[k,S.picks[ME.uid][k]])),...((S.picks[ME.uid]||{}).inv?{inv:(S.picks[ME.uid]||{}).inv}:{})};
     if(await act(()=>setDoc('picks/'+ME.uid,nx),what+' reset. Play it again from the Games tab.')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],nx);UI.pk={};UI.at={};UI.fcDeal=null;UI.fcAnim=null;render()}}
   else if(a==='lock'){try{await SB.rpc('admin_lock')}catch(_){}ME.admin=false;AD.rows=null;AD.sel=null;render()}
   else if(a==='saveSchool'){const v=$('#ad-school').value.trim();await act(()=>upsert('profiles/'+id,{school:v}),'School saved')}
@@ -7752,6 +7817,14 @@ document.addEventListener('click',async e=>{
   else if(a==='member'){UI.member=t.dataset.m;render()}
   else if(a==='mweek'){UI.mw=+t.dataset.w;render()}
   else if(a==='gweek'){UI.gw=t.dataset.w==='P'?'P':+t.dataset.w;render()}
+  else if(a==='gpo'){UI.gpo=t.dataset.v;render()}
+  else if(a==='bkDiv'){UI.bkdiv=t.dataset.v;render()}
+  else if(a==='bkPick'){UI.bkS=Object.assign({},UI.bkS,{[t.dataset.id]:t.dataset.n});render(true)}
+  else if(a==='bkFav'){bkFav();render(true)}
+  else if(a==='bkSave'){const T=bkTrees(ME.uid,UI.bkS),ok={};T.forEach(d=>d.rounds.forEach(r=>r.games.forEach(g=>{if(!g.locked&&!g.win&&g.pick)ok[g.id]=g.pick})));
+    const sv=bkOf(ME.uid),patch=Object.fromEntries(Object.entries(ok).filter(([id,n])=>sv[id]!==n));
+    if(!Object.keys(patch).length){UI.bkS={};render();return}
+    if(await act(()=>upsert('picks/'+ME.uid,{bk:patch}),Object.keys(patch).length+(Object.keys(patch).length===1?' pick':' picks')+' saved')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{bk:Object.assign({},sv,patch)});UI.bkS={};render()}}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
   else if(a==='cmpPick'){const sd=+t.dataset.s,pl=players().filter(x=>x.mp&&x.key!==t.dataset.id);
