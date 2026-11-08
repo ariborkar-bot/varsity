@@ -2600,7 +2600,7 @@ function authHTML(){
     <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button>'}<a class="link" href="#privacy" data-priv>Privacy</a></div>
   </div>`;
 }
-function openAuth(){if(!SB){say('Can’t connect to Varsity. Check your connection and try again.');return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
+function openAuth(){if(!SB){say('Couldn’t open sign-in. Try again in a moment.');return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
 document.addEventListener('click',e=>{
   if(e.target.closest&&e.target.closest('[data-priv]')){setTimeout(()=>{if(ME.mode==='guest'&&location.hash==='#privacy')closeGate()},0);return}
   const b=e.target.closest&&e.target.closest('[data-au]');if(!b)return;e.preventDefault();
@@ -2700,7 +2700,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v316 · Nov 8';
+const APP_BUILD='v317 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3081,7 +3081,7 @@ function myRanks(me){
 let tt;
 function say(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>{t.hidden=true},3200)}
 async function act(fn,ok){
-  if(ME.mode==='offline'){say('Can’t connect to Varsity, so nothing can be saved right now. Check your connection and try again.');return false}
+  if(ME.mode==='offline'){say('That didn’t save. Try again in a moment.');return false}
   if(ME.mode==='readonly'){say('You have view-only access. Ask the owner for contributor access.');return false}
   try{await fn();if(ok)say(ok);return true}
   catch(e){say(e&&e.code==='invalid_argument'?'You do not have permission to do that.':'That did not save. Try again.');return false}
@@ -5709,7 +5709,7 @@ const rcoWgOn=d=>d&&d.wg&&d.wg.st==='ok'?+d.wg.amt||0:0;
 const rcoWgAsk=d=>!!(d&&d.wg&&d.wg.st==='ask');
 const rcoFresh=d=>!d.last&&!Object.values(d.sl||{}).some(x=>x&&Object.keys(x).length);
 function rcoCan(){
-  if(ME.mode==='offline'){say('Can’t connect to Varsity right now. Check your connection and try again.');return false}
+  if(ME.mode==='offline'){say('That didn’t work. Try again in a moment.');return false}
   if(ME.mode==='readonly'){say('You have view-only access.');return false}
   if(!ME.uid||ME.mode==='guest'||needJoin('play Ring Chaser online'))return false;
   return true;
@@ -7727,7 +7727,6 @@ function bannerHTML(){
   {const a=S.settings&&S.settings.ann;let x='';try{x=localStorage.getItem('vs-ann-x')||''}catch(_){}
    if(a&&a.id&&a.text&&(!a.until||+new Date(a.until)>Date.now())&&x!==a.id&&UI.view!=='admin')b.push(`<p class="note ann-note ${a.kind==='warn'?'warn':''}"><span class="pill">${a.kind==='warn'?'Heads up':'News'}</span><span>${esc(a.text)}</span><button class="btn sm ghost" data-annx="${esc(a.id)}" aria-label="Close announcement">✕</button></p>`)}
   /* no sign-up banners */
-  if(ME.mode==='offline')b.push(`<p class="note"><span class="pill pending">Offline</span><span>Can’t connect to Varsity, so you can look around but not join, sign in or save anything. Some school and work Wi-Fi networks block it; try mobile data. <button class="btn sm ghost" data-act="reload">Try again</button></span></p>`);
   if(ME.mode==='readonly'&&!VA)b.push(`<p class="note"><span class="pill pending">View only</span><span>You can look around. Ask the app’s owner for contributor access to join, enter stats or make leagues.</span></p>`);
   if(S.timeout&&!S.loaded.profiles)b.push(`<p class="note"><span class="pill pending">Slow</span><span>The league data is taking a while to load. What you see may be out of date.</span></p>`);
   const sample=!MP&&!S.settings.hideSample;
@@ -8369,7 +8368,6 @@ async function boot(){
     SB.auth.onAuthStateChange((ev,s)=>{if((ev==='SIGNED_IN'&&s&&s.user.id!==(VA?VA.real:ME.uid))||(ev==='SIGNED_OUT'&&ME.uid))location.reload();if(ev==='PASSWORD_RECOVERY')setTimeout(newPassword,300)});
   }else if(NEEDS_SERVER){
     DB=memDb();ME.uid=null;ME.mode='offline';ME.admin=false;
-    setTimeout(()=>say('Can’t connect to Varsity. Check your connection and try again.'),600);
   }else{
     DB=memDb();ME.uid='me';ME.admin=true;ME.mode='demo';
     try{const p=JSON.parse(localStorage.getItem('gsd-demo-profile')||'null');if(p)await DB.doc('profiles/me').set(p)}catch(_){}
