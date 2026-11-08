@@ -2689,7 +2689,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v312 · Nov 8';
+const APP_BUILD='v313 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3041,7 +3041,7 @@ function extraNotes(at){const out=[],day0=ptAt(0),gm=FG_SPORT==='bb'?'Hoops':'Fi
   if(myPKL().length){const pk=((S.picks[ME.uid]||{}).pkl)||{},todays=((GAMES&&GAMES.games)||[]).filter(g=>g.d===TODAY()&&!gDone(g)),miss=todays.filter(g=>!pk[gid(g)]).length;
     if(miss&&day0>at)out.push({c:'lock',t:day0+1,k:'dn',text:`${miss} ${miss===1?'game':'games'} you haven’t picked start today. Picks lock at kickoff.`})}
   /* 5 Card Draw hand not dealt yet this week */
-  if(typeof fcHand==='function'&&!fcHand(ME.uid,CURW())&&ptAt(9)>at&&ptHour()>=9)out.push({c:'lock',t:ptAt(9),k:'join',text:`Your 5 Card Draw hand for ${FG_SPORT==='bb'?'game':'week'} ${CURW()} isn’t dealt yet.`});
+  if(typeof fcHand==='function'&&!fcHand(ME.uid,fcCur())&&(!FC_DAILY||dayOf(fcCur())===TODAY())&&ptAt(9)>at&&ptHour()>=9)out.push({c:'lock',t:ptAt(9),k:'join',text:FC_DAILY?'Your 5 Card Draw hand for today isn’t dealt yet.':`Your 5 Card Draw hand for week ${CURW()} isn’t dealt yet.`});
   /* v311: game day for your school, and the Sunday recap */
   {const sc=(myProfile()||{}).school,gs=sc?((GAMES&&GAMES.games)||[]).filter(g=>g.d===TODAY()&&!gDone(g)&&(g.h===sc||g.a===sc)):[];
     if(gs.length&&day0>at)out.push({c:'gstart',t:day0+3,k:'join',text:`${sc} plays today${gs[0].time?' at '+gs[0].time:''}.`})}
@@ -3434,6 +3434,24 @@ function standTab(){
    Everyone in the app is on one leaderboard. A card whose game already has stats in is locked, and new cards only come from players who have not played yet this week.
    A hand lives on the player's own picks document (picks/<uid>.fc[week] = {h: the 5 players, r: redraws used, d: players swapped out}). */
 const FC_SIZE=5,FC_REDRAWS=5,FC_BANK_MAX=6;
+/* v313: a 5 Card Draw hand belongs to a SLOT. Football: the week. Basketball (FC_DAILY): one game day, and only players whose team plays that day can be dealt.
+   A basketball slot id is the day number since Nov 1 2026 (so hands, redraw banks and prizes keep their numeric logic); prizes and the Cup still run by calendar week. */
+const FC_DAILY=false;
+const dayNo=d=>Math.round((Date.parse(d+'T00:00:00Z')-Date.UTC(2026,10,1))/864e5);
+const dayOf=n=>new Date(Date.UTC(2026,10,1)+n*864e5).toISOString().slice(0,10);
+let _fgA=null,_fgD=null,_fgW=null;
+function fcIdx(){const A=(GAMES&&GAMES.games)||[];if(_fgA!==A||!_fgD){_fgA=A;_fgD={};_fgW={};A.forEach(g=>{(_fgD[g.d]=_fgD[g.d]||[]).push(g);(_fgW[g.w]=_fgW[g.w]||[]).push(g)})}return{d:_fgD,w:_fgW}}
+const fcGamesOf=s=>{const x=fcIdx();return (FC_DAILY?x.d[dayOf(s)]:x.w[s])||[]};
+const fcSlotsOf=w=>FC_DAILY?[...new Set((fcIdx().w[w]||[]).map(g=>dayNo(g.d)))].sort((a,b)=>a-b):[w];
+function fcCur(){if(!FC_DAILY)return CURW();const ds=Object.keys(fcIdx().d).sort(),t=TODAY();return dayNo(ds.find(x=>x>=t)||ds[ds.length-1]||t)}
+const fcLabel=s=>FC_DAILY?new Date(dayOf(s)+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'}):'Week '+s;
+const fcUnit=()=>FC_DAILY?'day':'week';
+/* the player's stat line for that slot, or null. A basketball day uses the player's own game line (gl) for that date; week-only data counts only when his team played once that week. */
+function fcPts(p,s){if(!p)return null;if(!FC_DAILY)return (p.games&&p.games[s-1])||null;
+  const d=dayOf(s),g=fcGamesOf(s).find(g=>g.h===p.school||g.a===p.school);if(!g)return null;const x=p.games&&p.games[g.w-1];if(!x)return null;
+  if(x.gl&&x.gl.length){const y=x.gl.find(y=>y.d===d);return y?{stat:y.stat,ver:x.ver}:null}
+  const n=(fcIdx().w[g.w]||[]).filter(h=>h.h===p.school||h.a===p.school).length;return n===1?x:null}
+const fcStarted=(p,s)=>fcGamesOf(s).some(g=>(g.h===p.school||g.a===p.school)&&started(g));
 /* Redraws you do not use are saved for the next week (up to FC_BANK_MAX saved). Week w gives you FC_REDRAWS new ones plus whatever you saved. */
 function fcBank(u,w){let bank=0;for(const v of Object.keys(fcDoc(u)).map(Number).filter(n=>n<w).sort((a,b)=>a-b)){const h=fcHand(u,v);bank=Math.min(FC_BANK_MAX,Math.max(0,FC_REDRAWS+bank+fcX(u,v)-(h.r||0)))}return bank}
 const fcX=(u,w)=>+(((invOf(u).fcx)||{})[w])||0;   /* extra redraws from the Locker for that week */
@@ -3443,26 +3461,26 @@ const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
 const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;for(const k of ['gft','gsn','bnd','cup','bk','str']){const kv=(S.picks[ME.uid]||{})[k];if(kv)o[k]=kv}const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
-function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
+function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const x=fcPts(pByKey(k),w);if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
 /* anyone with a game on record and no stats in yet this week, and a team that is not on a bye */
 /* only players whose team still has a game this week that has not started (when this week's schedule is listed) */
-const fcPlays=p=>{const w=CURW(),gs=((GAMES&&GAMES.games)||[]).filter(g=>g.w===w);return !gs.length||gs.some(g=>(g.h===p.school||g.a===p.school)&&!started(g))};
-const fcPool=ex=>players().filter(p=>p.mp&&!ex.has(p.key)&&!statsIn(p)&&!pStarted(p)&&fcPlays(p)&&agg(p,'season').n>0&&!(oppInfo(p.school)||{}).bye);
+const fcPlays=p=>{const gs=fcGamesOf(fcCur());return !gs.length||gs.some(g=>(g.h===p.school||g.a===p.school)&&!started(g))};
+const fcPool=ex=>{const s=fcCur();return players().filter(p=>p.mp&&!ex.has(p.key)&&!fcPts(p,s)&&!fcStarted(p,s)&&fcPlays(p)&&agg(p,'season').n>0&&(FC_DAILY||!(oppInfo(p.school)||{}).bye))};
 const fcDraw=(pool,n)=>{const out=[],a=pool.slice();while(out.length<n&&a.length){out.push(a.splice(fcRnd(a.length),1)[0].key)}return out};
 let _fcBusy=false;
 async function fcDeal(){
   if(_fcBusy||ME.mode==='guest'||ME.mode==='readonly'||!ME.uid)return;
-  const w=CURW();if(fcHand(ME.uid,w))return;_fcBusy=true;
+  const w=fcCur();if(fcHand(ME.uid,w))return;_fcBusy=true;
   try{
     /* one hand per week, for good: always ask the server first, so a refresh (or a slow load) can never deal a second hand
        over the one you already have */
     let saved=null;
     try{const d=await DB.doc('picks/'+ME.uid).get();saved=d.exists?(((d.data()||{}).fc)||{})[w]||null:null}
     catch(_){say('Could not load your hand. Check your connection and try again.');return}
-    if(saved){fcSet(w,saved);say('You already have a hand for week '+w);return}
-    const hand=fcDraw(fcPool(new Set()),FC_SIZE);if(hand.length<FC_SIZE){say(((GAMES&&GAMES.games)||[]).some(g=>g.w===w&&started(g))?'This week’s games have started. 5 Card Draw opens again once stats post.':'Not enough players to deal a hand yet');return}
+    if(saved){fcSet(w,saved);say('You already have a hand for '+(FC_DAILY?'this day':'week '+w));return}
+    const hand=fcDraw(fcPool(new Set()),FC_SIZE);if(hand.length<FC_SIZE){say(fcGamesOf(w).some(started)?(FC_DAILY?'Today’s games have started. The next game day opens at midnight.':'This week’s games have started. 5 Card Draw opens again once stats post.'):'Not enough players to deal a hand yet');return}
     const nx={h:hand,r:0,d:[],rd:[],at:NOW()};fcSet(w,nx);
     const t0=Date.now(),st=hand.map(()=>'back');UI.fcDeal={w,st};render();   /* five face-down cards, then they flip one by one */
     if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Your hand is dealt')){const f={...fcDoc(ME.uid)};delete f[w];S.picks[ME.uid].fc=f;UI.fcDeal=null}
@@ -3472,16 +3490,16 @@ async function fcDeal(){
   finally{_fcBusy=false;render()}
 }
 function fcLock(){
-  const w=CURW(),hd=fcHand(ME.uid,w);if(!hd||hd.lk)return;const left=fcLeft(ME.uid,w),keep=Math.min(FC_BANK_MAX,left);
-  confirmBox('Lock in your hand?',`Your 5 cards are final for week ${w}, so no more redraws this week. ${keep?`You keep ${keep} unused ${keep===1?'redraw':'redraws'} for next week.`:'You have no redraws left to save.'}`,'Lock in',async()=>{
+  const w=fcCur(),hd=fcHand(ME.uid,w);if(!hd||hd.lk)return;const left=fcLeft(ME.uid,w),keep=Math.min(FC_BANK_MAX,left),U=fcUnit();
+  confirmBox('Lock in your hand?',`Your 5 cards are final for ${FC_DAILY?fcLabel(w):'week '+w}, so no more redraws this ${U}. ${keep?`You keep ${keep} unused ${keep===1?'redraw':'redraws'} for next ${U}.`:'You have no redraws left to save.'}`,'Lock in',async()=>{
     const nx={...hd,lk:1,lat:NOW()};fcSet(w,nx);
     if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Hand locked in'))fcSet(w,hd);render()})
 }
 async function fcRedraw(i){
-  if(_fcBusy||!ME.uid)return;const w=CURW(),hd=fcHand(ME.uid,w);if(!hd)return;
-  if(hd.lk){say('Your hand is locked in for the week');return}
-  if(fcLeft(ME.uid,w)<=0){say('You are out of redraws this week');return}
-  const old=pByKey(hd.h[i]);if(!old)return;if(statsIn(old)||pStarted(old)){say(old.name+'’s game has started, so that card is locked until stats post');return}
+  if(_fcBusy||!ME.uid)return;const w=fcCur(),hd=fcHand(ME.uid,w);if(!hd)return;
+  if(hd.lk){say('Your hand is locked in for the '+(FC_DAILY?'day':'week'));return}
+  if(fcLeft(ME.uid,w)<=0){say('You are out of redraws '+(FC_DAILY?'today':'this week'));return}
+  const old=pByKey(hd.h[i]);if(!old)return;if(fcPts(old,w)||fcStarted(old,w)){say(old.name+'’s game has started, so that card is locked until stats post');return}
   _fcBusy=true;
   try{const seen=new Set([...hd.h,...(hd.d||[])]),nk=fcDraw(fcPool(seen),1)[0];if(!nk){say('No new players to draw right now');return}
     const nh=hd.h.slice();nh[i]=nk;
@@ -3499,30 +3517,31 @@ async function fcAutoLock(w){const hd=fcHand(ME.uid,w);if(!hd||hd.lk)return;
   const nx={...hd,lk:1,lat:NOW()};fcSet(w,nx);render();
   if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Out of redraws: your hand is locked in')){fcSet(w,hd);render()}}
 function fcHTML(){
-  const cw=CURW(),w=UI.fcw&&UI.fcw<=cw?UI.fcw:cw,mine=ME.uid&&ME.mode!=='guest'?fcHand(ME.uid,w):null,can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const cw=fcCur(),w=UI.fcw&&UI.fcw<=cw?UI.fcw:cw,mine=ME.uid&&ME.mode!=='guest'?fcHand(ME.uid,w):null,can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const left=mine?fcLeft(ME.uid,w):0,bank=mine?fcBank(ME.uid,w):0,lkd=!!(mine&&mine.lk);
-  const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=p.games[w-1],lk=w===cw&&(statsIn(p)||pStarted(p));
+  const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=fcPts(p,w),lk=w===cw&&(!!x||fcStarted(p,w));
     const an=UI.fcAnim&&UI.fcAnim.w===w&&UI.fcAnim.i===i?UI.fcAnim:null,dl=UI.fcDeal&&UI.fcDeal.w===w?UI.fcDeal.st[i]:null;
     const mode=dl?{back:'fc-mys fc-back',flip:'fc-flip'}[dl]:an?(an.rev?'fc-flip':'fc-mys'):'',fdel=dl==='flip'?i*.13:0;
     return `<div class="fc-card ${x?'in':''} ${mode}" ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}${T10W(p,`<b class="fc-nm">${esc(p.name)}</b>`)}<small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
       <div class="fc-ppg">${(()=>{const a=agg(p,'season');return a.n?`<b>${f1(a.v/a.n)}</b> PPG<small>${a.n} ${a.n===1?'game':'games'}</small>`:'<small>No games yet</small>'})()}</div>
-      <div class="fc-pts"><b>${x?f1(pts(x.stat)):'—'}</b><small>${x?'week '+w+' pts':'waiting on game'}</small></div>
+      <div class="fc-pts"><b>${x?f1(pts(x.stat)):'—'}</b><small>${x?(FC_DAILY?'game pts':'week '+w+' pts'):'waiting on game'}</small></div>
       ${w===cw&&can?`<button class="btn sm ${left>0&&!lk&&!lkd?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!lkd&&!UI.fcAnim?'':'disabled'}>${lk?'Locked':'Redraw'}</button>`:''}</div>`}).join(''):'';
-  const wk=[...new Set([cw,...Object.keys(fcDoc(ME.uid||'')).map(Number)])].filter(n=>n<=cw).sort((a,b)=>b-a);
-  const all=Object.keys(S.picks).filter(u=>fcHand(u,w)).map(u=>({u,t:fcScore(u,w),s:fcSeason(u)}));
-  const byS=UI.fcb==='season',rows=all.sort((a,b)=>(byS?b.s-a.s:b.t-a.t)||(b.t-a.t)).map((x,i)=>Object.assign(x,{r:i+1}));
+  const wk=[...new Set([cw,...Object.keys(fcDoc(ME.uid||'')).map(Number)])].filter(n=>n<=cw).sort((a,b)=>b-a).slice(0,FC_DAILY?7:99),wkOf=(()=>{const g=fcGamesOf(w)[0];return g?g.w:CURW()})();
+  const byW=FC_DAILY&&UI.fcb==='wk',byS=UI.fcb==='season';
+  const all=byW?fcRank(wkOf).map(x=>({u:x.u,t:x.t,s:fcSeason(x.u)})):Object.keys(S.picks).filter(u=>fcHand(u,w)).map(u=>({u,t:fcScore(u,w),s:fcSeason(u)}));
+  const rows=all.sort((a,b)=>(byS?b.s-a.s:b.t-a.t)||(b.t-a.t)).map((x,i)=>Object.assign(x,{r:i+1}));
   const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
-  const lrow=x=>`<li class="${x.u===ME.uid?'me':''}"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w).h||[]).map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':'week '+w}</small></span></li>`;
-  return `<section class="card fc-hero ${eqOf(ME.uid,'cback')?'cb '+eqOf(ME.uid,'cback')+cbCls(eqOf(ME.uid,'cback')):''}" style="${eqOf(ME.uid,'cback')?cosStyle(eqOf(ME.uid,'cback')):''}"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">Week ${cw}</span></div>
-    <p class="muted">5 random players a week. ${FC_REDRAWS} redraws.</p>
-    ${wk.length>1?`<div class="chips" role="group" aria-label="Week">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">Week ${n}</button>`).join('')}</div>`:''}
-    ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&bank?`<small>${bank} saved from before</small>`:''}${w===cw&&!lkd&&invLeft(ME.uid,'p_redraw')>0?`<button class="btn sm ghost fc-x" data-act="perkRedraw">+1 redraw (${invLeft(ME.uid,'p_redraw')})</button>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> ${left?`${Math.min(FC_BANK_MAX,left)} unused ${left===1?'redraw is':'redraws are'} saved for next week.`:'No redraws left to save.'}</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand${left?` · save ${Math.min(FC_BANK_MAX,left)} ${left===1?'redraw':'redraws'}`:''}</button></div>`):''}`
-      :w!==cw?'<p class="hint">You had no hand that week.</p>'
+  const lrow=x=>`<li class="${x.u===ME.uid?'me':''}"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w)||{h:[]}).h.map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':byW?'week '+wkOf:FC_DAILY?'day':'week '+w}</small></span></li>`;
+  return `<section class="card fc-hero ${eqOf(ME.uid,'cback')?'cb '+eqOf(ME.uid,'cback')+cbCls(eqOf(ME.uid,'cback')):''}" style="${eqOf(ME.uid,'cback')?cosStyle(eqOf(ME.uid,'cback')):''}"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">${fcLabel(cw)}</span></div>
+    <p class="muted">${FC_DAILY?'5 players from today’s games. A new hand every game day.':'5 random players a week.'} ${FC_REDRAWS} redraws.</p>
+    ${wk.length>1?`<div class="chips" role="group" aria-label="${FC_DAILY?'Day':'Week'}">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">${fcLabel(n)}</button>`).join('')}</div>`:''}
+    ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&bank?`<small>${bank} saved from before</small>`:''}${w===cw&&!lkd&&invLeft(ME.uid,'p_redraw')>0?`<button class="btn sm ghost fc-x" data-act="perkRedraw">+1 redraw (${invLeft(ME.uid,'p_redraw')})</button>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> ${left?`${Math.min(FC_BANK_MAX,left)} unused ${left===1?'redraw is':'redraws are'} saved for next ${fcUnit()}.`:'No redraws left to save.'}</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand${left?` · save ${Math.min(FC_BANK_MAX,left)} ${left===1?'redraw':'redraws'}`:''}</button></div>`):''}`
+      :w!==cw?`<p class="hint">You had no hand that ${fcUnit()}.</p>`
       :can&&!S.loaded.picks?`<div class="fc-deal"><p class="muted">Loading your hand…</p></div>`
-      :can?`<div class="fc-deal"><p>Your week ${cw} hand is waiting.</p><button class="btn" data-act="fcDeal">Deal me in</button></div>`
+      :can?`<div class="fc-deal"><p>Your ${FC_DAILY?fcLabel(cw):'week '+cw} hand is waiting.</p><button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
-    <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS}">Week ${w}</button><button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
-    <p class="fg-prize">Weekly prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
+    <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS&&!byW}">${FC_DAILY?fcLabel(w):'Week '+w}</button>${FC_DAILY?`<button class="chip" data-act="fcBoard" data-v="wk" aria-pressed="${byW}">Week ${wkOf}</button>`:''}<button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
+    <p class="fg-prize">Weekly prizes${FC_DAILY?' (your days add up)':''}: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
 }
 /* ---------- Pick 'em league: friends pick the winner of EVERY game each week; best accuracy wins ----------
@@ -4992,14 +5011,16 @@ function fgPrizes(u){if(!u)return[];const out=[],cl=((invOf(u).fr||{}).lb)||{},d
    into picks/<uid>.lbt = {'fg|YYYY-MM-DD':100, 'fc|w':100} and added in bank(). */
 const LB_TOK=100,FC_LB_START=12,FC_LB_BACK=3;
 const lbHalf=(i,n)=>i>=3&&i<Math.floor(n/2);   /* i = 0-based place; top 50% minus the three pack places */
-const fcRank=w=>Object.keys(S.picks).filter(u=>fcHand(u,w)).map(u=>({u,t:fcScore(u,w)})).sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1));
+/* prizes and the Cup run by calendar week: in basketball a week's score is the sum of that week's daily hands */
+const fcWkScore=(u,w)=>Math.round(fcSlotsOf(w).reduce((a,s)=>a+fcScore(u,s),0)*10)/10;
+const fcRank=w=>Object.keys(S.picks).filter(u=>fcSlotsOf(w).some(s=>fcHand(u,s))).map(u=>({u,t:fcWkScore(u,w)})).sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1));
 /* a 5 Card Draw week is finished once every game that week has a score and 2 days have passed since the last one (time for stats to come in) */
 function fcWeekDone(w){const gs=((GAMES&&GAMES.games)||[]).filter(g=>g.w===w);if(!gs.length)return w<CURW();if(!gs.every(gDone))return false;
   /* v307: prizes wait for the Monday after the week's last game, and until every player in every hand has a stat line (a player who never gets one stops blocking on Thursday) */
   const last=gs.map(g=>g.d).sort().pop(),t=new Date(last+'T12:00:00Z');do{t.setUTCDate(t.getUTCDate()+1)}while(t.getUTCDay()!==1);
   const mon=t.toISOString().slice(0,10);if(mon>TODAY())return false;
   t.setUTCDate(t.getUTCDate()+3);if(t.toISOString().slice(0,10)<=TODAY())return true;
-  for(const u of Object.keys(S.picks)){const hd=fcHand(u,w);if(!hd)continue;for(const k of hd.h||[]){const p=pByKey(k);if(p&&!(p.games&&p.games[w-1]))return false}}return true}
+  for(const u of Object.keys(S.picks))for(const sl of fcSlotsOf(w)){const hd=fcHand(u,sl);if(!hd)continue;for(const k of hd.h||[]){const p=pByKey(k);if(p&&!fcPts(p,sl))return false}}return true}
 const fcLbWeeks=()=>{const out=[];for(let w=WEEKS;w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
 function fcPrizes(u){if(!u)return[];const cl=((invOf(u).fr||{}).fc)||{},out=[];
   for(const w of fcLbWeeks()){if(cl[w])continue;const pl=fcRank(w).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({w,place:pl+1,type:FG_LB_PRIZE[pl]})}return out}
@@ -5046,12 +5067,13 @@ function cupWkOfDay(day){if(!day||day<CUP_DAY0)return null;const f=cupFirst();fo
 function cupCurW(){const f=cupFirst(),t=TODAY(),W=cupWeeks().filter(x=>x.w>=f);if(!W.length)return f;return (W.find(x=>x.last>=t)||W[W.length-1]).w}
 const cupWeekDone=w=>w>=cupFirst()&&fcWeekDone(w);
 const _cb={};
-function cupBest(w,n){const k=w+'|'+n+'|'+_rev;if(_cb[k]!=null)return _cb[k];const a=[];players().forEach(p=>{const x=p.mp&&p.games&&p.games[w-1];if(x)a.push(pts(x.stat))});a.sort((x,y)=>y-x);return _cb[k]=a.slice(0,n).reduce((s,v)=>s+v,0)}
-function cupFc(u,w){const hd=fcHand(u,w);if(!hd)return 0;const b=cupBest(w,(hd.h||[]).length||5);return b>0?Math.round(Math.max(0,Math.min(1,fcScore(u,w)/b))*CUP_FC*10)/10:0}
+function cupBest(w,n){const k=w+'|'+n+'|'+_rev;if(_cb[k]!=null)return _cb[k];const a=[];players().forEach(p=>{const x=p.mp&&fcPts(p,w);if(x)a.push(pts(x.stat))});a.sort((x,y)=>y-x);return _cb[k]=a.slice(0,n).reduce((s,v)=>s+v,0)}
+/* football: your hand vs the best 5 that week. Basketball: each day's hand vs that day's best 5, added up and divided by the week's game days (so playing every day is worth the most) */
+function cupFc(u,w){const sl=fcSlotsOf(w);let r=0,any=false;for(const s of sl){const hd=fcHand(u,s);if(!hd)continue;any=true;const b=cupBest(s,(hd.h||[]).length||5);if(b>0)r+=Math.max(0,Math.min(1,fcScore(u,s)/b))}return any?Math.round(r/sl.length*CUP_FC*10)/10:0}
 function cupPk(u,w){let p=0,n=0;const P=cupDoc(u).pk||{};for(const g of (cupGames()[w]||[])){const k=P[gid(g)];if(!k)continue;n++;if(!gDone(g)||g.hs===g.as)continue;p+=((k==='h')===(g.hs>g.as))?CUP_PK_OK:CUP_PK_BAD}return{p,n}}
 function cupFg(u,w){const h=fgRec(u).dh||{};let p=0,n=0;for(const day in h){if(cupWkOfDay(day)!==w)continue;n++;p+=Math.min(CUP_FG,Math.floor((+h[day].b||0)/CUP_FG_DIV))}return{p,n}}
 function cupRcW(u,w){const r=cupDoc(u).rc||{};let n=0;for(const day in r)if(cupWkOfDay(day)===w)n+=+r[day]||0;return{p:n*CUP_RC,n}}
-function cupPts(u,w){const f=cupFc(u,w),k=cupPk(u,w),g=cupFg(u,w),r=cupRcW(u,w);return{t:Math.round((f+k.p+g.p+r.p)*10)/10,act:!!(fcHand(u,w)||k.n||g.n||r.n),f,pk:k.p,fg:g.p,rc:r.p}}
+function cupPts(u,w){const f=cupFc(u,w),k=cupPk(u,w),g=cupFg(u,w),r=cupRcW(u,w);return{t:Math.round((f+k.p+g.p+r.p)*10)/10,act:!!(fcSlotsOf(w).some(s=>fcHand(u,s))||k.n||g.n||r.n),f,pk:k.p,fg:g.p,rc:r.p}}
 const _cm={};
 function cupBoard(w){const c=_cm[w];if(c&&Date.now()-c.at<2000)return c.v;const by={};
   Object.keys(S.picks).forEach(u=>{const sc=cupSchool(u);if(!sc)return;const pt=cupPts(u,w);if(!pt.act)return;(by[sc]=by[sc]||[]).push({u,t:pt.t})});
@@ -8089,7 +8111,7 @@ document.addEventListener('click',async e=>{
   else if(a==='fgAdTry'){if(fgAdUsed())return;adPlay(()=>{fgAdTry();render()})}
   else if(a==='perkTry'){const d=fgDay(ME.uid)||{d:TODAY(),tries:0,best:0,t:0},dd=Object.assign({},d,{d:TODAY(),x:(+d.x||0)+1}),my=fgRec(ME.uid);
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{fg:Object.assign({},my,{dd})});upsert('picks/'+ME.uid,{fg:{dd}}).catch(()=>{});await invUse('p_try');say('Extra try added');render()}
-  else if(a==='perkRedraw'){const w=CURW(),inv=invOf(ME.uid),fcx=Object.assign({},inv.fcx,{[w]:fcX(ME.uid,w)+1});await invUse('p_redraw',{fcx});say('+1 redraw this week');render()}
+  else if(a==='perkRedraw'){const w=fcCur(),inv=invOf(ME.uid),fcx=Object.assign({},inv.fcx,{[w]:fcX(ME.uid,w)+1});await invUse('p_redraw',{fcx});say('+1 redraw '+(FC_DAILY?'today':'this week'));render()}
   else if(a==='pklSel'){UI.lgMenu=false;UI.pkli=t.dataset.v;UI.pkls={};UI.pklw=null;UI.lgk='pk';render()}
   else if(a==='pklNew'){UI.pklNew=!UI.pklNew;render()}
   else if(a==='pklWk'){UI.pklw=+t.dataset.w;render()}

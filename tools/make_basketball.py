@@ -243,6 +243,8 @@ def transform(s, mp, games, seeds, teams, prior):
                             prior_ratings=json.dumps(prior, separators=(',', ':')), rank=json.dumps(rank, separators=(',', ':')), top10=json.dumps(top10)))
     s = rep(s, '<span class="muted">CIF San Diego Section playoffs</span></div>${bracketHTML(d)}', '<span class="muted">Projected from last season</span></div>${bracketHTML(d)}')
     s = rep(s, 'const WEEKS=12;', 'const WEEKS=%d;' % weeks)
+    # 5 Card Draw is daily in basketball: a hand per game day, only players whose team plays that day
+    s = rep(s, 'const FC_DAILY=false;', 'const FC_DAILY=true;')
     # per-game stat lines: a week holds the sum of a player's games, games are counted one by one (a team can play twice a week)
     s = rep(s, "const BEST_L='Best week',GAME_L='Wk',GAME_H='Week';", "const BEST_L='Best game',GAME_L='Game',GAME_H='Game';")
     # preseason: nobody has played, so every player counts as one game of 0.0 (lists, pools and cards stay full).
