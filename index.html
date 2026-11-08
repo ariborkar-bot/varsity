@@ -416,6 +416,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .vt.ok{color:var(--pos)} .vt.un{color:var(--muted)} .vt.no{color:var(--neg)}
 .tr{font:700 .78rem/1 var(--f-body);font-style:normal;white-space:nowrap}
 .tr.up{color:var(--pos)} .tr.dn{color:var(--neg)}
+.leads-t{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold,#f5c542);margin:2px 2px 6px;opacity:.9}
 .leads{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
 .lead{display:flex;flex-direction:column;align-items:flex-start;gap:5px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;text-align:left;min-width:0}
 .lead:hover{border-color:var(--muted)}
@@ -2634,7 +2635,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v304 · Nov 7';
+const APP_BUILD='v305 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5786,7 +5787,7 @@ function rowHTML(x,rank){
 function leadersHTML(rows){
   if(UI.pos!=='ALL'||UI.q||UI.school!=='ALL')return'';
   const out=['QB','RB','WR','TE','K','DL','LB','DB'].map(pos=>{const r=rows.find(x=>posMatch(x.p,pos));return r?`<button class="lead" data-act="pos" data-v="${pos}">${pb(['DL','LB','DB'].includes(pos)?'DEF':pos,pos)}${T10W(r.p,`<b>${esc(r.p.name)}</b>`)}<span class="pv2">${bigV(r.a)}</span></button>`:''}).join('');
-  return out?`<div class="leads" aria-label="Leader at each position">${out}</div>`:'';
+  return out?`<div class="leads-t">First Team All-Varsity</div><div class="leads" aria-label="Leader at each position">${out}</div>`:'';
 }
 function listHTML(){
   const rows=leagueRows();
@@ -5898,7 +5899,6 @@ function viewLeague(){
   const fN=(UI.scope!=='season'?1:0)+(UI.school!=='ALL'?1:0)+(UI.grade?1:0);
   return `<div class="head"><h2>Players</h2><p>Every San Diego Section player, ranked by fantasy points. Tap one for every game and their projection.</p></div>
   ${seg}
-  ${(()=>{try{const D=sxData();return D.rows.length?sxAllV(D):''}catch(e){return ''}})()}
   <div class="tools lite">
     <div class="sb"><span class="sw"><input id="q" type="search" placeholder="Search players" aria-label="Search players" value="${esc(UI.q)}"></span>
       <button type="button" class="fbtn" data-act="ftoggle" aria-expanded="${!!UI.fOpen}">Filters${fN?`<b>${fN}</b>`:''}</button></div>
