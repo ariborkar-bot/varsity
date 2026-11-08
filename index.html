@@ -2705,7 +2705,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v330 · Nov 8';
+const APP_BUILD='v331 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3238,7 +3238,7 @@ const gDone=g=>g.hs!=null&&g.as!=null;
 const TOK0=100;
 /* Rewarded sponsor spots: watch a short sponsor message, earn tokens. Sponsors are plain data below (no ad network, no tracking).
    Swap the placeholder for a real sponsor: name, a line, an optional image and an optional link. */
-const ADS={reward:20,perDay:5,secs:10,sponsors:[{name:'FOGO',line:'Face-off timing and leaderboards.',video:'ads/fogo.mp4',img:'',url:''}]};   /* video: a short mp4 in ads/; the Collect button unlocks when it ends */
+const ADS={reward:20,perDay:5,secs:10,sponsors:[{name:'Your business here',line:'Sponsor the Varsity minigames and reach every player.',img:'',url:''}]};   /* a sponsor can also have video:'ads/name.mp4' (a short mp4); the Collect button then unlocks when it ends */
 const adDay=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const adOf=u=>((S.picks[u]||{}).ad)||{};
 const adLeft=u=>Math.max(0,ADS.perDay-(adOf(u).d===adDay()?+adOf(u).n||0:0));
