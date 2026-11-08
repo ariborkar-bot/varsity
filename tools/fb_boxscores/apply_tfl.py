@@ -23,6 +23,16 @@ for g in G.values():
 byid={x['id']:x for x in P};by=defaultdict(list)
 for x in P:by[(x['s'],slug(x['n']))].append(x)
 lines=open(H+'/data/tfl.txt').read().split('\n');labels=lines[0].split('|');rows=[l for l in lines[1:] if l]
+def parse(e):
+    """entries are week, tfl, pbu in base 36; a half (0.5) is written 'x.i'"""
+    k=0;out=[]
+    def num():
+        nonlocal k
+        v=int(e[k],36);k+=1
+        if k<len(e) and e[k]=='.':v+=int(e[k+1],36)/36;k+=2
+        return v
+    while k<len(e):out.append((int(num()),num(),num()))
+    return out
 tot=Counter();unm=Counter();amb=[];hit=Counter();new=defaultdict(dict)
 def pick(sc,car):
     ex=[byid[k] for k in (car,car+'o',car+'d') if k in byid]
@@ -36,7 +46,7 @@ def pick(sc,car):
     return 'amb'
 for r in rows:
     ti,car,e=r.split('|');sc=labels[int(ti,36)]
-    ws=[(int(e[k],36),int(e[k+1],36),int(e[k+2],36)) for k in range(0,len(e),3)]
+    ws=parse(e)
     for w,t,p in ws:tot['tfl']+=t;tot['pbu']+=p
     if sc not in schools:unm['outside:'+sc]+=sum(t+p for _,t,p in ws);continue
     x=pick(sc,car)
