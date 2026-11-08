@@ -1867,7 +1867,22 @@ body.fg-on{overflow:hidden}
   .lg-who .nmt>b,.lg-who .lt b{overflow:visible;white-space:normal;line-height:1.15}
 }
 
-.st-seg{margin:6px 0 14px}
+
+.st-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:auto;max-width:none;padding:6px;border-radius:18px;background:linear-gradient(135deg,#10294A,#0C1B30);border:1px solid #2A4A78;margin:8px 0 16px}
+.st-seg button{display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 10px;border-radius:13px;color:#9DB4D3;background:rgba(255,255,255,.04);text-align:left;transition:background .15s,transform .1s}
+.st-seg button span{display:flex;flex-direction:column;min-width:0}.st-seg button b{font:900 italic 1.05rem/1.05 var(--f-display,inherit);text-transform:uppercase;letter-spacing:.02em}.st-seg button small{font-size:.72rem;opacity:.8;white-space:nowrap}
+.st-seg button:active{transform:scale(.97)}
+.st-seg button[aria-pressed=true]{background:linear-gradient(135deg,#FFC21A,#FF9F1A);color:#2A1700;box-shadow:0 4px 14px rgba(255,194,26,.35)}
+@media (max-width:380px){.st-seg button{flex-direction:column;gap:2px;text-align:center}.st-seg button span{align-items:center}}
+.rk-poster{position:relative;overflow:hidden;border:0!important;margin:16px -4px 0!important;padding:16px 14px 14px!important;border-radius:20px;color:#fff;background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 27px,transparent 27px 54px),linear-gradient(145deg,#1C4E8C,#2878B3)}
+.rk-top{display:flex;justify-content:space-between;align-items:center}.rk-tag{font:800 1.3rem var(--f-display,inherit);letter-spacing:.14em;opacity:.95}.rk-h{font:800 .8rem var(--f-display,inherit);text-transform:uppercase;letter-spacing:.08em;opacity:.8}
+.rk-hero{text-align:center;padding:14px 0 10px}.rk-hero small{display:block;font-weight:700;opacity:.9}.rk-hero b{display:block;font:900 4.6rem/1 var(--f-display,inherit);color:#FFC21A;text-shadow:0 3px 0 rgba(0,0,0,.25)}.rk-hero span{font-size:.85rem;opacity:.9}
+.rk-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0 12px;text-align:center;border-top:1px solid rgba(255,255,255,.25);border-bottom:1px solid rgba(255,255,255,.25);padding:10px 0}
+.rk-cols b{display:block;font:900 1.5rem var(--f-display,inherit)}.rk-cols small{font-size:.7rem;opacity:.85}
+.rk-poster .metric-grid{gap:8px}.rk-poster .metric{background:rgba(6,20,42,.38);border:1px solid rgba(255,255,255,.18);color:#fff}.rk-poster .metric small{color:rgba(255,255,255,.8)}.rk-poster .metric b{color:#FFC21A}
+.rk-poster .rank-cta{margin-top:12px}
+.me-sec{border:1px solid #2A4A78;border-radius:18px;overflow:hidden;padding-top:0!important}
+.me-sec>h3{margin:0 -16px 10px!important;padding:12px 16px;color:#fff;font-family:var(--f-display,inherit);text-transform:uppercase;letter-spacing:.04em;background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 27px,transparent 27px 54px),linear-gradient(145deg,#1C4E8C,#2878B3)}
 .sx-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
 .sx-tile{min-width:0}
 .sx-tb{display:flex;flex-direction:column;gap:4px;width:100%;height:100%;padding:14px;border-radius:16px;border:1px solid var(--line,#22344B);background:var(--surface,#132235);color:inherit;font:inherit;text-align:left}
@@ -2629,7 +2644,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v299 · Nov 7';
+const APP_BUILD='v300 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5852,7 +5867,7 @@ function statsHTML(){
     ${sxTeams(D)}`;
 }
 function viewLeague(){
-  const seg=`<div class="pr-seg st-seg" role="tablist" aria-label="Stats sections">${[['players','Players'],['stats','Stats']].map(([v,l])=>`<button role="tab" data-act="stTab" data-v="${v}" aria-pressed="${UI.stab===v}" aria-selected="${UI.stab===v}">${l}</button>`).join('')}</div>`;
+  const seg=`<div class="pr-seg st-seg" role="tablist" aria-label="Stats sections">${[['players','Players','Full leaderboard'],['stats','Stats','Leaders and trends']].map(([v,l,d])=>`<button role="tab" data-act="stTab" data-v="${v}" aria-pressed="${UI.stab===v}" aria-selected="${UI.stab===v}">${v==='players'?'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .6 3.3 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>':'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}<span><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`;
   if(UI.stab==='stats')return `<div class="head"><h2>Stats</h2><p>Leaders at every position, who is heating up, the best single games and the top teams, from every box score this season. Tap a player for his full game log.</p></div>${seg}${statsHTML()}`;
   const schools=[...new Set(players().map(p=>p.school))].filter(Boolean).sort();
   const fN=(UI.scope!=='season'?1:0)+(UI.school!=='ALL'?1:0)+(UI.grade?1:0);
@@ -6491,13 +6506,13 @@ function viewMe(){
     const sl=[...schPos].sort((p,q)=>metric(q.a)-metric(p.a)),si=sl.findIndex(x=>x.p.key===me.key);
     const unit=UI.rank==='prev'?'points in their last game':'points';
     const sgap=sl.length<2?`You are the only ${me.pos} at ${esc(me.school)} with approved games.`:si===0?`You lead the ${me.pos}s at ${esc(me.school)} by ${f1(info.val-metric(sl[1].a))} ${unit}.`:`${f1(metric(sl[si-1].a)-info.val)} ${unit} behind ${esc(sl[si-1].p.name)}, the next ${me.pos} up.`;
-    schoolBoard=`<section class="card"><h3>${me.pos}s at ${esc(me.school)}</h3><p class="muted">${sgap}</p><div class="board">${sl.map(brow).join('')}</div></section>`;
+    schoolBoard=`<section class="card me-sec"><h3>${me.pos}s at ${esc(me.school)}</h3><p class="muted">${sgap}</p><div class="board">${sl.map(brow).join('')}</div></section>`;
     const SHORT={pts:'Pts',reb:'Reb',ast:'Ast',stl:'Stl',blk:'Blk',tov:'TO',tpm:'3PM',rec:'Rec',recYd:'Rec yd',recTD:'Rec TD',rushYd:'Rush yd',rushTD:'Rush TD',passYd:'Pass yd',passTD:'Pass TD',int:'INT',fumLost:'Fum',retTD:'Ret TD',tkl:'Tkl',sack:'Sack',dInt:'INT',ff:'FF',fr:'FR',dTD:'D TD'};
     const cols=FIELDS[me.pos].filter((k,i)=>i<3||me.games.some(g=>g&&g.stat&&g.stat[k]));
     const gl=me.games.map((g,i)=>({w:i+1,g})).filter(x=>UI.scope==='season'||x.w===UI.scope);
     const bestV=Math.max(...gl.filter(x=>x.g).map(x=>pts(x.g.stat)),-1),bestW=(gl.find(x=>x.g&&pts(x.g.stat)===bestV)||{}).w;
     const tot=cols.map(k=>me.games.reduce((s,g,i)=>s+((UI.scope==='season'||i+1===UI.scope)&&g&&g.stat?g.stat[k]||0:0),0));
-    weekCard=`<section class="card"><h3>Your game-by-game breakdown</h3><p class="muted">Every game, with the stats and fantasy points it earned. Your best game is highlighted in gold.</p>
+    weekCard=`<section class="card me-sec"><h3>Your game-by-game breakdown</h3><p class="muted">Every game, with the stats and fantasy points it earned. Your best game is highlighted in gold.</p>
       <div class="scroll"><table class="rkt wkt"><thead><tr><th>Game</th>${cols.map(k=>`<th>${SHORT[k]||LABEL[k]}</th>`).join('')}<th>Pts</th></tr></thead><tbody>
       ${gl.map(({w,g})=>g?`<tr class="${w===bestW&&gl.filter(x=>x.g).length>1?'best':''}"><td class="rl">Game ${w}${w===bestW&&gl.filter(x=>x.g).length>1?'<span class="best-tag">Best</span>':''}</td>${cols.map(k=>`<td>${g.stat[k]||0}</td>`).join('')}<td><b>${f1(pts(g.stat))}</b></td></tr>`:`<tr class="dim"><td class="rl">Game ${w}</td><td colspan="${cols.length+1}" class="muted">No game</td></tr>`).join('')}
       <tr class="sumrow"><td class="rl">Total</td>${tot.map(v=>`<td><b>${v}</b></td>`).join('')}<td><b>${f1(info.a.v)}</b></td></tr>
@@ -6508,7 +6523,7 @@ function viewMe(){
     const ptsAvg=l=>l.length?l.reduce((s,x)=>s+x.a.v/x.a.n,0)/l.length:null;
     const cmp=(mine,other)=>other==null?'':`<small class="${mine>=other?'trend-up':'trend-down'}">${mine>=other?'▲':'▼'} ${f1(Math.abs(mine-other))}</small>`;
     const arow=(label,mine,sch,sec)=>`<tr><td class="rl">${label}</td><td><b>${f1(mine)}</b></td><td>${sch==null?'—':f1(sch)} ${cmp(mine,sch)}</td><td>${sec==null?'—':f1(sec)} ${cmp(mine,sec)}</td></tr>`;
-    avgCard=`<section class="card"><h3>Your averages per game</h3><p class="muted">Average over your ${PRE()?0:info.a.n} approved ${!PRE()&&info.a.n===1?'game':'games'}${UI.scope==='season'?'':' (game '+UI.scope+')'}, compared with the average ${me.pos}.</p>
+    avgCard=`<section class="card me-sec"><h3>Your averages per game</h3><p class="muted">Average over your ${PRE()?0:info.a.n} approved ${!PRE()&&info.a.n===1?'game':'games'}${UI.scope==='season'?'':' (game '+UI.scope+')'}, compared with the average ${me.pos}.</p>
       <div class="scroll"><table class="rkt"><thead><tr><th></th><th>You</th><th>${me.pos}s at ${esc(me.school)}</th><th>${me.pos}s in the section</th></tr></thead><tbody>
       ${keys.map(k=>arow(LABEL[k],info.a.s[k]/info.a.n,avgOf(schPos,k),avgOf(secPos,k))).join('')}
       ${arow('Fantasy points',info.a.v/info.a.n,ptsAvg(schPos),ptsAvg(secPos))}
@@ -6516,7 +6531,7 @@ function viewMe(){
     const list=info.pool.filter(x=>x.p.pos===me.pos).sort((a,b)=>metric(b.a)-metric(a.a));
     const idx=list.findIndex(x=>x.p.key===me.key),start=Math.max(0,Math.min(idx-2,list.length-5));
     const gap=idx===0?`You lead the section among ${me.pos}s.`:`${f1(metric(list[idx-1].a)-info.val)} points behind ${esc(list[idx-1].p.name)}, the next spot up.`;
-    near=`<section class="card"><h3>Around you in the San Diego section</h3><p class="muted">${me.pos}s only. ${gap}</p><div class="board">${list.slice(start,start+5).map((x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${start+i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(me.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(me.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b></span></div>`).join('')}</div></section>`;
+    near=`<section class="card me-sec"><h3>Around you in the San Diego section</h3><p class="muted">${me.pos}s only. ${gap}</p><div class="board">${list.slice(start,start+5).map((x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${start+i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(me.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(me.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b></span></div>`).join('')}</div></section>`;
   }else ranks=`<p class="hint">No approved games for this period yet. Your rank and breakdown appear as soon as games are posted.</p>`;
   const wk=UI.meEntry.week;
   return head+`
@@ -6532,7 +6547,7 @@ function viewMe(){
       ${meSides().length>1?`<div class="side-sw"><small>You play both ways. Pick which profile to view. Each one has its own stats and rankings.</small><div class="chips" role="group" aria-label="Profile">${meSides().map(p=>`<button class="chip" data-act="meSide" data-v="${esc(p.key)}" aria-pressed="${me.key===p.key}">${esc(p.pos==='DEF'?(p.sub||'DEF'):p.pos)}</button>`).join('')}</div></div>`:''}
       ${info?`<div class="big"><div><span class="lbl">${UI.scope==='season'?'Season pts':'Game pts'}</span><b>${f1(info.a.v)}</b></div><div><span class="lbl">Games</span><b>${PRE()?0:info.a.n}</b></div><div><span class="lbl">Per game</span><b>${f1(info.a.v/info.a.n)}</b></div></div>`:''}
       <div class="tools bare">${scopeSel('scope3',UI.rank==='prev')}${rankSw()}</div>
-    <div class="me-cmp"><h4>How you compare</h4>${ranks}</div>
+    <div class="me-cmp rk-poster"><div class="rk-top"><span class="rk-tag">VARSITY</span><span class="rk-h">How you compare</span></div>${info?`<div class="rk-hero"><small>${esc(me.school)} · ${esc(me.pos)}</small><b>#${info.section.pos.rank}</b><span>of ${info.section.pos.of} ${me.pos}s in the San Diego section</span></div><div class="rk-cols"><div><b>${f1(info.a.v)}</b><small>${UI.scope==='season'?'Season pts':'Game pts'}</small></div><div><b>${f1(info.a.v/info.a.n)}</b><small>Per game</small></div><div><b>#${info.school.pos.rank}</b><small>of ${info.school.pos.of} at school</small></div></div>`:''}${ranks}</div>
   </section>
   ${weekCard}
   ${avgCard}
