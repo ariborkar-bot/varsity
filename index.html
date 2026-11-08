@@ -37,6 +37,15 @@ html,body{overscroll-behavior-y:contain}:root{color-scheme:light;box-sizing:bord
 .cup-wo{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;text-align:left;padding:11px 12px;border-radius:12px;border:1px solid var(--tc);background:rgba(255,255,255,.05);color:inherit;cursor:pointer}
 .cup-wo b{display:block;font-size:15px}.cup-wo small{display:block;font-size:12px;opacity:.75}.cup-wo em{font-style:normal;font-weight:800;color:var(--tc);font-size:13px}.cup-wo i{font-style:normal;font-weight:800;color:var(--tc)}
 .cup-rules summary{cursor:pointer;margin-top:10px}
+
+.lg-tiles{grid-template-columns:repeat(3,1fr)}.lg-tiles .mg-tile{padding:12px 6px 11px}.lg-tiles .mg-tile b{font-size:.82rem}@media (max-width:420px){.lg-tiles .mg-tile b{font-size:.7rem}}
+.lg-sw-wrap{width:100%;position:relative}
+.lg-sw{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border-radius:14px;border:1.5px solid #FFC23D;background:var(--surface);color:inherit;text-align:left;cursor:pointer}
+.lg-sw span{flex:1;min-width:0}.lg-sw small{display:block;font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.08em}.lg-sw b{display:block;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lg-sw em{font-style:normal;font-size:12px;font-weight:800;color:#1a1200;background:#FFC23D;border-radius:999px;padding:3px 9px}.lg-sw i{font-style:normal;opacity:.7}
+.lg-menu{margin-top:8px;max-height:60vh;overflow:auto;padding:10px}.lg-sec{display:grid;gap:6px;margin-bottom:10px}.lg-sec:last-child{margin-bottom:0}
+.lg-row2{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2,rgba(255,255,255,.04));color:inherit;text-align:left;cursor:pointer}
+.lg-row2 b{display:block;font-size:15px}.lg-row2 small{display:block;font-size:12px;opacity:.7}.lg-row2.on{border-color:#FFC23D;background:rgba(255,194,61,.1)}.lg-row2 em{font-style:normal;font-size:11px;font-weight:800;color:#FFC23D}.lg-row2 i{font-style:normal;opacity:.6}
 </style>
 <title>Varsity</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -2668,7 +2677,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v308 · Nov 8';
+const APP_BUILD='v309 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5178,7 +5187,7 @@ function fgStep(k){
     c=Math.max(top+gap/2,Math.min(bot-gap/2,Math.max(prev-climb,Math.min(prev+drop,c))));
     const tm=fgTeam(g.rnd),n=g.n,rr=g.mode==='daily'?fgSeed(hash('fgx|'+FG_SPORT+'|'+TODAY()+'|'+n)):Math.random,pst={x:g.W+30*s,c,gap,small,pts:small?3:1,done:false,tm};
     /* moving goal: it slides up and down, but never more than ~a fifth of its opening, so aiming at its middle always gets through */
-    if(!small&&n>=10&&n-g.lastMv>1&&rr()<(n<25?.15:n<45?.25:.33)){const a=gap*(.14+rr()*.08);pst.c0=Math.max(top+gap/2+a,Math.min(bot-gap/2-a,c));pst.c=pst.c0;pst.amp=a;pst.w=1.1+rr()*.9;pst.ph=rr()*6.28;g.lastMv=n}
+    if(!small&&n>=4&&n-g.lastMv>=1&&rr()<(n<10?.3:n<25?.5:n<45?.65:.75)){const a=gap*(.14+rr()*.08);pst.c0=Math.max(top+gap/2+a,Math.min(bot-gap/2-a,c));pst.c=pst.c0;pst.amp=a;pst.w=1.1+rr()*1.1;pst.ph=rr()*6.28;g.lastMv=n}
     g.posts.push(pst);
     const mx=g.W+30*s-(g.sp||g.W*.12)/2,my=(prev+(pst.c0??c))/2;
     const pwOn=['sh','x2','mg','sl'].some(kk=>g.t<g.pw[kk])||g.items.some(it=>it.k!=='hz'&&!it.got);
@@ -6403,7 +6412,11 @@ const groupDanger=(coll,g,word)=>{const own=g.ownerId===ME.uid;return `<div clas
 function viewGroups(){
   if(UI.ltab==='pkl'){UI.ltab='leagues';UI.lgk='pk'}
   const L=UI.ltab==='mock'?'mock':UI.ltab==='cup'?'cup':'leagues';
-  const seg=`<div class="chips gm-tabs lgx-tabs" role="group" aria-label="Leagues">${[['leagues','My leagues'],['cup','School Cup'],['mock','Mock Draft']].map(([v,l])=>`<button class="chip" data-act="ltab" data-v="${v}" aria-pressed="${v===L}">${l}</button>`).join('')}</div>`;
+  const LGI=(()=>{const w=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;return {
+    leagues:w('<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 19c.4-3.6 2.8-5.5 5.5-5.5s5.1 1.9 5.5 5.5M14.5 14.2c.8-.5 1.7-.7 2.5-.7 2.3 0 4 1.5 4.5 4.5"/>'),
+    cup:w('<path d="M12 2.8l7 2.6v6c0 4.4-3 7.6-7 9.4-4-1.8-7-5-7-9.4v-6z"/><path d="M12 8l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.4z" fill="currentColor" stroke="none"/>'),
+    mock:w('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4M8.5 10h7M8.5 14h7M8.5 18h4"/>')}})();
+  const seg=`<div class="mg-tiles lg-tiles" role="group" aria-label="Leagues">${[['leagues','My leagues',LGI.leagues,'#2F6BFF'],['cup','School Cup',LGI.cup,'#E5483B'],['mock','Mock Draft',LGI.mock,'#7A4DFF']].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="ltab" data-v="${v}" aria-pressed="${v===L}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
   if(L==='cup')return `<div class="head"><h2>School Cup</h2><p>Your school against every other school. Free games only.</p></div>`+seg+cupHTML();
   if(L==='mock')return `<div class="head"><h2>Mock Draft</h2><p>Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.</p></div>`+seg+mockHTML();
   const h=viewGroups0(),i=h.indexOf('</div>',h.indexOf('<div class="head"'));
@@ -6422,8 +6435,14 @@ function viewGroups0(){
   const joinForm=`<form class="card lg-form" id="join-form"><h3>Join a league</h3><p class="muted">Paste the invite code a friend sent you.</p>
       <div class="lg-row"><input id="join-code" maxlength="12" placeholder="Invite code, like FNL-7Q2K" autocomplete="off" aria-label="Invite code" value="${esc(UI.joinCode||'')}"><button class="btn" type="submit">Join</button></div></form>`;
   const pks=myPKL(),pkMode=!!pks.length&&(UI.lgk==='pk'||!g),pkg=pkMode?(pks.find(x=>x.id===UI.pkli)||pks[0]):null;if(pkg)UI.pkli=pkg.id;
+  const fmt=x=>x.mode==='budget'?'Budget':'Snake draft',curId=pkMode?(pkg&&pkg.id):(g&&g.id),curL=pkMode?pkg:g,tot=gs.length+pks.length;
+  const tabsOld=`<div class="lg-tabs" role="tablist" aria-label="Your leagues">${gs.map(x=>`<button class="gtab" role="tab" aria-selected="${!pkMode&&g&&x.id===g.id}" data-act="group" data-id="${esc(x.id)}">${esc(x.name)}<small>${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'team':'teams'}</small></button>`).join('')}${pks.map(x=>`<button class="gtab" role="tab" aria-selected="${!!pkg&&x.id===pkg.id}" data-act="pklSel" data-v="${esc(x.id)}">${esc(x.name)}<small>Pick ’em · ${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'player':'players'}</small></button>`).join('')}</div>`;
+  const rankOf=x=>{try{const st=standingsOf(x),i=st.findIndex(y=>y.uid===ME.uid);return i>=0?`You’re #${i+1} of ${st.length}`:''}catch(_){return ''}};
+  const row=(x,kind)=>{const n=Object.keys(x.members).length,on=x.id===curId&&(kind==='pk')===!!pkMode;return `<button class="lg-row2 ${on?'on':''}" data-act="${kind==='pk'?'pklSel':'group'}" ${kind==='pk'?`data-v="${esc(x.id)}"`:`data-id="${esc(x.id)}"`}><span><b>${esc(x.name)}</b><small>${n} ${kind==='pk'?(n===1?'player':'players'):(n===1?'team':'teams')}${kind==='pk'?'':(rankOf(x)?' · '+rankOf(x):'')}</small></span>${on?'<em>Open</em>':'<i>›</i>'}</button>`};
+  const sect=(t,list,kind)=>list.length?`<div class="lg-sec"><span class="lbl">${t} · ${list.length}</span>${list.map(x=>row(x,kind)).join('')}</div>`:'';
+  const switcher=`<div class="lg-sw-wrap"><button class="lg-sw" data-act="lgMenu" aria-expanded="${!!UI.lgMenu}"><span><small>Open league</small><b>${curL?esc(curL.name):'Choose a league'}</b></span><em>${tot} leagues</em><i>${UI.lgMenu?'▴':'▾'}</i></button>${UI.lgMenu?`<div class="card lg-menu">${sect('Snake draft',gs.filter(x=>x.mode!=='budget'),'')}${sect('Budget',gs.filter(x=>x.mode==='budget'),'')}${sect('Pick ’em',pks,'pk')}</div>`:''}</div>`;
   const topRow=`<div class="lg-top">
-      <div class="lg-tabs" role="tablist" aria-label="Your leagues">${gs.map(x=>`<button class="gtab" role="tab" aria-selected="${!pkMode&&g&&x.id===g.id}" data-act="group" data-id="${esc(x.id)}">${esc(x.name)}<small>${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'team':'teams'}</small></button>`).join('')}${pks.map(x=>`<button class="gtab" role="tab" aria-selected="${!!pkg&&x.id===pkg.id}" data-act="pklSel" data-v="${esc(x.id)}">${esc(x.name)}<small>Pick ’em · ${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'player':'players'}</small></button>`).join('')}</div>
+      ${tot>=3?switcher:tabsOld}
       <div class="lg-new"><button class="btn sm ${UI.lgp==='new'?'':'ghost'}" data-act="lgPanel" data-v="new">+ New league</button><button class="btn sm ${UI.lgp==='join'?'':'ghost'}" data-act="lgPanel" data-v="join">Join with code</button></div>
     </div>
     ${UI.lgp==='new'?newForm:UI.lgp==='join'?joinForm:''}`;
@@ -7763,7 +7782,8 @@ document.addEventListener('click',async e=>{
   else if(a==='toMe')location.hash='#me';
   else if(a==='resetDemo'){if(confirm('Reset the demo and your consent choice? This cannot be undone.')){try{localStorage.removeItem('gsd-demo-profile')}catch(_){}location.reload()}}
   else if(a==='rank'){UI.rank=t.dataset.v;render()}
-  else if(a==='group'){UI.gi=id;UI.member=null;UI.lgk='';render()}
+  else if(a==='lgMenu'){UI.lgMenu=!UI.lgMenu;render(true)}
+  else if(a==='group'){UI.lgMenu=false;UI.gi=id;UI.member=null;UI.lgk='';render()}
   else if(a==='fgroup'){UI.fi=id;render()}
   else if(a==='member'){UI.member=t.dataset.m;render()}
   else if(a==='mweek'){UI.mw=+t.dataset.w;render()}
@@ -7921,7 +7941,7 @@ document.addEventListener('click',async e=>{
   else if(a==='perkTry'){const d=fgDay(ME.uid)||{d:TODAY(),tries:0,best:0,t:0},dd=Object.assign({},d,{d:TODAY(),x:(+d.x||0)+1}),my=fgRec(ME.uid);
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{fg:Object.assign({},my,{dd})});upsert('picks/'+ME.uid,{fg:{dd}}).catch(()=>{});await invUse('p_try');say('Extra try added');render()}
   else if(a==='perkRedraw'){const w=CURW(),inv=invOf(ME.uid),fcx=Object.assign({},inv.fcx,{[w]:fcX(ME.uid,w)+1});await invUse('p_redraw',{fcx});say('+1 redraw this week');render()}
-  else if(a==='pklSel'){UI.pkli=t.dataset.v;UI.pkls={};UI.pklw=null;UI.lgk='pk';render()}
+  else if(a==='pklSel'){UI.lgMenu=false;UI.pkli=t.dataset.v;UI.pkls={};UI.pklw=null;UI.lgk='pk';render()}
   else if(a==='pklNew'){UI.pklNew=!UI.pklNew;render()}
   else if(a==='pklWk'){UI.pklw=+t.dataset.w;render()}
   else if(a==='pklInv'){const g=S.fgroups[t.dataset.gid];if(g){const bb=FG_SPORT==='bb',m=`Join my ${bb?'basketball':'football'} Pick ’em league "${g.name}" on Varsity. Pick every game each week and see who’s most accurate.\n\nOpen ${SITE_URL}#groups, tap Join with code, and enter ${g.code}`;
