@@ -2690,7 +2690,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v317 · Nov 8';
+const APP_BUILD='v318 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -2716,6 +2716,15 @@ const delDoc=path=>wr(path,()=>DB.doc(path).delete());
 function effGames(uid){
   const v=(S.verified[uid]||{}).weeks||{};
   return Array.from({length:WEEKS},(_,i)=>{const ve=v[String(i+1)];return ve&&ve.status==='approved'?{stat:S0(ve.stat),ver:'verified'}:null});
+}
+/* Basketball: schools that never post stats (none last season, none yet this season) stay out of the minigames until at least
+   3 of their players have a real stat line. Football has no such list (window.BB_NOSTAT is only set in basketball.html). */
+let _nsR=-1,_nsL=null,_nsS=null;
+function mgOk(p){
+  if(_nsS===null)_nsS=new Set(window.BB_NOSTAT||[]);
+  if(!_nsS.size||!p.school||!_nsS.has(p.school))return true;
+  if(_nsR!==_rev){_nsR=_rev;_nsL={};players().forEach(x=>{if(x.mp&&x.games.some(Boolean))_nsL[x.school]=(_nsL[x.school]||0)+1})}
+  return (_nsL[p.school]||0)>=3;
 }
 let _pl=null;
 function players(){
@@ -3472,7 +3481,7 @@ const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return 
 /* anyone with a game on record and no stats in yet this week, and a team that is not on a bye */
 /* only players whose team still has a game this week that has not started (when this week's schedule is listed) */
 const fcPlays=p=>{const gs=fcGamesOf(fcCur());return !gs.length||gs.some(g=>(g.h===p.school||g.a===p.school)&&!started(g))};
-const fcPool=ex=>{const s=fcCur();return players().filter(p=>p.mp&&!ex.has(p.key)&&!fcPts(p,s)&&!fcStarted(p,s)&&fcPlays(p)&&agg(p,'season').n>0&&(FC_DAILY||!(oppInfo(p.school)||{}).bye))};
+const fcPool=ex=>{const s=fcCur();return players().filter(p=>p.mp&&mgOk(p)&&!ex.has(p.key)&&!fcPts(p,s)&&!fcStarted(p,s)&&fcPlays(p)&&agg(p,'season').n>0&&(FC_DAILY||!(oppInfo(p.school)||{}).bye))};
 const fcDraw=(pool,n)=>{const out=[],a=pool.slice();while(out.length<n&&a.length){out.push(a.splice(fcRnd(a.length),1)[0].key)}return out};
 let _fcBusy=false;
 async function fcDeal(){
@@ -4420,10 +4429,10 @@ const simKey=p=>((p.name||'')+'|'+(p.school||'')).toLowerCase();
 const simTot=p=>agg(p,'season').v;
 /* points per game: the 10-0 leaderboard ranks teams by the players' combined PPG (owner, Nov 6), so games played don't decide it */
 const simPPG=p=>{const a=agg(p,'season');return a.n?a.v/a.n:0},teamPPG=c=>c.reduce((t,k)=>t+(pByKey(k)?simPPG(pByKey(k)):0),0);
-const simPool=(slot,ex)=>players().filter(p=>p.mp&&!ex.has(simKey(p))&&slotOk(slot,p)&&agg(p,'season').n>=2);
+const simPool=(slot,ex)=>players().filter(p=>p.mp&&mgOk(p)&&!ex.has(simKey(p))&&slotOk(slot,p)&&agg(p,'season').n>=2);
 /* the best team that could have been drawn: top player at each spot, FLEX goes to the best one left over */
 function simBest(){
-  const by=(pos,sub)=>{const seen=new Set();return players().filter(p=>p.mp&&p.pos===pos&&(!sub||p.sub===sub)&&agg(p,'season').n>=2).sort((a,b)=>simTot(b)-simTot(a)).filter(p=>{const k=simKey(p);if(seen.has(k))return false;seen.add(k);return true})};
+  const by=(pos,sub)=>{const seen=new Set();return players().filter(p=>p.mp&&mgOk(p)&&p.pos===pos&&(!sub||p.sub===sub)&&agg(p,'season').n>=2).sort((a,b)=>simTot(b)-simTot(a)).filter(p=>{const k=simKey(p);if(seen.has(k))return false;seen.add(k);return true})};
   const QB=by('QB'),RB=by('RB'),WR=by('WR'),TE=by('TE'),DB=by('DEF','DB'),LB=by('DEF','LB'),DL=by('DEF','DL');
   const pick=[['QB',QB[0]],['RB',RB[0]],['WR',WR[0]],['WR',WR[1]],['TE',TE[0]],...[0,1,2,3].map(n=>['DB',DB[n]]),...[0,1,2].map(n=>['LB',LB[n]]),...[0,1,2,3].map(n=>['DL',DL[n]])];
   const fx=[RB[1],WR[2],TE[1]].filter(Boolean).sort((a,b)=>simTot(b)-simTot(a))[0];
@@ -4664,7 +4673,7 @@ let _ppC=null;
 function propCands(){
   const gs=((GAMES&&GAMES.games)||[]).filter(g=>!gDone(g)),key=gs.length+'|'+_rev+'|'+((window.MAXPREPS&&MAXPREPS.updated)||'');
   if(_ppC&&_ppC.k===key)return _ppC.list;
-  const by={};players().forEach(p=>{if(p.mp&&p.school){(by[p.school]=by[p.school]||[]).push(p)}});
+  const by={};players().forEach(p=>{if(p.mp&&p.school&&mgOk(p)){(by[p.school]=by[p.school]||[]).push(p)}});
   const list=[];
   gs.forEach(g=>{[[g.h,g.a],[g.a,g.h]].forEach(([sc,opp])=>{
     const rows={};
@@ -5617,7 +5626,7 @@ const rcRec=u=>((S.picks[u]||{}).rc)||{};
 /* everything in Ring Chaser is per game: average fantasy points and average stats */
 const rcAvg=p=>{const a=agg(p,'season');return a.n?Math.round(a.v/a.n*10)/10:0};
 let _rcP=null,_rcR=-1;
-const rcPool=()=>{if(_rcR!==_rev||!_rcP){_rcP=players().filter(p=>p.mp&&p.school&&agg(p,'season').n>0).map(p=>(p._rcv=rcAvg(p),p));_rcR=_rev}return _rcP};
+const rcPool=()=>{if(_rcR!==_rev||!_rcP){_rcP=players().filter(p=>p.mp&&mgOk(p)&&p.school&&agg(p,'season').n>0).map(p=>(p._rcv=rcAvg(p),p));_rcR=_rev}return _rcP};
 const rcOpen=t=>RC_SLOTS.filter(s=>!t.sl[s.k]);
 /* a player can only be on one team: yours or the AI's */
 const rcUsed=m=>new Set([...Object.values(m.me.sl),...Object.values(m.ai.sl)]);

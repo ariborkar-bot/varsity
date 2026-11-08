@@ -61,6 +61,47 @@ def load_real():
     return teams
 
 
+ROSTERS_FILE = os.path.join(os.path.dirname(DATA), 'bb_2627_rosters.txt')
+
+
+def load_rosters_2627():
+    """tools/data/bb_2627_rosters.txt: real 2026-27 rosters posted on MaxPreps, '#slug|name,grade(9-12),positions;...'.
+    Returns {slug: [dict(n, g(1-4), pos)]}. Only a few schools have posted one so far; re-read MaxPreps to add more."""
+    out = {}
+    if not os.path.exists(ROSTERS_FILE):
+        return out
+    for ln in open(ROSTERS_FILE, encoding='utf-8').read().split('\n'):
+        if not ln.startswith('#') or '|' not in ln or ln.startswith('# '):
+            continue
+        slug, body = ln[1:].split('|', 1)
+        rows = []
+        for ent in body.split(';'):
+            f = ent.split(',', 2)
+            if len(f) < 2 or not f[0].strip():
+                continue
+            nm = clean_name(f[0])
+            g = int(f[1] or 0)
+            pos = ''
+            for q in (f[2] if len(f) > 2 else '').replace(' ', '').split(','):
+                if q in POS5:
+                    pos = q
+                    break
+            if not pos:
+                for q in (f[2] if len(f) > 2 else '').replace(' ', '').split(','):
+                    if q in ('G', 'F', 'W'):
+                        pos = q
+                        break
+            if any(r['n'] == nm for r in rows):
+                continue
+            rows.append(dict(n=nm, g=g - 8 if 9 <= g <= 12 else 0, pos=pos, gp=0, st=None))
+        out[slug] = rows
+    return out
+
+
+def nkey(n):
+    return re.sub(r'[^a-z]', '', re.sub(r'\b(jr|sr|ii|iii|iv)\b\.?', '', n.lower()))
+
+
 def assign_positions(rows):
     """MaxPreps lists G / F / W or nothing for many teams. Map to PG SG SF PF C, using the player's own stats where there are some."""
     n_un = 0
@@ -145,8 +186,41 @@ def build_data():
 
     # seniors (grade 4 in 2025-26) graduate before the 2026-27 season, so they are left out. Team strength above still
     # counts them: it is last season's real scoring, the best signal there is for the preseason odds.
+    ros = load_rosters_2627()
+    n_ros = n_new = n_fix = n_keep = 0
     for t in real:
-        t['rows'] = [x for x in t['rows'] if x['g'] != 4]
+        old = t['rows']
+        if t['slug'] in ros and ros[t['slug']]:
+            # this school has posted its real 2026-27 roster: it is the roster, with the real class year of each player.
+            # A player listed last year with stats keeps his hidden ranking and a known position; a school that has only
+            # posted a few names so far keeps last year's returning players too (the roster is clearly not complete).
+            prev = {nkey(x['n']): x for x in old}
+            rows, used = [], set()
+            for r in ros[t['slug']]:
+                m = prev.get(nkey(r['n']))
+                if m:
+                    used.add(nkey(r['n']))
+                    n_fix += 1 if m['g'] + 1 != r['g'] and m['g'] != 0 else 0
+                    r['gp'], r['st'] = m['gp'], m['st']
+                    if not r['pos']:
+                        r['pos'] = m['pos']
+                else:
+                    n_new += 1
+                r['cur'] = True
+                rows.append(r)
+            if len(rows) < 8:
+                for k, x in prev.items():
+                    if k not in used and x['g'] != 4:
+                        rows.append(x)
+                        n_keep += 1
+            t['rows'] = rows
+            n_ros += 1
+        else:
+            t['rows'] = [x for x in old if x['g'] != 4]
+    print('2026-27 rosters used: %d schools, %d new players, %d class years corrected, %d returning kept (small rosters)' % (n_ros, n_new, n_fix, n_keep))
+
+    # schools that never post stats (no stat line for anyone last season) stay out of the minigames until they have real ones
+    nostat = sorted(t['name'] for t in real if ppg[t['name']] == 0)
 
     games = load_games()
 
@@ -164,7 +238,7 @@ def build_data():
                 for wk in range(1, nw + 1):
                     w[str(wk)] = line
             # grades are moved up one year for 2026-27 (Fr->So, So->Jr, Jr->Sr; 0 = unknown stays 0)
-            players.append({'id': str(pid), 'n': x['n'], 's': t['name'], 'g': x['g'] + 1 if x['g'] in (1, 2, 3) else x['g'], 'p': x['p'], 'u': x['p'], 'w': w})
+            players.append({'id': str(pid), 'n': x['n'], 's': t['name'], 'g': x['g'] if x.get('cur') else (x['g'] + 1 if x['g'] in (1, 2, 3) else x['g']), 'p': x['p'], 'u': x['p'], 'w': w})
     # hidden preseason order: last season's fantasy points under the current scoring, weighted by games played.
     # It never shows as a stat; it only decides who sits at the top while everyone is at 0.0.
     rank = {}
@@ -177,6 +251,7 @@ def build_data():
     seeds = sorted([n for n in TEAMS if ppg[n] > 0], key=lambda t: -rating[t])[:8]
     prior = {n: round(rating[n], 1) for n in TEAMS if rating[n]}
     mp['rank'] = rank
+    mp['nostat'] = nostat
     return mp, games, seeds, TEAMS, prior
 
 
@@ -188,7 +263,7 @@ GAMES_JS = """<script>
   var wk=Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate())-st)/604800000);
   window.BB_CUR=Math.max(P+1,Math.min(W,P+1+wk));
   window.BB_PRIOR=%(prior_ratings)s;
-  window.BB_RANK=%(rank)s; window.BB_TOP10=%(top10)s;
+  window.BB_RANK=%(rank)s; window.BB_TOP10=%(top10)s; window.BB_NOSTAT=%(nostat)s;
   window.VARSITY_GAMES={games:G,brackets:[],bracketName:'CIF San Diego Section playoffs'};
 })();
 </script>"""
@@ -233,6 +308,7 @@ def transform(s, mp, games, seeds, teams, prior):
     # --- data: baked-in placeholder players and games ------------------------------------------------------------
     mp = dict(mp)
     rank = mp.pop('rank', {})
+    nostat = mp.pop('nostat', [])
     top10 = [k for k, _ in sorted(rank.items(), key=lambda kv: -kv[1])[:10]]
     s = line_replace(s, 'window.MAXPREPS=', 'window.MAXPREPS=' + json.dumps(mp, separators=(',', ':')) + ';')
     weeks = max(g['w'] for g in games)
@@ -240,7 +316,7 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, '<script src="games.js" onerror="void 0"></script>',
             GAMES_JS % dict(games=json.dumps(g2, separators=(',', ':')), prior=PRIOR, first=PRIOR + 1, weeks=weeks,
                             start=START.isoformat(), sy=START.year, sm=START.month - 1, sd=START.day,
-                            prior_ratings=json.dumps(prior, separators=(',', ':')), rank=json.dumps(rank, separators=(',', ':')), top10=json.dumps(top10)))
+                            prior_ratings=json.dumps(prior, separators=(',', ':')), rank=json.dumps(rank, separators=(',', ':')), top10=json.dumps(top10), nostat=json.dumps(nostat)))
     s = rep(s, '<span class="muted">CIF San Diego Section playoffs</span></div>${bracketHTML(d)}', '<span class="muted">Projected from last season</span></div>${bracketHTML(d)}')
     s = rep(s, 'const WEEKS=12;', 'const WEEKS=%d;' % weeks)
     # 5 Card Draw is daily in basketball: a hand per game day, only players whose team plays that day
@@ -382,7 +458,7 @@ const SIM_COL={PG:'#E65B28',SG:'#2868E8',SF:'#079B82',PF:'#9655D8',C:'#E0455B',G
 """)
     s = between(s, 'function simBest(){', '\nfunction simStart',
                 """function simBest(){
-  const seen=new Set(),all=players().filter(p=>p.mp&&agg(p,'season').n>=2).sort((a,b)=>simTot(b)-simTot(a)).filter(p=>{const k=simKey(p);if(seen.has(k))return false;seen.add(k);return true});
+  const seen=new Set(),all=players().filter(p=>p.mp&&mgOk(p)&&agg(p,'season').n>=2).sort((a,b)=>simTot(b)-simTot(a)).filter(p=>{const k=simKey(p);if(seen.has(k))return false;seen.add(k);return true});
   const used=new Set(),list=[];
   for(const sl of SIM_SLOTS){const p=all.find(x=>!used.has(simKey(x))&&sl.elig.includes(x.pos));if(p){used.add(simKey(p));list.push({l:sl.label,p})}}
   return {list,total:list.reduce((t,x)=>t+simTot(x.p),0)};
