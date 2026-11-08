@@ -2409,7 +2409,7 @@ const mpP=MP?MP.players.map(p=>({key:'mp'+p.id,gr:p.g||0,name:p.n,school:p.s,pos
 /* No cross-crediting: an offense card scores only offense, a defense card only defense.
    A one-card player who also has stats on the other side of the ball gets a second card (key + 'x') for that side,
    and his original card keeps only its own side. Kick and punt return TDs stay with the offense card. */
-const OFFK=['passYd','passTD','int','rushYd','rushTD','rec','recYd','recTD','fumLost','retTD'],DEFK=['tkl','sack','dInt','ff','fr','dTD'];
+const OFFK=['passYd','passTD','int','rushYd','rushTD','rec','recYd','recTD','fumLost','retTD'],DEFK=['tkl','tfl','sack','dInt','pbu','ff','fr','dTD'];
 const zeroStat=()=>Object.fromEntries(KEYS.map(k=>[k,0]));
 const keepOnly=(st,ks)=>{const o=zeroStat();ks.forEach(k=>o[k]=st[k]||0);return o};
 (()=>{const add=[];for(const p of mpP){if(p.tw||p.pos==='K')continue;const isD=p.pos==='DEF',mine=isD?DEFK:OFFK,theirs=isD?OFFK:DEFK;
@@ -2644,7 +2644,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v300 · Nov 7';
+const APP_BUILD='v301 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5774,7 +5774,7 @@ function listHTML(){
 function hotHTML(){
   if(UI.scope!=='season'||UI.pos!=='ALL'||UI.q||UI.school!=='ALL')return'';
   const wt=weekTop(),pd=wt.list;if(!pd.length)return'';
-  const AB={passYd:'pass yds',passTD:'pass TD',rushYd:'rush yds',rushTD:'rush TD',rec:'rec',recYd:'rec yds',recTD:'rec TD',tkl:'tkl',sack:'sacks',dInt:'INT',ff:'FF',fr:'FR',dTD:'def TD',retTD:'ret TD',fgm:'FG',xpm:'XP'};
+  const AB={passYd:'pass yds',passTD:'pass TD',rushYd:'rush yds',rushTD:'rush TD',rec:'rec',recYd:'rec yds',recTD:'rec TD',tkl:'tkl',sack:'sacks',dInt:'INT',ff:'FF',fr:'FR',dTD:'def TD',retTD:'ret TD',fgm:'FG',xpm:'XP',tfl:'TFL',pbu:'PBU'};
   const sl=st=>Object.keys(AB).filter(k=>st&&st[k]>0).sort((x,y)=>Math.abs(st[y]*PTS[y])-Math.abs(st[x]*PTS[x])).slice(0,2).map(k=>`${st[k]>=1000?st[k].toLocaleString():st[k]} ${AB[k]}`).join(' · ');
   const row=(x,k)=>{const g=x.p.games[wt.w-1],m=k===1?'gold':'silver';return `<button class="pw-r ${m}" data-act="player" data-id="${esc(x.p.key)}">
     <span class="pw-k">${k}</span>${av(x.p.name,x.p.school,k===1?46:38)}
@@ -6507,7 +6507,7 @@ function viewMe(){
     const unit=UI.rank==='prev'?'points in their last game':'points';
     const sgap=sl.length<2?`You are the only ${me.pos} at ${esc(me.school)} with approved games.`:si===0?`You lead the ${me.pos}s at ${esc(me.school)} by ${f1(info.val-metric(sl[1].a))} ${unit}.`:`${f1(metric(sl[si-1].a)-info.val)} ${unit} behind ${esc(sl[si-1].p.name)}, the next ${me.pos} up.`;
     schoolBoard=`<section class="card me-sec"><h3>${me.pos}s at ${esc(me.school)}</h3><p class="muted">${sgap}</p><div class="board">${sl.map(brow).join('')}</div></section>`;
-    const SHORT={pts:'Pts',reb:'Reb',ast:'Ast',stl:'Stl',blk:'Blk',tov:'TO',tpm:'3PM',rec:'Rec',recYd:'Rec yd',recTD:'Rec TD',rushYd:'Rush yd',rushTD:'Rush TD',passYd:'Pass yd',passTD:'Pass TD',int:'INT',fumLost:'Fum',retTD:'Ret TD',tkl:'Tkl',sack:'Sack',dInt:'INT',ff:'FF',fr:'FR',dTD:'D TD'};
+    const SHORT={pts:'Pts',reb:'Reb',ast:'Ast',stl:'Stl',blk:'Blk',tov:'TO',tpm:'3PM',rec:'Rec',recYd:'Rec yd',recTD:'Rec TD',rushYd:'Rush yd',rushTD:'Rush TD',passYd:'Pass yd',passTD:'Pass TD',int:'INT',fumLost:'Fum',retTD:'Ret TD',tkl:'Tkl',sack:'Sack',dInt:'INT',ff:'FF',fr:'FR',dTD:'D TD',tfl:'TFL',pbu:'PBU'};
     const cols=FIELDS[me.pos].filter((k,i)=>i<3||me.games.some(g=>g&&g.stat&&g.stat[k]));
     const gl=me.games.map((g,i)=>({w:i+1,g})).filter(x=>UI.scope==='season'||x.w===UI.scope);
     const bestV=Math.max(...gl.filter(x=>x.g).map(x=>pts(x.g.stat)),-1),bestW=(gl.find(x=>x.g&&pts(x.g.stat)===bestV)||{}).w;
