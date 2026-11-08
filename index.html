@@ -2329,7 +2329,7 @@ const PTS={passYd:.04,passTD:4,int:-2,rushYd:.1,rushTD:6,rec:1,recYd:.1,recTD:6,
 const KEYS=Object.keys(PTS);
 const KM=Object.fromEntries(KEYS.map(k=>[k.toLowerCase(),k]));
 const LABEL={passYd:'Pass yds',passTD:'Pass TD',int:'INT thrown',rushYd:'Rush yds',rushTD:'Rush TD',rec:'Receptions',recYd:'Rec yds',recTD:'Rec TD',fumLost:'Fumbles lost',tkl:'Tackles',sack:'Sacks',dInt:'Interceptions',ff:'Forced fumbles',fr:'Fumble recoveries',dTD:'Defensive TD',retTD:'Return TD',xpm:'PAT made',xpMiss:'PAT missed',fgm:'FG made',fgMiss:'FG missed',puntYd:'Punt yds',in20:'Punts inside 20',punts:'Punts',tfl:'Tackles for loss',pbu:'Pass breakups'};
-const FIELDS={QB:['passYd','passTD','int','rushYd','rushTD'],RB:['rushYd','rushTD','rec','recYd','recTD','fumLost','retTD'],WR:['rec','recYd','recTD','rushYd','fumLost','retTD'],TE:['rec','recYd','recTD','fumLost'],DEF:['tkl','tfl','sack','dInt','pbu','ff','fr','dTD'],K:['xpm','xpMiss','fgm','fgMiss','punts','puntYd','in20']};
+const FIELDS={QB:['passYd','passTD','int','rushYd','rushTD'],RB:['rushYd','rushTD','rec','recYd','recTD','fumLost','retTD'],WR:['rec','recYd','recTD','rushYd','rushTD','fumLost','retTD'],TE:['rec','recYd','recTD','rushYd','rushTD','fumLost'],DEF:['tkl','tfl','sack','dInt','pbu','ff','fr','dTD'],K:['xpm','xpMiss','fgm','fgMiss','punts','puntYd','in20']};
 const POSITIONS=['QB','RB','WR','TE','DEF','K'];
 /* every position a player can pick, and which fantasy slot it scores as */
 const POS_ALL=[['QB','Quarterback'],['RB','Running back'],['FB','Fullback'],['WR','Wide receiver'],['TE','Tight end'],['OL','Offensive line'],
@@ -2346,9 +2346,10 @@ const pts=s=>Math.round((KEYS.reduce((a,k)=>a+((s&&s[k])||0)*PTS[k],0)+puntPts(s
 const sum=list=>{const o=blank();list.forEach(g=>KEYS.forEach(k=>o[k]+=(g&&g[k])||0));return o};
 const same=(a,b)=>KEYS.every(k=>((a&&a[k])||0)===((b&&b[k])||0));
 function line(pos,s){
-  if(pos==='QB')return `${s.passYd} pass yd · ${s.passTD} TD · ${s.int} INT`;
-  if(pos==='RB')return `${s.rushYd} rush yd · ${s.rushTD+s.recTD} TD · ${s.rec} rec`;
-  if(pos==='WR'||pos==='TE')return `${s.rec} rec · ${s.recYd} yd · ${s.recTD} TD`;
+  const ru=()=>s.rushYd||s.rushTD?` · ${s.rushYd} rush yd${s.rushTD?' · '+s.rushTD+' rush TD':''}`:'';
+  if(pos==='QB')return `${s.passYd} pass yd · ${s.passTD} TD · ${s.int} INT${ru()}`;
+  if(pos==='RB')return `${s.rushYd} rush yd${s.rushTD?' · '+s.rushTD+' rush TD':''} · ${s.rec} rec${s.rec?' · '+s.recYd+' rec yd':''}${s.recTD?' · '+s.recTD+' rec TD':''}`;
+  if(pos==='WR'||pos==='TE')return `${s.rec} rec · ${s.recYd} yd · ${s.recTD} TD${ru()}`;
   if(pos==='K'){const k=`${s.xpm}/${s.xpm+s.xpMiss} PAT · ${s.fgm}/${s.fgm+s.fgMiss} FG`;return s.punts?k+` · ${f1(s.puntYd/s.punts)} yd per punt (${s.punts})`:(s.puntYd?k+` · ${s.puntYd} punt yd`:k)}
   return `${s.tkl} tkl${s.tfl?' · '+s.tfl+' TFL':''} · ${s.sack} sack · ${s.dInt} INT${s.pbu?' · '+s.pbu+' PBU':''}`;
 }
@@ -2633,7 +2634,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v302 · Nov 7';
+const APP_BUILD='v303 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5897,6 +5898,7 @@ function viewLeague(){
   const fN=(UI.scope!=='season'?1:0)+(UI.school!=='ALL'?1:0)+(UI.grade?1:0);
   return `<div class="head"><h2>Players</h2><p>Every San Diego Section player, ranked by fantasy points. Tap one for every game and their projection.</p></div>
   ${seg}
+  ${(()=>{try{const D=sxData();return D.rows.length?sxAllV(D):''}catch(e){return ''}})()}
   <div class="tools lite">
     <div class="sb"><span class="sw"><input id="q" type="search" placeholder="Search players" aria-label="Search players" value="${esc(UI.q)}"></span>
       <button type="button" class="fbtn" data-act="ftoggle" aria-expanded="${!!UI.fOpen}">Filters${fN?`<b>${fN}</b>`:''}</button></div>
