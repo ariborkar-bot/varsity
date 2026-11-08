@@ -30,7 +30,7 @@
   drun.querySelector('.in-fl').style.transformOrigin='50% 60%';
 
   /* ----- the numbers ----- */
-  const FEET=elTop+pw*.87,LIFT=pw*1.42,F=780,HANG=380,DROP=430,SETTLE=640,TOTAL=F+HANG+DROP+SETTLE;
+  const FEET=elTop+pw*.87,LIFT=pw*1.42,F=1090,HANG=520,DROP=560,SETTLE=760,TOTAL=F+HANG+DROP+SETTLE;
   const rimR=pw*.25,rimX=Math.min(W-Math.max(pw*.62,52),wr.right-sr.left+pw*.5);
   const rimY=elTop+pw*.1-LIFT,bw=Math.max(6,pw*.07),bh=pw*.74,bx=rimX+rimR+pw*.07,by=rimY-bh*.58;
   const ex=cbz(.3,.4,.6,1),EX='cubic-bezier(.3,.4,.6,1)',EY='cubic-bezier(.14,.62,.3,1)',GRAV='cubic-bezier(.55,0,.9,.65)';

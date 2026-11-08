@@ -2212,10 +2212,11 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .lk-god{border-color:#FFC23D!important;box-shadow:0 0 0 1px rgba(255,194,61,.5),0 10px 30px -10px rgba(255,79,224,.5)!important}
 .pr-big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 6px}
 .pr-bt{display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.pr-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}@media (max-width:420px){.pr-ic svg{width:19px;height:19px}}
 .pr-bt:hover{transform:translateY(-1px)}.pr-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:1.3rem;background:rgba(255,255,255,.06);flex:none}
 .pr-tx{display:flex;flex-direction:column;min-width:0;gap:2px}.pr-tx b{font:900 italic 1.05rem/1.05 var(--f-display,inherit);text-transform:uppercase;letter-spacing:.02em}.pr-tx small{font-size:.72rem;color:var(--muted);line-height:1.2}
 .pr-bt[aria-pressed=true]{border-color:#FFC23D;background:linear-gradient(135deg,rgba(255,194,61,.22),rgba(242,154,29,.08)),var(--surface);box-shadow:0 8px 22px -10px rgba(255,170,40,.7)}
-.pr-bt[aria-pressed=true] .pr-ic{background:linear-gradient(135deg,#FFE08A,#F29A1D)}.pr-bt[aria-pressed=true] b{color:#FFC23D}
+.pr-bt[aria-pressed=true] .pr-ic{background:linear-gradient(135deg,#FFE08A,#F29A1D);color:#3a2400}.pr-bt[aria-pressed=true] b{color:#FFC23D}
 @media (max-width:420px){.pr-bt{padding:10px;gap:8px}.pr-ic{width:34px;height:34px;font-size:1.1rem}.pr-tx b{font-size:.95rem}.pr-tx small{font-size:.66rem}}
 .chip.allin{background:linear-gradient(135deg,#FF4F6D,#FF9A1F)!important;color:#fff!important;border-color:transparent!important;font-weight:900!important;text-transform:uppercase;letter-spacing:.04em;box-shadow:0 4px 14px -4px rgba(255,79,109,.7)}
 .chip.allin[aria-pressed=true]{box-shadow:0 0 0 2px #fff,0 4px 14px -4px rgba(255,79,109,.8)}
@@ -2714,7 +2715,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v329 · Nov 8';
+const APP_BUILD='v330 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6070,7 +6071,7 @@ const MGI=(()=>{const w=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</sv
   fg:w('<path d="M12 20.5v-8M6 3.5V9a6 6 0 0 0 12 0V3.5"/>'),
   hoop:w('<circle cx="12" cy="4.6" r="2.6"/><ellipse cx="12" cy="11" rx="7" ry="2"/><path d="M5.4 12l2.6 7M18.6 12l-2.6 7M10 13l.8 6.4M14 13l-.8 6.4"/>')}})();
   const tabs=`<div class="mg-tiles" role="group" aria-label="Minigames">${[['predict','Predict',MGI.predict,'#2F6BFF'],['draw','5 Card Draw',MGI.draw,'#7A4DFF'],['sim','82-0',MGI.sim,'#FF4F6D'],['rc','Ring Chaser',MGI.rc,'#3DDC84'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal',FG_SPORT==='bb'?MGI.hoop:MGI.fg,'#FF9A1F']].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="mtab" data-v="${v}" aria-pressed="${v===T}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
-  const sub=T==='predict'?`<div class="pr-big" role="group" aria-label="Predict">${[['props','Player props','Over or under on player stats','📊'],['picks','Pick ’em','Pick the winners of the games','🏆']].map(([v,l,d,ic])=>`<button class="pr-bt" data-act="mtab" data-v="${v}" aria-pressed="${PT===v}"><span class="pr-ic" aria-hidden="true">${ic}</span><span class="pr-tx"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`:'';
+  const sub=T==='predict'?`<div class="pr-big" role="group" aria-label="Predict">${[['props','Player props','Over or under on player stats','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5-5 5 5M7 14l5 5 5-5"/></svg>'],['picks','Pick ’em','Pick the winners of the games','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h12l-3 4.5 3 4.5H6"/></svg>']].map(([v,l,d,ic])=>`<button class="pr-bt" data-act="mtab" data-v="${v}" aria-pressed="${PT===v}"><span class="pr-ic" aria-hidden="true">${ic}</span><span class="pr-tx"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
 }
@@ -9291,7 +9292,7 @@ const __introRun=()=>{
   drun.querySelector('.in-fl').style.transformOrigin='50% 60%';
 
   /* ----- the numbers ----- */
-  const FEET=elTop+pw*.87,LIFT=pw*1.42,F=780,HANG=380,DROP=430,SETTLE=640,TOTAL=F+HANG+DROP+SETTLE;
+  const FEET=elTop+pw*.87,LIFT=pw*1.42,F=1090,HANG=520,DROP=560,SETTLE=760,TOTAL=F+HANG+DROP+SETTLE;
   const rimR=pw*.25,rimX=Math.min(W-Math.max(pw*.62,52),wr.right-sr.left+pw*.5);
   const rimY=elTop+pw*.1-LIFT,bw=Math.max(6,pw*.07),bh=pw*.74,bx=rimX+rimR+pw*.07,by=rimY-bh*.58;
   const ex=cbz(.3,.4,.6,1),EX='cubic-bezier(.3,.4,.6,1)',EY='cubic-bezier(.14,.62,.3,1)',GRAV='cubic-bezier(.55,0,.9,.65)';
