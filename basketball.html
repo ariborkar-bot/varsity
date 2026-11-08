@@ -2354,8 +2354,9 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
   <button class="in-skip" type="button">Skip</button>
 </div>
 <div id="toast" role="status" aria-live="polite" hidden></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script>/* backup source for the login library, for networks that block jsDelivr */window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\/script>')</script>
+<script src="vendor/supabase.min.js"></script>
+<script>/* v314: the login library is hosted with the app (vendor/). The two CDNs are only backups, for the rare case the local copy cannot load */window.supabase||document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\/script>')</script>
+<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\/script>')</script>
 <script src="logos.js"></script>
 <script>
 /* Real 2026-27 San Diego Section boys basketball schedule (MaxPreps). Final scores are added by tools/add_scores.py as games are played.
@@ -2699,7 +2700,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v313 · Nov 8';
+const APP_BUILD='v314 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -8340,6 +8341,11 @@ function subscribe(){
   if(ME.uid)DB.doc('data/users/'+ME.uid+'/seen').onSnapshot(s=>{S.seen=s.exists?s.data():null;S.loaded.seen=true;touch()},()=>{S.loaded.seen=true;touch()});
 }
 async function boot(){
+  /* v314: if the login library did not load with the page, try each source again here (8 s each) before calling the app offline */
+  if(NEEDS_SERVER&&!(window.supabase&&window.supabase.createClient)){
+    for(const u of ['vendor/supabase.min.js?r='+Date.now(),'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js','https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js']){
+      await new Promise(r=>{const el=document.createElement('script');el.src=u;el.onload=el.onerror=()=>r();document.head.appendChild(el);setTimeout(r,8000)});
+      if(window.supabase&&window.supabase.createClient)break}}
   DL={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data]);const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}};
   if(window.supabase&&window.supabase.createClient){
     SB=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'varsity-auth'}});
