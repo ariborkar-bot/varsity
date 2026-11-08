@@ -1428,6 +1428,9 @@ select option{background:#0B1730;color:#EAF0F8}
 .bt-t .cb-tag{margin:4px 0 0}.bx-tag.cbx{color:#3DDC84}
 .lk-tiers{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.lk-tiers li{display:flex;justify-content:space-between;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:.8rem}
 .lk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:10px}.lk-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;border:1px solid var(--line);border-left:3px solid var(--rc);background:var(--surface2);color:inherit;font:inherit;text-align:left}.lk-card span{display:flex;flex-direction:column;gap:2px;min-width:0}.lk-card small{font-size:.72rem}
+.bnd-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-bottom:8px}.bnd-s{display:flex;align-items:center;gap:10px;text-align:left;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface2)}.bnd-s>span{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.bnd-s[aria-pressed="true"]{border-color:#FFC23D;box-shadow:0 0 0 2px rgba(255,194,61,.35)}.bnd-s.dn{border-color:#2EC27E;background:rgba(46,194,126,.1)}
+.bnd-b{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}.bnd-b u{display:block;height:100%;background:linear-gradient(90deg,#FFC23D,#FF8A3D);text-decoration:none}.bnd-s.dn .bnd-b u{background:#2EC27E}
+.bnd-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:8px}.bnd-c{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:8px 4px;border-radius:12px;border:1px solid var(--rc);background:var(--surface2);opacity:.6}.bnd-c.on{opacity:1}.bnd-c b{font-size:.78rem;line-height:1.15}.bnd-e{display:flex;align-items:center;justify-content:center;border:2px dashed #566;border-radius:8px;font-size:1.6rem;color:#778}
 .bu.bu_rainbow{background:linear-gradient(90deg,#FF3B30,#FFC23D,#2FBF71,#2F6BFF,#B48CFF,#FF3B30)!important;background-size:200% 100%!important;animation:ncShine 3s linear infinite;border-color:#fff!important;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 .lk-card .lk-vers,.lk-vers{display:flex;flex-direction:row;gap:3px;margin-top:3px}@media (max-width:480px){.lk-tiers{grid-template-columns:repeat(2,1fr)}}.lk-vers i{width:10px;height:10px;border-radius:3px;border:1.5px solid var(--rc);opacity:.35}.lk-vers i.on{background:var(--rc);opacity:1}
 .tok-wrap{display:flex;gap:8px;align-items:stretch;flex:none}.shop-box{text-decoration:none}.shop-box b{display:flex;align-items:center;justify-content:center;height:100%}
@@ -2613,7 +2616,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v296 · Nov 7';
+const APP_BUILD='v297 · Nov 7';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3175,13 +3178,13 @@ const betsOf=u=>((S.picks[u]||{}).bets)||{};
 const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g});return m};
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
-  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+(+rcRec(u).wn||0);
-  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(100,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
+  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+(+rcRec(u).wn||0);
+  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(150,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
-  Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(100,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
-  return Math.round(t*100)/100;
+  Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(150,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
+  return Math.round(t);
 }
-const tk=n=>(Math.round(n*10)/10).toLocaleString()+' tokens';
+const tk=n=>Math.round(n).toLocaleString()+' tokens';
 /* Starter rewards: +5 tokens the first time you do each of these. Worked out from what you have already done
    (so they can't be farmed) and claimed automatically (picks/<uid>.rw = {key: when}). */
 const RW_PAY=5;
@@ -3203,7 +3206,7 @@ const rwOf=u=>((S.picks[u]||{}).rw)||{};
 /* total token leaderboard: everyone's whole balance (picks, props, sponsors, rewards, daily challenge) */
 function tokRows(){const ids=new Set(Object.keys(S.picks).filter(u=>S.profiles[u]));if(ME.uid&&ME.mode!=='guest')ids.add(ME.uid);
   return [...ids].map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t)}
-const tokBoard=()=>mgBoard('Token leaderboard',tokRows().map(x=>({u:x.u,v:(Math.floor(x.t*10)/10).toLocaleString()+' tokens'})),'No one is on the board yet.');
+const tokBoard=()=>mgBoard('Token leaderboard',tokRows().map(x=>({u:x.u,v:(Math.round(x.t)).toLocaleString()+' tokens'})),'No one is on the board yet.');
 const rwBonus=u=>RW_PAY*rwList().filter(([k])=>rwOf(u)[k]).length;
 let rwPend='';
 function rwClaim(){
@@ -3301,7 +3304,7 @@ const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;for(const k of ['gft','gsn','bnd']){const kv=(S.picks[ME.uid]||{})[k];if(kv)o[k]=kv}const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const p=pByKey(k),x=p&&p.games[w-1];if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -3381,7 +3384,7 @@ function fcHTML(){
       :can?`<div class="fc-deal"><p>Your week ${cw} hand is waiting.</p><button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
     <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS}">Week ${w}</button><button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
-    <p class="fg-prize">🏆 Weekly prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
+    <p class="fg-prize">Weekly prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
 }
 /* ---------- Pick 'em league: friends pick the winner of EVERY game each week; best accuracy wins ----------
@@ -3764,7 +3767,38 @@ function cardPools(){
 const cardsOf=u=>{const c=invOf(u).cards||{},o={};for(const [id,v] of Object.entries(c))o[id]=typeof v==='string'?{[v]:1}:(v||{});return o};
 const cardVers=(u,id)=>RAR_ORD.filter(r=>(cardsOf(u)[id]||{})[r]);
 const cardR=(u,id)=>{const v=cardVers(u,id);return v.length?v[v.length-1]:''};
-const cardPct=(u,id)=>{const r=cardR(u,id);return r?CARD_PCT[r]:0};
+const cardPct=(u,id)=>{const r=cardR(u,id),sc=id.startsWith('tc:')?id.slice(3):((pByKey(id.slice(3))||{}).school||'');return (r?CARD_PCT[r]:0)+(sc?bndBoost(u,sc):0)};
+/* Card Binder (v297): a school's set = its team card + its BND_N best players (by season fantasy points), any version of each.
+   Complete one: +BND_TOK tokens once and a permanent +BND_BOOST% on winnings of Pick 'em picks on that team and props on its players
+   (added on top of card boosts, saved on the pick as cb). Claimed sets are kept in picks/<uid>.bnd = {school: time}. */
+const BND_N=8,BND_TOK=1000,BND_BOOST=50;
+function bndOf(u){return ((S.picks[u]||{}).bnd)||{}}
+function bndBoost(u,sc){return bndOf(u)[sc]?BND_BOOST:0}
+function bndBonus(u){return BND_TOK*Object.keys(bndOf(u)).length}
+var _bs={rev:-1,m:{}};
+function bndSet(sc){if(_bs.rev!==_rev)_bs={rev:_rev,m:{}};if(_bs.m[sc])return _bs.m[sc];
+  const pl=players().filter(p=>!p.sample&&!/x$/.test(p.key)&&p.school===sc).map(p=>({k:p.key,v:agg(p,'season').v,n:p.name})).sort((a,b)=>b.v-a.v||a.n.localeCompare(b.n)).slice(0,BND_N);
+  return _bs.m[sc]=['tc:'+sc,...pl.map(x=>'pc:'+x.k)]}
+function bndHave(u,sc){const ids=bndSet(sc);return {ids,have:ids.filter(i=>cardVers(u,i).length).length}}
+function bndSchools(){return SD_SCHOOLS.filter(sc=>bndSet(sc).length>=4)}
+let bndPend='';
+function bndClaim(){if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks)return;
+  const mine=cardsOf(ME.uid),done=bndOf(ME.uid),due=Object.keys(mine).filter(i=>i.startsWith('tc:')&&cardVers(ME.uid,i).length).map(i=>i.slice(3)).filter(sc=>!done[sc]&&bndSet(sc).length>=4&&bndHave(ME.uid,sc).have===bndSet(sc).length);
+  const key=due.join('|');if(!due.length||bndPend===key)return;bndPend=key;const add={};due.forEach(sc=>{add[sc]=NOW()});
+  S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{bnd:Object.assign({},done,add)});
+  upsert('picks/'+ME.uid,{bnd:add}).then(()=>{say(`${due.join(' & ')} binder complete! +${BND_TOK*due.length} tokens and +${BND_BOOST}% on bets for ${due.length>1?'them':'that school'} forever.`);render(true)},()=>{bndPend='';S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{bnd:done})})}
+function bndHTML(){const u=ME.uid,done=bndOf(u),all=bndSchools(),N=UI.bndN||12,q=(UI.bndQ||'').trim().toLowerCase();
+  const rows=all.map(sc=>({sc,h:bndHave(u,sc),d:!!done[sc]})).filter(x=>!q||x.sc.toLowerCase().includes(q)).sort((a,b)=>(b.d-a.d)||(b.h.have/b.h.ids.length-a.h.have/a.h.ids.length)||a.sc.localeCompare(b.sc));
+  const nd=Object.keys(done).length,open=UI.bndO&&all.includes(UI.bndO)?UI.bndO:'';
+  const card=x=>{const t=x.h.ids.length,p=x.h.have/t*100;return `<button type="button" class="bnd-s ${x.d?'dn':''}" data-act="bndOpen" data-v="${esc(x.sc)}" aria-pressed="${open===x.sc}">${slogo(x.sc,34)}<span><b>${esc(x.sc)}</b><small class="muted">${x.d?'Complete · +'+BND_BOOST+'% boost':x.h.have+' of '+t+' cards'}</small><i class="bnd-b"><u style="width:${p}%"></u></i></span></button>`};
+  let det='';if(open){const h=bndHave(u,open),R=Object.fromEntries(RAR_ORD.map(r=>[r,RAR[r]]));
+    det=`<section class="card bnd-d"><div class="qh"><h3>${slogo(open,28)} ${esc(open)} binder</h3><span class="muted">${h.have}/${h.ids.length}</span></div>
+      <p class="muted">${done[open]?`Complete. You got +${BND_TOK} tokens and your bets on ${esc(open)} pay +${BND_BOOST}% more, for good.`:`Collect every card below, any version, for +${BND_TOK} tokens and a permanent +${BND_BOOST}% on bets for ${esc(open)}.`}</p>
+      <div class="bnd-g">${h.ids.map(id=>{const c=cardInfo(id),r=cardR(u,id),own=!!r;return `<div class="bnd-c ${own?'on':''}" style="--rc:${own?RAR[r].c:'#566'}">${own?cardArt(id,r,70):`<span class="tcard bnd-e" style="width:55px;height:70px">?</span>`}<b>${esc(c.name)}</b><small class="muted">${c.team?'Team':esc((c.sub||'').split(' · ')[0])}</small>${own?`<small style="color:${RAR[r].c}">${RAR[r].n}</small>`:'<small class="muted">Missing</small>'}</div>`}).join('')}</div></section>`}
+  return `<section class="card bnd-h"><div class="qh"><h3>Card Binder</h3><span class="muted">${nd} of ${all.length} schools</span></div>
+    <p class="muted">Collect a school’s team card and its ${BND_N} best players to complete its binder. Any version counts. Each completed school pays <b>${BND_TOK.toLocaleString()} tokens</b> once and gives a permanent <b>+${BND_BOOST}%</b> on winnings from your Pick ’em picks on that team and props on its players.</p>
+    <label class="fld"><span>Find a school</span><input id="bnd-q" type="search" value="${esc(UI.bndQ||'')}" placeholder="School name" autocomplete="off"></label></section>${det}
+    <section class="card"><div class="bnd-l">${rows.slice(0,N).map(card).join('')||'<p class="empty">No school matches.</p>'}</div>${rows.length>N?`<button class="btn ghost" data-act="bndMore">Show more (${rows.length-N})</button>`:''}</section>`}
 function rollCard(r){const P=cardPools(),team=fcRnd(100)<35,pool=team?P.tm:P.pl;return pool.length?pool[fcRnd(pool.length)]:''}
 function cardInfo(id){if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
   const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
@@ -3987,7 +4021,7 @@ async function troSave(){const g=S.groups[TR.gid];if(!g||g.ownerId!==ME.uid){say
   if(!paid){const patch={sp:(+v.sp||0)+TRO_TOK,tro:Object.assign({},v.tro,{[g.id]:1})};S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
     try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){say('That did not save. Try again.');return}}
   const ok=await act(()=>upsert('groups/'+g.id,{trophy:t}),'Trophy saved');if(ok){S.groups[g.id]=Object.assign({},g,{trophy:t});closeConfirm();render()}}
-document.addEventListener('input',e=>{const t=e.target;if(t.id==='gf-q'){GF.q=t.value;GF._focus=true;giftSheet()}else if(t.id==='gf-m')GF.m=t.value;else if(t.id==='gf-a'){GF.a=+t.value;const b=document.querySelector('[data-act=gfSend]'),l=Math.floor(bank(ME.uid));if(b)b.disabled=!(GF.to&&GF.a>=1&&GF.a<=l);document.querySelectorAll('[data-act=gfAmt]').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.v===GF.a)))}else if(t.id==='tr-nm'){TR.nm=t.value;const pv=document.querySelector('.tro-prev');if(pv)pv.innerHTML=trophySVG(TR,170)}});
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='bnd-q'){UI.bndQ=t.value;UI.bndN=12;const p=t.selectionStart;render();const n=$('#bnd-q');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(_){}}}else if(t.id==='gf-q'){GF.q=t.value;GF._focus=true;giftSheet()}else if(t.id==='gf-m')GF.m=t.value;else if(t.id==='gf-a'){GF.a=+t.value;const b=document.querySelector('[data-act=gfSend]'),l=Math.floor(bank(ME.uid));if(b)b.disabled=!(GF.to&&GF.a>=1&&GF.a<=l);document.querySelectorAll('[data-act=gfAmt]').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.v===GF.a)))}else if(t.id==='tr-nm'){TR.nm=t.value;const pv=document.querySelector('.tro-prev');if(pv)pv.innerHTML=trophySVG(TR,170)}});
 document.addEventListener('change',e=>{if(e.target.id==='gf-i'){GF.i=e.target.value;giftSheet()}});
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,v=t.dataset.v;
   if(a==='ntPhone')ntPhoneAsk();
@@ -4008,7 +4042,7 @@ function viewShop(){
   const head=`<div class="head"><h2>Shop</h2><p>Open packs for player and team cards that boost your picks, and cosmetics for your profile. Everything here is earned with tokens and daily play.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to open packs.</p>';
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid);
-  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.floor(bal*10)/10}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
+  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><div><span class="lbl">Packs opened</span><b class="bt-n">${+v.n||0}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
   let body='';
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
@@ -4033,10 +4067,10 @@ function viewLocker(){
   if(!can)return head+'<p class="empty">Sign in to keep your items.</p>';
   const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),pct=Math.min(100,ownN/Math.max(1,totN)*100);
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
-  const tab=['cards','cos','boost'].includes(UI.lk)?UI.lk:'cos';
-  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['boost','Boosts']].map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const tab=['cards','cos','boost','bnd'].includes(UI.lk)?UI.lk:'cos';
+  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['bnd','Binder'],['boost','Boosts']].map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
   const top=`<section class="lk-hero"><div class="lk-ring" style="--p:${pct.toFixed(1)}"><b>${pct>0&&pct<1?'<1':Math.floor(pct)}%</b><small>collected</small></div>
-    <div class="lk-hs"><div><b>${ownN}</b><small>cosmetics</small></div><div><b>${cardN}</b><small>cards</small></div><div><b>${+v.n||0}</b><small>packs opened</small></div><div><b>${coinIc(ME.uid)}${Math.floor(bal*10)/10}</b><small>tokens</small></div></div>
+    <div class="lk-hs"><div><b>${ownN}</b><small>cosmetics</small></div><div><b>${cardN}</b><small>cards</small></div><div><b>${+v.n||0}</b><small>packs opened</small></div><div><b>${coinIc(ME.uid)}${Math.round(bal)}</b><small>tokens</small></div></div>
     <a class="btn lk-shopb" href="#shop">Shop${fp?` · ${fp} free`:''}</a></section>`;
   let body='';
   if(false){
@@ -4053,6 +4087,7 @@ function viewLocker(){
       <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button></div>
       ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.key?'button type="button" data-act="player" data-id="'+esc(c.key)+'"':'div'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,64)}<span><b>${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">Best: ${R.n} · +${CARD_PCT[r]}%</small>${dots(id)}</span></${c.key?'button':'div'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
         :`<p class="empty">No ${T==='t'?'team':'player'} cards yet. Open packs to pull some.</p>`}</section>`;
+  }else if(tab==='bnd'){body=bndHTML()
   }else if(tab==='cos'){
     const dflt={ball:`<span class="ia ia-ball" style="width:48px;height:48px"></span>`,frame:`<span class="ia ia-frame" style="width:48px;height:48px"><i></i></span>`,
       banner:`<span class="ia ia-bn" style="width:77px;height:48px"></span>`,name:`<span class="ia ia-nc" style="width:77px;height:48px;font-size:20px">Aa</span>`,
@@ -4104,7 +4139,7 @@ function mgBoard(title,rows,empty){
   const more=!!UI.mgMore,top=more?rows:rows.slice(0,3),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>{const bn=eqOf(x.u,'banner');return `<div class="bt-h ${x.u===ME.uid?'me':''} ${bn?'bn bn-row '+bn:''}" style="${bn?cosStyle(bn):''}"><span><span class="rk">${i+1}</span> <b>${nmC(x.u,esc(nm(x.u)))}${x.u===ME.uid?' (you)':''}</b></span><b>${x.v}</b></div>`};
   return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${!more&&meI>=3?`<div class="bt-gap muted">···</div>${line(rows[meI],meI)}`:''}${rows.length>3?`<button class="btn sm ghost bt-more" data-act="mgMore">${more?'Show less':'Show more ('+(rows.length-3)+')'}</button>`:''}</section>`;
 }
-const n1=v=>Math.round(v*10)/10;
+const n1=v=>Math.round(v);
 function resCard(hist,label){
   if(!hist.length)return '';
   const more=!!UI.mgRes,L=more?hist:hist.slice(0,5);
@@ -4133,7 +4168,7 @@ function picksHTML(){
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(betResult(b,gm[id])==='open'?+b.stake||0:0),0);
   const avail=Math.round((bal-0)*100)/100;
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.floor(avail*10)/10}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.round(avail)}</div></div><div class="muted">Everyone starts with ${TOK0}. ${staked?`${tk(staked)} are riding on open picks. `:''}Pick the winners, a right pick pays your stake times the odds, a wrong one loses the stake.</div></section>`;
   const card=g=>{
     const id=gid(g),o=oddsFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?betResult(b,g):'open',ui=UI.pk[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
     const btn=(sd,n)=>{const odd=o[sd],pr=Math.round((sd==='h'?o.ph:1-o.ph)*100);
@@ -4327,7 +4362,7 @@ function simChamp(school,W,L){
   for(let i=0;i<70;i++){const x=Math.random()*100,d=(1.8+Math.random()*2.2).toFixed(2),dl=(Math.random()*1.2).toFixed(2),r=Math.round(Math.random()*720-360),w=6+Math.random()*7;
     conf+=`<i style="left:${x}%;width:${w.toFixed(0)}px;height:${(w*.45).toFixed(0)}px;background:${cols[i%cols.length]};animation-duration:${d}s;animation-delay:${dl}s;--r:${r}deg"></i>`}
   let fw='';for(let i=0;i<5;i++){const x=10+Math.random()*80,y=10+Math.random()*35,dl=(.3+i*.5).toFixed(2);fw+=`<b class="champ-fw" style="left:${x}%;top:${y}%;animation-delay:${dl}s;--c:${cols[i%cols.length]}"></b>`}
-  o.innerHTML=`<div class="champ-rays"></div>${fw}<div class="champ-conf">${conf}</div><div class="champ-in"><div class="champ-tr">🏆</div><div class="champ-logo">${slogo(school,64)}</div><h2>Champions!</h2><p>${esc(school)} · ${W}-${L} · won the playoffs</p><small>Tap to close</small></div>`;
+  o.innerHTML=`<div class="champ-rays"></div>${fw}<div class="champ-conf">${conf}</div><div class="champ-in"><div class="champ-tr"></div><div class="champ-logo">${slogo(school,64)}</div><h2>Champions!</h2><p>${esc(school)} · ${W}-${L} · won the playoffs</p><small>Tap to close</small></div>`;
   document.body.appendChild(o);try{navigator.vibrate&&navigator.vibrate([60,40,60,40,160])}catch(_){}
   const close=()=>{o.classList.add('out');setTimeout(()=>o.remove(),350)};o.addEventListener('click',close);setTimeout(()=>{if(o.isConnected)close()},6500);
 }
@@ -4397,7 +4432,7 @@ function spreadHTML(){
   const open=gs.filter(g=>!gDone(g)||mine[gid(g)]).sort((a,b)=>(a.w-b.w)||(a.d<b.d?-1:a.d>b.d?1:0)||a.h.localeCompare(b.h));
   const bal=ME.uid?bank(ME.uid):TOK0;
   const staked=Object.entries(mine).reduce((a,[id,b])=>a+(atsResult(b,gm[id])==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</div></div><div class="muted">Same tokens as Pick ’em. Beat the spread and a ${tk(10)} pick pays ${tk(10*ATS_PAY)}. ${staked?`${tk(staked)} riding on open picks. `:''}Varsity sets each spread from team ratings, so either side is close to a coin flip.</div></section>`;
   const nm2=(x,g)=>x.s==='h'?g.h:g.a,lnTxt=x=>fmtLine(x.s==='h'?+x.line:-x.line);
   const card=g=>{
     const id=gid(g),L=spreadFor(g),b=mine[id],locked=started(g)||gDone(g),res=b?atsResult(b,g):'open',ui=UI.at[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
@@ -4505,7 +4540,7 @@ function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
   const staked=Object.values(mine).reduce((a,b)=>a+(propResult(b,gm)==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.floor(bal*10)/10}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, your tokens come back.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, your tokens come back.</div></section>`;
   const mkChips=`<div class="chips bf-mk" role="group" aria-label="Stat type">${['ALL',...PP_GROUPS].map(v=>`<button class="chip" data-act="ppM" data-v="${v}" aria-pressed="${UI.pm===v}">${v==='ALL'?'All stats':v}</button>`).join('')}</div>`;
   const all=propCands().filter(x=>bfOK(x.game)&&(UI.pm==='ALL'||PP_MK[x.m].g===UI.pm));
   const shown=all.slice(0,UI.ppN);
@@ -4836,7 +4871,7 @@ function fgHTML(){
     const rows=Object.keys(S.picks).map(u=>({u,d:fgDay(u)})).filter(x=>x.d&&(+x.d.best||0)>0).sort((a,b)=>b.d.best-a.d.best||(a.d.t||0)-(b.d.t||0)).map(x=>({u:x.u,v:x.d.best+' pts · '+fgTime(x.d.t)}));
     const sk=ME.uid?fgStreak(ME.uid):0,gold=sk>=FG_GOLD;
     body=`<p class="fg-note">Same course for everyone · ${FG_TRIES} tries, best counts · <b>+${FG_DAY_PAY} tokens</b> a day.</p>
-      <p class="fg-prize">🏆 Daily prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${can&&fgPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
+      <p class="fg-prize">Daily prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top 50%</b> +${LB_TOK} tokens${can&&fgPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
       <div class="fc-bar" style="grid-template-columns:repeat(3,1fr)"><div><small>Your best today</small><b>${d&&d.best?d.best:'–'}</b></div><div><small>Tries left</small><b>${left} of ${FG_TRIES}</b></div><div><small>Streak</small><b>${sk} ${sk===1?'day':'days'}</b></div></div>
       <div class="fg-gold ${gold?'on':''}"><span class="fg-gb" aria-hidden="true"></span><span>${gold?`<b>Golden ball active.</b> Play every day to keep it.`:`<b>Golden ball:</b> ${Math.min(sk,FG_GOLD)} of ${FG_GOLD} days`}</span>${gold?'':`<i style="--p:${Math.min(1,sk/FG_GOLD)}"></i>`}</div>
       <div class="fc-deal">${can&&!left?fgMoreBtns()+'<button class="btn ghost" data-act="fgPlay" data-v="free">Play Unlimited</button>':'<button class="btn" data-act="fgPlay" data-v="daily">Play today’s challenge</button>'}${can&&!left&&invLeft(ME.uid,'p_try')>0?`<button class="btn ghost" data-act="perkTry">Use an extra try (${invLeft(ME.uid,'p_try')})</button>`:''}</div>`;
@@ -4848,7 +4883,7 @@ function fgHTML(){
       <div class="fc-deal"><button class="btn" data-act="fgPlay" data-v="free">Play</button></div>`;
     board=mgBoard('All-time best runs',rows,'No one is on the board yet. Play a run to be first.');
   }
-  return `<section class="card fg-card"><div class="fg-hero" aria-hidden="true">${bb?'🏀':'🏈'}</div><h3>${name}</h3>${seg}${body}${can?'':'<p class="hint">Sign in to save your scores and get on the leaderboards.</p>'}</section>`+board;
+  return `<section class="card fg-card"><h3>${name}</h3>${seg}${body}${can?'':'<p class="hint">Sign in to save your scores and get on the leaderboards.</p>'}</section>`+board;
 }
 const fgTime=s=>{s=Math.max(0,s||0);const m=Math.floor(s/60),r=s-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)};
 /* Field Goal / Hoops zones: a new look as the run goes on, like Geometry Dash levels. Colours fade between zones (fgMix).
@@ -4942,7 +4977,7 @@ window.addEventListener('popstate',()=>{if(FG)fgClose(true)});
 /* v262: more to the game, all held back until you've gone a while (by goal number, so the daily course is the same for everyone):
    moving goals from goal 10, power-ups from goal 7 (shield, 2x points, magnet, slow-mo), defenders drifting in the gaps from goal 18,
    wind gusts from goal 25 (warned first), and a combo for passing dead centre (PERFECT / SWISH: +1 and a x2-x4 multiplier). */
-const FG_PW={sh:{c:'#3DDC84',t:'🛡',n:'Shield',d:20},x2:{c:'#FFC23D',t:'2x',n:'Double points',d:10},mg:{c:'#FF4F6D',t:'🧲',n:'Magnet',d:7},sl:{c:'#7AB8FF',t:'⏳',n:'Slow-mo',d:6}};
+const FG_PW={sh:{c:'#3DDC84',t:'S',n:'Shield',d:20},x2:{c:'#FFC23D',t:'2x',n:'Double points',d:10},mg:{c:'#FF4F6D',t:'M',n:'Magnet',d:7},sl:{c:'#7AB8FF',t:'SL',n:'Slow-mo',d:6}};
 const fgMult=c=>c>=6?3:c>=3?2:1;   /* 3 perfects in a row = x2, 6 = x3 (max) */
 const fgPop=(g,x,y,txt,col)=>{g.pops.push({x,y,txt,col,t0:performance.now()});if(g.pops.length>8)g.pops.shift()};
 function fgHit(g){   /* a shield takes the hit instead of you */
@@ -5083,7 +5118,7 @@ function fgReady(c,g,W,H,s,bb,top){
   /* mode pill */
   const ml=dly?'DAILY CHALLENGE · TRY '+Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1)+' OF '+FG_TRIES:'UNLIMITED';c.font=`800 ${Math.round(12*s)}px system-ui,sans-serif`;const mlw=c.measureText(ml).width+26*s;
   rr(cx-mlw/2,ty+14*s,mlw,24*s,12*s);c.fillStyle=dly?'rgba(255,194,61,.18)':'rgba(47,107,255,.25)';c.fill();c.strokeStyle=dly?'#FFC23D':'#5B8CFF';c.lineWidth=1.5;c.stroke();c.fillStyle=dly?'#FFD66B':'#BFD3FF';c.fillText(ml,cx,ty+30.5*s);
-  if(g.gold){c.fillStyle='#FFD54A';c.font=`800 ${Math.round(12*s)}px system-ui,sans-serif`;c.fillText('✨ GOLDEN BALL · '+sk+'-DAY STREAK',cx,ty+56*s)}
+  if(g.gold){c.fillStyle='#FFD54A';c.font=`800 ${Math.round(12*s)}px system-ui,sans-serif`;c.fillText('GOLDEN BALL · '+sk+'-DAY STREAK',cx,ty+56*s)}
   c.restore();
   /* your numbers */
   const best=dly?(d&&d.best)||0:(+my.best||0),stats=[[dly?'BEST TODAY':'BEST RUN',best?best+' pts':'–'],[dly?'TRIES LEFT':'RUNS',dly?String(fgTriesLeft()):String(+my.runs||0)],['STREAK',sk+(sk===1?' day':' days')]];
@@ -5091,7 +5126,7 @@ function fgReady(c,g,W,H,s,bb,top){
     c.textAlign='center';c.fillStyle='#98A8BA';c.font=`800 ${Math.round(9.5*s)}px system-ui,sans-serif`;c.fillText(l,x+bw/2,sy+17*s);c.fillStyle='#fff';fit(v,'900 #px system-ui,sans-serif',bw-12*s,19*s);c.fillText(v,x+bw/2,sy+38*s);c.restore()});
   /* how to play + power-ups, in the lower part so the ball stays in view */
   const ch=Math.min(196*s,H*.3),cy=Math.max(g.y+60*s,H-ch-96*s);c.save();rr(cx-mw/2,cy,mw,ch,16*s);c.fillStyle='rgba(5,12,30,.8)';c.fill();c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=1;c.stroke();
-  const rows=[['👆','Tap to rise, let go to fall'],[bb?'🏀':'🏈','Fly '+(bb?'through the hoops':'between the uprights')+' · gold = 3 pts'],['🎯','Dead centre = '+(bb?'SWISH':'PERFECT')+' +1 · chain for x3']];
+  const rows=[['•','Tap to rise, let go to fall'],['•','Fly '+(bb?'through the hoops':'between the uprights')+' · gold = 3 pts'],['•','Dead centre = '+(bb?'SWISH':'PERFECT')+' +1 · chain for x3']];
   c.textAlign='left';const lh=Math.min(26*s,(ch-78*s)/3);rows.forEach(([ic,tx],i)=>{const y=cy+22*s+i*lh;c.font=`${Math.round(15*s)}px system-ui,sans-serif`;c.fillStyle='#fff';c.fillText(ic,cx-mw/2+16*s,y+5*s);c.fillStyle='#EAF0F8';fit(tx,'700 #px system-ui,sans-serif',mw-60*s,13*s);c.fillText(tx,cx-mw/2+44*s,y+5*s)});
   const py2=cy+22*s+3*lh+6*s;c.strokeStyle='rgba(255,255,255,.1)';c.beginPath();c.moveTo(cx-mw/2+14*s,py2-8*s);c.lineTo(cx+mw/2-14*s,py2-8*s);c.stroke();
   c.textAlign='center';c.fillStyle='#98A8BA';c.font=`800 ${Math.round(9.5*s)}px system-ui,sans-serif`;c.fillText('POWER-UPS ON THE COURSE',cx,py2+6*s);
@@ -5234,7 +5269,7 @@ function fgDraw(){
   const top=Math.max(14,(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0)+14);
   c.textAlign='center';c.fillStyle='#fff';c.strokeStyle='rgba(0,0,0,.5)';c.lineWidth=5;c.font=`900 ${Math.round(44*s)}px system-ui,sans-serif`;
   if(g.st!=='ready'){c.strokeText(g.score,W/2,top+40*s);c.fillText(g.score,W/2,top+40*s);
-  c.textAlign='left';c.font=`800 ${Math.round(17*s)}px system-ui,sans-serif`;c.lineWidth=4;const tt='⏱ '+fgTime(g.t);c.strokeText(tt,14,top+20*s);c.fillText(tt,14,top+20*s)}
+  c.textAlign='left';c.font=`800 ${Math.round(17*s)}px system-ui,sans-serif`;c.lineWidth=4;const tt=''+fgTime(g.t);c.strokeText(tt,14,top+20*s);c.fillText(tt,14,top+20*s)}
   if(g.st!=='ready'){const zn=zl[g.zone];c.font=`800 ${Math.round(12*s)}px system-ui,sans-serif`;c.lineWidth=3;const zt='ZONE '+(g.zone+1);c.strokeText(zt,14,top+40*s);c.fillStyle=zn.acc;c.fillText(zt,14,top+40*s);c.fillStyle='#fff'}
   if(g.st!=='ready'){const m=fgMult(g.combo);if(m>1){c.textAlign='center';c.font=`900 italic ${Math.round(16*s)}px system-ui,sans-serif`;c.lineWidth=4;c.strokeStyle='rgba(0,0,0,.55)';const ct='COMBO x'+m;c.strokeText(ct,W/2,top+64*s);c.fillStyle='#FFC23D';c.fillText(ct,W/2,top+64*s)}
     let hx=W-30*s;for(const kk of ['sh','x2','mg','sl']){const P=FG_PW[kk],on=g.t<g.pw[kk];if(!on)continue;const R=14*s,cy=top+62*s;
@@ -5249,7 +5284,7 @@ function fgDraw(){
     c.fillStyle='#fff';c.textAlign='center';c.font=`900 ${Math.round(26*s)}px system-ui,sans-serif`;c.fillText(a,W/2,y+42*s);
     if(b){c.font=`700 ${Math.round(15*s)}px system-ui,sans-serif`;b.split('\n').forEach((l,i)=>c.fillText(l,W/2,y+74*s+i*24*s))}};
   if(g.st==='ready')fgReady(c,g,W,H,s,bb,top);
-  else if(false)msg(bb?'Tap to tip off':'Tap to kick off',(g.gold?'✨ Golden ball · '+fgStreak(ME.uid)+'-day streak\n':'')+(g.mode==='daily'?'Daily challenge · try '+(Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1))+' of '+FG_TRIES+'\n':'')+(bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts'));
+  else if(false)msg(bb?'Tap to tip off':'Tap to kick off',(g.gold?'Golden ball · '+fgStreak(ME.uid)+'-day streak\n':'')+(g.mode==='daily'?'Daily challenge · try '+(Math.min(FG_TRIES,FG_TRIES-fgTriesLeft()+1))+' of '+FG_TRIES+'\n':'')+(bb?'Through the hoops. Gold = 3 pts':'Through the uprights. Gold = 3 pts'));
   else if(g.paused&&g.st==='play'){msg(g.invP?'Revived!':'Paused','Tap to keep going');}
   if(g.st==='over'||g.el.querySelector('.fgx-more'))fgOut();
   if(g.st==='over'){const dly=g.mode==='daily',my=ME.uid?fgRec(ME.uid):{},d=ME.uid?fgDay(ME.uid):null,best=dly?(d&&d.best):my.best,line1=`${g.score} pts · ${g.goals} ${g.goals===1?(bb?'hoop':'goal'):(bb?'hoops':'goals')} · ${fgTime(g.t)}`;
@@ -5336,16 +5371,16 @@ function rcHTML(){
   const on=my.on||{},orec=`${+on.w||0}-${+on.l||0}${+on.t?'-'+on.t:''}`,hasOn=(+on.w||0)+(+on.l||0)+(+on.t||0)>0;
   const myBar=my.runs||hasOn?`<div class="fc-bar" style="grid-template-columns:repeat(${hasOn?3:2},1fr)"><div><small>Record vs AI</small><b>${rec}</b></div>${hasOn?`<div><small>Online record</small><b>${orec}</b></div>`:''}<div><small>Best lineup</small><b>${f1(my.bpg||0)}</b></div></div>`:'';
   const bz=UI.rcoBusy?'disabled':'';
-  const play=`<div class="rco-modes"><button class="btn" data-act="rcStart" ${bz}>🤖 Play the AI</button><button class="btn" data-act="rcoFind" ${bz}>🌐 Find an opponent</button><button class="btn ghost" data-act="rcoParty" ${bz}>🎉 Create a party</button></div>
+  const play=`<div class="rco-modes"><button class="btn" data-act="rcStart" ${bz}>Play the AI</button><button class="btn" data-act="rcoFind" ${bz}>Find an opponent</button><button class="btn ghost" data-act="rcoParty" ${bz}>Create a party</button></div>
     <div class="rco-join"><label class="sr-only" for="rcCode">Party code</label><input id="rcCode" class="rco-in" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Party code" value="${esc(UI.rcCode||'')}"><button class="btn ghost" type="button" data-act="rcoJoin" ${bz}>Join a party</button></div>
     ${UI.rcoBusy?'<p class="hint">Connecting…</p>':''}`;
-  if(!m)return `<section class="card rc-card"><div class="fg-hero" aria-hidden="true">💍</div><h3>Ring Chaser</h3>
+  if(!m)return `<section class="card rc-card"><h3>Ring Chaser</h3>
     <p class="muted">Take turns spinning a random school and picking one of its players. Best lineup by points per game wins.</p>
     ${myBar}<div class="fc-deal">${ready?play:'<p class="hint">Ring Chaser opens once players have stats.</p>'}</div>${can?'':'<p class="hint">Sign in to save your record and play online.</p>'}</section>`+board;
   const score=`<div class="rc-vs"><div class="${m.done&&m.res==='w'?'win':''}"><small>You · pts/game</small><b>${f1(m.done?m.total:rcSum(m.me))}</b></div><span>vs</span><div class="${m.done&&m.res==='l'?'win':''}"><small>AI · pts/game</small><b>${f1(m.done?m.aiTotal:rcSum(m.ai))}</b></div></div>`;
   const teams=`<div class="rc-two"><section class="card"><div class="qh"><h3>Your lineup</h3><span class="muted">${f1(rcSum(m.me))} pts/game</span></div>${rcSlots(m.me)}${m.done?'':'<button class="btn sm ghost rc-quit" data-act="rcQuit">Quit</button>'}</section>
     <section class="card"><div class="qh"><h3>AI lineup</h3><span class="muted">${f1(rcSum(m.ai))} pts/game</span></div>${rcSlots(m.ai)}</section></div>`;
-  if(m.done)return `<section class="card rc-card"><div class="qh"><h3>${m.res==='w'?'You win! 💍':m.res==='l'?'The AI wins':'It’s a tie'}</h3></div>${score}
+  if(m.done)return `<section class="card rc-card"><div class="qh"><h3>${m.res==='w'?'You win! ':m.res==='l'?'The AI wins':'It’s a tie'}</h3></div>${score}
     <p class="muted" style="text-align:center">${m.res==='w'?'Your lineup averages more fantasy points per game than the AI’s.':m.res==='l'?'The AI’s lineup averages more fantasy points per game. Run it back?':'Same total, down to the decimal.'}${m.newBest?' New best lineup!':''}</p>
     <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn" data-act="rcStart">Play again</button><button class="btn ghost" data-act="rcQuit">Done</button></div></section>`+teams+board;
   const open=rcOpen(m.me),need=[...new Set(open.map(s=>s.label))].join(', ');
@@ -5574,14 +5609,14 @@ async function rcoFollow(n){
 }
 function rcoWgBar(d,on){
   const o=UI.rco,amt=d.wg?+d.wg.amt:0;
-  if(rcoWgOn(d))return `<p class="rco-wg on">🪙 <b>${amt} tokens</b> on the line. Winner takes them.</p>`;
+  if(rcoWgOn(d))return `<p class="rco-wg on"><b>${amt} tokens</b> on the line. Winner takes them.</p>`;
   if(rcoWgAsk(d))return d.wg.by===ME.uid
     ?`<div class="rco-wg ask"><p>You offered a <b>${amt}-token</b> wager. Waiting for ${esc(on)} to answer…</p><div class="btns"><button class="btn sm ghost" data-act="rcoWg" data-v="0">Cancel wager</button></div></div>`
     :`<div class="rco-wg ask them"><p>${esc(on)} wants to play for <b>${amt} tokens</b>. Winner takes them.</p><div class="btns"><button class="btn sm" data-act="rcoWgYes" ${bank(ME.uid)<amt?'disabled':''}>Accept</button><button class="btn sm ghost" data-act="rcoWgNo">Play for fun</button></div>${bank(ME.uid)<amt?'<small class="muted">You don’t have enough tokens.</small>':''}</div>`;
   const canOffer=d.st==='wait'||(d.st==='live'&&rcoFresh(d));
   if(!canOffer||!ME.uid)return d.wg&&d.wg.st==='no'?`<p class="rco-wg muted">Playing for fun, no tokens.</p>`:'';
   const bal=bank(ME.uid);
-  return `<div class="rco-wg pick">${d.wg&&d.wg.st==='no'?'<small class="muted">Your last wager was turned down.</small>':''}${UI.rcoWgPick?`<p>Bet tokens on this game:</p><div class="chips">${RCO_WG.map(v=>`<button class="chip" data-act="rcoWg" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}${bal>=1?`<button class="chip allin" data-act="rcoWg" data-v="${Math.floor(bal)}">All in · ${Math.floor(bal)}</button>`:''}<button class="chip" data-act="rcoWgPick">Cancel</button></div><small class="muted">Your opponent has to accept. Winner takes the tokens.</small>`:`<button class="btn sm ghost" data-act="rcoWgPick">🪙 Wager tokens</button>`}</div>`;
+  return `<div class="rco-wg pick">${d.wg&&d.wg.st==='no'?'<small class="muted">Your last wager was turned down.</small>':''}${UI.rcoWgPick?`<p>Bet tokens on this game:</p><div class="chips">${RCO_WG.map(v=>`<button class="chip" data-act="rcoWg" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}${bal>=1?`<button class="chip allin" data-act="rcoWg" data-v="${Math.floor(bal)}">All in · ${Math.floor(bal)}</button>`:''}<button class="chip" data-act="rcoWgPick">Cancel</button></div><small class="muted">Your opponent has to accept. Winner takes the tokens.</small>`:`<button class="btn sm ghost" data-act="rcoWgPick">Wager tokens</button>`}</div>`;
 }
 function rcoRmBar(d,on){
   const rm=d.rm,bal=bank(ME.uid);
@@ -5590,8 +5625,8 @@ function rcoRmBar(d,on){
   if(rm&&!rm.no&&rm.by===ME.uid)return `<div class="rco-wg ask"><p>Rematch${rm.amt?` for <b>${rm.amt} tokens</b>`:''} sent. Waiting for ${esc(on)}…</p><div class="btns"><button class="btn sm ghost" data-act="rcoRmCancel">Cancel</button></div></div>`;
   if(rm&&!rm.no)return `<div class="rco-wg ask them"><p>${esc(on)} wants a rematch${rm.amt?` for <b>${rm.amt} tokens</b>`:''}!</p><div class="btns"><button class="btn sm" data-act="rcoRmYes" ${rm.amt&&bal<rm.amt?'disabled':''}>Accept</button><button class="btn sm ghost" data-act="rcoRmNo">No thanks</button></div>${rm.amt&&bal<rm.amt?'<small class="muted">You don’t have enough tokens.</small>':''}</div>`;
   const last=rcoWgOn(d);
-  return `<div class="rco-rm">${rm&&rm.no&&rm.by===ME.uid?`<small class="muted">${esc(on)} said no to the rematch.</small>`:''}<div class="btns" style="justify-content:center"><button class="btn" data-act="rcoRm" data-v="0">🔁 Rematch</button>${last?`<button class="btn ghost" data-act="rcoRm" data-v="${last}" ${bal<last?'disabled':''}>🔁 Run it back for ${last}</button>`:''}</div>
-    ${UI.rcoRmPick?`<div class="chips" style="justify-content:center">${RCO_WG.map(v=>`<button class="chip" data-act="rcoRm" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}${bal>=1?`<button class="chip allin" data-act="rcoRm" data-v="${Math.floor(bal)}">All in · ${Math.floor(bal)}</button>`:''}<button class="chip" data-act="rcoRmPick">Cancel</button></div>`:`<button class="btn sm ghost" data-act="rcoRmPick">🪙 Rematch with a wager</button>`}</div>`;
+  return `<div class="rco-rm">${rm&&rm.no&&rm.by===ME.uid?`<small class="muted">${esc(on)} said no to the rematch.</small>`:''}<div class="btns" style="justify-content:center"><button class="btn" data-act="rcoRm" data-v="0">Rematch</button>${last?`<button class="btn ghost" data-act="rcoRm" data-v="${last}" ${bal<last?'disabled':''}>Run it back for ${last}</button>`:''}</div>
+    ${UI.rcoRmPick?`<div class="chips" style="justify-content:center">${RCO_WG.map(v=>`<button class="chip" data-act="rcoRm" data-v="${v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}${bal>=1?`<button class="chip allin" data-act="rcoRm" data-v="${Math.floor(bal)}">All in · ${Math.floor(bal)}</button>`:''}<button class="chip" data-act="rcoRmPick">Cancel</button></div>`:`<button class="btn sm ghost" data-act="rcoRmPick">Rematch with a wager</button>`}</div>`;
 }
 function rcoShare(){
   const o=UI.rco;if(!o||!o.d||!o.d.code)return;const code=o.d.code;
@@ -5602,13 +5637,13 @@ function rcoShare(){
 }
 function rcoHTML(){
   const o=UI.rco,d=o.d;
-  if(!d)return `<section class="card rc-card"><div class="fg-hero" aria-hidden="true">💍</div><h3>Connecting…</h3><div class="fc-deal"><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
-  if(d.st==='wait'&&d.rem)return `<section class="card rc-card rco-lobby"><div class="fg-hero" aria-hidden="true">🔁</div><h3>Rematch with ${esc(nm(d.rem))}</h3>${rcoWgOn(d)?`<p class="rco-wg on">🪙 <b>${rcoWgOn(d)} tokens</b> on the line.</p>`:''}<p class="muted" style="text-align:center"><span class="rco-dot"></span> Waiting for ${esc(nm(d.rem))} to join… <b class="rco-wait">0:00</b></p><div class="btns" style="justify-content:center;margin-top:8px"><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
+  if(!d)return `<section class="card rc-card"><h3>Connecting…</h3><div class="fc-deal"><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
+  if(d.st==='wait'&&d.rem)return `<section class="card rc-card rco-lobby"><h3>Rematch with ${esc(nm(d.rem))}</h3>${rcoWgOn(d)?`<p class="rco-wg on"><b>${rcoWgOn(d)} tokens</b> on the line.</p>`:''}<p class="muted" style="text-align:center"><span class="rco-dot"></span> Waiting for ${esc(nm(d.rem))} to join… <b class="rco-wait">0:00</b></p><div class="btns" style="justify-content:center;margin-top:8px"><button class="btn ghost" data-act="rcoLeave">Cancel</button></div></section>`;
   if(d.st==='wait')return d.pub
-    ?`<section class="card rc-card rco-lobby"><div class="rco-radar" aria-hidden="true"><i></i><i></i><i></i><em></em><span>💍</span></div><h3>Looking for an opponent<span class="rco-dots" aria-hidden="true"></span></h3>
+    ?`<section class="card rc-card rco-lobby"><div class="rco-radar" aria-hidden="true"><i></i><i></i><i></i><em></em><span></span></div><h3>Looking for an opponent<span class="rco-dots" aria-hidden="true"></span></h3>
       <p class="muted" style="text-align:center">You’ll be matched with the next person who taps Find an opponent. Keep this screen open. <b class="rco-wait">0:00</b></p>
       <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn ghost" data-act="rcoLeave">Cancel</button><button class="btn ghost" data-act="rcoAi">Play the AI instead</button></div></section>`
-    :`<section class="card rc-card rco-lobby"><div class="fg-hero" aria-hidden="true">🎉</div><h3>Your party</h3>
+    :`<section class="card rc-card rco-lobby"><h3>Your party</h3>
       <p class="muted" style="text-align:center">Send this code to a friend. They open Ring Chaser, tap Join a party and type it in.</p>
       <div class="rco-code" aria-label="Party code ${esc(d.code)}">${esc(d.code).split('').map(c=>`<span>${c}</span>`).join('')}</div>
       <p class="muted" style="text-align:center"><span class="rco-dot"></span> Waiting for your friend to join… <b class="rco-wait">0:00</b></p>${rcoWgBar(d,'your friend')}
@@ -5620,7 +5655,7 @@ function rcoHTML(){
     <section class="card"><div class="qh"><h3>${esc(on)}’s lineup</h3><span class="muted">${f1(rcSum(m.ai))} pts/game</span></div>${rcSlots(m.ai)}</section></div>`;
   if(over){
     const why=d.st==='gone'?(d.left===ME.uid?'You left the match.':esc(on)+' left the match, so the win is yours.'):d.win?(d.win===ME.uid?esc(on)+' stopped playing, so the win is yours.':'You ran out of time, so '+esc(on)+' takes the win.'):o.res==='w'?'Your lineup averages more fantasy points per game.':o.res==='l'?esc(on)+'’s lineup averages more fantasy points per game. Run it back?':'Same total, down to the decimal.';
-    return `<section class="card rc-card"><div class="qh"><h3>${o.res==='w'?'You win! 💍':o.res==='l'?esc(on)+' wins':'It’s a tie'}</h3></div>${score}
+    return `<section class="card rc-card"><div class="qh"><h3>${o.res==='w'?'You win! ':o.res==='l'?esc(on)+' wins':'It’s a tie'}</h3></div>${score}
     <p class="muted" style="text-align:center">${why}${o.newBest?' New best lineup!':''}${rcoWgOn(d)&&o.res&&o.res!=='t'?` <b class="${o.res==='w'?'rco-won':'rco-lost'}">${o.res==='w'?'+':'-'}${rcoWgOn(d)} tokens</b>`:''}</p>
     ${rcoRmBar(d,on)}<div class="btns" style="justify-content:center;margin-top:8px"><button class="btn ghost" data-act="rcoFind">Find another opponent</button>${d.code?'<button class="btn ghost" data-act="rcoParty">New party</button>':''}<button class="btn ghost" data-act="rcoDone">Done</button></div></section>`+teams;
   }
@@ -5649,10 +5684,10 @@ function viewMini(){
   if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='leagues';UI.lgk='pk';setTimeout(()=>{location.hash='#groups'},0)}
   if(!UI.mtab||UI.mtab==='predict')UI.mtab=propCands().length?'props':'picks';   /* v287: Predict opens on Player props (Pick 'em when there are no lines yet) */
   const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
-  const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-wrap"><a class="tok-box shop-box" href="#shop" aria-label="Shop: open packs"><small>Shop</small><b><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b></a><button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${coinIc(ME.uid)}${Math.floor(bank(ME.uid)*10)/10}<span class="tok-plus" aria-hidden="true">+</span></b></button></div>`:'';
+  const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-wrap"><a class="tok-box shop-box" href="#shop" aria-label="Shop: open packs"><small>Shop</small><b><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b></a><button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${coinIc(ME.uid)}${Math.round(bank(ME.uid))}<span class="tok-plus" aria-hidden="true">+</span></b></button></div>`:'';
   const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Draft a lineup against the AI or a real person, one random school at a time. Best team wins.':T==='fg'?'A quick arcade game. Tap to keep the ball up and fly it through the goals.':T==='sim'?'Draw a full 12-player team, use your respins to swap players, and build the best team you can. Your score is the season fantasy points of everyone on it.':T==='mock'?'Practice drafting against AI teams, or jump into a mock draft with other people. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on player stats like yards, touchdowns and tackles. Every line is built from that player’s own game log.':T==='draw'?'Get dealt 5 random players each week, redraw up to '+FC_REDRAWS+', and see where your hand ranks across the whole app.':PT==='pkl'?'Pick the winner of every game each week. The friend with the best accuracy tops your league.':'Pick the winners of the upcoming games and grow your tokens.'}</p></div>${tkn}</div>`;
   /* v289: game tiles with an icon and a colour each (gold glow on the one you're in) */
-  const tabs=`<div class="mg-tiles" role="group" aria-label="Minigames">${[['predict','Predict','🎯','#2F6BFF'],['draw','5 Card Draw','🃏','#7A4DFF'],['sim','10-0','⚡','#FF4F6D'],['rc','Ring Chaser','💍','#3DDC84'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal',FG_SPORT==='bb'?'🏀':'🏈','#FF9A1F']].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="mtab" data-v="${v}" aria-pressed="${v===T}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
+  const tabs=`<div class="mg-tiles" role="group" aria-label="Minigames">${[['predict','Predict','🎯','#2F6BFF'],['draw','5 Card Draw','5','#7A4DFF'],['sim','10-0','10','#FF4F6D'],['rc','Ring Chaser','RC','#3DDC84'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal',FG_SPORT==='bb'?'HP':'FG','#FF9A1F']].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="mtab" data-v="${v}" aria-pressed="${v===T}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="pr-big" role="group" aria-label="Predict">${[['props','Player props','Over or under on player stats','📊'],['picks','Pick ’em','Pick the winners of the games','🏆']].map(([v,l,d,ic])=>`<button class="pr-bt" data-act="mtab" data-v="${v}" aria-pressed="${PT===v}"><span class="pr-ic" aria-hidden="true">${ic}</span><span class="pr-tx"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`:'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
@@ -7343,7 +7378,7 @@ document.addEventListener('click',async e=>{
   else if(a==='rstFc'||a==='rstBets'||a==='rstAts'||a==='rstAll'){
     if(VA||!ME.uid)return;const all=a==='rstAll',what=all?'all three games':a==='rstFc'?'5 Card Draw':a==='rstBets'?'Pick ’em':'Player props';
     if(!confirm('Reset your own '+what+'? Your hand, picks and tokens for it are cleared so you can replay. Other people are not affected.'))return;
-    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{}),...(Object.keys(rwOf(ME.uid)).length?{rw:rwOf(ME.uid)}:{}),...(Object.keys(lbtOf(ME.uid)).length?{lbt:lbtOf(ME.uid)}:{}),...(dlyOf(ME.uid).n?{dly:dlyOf(ME.uid)}:{}),...((S.picks[ME.uid]||{}).inv?{inv:(S.picks[ME.uid]||{}).inv}:{})};
+    const nx={bets:(all||a==='rstBets')?{}:betsOf(ME.uid),fc:(all||a==='rstFc')?{}:fcDoc(ME.uid),ats:(all||a==='rstAts')?{}:atsOf(ME.uid),props:(all||a==='rstAts')?{}:propsOf(ME.uid),...(adOf(ME.uid).d?{ad:adOf(ME.uid)}:{}),...(Object.keys(rwOf(ME.uid)).length?{rw:rwOf(ME.uid)}:{}),...(Object.keys(lbtOf(ME.uid)).length?{lbt:lbtOf(ME.uid)}:{}),...(dlyOf(ME.uid).n?{dly:dlyOf(ME.uid)}:{}),...Object.fromEntries(['gft','gsn','bnd'].filter(k=>(S.picks[ME.uid]||{})[k]).map(k=>[k,S.picks[ME.uid][k]])),...((S.picks[ME.uid]||{}).inv?{inv:(S.picks[ME.uid]||{}).inv}:{})};
     if(await act(()=>setDoc('picks/'+ME.uid,nx),what+' reset. Play it again from the Games tab.')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],nx);UI.pk={};UI.at={};UI.fcDeal=null;UI.fcAnim=null;render()}}
   else if(a==='lock'){try{await SB.rpc('admin_lock')}catch(_){}ME.admin=false;AD.rows=null;AD.sel=null;render()}
   else if(a==='saveSchool'){const v=$('#ad-school').value.trim();await act(()=>upsert('profiles/'+id,{school:v}),'School saved')}
@@ -7398,7 +7433,7 @@ function chrome(v){
   const wk=$('#wk');if(wk)wk.textContent='Week '+CURW();
   const wk2=$('#wk2');if(wk2)wk2.textContent='Week '+CURW();
   /* tokens + Shop in the header on every tab (v258) */
-  try{const on=!!(ME.uid&&ME.mode!=='guest'),h=on?coinIc(ME.uid)+'<b>'+(Math.floor(bank(ME.uid)*10)/10).toLocaleString()+'</b>':'';
+  try{const on=!!(ME.uid&&ME.mode!=='guest'),h=on?coinIc(ME.uid)+'<b>'+Math.round(bank(ME.uid)).toLocaleString()+'</b>':'';
     document.querySelectorAll('.hdr-tk').forEach(e=>{e.hidden=!on});document.querySelectorAll('.hdr-tokn').forEach(e=>{if(e.innerHTML!==h)e.innerHTML=h});
     document.querySelectorAll('.hdr-shop').forEach(a=>a.classList.toggle('on',v==='shop'))}catch(_){}
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
@@ -7440,7 +7475,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{lbTokClaim()}catch(_){}try{dlyClaim()}catch(_){}try{giftPopup()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{lbTokClaim()}catch(_){}try{dlyClaim()}catch(_){}try{giftPopup()}catch(_){}try{bndClaim()}catch(_){}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
   /* a refresh that lands mid-swipe waits until the finger is up and the page has stopped scrolling */
@@ -7529,12 +7564,12 @@ document.addEventListener('click',async e=>{
   else if(a==='adWatch'){if(!$('#cfm').hidden)closeConfirm();adPlay()}
   else if(a==='tokOpen'){const c=$('#cfm');const l=adLeft(ME.uid);
     c.innerHTML=`<div class="gcard tok-sheet" role="dialog" aria-modal="true" aria-labelledby="tk-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="tk-t">Get tokens</h2>
-      <div class="tok-bal"><small>You have</small><b>${Math.floor(bank(ME.uid)*10)/10}</b><small>tokens</small></div>
+      <div class="tok-bal"><small>You have</small><b>${Math.round(bank(ME.uid))}</b><small>tokens</small></div>
       <div class="tok-opt" style="cursor:default"><span class="tok-ic" aria-hidden="true">☀</span><span><b>Daily bonus: +${DLY_PAY} tokens</b><small>${dlyOf(ME.uid).d===TODAY()?'Collected today ✓ · come back tomorrow':'Added when you open Varsity each day'}</small></span></div>
       <button type="button" class="tok-opt" data-act="adWatch" ${l?'':'disabled'}><span class="tok-ic" aria-hidden="true">▶</span><span><b>Watch a short sponsor spot</b><small>+${ADS.reward} tokens · ${l?l+' left today':'back tomorrow'}</small></span></button>
       <button type="button" class="tok-opt" data-act="goLocker"><span class="tok-ic" aria-hidden="true">▣</span><span><b>Open packs in the Shop</b><small>${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' waiting · ':''}Ball skins, frames, perks, boosts</small></span></button>
       ${rwHTML()}
-      ${(()=>{const r=tokRows(),i=r.findIndex(x=>x.u===ME.uid);return r.length?`<div class="rw"><div class="rw-h"><b>Token leaderboard</b><small class="muted">${i>=0?'You are #'+(i+1)+' of '+r.length:''}</small></div><ul>${r.slice(0,5).map((x,k)=>`<li class="${x.u===ME.uid?'me':''}"><span class="rw-c">${k+1}</span><span>${esc(x.u===ME.uid?'You':nm(x.u))}</span><b>${(Math.floor(x.t*10)/10).toLocaleString()}</b></li>`).join('')}</ul></div>`:''})()}
+      ${(()=>{const r=tokRows(),i=r.findIndex(x=>x.u===ME.uid);return r.length?`<div class="rw"><div class="rw-h"><b>Token leaderboard</b><small class="muted">${i>=0?'You are #'+(i+1)+' of '+r.length:''}</small></div><ul>${r.slice(0,5).map((x,k)=>`<li class="${x.u===ME.uid?'me':''}"><span class="rw-c">${k+1}</span><span>${esc(x.u===ME.uid?'You':nm(x.u))}</span><b>${(Math.round(x.t)).toLocaleString()}</b></li>`).join('')}</ul></div>`:''})()}
       <p class="muted">Tokens are free, are shared by every game in Minigames, and have no cash value.</p>
       <div class="gbtns"><button class="btn ghost" data-c="no">Close</button></div></div>`;
     c.hidden=false;const b=c.querySelector('.tok-opt');if(b)b.focus()}
@@ -7685,6 +7720,8 @@ document.addEventListener('click',async e=>{
   else if(a==='goLocker'){const c=$('#cfm');if(c&&!c.hidden&&typeof closeConfirm==='function')closeConfirm();location.hash='#shop'}
   else if(a==='lkTab'){UI.lk=t.dataset.v;render()}
   else if(a==='pkAd'){if(((invOf(ME.uid).fr||{}).ad)===TODAY()){say('Come back tomorrow for another free pack.');return}adPlay(()=>packOpen('rookie','ad'))}
+  else if(a==='bndOpen'){UI.bndO=UI.bndO===t.dataset.v?'':t.dataset.v;render()}
+  else if(a==='bndMore'){UI.bndN=(UI.bndN||12)+12;render()}
   else if(a==='lkC'){UI.lkC=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkK'){UI.lkK=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkOwn'){UI.lkOwn=!UI.lkOwn;UI.lkN=30;render()}
