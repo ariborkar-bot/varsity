@@ -2711,7 +2711,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v322 · Nov 8';
+const APP_BUILD='v323 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3374,7 +3374,7 @@ function playoffsHTML(){
    Free: pick the winner of every playoff game in every division (Games tab → Playoff bracket → Bracket Challenge). Later rounds use your own
    earlier picks, like a classic bracket. Points per correct pick: Round 1 = 1, Round 2 / Quarterfinals = 2, Semifinals = 4, Championship = 8
    (a pick counts if that team really wins that slot, even if it got there differently than you thought). A round locks at the start of its day.
-   Saved in picks/<uid>.bk = {'Division|round|game': teamName}. When every championship is final: 1st a Pro pack, 2nd-3rd a Rookie pack,
+   Saved in picks/<uid>.bk = {'Division|round|game': teamName}. When every championship is final: 1st a Champion pack (v323), 2nd-3rd a Rookie pack,
    the rest of the top 50% +100 tokens (inv.fr.bk, lbt.bk). Football only (the basketball bracket is only a projection). */
 const BK_ON=false;
 const bkWt=n=>/champ/i.test(n)?8:/semi/i.test(n)?4:/quarter|round 2/i.test(n)?2:1;
@@ -3396,7 +3396,7 @@ function bkActual(){if(_bkA&&Date.now()-_bkA.at<1500)return _bkA.v;const m={};le
   _bkA={at:Date.now(),v:{m,done}};return _bkA.v}
 function bkScore(u){const A=bkActual().m,P=bkOf(u);let p=0,c=0,n=0,f=0;for(const id in P){n++;const a=A[id];if(a){f++;if(a.win===P[id]){p+=a.wt;c++}}}return{p,c,n,f}}
 function bkRank(){return Object.keys(S.picks).filter(u=>Object.keys(bkOf(u)).length&&S.profiles[u]).map(u=>({u,s:bkScore(u)})).sort((a,b)=>b.s.p-a.s.p||b.s.c-a.s.c||b.s.n-a.s.n||(a.u<b.u?-1:1))}
-function bkPrizes(u){if(!u||!BK_ON)return[];try{if(!bkActual().done)return[];if(((invOf(u).fr||{}).bk))return[];const r=bkRank(),i=r.findIndex(x=>x.u===u);return i>=0&&i<3?[{place:i+1,type:i===0?'player':'rookie'}]:[]}catch(_){return[]}}
+function bkPrizes(u){if(!u||!BK_ON)return[];try{if(!bkActual().done)return[];if(((invOf(u).fr||{}).bk))return[];const r=bkRank(),i=r.findIndex(x=>x.u===u);return i>=0&&i<3?[{place:i+1,type:i===0?'champs':'rookie'}]:[]}catch(_){return[]}}
 function bkTokDue(u){try{if(!BK_ON||!bkActual().done)return false;const r=bkRank(),i=r.findIndex(x=>x.u===u);return i>=0&&lbHalf(i,r.length)}catch(_){return false}}
 function bkFav(){const st=Object.assign({},UI.bkS);for(let k=0;k<6;k++){let add=0;bkTrees(ME.uid,st).forEach(d=>d.rounds.forEach(r=>r.games.forEach(g=>{if(g.locked||g.win||st[g.id]||g.pick||!g.a||!g.h)return;const sa=+g.sa||99,sh=+g.sh||99;st[g.id]=sa<=sh?g.a:g.h;add++})));if(!add)break}UI.bkS=st}
 function bkHTML(){
@@ -3410,7 +3410,7 @@ function bkHTML(){
     <p class="muted">Pick every playoff winner. Later rounds are worth more. A round locks when it starts.</p>
     <div class="cup-sc2"><div><small>Your points</small><b>${sc.p}</b></div><div><small>Correct</small><b>${sc.c}/${sc.f}</b></div><div><small>Rank</small><b>${mi>=0?(mi+1)+' of '+rows.length:'–'}</b></div></div>
     ${nextR?`<p class="muted">Next round locks ${esc(fmtDate(nextR))}.</p>`:''}
-    <p class="muted">When all championships are final: <b>1st</b> ${esc(PACKS.player.n)}, <b>2nd–3rd</b> ${esc(PACKS.rookie.n)}, <b>top 50%</b> +${LB_TOK} tokens. Free to play.${can&&bkPrizes(ME.uid).length?` <a href="#shop"><b>Your prize is waiting →</b></a>`:''}</p></section>`;
+    <p class="muted">When all championships are final: <b>1st</b> ${esc(PACKS.champs.n)}, <b>2nd–3rd</b> ${esc(PACKS.rookie.n)}, <b>top 50%</b> +${LB_TOK} tokens. Free to play.${can&&bkPrizes(ME.uid).length?` <a href="#shop"><b>Your prize is waiting →</b></a>`:''}</p></section>`;
   const chips=`<div class="chips gm-divs" role="group" aria-label="Division">${T.map(x=>`<button class="chip" data-act="bkDiv" data-v="${esc(x.div)}" aria-pressed="${x===d}">${esc(x.div)}${open(x)?` <small class="bk-n">${open(x)}</small>`:''}</button>`).join('')}</div>`;
   const card=g=>{const lock=g.locked||!!g.win,cur=g.pick;
     const btn=(n,s,guess)=>{if(!n)return `<div class="bk-t tbd"><b>To be decided</b></div>`;const on=cur===n,res=g.win?(on?(g.win===n?'ok':'no'):(g.win===n?'was':'')):'',sc2=g.win&&g.as!=null?(n===g.a?g.as:g.hs):null;
