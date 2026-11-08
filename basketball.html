@@ -2700,7 +2700,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v315 · Nov 8';
+const APP_BUILD='v316 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3508,7 +3508,7 @@ function fcHTML(){
     const mode=dl?{back:'fc-mys fc-back',flip:'fc-flip'}[dl]:an?(an.rev?'fc-flip':'fc-mys'):'',fdel=dl==='flip'?i*.13:0;
     return `<div class="fc-card ${x?'in':''} ${mode}" ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}${T10W(p,`<b class="fc-nm">${esc(p.name)}</b>`)}<small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
       <div class="fc-ppg">${(()=>{const a=agg(p,'season');return a.n?`<b>${f1(a.v/a.n)}</b> PPG<small>${PRE()?0:a.n} ${!PRE()&&a.n===1?'game':'games'}</small>`:'<small>No games yet</small>'})()}</div>
-      <div class="fc-pts"><b>${x?f1(pts(x.stat)):'—'}</b><small>${x?(FC_DAILY?'game pts':'week '+w+' pts'):'waiting on game'}</small></div>
+      <div class="fc-pts"><b>${x?f1(pts(x.stat)):fcDnp(p,w)?'0.0':'—'}</b><small>${x?(FC_DAILY?'game pts':'week '+w+' pts'):fcDnp(p,w)?'did not play':'waiting on game'}</small></div>
       ${w===cw&&can?`<button class="btn sm ${left>0&&!lk&&!lkd&&fcOpen(w)?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!lkd&&fcOpen(w)&&!UI.fcAnim?'':'disabled'}>${lk||!fcOpen(w)?'Locked':'Redraw'}</button>`:''}</div>`}).join(''):'';
   const wk=[...new Set([cw,...Object.keys(fcDoc(ME.uid||'')).map(Number)])].filter(n=>n<=cw).sort((a,b)=>b-a).slice(0,FC_DAILY?7:99),wkOf=(()=>{const g=fcGamesOf(w)[0];return g?g.w:CURW()})();
   const byW=FC_DAILY&&UI.fcb==='wk',byS=UI.fcb==='season';
@@ -5000,12 +5000,16 @@ const lbHalf=(i,n)=>i>=3&&i<Math.floor(n/2);   /* i = 0-based place; top 50% min
 const fcWkScore=(u,w)=>Math.round(fcSlotsOf(w).reduce((a,s)=>a+fcScore(u,s),0)*10)/10;
 const fcRank=w=>Object.keys(S.picks).filter(u=>fcSlotsOf(w).some(s=>fcHand(u,s))).map(u=>({u,t:fcWkScore(u,w)})).sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1));
 /* a 5 Card Draw week is finished once every game that week has a score and 2 days have passed since the last one (time for stats to come in) */
-/* hand players with no stat line yet, across every hand that week (all days in basketball) */
-function fcWaiting(w){let n=0;const seen=new Set();for(const u of Object.keys(S.picks))for(const sl of fcSlotsOf(w)){const hd=fcHand(u,sl);if(!hd)continue;for(const k of hd.h||[]){const p=pByKey(k),id=k+'|'+sl;if(p&&!seen.has(id)){seen.add(id);if(!fcPts(p,sl))n++}}}return n}
+/* v316 (owner): a player with no line whose team's game is final AND whose team has a real box score (3+ of its players have lines that day/week) did not play: he counts as 0 points, so he never holds up the payout */
+let _bx={r:-1,s:{}};
+function fcBox(sl){if(_bx.r!==_rev)_bx={r:_rev,s:{}};if(_bx.s[sl])return _bx.s[sl];const m={};players().forEach(p=>{if(p.mp&&fcPts(p,sl))m[p.school]=(m[p.school]||0)+1});return _bx.s[sl]=m}
+const fcDnp=(p,sl)=>{if(!p||fcPts(p,sl))return false;const g=fcGamesOf(sl).find(g=>g.h===p.school||g.a===p.school);return !!g&&gDone(g)&&(fcBox(sl)[p.school]||0)>=3};
+/* hand players with no stat line yet (and not a did-not-play), across every hand that week (all days in basketball) */
+function fcWaiting(w){let n=0;const seen=new Set();for(const u of Object.keys(S.picks))for(const sl of fcSlotsOf(w)){const hd=fcHand(u,sl);if(!hd)continue;for(const k of hd.h||[]){const p=pByKey(k),id=k+'|'+sl;if(p&&!seen.has(id)){seen.add(id);if(!fcPts(p,sl)&&!fcDnp(p,sl))n++}}}return n}
 /* v315 (owner): prizes and tokens pay out only when every game that week is final AND every player in every hand has a stat line, so the winners are known for sure.
    (Before v315 a missing stat line stopped blocking after the Thursday following the week.) */
 function fcWeekDone(w){const gs=fcIdx().w[w]||[];if(!gs.length)return w<CURW();if(!gs.every(gDone))return false;return fcWaiting(w)===0}
-const fcWaitNote=w=>{const gs=fcIdx().w[w]||[];if(!gs.length||!gs.every(gDone))return '';const n=fcWaiting(w);return n?`<p class="hint">Prizes pay out once every player in every hand has a stat line. Waiting on ${n} ${n===1?'player':'players'}.</p>`:''};
+const fcWaitNote=w=>{const gs=fcIdx().w[w]||[];if(!gs.length||!gs.every(gDone))return '';const n=fcWaiting(w);return n?`<p class="hint">Prizes pay out once every player in every hand has a stat line (a player who didn’t play counts as 0). Waiting on ${n} ${n===1?'player':'players'}.</p>`:''};
 const fcLbWeeks=()=>{const out=[];for(let w=WEEKS;w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
 function fcPrizes(u){if(!u)return[];const cl=((invOf(u).fr||{}).fc)||{},out=[];
   for(const w of fcLbWeeks()){if(cl[w])continue;const pl=fcRank(w).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({w,place:pl+1,type:FG_LB_PRIZE[pl]})}return out}
