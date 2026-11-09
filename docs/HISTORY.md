@@ -238,3 +238,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v378 (Nov 9): near-miss names find their box-score player
 - `mpFind(profile)`: exact name at the school first; otherwise the closest box-score name at the same school within edit distance 1 (2 for names of 10+ letters, `nmLev()`); if two names tie, the one at the profile's position wins, otherwise no match. Used by `players()` (no duplicate entry) and `meSides()` (Me tab stats). Saving the profile step replaces a near-miss name with the real one ("Darian Web" → Darian Webb) and says "Found you: …". Tested: Zeed Hornby/zed hornbey → Zed Hornby, Isac Smedra → Isaac Smedra, Hezekiah Manual → Hezekiah Manuel; wrong school or unrelated names don't match. Only 3 pairs of box-score names in the whole section are 1 letter apart at the same school.
+
+## v379 (Nov 9): Isaac Smedra's account is put on his player profile
+- `PROFILE_FIX` + `profileFix()` (runs first in touch()): an account whose sign-in email contains "smedra", or whose profile name is within 2 letters of "Isaac Smedra", gets the profile Isaac Smedra · Bishop's · player · football · DEF/DL, marked done (`ob:2`, `fx['is-p1']`, and v374's `redo['is-1']` so he isn't signed out again). Works whether or not he already has a profile; the profile step closes and he lands with his stats (30.7 pts, 7 games).
