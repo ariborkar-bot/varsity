@@ -21,3 +21,9 @@ Each video also has a `_no_music` version (sound effects only, about -18 LUFS) f
 3. `python3 music.py v1 v2 v3 v4 v5` -> `audio/vN.wav` and `audio/vN_sfx.wav`.
 4. `python3 render.py video v/vN.html out/name.mp4 <seconds> audio/vN.wav` (stills: `render.py stills v/vN.html prefix t1 t2 ...`).
 Notes: the pack recording flickers the last cards (virtual clock); v1 holds frame 402 for the final grid. Hoops search by school name does not exist (search matches player names), so v2 uses the team page.
+
+## v6 stats leaderboard + over/unders (added Nov 8, 14.8 s, music only)
+Owner asked for one about the leaderboard and the over/unders with music and NO sound effects. Brazilian funk, 130 BPM, D minor (`music.py v6`, no effects bus).
+Sports-broadcast look (lime #C6FF3D, skewed Barlow Condensed lower-thirds, counting numbers). Footage: `REAL=1`-style real names via `python3 rec6.py lb props`
+(leaderboard with 3x "Show 10 more", then Zed Hornby receiving yards OVER 60.5, 25 tokens, Lock in pick = `[data-act=ppAll]`).
+Fact check: #1 overall is Hezekiah Manuel (Hoover QB, 464.1); top RB is Paisios Polamalu (428.0); Darian Webb is #3 overall, so v1's caption now says "top 3 in all of San Diego".

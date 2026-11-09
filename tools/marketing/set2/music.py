@@ -304,5 +304,68 @@ def v5():
     m.fx_reverb('brass', .3, 2.4, 2.2, 6000); m.fx_reverb('drums', .18, 2.0, 2.6, 7000)
     finish(m, 'v5', [], gains={'brass': .85, 'drums': 1.0, 'bass': .9, 'sfx': .7})
 
+# ======================= V6: Brazilian funk (stats + over/unders) 130 BPM, D minor. MUSIC ONLY, no sound effects =======================
+def flute(note, length, vib=.012, breath=.12):
+    n = T(length); t = tt(n); f = hz(note) * (1 + vib * np.sin(2 * np.pi * 5.5 * t) * np.clip(t / .12, 0, 1))
+    x = np.sin(phase(f, n)) + .18 * np.sin(2 * phase(f, n)) + .06 * np.sin(3 * phase(f, n))
+    x += bp(noise(n), hz(note) * 1.5, hz(note) * 4) * breath
+    return x * adsr(n, .03, .1, .85, .06) * .35
+def conga(note=220, length=.18):
+    n = T(length); t = tt(n); f = note * (1 + .25 * np.exp(-t * 40))
+    return (np.sin(phase(f, n)) * np.exp(-t * 18) + bp(noise(n), 800, 4000) * np.exp(-t * 90) * .3) * .5
+def v6():
+    bpm = 130; b = 60 / bpm; bar = 4 * b; s16 = b / 4; L = 8 * bar; m = Mix(L + .4); kicks = []
+    KP = [0, 3, 6, 10, 12]            # tamborzao-style 3-3-4-2-4
+    roots = ['D1', 'D1', 'A#0', 'C1']
+    mel = [('A5', 0, 2), ('F5', 2, 1), ('G5', 3, 2), ('A5', 6, 2), ('C6', 8, 2), ('A5', 10, 1), ('G5', 11, 1), ('F5', 12, 2), ('E5', 14, 2)]
+    mel2 = [('D6', 0, 2), ('C6', 2, 1), ('A5', 3, 3), ('G5', 6, 2), ('A5', 8, 3), ('F5', 11, 1), ('G5', 12, 2), ('A5', 14, 2)]
+    def melody(t0, which=0, gain=1.0, cut=None):
+        for nt, k, d in (mel if which == 0 else mel2):
+            x = flute(nt, s16 * d * 1.05)
+            if cut: x = lp(x, cut)
+            m.add(x, t0 + k * s16, .62 * gain, pan=-.1, bus='lead')
+            m.add(flute(nt.replace('5', '4').replace('6', '5'), s16 * d * 1.05, breath=.05), t0 + k * s16, .25 * gain, pan=.25, bus='lead')
+    def funk(t0, ci, full=True, fill=False):
+        for k in KP:
+            m.add(kick(punch=1.15, top=170, bottom=48, length=.3, drive=2.2), t0 + k * s16, .9, bus='drums'); kicks.append(t0 + k * s16)
+            m.add(k808(roots[ci], length=s16 * 2.6, drive=4.0, decay=3.5, tone=1600, punch=.6), t0 + k * s16, .85, bus='bass')
+        for k in (4, 12): m.add(clap(length=.3), t0 + k * s16, .7, bus='drums'); m.add(snare(tone=240, length=.15, crack=.9, body=.2), t0 + k * s16, .3, bus='drums')
+        for k in range(16):
+            m.add(hat(vel=1.0 if k % 2 == 0 else .55, tone=8000), t0 + k * s16, .38, pan=.3, bus='drums')
+        for k, nt in ((2, 300), (5, 220), (7, 260), (9, 300), (13, 220), (15, 260)):
+            m.add(conga(nt), t0 + k * s16, .55, pan=-.35, bus='drums')
+        if fill:
+            for r, nt in enumerate([300, 280, 260, 240, 220, 200, 180, 160]):
+                m.add(conga(nt, .14), t0 + 3 * b + r * b / 8, .5, pan=(-.4 + r * .1), bus='drums')
+    # bar 1: melody + congas + filtered kick pattern (hook)
+    melody(0, 0, cut=3000)
+    for k in KP: m.add(lp(kick(length=.25), 900), k * s16, .6, bus='drums'); kicks.append(k * s16)
+    for k, nt in ((2, 300), (5, 220), (7, 260), (9, 300), (13, 220), (15, 260)): m.add(conga(nt), k * s16, .5, pan=-.35, bus='drums')
+    for r, nt in enumerate([300, 280, 260, 240, 220, 200, 180, 160]): m.add(conga(nt, .14), 3 * b + r * b / 8, .5, bus='drums')
+    # bars 2-6 full, melody alternates; bar 4 is the switch into the over/unders (bass + chords only for 2 beats)
+    for i in range(1, 6):
+        t0 = i * bar; ci = i % 4
+        if i == 3:
+            for nt in ['D4', 'F4', 'A4']: m.add(pad([nt], 2 * b, cutoff=2200, a=.05, r=.2), t0, .5, bus='lead')
+            m.add(k808('D1', length=2 * b, glide='A1', drive=3.5, decay=1.2, tone=1500), t0, .9, bus='bass')
+            for k in range(8, 16):
+                m.add(hat(vel=.8, tone=8000), t0 + k * s16, .4, pan=.3, bus='drums')
+            for k in (8, 11, 14): m.add(kick(punch=1.15, length=.3, drive=2.2), t0 + k * s16, .9, bus='drums'); kicks.append(t0 + k * s16)
+            m.add(clap(), t0 + 12 * s16, .7, bus='drums'); melody(t0 + 2 * b, 1, .9)
+            continue
+        funk(t0, ci, fill=i in (2, 5)); melody(t0, i % 2)
+    # bars 7-8: end card: full groove then a held chord
+    funk(6 * bar, 0); melody(6 * bar, 0)
+    t0 = 7 * bar
+    for k in KP[:3]: m.add(kick(punch=1.15, length=.3, drive=2.2), t0 + k * s16, .9, bus='drums'); kicks.append(t0 + k * s16); m.add(k808('D1', length=s16 * 2.6, drive=4, decay=3.5, tone=1600), t0 + k * s16, .85, bus='bass')
+    m.add(clap(), t0 + 4 * s16, .7, bus='drums')
+    m.add(pad(['D4', 'F4', 'A4', 'C5'], bar * .9, cutoff=2600, a=.05, r=.5), t0 + 2 * b, .55, bus='lead')
+    m.add(flute('D6', bar * .45), t0 + 2 * b, .6, bus='lead')
+    m.add(k808('D1', length=1.4, drive=3.5, decay=1.6), t0 + 2 * b, .8, bus='bass')
+    m.sidechain('lead', kicks, .35, .12)
+    m.fx_reverb('lead', .25, 1.6, 3.2, 7000); m.fx_reverb('drums', .07, 1.0, 5, 6000)
+    full = m.render({'lead': .85, 'drums': 1.0, 'bass': .95}, lufsish=-11.0)
+    write_wav(OUT + 'v6.wav', full); print('v6 peak %.2f rms %.3f' % (np.abs(full).max(), np.sqrt(np.mean(full ** 2))))
+
 if __name__ == '__main__':
     for a in sys.argv[1:]: globals()[a]()
