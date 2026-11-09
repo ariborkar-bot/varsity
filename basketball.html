@@ -3029,9 +3029,14 @@ function mgOk(p){
   return (_nsL[p.school]||0)>=3;
 }
 let _pl=null;
+const nmNorm=x=>String(x||'').trim().toLowerCase().replace(/[’‘`]/g,"'").replace(/\s+/g,' ');
+const nmKey=(n,s)=>nmNorm(n)+'|'+nmNorm(s);
 function players(){
   if(_pl&&_pl.rev===_rev)return _pl.list;
-  const real=Object.entries(S.profiles).filter(([id,p])=>p&&p.role==='player'&&FIELDS[p.pos]).map(([uid,p])=>({key:uid,uid,name:p.name||'Player',school:p.school||'',pos:p.pos,sub:p.pos,sample:false,gr:classOf(p.name,p.school),games:effGames(uid)}));
+  /* v376 (owner): a player profile that matches a box-score player (same name and school) IS that player: no second, empty entry.
+     Profiles with no box-score match still get their own entry, labelled with the position they picked (DL/LB/DB, not DEF). */
+  const mpKeys=new Set(mpP.map(p=>nmKey(p.name,p.school)));
+  const real=Object.entries(S.profiles).filter(([id,p])=>p&&p.role==='player'&&FIELDS[p.pos]&&!mpKeys.has(nmKey(p.name,p.school))).map(([uid,p])=>({key:uid,uid,name:p.name||'Player',school:p.school||'',pos:p.pos,sub:p.pos==='DEF'&&['DL','LB','DB'].includes(p.posLabel)?p.posLabel:p.pos,sample:false,gr:classOf(p.name,p.school),games:effGames(uid)}));
   const list=[...real,...mpP,...(MP||(S.settings&&S.settings.hideSample)?[]:sampleP)];
   _pl={rev:_rev,list,map:Object.fromEntries(list.map(p=>[p.key,p]))};
   return list;
@@ -7469,8 +7474,8 @@ function weekChart(p){
 /* a two-way player claims both of their profiles (offense and defense). Each keeps its own stats and its own rankings. */
 function meSides(){
   const pr=myProfile();if(!pr)return[];
-  const nm0=String(pr.name).trim().toLowerCase();
-  return players().filter(p=>p.mp&&p.school===pr.school&&p.name.toLowerCase()===nm0);
+  const k=nmKey(pr.name,pr.school);
+  return players().filter(p=>p.mp&&nmKey(p.name,p.school)===k);
 }
 function meP(){
   const pr=myProfile();if(!pr)return null;
@@ -7490,18 +7495,20 @@ function viewMe(){
   if(!pr||pr.role!=='player'||!pr.school)return head+`<p class="empty">Play high school basketball? Add your school and position to see your own stats and where you rank.</p><div class="btns"><button class="btn" data-act="consent">${pr?'Add my school':ME.mode==='guest'?'Sign in to get started':'Get started'}</button></div>`;
   const me=meP()||{key:ME.uid,uid:ME.uid,name:pr.name,school:pr.school,pos:pr.pos,games:Array(WEEKS).fill(null)};
   const info=myRanks(me);
+  /* v376: defenders are ranked together, so say "defenders" instead of DEF */
+  const PW=me.pos==='DEF'?'defender':me.pos;
   const cell=c=>`<div class="rc"><b>#${c.rank}</b><small>of ${c.of}, top ${Math.ceil(c.rank/c.of*100)}%</small></div>`;
   let ranks='',near='',schoolBoard='',avgCard='',weekCard='';
   if(info){
     const mc=(label,c)=>`<div class="metric"><small>${label}</small><b>#${c.rank}</b><small>of ${c.of} ${c.of===1?'player':'players'}</small></div>`;
-    ranks=`<div class="metric-grid">${mc('Among '+me.pos+'s at '+esc(me.school),info.school.pos)}${mc('Overall at '+esc(me.school),info.school.all)}${mc('Among '+me.pos+'s in the section',info.section.pos)}${mc('Overall in the section',info.section.all)}</div>
+    ranks=`<div class="metric-grid">${mc('Among '+PW+'s at '+esc(me.school),info.school.pos)}${mc('Overall at '+esc(me.school),info.school.all)}${mc('Among '+PW+'s in the section',info.section.pos)}${mc('Overall in the section',info.section.all)}</div>
       <button class="rank-cta" type="button" data-act="share"><span class="rank-cta-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><rect x="5" y="2.5" width="14" height="19" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 15l2 2 4-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="rank-cta-t"><b>Save your rank card</b><small>Show it off on your story</small></span><span class="rank-cta-go" aria-hidden="true">→</span></button>`;
     const brow=(x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who"><b>${esc(x.p.name)}${x.p.key===me.key?' (you)':''}</b><i>${pb(x.p.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(x.p.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b><small>${subV(x.a)}</small></span></div>`;
     const schPos=info.pool.filter(x=>x.p.school===me.school&&x.p.pos===me.pos),secPos=info.pool.filter(x=>x.p.pos===me.pos);
     const sl=[...schPos].sort((p,q)=>metric(q.a)-metric(p.a)),si=sl.findIndex(x=>x.p.key===me.key);
     const unit=UI.rank==='prev'?'points in their last game':'points';
-    const sgap=sl.length<2?`You are the only ${me.pos} at ${esc(me.school)} with approved games.`:si===0?`You lead the ${me.pos}s at ${esc(me.school)} by ${f1(info.val-metric(sl[1].a))} ${unit}.`:`${f1(metric(sl[si-1].a)-info.val)} ${unit} behind ${esc(sl[si-1].p.name)}, the next ${me.pos} up.`;
-    schoolBoard=`<section class="card me-sec"><h3>${me.pos}s at ${esc(me.school)}</h3><p class="muted">${sgap}</p><div class="board">${sl.map(brow).join('')}</div></section>`;
+    const sgap=sl.length<2?`You are the only ${PW} at ${esc(me.school)} with approved games.`:si===0?`You lead the ${PW}s at ${esc(me.school)} by ${f1(info.val-metric(sl[1].a))} ${unit}.`:`${f1(metric(sl[si-1].a)-info.val)} ${unit} behind ${esc(sl[si-1].p.name)}, the next ${me.pos} up.`;
+    schoolBoard=`<section class="card me-sec"><h3>${PW}s at ${esc(me.school)}</h3><p class="muted">${sgap}</p><div class="board">${sl.map(brow).join('')}</div></section>`;
     const SHORT={pts:'Pts',reb:'Reb',ast:'Ast',stl:'Stl',blk:'Blk',tov:'TO',tpm:'3PM',rec:'Rec',recYd:'Rec yd',recTD:'Rec TD',rushYd:'Rush yd',rushTD:'Rush TD',passYd:'Pass yd',passTD:'Pass TD',int:'INT',fumLost:'Fum',retTD:'Ret TD',tkl:'Tkl',sack:'Sack',dInt:'INT',ff:'FF',fr:'FR',dTD:'D TD',tfl:'TFL',pbu:'PBU'};
     const cols=FIELDS[me.pos].filter((k,i)=>i<3||me.games.some(g=>g&&g.stat&&g.stat[k]));
     const gl=me.games.map((g,i)=>({w:i+1,g})).filter(x=>UI.scope==='season'||x.w===UI.scope);
@@ -7519,14 +7526,14 @@ function viewMe(){
     const cmp=(mine,other)=>other==null?'':`<small class="${mine>=other?'trend-up':'trend-down'}">${mine>=other?'▲':'▼'} ${f1(Math.abs(mine-other))}</small>`;
     const arow=(label,mine,sch,sec)=>`<tr><td class="rl">${label}</td><td><b>${f1(mine)}</b></td><td>${sch==null?'—':f1(sch)} ${cmp(mine,sch)}</td><td>${sec==null?'—':f1(sec)} ${cmp(mine,sec)}</td></tr>`;
     avgCard=`<section class="card me-sec"><h3>Your averages per game</h3><p class="muted">Average over your ${PRE()?0:info.a.n} approved ${!PRE()&&info.a.n===1?'game':'games'}${UI.scope==='season'?'':' (week '+UI.scope+')'}, compared with the average ${me.pos}.</p>
-      <div class="scroll"><table class="rkt"><thead><tr><th></th><th>You</th><th>${me.pos}s at ${esc(me.school)}</th><th>${me.pos}s in the section</th></tr></thead><tbody>
+      <div class="scroll"><table class="rkt"><thead><tr><th></th><th>You</th><th>${PW}s at ${esc(me.school)}</th><th>${PW}s in the section</th></tr></thead><tbody>
       ${keys.map(k=>arow(LABEL[k],info.a.s[k]/info.a.n,avgOf(schPos,k),avgOf(secPos,k))).join('')}
       ${arow('Fantasy points',info.a.v/info.a.n,ptsAvg(schPos),ptsAvg(secPos))}
       </tbody></table></div></section>`;
     const list=info.pool.filter(x=>x.p.pos===me.pos).sort((a,b)=>metric(b.a)-metric(a.a));
     const idx=list.findIndex(x=>x.p.key===me.key),start=Math.max(0,Math.min(idx-2,list.length-5));
-    const gap=idx<0?'':idx===0?`You lead the section among ${me.pos}s.`:`${f1(metric(list[idx-1].a)-info.val)} points behind ${esc(list[idx-1].p.name)}, the next spot up.`;
-    near=`<section class="card me-sec"><h3>Around you in the San Diego section</h3><p class="muted">${me.pos}s only. ${gap}</p><div class="board">${list.slice(start,start+5).map((x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${start+i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(me.pos)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(me.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b></span></div>`).join('')}</div></section>`;
+    const gap=idx<0?'':idx===0?`You lead the section among ${PW}s.`:`${f1(metric(list[idx-1].a)-info.val)} points behind ${esc(list[idx-1].p.name)}, the next spot up.`;
+    near=`<section class="card me-sec"><h3>Around you in the San Diego section</h3><p class="muted">${PW}s only. ${gap}</p><div class="board">${list.slice(start,start+5).map((x,i)=>`<div class="row ${x.p.key===me.key?'me':''}"><span class="rk">${start+i+1}</span>${av(x.p.name,x.p.school,40)}<span class="who">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(me.pos,me.sub)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span><span class="ln">${line(me.pos,x.a.s)}</span><span class="pt"><b>${bigV(x.a)}</b></span></div>`).join('')}</div></section>`;
   }else ranks=`<p class="hint">No approved games for this period yet. Your rank and breakdown appear as soon as games are posted.</p>`;
   const wk=UI.meEntry.week;
   return head+`
@@ -7542,7 +7549,7 @@ function viewMe(){
       ${meSides().length>1?`<div class="side-sw"><small>You play both ways. Pick which profile to view. Each one has its own stats and rankings.</small><div class="chips" role="group" aria-label="Profile">${meSides().map(p=>`<button class="chip" data-act="meSide" data-v="${esc(p.key)}" aria-pressed="${me.key===p.key}">${esc(p.pos==='DEF'?(p.sub||'DEF'):p.pos)}</button>`).join('')}</div></div>`:''}
       ${info?`<div class="big"><div><span class="lbl">${UI.scope==='season'?'Season pts':'Week pts'}</span><b>${f1(info.a.v)}</b></div><div><span class="lbl">Games</span><b>${PRE()?0:info.a.n}</b></div><div><span class="lbl">Per game</span><b>${f1(info.a.v/info.a.n)}</b></div></div>`:''}
       <div class="tools bare">${scopeSel('scope3',UI.rank==='prev')}${rankSw()}</div>
-    <div class="me-cmp rk-poster"><div class="rk-top"><span class="rk-tag">VARSITY</span><span class="rk-h">How you compare</span></div>${info?`<div class="rk-hero"><small>${esc(me.school)} · ${esc(me.pos)}</small><b>#${info.section.pos.rank}</b><span>of ${info.section.pos.of} ${me.pos}s in the San Diego section</span></div><div class="rk-cols"><div><b>${f1(info.a.v)}</b><small>${UI.scope==='season'?'Season pts':'Week pts'}</small></div><div><b>${f1(info.a.v/info.a.n)}</b><small>Per game</small></div><div><b>#${info.school.pos.rank}</b><small>of ${info.school.pos.of} at school</small></div></div>`:''}${ranks}</div>
+    <div class="me-cmp rk-poster"><div class="rk-top"><span class="rk-tag">VARSITY</span><span class="rk-h">How you compare</span></div>${info?`<div class="rk-hero"><small>${esc(me.school)} · ${esc(me.sub||me.pos)}</small><b>#${info.section.pos.rank}</b><span>of ${info.section.pos.of} ${PW}s in the San Diego section</span></div><div class="rk-cols"><div><b>${f1(info.a.v)}</b><small>${UI.scope==='season'?'Season pts':'Week pts'}</small></div><div><b>${f1(info.a.v/info.a.n)}</b><small>Per game</small></div><div><b>#${info.school.pos.rank}</b><small>of ${info.school.pos.of} at school</small></div></div>`:''}${ranks}</div>
   </section>
   ${weekCard}
   ${avgCard}

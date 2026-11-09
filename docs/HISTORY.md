@@ -231,3 +231,7 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 - stats.js: Jonah Garcia (Bishop's, id 463) defensive position S → DL (owner). Isaac Smedra's forced sign-in/profile redo was already shipped in v374.
 - v376 (Nov 9, owner): owner gift packs can carry a message (`inv.fr.gp[id].m`), shown on the Shop's Gift card instead of 'A pack from Varsity.'
 - v377 (Nov 9, owner): account notice `picks/<uid>.ban={m}`: that user alone sees a full-screen 'Account banned' screen (`banCheck`, `#ban-scr`); delete the field to lift it. Set on Isaac Smedra's account as a joke (owner, Nov 9).
+
+## v377 (Nov 9): a player's account is their box-score player
+- `players()` no longer adds a second, empty entry for a player profile that matches a box-score player by name and school (`nmKey()`: trimmed, case-insensitive, curly apostrophes folded). That duplicate was what showed "DEF" with no stats. `meSides()` uses the same matching, so the Me tab shows the player's own stats (tested: Isaac Smedra, Bishop's → DL, 30.7 pts; Seth Fanua, Lincoln → LB, 243.8).
+- Profiles with no box-score match keep their own entry, labelled with the position picked (DL/LB/DB instead of DEF). Me tab: "Among defenders…" instead of "Among DEFs…", and the How you compare card shows DL/LB/DB.
