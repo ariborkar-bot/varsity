@@ -2886,7 +2886,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v353 · Nov 8';
+const APP_BUILD='v354 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4386,7 +4386,7 @@ const wpCan=()=>ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offl
 let _wpAsked=false,_wpBusy=false;
 function wpTeams(){const by={};for(const p of players())if(!p.sample&&!/x$/.test(p.key)&&p.school){(by[p.school]=by[p.school]||[]).push(p)}return by}
 /* v352 (owner): the player is one of the team's top 10 by season fantasy points (basketball before stats: last season's hidden rank) */
-const WP_TOP=10;
+const WP_TOP=10,WP_CUT=Date.UTC(2026,10,9,6,46,33);   /* v352 went live 22:43:33 Pacific Nov 8 (+3 min for the site to update) */
 function wpTop(list){const rk=k=>((window.BB_RANK||{})[k])||0;return list.map(p=>({p,v:agg(p,'season').v})).sort((x,y)=>y.v-x.v||rk(y.p.key)-rk(x.p.key)||x.p.name.localeCompare(y.p.name)).slice(0,WP_TOP).map(x=>x.p)}
 function wpRoll(){const by=wpTeams(),ts=Object.keys(by).filter(t=>by[t].length);if(!ts.length)return null;
   const team=ts[fcRnd(ts.length)],r=rollRarity(WP_ODDS),pool=wpTop(by[team]),p=pool[fcRnd(pool.length)];return {team,r,key:p.key,teams:ts,pool}}
@@ -4400,7 +4400,7 @@ function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div
 async function wpOpen(){if(_wpBusy||!wpCan())return;_wpBusy=true;try{closeConfirm()}catch(_){}
   try{const R=wpRoll();if(!R){say('No players to pull yet. Try again soon.');return}
     const v=invOf(ME.uid),cards=Object.assign({},v.cards),cid='pc:'+R.key,cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),dup=!!cur[R.r];
-    const patch={wp:NOW()};if(dup)patch.dup=(+v.dup||0)+RAR[R.r].dup;else{cur[R.r]=1;cards[cid]=cur;patch.cards=cards}
+    const patch={wp:NOW(),wpv:2,wpc:cid+':'+R.r};if(dup)patch.dup=(+v.dup||0)+RAR[R.r].dup;else{cur[R.r]=1;cards[cid]=cur;patch.cards=cards}
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
     try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:v});say('That did not save. Try again.');return}
     wpShow(R,dup)}finally{_wpBusy=false}}
@@ -4492,6 +4492,8 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
+  /* v354 (owner): a welcome pack opened before the v352 rules (Epic or better, top 10 player) was live gets a fresh one under the new rules */
+  if(+old.wp>0&&+old.wp<WP_CUT&&!old.wpv&&!rv['wp-v2']){rv['wp-v2']=1;patch.wp=0;n++}
   for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;rv[f.id]=1;n++;
     if(f.wp){patch.wp=0;continue}
     if(f.restore){const raw=old.cards&&old.cards[f.card];if(raw&&typeof raw==='object'){const zs=Object.keys(raw).filter(r=>raw[r]===0);if(zs.length)put(f.card,c=>zs.forEach(r=>c[r]=1))}continue}
