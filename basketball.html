@@ -2765,7 +2765,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v339 · Nov 8';
+const APP_BUILD='v340 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3769,7 +3769,8 @@ const SOLID_NC=[['white','White','#FFFFFF'],['silver','Silver','#C9CFD6'],['red'
   }
   SOLID_NC.forEach(([k,n,c],i)=>add({id:`nc_s_${k}`,k:'name',r:i%2?'u':'c',n:`${n} name`,d:`${n} name.`,col:c}));
   TITLES.forEach(([t,r],i)=>add({id:`ti_${i}`,k:'title',r,n:t,d:`Shows “${t}” under your name.`}));
-  for(const [ik,[inm]] of Object.entries(BADGE_IC))for(const [mk,mn,r,c1,c2] of METALS)add({id:`bd_${ik}_${mk}`,k:'badge',r,n:`${mn} ${inm}`,d:`${mn} ${inm.toLowerCase()} next to your name.`,ic:ik,m:[c1,c2]});
+  /* v340 (owner): only Legendary (Diamond) and Mythical (Inferno) badges exist; Bronze/Silver/Gold/Platinum were removed. Owned copies of removed ones just stop showing. */
+  for(const [ik,[inm]] of Object.entries(BADGE_IC))for(const [mk,mn,r,c1,c2] of METALS)if(r==='l'||r==='m')add({id:`bd_${ik}_${mk}`,k:'badge',r,n:`${mn} ${inm}`,d:`${mn} ${inm.toLowerCase()} next to your name.`,ic:ik,m:[c1,c2]});
   /* collection milestones (exclusive, never in packs) */
   for(const [need,id,k,n,extra] of [[25,'mx_25','title','Collector',{}],[50,'mx_50','frame','Collector frame',{cg:'conic-gradient(#9FF3FF,#B48CFF,#FF7AA8,#FFD36B,#9FF3FF)',fc:['#9FF3FF','#B48CFF'],glow:1}],
     [100,'mx_100','banner','Hall of Fame banner',{bg:'radial-gradient(ellipse at 50% -10%,rgba(255,236,170,.9),transparent 55%),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 9px),linear-gradient(180deg,#3a2705,#0b0a12)'}],
@@ -4149,7 +4150,7 @@ function itemArt(id,s=48){const x=ITEM[id];if(!x)return'';
   return `<span class="ia ia-perk ${x.k}" style="width:${s}px;height:${s}px"><svg viewBox="0 0 24 24" width="${Math.round(s*.55)}" height="${Math.round(s*.55)}" aria-hidden="true"><path d="${ic}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`}
 const frameOf=u=>{const f=(invOf(u).eq||{}).frame;return f&&invHas(u,f)?f:''};
 const ballOf=u=>{const b=(invOf(u).eq||{}).ball;return b&&invHas(u,b)?b:''};
-const eqOf=(u,k)=>{if(!u||!S.picks||!S.picks[u])return '';const x=(invOf(u).eq||{})[k];return x&&invHas(u,x)?x:''};
+const eqOf=(u,k)=>{if(!u||!S.picks||!S.picks[u])return '';const x=(invOf(u).eq||{})[k];return x&&ITEM[x]&&invHas(u,x)?x:''};   /* v340: an item that no longer exists (removed badges) counts as nothing equipped */
 /* a name in someone's name colour (chat, leaderboards, matchups) */
 const nmC=(u,txt)=>{const c=eqOf(u,'name'),b=eqOf(u,'badge');return (c?`<span class="nc ${c}" style="${cosStyle(c)}">${txt}</span>`:txt)+(b?bdgHTML(b):'')};
 
