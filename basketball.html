@@ -39,7 +39,13 @@ html,body{overscroll-behavior-y:contain}:root{color-scheme:light;box-sizing:bord
 .cup-rules summary{cursor:pointer;margin-top:10px}
 .cup-how{margin:0}.cup-how>b{display:block;font-size:13px;margin-bottom:8px}.cup-how ol{list-style:none;margin:0;padding:0;counter-reset:ch}.cup-how li{counter-increment:ch;display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:13px;line-height:1.35;color:var(--mut,#98A8BA)}.cup-how li::before{content:counter(ch);flex:none;width:20px;height:20px;border-radius:50%;background:#FFC23D;color:#111;font-weight:900;font-size:12px;display:grid;place-items:center;margin-top:1px}.cup-how li b{color:var(--tx,#fff)}
 
-.lg-tiles{grid-template-columns:repeat(3,1fr)}.lg-tiles .mg-tile{padding:12px 6px 11px}.lg-tiles .mg-tile b{font-size:.82rem}@media (max-width:420px){.lg-tiles .mg-tile b{font-size:.7rem}}
+.lg-tiles{grid-template-columns:repeat(3,1fr)}
+/* v339 (owner): My leagues and School Cup are big tiles, Mock Draft keeps its small size */
+.mg-tiles.lg-tiles{grid-template-columns:2fr 2fr 1fr;align-items:center}
+.lg-tiles .mg-tile:not([data-v=mock]){flex-direction:row;gap:10px;padding:14px 10px;min-height:78px}
+.lg-tiles .mg-tile:not([data-v=mock]) .mg-ti{width:46px;height:46px;flex:0 0 46px;border-radius:14px}
+.lg-tiles .mg-tile:not([data-v=mock]) .mg-ti svg{width:25px;height:25px}
+.lg-tiles .mg-tile:not([data-v=mock]) b{font-size:.88rem;text-align:left;line-height:1.05}.lg-tiles .mg-tile{padding:12px 6px 11px}.lg-tiles .mg-tile b{font-size:.82rem}@media (max-width:420px){.lg-tiles .mg-tile b{font-size:.7rem}}
 .lg-sw-wrap{width:100%;position:relative}
 .lg-sw{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border-radius:14px;border:1.5px solid #FFC23D;background:var(--surface);color:inherit;text-align:left;cursor:pointer}
 .lg-sw span{flex:1;min-width:0}.lg-sw small{display:block;font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.08em}.lg-sw b{display:block;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -241,7 +247,10 @@ input[type=number]{width:100%}
 .fc-top{width:100%;display:flex;justify-content:space-between;align-items:center}.fc-pos{font:900 .9rem/1 var(--f-display);color:#FFD27A;letter-spacing:.05em}
 .fc-nm{font-size:.98rem;line-height:1.15}.fc-sc{color:var(--muted);display:flex;align-items:center;gap:4px;justify-content:center;font-size:.75rem}
 .fc-pts b{display:block;font:900 1.6rem/1 var(--f-display)}.fc-pts small{color:var(--muted);font-size:.7rem}
-.fc-deal{text-align:center;padding:18px 0 6px}.fc-board{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}.fc-board li{display:flex;gap:10px;align-items:center;padding:8px 6px;border-top:1px solid var(--line)}.fc-board li.me{background:color-mix(in srgb,#2F6BFF 16%,transparent);border-radius:10px}.fc-board .who{flex:1;min-width:0;display:flex;flex-direction:column}.fc-board .who small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fc-board .pt{text-align:right}.fc-board .pt b{display:block}.fc-gap{justify-content:center;color:var(--muted)}
+.fc-deal{text-align:center;padding:18px 0 6px}.fc-board{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}.fc-board li{display:flex;gap:10px;align-items:center;padding:8px 6px;border-top:1px solid var(--line)}.fc-board li.me{background:color-mix(in srgb,#2F6BFF 16%,transparent);border-radius:10px}.fc-board .who{flex:1;min-width:0;display:flex;flex-direction:column}.fc-board .who small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fc-board .pt{text-align:right}.fc-board .pt b{display:block}.fc-gap{justify-content:center;color:var(--muted)}.fc-board li.fc-tap{cursor:pointer;border-radius:10px;transition:background .15s}.fc-board li.fc-tap:hover,.fc-board li.fc-tap:focus-visible{background:color-mix(in srgb,#FFC23D 10%,transparent);outline:none}.fc-board .chev{color:var(--muted);font-size:1.3rem;line-height:1;margin-left:-2px}
+.fcv-h{display:flex;gap:12px;align-items:center;margin:0 28px 10px 0}.fcv-h h2{margin:0}.fcv-h small{display:block;margin-top:3px}
+.fcv-row{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:10px 4px;border:0;border-top:1px solid var(--line);background:none;color:inherit;cursor:pointer;font:inherit}.fcv-row .who{flex:1;min-width:0;display:flex;flex-direction:column}.fcv-row .who small{display:flex;align-items:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fcv-row .pt{text-align:right}.fcv-row .pt b{display:block;font:800 1.25rem/1 var(--f-display,inherit)}.fcv-row .pt small{font-size:.7rem;opacity:.75}
+.fcv-tot{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:12px;margin-top:2px}.fcv-tot b{font:800 1.9rem/1 var(--f-display,inherit);color:#FFC23D}
 .cmp-top{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch;margin:16px 0 6px}
 .cmp-vs{align-self:center;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#FFC23D,#FF9F1C);color:#1a1200;font:900 .8rem/1 var(--f-display);box-shadow:0 4px 14px rgba(255,170,30,.35);z-index:1}
 .cmp-pl{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0;padding:16px 10px 14px;border-radius:20px;border:1px solid #2A4472;background:linear-gradient(165deg,#12295a 0%,#0a1630 70%);margin:0 -14px}
@@ -2756,7 +2765,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v338 · Nov 8';
+const APP_BUILD='v339 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3499,8 +3508,8 @@ const fcClose=s=>{const g=fcGamesOf(s);return g.length?g.map(x=>x.d+'T'+(x.t||KI
 const fcOpen=s=>!FC_DAILY||(dayOf(s)===TODAY()&&!!fcClose(s)&&NOWPT()<fcClose(s));
 const fcNextDay=()=>{const t=TODAY(),ds=Object.keys(fcIdx().d).sort().filter(d=>d>t);return ds.length?dayNo(ds[0]):null};
 const fcStarted=(p,s)=>fcGamesOf(s).some(g=>(g.h===p.school||g.a===p.school)&&started(g));
-/* Redraws you do not use are saved for the next week (up to FC_BANK_MAX saved). Week w gives you FC_REDRAWS new ones plus whatever you saved. */
-function fcBank(u,w){let bank=0;for(const v of Object.keys(fcDoc(u)).map(Number).filter(n=>n<w).sort((a,b)=>a-b)){const h=fcHand(u,v);bank=Math.min(FC_BANK_MAX,Math.max(0,FC_REDRAWS+bank+fcX(u,v)-(h.r||0)))}return bank}
+/* v339 (owner): unused redraws do NOT carry over. Every hand starts with FC_REDRAWS (plus any Locker extras for that hand). fcBank stays so old callers keep working. */
+function fcBank(u,w){return 0}
 const fcX=(u,w)=>+(((invOf(u).fcx)||{})[w])||0;   /* extra redraws from the Locker for that week */
 const fcAllow=(u,w)=>FC_REDRAWS+fcBank(u,w)+fcX(u,w);
 const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||0:0))};
@@ -3539,8 +3548,8 @@ async function fcDeal(){
   finally{_fcBusy=false;render()}
 }
 function fcLock(){
-  const w=fcCur(),hd=fcHand(ME.uid,w);if(!hd||hd.lk)return;if(!fcOpen(w))return;const left=fcLeft(ME.uid,w),keep=Math.min(FC_BANK_MAX,left),U=fcUnit();
-  confirmBox('Lock in your hand?',`Your 5 cards are final for ${FC_DAILY?fcLabel(w):'week '+w}, so no more redraws this ${U}. ${keep?`You keep ${keep} unused ${keep===1?'redraw':'redraws'} for next ${U}.`:'You have no redraws left to save.'}`,'Lock in',async()=>{
+  const w=fcCur(),hd=fcHand(ME.uid,w);if(!hd||hd.lk)return;if(!fcOpen(w))return;const left=fcLeft(ME.uid,w),U=fcUnit();
+  confirmBox('Lock in your hand?',`Your 5 cards are final for ${FC_DAILY?fcLabel(w):'week '+w}, so no more redraws this ${U}.${left?` Unused redraws do not carry over to your next hand.`:''}`,'Lock in',async()=>{
     const nx={...hd,lk:1,lat:NOW()};fcSet(w,nx);
     if(!await act(()=>upsert('picks/'+ME.uid,{fc:{[w]:nx}}),'Hand locked in'))fcSet(w,hd);render()})
 }
@@ -3562,6 +3571,16 @@ async function fcRedraw(i){
       UI.fcAnim={i,w,rev:true};render();setTimeout(()=>{UI.fcAnim=null;render();if(fcLeft(ME.uid,w)<=0)fcAutoLock(w)},1100)}}
   finally{_fcBusy=false;render()}
 }
+/* v339: tap a 5 Card Draw leaderboard row to see that person's hand for the shown week/day (players, points, redraws used) */
+function fcViewSheet(u,w){const hd=fcHand(u,w);if(!hd)return;const c=$('#cfm'),me=u===ME.uid,cw=fcCur();
+  const rows=hd.h.map(k=>{const p=pByKey(k);if(!p)return '';const x=fcPts(p,w),dnp=!x&&fcDnp(p,w);
+    return `<button type="button" class="fcv-row" data-act="fcPl" data-id="${esc(k)}">${av(p.name,p.school,40)}<span class="who"><b>${esc(p.name)}</b><small class="muted">${p.pos==='DEF'?esc(p.sub||'DEF'):esc(p.pos)} · ${slogo(p.school)}${esc(p.school)}</small></span><span class="pt"><b>${x?f1(pts(x.stat)):dnp?'0.0':'—'}</b><small>${x?'pts':dnp?'did not play':'waiting'}</small></span></button>`}).join('');
+  const st=hd.lk?'Locked in':w===cw&&fcOpen(w)?'Still drawing':'Final';
+  c.innerHTML=`<div class="gcard tok-sheet fcv" role="dialog" aria-modal="true" aria-labelledby="fcv-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button>
+    <div class="fcv-h">${av(nm(u),u,44)}<div><h2 id="fcv-t">${esc(me?'Your hand':nm(u)+'’s hand')}</h2><small class="muted">5 Card Draw · ${esc(FC_DAILY?fcLabel(w):'Week '+w)} · ${st} · ${hd.r||0} ${(hd.r||0)===1?'redraw':'redraws'} used</small></div></div>
+    <div class="fcv-list">${rows}</div>
+    <div class="fcv-tot"><span>Hand total</span><b>${f1(fcScore(u,w))}</b></div></div>`;
+  c.hidden=false;const x=c.querySelector('.tok-x');if(x)x.focus()}
 /* the last redraw is used: the hand locks itself (no confirm box, nothing left to decide) */
 async function fcAutoLock(w){const hd=fcHand(ME.uid,w);if(!hd||hd.lk)return;
   const nx={...hd,lk:1,lat:NOW()};fcSet(w,nx);render();
@@ -3581,11 +3600,11 @@ function fcHTML(){
   const all=byW?fcRank(wkOf).map(x=>({u:x.u,t:x.t,s:fcSeason(x.u)})):Object.keys(S.picks).filter(u=>fcHand(u,w)).map(u=>({u,t:fcScore(u,w),s:fcSeason(u)}));
   const rows=all.sort((a,b)=>(byS?b.s-a.s:b.t-a.t)||(b.t-a.t)).map((x,i)=>Object.assign(x,{r:i+1}));
   const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
-  const lrow=x=>`<li class="${x.u===ME.uid?'me':''}"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w)||{h:[]}).h.map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':byW?'week '+wkOf:FC_DAILY?'day':'week '+w}</small></span></li>`;
+  const lrow=x=>`<li class="fc-tap ${x.u===ME.uid?'me':''}" data-act="fcView" data-u="${esc(x.u)}" data-w="${w}" role="button" tabindex="0" aria-label="See ${esc(x.u===ME.uid?'your':nm(x.u)+'’s')} hand"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w)||{h:[]}).h.map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':byW?'week '+wkOf:FC_DAILY?'day':'week '+w}</small></span><span class="chev" aria-hidden="true">›</span></li>`;
   return `<section class="card fc-hero ${eqOf(ME.uid,'cback')?'cb '+eqOf(ME.uid,'cback')+cbCls(eqOf(ME.uid,'cback')):''}" style="${eqOf(ME.uid,'cback')?cosStyle(eqOf(ME.uid,'cback')):''}"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">${FC_DAILY&&dayOf(cw)!==TODAY()?'Next · ':''}${fcLabel(cw)}</span></div>
     <p class="muted">${FC_DAILY?'5 players from today’s games. A new hand every game day.':'5 random players a week.'} ${FC_REDRAWS} redraws.</p>
     ${wk.length>1?`<div class="chips" role="group" aria-label="${FC_DAILY?'Day':'Week'}">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">${fcLabel(n)}</button>`).join('')}</div>`:''}
-    ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&bank?`<small>${bank} saved from before</small>`:''}${w===cw&&!lkd&&invLeft(ME.uid,'p_redraw')>0?`<button class="btn sm ghost fc-x" data-act="perkRedraw">+1 redraw (${invLeft(ME.uid,'p_redraw')})</button>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(!lkd&&!fcOpen(w)?`<p class="hint" style="margin-top:12px"><b>Hand closed at tip-off.</b> This hand counts as it stands.</p>`:lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> ${left?`${Math.min(FC_BANK_MAX,left)} unused ${left===1?'redraw is':'redraws are'} saved for next ${fcUnit()}.`:'No redraws left to save.'}</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand${left?` · save ${Math.min(FC_BANK_MAX,left)} ${left===1?'redraw':'redraws'}`:''}</button></div>`):''}`
+    ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&!lkd&&invLeft(ME.uid,'p_redraw')>0?`<button class="btn sm ghost fc-x" data-act="perkRedraw">+1 redraw (${invLeft(ME.uid,'p_redraw')})</button>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(!lkd&&!fcOpen(w)?`<p class="hint" style="margin-top:12px"><b>Hand closed at tip-off.</b> This hand counts as it stands.</p>`:lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> Good luck this ${fcUnit()}.</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand</button></div>`):''}`
       :w!==cw?`<p class="hint">You had no hand that ${fcUnit()}.</p>`
       :can&&!S.loaded.picks?`<div class="fc-deal"><p class="muted">Loading your hand…</p></div>`
       :can&&!fcOpen(cw)?(()=>{const nx=dayOf(cw)===TODAY()?fcNextDay():cw;return `<div class="fc-deal"><p>${dayOf(cw)!==TODAY()?'No games today.':'Today’s hand closed at tip-off.'}</p><p class="muted">${nx?'The next hand opens '+fcLabel(nx)+', before the first game.':'No more game days on the schedule.'}</p></div>`})()
@@ -8573,6 +8592,7 @@ $('#cfm').addEventListener('click',async e=>{
   const fn=cfmFn;b.disabled=true;await fn();closeConfirm();
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#cfm').hidden)closeConfirm()});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('fc-tap')){e.preventDefault();fcViewSheet(e.target.dataset.u,+e.target.dataset.w)}});
 document.addEventListener('click',e=>{
   const t=e.target.closest('[data-act]');if(!t)return;
   const a=t.dataset.act;
@@ -9107,6 +9127,8 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
     else if(a==='fcLock')fcLock()
     else if(a==='fcWeek'){UI.fcw=+t.dataset.v;render()}
     else if(a==='fcBoard'){UI.fcb=t.dataset.v;render()}
+    else if(a==='fcView')fcViewSheet(t.dataset.u,+t.dataset.w)
+    else if(a==='fcPl'){closeConfirm();openPlayer(t.dataset.id)}
     else if(a==='trNew')openTrade()
     else if(a==='trAccept')tradeAct(t.dataset.id,'accept')
     else if(a==='trDecline')tradeAct(t.dataset.id,'decline')
