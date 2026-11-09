@@ -2886,7 +2886,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v349 · Nov 8';
+const APP_BUILD='v350 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4477,16 +4477,22 @@ function spRevoke(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly
   upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:v})})}
 /* v347 (owner): one-time card removals by account. Each entry switches off the Legendary version of a named player's card on that
    account's next app open (done once, marked in inv.fr.rv[id]). */
-const CARD_FIX=[{id:'zh-ig',who:/^\s*zed\s+hornby\s*$/i,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'},
-  {id:'ab-dg',who:/^\s*ari\s+borkar\s*$/i,name:'Daine Gonzalez',school:'Classical Academy',r:'*'},   /* v349: every version */
-  {id:'zh-rd',who:/^\s*zed\s+hornby\s*$/i,name:'Rory Dunn',school:'Scripps Ranch',r:'*'}];
+const AB=/^\s*ari\s+borkar\s*$/i,ZH=/^\s*zed\s+hornby\s*$/i,ABZH=/^\s*(ari\s+borkar|zed\s+hornby)\s*$/i;
+/* entries: remove {name,school,r ('*' = every version)} · restore {card}: versions set to 0 go back to 1 · wp: a new welcome pack */
+const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'},
+  {id:'ab-dg',who:AB,name:'Daine Gonzalez',school:'Classical Academy',r:'*'},
+  {id:'zh-rd-back',who:ZH,card:'pc:mp955',restore:1},   /* v350: owner gave Rory Dunn back (the v349 removal is gone) */
+  {id:'ai-x',who:ABZH,name:'Adrian Ismaili',school:'Poway',r:'*'},   /* v350: every version, from Ari or Zed */
+  {id:'wp-2',who:ABZH,wp:1}];   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
-  const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u);let n=0;
+  const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0;
+  const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
   for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;rv[f.id]=1;n++;
+    if(f.wp){patch.wp=0;continue}
+    if(f.restore){const raw=old.cards&&old.cards[f.card];if(raw&&typeof raw==='object'){const zs=Object.keys(raw).filter(r=>raw[r]===0);if(zs.length)put(f.card,c=>zs.forEach(r=>c[r]=1))}continue}
     for(const p of players().filter(p=>p.name===f.name&&p.school===f.school)){const id='pc:'+p.key,have=own[id]||{};
-      const rs=f.r==='*'?Object.keys(have).filter(r=>have[r]):have[f.r]?[f.r]:[];if(!rs.length)continue;
-      const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);rs.forEach(r=>cur[r]=0);cards[id]=cur}}
-  if(!n)return;const patch={cards,fr:Object.assign({},old.fr,{rv})};
+      const rs=f.r==='*'?Object.keys(have).filter(r=>have[r]):have[f.r]?[f.r]:[];if(rs.length)put(id,c=>rs.forEach(r=>c[r]=0))}}
+  if(!n)return;patch.fr=Object.assign({},old.fr,{rv});
   S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},old,patch)});
   upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:old})})}
 function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
@@ -8347,7 +8353,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{wpMaybe()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
