@@ -179,3 +179,8 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 - Profile step (`nameHTML()`/`openName()`, live accounts): everyone first taps Player or Fan (`NM.role`, buttons `[data-nm-role]`). Fan: name + "School you're a fan of" (saved as `profile.school`, role 'fan'). Player: name + school + position. School is required for both, position for players. What you typed survives switching (`nmKeep()`). Fields stack in one column.
 - Football position picker (`POS_PICK`): QB, RB, WR, TE, DL, LB, DB (new, maps to DEF), K. OL, CB, S, P, LS, ATH and FB removed from the picker; old profiles keep their label and POS_MAP still maps them. Basketball sets `POS_PICK=null`.
 - `TOK0` 100 → 200 and `RW_PAY` 5 → 10. Balances are computed, so every existing account got the extra 100 plus 5 more per starter reward already done.
+
+## v359 (Nov 8): players pick a main sport; the app opens on it
+- Profile step: after Player, a "Main sport" choice (Football / Basketball, `NM.sport`, `[data-nm-sport]`) comes before name/school/position. Positions follow the sport (`NM_SP` holds both lists and maps, so either app can make either kind of player). Saved as `profile.sport` ('fb'|'bb'). Player card text: "I play high school sports".
+- Landing: `landCheck()` (first in touch(), once per tab session via sessionStorage `vs-landed`, window.name fallback) switches to the other app with `sportCut()` when a player's `sport` is the other one; after that the sport switch is never undone. Right after making a profile for the other sport the app switches straight away (`landGo()`). The welcome pack and other pop-ups wait while a switch is under way.
+- Me tab on the other sport's app: "Your player profile is for basketball/football" with a link to that app.

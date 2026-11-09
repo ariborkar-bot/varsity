@@ -299,7 +299,6 @@ def transform(s, mp, games, seeds, teams, prior):
     # --- identity ---------------------------------------------------------------------------------------------
     s = rep(s, '<title>Varsity</title>', '<title>Varsity Basketball</title>')
     s = rep(s, '<h1>Varsity</h1><p>High school fantasy football</p>', '<h1>Varsity</h1><p>High school fantasy basketball</p>')
-    s = rep(s, "'I play high school football'", "'I play high school basketball'")
     s = rep(s, 'Classic fantasy football.', 'Classic fantasy basketball.')
     s = rep(s, 'Play high school football?', 'Play high school basketball?')
     s = rep(s, '<a class="sport-opt on" href="index.html', '<a class="sport-opt" href="index.html')
