@@ -2965,7 +2965,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v368 · Nov 9';
+const APP_BUILD='v369 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3524,7 +3524,11 @@ function ridgeRatings(){
   for(let sc=3;sc<=30;sc+=.5){let l=0,c=0;for(const x of rows){if(!x.m)continue;const p=1/(1+Math.exp(-(r[x.h]-r[x.a]+H)/sc));l-=Math.log(x.m>0?p:1-p);c++}l/=c;if(l<bl){bl=l;s=sc}}
   const out={};T.forEach((t,i)=>{out[t]=r[i]});_rg={r:out,H,s};return _rg;
 }
+/* v366 (owner): set win chances for specific games, home team's chance, keyed 'date|home|away'. Odds follow from it (7% cut). */
+const ODDS_PIN={'2026-11-13|Carlsbad|Santa Fe Christian':.80};
 function oddsFor(g){
+  const pin=ODDS_PIN[g.d+'|'+g.h+'|'+g.a];
+  if(pin!=null){const dec=p=>Math.round(Math.min(12,Math.max(1.05,.93/p))*100)/100;return {ph:pin,h:dec(pin),a:dec(1-pin)}}
   const r=ratings(),rh=r[g.h]===undefined?1500:r[g.h],ra=r[g.a]===undefined?1500:r[g.a];
   const pe=1/(1+Math.pow(10,(ra-rh-45)/400));
   const R=ridgeRatings(),pr=1/(1+Math.exp(-(((R.r[g.h]||0)-(R.r[g.a]||0))+R.H)/R.s));
@@ -4684,7 +4688,7 @@ function spRevoke(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly
   upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:v})})}
 /* v347 (owner): one-time card removals by account. Each entry switches off the Legendary version of a named player's card on that
    account's next app open (done once, marked in inv.fr.rv[id]). */
-const AB=/^\s*ari\s+borkar\s*$/i,ZH=/^\s*zed\s+hornby\s*$/i,ABZH=/^\s*(ari\s+borkar|zed\s+hornby)\s*$/i;
+const ML=/^\s*max\s+london\s*$/i,AB=/^\s*ari\s+borkar\s*$/i,ZH=/^\s*zed\s+hornby\s*$/i,ABZH=/^\s*(ari\s+borkar|zed\s+hornby)\s*$/i;
 /* entries: remove {name,school,r ('*' = every version)} · restore {card}: versions set to 0 go back to 1 · wp: a new welcome pack */
 const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'},
   {id:'ab-dg',who:AB,name:'Daine Gonzalez',school:'Classical Academy',r:'*'},
@@ -4692,7 +4696,8 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'ai-x',who:ABZH,name:'Adrian Ismaili',school:'Poway',r:'*'},   /* v350: every version, from Ari or Zed */
   {id:'wp-2',who:ABZH,wp:1},
   {id:'zh-ch',who:ZH,name:'Carson Hasting',school:'Granite Hills',r:'*'},   /* v352 */
-  {id:'wp-3',who:ZH,wp:1}];   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
+  {id:'wp-3',who:ZH,wp:1},
+  {id:'ml-wp-1',who:ML,wp:1}];   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
