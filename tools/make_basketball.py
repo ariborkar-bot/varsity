@@ -378,6 +378,7 @@ def transform(s, mp, games, seeds, teams, prior):
     s = rep(s, "const SHORT={", "const SHORT={pts:'Pts',reb:'Reb',ast:'Ast',stl:'Stl',blk:'Blk',tov:'TO',tpm:'3PM',")
 
     s = rep(s, "const POSF=['ALL','QB','RB','WR','TE','K','DL','LB','DB'];", "const POSF=['ALL','PG','SG','SF','PF','C'];")
+    s = rep(s, "POSF=['ALL','QB','RB','WR','TE','K','DL','LB','DB'],pos=UI.mk.pos", "POSF=['ALL','PG','SG','SF','PF','C'],pos=UI.mk.pos")   # v361: the mock draft's position chips too
     s = rep(s, "San Diego high school fantasy football", "San Diego high school fantasy basketball")
     s = rep(s, "p.pos='QB';p.posLabel='QB'", "void 0")
     s = rep(s, "Default roster: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots.", "Default roster: 1 PG, 1 SG, 1 SF, 1 PF, 1 C, 1 FLEX and 3 bench spots.")

@@ -187,3 +187,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v360 (Nov 8): welcome pack pool = a team's best player at each position
 - `wpTop(list)` now returns the best player (season fantasy points, then hidden rank) at each position, grouped by `WP_POS()`: football QB, RB, WR, TE, DL, LB, DB, K (8 per team; defenders with no DL/LB/DB position are skipped), basketball PG, SG, SF, PF, C (5). Teams missing a position in the data have fewer (football: 8 for about 56% of rolls, 4-7 for the rest). A two-way player can fill two spots (each side is its own card). Old welcome packs are not refreshed. `WP_TOP` is no longer used.
+
+## v361 (Nov 9): basketball mock draft works before the season
+- `mkPool()` filtered out everyone with 0 season points, so in basketball preseason the mock draft's Best available was empty ("No one left at that position") and nothing could be drafted. With no one on points it now ranks by last season's hidden rank (`window.BB_RANK`). The mock draft's position chips in basketball are PG/SG/SF/PF/C (they showed football positions). Found while recording the marketing videos.

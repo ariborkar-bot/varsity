@@ -2929,7 +2929,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v360 · Nov 8';
+const APP_BUILD='v361 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5230,7 +5230,9 @@ function mkRoster(m,t){
 let _mkP=null;
 function mkPool(){
   if(_mkP&&_mkP.rev===_rev)return _mkP.list;
-  const list=players().filter(p=>p.mp).map(p=>{const a=agg(p,'season'),per=a.n?a.v/a.n:0;return{p,v:per*(.5+.5*Math.min(a.n,8)/8),s:a.v}}).filter(x=>x.s>0).sort((a,b)=>b.v-a.v);
+  let list=players().filter(p=>p.mp).map(p=>{const a=agg(p,'season'),per=a.n?a.v/a.n:0;return{p,v:per*(.5+.5*Math.min(a.n,8)/8),s:a.v}}).filter(x=>x.s>0).sort((a,b)=>b.v-a.v);
+  /* v361: before anyone has points (basketball preseason) the pool was empty and nothing could be drafted: use last season's hidden rank */
+  if(!list.length){const rk=k=>((window.BB_RANK||{})[k])||0;list=players().filter(p=>p.mp).map(p=>({p,v:rk(p.key),s:0})).sort((a,b)=>b.v-a.v||a.p.name.localeCompare(b.p.name))}
   _mkP={rev:_rev,list};return list;
 }
 function _rng(str){let h=2166136261;for(let k=0;k<str.length;k++){h^=str.charCodeAt(k);h=Math.imul(h,16777619)}return()=>{h+=0x6D2B79F5;let t=Math.imul(h^h>>>15,1|h);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -5315,7 +5317,7 @@ function mkRoomHTML(m){
   }
   const me=di.t===mkMe(),ro=mkRoster(m,mkMe()),cl=m.clock||0,last=di.picks.length?di.picks[di.picks.length-1].at:(m.startedAt||NOW()),left=cl?Math.max(0,cl-Math.floor((NOW()-last)/1000)):null;
   const myI=(()=>{const n=di.order.length;for(let k=1;k<n*2+2;k++){const i=di.i+k;if(i>=di.total)return null;const r=Math.floor(i/n),j=i%n;if((r%2===0?di.order[j]:di.order[n-1-j])===mkMe())return k}return null})();
-  const taken=mkTaken(m),POSF=['ALL','QB','RB','WR','TE','K','DL','LB','DB'],pos=UI.mk.pos,tab=UI.mk.tab;
+  const taken=mkTaken(m),POSF=['ALL','PG','SG','SF','PF','C'],pos=UI.mk.pos,tab=UI.mk.tab;
   const best=mkPool().filter(x=>!taken.has(x.p.key)&&posMatch(x.p,pos)&&ro.open.some(s=>slotOk(s,x.p))).slice(0,15);
   const rec=di.picks.slice(-4).reverse().map(x=>{const pl=pByKey(x.key);return pl?`<li><b>${esc(mkName(x.t,m))}</b> took ${pb(pl.pos,pl.sub)} <b>${esc(pl.name)}</b>${x.auto?' <small class="muted">(auto)</small>':''}</li>`:''}).join('');
   return `<section class="card lg-draft ${me?'turn':''}"><div class="qh"><h3>${esc(m.name||'Mock draft')}</h3><span class="pill live">Round ${di.round} of ${mkSlots(m).length} · Pick ${di.i+1} of ${di.total}</span></div>
