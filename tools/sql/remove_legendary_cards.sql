@@ -72,3 +72,10 @@ update public.docs d
        updated_at = now()
  where d.coll = 'picks' and d.id in (select id from public.docs where coll = 'profiles' and lower(trim(data->>'name')) = 'zed hornby')
 returning d.id, d.data->'inv'->'cards'->'pc:mp584' as carson_hasting;
+
+-- v353 (owner): Zed Hornby gets another welcome pack (inv.wp = 0), marked done so the app does not repeat it.
+update public.docs d
+   set data = jsonb_set(jsonb_set(d.data, '{inv,wp}', '0'::jsonb, true), '{inv,fr,rv}', coalesce(d.data->'inv'->'fr'->'rv','{}'::jsonb) || '{"wp-3":1}'::jsonb, true),
+       updated_at = now()
+ where d.coll = 'picks' and d.id in (select id from public.docs where coll = 'profiles' and lower(trim(data->>'name')) = 'zed hornby')
+returning d.id;

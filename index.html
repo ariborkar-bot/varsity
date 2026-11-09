@@ -2876,7 +2876,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v352 · Nov 8';
+const APP_BUILD='v353 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4511,7 +4511,8 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'zh-rd-back',who:ZH,card:'pc:mp955',restore:1},   /* v350: owner gave Rory Dunn back (the v349 removal is gone) */
   {id:'ai-x',who:ABZH,name:'Adrian Ismaili',school:'Poway',r:'*'},   /* v350: every version, from Ari or Zed */
   {id:'wp-2',who:ABZH,wp:1},
-  {id:'zh-ch',who:ZH,name:'Carson Hasting',school:'Granite Hills',r:'*'}];   /* v352 */   /* v350: Ari and Zed get a new welcome pack */
+  {id:'zh-ch',who:ZH,name:'Carson Hasting',school:'Granite Hills',r:'*'},   /* v352 */
+  {id:'wp-3',who:ZH,wp:1}];   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
