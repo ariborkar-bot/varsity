@@ -1828,7 +1828,7 @@ html,body{overflow-x:clip;max-width:100%}
 @keyframes wpFlash{0%{opacity:.75}100%{opacity:0}}
 .wpk-lad{position:relative;display:flex;flex-direction:column;gap:10px;padding-left:44px}
 .wpk-meter{position:absolute;left:0;top:0;bottom:0;width:24px;border-radius:12px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.16);overflow:hidden}
-.wpk-meter i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,#4C8DFF 0 25%,#B48CFF 25% 50%,#FFC23D 50% 75%,#FF4F6D 75% 100%);background-size:100% 320px;background-position:bottom;box-shadow:0 0 22px rgba(255,255,255,.7)}
+.wpk-meter i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,#B48CFF 0 33.3%,#FFC23D 33.3% 66.7%,#FF4F6D 66.7% 100%);background-size:100% 230px;background-position:bottom;box-shadow:0 0 22px rgba(255,255,255,.7)}
 .wpk-meter i:after{content:'';position:absolute;left:-4px;right:-4px;top:-3px;height:6px;border-radius:3px;background:#fff;box-shadow:0 0 14px #fff}
 .wpk-tier{position:relative;width:250px;height:70px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;box-sizing:border-box;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
 .wpk-tier i{position:absolute;inset:0;background:linear-gradient(90deg,var(--tc),color-mix(in srgb,var(--tc) 35%,transparent));opacity:0;transition:opacity .2s}
@@ -2886,7 +2886,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v348 · Nov 8';
+const APP_BUILD='v349 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4377,10 +4377,10 @@ function giftSheet(){const c=$('#cfm'),fr=giftFriends(),q=GF.q.trim().toLowerCas
   c.hidden=false;const qi=$('#gf-q');if(qi&&GF._focus){qi.focus();qi.setSelectionRange(qi.value.length,qi.value.length)}GF._focus=false}
 
 /* ---------- Welcome pack (v348, owner) ----------
-   Once you have a profile you get one free pack, once per account: ONE player card, odds Rare 40 / Epic 30 / Legendary 20 / Mythical 10.
+   Once you have a profile you get one free pack, once per account: ONE player card, Epic or better (WP_ODDS).
    It is rolled in three steps and shown that way: the TEAM (a slot reel of school logos), the RARITY (a wheel split by the odds),
    then the PLAYER (a carousel of that team's players). Saved as picks/<uid>.inv.wp = when opened, plus the card in inv.cards. */
-const WP_ODDS={r:40,e:30,l:20,m:10};
+const WP_ODDS={e:50,l:33,m:17};   /* v349 (owner): Epic or better (was Rare 40 / Epic 30 / Legendary 20 / Mythical 10) */
 const wpDone=u=>!!(invOf(u).wp);
 const wpCan=()=>ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'&&!!myProfile()&&S.loaded&&S.loaded.picks&&!wpDone(ME.uid);
 let _wpAsked=false,_wpBusy=false;
@@ -4390,10 +4390,10 @@ function wpRoll(){const by=wpTeams(),ts=Object.keys(by).filter(t=>by[t].length);
 /* the invite: shown once per app session after you have a profile (Later keeps it in the Shop) */
 function wpMaybe(){if(_wpAsked||!wpCan())return;const c=$('#cfm');if(!c||!c.hidden||document.querySelector('.pko,.wpk'))return;_wpAsked=true;
   c.innerHTML=`<div class="gcard tok-sheet wp-ask" role="dialog" aria-modal="true" aria-labelledby="wp-t"><div class="wp-ask-art" aria-hidden="true"><span>1</span><small>player</small></div><h2 id="wp-t">Welcome to Varsity!</h2>
-    <p>Here’s a free <b>player pack</b> to start you off: one player card, Rare or better.</p>
+    <p>Here’s a free <b>player pack</b> to start you off: one player card, Epic or better.</p>
     <p class="wp-odds">${Object.entries(WP_ODDS).map(([r,n])=>`<span style="color:${RAR[r].c}">${RAR[r].n} ${n}%</span>`).join('')}</p>
     <div class="gbtns"><button class="btn" data-act="wpOpen">Open it</button><button class="btn ghost" data-c="no">Later</button></div></div>`;c.hidden=false}
-function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One player card, Rare or better (Rare 40% · Epic 30% · Legendary 20% · Mythical 10%).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
+function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One player card, Epic or better (${Object.entries(WP_ODDS).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
 async function wpOpen(){if(_wpBusy||!wpCan())return;_wpBusy=true;try{closeConfirm()}catch(_){}
   try{const R=wpRoll();if(!R){say('No players to pull yet. Try again soon.');return}
     const v=invOf(ME.uid),cards=Object.assign({},v.cards),cid='pc:'+R.key,cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),dup=!!cur[R.r];
@@ -4408,9 +4408,9 @@ function wpShow(R,dup){
   /* team reel: random teams, the rolled one near the end */
   const others=R.teams.filter(t=>t!==R.team),reel=[];for(let i=0;i<36;i++)reel.push(others[fcRnd(others.length)]||R.team);const TI=33;reel[TI]=R.team;
   const tile=t=>`<div class="wpk-tt">${logoFor(t)?slogo(t,64):`<span class="wpk-ini">${esc(t.split(/\s+/).map(w=>w[0]).slice(0,2).join(''))}</span>`}<b>${esc(t)}</b></div>`;
-  /* rarity power meter (v347, replaces the wheel): tiers bottom to top Rare, Epic, Legendary, Mythical. The charge climbs one tier at a
+  /* rarity power meter (v347, replaces the wheel; v349: Epic, Legendary, Mythical): tiers bottom to top. The charge climbs one tier at a
      time, lighting each one; above your rarity it teases the next tier (flicker) and drops back, unless you hit Mythical. */
-  const LAD=['r','e','l','m'],ti=LAD.indexOf(R.r);
+  const LAD=Object.keys(WP_ODDS),ti=LAD.indexOf(R.r);
   /* player carousel: the team's players, repeated, the rolled one at index PI */
   const pool=R.pool.filter(q=>q.key!==R.key),car=[];for(let i=0;i<22;i++)car.push(pool.length?pool[fcRnd(pool.length)]:p);const PI=19;car[PI]=p;
   const pc=q=>`<div class="wpk-pc">${av(q.name,q.school,58)}<b>${esc(q.name)}</b><small>${q.pos==='DEF'?esc(q.sub||'DEF'):esc(q.pos)}</small></div>`;
@@ -4430,7 +4430,7 @@ function wpShow(R,dup){
   const T={t1:.7,l1:4.4,t2:5.0};
   /* meter keyframes [time, level]: climb a tier in .42 s, rest .22 s on it; then tease the next one (unless Mythical) */
   const KF=[[T.t2+.25,0]];{let t=T.t2+.25;for(let k=0;k<=ti;k++){t+=.42;KF.push([t,k+1]);t+=.22;KF.push([t,k+1])}
-    if(ti<3){t+=.38;KF.push([t,ti+1.62]);t+=.32;KF.push([t,ti+1.62]);t+=.3;KF.push([t,ti+1])}else{t+=.3;KF.push([t,4])}
+    if(ti<LAD.length-1){t+=.38;KF.push([t,ti+1.62]);t+=.32;KF.push([t,ti+1.62]);t+=.3;KF.push([t,ti+1])}else{t+=.3;KF.push([t,LAD.length])}
     T.l2=t;}
   T.t3=T.l2+.7;T.l3=T.t3+2.4;T.rev=T.l3+.2;T.end=T.rev+.9;
   const lvl=t=>{if(t<=KF[0][0])return 0;for(let i=1;i<KF.length;i++){const[a,la]=KF[i-1],[b,lb]=KF[i];if(t<=b){const k=(t-a)/(b-a);return la+(lb-la)*(k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2)}}return KF[KF.length-1][1]};
@@ -4445,7 +4445,7 @@ function wpShow(R,dup){
     if(t<T.t2){show(0);const k=wpEase((t-T.t1)/(T.l1-T.t1));const y=k*(TI*TH)-(winH/2-TH/2);reelEl.style.transform=`translateY(${-y}px)`;
       reelEl.classList.toggle('blur',t>T.t1&&k<.85);$o('.wpk-win').style.setProperty('--wa',(t*720%360)+'deg');
       if(t>=T.l1)fire('l1',()=>{reelEl.children[TI].classList.add('hit');steps[0].classList.add('done');steps[0].querySelector('small').textContent=R.team;pop(0);buzz(25)})}
-    else if(t<T.t3){show(1);fire('s2',()=>steps[1].classList.add('now'));const L=lvl(t);meter.style.height=(L/4*100)+'%';
+    else if(t<T.t3){show(1);fire('s2',()=>steps[1].classList.add('now'));const L=lvl(t);meter.style.height=(L/LAD.length*100)+'%';
       tiers.forEach((e,k)=>{const on=L>=k+.98;if(on&&!e.classList.contains('lit')){e.classList.add('lit');buzz(12)}e.classList.toggle('tease',!on&&L>k+.15&&t<T.l2);e.classList.toggle('top',on&&L<k+1.9)});
       if(t>=T.l2)fire('l2',()=>{o.classList.add('tint');$o('.wpk-stamp').classList.add('go');tiers[ti].classList.add('win');pop(1);steps[1].classList.remove('now');steps[1].classList.add('done');steps[1].querySelector('small').textContent=RAR[R.r].n;buzz([30,30,60])})}
     else if(t<T.rev){show(2);fire('s3',()=>steps[2].classList.add('now'));const k=wpEase((t-T.t3)/(T.l3-T.t3)),w=PW+PG;track.style.transform=`translateX(${-(k*(PI*w))+(innerWidth/2-PW/2)}px)`;
@@ -4477,15 +4477,18 @@ function spRevoke(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly
   upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:v})})}
 /* v347 (owner): one-time card removals by account. Each entry switches off the Legendary version of a named player's card on that
    account's next app open (done once, marked in inv.fr.rv[id]). */
-const CARD_FIX=[{id:'zh-ig',who:/^\s*zed\s+hornby\s*$/i,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'}];
+const CARD_FIX=[{id:'zh-ig',who:/^\s*zed\s+hornby\s*$/i,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'},
+  {id:'ab-dg',who:/^\s*ari\s+borkar\s*$/i,name:'Daine Gonzalez',school:'Classical Academy',r:'*'},   /* v349: every version */
+  {id:'zh-rd',who:/^\s*zed\s+hornby\s*$/i,name:'Rory Dunn',school:'Scripps Ranch',r:'*'}];
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
-  const nmU=String((myProfile()||{}).name||''),v=invOf(u),fr=v.fr||{},rv=fr.rv||{};
-  for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;
-    const ids=players().filter(p=>p.name===f.name&&p.school===f.school).map(p=>'pc:'+p.key).filter(id=>(cardsOf(u)[id]||{})[f.r]);
-    const cards=Object.assign({},invOf(u).cards);for(const id of ids){const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur[f.r]=0;cards[id]=cur}
-    const nfr=Object.assign({},invOf(u).fr,{rv:Object.assign({},rv,{[f.id]:1})}),patch={cards,fr:nfr},old=invOf(u);
-    S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},old,patch)});
-    upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:old})});return}}
+  const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u);let n=0;
+  for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;rv[f.id]=1;n++;
+    for(const p of players().filter(p=>p.name===f.name&&p.school===f.school)){const id='pc:'+p.key,have=own[id]||{};
+      const rs=f.r==='*'?Object.keys(have).filter(r=>have[r]):have[f.r]?[f.r]:[];if(!rs.length)continue;
+      const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);rs.forEach(r=>cur[r]=0);cards[id]=cur}}
+  if(!n)return;const patch={cards,fr:Object.assign({},old.fr,{rv})};
+  S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},old,patch)});
+  upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:old})})}
 function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const seen=+((S.picks[ME.uid]||{}).gsn)||0,nw=giftsIn(ME.uid).filter(x=>(+x.at||0)>seen).sort((a,b)=>a.at-b.at);if(!nw.length)return;
   const c=$('#cfm');if(!c||!c.hidden)return;_gPop=true;const last=nw[nw.length-1].at;

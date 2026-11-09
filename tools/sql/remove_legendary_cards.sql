@@ -28,3 +28,18 @@ update public.docs d
    and d.id in (select id from z)
    and (d.data->'inv'->'cards'->'pc:mp461'->>'l') is not null
 returning d.id, d.data->'inv'->'cards'->'pc:mp461' as isaiah_garcia_card;
+
+-- v349 (owner): remove EVERY version of Daine Gonzalez (pc:mp556o, pc:mp556d) from Ari Borkar and of Rory Dunn (pc:mp955) from Zed Hornby.
+-- The app does this by itself on their next app open (cardFix); this makes it immediate. Each version is set to 0 (= not owned).
+create or replace function pg_temp.zero_card(d jsonb, card text) returns jsonb language sql as $$
+  select case when d->'inv'->'cards' ? card
+    then jsonb_set(d, array['inv','cards',card], (select coalesce(jsonb_object_agg(k, 0), '{}'::jsonb) from jsonb_object_keys(d->'inv'->'cards'->card) k))
+    else d end $$;
+update public.docs d
+   set data = pg_temp.zero_card(pg_temp.zero_card(d.data, 'pc:mp556o'), 'pc:mp556d'), updated_at = now()
+ where d.coll = 'picks' and d.id in (select id from public.docs where coll = 'profiles' and lower(trim(data->>'name')) = 'ari borkar')
+returning d.id, d.data->'inv'->'cards'->'pc:mp556o' as dg_rb, d.data->'inv'->'cards'->'pc:mp556d' as dg_def;
+update public.docs d
+   set data = pg_temp.zero_card(d.data, 'pc:mp955'), updated_at = now()
+ where d.coll = 'picks' and d.id in (select id from public.docs where coll = 'profiles' and lower(trim(data->>'name')) = 'zed hornby')
+returning d.id, d.data->'inv'->'cards'->'pc:mp955' as rory_dunn;
