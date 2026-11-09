@@ -2529,6 +2529,9 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 @media (prefers-reduced-motion:reduce){.tc-x,.tc-x .tcx-s,.ax-sec h3{animation:none!important}}
 
 /* Starter pick CSS removed in v346 */
+
+#ban-scr{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 35%,#3a0a12,#07090f 75%);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff}
+#ban-scr .ban-c{max-width:360px;display:flex;flex-direction:column;gap:10px;align-items:center}#ban-scr .ban-ic{font-size:3.4rem}#ban-scr h2{margin:0;font:900 1.9rem/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:#FF4F6D}#ban-scr p{margin:0;font-size:1.05rem}#ban-scr small{color:#b9c0d4}
 </style><style id="bb-theme">
 .bb-pre{display:flex;flex-direction:column;gap:4px;margin:12px 0;border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 0 0,rgba(255,194,61,.14),transparent 60%),var(--card,#132235)}
 .bb-pre b{font:800 1.15rem/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#FFC23D}.bb-pre span{opacity:.8}
@@ -2989,7 +2992,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v376 · Nov 9';
+const APP_BUILD='v377 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4735,6 +4738,12 @@ function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'
   if(!n)return;patch.fr=Object.assign({},old.fr,{rv});
   S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},old,patch)});
   upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:old})})}
+/* account notice (v374): picks/<uid>.ban={m:reason} shows a full-screen "Account banned" screen to that user only. Remove the field to lift it. */
+function banCheck(){const b=ME.uid&&(S.picks[ME.uid]||{}).ban;let el=document.getElementById('ban-scr');
+  if(!b){if(el)el.remove();return}
+  if(!el){el=document.createElement('div');el.id='ban-scr';el.setAttribute('role','alertdialog');el.setAttribute('aria-modal','true');document.body.appendChild(el)}
+  const h=`<div class="ban-c"><div class="ban-ic" aria-hidden="true">⛔</div><h2>Account banned</h2><p>Your Varsity account has been banned${b.m?' for <b>'+esc(b.m)+'</b>':''}.</p><small>Contact a Varsity admin if you think this is a mistake.</small></div>`;
+  if(el.innerHTML!==h)el.innerHTML=h}
 function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const seen=+((S.picks[ME.uid]||{}).gsn)||0,nw=giftsIn(ME.uid).filter(x=>(+x.at||0)>seen).sort((a,b)=>a.at-b.at);if(!nw.length)return;
   const c=$('#cfm');if(!c||!c.hidden)return;_gPop=true;const last=nw[nw.length-1].at;
@@ -8502,7 +8511,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;

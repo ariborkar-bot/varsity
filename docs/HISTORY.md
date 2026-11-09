@@ -230,3 +230,4 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 ## v375 (Nov 9): Jonah Garcia is a DL
 - stats.js: Jonah Garcia (Bishop's, id 463) defensive position S → DL (owner). Isaac Smedra's forced sign-in/profile redo was already shipped in v374.
 - v376 (Nov 9, owner): owner gift packs can carry a message (`inv.fr.gp[id].m`), shown on the Shop's Gift card instead of 'A pack from Varsity.'
+- v377 (Nov 9, owner): account notice `picks/<uid>.ban={m}`: that user alone sees a full-screen 'Account banned' screen (`banCheck`, `#ban-scr`); delete the field to lift it. Set on Isaac Smedra's account as a joke (owner, Nov 9).
