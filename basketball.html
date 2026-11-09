@@ -2886,7 +2886,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v351 · Nov 8';
+const APP_BUILD='v352 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4385,15 +4385,18 @@ const wpDone=u=>!!(invOf(u).wp);
 const wpCan=()=>ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'&&!!myProfile()&&S.loaded&&S.loaded.picks&&!wpDone(ME.uid);
 let _wpAsked=false,_wpBusy=false;
 function wpTeams(){const by={};for(const p of players())if(!p.sample&&!/x$/.test(p.key)&&p.school){(by[p.school]=by[p.school]||[]).push(p)}return by}
+/* v352 (owner): the player is one of the team's top 10 by season fantasy points (basketball before stats: last season's hidden rank) */
+const WP_TOP=10;
+function wpTop(list){const rk=k=>((window.BB_RANK||{})[k])||0;return list.map(p=>({p,v:agg(p,'season').v})).sort((x,y)=>y.v-x.v||rk(y.p.key)-rk(x.p.key)||x.p.name.localeCompare(y.p.name)).slice(0,WP_TOP).map(x=>x.p)}
 function wpRoll(){const by=wpTeams(),ts=Object.keys(by).filter(t=>by[t].length);if(!ts.length)return null;
-  const team=ts[fcRnd(ts.length)],r=rollRarity(WP_ODDS),pool=by[team],p=pool[fcRnd(pool.length)];return {team,r,key:p.key,teams:ts,pool}}
+  const team=ts[fcRnd(ts.length)],r=rollRarity(WP_ODDS),pool=wpTop(by[team]),p=pool[fcRnd(pool.length)];return {team,r,key:p.key,teams:ts,pool}}
 /* the invite: shown once per app session after you have a profile (Later keeps it in the Shop) */
 function wpMaybe(){if(_wpAsked||!wpCan())return;const c=$('#cfm');if(!c||!c.hidden||document.querySelector('.pko,.wpk'))return;_wpAsked=true;
   c.innerHTML=`<div class="gcard tok-sheet wp-ask" role="dialog" aria-modal="true" aria-labelledby="wp-t"><div class="wp-ask-art" aria-hidden="true"><span>1</span><small>player</small></div><h2 id="wp-t">Welcome to Varsity!</h2>
-    <p>Here’s a free <b>player pack</b> to start you off: one player card, Epic or better.</p>
+    <p>Here’s a free <b>player pack</b> to start you off: one card of a top 10 player from a random team, Epic or better.</p>
     <p class="wp-odds">${Object.entries(WP_ODDS).map(([r,n])=>`<span style="color:${RAR[r].c}">${RAR[r].n} ${n}%</span>`).join('')}</p>
     <div class="gbtns"><button class="btn" data-act="wpOpen">Open it</button><button class="btn ghost" data-c="no">Later</button></div></div>`;c.hidden=false}
-function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One player card, Epic or better (${Object.entries(WP_ODDS).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
+function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One card of a team’s top 10 player, Epic or better (${Object.entries(WP_ODDS).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
 async function wpOpen(){if(_wpBusy||!wpCan())return;_wpBusy=true;try{closeConfirm()}catch(_){}
   try{const R=wpRoll();if(!R){say('No players to pull yet. Try again soon.');return}
     const v=invOf(ME.uid),cards=Object.assign({},v.cards),cid='pc:'+R.key,cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),dup=!!cur[R.r];
@@ -4483,7 +4486,8 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'ab-dg',who:AB,name:'Daine Gonzalez',school:'Classical Academy',r:'*'},
   {id:'zh-rd-back',who:ZH,card:'pc:mp955',restore:1},   /* v350: owner gave Rory Dunn back (the v349 removal is gone) */
   {id:'ai-x',who:ABZH,name:'Adrian Ismaili',school:'Poway',r:'*'},   /* v350: every version, from Ari or Zed */
-  {id:'wp-2',who:ABZH,wp:1}];   /* v350: Ari and Zed get a new welcome pack */
+  {id:'wp-2',who:ABZH,wp:1},
+  {id:'zh-ch',who:ZH,name:'Carson Hasting',school:'Granite Hills',r:'*'}];   /* v352 */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};

@@ -65,3 +65,10 @@ update public.docs d
        updated_at = now()
  where d.coll = 'picks' and d.id in (select id from public.docs where coll = 'profiles' and lower(trim(data->>'name')) = 'ari borkar')
 returning d.id;
+
+-- v352 (owner): remove every version of Carson Hasting (Granite Hills, pc:mp584) from Zed Hornby. Needs pg_temp.zero_card from above.
+update public.docs d
+   set data = jsonb_set(pg_temp.zero_card(d.data,'pc:mp584'), '{inv,fr,rv}', coalesce(d.data->'inv'->'fr'->'rv','{}'::jsonb) || '{"zh-ch":1}'::jsonb, true),
+       updated_at = now()
+ where d.coll = 'picks' and d.id in (select id from public.docs where coll = 'profiles' and lower(trim(data->>'name')) = 'zed hornby')
+returning d.id, d.data->'inv'->'cards'->'pc:mp584' as carson_hasting;
