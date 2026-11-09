@@ -1828,7 +1828,7 @@ html,body{overflow-x:clip;max-width:100%}
 @keyframes wpFlash{0%{opacity:.75}100%{opacity:0}}
 .wpk-lad{position:relative;display:flex;flex-direction:column;gap:10px;padding-left:44px}
 .wpk-meter{position:absolute;left:0;top:0;bottom:0;width:24px;border-radius:12px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.16);overflow:hidden}
-.wpk-meter i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,#B48CFF 0 33.3%,#FFC23D 33.3% 66.7%,#FF4F6D 66.7% 100%);background-size:100% 230px;background-position:bottom;box-shadow:0 0 22px rgba(255,255,255,.7)}
+.wpk-meter i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,#B48CFF 0 25%,#FFC23D 25% 50%,#FF4F6D 50% 75%,#7CF3FF 75% 100%);background-size:100% 310px;background-position:bottom;box-shadow:0 0 22px rgba(255,255,255,.7)}
 .wpk-meter i:after{content:'';position:absolute;left:-4px;right:-4px;top:-3px;height:6px;border-radius:3px;background:#fff;box-shadow:0 0 14px #fff}
 .wpk-tier{position:relative;width:250px;height:70px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;box-sizing:border-box;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
 .wpk-tier i{position:absolute;inset:0;background:linear-gradient(90deg,var(--tc),color-mix(in srgb,var(--tc) 35%,transparent));opacity:0;transition:opacity .2s}
@@ -2876,7 +2876,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v354 · Nov 8';
+const APP_BUILD='v355 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4404,27 +4404,30 @@ function giftSheet(){const c=$('#cfm'),fr=giftFriends(),q=GF.q.trim().toLowerCas
    Once you have a profile you get one free pack, once per account: ONE player card, Epic or better (WP_ODDS).
    It is rolled in three steps and shown that way: the TEAM (a slot reel of school logos), the RARITY (a wheel split by the odds),
    then the PLAYER (a carousel of that team's players). Saved as picks/<uid>.inv.wp = when opened, plus the card in inv.cards. */
-const WP_ODDS={e:50,l:33,m:17};   /* v349 (owner): Epic or better (was Rare 40 / Epic 30 / Legendary 20 / Mythical 10) */
+const WP_ODDS={e:49,l:33,m:17},WP_ACH=1,WPO={e:49,l:33,m:17,x:1};   /* v355 (owner): 1% Immortal card (rolled first), Epic 49 / Legendary 33 / Mythical 17 */   /* v349 (owner): Epic or better (was Rare 40 / Epic 30 / Legendary 20 / Mythical 10) */
 const wpDone=u=>!!(invOf(u).wp);
 const wpCan=()=>ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'&&!!myProfile()&&S.loaded&&S.loaded.picks&&!wpDone(ME.uid);
 let _wpAsked=false,_wpBusy=false;
 function wpTeams(){const by={};for(const p of players())if(!p.sample&&!/x$/.test(p.key)&&p.school){(by[p.school]=by[p.school]||[]).push(p)}return by}
 /* v352 (owner): the player is one of the team's top 10 by season fantasy points (basketball before stats: last season's hidden rank) */
-const WP_TOP=10,WP_CUT=Date.UTC(2026,10,9,6,46,33);   /* v352 went live 22:43:33 Pacific Nov 8 (+3 min for the site to update) */
+const WP_TOP=10;
 function wpTop(list){const rk=k=>((window.BB_RANK||{})[k])||0;return list.map(p=>({p,v:agg(p,'season').v})).sort((x,y)=>y.v-x.v||rk(y.p.key)-rk(x.p.key)||x.p.name.localeCompare(y.p.name)).slice(0,WP_TOP).map(x=>x.p)}
 function wpRoll(){const by=wpTeams(),ts=Object.keys(by).filter(t=>by[t].length);if(!ts.length)return null;
+  /* 1%: an Immortal achievement card; its player's school is the team and he is the player (basketball has none until games are played) */
+  if(fcRnd(10000)<WP_ACH*100){const aid=rollAch(),a=aid&&achInfo(aid),q=a&&pByKey(a.key);
+    if(q&&by[q.school]){const pool=wpTop(by[q.school]);if(!pool.some(x=>x.key===q.key))pool[pool.length-1]=q;return {team:q.school,r:'x',key:q.key,ach:aid,teams:ts,pool}}}
   const team=ts[fcRnd(ts.length)],r=rollRarity(WP_ODDS),pool=wpTop(by[team]),p=pool[fcRnd(pool.length)];return {team,r,key:p.key,teams:ts,pool}}
 /* the invite: shown once per app session after you have a profile (Later keeps it in the Shop) */
 function wpMaybe(){if(_wpAsked||!wpCan())return;const c=$('#cfm');if(!c||!c.hidden||document.querySelector('.pko,.wpk'))return;_wpAsked=true;
   c.innerHTML=`<div class="gcard tok-sheet wp-ask" role="dialog" aria-modal="true" aria-labelledby="wp-t"><div class="wp-ask-art" aria-hidden="true"><span>1</span><small>player</small></div><h2 id="wp-t">Welcome to Varsity!</h2>
     <p>Here’s a free <b>player pack</b> to start you off: one card of a top 10 player from a random team, Epic or better.</p>
-    <p class="wp-odds">${Object.entries(WP_ODDS).map(([r,n])=>`<span style="color:${RAR[r].c}">${RAR[r].n} ${n}%</span>`).join('')}</p>
+    <p class="wp-odds">${Object.entries(WPO).map(([r,n])=>`<span style="color:${RAR[r].c}">${RAR[r].n} ${n}%</span>`).join('')}</p>
     <div class="gbtns"><button class="btn" data-act="wpOpen">Open it</button><button class="btn ghost" data-c="no">Later</button></div></div>`;c.hidden=false}
-function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One card of a team’s top 10 player, Epic or better (${Object.entries(WP_ODDS).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
+function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One card of a team’s top 10 player, Epic or better (${Object.entries(WPO).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
 async function wpOpen(){if(_wpBusy||!wpCan())return;_wpBusy=true;try{closeConfirm()}catch(_){}
   try{const R=wpRoll();if(!R){say('No players to pull yet. Try again soon.');return}
-    const v=invOf(ME.uid),cards=Object.assign({},v.cards),cid='pc:'+R.key,cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),dup=!!cur[R.r];
-    const patch={wp:NOW(),wpv:2,wpc:cid+':'+R.r};if(dup)patch.dup=(+v.dup||0)+RAR[R.r].dup;else{cur[R.r]=1;cards[cid]=cur;patch.cards=cards}
+    const v=invOf(ME.uid),cards=Object.assign({},v.cards),cid=R.ach||'pc:'+R.key,cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),dup=!!cur[R.r];
+    const patch={wp:NOW(),wpv:3,wpc:cid+':'+R.r};if(dup)patch.dup=(+v.dup||0)+RAR[R.r].dup;else{cur[R.r]=1;cards[cid]=cur;patch.cards=cards}
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
     try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:v});say('That did not save. Try again.');return}
     wpShow(R,dup)}finally{_wpBusy=false}}
@@ -4437,17 +4440,17 @@ function wpShow(R,dup){
   const tile=t=>`<div class="wpk-tt">${logoFor(t)?slogo(t,64):`<span class="wpk-ini">${esc(t.split(/\s+/).map(w=>w[0]).slice(0,2).join(''))}</span>`}<b>${esc(t)}</b></div>`;
   /* rarity power meter (v347, replaces the wheel; v349: Epic, Legendary, Mythical): tiers bottom to top. The charge climbs one tier at a
      time, lighting each one; above your rarity it teases the next tier (flicker) and drops back, unless you hit Mythical. */
-  const LAD=Object.keys(WP_ODDS),ti=LAD.indexOf(R.r);
+  const LAD=Object.keys(WPO),ti=LAD.indexOf(R.r);
   /* player carousel: the team's players, repeated, the rolled one at index PI */
   const pool=R.pool.filter(q=>q.key!==R.key),car=[];for(let i=0;i<22;i++)car.push(pool.length?pool[fcRnd(pool.length)]:p);const PI=19;car[PI]=p;
   const pc=q=>`<div class="wpk-pc">${av(q.name,q.school,58)}<b>${esc(q.name)}</b><small>${q.pos==='DEF'?esc(q.sub||'DEF'):esc(q.pos)}</small></div>`;
-  const pct=CARD_PCT[R.r];
+  const ai=R.ach?achInfo(R.ach):null,pct=ai?ai.pct:CARD_PCT[R.r],RI=R.r==='x'?6:RAR_ORD.indexOf(R.r);
   o.innerHTML=`<div class="wpk-bg" aria-hidden="true"><i class="wpk-rays"></i></div>
     <div class="wpk-top"><h2>Your free player</h2><ol class="wpk-steps"><li data-s="1"><b>Team</b><small>…</small></li><li data-s="2"><b>Rarity</b><small>…</small></li><li data-s="3"><b>Player</b><small>…</small></li></ol></div>
     <div class="wpk-st wpk-s1"><div class="wpk-win"><div class="wpk-reel">${reel.map(tile).join('')}</div><i class="wpk-mark"></i></div><p class="wpk-cap">Rolling your team…</p></div>
-    <div class="wpk-st wpk-s2"><div class="wpk-lad"><div class="wpk-meter"><i></i></div>${LAD.slice().reverse().map(r=>`<div class="wpk-tier" data-r="${r}" style="--tc:${RAR[r].c}"><i></i><b>${RAR[r].n}</b><small>${WP_ODDS[r]}%</small></div>`).join('')}</div><p class="wpk-cap">Rolling your rarity…</p><div class="wpk-stamp">${RAR[R.r].n}!</div></div>
+    <div class="wpk-st wpk-s2"><div class="wpk-lad"><div class="wpk-meter"><i></i></div>${LAD.slice().reverse().map(r=>`<div class="wpk-tier" data-r="${r}" style="--tc:${RAR[r].c}"><i></i><b>${RAR[r].n}</b><small>${WPO[r]}%</small></div>`).join('')}</div><p class="wpk-cap">Rolling your rarity…</p><div class="wpk-stamp">${RAR[R.r].n}!</div></div>
     <div class="wpk-st wpk-s3"><div class="wpk-track">${car.map(pc).join('')}</div><i class="wpk-pin" aria-hidden="true"></i><p class="wpk-cap">Rolling your player…</p></div>
-    <div class="wpk-st wpk-s4"><div class="wpk-card"><div class="wpk-ctop"><span>${RAR[R.r].n}</span><span>Player card</span></div>${av(p.name,p.school,110)}<h3>${esc(p.name)}</h3><p>${p.pos==='DEF'?esc(p.sub||'DEF'):esc(p.pos)} · ${slogo(p.school,20)} ${esc(p.school)}</p><em>${dup?`Duplicate · +${RAR[R.r].dup} tokens`:`+${pct}% on his props`}</em><i class="wpk-shine"></i></div><i class="wpk-pts"></i>
+    <div class="wpk-st wpk-s4"><div class="wpk-card"><div class="wpk-ctop"><span>${RAR[R.r].n}</span><span>${ai?'Achievement card':'Player card'}</span></div>${av(p.name,p.school,110)}<h3>${esc(p.name)}</h3><p>${p.pos==='DEF'?esc(p.sub||'DEF'):esc(p.pos)} · ${slogo(p.school,20)} ${esc(p.school)}</p><em>${dup?`Duplicate · +${RAR[R.r].dup} tokens`:ai?`${esc(ai.line)} · +${pct}% on his props`:`+${pct}% on his props`}</em><i class="wpk-shine"></i></div><i class="wpk-pts"></i>
       <div class="wpk-btns"><button class="btn" data-w="done">Nice!</button><button class="btn ghost" data-w="see">See his card</button></div></div>
     <button class="wpk-skip" type="button" data-w="skip">Skip</button><i class="wpk-flash" aria-hidden="true"></i>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
@@ -4464,7 +4467,7 @@ function wpShow(R,dup){
   let t0=performance.now(),raf=0,last=-1,fired={};
   const fire=(k,f)=>{if(!fired[k]){fired[k]=1;f()}};
   const buzz=pat=>{try{navigator.vibrate&&navigator.vibrate(pat)}catch(_){}};
-  const sparks=()=>{if(calm)return;const n=[0,0,18,26,36,50][RAR_ORD.indexOf(R.r)]||20,box=$o('.wpk-pts');let h='';
+  const sparks=()=>{if(calm)return;const n=[0,0,18,26,36,50,64][RI]||20,box=$o('.wpk-pts');let h='';
     for(let i=0;i<n;i++){const a=Math.PI*2*i/n+Math.random()*.3,d=120+Math.random()*170;h+=`<i style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d)}px;--t:${(.7+Math.random()*.6).toFixed(2)}s"></i>`}box.innerHTML=h};
   const show=i=>st.forEach((e,k)=>e.classList.toggle('on',k===i));
   const pop=i=>{const e=st[i],f=$o('.wpk-flash');e.classList.remove('punch');f.classList.remove('go');void e.offsetWidth;e.classList.add('punch');f.classList.add('go')};
@@ -4478,7 +4481,7 @@ function wpShow(R,dup){
     else if(t<T.rev){show(2);fire('s3',()=>steps[2].classList.add('now'));const k=wpEase((t-T.t3)/(T.l3-T.t3)),w=PW+PG;track.style.transform=`translateX(${-(k*(PI*w))+(innerWidth/2-PW/2)}px)`;
       track.classList.toggle('blur',k<.8&&t>T.t3);
       if(t>=T.l3)fire('l3',()=>{track.children[PI].classList.add('hit');pop(2);steps[2].classList.remove('now');steps[2].classList.add('done');steps[2].querySelector('small').textContent=p.name;buzz(25)})}
-    else{show(3);fire('rev',()=>{o.classList.add('rev',RAR_ORD.indexOf(R.r)>=4?'rays':'x');pop(3);sparks();buzz(R.r==='m'?[40,40,160]:R.r==='l'?[30,30,100]:[30,20,60]);$o('.wpk-skip').hidden=true})
+    else{show(3);fire('rev',()=>{o.classList.add('rev',RI>=4?'rays':'x');pop(3);sparks();buzz(RI>=5?[40,40,160]:RI===4?[30,30,100]:[30,20,60]);$o('.wpk-skip').hidden=true})
       if(t>=T.end)fire('end',()=>o.classList.add('rdy'))}
     raf=requestAnimationFrame(step)};
   if(calm)t0=performance.now()-T.end*1000;
@@ -4516,8 +4519,8 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
-  /* v354 (owner): a welcome pack opened before the v352 rules (Epic or better, top 10 player) was live gets a fresh one under the new rules */
-  if(+old.wp>0&&+old.wp<WP_CUT&&!old.wpv&&!rv['wp-v2']){rv['wp-v2']=1;patch.wp=0;n++}
+  /* v355 (owner, "refresh all packs"): every welcome pack opened before the v355 rules (Epic+, top 10 player, 1% Immortal; wpv 3) is refreshed once */
+  if(+old.wp>0&&(+old.wpv||1)<3&&!rv['wp-v3']){rv['wp-v3']=1;patch.wp=0;n++}
   for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;rv[f.id]=1;n++;
     if(f.wp){patch.wp=0;continue}
     if(f.restore){const raw=old.cards&&old.cards[f.card];if(raw&&typeof raw==='object'){const zs=Object.keys(raw).filter(r=>raw[r]===0);if(zs.length)put(f.card,c=>zs.forEach(r=>c[r]=1))}continue}
