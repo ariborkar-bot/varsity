@@ -2929,7 +2929,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v359 · Nov 8';
+const APP_BUILD='v360 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4439,9 +4439,14 @@ const wpDone=u=>!!(invOf(u).wp);
 const wpCan=()=>ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'&&!!myProfile()&&S.loaded&&S.loaded.picks&&!wpDone(ME.uid);
 let _wpAsked=false,_wpBusy=false;
 function wpTeams(){const by={};for(const p of players())if(!p.sample&&!/x$/.test(p.key)&&p.school){(by[p.school]=by[p.school]||[]).push(p)}return by}
-/* v352 (owner): the player is one of the team's top 10 by season fantasy points (basketball before stats: last season's hidden rank) */
+/* v352: the player was one of the team's top 10 (replaced in v360 by the best player at each position, below) */
 const WP_TOP=10;
-function wpTop(list){const rk=k=>((window.BB_RANK||{})[k])||0;return list.map(p=>({p,v:agg(p,'season').v})).sort((x,y)=>y.v-x.v||rk(y.p.key)-rk(x.p.key)||x.p.name.localeCompare(y.p.name)).slice(0,WP_TOP).map(x=>x.p)}
+/* v360 (owner): the welcome pack's pool is a team's best player at each position, not its top 10. Football: QB, RB, WR, TE, DL, LB,
+   DB, K (8 cards per team; defenders without a DL/LB/DB position are left out). Basketball: PG, SG, SF, PF, C (5). */
+const WP_POS=k=>k.pos==='DEF'?(['DL','LB','DB'].includes(k.sub)?k.sub:''):k.pos;
+function wpTop(list){const rk=k=>((window.BB_RANK||{})[k])||0,best={};
+  list.map(p=>({p,v:agg(p,'season').v})).sort((x,y)=>y.v-x.v||rk(y.p.key)-rk(x.p.key)||x.p.name.localeCompare(y.p.name)).forEach(x=>{const g=WP_POS(x.p);if(g&&!best[g])best[g]=x.p});
+  return Object.values(best)}
 function wpRoll(){const by=wpTeams(),ts=Object.keys(by).filter(t=>by[t].length);if(!ts.length)return null;
   /* 1%: an Immortal achievement card; its player's school is the team and he is the player (basketball has none until games are played) */
   if(fcRnd(10000)<WP_ACH*100){const aid=rollAch(),a=aid&&achInfo(aid),q=a&&pByKey(a.key);
@@ -4450,10 +4455,10 @@ function wpRoll(){const by=wpTeams(),ts=Object.keys(by).filter(t=>by[t].length);
 /* the invite: shown once per app session after you have a profile (Later keeps it in the Shop) */
 function wpMaybe(){if(_wpAsked||!wpCan())return;const c=$('#cfm');if(!c||!c.hidden||document.querySelector('.pko,.wpk'))return;_wpAsked=true;
   c.innerHTML=`<div class="gcard tok-sheet wp-ask" role="dialog" aria-modal="true" aria-labelledby="wp-t"><div class="wp-ask-art" aria-hidden="true"><span>1</span><small>player</small></div><h2 id="wp-t">Welcome to Varsity!</h2>
-    <p>Here’s a free <b>player pack</b> to start you off: one card of a top 10 player from a random team, Epic or better.</p>
+    <p>Here’s a free <b>player pack</b> to start you off: one card of a random team’s best player at one position, Epic or better.</p>
     <p class="wp-odds">${Object.entries(WPO).map(([r,n])=>`<span style="color:${RAR[r].c}">${RAR[r].n} ${n}%</span>`).join('')}</p>
     <div class="gbtns"><button class="btn" data-act="wpOpen">Open it</button><button class="btn ghost" data-c="no">Later</button></div></div>`;c.hidden=false}
-function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One card of a team’s top 10 player, Epic or better (${Object.entries(WPO).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
+function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One card of a team’s best player at one position, Epic or better (${Object.entries(WPO).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
 async function wpOpen(){if(_wpBusy||!wpCan())return;_wpBusy=true;try{closeConfirm()}catch(_){}
   try{const R=wpRoll();if(!R){say('No players to pull yet. Try again soon.');return}
     const v=invOf(ME.uid),cards=Object.assign({},v.cards),cid=R.ach||'pc:'+R.key,cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),dup=!!cur[R.r];
