@@ -11,7 +11,7 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - Tools: `python3 tools/preview/check_syntax.py` (syntax-checks every inline script) and `python3 tools/preview/make_previews.py [out_dir]` (builds the two single-file demo previews).
 
 ## Standing preferences from the owner
-- After each change: commit, push to `main`, and send the owner fresh preview files (`make_previews.py`, then SendUserFile both `varsity-basketball.html` and `varsity-football.html`).
+- After each change: commit and push to `main`. Do NOT send preview files after app changes (owner, Nov 9 2026): only send them (`make_previews.py`, then SendUserFile both `varsity-basketball.html` and `varsity-football.html`) when the owner asks for them.
 - The owner also has a private artifact page with both previews: https://claude.ai/artifact/2xj2HfG4M4WiKrj7TnxFmL (slug `0fe0f16f-75c5-4b8c-a206-03dac0615e2b`; the files are `index.html` = basketball, `varsity-basketball.html`, `varsity-football.html`). Republish it with the new preview files after changes if asked to show it in the side panel.
 - Short replies. Say what changed in one or two sentences, mention anything the owner should know.
 - No approval step (owner, Nov 6 2026): make the change, test it, ship it. (Earlier the owner wanted a picture before each change; that is withdrawn.)
