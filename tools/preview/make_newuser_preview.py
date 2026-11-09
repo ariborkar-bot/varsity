@@ -27,7 +27,11 @@ window.__NU=1;(function(){
   const client=new Proxy({auth,rpc:()=>ok(false)},{get:(t,k)=>k in t?t[k]:any()});
   Object.defineProperty(window,'supabase',{value:Object.freeze({createClient:()=>client}),writable:false,configurable:false});
 })();</script>
-<div style="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#FFC23D;color:#1b1200;font:800 11px/1 system-ui;padding:5px 8px;border-radius:99px;opacity:.85;pointer-events:none">NEW-USER PREVIEW · nothing is saved</div>"""
+<div style="position:fixed;left:8px;bottom:8px;z-index:2147483647;display:flex;gap:6px;align-items:center;font:800 11px/1 system-ui"><span style="background:#FFC23D;color:#1b1200;padding:5px 8px;border-radius:99px;opacity:.85;pointer-events:none">NEW-USER PREVIEW · nothing is saved</span><button type="button" onclick="nuFill()" style="font:inherit;background:#fff;color:#1b1200;border:0;padding:5px 9px;border-radius:99px;cursor:pointer">Fill demo answers</button></div>
+<script>/* owner: fill whatever sign-up / profile form is showing with demo answers (you still tap the button yourself) */
+function nuFill(){const set=(id,v)=>{const e=document.getElementById(id);if(!e)return 0;if(e.type==='checkbox'){if(!e.checked)e.click()}else{e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}))}return 1};
+  const n=set('au-email','demo'+Math.floor(Math.random()*900+100)+'@varsity.test')+set('au-pass','demo1234')+set('au-age',1)+set('nm-name','Demo Player');
+  if(!n)alert('No sign-up or profile form is showing right now.')}</script>"""
 
 LIB = ['<script src="vendor/supabase.min.js"></script>',
        """<script>/* v314: the login library is hosted with the app (vendor/). The two CDNs are only backups, for the rare case the local copy cannot load */window.supabase||document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\\/script>')</script>""",

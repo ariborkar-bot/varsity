@@ -1266,6 +1266,8 @@ select option{background:#0B1730;color:#EAF0F8}
 .bt-pk{display:flex;align-items:center;gap:10px;min-width:0}.bt-pk>span{display:flex;flex-direction:column;min-width:0}.bt-pk small{font-size:.76rem}
 .bt-pay{display:flex;flex-direction:column;align-items:flex-end;text-align:right;white-space:nowrap}.bt-pay b{color:#4ADE80}.bt-pay small{font-size:.74rem}
 .bt-mine .bt-h:first-of-type{border-top:0}
+.tk-v{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;white-space:nowrap}.tk-v small{font-size:.72rem;opacity:.7;font-weight:600}
+.tk-sub{font-size:.76rem;margin:-4px 0 6px}.act-l{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:10px 0 2px;opacity:.85}.act-picks .act-l+.bt-h{border-top:0}
 .bd-c{grid-template-columns:44px minmax(0,1fr) auto!important;grid-template-areas:"slot who r" "slot m m" "slot acts acts";gap:8px 10px!important;align-items:center}
 .bd-c .lg-slot{grid-area:slot;align-self:start}.bd-c .lg-who{grid-area:who}.bd-c .bd-r{grid-area:r}.bd-c .bd-m{grid-area:m}.bd-c .lg-acts{grid-area:acts!important;grid-column:auto!important;justify-content:flex-end}
 .bd-c .lg-who .lt b{white-space:normal;line-height:1.15;font-size:.98rem}.bd-c .lg-who .lt i{flex-wrap:wrap;row-gap:3px}
@@ -2886,7 +2888,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v355 · Nov 8';
+const APP_BUILD='v356 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3486,10 +3488,21 @@ const rwList=()=>[
   ['fg','Play '+(FG_SPORT==='bb'?'Hoops':'Field Goal'),()=>!!(S.picks[ME.uid]||{}).fg],
   ['ad','Watch a sponsor spot',()=>adBonus(ME.uid)>0]];
 const rwOf=u=>((S.picks[u]||{}).rw)||{};
-/* total token leaderboard: everyone's whole balance (picks, props, sponsors, rewards, daily challenge) */
+/* v356 (owner): the token leaderboard ranks by every token you have ever earned (start, rewards, sponsors, daily
+   challenge, minigame pay, duplicate refunds, gifts received, and winnings on picks and props). Spending tokens or
+   losing a wager never lowers it. The current balance (bank) shows next to it and does not affect rank. */
+function earned(u){
+  const gm=gameMap(),v=invOf(u);let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+(+v.dup||0)+(+rcRec(u).wn||0);
+  for(const x of giftsIn(u))t+=+x.a||0;
+  const win=b=>{const st=+b.stake||0;return (st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100)};
+  Object.entries(betsOf(u)).forEach(([id,b])=>{if(betResult(b,gm[id])==='won')t+=win(b)});
+  Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0;if(atsResult(b,gm[id])==='won')t+=st*b.odds-st});
+  Object.values(propsOf(u)).forEach(b=>{if(propResult(b,gm)==='won')t+=win(b)});
+  return Math.round(t);
+}
 function tokRows(){const ids=new Set(Object.keys(S.picks).filter(u=>S.profiles[u]));if(ME.uid&&ME.mode!=='guest')ids.add(ME.uid);
-  return [...ids].map(u=>({u,t:bank(u)})).sort((a,b)=>b.t-a.t)}
-const tokBoard=()=>mgBoard('Token leaderboard',tokRows().map(x=>({u:x.u,v:(Math.round(x.t)).toLocaleString()+' tokens'})),'No one is on the board yet.');
+  return [...ids].map(u=>({u,t:earned(u),b:bank(u)})).sort((a,b)=>b.t-a.t||b.b-a.b)}
+const tokBoard=()=>mgBoard('Token leaderboard',tokRows().map(x=>({u:x.u,h:`<span class="tk-v"><b>${x.t.toLocaleString()}</b><small>${x.b.toLocaleString()} now</small></span>`})),'No one is on the board yet.','Ranked by total tokens earned · “now” is what they have today');
 const rwBonus=u=>RW_PAY*rwList().filter(([k])=>rwOf(u)[k]).length;
 let rwPend='';
 function rwClaim(){
@@ -4679,10 +4692,27 @@ function bxChips(kind,id,b){
   if(!b.bx&&!nb&&!ni)return '';
   const chip=(f,id2,label,n)=>`<button class="chip bx ${b.bx===f?'on':''}" data-act="bxSet" data-kind="${kind}" data-id="${esc(id)}" data-f="${f}" aria-pressed="${b.bx===f}" ${b.bx===f||n?'':'disabled'}>${label}${b.bx===f?' · on':` (${n})`}</button>`;
   return `<div class="bx-row">${chip('b','t_boost','+25% boost',nb)}${chip('i','t_insure','Insurance',ni)}</div>`}
-function mgBoard(title,rows,empty){
+/* v356 (owner): Active picks, right under the token leaderboard on Pick ’em and Player props: every pick
+   and over/under you have locked in that is not settled yet */
+function activeCard(){
+  if(!ME.uid||ME.mode==='guest')return '';
+  const gm=gameMap(),dt=g=>g?g.d+(g.t||''):'9';
+  const pk=Object.entries(betsOf(ME.uid)).map(([id,b])=>({b,g:gm[id]})).filter(x=>x.g&&!gDone(x.g)).sort((a,b)=>dt(a.g)<dt(b.g)?-1:1);
+  const pp=Object.values(propsOf(ME.uid)).map(b=>({b,g:gm[b.g]})).filter(x=>propResult(x.b,gm)==='open').sort((a,b)=>dt(a.g)<dt(b.g)?-1:1);
+  const pay=b=>{const st=+b.stake||0;return st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100)};
+  const right=b=>`<span class="bt-pay"><b>${tk(pay(b))}</b><small class="muted">${tk(b.stake)} at ${(+b.odds).toFixed(2)}x</small></span>`;
+  const pkRow=x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
+    return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)} to win</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${started(x.g)?' · locked':''}</small></span></span>${right(x.b)}</div>`};
+  const ppRow=x=>{const p=pByKey(x.b.k),M=PP_MK[x.b.m]||{l:x.b.m||''},g=x.g;
+    return `<div class="bt-h"><span class="bt-pk">${slogo(p?p.school:'',30)}<span><b>${esc(p?p.name:'Player')} ${x.b.s==='o'?'Over':'Under'} ${fmtN(+x.b.line)}</b><small class="muted">${esc(M.l)}${g?' · '+esc(abbr(g.a))+' at '+esc(abbr(g.h))+' · '+esc(fmtDate(g.d)):''}${g&&started(g)?' · locked':''}</small></span></span>${right(x.b)}</div>`};
+  const n=pk.length+pp.length,wag=[...pk,...pp].reduce((t,x)=>t+(+x.b.stake||0),0);
+  const sec=(l,arr,f)=>arr.length?`<div class="act-l">${l} <span class="muted">${arr.length}</span></div>${arr.map(f).join('')}`:'';
+  return `<section class="card bt-mine act-picks"><div class="qh"><h3>Active picks</h3>${n?`<span class="muted">${n} open · ${tk(wag)} wagered</span>`:''}</div>${n?sec('Pick ’em',pk,pkRow)+sec('Player props',pp,ppRow):'<p class="muted">Nothing open right now. Your Pick ’em picks and player props show here until they are settled.</p>'}</section>`;
+}
+function mgBoard(title,rows,empty,sub){
   if(!rows.length)return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div><p class="muted">${empty||'No one is on the board yet. Lock in a pick to be first.'}</p></section>`;
-  const more=!!UI.mgMore,top=more?rows:rows.slice(0,3),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>{const bn=eqOf(x.u,'banner');return `<div class="bt-h ${x.u===ME.uid?'me':''} ${bn?'bn bn-row '+bn:''}" style="${bn?cosStyle(bn):''}"><span><span class="rk">${i+1}</span> <b>${nmC(x.u,esc(nm(x.u)))}${x.u===ME.uid?' (you)':''}</b></span><b>${x.v}</b></div>`};
-  return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${top.map(line).join('')}${!more&&meI>=3?`<div class="bt-gap muted">···</div>${line(rows[meI],meI)}`:''}${rows.length>3?`<button class="btn sm ghost bt-more" data-act="mgMore">${more?'Show less':'Show more ('+(rows.length-3)+')'}</button>`:''}</section>`;
+  const more=!!UI.mgMore,top=more?rows:rows.slice(0,3),meI=rows.findIndex(x=>x.u===ME.uid),line=(x,i)=>{const bn=eqOf(x.u,'banner');return `<div class="bt-h ${x.u===ME.uid?'me':''} ${bn?'bn bn-row '+bn:''}" style="${bn?cosStyle(bn):''}"><span><span class="rk">${i+1}</span> <b>${nmC(x.u,esc(nm(x.u)))}${x.u===ME.uid?' (you)':''}</b></span>${x.h||'<b>'+x.v+'</b>'}</div>`};
+  return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div>${sub?`<p class="muted tk-sub">${sub}</p>`:''}${top.map(line).join('')}${!more&&meI>=3?`<div class="bt-gap muted">···</div>${line(rows[meI],meI)}`:''}${rows.length>3?`<button class="btn sm ghost bt-more" data-act="mgMore">${more?'Show less':'Show more ('+(rows.length-3)+')'}</button>`:''}</section>`;
 }
 const n1=v=>Math.round(v);
 function resCard(hist,label){
@@ -4735,17 +4765,13 @@ function picksHTML(){
   /* history and the board */
   const hist=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id],res:betResult(b,gm[id])})).filter(x=>x.g&&x.res!=='open').sort((a,b)=>a.g.d<b.g.d?1:-1);
   const histCard=resCard(hist,x=>esc(x.b.s==='h'?x.g.h:x.g.a));
-  /* the picks you have locked in that are still waiting on a final score */
-  const openBets=Object.entries(mine).map(([id,b])=>({id,b,g:gm[id]})).filter(x=>x.g&&!gDone(x.g)).sort((a,b)=>a.g.d<b.g.d?-1:a.g.d>b.g.d?1:0);
-  const myCard=openBets.length?`<section class="card bt-mine"><div class="qh"><h3>Your picks</h3><span class="muted">${openBets.length} locked in · ${tk(openBets.reduce((t,x)=>t+(+x.b.stake||0),0))} wagered</span></div>${openBets.map(x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
-    return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)}</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${started(x.g)?' · locked':''}</small></span></span><span class="bt-pay"><b>${tk(x.b.stake*x.b.odds)}</b><small class="muted">${tk(x.b.stake)} at ${(+x.b.odds).toFixed(2)}x</small></span></div>`}).join('')}</section>`:'';
   const boardCard=tokBoard();
   /* lock in everything at once */
   const staged=can?list.filter(g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return u&&u.s&&!started(g)&&!gDone(g)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}):[];
   const stakeOf=g=>{const u=UI.pk[gid(g)],b=mine[gid(g)];return Math.floor(u.stake||(b&&b.stake)||5)};
   const need=staged.reduce((t,g)=>t+stakeOf(g)-(mine[gid(g)]?+mine[gid(g)].stake:0),0),over=need-avail;
   const allBar=staged.length?`<section class="card bt-all"><div><b>${staged.length} ${staged.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(avail)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Hit the button to save your picks.`}</div></div><div class="bt-go"><button class="btn" data-act="pkAll" ${over>0?'disabled':''}>${staged.length===1?'Lock in pick':'Lock in all '+staged.length}</button><button class="btn ghost" data-act="pkClear">Clear</button></div></section>`:'';
-  return boardCard+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+myCard+bfBar()+allBar+(list.length?pkWeeksHTML(list,card,nextW):`<p class="empty">${UI.bf.dv||UI.bf.w||UI.bf.sc?'No games match those filters. Try clearing them.':'No upcoming games to pick yet. New matchups show up here as they are set.'}</p>`)+histCard;
+  return boardCard+activeCard()+recordCard(Object.entries(mine).map(([id,b])=>betResult(b,gm[id])))+bfBar()+allBar+(list.length?pkWeeksHTML(list,card,nextW):`<p class="empty">${UI.bf.dv||UI.bf.w||UI.bf.sc?'No games match those filters. Try clearing them.':'No upcoming games to pick yet. New matchups show up here as they are set.'}</p>`)+histCard;
 }
 /* most anticipated: the best teams, closest to each other. Upcoming games first, then the biggest finals. */
 function anticipated(){
@@ -5130,7 +5156,7 @@ function propsHTML(){
     const cards=byP.map(grp=>{const k=grp[0].k,sel=grp.find(y=>y.id===UI.ppSel[k])||grp.find(y=>UI.pp[y.id]&&UI.pp[y.id].s)||grp.find(y=>mine[y.id])||grp[0];return card(sel,grp)});
     body=`<div class="qh pp-gh"><h3>${esc(cur.g.a)} at ${esc(cur.g.h)}</h3><span class="muted">${esc(fmtDate(cur.g.d))}${cur.g.time?' · '+esc(cur.g.time):''} · ${byP.length} players · ${L.length} lines</span></div><div class="gm-grid">${cards.join('')}</div>`;
   }
-  return boardCard+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+allBar+ppPick+body+histCard;
+  return boardCard+activeCard()+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+allBar+ppPick+body+histCard;
 }
 
 /* ---- Mock drafts: practice against AI teams, or join other people's mock draft ---- */
@@ -8463,7 +8489,7 @@ document.addEventListener('click',async e=>{
       <button type="button" class="tok-opt" data-act="adWatch" ${l?'':'disabled'}><span class="tok-ic" aria-hidden="true">▶</span><span><b>Watch a short sponsor spot</b><small>+${ADS.reward} tokens · ${l?l+' left today':'back tomorrow'}</small></span></button>
       <button type="button" class="tok-opt" data-act="goLocker"><span class="tok-ic" aria-hidden="true">▣</span><span><b>Open packs in the Shop</b><small>${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' waiting · ':''}Ball skins, frames, perks, boosts</small></span></button>
       ${rwHTML()}
-      ${(()=>{const r=tokRows(),i=r.findIndex(x=>x.u===ME.uid);return r.length?`<div class="rw"><div class="rw-h"><b>Token leaderboard</b><small class="muted">${i>=0?'You are #'+(i+1)+' of '+r.length:''}</small></div><ul>${r.slice(0,5).map((x,k)=>`<li class="${x.u===ME.uid?'me':''}"><span class="rw-c">${k+1}</span><span>${esc(x.u===ME.uid?'You':nm(x.u))}</span><b>${(Math.round(x.t)).toLocaleString()}</b></li>`).join('')}</ul></div>`:''})()}
+      ${(()=>{const r=tokRows(),i=r.findIndex(x=>x.u===ME.uid);return r.length?`<div class="rw"><div class="rw-h"><b>Token leaderboard</b><small class="muted">${i>=0?'You are #'+(i+1)+' of '+r.length:''}</small></div><ul>${r.slice(0,5).map((x,k)=>`<li class="${x.u===ME.uid?'me':''}"><span class="rw-c">${k+1}</span><span>${esc(x.u===ME.uid?'You':nm(x.u))}</span><span class="tk-v"><b>${x.t.toLocaleString()}</b><small>${x.b.toLocaleString()} now</small></span></li>`).join('')}</ul></div>`:''})()}
       <p class="muted">Tokens are free, are shared by every game in Minigames, and have no cash value.</p>
       <div class="gbtns"><button class="btn ghost" data-c="no">Close</button></div></div>`;
     c.hidden=false;const b=c.querySelector('.tok-opt');if(b)b.focus()}

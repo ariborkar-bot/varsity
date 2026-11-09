@@ -165,3 +165,8 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## New-user preview tool (Nov 8)
 - `tools/preview/make_newuser_preview.py [out_dir]` builds `varsity-football-newuser.html` and `varsity-basketball-newuser.html`: the real sign-in flow with a fake in-memory Supabase (sign up / sign in work, nothing is sent anywhere), so you can click through sign in → create account → name/profile → welcome pack → app as a brand-new user. Clears saved local state on first load; yellow "NEW-USER PREVIEW" badge.
+
+## v356 (Nov 8): token leaderboard by tokens earned, Active picks, demo answers in the new-user preview
+- Token leaderboard ranks by `earned(u)`: every token ever earned (TOK0, starter rewards, sponsors, leaderboard/daily/bundle bonuses, Field Goal day pay, Ring Chaser wins, duplicate refunds `inv.dup`, gifts received, and the winnings part of won Pick ’em / spread / prop wagers incl. boosts). Spending and lost wagers never lower it. Each row also shows the current balance (`bank(u)`) as "N now", which does not affect rank. `tokRows()` rows are `{u,t:earned,b:bank}`; `mgBoard()` takes an optional subtitle and per-row HTML (`x.h`). The home rewards widget shows both too.
+- `activeCard()` "Active picks" sits right under the token leaderboard on both Pick ’em and Player props: every open Pick ’em pick and player prop, with payout. It replaces the old Pick ’em-only "Your picks" card.
+- New-user preview: a "Fill demo answers" button next to the badge fills the sign-up form (random demo email, password demo1234, 13+ box) or the profile name.
