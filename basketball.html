@@ -2965,7 +2965,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v367 · Nov 9';
+const APP_BUILD='v368 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4053,7 +4053,8 @@ const PACKS={
   /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
   god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:33,e:35,l:17,m:8},g:'l',cos:1},
   /* v366 (owner): Pick 1 of 5: 5 players, one is a Top 10 Immortal card, you keep 1 (odds are for the other 4, Rare or better) */
-  pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1}};
+  pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1},
+  godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
 const cosOwnCount=u=>{const it=invOf(u).it||{},d=gDelta(u);let n=0;for(const id of new Set([...Object.keys(it),...Object.keys(d)])){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&(+it[id]||0)+(+d[id]||0)>0)n++}return n};
@@ -4323,7 +4324,9 @@ async function packOpen(type,how,day){
    (position, team, best stat, then the player) plays for the Top 10 player, then the pick screen. Your pick is final; the other four go back. */
 const posOf=q=>q.pos==='DEF'?(q.sub||'DEF'):q.pos;
 const pkpOf=u=>{const p=invOf(u).pkp;return p&&!p.d&&Array.isArray(p.o)&&p.o.length?p:null};
-function pkpRoll(u){
+function pkpRoll(u,all){
+  if(all){const D0=achData(),own0=cardsOf(u),ids0=D0.pool.t10.filter(id=>pByKey(achParse(id).key)),fr=ids0.filter(id=>!(own0[id]||{}).x),pool=fr.concat(ids0.filter(id=>(own0[id]||{}).x)),o=[];
+    while(o.length<5&&pool.length)o.push(pool.shift()+'|x');if(o.length<5)return null;for(let i=o.length-1;i>0;i--){const j=fcRnd(i+1);[o[i],o[j]]=[o[j],o[i]]}return {o,g:0}}
   const D=achData(),own=cardsOf(u),ids=D.pool.t10.filter(id=>pByKey(achParse(id).key));if(!ids.length)return null;
   const fresh=ids.filter(id=>!(own[id]||{}).x),src=fresh.length?fresh:ids,god=src[fcRnd(src.length)],gk=achParse(god).key;
   const pl=cardPools().pl.filter(id=>id.slice(3)!==gk),pick=[];
@@ -4337,16 +4340,16 @@ function pkStat(key,rank){const p=pByKey(key),a=p?agg(p,'season'):null;
     if(k)return {n:Math.round(a.s[k]),l:LABEL[k]||k,sub:`${a.v} fantasy points this season`}}
   return {n:0,big:'#'+rank,l:'Top 10 right now',sub:'Ranked by fantasy points'}}
 let _pkBusy=false;
-async function pkpBuy(gid){
-  const P=PACKS.pick;
+async function pkpBuy(gid,key){
+  key=key||'pick';const P=PACKS[key];
   if(_pkBusy)return;
   if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
   if(ME.mode==='readonly'||ME.mode==='offline'){say('Can’t open packs right now.');return}
   if(pkpOf(ME.uid)){pkpShow();return}
-  if(gid&&!giftPacks(ME.uid).some(x=>x.id===gid&&x.type==='pick')){say('That pack was already opened.');return}
+  if(gid&&!giftPacks(ME.uid).some(x=>x.id===gid&&x.type===key)){say('That pack was already opened.');return}
   if(!gid&&bank(ME.uid)<P.tok){say(`You need ${P.tok} tokens for the ${P.n}.`);return}
   _pkBusy=true;
-  try{const R=pkpRoll(ME.uid);if(!R){say('The Top 10 is not set yet. Try again soon.');return}
+  try{const R=pkpRoll(ME.uid,P.all);if(!R){say('The Top 10 is not set yet. Try again soon.');return}
     const v=invOf(ME.uid),patch={n:(+v.n||0)+1,pkp:{o:R.o,g:R.g,t:NOW(),d:0}};if(gid)patch.fr=Object.assign({},v.fr,{gpo:Object.assign({},(v.fr||{}).gpo,{[gid]:1})});else patch.sp=(+v.sp||0)+P.tok;
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
     try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:v});say('That did not save. Try again.');return}
@@ -4362,8 +4365,8 @@ async function pkpTake(i){
     return {dup,tok:RAR[r].dup}}finally{_pkBusy=false}}
 function pkpShopCard(k,P,bal){const pend=!!pkpOf(ME.uid);
   return `<article class="card lk-pack lk-${k}"><div class="lk-art"><span>1/${P.c}</span><small>pick one</small></div><h3>${esc(P.n)}</h3>
-    <p class="muted">${P.c} players, you keep 1 · one is a Top 10 Immortal card (+${ACH.t10.pct}% on his props), the other 4 are ${RAR.r.n} or better player cards</p>
-    <details class="lk-odds"><summary>Odds</summary><ul><li><span style="color:${RAR.x.c}">${RAR.x.n} Top 10 card (always 1 of the 5)</span><b>100%</b></li>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n} (each of the other 4)</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">The Top 10 card is one you don’t own yet when there is one. Your pick is final; the other four go back. A duplicate turns into tokens.</small></details>
+    <p class="muted">${P.all?`${P.c} players, you keep 1 · all ${P.c} are Top 10 Immortal cards (+${ACH.t10.pct}% on his props)`:`${P.c} players, you keep 1 · one is a Top 10 Immortal card (+${ACH.t10.pct}% on his props), the other 4 are ${RAR.r.n} or better player cards`}</p>
+    ${P.all?'':`<details class="lk-odds"><summary>Odds</summary><ul><li><span style="color:${RAR.x.c}">${RAR.x.n} Top 10 card (always 1 of the 5)</span><b>100%</b></li>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n} (each of the other 4)</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">The Top 10 card is one you don’t own yet when there is one. Your pick is final; the other four go back. A duplicate turns into tokens.</small></details>`}
     <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${!pend&&bal<P.tok?'disabled':''}>${pend?'Pick your player':P.tok.toLocaleString()+' tokens'}</button></article>`}
 function pkpBanner(){return pkpOf(ME.uid)?`<section class="card lk-free lk-prize"><div><b>Pick 1 of 5 · your pack is open</b><small class="muted">Choose the player you want to keep.</small></div><button class="btn" data-act="pkOpen" data-v="pick" data-h="tok">Pick now</button></section>`:''}
 /* the walkout: dark tunnel, then position, team, best stat and the player. Tap to move on, Skip to jump to the player. */
@@ -8743,8 +8746,8 @@ document.addEventListener('click',async e=>{
   else if(a==='lkMoreA'){UI.lkA=(UI.lkA||12)+12;render()}
   else if(a==='lkMore'){UI.lkN=(UI.lkN||30)+30;render()}
   else if(a==='pkOpen'){const k=t.dataset.v,h=t.dataset.h,P=PACKS[k];if(!P)return;
-    if(P.pick&&h==='gift'){pkpBuy(t.dataset.d);return}
-    if(P.pick){if(pkpOf(ME.uid)){pkpShow();return}confirmBox('Open a '+P.n+'?',`Spend ${P.tok.toLocaleString()} tokens for ${P.c} players: one is a Top 10 Immortal card (+${ACH.t10.pct}% on his props) and the other 4 are ${RAR.r.n} or better. You keep 1, your pick is final.`,'Open it',()=>pkpBuy());return}
+    if(P.pick&&h==='gift'){pkpBuy(t.dataset.d,k);return}
+    if(P.pick){if(pkpOf(ME.uid)){pkpShow();return}confirmBox('Open a '+P.n+'?',P.all?`Spend ${P.tok.toLocaleString()} tokens for ${P.c} players, all Top 10 Immortal cards (+${ACH.t10.pct}% on his props). You keep 1, your pick is final.`:`Spend ${P.tok.toLocaleString()} tokens for ${P.c} players: one is a Top 10 Immortal card (+${ACH.t10.pct}% on his props) and the other 4 are ${RAR.r.n} or better. You keep 1, your pick is final.`,'Open it',()=>pkpBuy(0,k));return}
     if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random ${P.cards?'player and team cards':'items'}${P.g?` (the last one is ${RAR[P.g].n} or better)`:''}. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h,t.dataset.d)}
   else if(a==='lkEq'){const k=t.dataset.k,v=t.dataset.v;if(v&&!invHas(ME.uid,v))return;if(t.closest('.pko')){t.closest('.pko').querySelectorAll(`.pko-eq[data-k="${k}"]`).forEach(x=>{x.textContent='Equip';x.disabled=false});t.textContent='Equipped ✓';t.disabled=true}const inv=invOf(ME.uid),eq=Object.assign({},inv.eq,{[k]:v});
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},inv,{eq})});if(!t.closest('.pko'))render();upsert('picks/'+ME.uid,{inv:{eq}}).catch(()=>say('That did not save.'))}
