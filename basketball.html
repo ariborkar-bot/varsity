@@ -2381,13 +2381,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pks.r-x{background:radial-gradient(circle at 50% 50%,rgba(124,243,255,.28),#02060F 72%)}
 @media (prefers-reduced-motion:reduce){.tc-x,.tc-x .tcx-s,.ax-sec h3{animation:none!important}}
 
-/* Starter pick (v343) */
-.sp-pop{gap:10px;max-height:min(88vh,640px);overflow:hidden}.sp-hd{text-align:center}.sp-k{display:inline-block;font:900 .62rem/1 var(--f-display,inherit);letter-spacing:.14em;text-transform:uppercase;color:#3A2600;background:linear-gradient(90deg,#FFC23D,#FFE08A);padding:4px 9px;border-radius:99px}
-.sp-hd h2{margin:8px 0 4px}.sp-hd p{font-size:.9rem}
-.sp-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;overflow-y:auto;min-height:120px;flex:1;padding:2px;-webkit-overflow-scrolling:touch}
-.sp-t{display:flex;align-items:center;gap:8px;padding:8px;border-radius:12px;border:1px solid var(--line);background:var(--surface2,rgba(255,255,255,.04));color:inherit;text-align:left;font:inherit;cursor:pointer}
-.sp-t b{font-size:.82rem;line-height:1.15;overflow-wrap:anywhere}.sp-t.on{border-color:#FFC23D;box-shadow:0 0 0 2px #FFC23D,0 0 14px rgba(255,194,61,.45);background:rgba(255,194,61,.1)}
-.sp-pop .gbtns{position:sticky;bottom:0}.sp-card{border-color:#FFC23D;box-shadow:0 0 16px -4px rgba(255,194,61,.6)}
+/* Starter pick CSS removed in v346 */
 </style><style id="bb-theme">
 .bb-pre{display:flex;flex-direction:column;gap:4px;margin:12px 0;border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 0 0,rgba(255,194,61,.14),transparent 60%),var(--card,#132235)}
 .bb-pre b{font:800 1.15rem/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#FFC23D}.bb-pre span{opacity:.8}
@@ -2808,7 +2802,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v345 · Nov 8';
+const APP_BUILD='v346 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4300,34 +4294,15 @@ function giftSheet(){const c=$('#cfm'),fr=giftFriends(),q=GF.q.trim().toLowerCas
 
 /* Gift pop-up: gifts you haven't seen yet open on top of everything when you open the app. Seen time saved in picks/<uid>.gsn. */
 var _gPop=false;
-/* ---------- Starter pick (v343) ----------
-   Every account gets one free Legendary player card: pick any team and you get one of its top 3 players (by season fantasy points), chosen at random.
-   Saved in inv.fr.sp={s:school,k:player key,at}. Shown as a pop-up the first time the app opens, and as a card at the top of the Shop until used. */
-let _spPop=false;
-const spUsed=u=>!!((invOf(u).fr||{}).sp);
-const spTop=sc=>{const rk=k=>((window.BB_RANK||{})[k])||0;return players().filter(p=>p.school===sc&&!p.sample&&p.key&&!/x$/.test(p.key)).map(p=>({p,a:agg(p,'season')})).sort((x,y)=>y.a.v-x.a.v||rk(y.p.key)-rk(x.p.key)||x.p.name.localeCompare(y.p.name)).slice(0,3).map(x=>x.p)};
-const spSchools=()=>SD_SCHOOLS.filter(sc=>spTop(sc).length>=1);
-function spListHTML(){const q=(UI.spQ||'').trim().toLowerCase(),sel=UI.spSc||'';
-  const rows=spSchools().filter(sc=>!q||sc.toLowerCase().includes(q));
-  return rows.length?rows.map(sc=>`<button type="button" class="sp-t${sel===sc?' on':''}" data-act="spPick" data-v="${esc(sc)}" aria-pressed="${sel===sc}">${slogo(sc,30)}<b>${esc(sc)}</b></button>`).join(''):'<p class="empty">No team matches.</p>'}
-function spSheet(){const c=$('#cfm');if(!c)return;
-  c.innerHTML=`<div class="gcard tok-sheet sp-pop" role="dialog" aria-modal="true" aria-labelledby="sp-t"><div class="sp-hd"><span class="sp-k">Starter pick</span><h2 id="sp-t">Pick your team</h2>
-    <p>You get one <b style="color:${RAR.l.c}">Legendary</b> card of a random top 3 player from the team you choose. Choose carefully, you only get one.</p></div>
-    <label class="fld"><span>Find a team</span><input id="sp-q" type="search" value="${esc(UI.spQ||'')}" placeholder="Team name" autocomplete="off"></label>
-    <div class="sp-l" id="sp-l">${spListHTML()}</div>
-    <div class="gbtns"><button class="btn" data-act="spGo" id="sp-go" ${UI.spSc?'':'disabled'}>${UI.spSc?'Get a '+esc(UI.spSc)+' Legendary':'Choose a team'}</button><button class="btn ghost" data-act="spLater">Later</button></div></div>`;
-  c.hidden=false;const q=$('#sp-q');if(q)q.addEventListener('input',()=>{UI.spQ=q.value;const l=$('#sp-l');if(l)l.innerHTML=spListHTML()})}
-function spPopup(){if(_spPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
-  if(spUsed(ME.uid)||!players().length)return;const c=$('#cfm');if(!c||!c.hidden)return;_spPop=true;UI.spSc='';UI.spQ='';spSheet()}
-async function spClaim(){const u=ME.uid,sc=UI.spSc;if(!u||!sc||spUsed(u))return;
-  const top=spTop(sc);if(!top.length){say('That team has no players yet.');return}
-  const p=top[fcRnd(top.length)],id='pc:'+p.key,v=invOf(u),cards=Object.assign({},v.cards),cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur.l=1;cards[id]=cur;
-  const patch={cards,fr:Object.assign({},v.fr,{sp:{s:sc,k:p.key,at:NOW()}})};
-  S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},v,patch)});
-  try{await upsert('picks/'+u,{inv:patch})}catch(_){S.picks[u]=Object.assign({},S.picks[u],{inv:v});say('That did not save. Try again.');return}
-  closeConfirm();packShow({n:'Starter pick',c:1},[{card:id,r:'l',dup:false}])}
-function spCard(){if(!ME.uid||spUsed(ME.uid))return '';
-  return `<section class="card lk-free sp-card"><div><b>Starter pick: a free Legendary card</b><small class="muted">Choose any team and get a random top 3 player of theirs.</small></div><button class="btn" data-act="spOpen">Choose a team</button></section>`}
+/* Starter pick (v343, other contributor) was removed in v346 at the owner's request: no free Legendary card on joining.
+   One-time cleanup: Ari Borkar's Starter pick Legendary (Reid Dielman) is switched off on his next app open (owner, Nov 8).
+   Saves merge, so the version is set to 0 (cardsOf/cardVers treat 0 as not owned) and inv.fr.spx marks it done. */
+function spRevoke(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
+  const v=invOf(u),fr=v.fr||{},sp=fr.sp;if(!sp||!sp.k||fr.spx)return;
+  if(!/^\s*ari\s+borkar\s*$/i.test(String((myProfile()||{}).name||'')))return;
+  const id='pc:'+sp.k,cards=Object.assign({},v.cards),cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur.l=0;cards[id]=cur;
+  const patch={cards,fr:Object.assign({},fr,{spx:1})};S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},v,patch)});
+  upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:v})})}
 function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const seen=+((S.picks[ME.uid]||{}).gsn)||0,nw=giftsIn(ME.uid).filter(x=>(+x.at||0)>seen).sort((a,b)=>a.at-b.at);if(!nw.length)return;
   const c=$('#cfm');if(!c||!c.hidden)return;_gPop=true;const last=nw[nw.length-1].at;
@@ -4391,10 +4366,6 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   else if(a==='gfKind'){GF.kind=v;giftSheet()}
   else if(a==='gfAmt'){GF.a=+v;giftSheet()}
   else if(a==='gfItem'){GF.i=GF.i===v?'':v;const g=document.querySelector('.gf-items'),y=g?g.scrollTop:0;giftSheet();const g2=document.querySelector('.gf-items');if(g2)g2.scrollTop=y}
-  else if(a==='spOpen'){UI.spSc='';UI.spQ='';spSheet()}
-  else if(a==='spPick'){UI.spSc=UI.spSc===v?'':v;const l=$('#sp-l'),y=l?l.scrollTop:0;spSheet();const l2=$('#sp-l');if(l2)l2.scrollTop=y}
-  else if(a==='spGo')spClaim();
-  else if(a==='spLater')closeConfirm();
   else if(a==='gpOk'){const at=+t.dataset.at||NOW();closeConfirm();S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{gsn:at});upsert('picks/'+ME.uid,{gsn:at}).catch(()=>{})}
   else if(a==='gfSend')giftSend();
   else if(a==='remOpen')remSheet(t.dataset.n,t.dataset.s);
@@ -4408,7 +4379,7 @@ function viewShop(){
   const head=`<div class="head"><h2>Shop</h2><p>Open packs with tokens.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to open packs.</p>';
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid);
-  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`+spCard();
+  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
   let body='';
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
@@ -8189,7 +8160,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{spPopup()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
