@@ -38,7 +38,10 @@ window.__NU=1;(function(){
 <script>/* owner: fill whatever sign-up / profile form is showing with demo answers (you still tap the button yourself) */
 function nuFill(){const set=(id,v)=>{const e=document.getElementById(id);if(!e)return 0;if(e.type==='checkbox'){if(!e.checked)e.click()}else{e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}))}return 1};
   const n=set('au-email','demo'+Math.floor(Math.random()*900+100)+'@varsity.test')+set('au-pass','demo1234')+set('au-age',1)+set('nm-name','Demo Player');
-  if(!n)alert('No sign-up or profile form is showing right now.')}</script>"""
+  const sc=document.getElementById('nm-school'),po=document.getElementById('nm-pos');
+  if(sc){const o=[...sc.options].find(o=>o.value);set('nm-school',o.value);const t=sc.parentElement.querySelector('input');if(t)t.value=o.textContent}
+  if(po){set('nm-pos',[...po.options].map(o=>o.value).filter(Boolean)[0])}
+  if(!n&&document.querySelector('[data-nm-role]'))alert('Tap Player or Fan first, then fill.');else if(!n)alert('No sign-up or profile form is showing right now.')}</script>"""
 
 LIB = ['<script src="vendor/supabase.min.js"></script>',
        """<script>/* v314: the login library is hosted with the app (vendor/). The two CDNs are only backups, for the rare case the local copy cannot load */window.supabase||document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"><\\/script>')</script>""",

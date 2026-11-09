@@ -959,6 +959,12 @@ select option{background:#0B1730;color:#EAF0F8}
 }
 
 .nm details{border:1px solid var(--line);border-radius:14px;padding:10px 14px;background:var(--surface2)}
+.nm-roles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.nm-rb{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px;border-radius:16px;border:2px solid var(--line);background:var(--surface2);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s,background .15s}
+.nm-rb b{display:block;font-family:var(--fd,inherit);font-size:1.15rem;letter-spacing:.02em;text-transform:uppercase}.nm-rb small{display:block;font-size:.76rem;opacity:.75;margin-top:2px}
+.nm-ri{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,194,61,.14)}.nm-ri svg{width:20px;height:20px;fill:none;stroke:#FFC23D;stroke-width:2;stroke-linejoin:round}
+.nm-rb.on{border-color:#FFC23D;background:rgba(255,194,61,.1);transform:translateY(-1px)}.nm-rb.on .nm-ri{background:#FFC23D}.nm-rb.on .nm-ri svg{stroke:#1b1200}
+.nm .nm-play{grid-template-columns:1fr}
 .nm summary{cursor:pointer;font-weight:700;color:#BFD3FF}
 .nm-play{display:grid;grid-template-columns:1.6fr 1fr;gap:10px;margin-top:10px}
 
@@ -2565,9 +2571,12 @@ const FIELDS={QB:['passYd','passTD','int','rushYd','rushTD'],RB:['rushYd','rushT
 const POSITIONS=['QB','RB','WR','TE','DEF','K'];
 /* every position a player can pick, and which fantasy slot it scores as */
 const POS_ALL=[['QB','Quarterback'],['RB','Running back'],['FB','Fullback'],['WR','Wide receiver'],['TE','Tight end'],['OL','Offensive line'],
-  ['DL','Defensive line'],['LB','Linebacker'],['CB','Cornerback'],['S','Safety'],['K','Kicker'],['P','Punter'],['LS','Long snapper'],['ATH','Athlete']];
-const POS_MAP={QB:'QB',RB:'RB',FB:'RB',WR:'WR',TE:'TE',DL:'DEF',LB:'DEF',CB:'DEF',S:'DEF',K:'K',P:'K',ATH:'WR'};
-const posOptions=sel=>(sel?'':'<option value="" selected disabled>Choose your position</option>')+POS_ALL.map(([k,n])=>`<option value="${k}" ${k===sel?'selected':''}>${n} (${k})</option>`).join('');
+  ['DL','Defensive line'],['LB','Linebacker'],['DB','Defensive back'],['CB','Cornerback'],['S','Safety'],['K','Kicker'],['P','Punter'],['LS','Long snapper'],['ATH','Athlete']];
+const POS_MAP={QB:'QB',RB:'RB',FB:'RB',WR:'WR',TE:'TE',DL:'DEF',LB:'DEF',DB:'DEF',CB:'DEF',S:'DEF',K:'K',P:'K',ATH:'WR'};
+/* v358 (owner): the position picker offers only these (OL, CB, S, P, LS, ATH and FB removed; DB added). Old profiles keep their label. */
+const POS_PICK=['QB','RB','WR','TE','DL','LB','DB','K'];
+const posOptions=sel=>{const L=POS_PICK?POS_ALL.filter(x=>POS_PICK.includes(x[0])):POS_ALL;if(!L.some(x=>x[0]===sel))sel='';
+  return (sel?'':'<option value="" selected disabled>Choose your position</option>')+L.map(([k,n])=>`<option value="${k}" ${k===sel?'selected':''}>${n} (${k})</option>`).join('')};
 
 const blank=()=>Object.fromEntries(KEYS.map(k=>[k,0]));
 const S0=o=>Object.assign(blank(),o||{});
@@ -2832,47 +2841,57 @@ document.addEventListener('submit',async e=>{
 /* ---------- no sign-up: a name is all it takes ----------
    The first time someone starts or joins a league, they pick the name friends will see.
    Behind the scenes this makes an anonymous Supabase account that stays on this device. */
-const NM={busy:false,err:''};
+const NM={busy:false,err:'',role:''};
+/* v358 (owner): after the email step everyone picks Player or Fan first. Fans give their name and the school they
+   root for; players give their name, school and position. */
 function nameHTML(){
-  const pr=myProfile()||{},sch=pr.school||'',pos=pr.pos||'';
+  const pr=myProfile()||{},sch=pr.school||'',pos=pr.pos||'',R=NM.role||(myProfile()?(pr.role==='player'?'player':'fan'):'');
+  const rb=(v,t,d,ic)=>`<button type="button" class="nm-rb${R===v?' on':''}" data-nm-role="${v}" aria-pressed="${R===v}"><span class="nm-ri" aria-hidden="true">${ic}</span><span><b>${t}</b><small>${d}</small></span></button>`;
   return `<div class="gcard nm" role="dialog" aria-modal="true" aria-labelledby="nm-t">
     <div class="au-brand"><img src="logo.png" alt=""><span>VARSITY</span></div>
-    <h2 id="nm-t">${myProfile()?'Your profile':'What should friends call you?'}</h2>
-    <p class="muted">${myProfile()?'Change your name, or add your school to see your own stats on the Me tab.':'Last step. This is the name your leagues will see.'}</p>
+    <h2 id="nm-t">${myProfile()?'Your profile':'Are you a player or a fan?'}</h2>
+    <p class="muted">${myProfile()?'Change your name, school or position.':'Last step. Pick one to set up your profile.'}</p>
     <form id="nm-form" class="au-form">
-      <label class="fld"><span>Your name</span><input id="nm-name" maxlength="40" autocomplete="name" value="${esc(pr.name||'')}" placeholder="Ari B." required></label>
-      <details ${sch?'open':''}><summary>I play high school football: add my school and position</summary>
-        <div class="nm-play">
-          <label class="fld"><span>School</span><select id="nm-school"><option value="">Pick your school</option>${SD_SCHOOLS.map(x=>`<option ${x===sch?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
-          <label class="fld"><span>Position</span><select id="nm-pos">${posOptions(pr.posLabel||pos||'')}</select></label>
-        </div></details>
+      <div class="nm-roles" role="group" aria-label="Player or fan">${rb('player','Player','I play high school football','<svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>')}${rb('fan','Fan','I root for a school','<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>')}</div>
+      ${R?`<label class="fld"><span>Your name</span><input id="nm-name" maxlength="40" autocomplete="name" value="${esc(NM.name!=null?NM.name:pr.name||'')}" placeholder="Ari B." required></label>
+      <div class="nm-play${R==='fan'?' fan':''}">
+        <label class="fld"><span>${R==='fan'?'School you’re a fan of':'Your school'}</span><select id="nm-school"><option value="">Pick a school</option>${SD_SCHOOLS.map(x=>`<option ${x===(NM.school!=null?NM.school:sch)?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
+        ${R==='player'?`<label class="fld"><span>Position</span><select id="nm-pos">${posOptions(NM.pos!=null?NM.pos:(pr.posLabel||pos||''))}</select></label>`:''}
+      </div>`:''}
       ${NM.err?`<p class="au-err" role="alert">${esc(NM.err)}</p>`:''}
-      <div class="btns"><button class="btn" type="submit" ${NM.busy?'disabled':''}>${NM.busy?'One moment…':myProfile()?'Save':'Let’s play'}</button><button class="btn ghost" type="button" data-nm="close">${myProfile()?'Close':'Not now'}</button></div>
+      <div class="btns"><button class="btn" type="submit" ${NM.busy||!R?'disabled':''}>${NM.busy?'One moment…':myProfile()?'Save':'Let’s play'}</button><button class="btn ghost" type="button" data-nm="close">${myProfile()?'Close':'Not now'}</button></div>
     </form>
   </div>`;
 }
-function openName(){const g=$('#gate');g.innerHTML=nameHTML();g.hidden=false;document.body.style.overflow='hidden';const f=$('#nm-name');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
-document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-nm=close]')){NM.err='';closeGate()}});
+/* keep what was typed when the form is drawn again */
+function nmKeep(){const v=id=>{const e=$('#'+id);return e?e.value:null};const n=v('nm-name'),sc=v('nm-school'),po=v('nm-pos');if(n!=null)NM.name=n;if(sc!=null)NM.school=sc;if(po!=null)NM.pos=po}
+function openName(){const g=$('#gate');g.innerHTML=nameHTML();g.hidden=false;document.body.style.overflow='hidden';const f=$('#nm-name');if(f&&!f.value&&matchMedia('(pointer:fine)').matches)f.focus()}
+document.addEventListener('click',e=>{if(!e.target.closest)return;
+  if(e.target.closest('[data-nm=close]')){NM.err='';NM.role='';NM.name=NM.school=NM.pos=null;closeGate();return}
+  const r=e.target.closest('[data-nm-role]');if(r){nmKeep();NM.role=r.dataset.nmRole;NM.err='';openName()}});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='nm-form')return;e.preventDefault();e.stopImmediatePropagation();
-  const name=$('#nm-name').value.trim(),school=$('#nm-school').value,pos=$('#nm-pos').value;
-  if(name.length<2){NM.err='Type at least 2 letters.';openName();return}
-  if(school&&!pos){NM.err='Pick your position.';openName();$('#nm-name').value=name;$('#nm-school').value=school;return}
-  NM.busy=true;NM.err='';openName();$('#nm-name').value=name;
+  nmKeep();const role=NM.role||((myProfile()||{}).role==='player'?'player':myProfile()?'fan':'');
+  const name=(NM.name||'').trim(),school=NM.school||'',pos=role==='player'?(NM.pos||''):'';
+  const fail=m=>{NM.err=m;openName()};
+  if(!role)return fail('Pick Player or Fan.');
+  if(name.length<2)return fail('Type at least 2 letters for your name.');
+  if(!school)return fail(role==='fan'?'Pick the school you’re a fan of.':'Pick your school.');
+  if(role==='player'&&!pos)return fail('Pick your position.');
+  NM.busy=true;NM.err='';openName();
   try{
     if(!ME.uid){NM.busy=false;openAuth();return}
     const fresh=!myProfile();
     const prev=myProfile()||{};
-    const profile=Object.assign({},prev,{name,school:school||prev.school||'',role:school?'player':(prev.role==='player'&&!school?'fan':prev.role||'fan'),v:2,joinedAt:prev.joinedAt||NOW()});
-    if(school){profile.posLabel=pos;profile.pos=POS_MAP[pos]||null;if(!profile.pos)delete profile.pos}else{delete profile.pos;delete profile.posLabel;profile.school=''}
+    const profile=Object.assign({},prev,{name,school,role,v:2,joinedAt:prev.joinedAt||NOW()});
+    if(role==='player'){profile.posLabel=pos;profile.pos=POS_MAP[pos]||null;if(!profile.pos)delete profile.pos}else{delete profile.pos;delete profile.posLabel}
     await setDoc('profiles/'+ME.uid,profile);
-    NM.busy=false;
+    NM.busy=false;NM.role='';NM.name=NM.school=NM.pos=null;
     closeGate();say(fresh?'Welcome to Varsity, '+name.split(' ')[0]:'Saved');
   }catch(err){
     NM.busy=false;
-    const m=(err&&err.message)||'';
     NM.err='That didn’t save. Check your connection and try again.';
-    openName();$('#nm-name').value=name;
+    openName();
   }
 },true);
 async function signOut(){try{await pushOff()}catch(_){}try{await SB.auth.signOut()}catch(_){}try{localStorage.removeItem('gf-browse');sessionStorage.removeItem('varsity-viewas')}catch(_){}location.reload()}
@@ -2880,7 +2899,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v357 · Nov 8';
+const APP_BUILD='v358 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3410,7 +3429,7 @@ function viewSched(head){
 /* ---------- games: schedule and standings, and picks ---------- */
 const gid=g=>g.w+'|'+g.h+'|'+g.a;
 const gDone=g=>g.hs!=null&&g.as!=null;
-const TOK0=100;
+const TOK0=200;   /* v358 (owner): everyone starts with 200 (was 100). Balances are worked out from this, so existing accounts got the extra 100 too */
 /* Rewarded sponsor spots: watch a short sponsor message, earn tokens. Sponsors are plain data below (no ad network, no tracking).
    Swap the placeholder for a real sponsor: name, a line, an optional image and an optional link. */
 const ADS={reward:20,perDay:5,secs:10,sponsors:[{name:'FOGO',line:'Face-off timing and leaderboards.',video:'ads/fogo.mp4',img:'',url:''}]};   /* video: a short mp4 in ads/; the Collect button unlocks when it ends */
@@ -3470,9 +3489,9 @@ function bank(u){
   return Math.round(t);
 }
 const tk=n=>Math.round(n).toLocaleString()+' tokens';
-/* Starter rewards: +5 tokens the first time you do each of these. Worked out from what you have already done
+/* Starter rewards: +10 tokens the first time you do each of these. Worked out from what you have already done
    (so they can't be farmed) and claimed automatically (picks/<uid>.rw = {key: when}). */
-const RW_PAY=5;
+const RW_PAY=10;   /* v358 (owner): 10 per starter reward (was 5), also counted again for rewards already done */
 const rwList=()=>[
   ['profile','Make your profile',()=>!!myProfile()],
   ['league','Create or join a league',()=>myGroups().length>0],

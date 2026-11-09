@@ -174,3 +174,8 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 ## v357 (Nov 8): sign-in screen no longer reloads the page
 - `route()` → `guestGate()` → `openAuth()` runs before `boot()` has made the Supabase client, so `openAuth()` used to call `libRetry()`, which found the library loaded and reloaded the page. Signed-out visitors got up to 3 reloads per tab, and where sessionStorage is blocked (the claude.ai file viewer) it reloaded forever, so the form could not be used. Now `openAuth()` waits for boot (150 ms timer, `window.__oaT`) and `libRetry()` only runs in offline mode.
 - New-user preview: works inside the viewer's sandbox (memory fallback for sessionStorage, submit/Enter on the sign-up and profile forms dispatched by hand because the sandbox blocks real form submits, sign-in without a page reload via `nuIn()`).
+
+## v358 (Nov 8): Player or Fan profile step, trimmed football positions, 200 starting tokens, 10 per starter reward
+- Profile step (`nameHTML()`/`openName()`, live accounts): everyone first taps Player or Fan (`NM.role`, buttons `[data-nm-role]`). Fan: name + "School you're a fan of" (saved as `profile.school`, role 'fan'). Player: name + school + position. School is required for both, position for players. What you typed survives switching (`nmKeep()`). Fields stack in one column.
+- Football position picker (`POS_PICK`): QB, RB, WR, TE, DL, LB, DB (new, maps to DEF), K. OL, CB, S, P, LS, ATH and FB removed from the picker; old profiles keep their label and POS_MAP still maps them. Basketball sets `POS_PICK=null`.
+- `TOK0` 100 → 200 and `RW_PAY` 5 → 10. Balances are computed, so every existing account got the extra 100 plus 5 more per starter reward already done.

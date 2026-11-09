@@ -299,7 +299,7 @@ def transform(s, mp, games, seeds, teams, prior):
     # --- identity ---------------------------------------------------------------------------------------------
     s = rep(s, '<title>Varsity</title>', '<title>Varsity Basketball</title>')
     s = rep(s, '<h1>Varsity</h1><p>High school fantasy football</p>', '<h1>Varsity</h1><p>High school fantasy basketball</p>')
-    s = rep(s, 'I play high school football: add my school and position', 'I play high school basketball: add my school and position')
+    s = rep(s, "'I play high school football'", "'I play high school basketball'")
     s = rep(s, 'Classic fantasy football.', 'Classic fantasy basketball.')
     s = rep(s, 'Play high school football?', 'Play high school basketball?')
     s = rep(s, '<a class="sport-opt on" href="index.html', '<a class="sport-opt" href="index.html')
@@ -359,7 +359,7 @@ def transform(s, mp, games, seeds, teams, prior):
     s = line_replace(s, 'const POSITIONS=', "const POSITIONS=['PG','SG','SF','PF','C'];")
     s = between(s, 'const POS_ALL=[', 'const posOptions=',
                 "const POS_ALL=[['PG','Point guard'],['SG','Shooting guard'],['SF','Small forward'],['PF','Power forward'],['C','Center']];\n"
-                "const POS_MAP={PG:'PG',SG:'SG',SF:'SF',PF:'PF',C:'C'};\n")
+                "const POS_MAP={PG:'PG',SG:'SG',SF:'SF',PF:'PF',C:'C'};\nconst POS_PICK=null;\n")
     s = between(s, 'function line(pos,s){', '\nconst SD_SCHOOLS',
                 "function line(pos,s){return `${s.pts} pts · ${s.reb} reb · ${s.ast} ast`}\n")
     s = between(s, 'const RAW=[', '\nfunction gen', 'const RAW=[];')
