@@ -2356,6 +2356,29 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pks-hint{margin:2px 0 0;color:var(--muted,#98A8BA);font-size:.8rem;opacity:0}.pks.rdy .pks-hint{animation:pksFade .5s both}
 @keyframes pksFade{to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.pks,.pks-stage,.pks-in3,.pks-ring,.pks-rays,.pks::after,.pks-title{animation:none!important}.pks{opacity:1}.pks-stage{opacity:1;transform:scale(var(--ss,1.8))}}
+
+/* Immortal achievement cards (v342) */
+@keyframes txHolo{to{background-position:300% 0}}
+@keyframes txShine{0%{transform:translateX(-140%) skewX(-18deg)}60%,100%{transform:translateX(260%) skewX(-18deg)}}
+@keyframes txPulse{50%{box-shadow:0 0 18px #7CF3FF,0 0 42px rgba(176,92,255,.7)}}
+.tc-x{--rc:#7CF3FF;border:2px solid transparent!important;background:linear-gradient(#0a1124,#0a1124) padding-box,linear-gradient(120deg,#7CF3FF,#B05CFF,#FF4F9A,#FFC93A,#3DDC84,#7CF3FF) border-box!important;background-size:100% 100%,300% 100%!important;animation:txHolo 3.2s linear infinite,txPulse 2.2s ease-in-out infinite;gap:2px;padding:2px 0}
+.tc-x .tcx-k{font:900 .5rem/1 var(--f-display,inherit);letter-spacing:.08em;color:#fff;background:linear-gradient(90deg,#7CF3FF,#B05CFF,#FF4F9A);padding:2px 4px;border-radius:99px;text-shadow:0 1px 2px #0008}
+.tc-x i{color:#CFFBFF!important;margin-top:4px;white-space:nowrap}.tc-x .av{margin-bottom:2px}
+.tc-x .tcx-s{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);animation:txShine 2.6s ease-in-out infinite;pointer-events:none}
+.tc-x.ax-potw{filter:saturate(1.2)}.tc-x.ax-potw .tcx-k{background:linear-gradient(90deg,#FFC93A,#FFF1B8,#FFC93A);color:#3A2600;text-shadow:none}
+.tc-x.ax-t10 .tcx-k{background:linear-gradient(90deg,#FF4F9A,#FFC93A);color:#1b0a22;text-shadow:none}
+.lk-x{border-left-color:#7CF3FF!important;background:linear-gradient(100deg,rgba(124,243,255,.1),rgba(176,92,255,.1))!important;box-shadow:0 0 16px -6px #7CF3FF}
+.ax-sec h3{background:linear-gradient(90deg,#7CF3FF,#B05CFF,#FF4F9A,#7CF3FF);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pksRb 3s linear infinite}
+.pko-c.fl.r-x .pko-burst{background:radial-gradient(circle,#7CF3FF,transparent 70%);animation:pkoRays 1s .3s ease-out forwards}
+.pko-c.fl.r-x .pko-front{animation:pkoGlow 1.6s 1s ease-in-out infinite!important;box-shadow:0 0 0 2px #7CF3FF,0 0 34px #7CF3FF,0 0 80px rgba(176,92,255,.6)}
+.pks.rev.r-x .pks-rays{animation-duration:6s}
+.pks.rev.r-x .pks-stage{animation:pksShake .7s ease-out}
+.pks.go.r-x .pks-in3{animation:pksFx 2.3s cubic-bezier(.3,.7,.3,1) forwards}
+@keyframes pksFx{0%{transform:rotateY(0)}18%{transform:translateY(-44px) scale(1.18) rotateY(260deg)}72%{transform:translateY(-40px) scale(1.38) rotateY(1260deg)}100%{transform:rotateY(1620deg)}}
+.pks.r-x .pks-title,.pks.rev.r-x .pks-title{background:linear-gradient(90deg,#7CF3FF,#B05CFF,#FF4F9A,#FFC93A,#3DDC84,#7CF3FF);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 18px #7CF3FF);animation:pksRb 1.6s linear infinite}
+.pks.rev.r-x .pks-title{animation:pksTitle .6s cubic-bezier(.2,1.4,.4,1) both,pksRb 1.6s linear infinite}
+.pks.r-x{background:radial-gradient(circle at 50% 50%,rgba(124,243,255,.28),#02060F 72%)}
+@media (prefers-reduced-motion:reduce){.tc-x,.tc-x .tcx-s,.ax-sec h3{animation:none!important}}
 </style><style id="bb-theme">
 .bb-pre{display:flex;flex-direction:column;gap:4px;margin:12px 0;border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 0 0,rgba(255,194,61,.14),transparent 60%),var(--card,#132235)}
 .bb-pre b{font:800 1.15rem/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#FFC23D}.bb-pre span{opacity:.8}
@@ -2776,7 +2799,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v341 · Nov 8';
+const APP_BUILD='v342 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3352,9 +3375,9 @@ const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
   const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+(+rcRec(u).wn||0);
-  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(150,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
+  Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
-  Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(150,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
+  Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   return Math.round(t);
 }
 const tk=n=>Math.round(n).toLocaleString()+' tokens';
@@ -3687,7 +3710,7 @@ function pklHTML(inL){
      n: packs opened }
    Token boosts sit on the pick itself (bets/props[id].bx = 'b' +25% winnings, 'i' insured: stake back if wrong), so a boost is used
    exactly when a pick carries it. Pack odds are shown before you open or buy (Apple requires this for random items). */
-const RAR={c:{n:'Common',c:'#9FB0CC',dup:10},u:{n:'Uncommon',c:'#3DDC84',dup:15},r:{n:'Rare',c:'#4C8DFF',dup:25},e:{n:'Epic',c:'#B48CFF',dup:60},l:{n:'Legendary',c:'#FFC23D',dup:150},m:{n:'Mythical',c:'#FF4F6D',dup:400}};
+const RAR={c:{n:'Common',c:'#9FB0CC',dup:10},u:{n:'Uncommon',c:'#3DDC84',dup:15},r:{n:'Rare',c:'#4C8DFF',dup:25},e:{n:'Epic',c:'#B48CFF',dup:60},l:{n:'Legendary',c:'#FFC23D',dup:150},m:{n:'Mythical',c:'#FF4F6D',dup:400},x:{n:'Immortal',c:'#7CF3FF',dup:600}};
 const RAR_ORD=['c','u','r','e','l','m'];
 const ITEMS=[
   /* ball skins for Field Goal / Hoops */
@@ -4006,7 +4029,7 @@ function cardPools(){
 const cardsOf=u=>{const c=invOf(u).cards||{},o={};for(const [id,v] of Object.entries(c))o[id]=typeof v==='string'?{[v]:1}:(v||{});return o};
 const cardVers=(u,id)=>RAR_ORD.filter(r=>(cardsOf(u)[id]||{})[r]);
 const cardR=(u,id)=>{const v=cardVers(u,id);return v.length?v[v.length-1]:''};
-const cardPct=(u,id)=>{const r=cardR(u,id),sc=id.startsWith('tc:')?id.slice(3):((pByKey(id.slice(3))||{}).school||'');return (r?CARD_PCT[r]:0)+(sc?bndBoost(u,sc):0)};
+const cardPct=(u,id)=>{const r=cardR(u,id),sc=id.startsWith('tc:')?id.slice(3):((pByKey(id.slice(3))||{}).school||'');return Math.max(r?CARD_PCT[r]:0,id.startsWith('pc:')?achBest(u,id.slice(3)):0)+(sc?bndBoost(u,sc):0)};
 /* Card Binder (v297): a school's set = its team card + its BND_N best players (by season fantasy points), any version of each.
    Complete one: +BND_TOK tokens once and a permanent +BND_BOOST% on winnings of Pick 'em picks on that team and props on its players
    (added on top of card boosts, saved on the pick as cb). Claimed sets are kept in picks/<uid>.bnd = {school: time}. */
@@ -4039,9 +4062,44 @@ function bndHTML(){const u=ME.uid,done=bndOf(u),all=bndSchools(),N=UI.bndN||12,q
     <label class="fld"><span>Find a school</span><input id="bnd-q" type="search" value="${esc(UI.bndQ||'')}" placeholder="School name" autocomplete="off"></label></section>${det}
     <section class="card"><div class="bnd-l">${rows.slice(0,N).map(card).join('')||'<p class="empty">No school matches.</p>'}</div>${rows.length>N?`<button class="btn ghost" data-act="bndMore">Show more (${rows.length-N})</button>`:''}</section>`}
 function rollCard(r){const P=cardPools(),team=fcRnd(100)<35,pool=team?P.tm:P.pl;return pool.length?pool[fcRnd(pool.length)]:''}
-function cardInfo(id){if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
+/* ---------- Immortal achievement cards (v342) ----------
+   A tier above Mythical, only for players who earned it: Top 25 at his position in a week, Top 50 of all players in a week,
+   Player of the Week (top 3 of a week), or Top 10 of the season right now. Id = 'ac:<type>:<player key>:<week>' (week 0 for the season card).
+   Found in Pro and Champion packs (ACH_CHANCE % per card slot). Stored in inv.cards[id]={x:1}; they are not one of the six normal
+   versions (RAR_ORD), so the normal card lists ignore them. The best one you own for a player replaces his normal card boost on his props. */
+const ACH={pos:{n:'Top 25',pct:125,pr:55,k:'TOP 25'},all:{n:'Top 50',pct:200,pr:28,k:'TOP 50'},potw:{n:'Player of the Week',pct:300,pr:12,k:'POTW'},t10:{n:'Top 10',pct:400,pr:5,k:'TOP 10'}};
+const ACH_CHANCE={player:1.5,champs:4};
+let _ac=null;
+function achData(){
+  if(_ac&&_ac.rev===_rev)return _ac;
+  const ps=players().filter(p=>!p.sample&&p.key&&!/x$/.test(p.key)),pool={pos:[],all:[],potw:[],t10:[]},rk={};let W=0;
+  ps.forEach(p=>p.games.forEach((g,i)=>{if(g&&g.stat&&i+1>W)W=i+1}));
+  const lab=p=>p.pos==='DEF'?(p.sub||'DEF'):p.pos,cmp=(a,b)=>b.v-a.v||a.p.name.localeCompare(b.p.name);
+  for(let w=1;w<=W;w++){
+    const rows=ps.map(p=>{const g=p.games[w-1];return g&&g.stat?{p,v:pts(g.stat)}:null}).filter(x=>x&&x.v>0).sort(cmp);
+    rows.slice(0,50).forEach((x,i)=>{const id=`ac:all:${x.p.key}:${w}`;pool.all.push(id);rk[id]={rk:i+1,v:x.v}});
+    rows.slice(0,3).forEach((x,i)=>{const id=`ac:potw:${x.p.key}:${w}`;pool.potw.push(id);rk[id]={rk:i+1,v:x.v}});
+    const by={};rows.forEach(x=>{(by[lab(x.p)]=by[lab(x.p)]||[]).push(x)});
+    Object.values(by).forEach(a=>a.slice(0,25).forEach((x,i)=>{const id=`ac:pos:${x.p.key}:${w}`;pool.pos.push(id);rk[id]={rk:i+1,v:x.v,ps:lab(x.p)}}))}
+  ps.map(p=>({p,v:agg(p,'season')})).filter(x=>x.v.n>0).sort((a,b)=>b.v.v-a.v.v||a.p.name.localeCompare(b.p.name)).slice(0,10).forEach((x,i)=>{const id=`ac:t10:${x.p.key}:0`;pool.t10.push(id);rk[id]={rk:i+1,v:x.v.v}});
+  return _ac={rev:_rev,pool,rk,W}}
+function achParse(id){const m=/^ac:(pos|all|potw|t10):(.+):(\d+)$/.exec(id);return m?{t:m[1],key:m[2],w:+m[3]}:null}
+function rollAch(){const D=achData(),ts=Object.keys(ACH).filter(t=>D.pool[t].length);if(!ts.length)return '';
+  let x=fcRnd(ts.reduce((a,t)=>a+ACH[t].pr,0)),t=ts[ts.length-1];for(const k of ts){if(x<ACH[k].pr){t=k;break}x-=ACH[k].pr}
+  const a=D.pool[t];return a[fcRnd(a.length)]}
+function achBest(u,key){let m=0;for(const id of Object.keys(cardsOf(u))){if(!id.startsWith('ac:'))continue;const a=achParse(id);if(a&&a.key===key&&cardsOf(u)[id].x)m=Math.max(m,ACH[a.t].pct)}return m}
+function achInfo(id){const a=achParse(id);if(!a)return {name:'Player',school:'',sub:'',t:'pos',w:0,k:'',line:''};
+  const p=pByKey(a.key)||{},r=(achData().rk[id]||{}),A=ACH[a.t],pl=p.name?p.name:'Player';
+  const where=a.t==='pos'?`${A.n} ${r.ps||p.pos||''}`.trim():A.n;
+  return {t:a.t,w:a.w,key:a.key,ach:1,name:pl,school:p.school||'',k:A.k,pct:A.pct,rank:r.rk||0,
+    line:a.w?`${where} · Week ${a.w}`:`${A.n} this season`,sub:(a.w?`${where} · Week ${a.w}`:`${A.n} this season`)+' · '+(p.school||'')}}
+function achArt(id,s=54){const a=achInfo(id),w=Math.round(s*.78);
+  return `<span class="tcard tc-x ax-${a.t}" style="width:${w}px;height:${s}px"><b class="tcx-k">${a.k}</b>${av(a.name,a.school,Math.round(s*.34))}<i>${a.w?'WK '+a.w:'SEASON'}</i><u class="tcx-s"></u></span>`}
+const achOwned=u=>Object.keys(cardsOf(u)).filter(id=>id.startsWith('ac:')&&cardsOf(u)[id].x);
+function cardInfo(id){if(id.startsWith('ac:')){const a=achInfo(id);return {team:0,ach:1,at:a.t,name:a.name,school:a.school,sub:a.sub,key:a.key,pct:a.pct,line:a.line}}
+  if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
   const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
-function cardArt(id,r,s=54){const c=cardInfo(id),R=RAR[r]||RAR.c;
+function cardArt(id,r,s=54){if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
   return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${c.team?slogo(c.school,Math.round(s*.5)):av(c.name,c.school,Math.round(s*.46))}<i>${c.team?'TEAM':'PLAYER'}</i></span>`}
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
@@ -4060,6 +4118,7 @@ async function packOpen(type,how,day){
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
+    if(!P.cos&&fcRnd(10000)<(ACH_CHANCE[type]||0)*100){const aid=rollAch();if(aid){const cur=Object.assign({},cards[aid]),isDup=!!cur.x;if(isDup)dup+=RAR.x.dup;else{cur.x=1;cards[aid]=cur;gotCard=true}got.push({card:aid,r:'x',dup:isDup});continue}}
     if(!P.cos&&fcRnd(100)<CARD_CHANCE){const cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     const id=rollItem(r,!!P.cos);
     const was=Math.max(+it[id]||0,invHas(ME.uid,id)),isDup=isCos(id)&&was>0;if(isDup)dup+=RAR[r].dup;else it[id]=(+it[id]||0)+1;got.push({id,r,dup:isDup})}
@@ -4081,9 +4140,9 @@ async function packOpen(type,how,day){
    Epic or better: the whole background glows in that colour (and keeps the best colour seen so far); Legendary+ adds turning light rays. */
 function packShow(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
-  const ORD=['c','u','r','e','l','m'],calm=matchMedia('(prefers-reduced-motion: reduce)').matches,key=Object.keys(PACKS).find(k=>PACKS[k]===P)||'rookie';
+  const ORD=['c','u','r','e','l','m','x'],calm=matchMedia('(prefers-reduced-motion: reduce)').matches,key=Object.keys(PACKS).find(k=>PACKS[k]===P)||'rookie';
   const face=g=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
-      return `${cardArt(g.card,g.r,58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n} ${c.team?'team':'player'} card</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${CARD_PCT[g.r]}% on ${c.team?'Pick ’em picks':'his props'}`}</em>`}
+      return `${cardArt(g.card,g.r,c.ach?66:58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${c.ach?esc(c.line):R.n+' '+(c.team?'team':'player')+' card'}</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${c.ach?c.pct:CARD_PCT[g.r]}% on ${c.team?'Pick ’em picks':'his props'}`}</em>`}
     const x=ITEM[g.id];
     return `${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}`};
   o.innerHTML=`<div class="pko-bg" aria-hidden="true"><i class="pko-rays"></i></div>
@@ -4106,7 +4165,7 @@ function packShow(P,got){
   const glow=r=>{const n=ORD.indexOf(r);if(n<3)return;
     if(n>=best){best=n;o.style.setProperty('--gc',RAR[r].c);o.classList.toggle('rays',n>=4)}
     o.classList.add('glow');o.classList.remove('pulse');void o.offsetWidth;o.classList.add('pulse')};
-  const sparks=(c,r)=>{if(calm)return;const n=[8,10,14,22,30,40][ORD.indexOf(r)],box=c.querySelector('.pko-pts');let h='';
+  const sparks=(c,r)=>{if(calm)return;const n=[8,10,14,22,30,40,56][ORD.indexOf(r)],box=c.querySelector('.pko-pts');let h='';
     for(let i=0;i<n;i++){const a=Math.PI*2*i/n+Math.random()*.4,d=60+Math.random()*(ORD.indexOf(r)>=3?120:60),z=3+Math.random()*5;
       h+=`<i style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d)}px;--z:${z.toFixed(1)}px;--t:${(.6+Math.random()*.5).toFixed(2)}s"></i>`}
     box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},1300)};
@@ -4118,10 +4177,10 @@ function packShow(P,got){
     const nm=g.card?cardInfo(g.card).name:(ITEM[g.id]||{}).n||'';
     sp.innerHTML=`<i class="pks-rays"></i><i class="pks-ring"></i><i class="pks-ring b"></i><div class="pks-title">${esc(R.n)}!</div><div class="pks-stage"><div class="pks-in3"><div class="pko-f pko-back"><span>V</span></div><div class="pko-f pko-front" style="--rc:${R.c}">${fr}</div></div><i class="pko-pts"></i></div><p class="pks-hint">Tap to continue</p>`;
     document.body.appendChild(sp);   /* on the page, not inside the scrolling pack screen: a fixed child of a scrolled box moves with it */
-    const T=r==='m'?1900:r==='l'?1450:1050;let ready=false,fin=false;
+    const T=r==='x'?2300:r==='m'?1900:r==='l'?1450:1050;let ready=false,fin=false;
     setTimeout(()=>sp.classList.add('go'),650);
     setTimeout(()=>{sp.classList.add('rev');sparks(sp.querySelector('.pks-stage'),r);if(r!=='e')setTimeout(()=>sparks(sp.querySelector('.pks-stage'),r),180);
-      try{navigator.vibrate&&navigator.vibrate(r==='m'?[40,40,160]:r==='l'?[30,30,100]:[30,20,60])}catch(_){}},650+T);
+      try{navigator.vibrate&&navigator.vibrate(r==='x'?[40,40,80,40,200]:r==='m'?[40,40,160]:r==='l'?[30,30,100]:[30,20,60])}catch(_){}},650+T);
     setTimeout(()=>{ready=true;sp.classList.add('rdy')},650+T+900);
     const end=()=>{if(!ready||fin)return;fin=true;sp.classList.add('out');
       setTimeout(()=>{sp.remove();c.classList.remove('pre');c.classList.add('now','fl','land');glow(r);setTimeout(sync,50);done()},280)};
@@ -4330,7 +4389,7 @@ function viewLocker(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const head=`<div class="head"><h2>My Locker</h2><p>Everything you have pulled. Tap a cosmetic to equip it.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to keep your items.</p>';
-  const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),pct=Math.min(100,ownN/Math.max(1,totN)*100);
+  const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0)+achOwned(ME.uid).length,pct=Math.min(100,ownN/Math.max(1,totN)*100);
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
   const tab=['cards','cos','boost','bnd'].includes(UI.lk)?UI.lk:'cos';
   const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['boost','Boosts'],['bnd','Binder']].map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
@@ -4346,7 +4405,11 @@ function viewLocker(){
     const vers=Object.keys(mine).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),nP=Object.keys(mine).filter(i=>i.startsWith('pc:')&&cardVers(ME.uid,i).length).length,nT=Object.keys(mine).filter(i=>i.startsWith('tc:')&&cardVers(ME.uid,i).length).length;
     const tiers=RAR_ORD.slice().reverse().map(r=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>+${CARD_PCT[r]}%</b></li>`).join('');
     const dots=id=>`<span class="lk-vers">${RAR_ORD.map(r=>`<i style="--rc:${RAR[r].c}" class="${(mine[id]||{})[r]?'on':''}" title="${RAR[r].n}"></i>`).join('')}</span>`;
-    body=`<section class="card"><div class="qh"><h3>Player & team cards</h3><span class="muted">${vers} of ${(P.nP+P.nT)*6} versions</span></div>
+    const AC=achOwned(ME.uid).sort((a,b)=>ACH[achParse(b).t].pct-ACH[achParse(a).t].pct||achInfo(a).name.localeCompare(achInfo(b).name)),ACN=UI.lkA||12;
+    const achSec=`<section class="card ax-sec"><div class="qh"><h3>Immortal cards</h3><span class="muted">${AC.length} owned</span></div>
+      <p class="muted">The top tier. Only players who earned it: ${Object.values(ACH).map(a=>a.n+' +'+a.pct+'%').join(', ')}. They replace his normal card boost on his props. Found in Pro and Champion packs.</p>
+      ${AC.length?`<div class="lk-cards">${AC.slice(0,ACN).map(id=>{const c=cardInfo(id);return `<button type="button" data-act="player" data-id="${esc(c.key)}" class="lk-card lk-x" style="--rc:${RAR.x.c}">${achArt(id,64)}<span><b>${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${RAR.x.c}">Immortal · +${c.pct}% on his props</small></span></button>`}).join('')}</div>${AC.length>ACN?`<button class="btn ghost" data-act="lkMoreA">Show more (${AC.length-ACN})</button>`:''}`:'<p class="empty">None yet. Pro and Champion packs can hold one.</p>'}</section>`;
+    body=achSec+`<section class="card"><div class="qh"><h3>Player & team cards</h3><span class="muted">${vers} of ${(P.nP+P.nT)*6} versions</span></div>
       <p class="muted">Player and team cards boost your winning picks. Better versions boost more.</p>
       <ul class="lk-tiers">${tiers}</ul><small class="muted">Boost on the winnings, added on top of a +25% token boost. It is saved on the pick when you lock it in.</small></section>
       <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button></div>
@@ -8353,6 +8416,7 @@ document.addEventListener('click',async e=>{
   else if(a==='lkC'){UI.lkC=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkK'){UI.lkK=t.dataset.v;UI.lkN=30;render()}
   else if(a==='lkOwn'){UI.lkOwn=!UI.lkOwn;UI.lkN=30;render()}
+  else if(a==='lkMoreA'){UI.lkA=(UI.lkA||12)+12;render()}
   else if(a==='lkMore'){UI.lkN=(UI.lkN||30)+30;render()}
   else if(a==='pkOpen'){const k=t.dataset.v,h=t.dataset.h,P=PACKS[k];if(!P)return;
     if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random items. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h,t.dataset.d)}
