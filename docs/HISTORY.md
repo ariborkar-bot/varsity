@@ -226,3 +226,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v374 (Nov 9): Isaac Smedra signs in again and redoes his profile
 - `REDO` list + `redoCheck()` (first thing in touch): a live account whose profile name matches gets `ob:0` and a `redo[id]` marker saved on its profile, is signed out, and lands on the sign-in screen ("Sign in again…"). After signing in, `mustSetup()` sends him through Player/Fan → name, school, position. Runs once per account (the marker). Entry: `is-1` Isaac Smedra.
+
+## v375 (Nov 9): Jonah Garcia is a DL
+- stats.js: Jonah Garcia (Bishop's, id 463) defensive position S → DL (owner). Isaac Smedra's forced sign-in/profile redo was already shipped in v374.
