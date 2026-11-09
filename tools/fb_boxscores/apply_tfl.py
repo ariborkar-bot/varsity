@@ -1,15 +1,15 @@
-"""Add tackles for loss (index 23) and passes defensed (index 24) to window.MAXPREPS in index.html (v301).
+"""Add tackles for loss (index 23) and passes defensed (index 24) to window.MAXPREPS in stats.js (v301).
 
 1. Run collect_tfl.js in the browser pane (any maxpreps.com page); when window.__DONE is 1, save window.__TL (team labels, '|' separated)
    as the first line and window.__T as the rest into data/tfl.txt.
 2. python3 apply_tfl.py          -> dry run (what matches, what does not)
-   python3 apply_tfl.py write    -> writes index.html (then run tools/make_basketball.py)
+   python3 apply_tfl.py write    -> writes stats.js (then run tools/make_basketball.py)
 Players are matched like merge.py: by career id (id, id+'o', id+'d'), then roster name, then box-score name, within the school.
 Two-way players get the numbers on their defense entry. Nothing else in a week's line is touched."""
 import json,re,sys,unicodedata,os
 from collections import defaultdict,Counter
 H=os.path.dirname(os.path.abspath(__file__));ROOT=H+'/../../'
-s0=open(ROOT+'index.html').read()
+s0=open(ROOT+'stats.js').read()
 i=s0.index('window.MAXPREPS=')+len('window.MAXPREPS=');j=s0.index('\n',i)
 D=json.loads(s0[i:j].rstrip().rstrip(';'));P=D['players']
 G=json.load(open(H+'/data/games.json'));R=json.load(open(H+'/data/rosters.json'))
@@ -61,4 +61,4 @@ print('players not in app:',[(k,v) for k,v in unm.items() if not k.startswith('o
 print('ambiguous',amb)
 if 'write' in sys.argv:
     D['players']=P
-    open(ROOT+'index.html','w').write(s0[:i]+json.dumps(D,separators=(',',':'),ensure_ascii=False)+';'+s0[j:]);print('written')
+    open(ROOT+'stats.js','w').write(s0[:i]+json.dumps(D,separators=(',',':'),ensure_ascii=False)+';'+s0[j:]);print('written')

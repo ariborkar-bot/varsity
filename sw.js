@@ -1,8 +1,8 @@
 /* Varsity service worker: lets the app open from the home screen, and offline.
    The page is always fetched fresh when there is a connection, so updates show up right away;
    the saved copy is only used offline. League data from Supabase is never cached. */
-const CACHE = 'varsity-v363';
-const SHELL = ['./', 'vendor/supabase.min.js', 'manifest.webmanifest', 'logo.png', 'logos.js', 'games.js', 'fonts.css', 'icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/apple-touch-icon-v2.png'];
+const CACHE = 'varsity-v364';
+const SHELL = ['./', 'vendor/supabase.min.js', 'manifest.webmanifest', 'logo.png', 'logos.js', 'games.js', 'stats.js', 'fonts.css', 'icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/apple-touch-icon-v2.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
@@ -19,7 +19,7 @@ self.addEventListener('fetch', e => {
       .catch(() => caches.match(key).then(h => h || caches.match('./'))));
     return;
   }
-  if (same && url.pathname.endsWith('/games.js')) {            // schedule data: always try the network first so new games show up right away
+  if (same && /\/(games|stats)\.js$/.test(url.pathname)) {   // schedule and stats data: always try the network first so new games and stats show up right away
     e.respondWith(fetch(req, { cache: 'no-cache' }).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return r; }).catch(() => caches.match(req)));
     return;
   }

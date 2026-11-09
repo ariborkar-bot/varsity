@@ -309,7 +309,8 @@ def transform(s, mp, games, seeds, teams, prior):
     rank = mp.pop('rank', {})
     nostat = mp.pop('nostat', [])
     top10 = [k for k, _ in sorted(rank.items(), key=lambda kv: -kv[1])[:10]]
-    s = line_replace(s, 'window.MAXPREPS=', 'window.MAXPREPS=' + json.dumps(mp, separators=(',', ':')) + ';')
+    # v364: football's stats live in stats.js; basketball bakes its own stats in place of that script tag
+    s = rep(s, '<script src="stats.js" onerror="void 0"></script>', '<script>\nwindow.MAXPREPS=' + json.dumps(mp, separators=(',', ':')) + ';\n</script>')
     weeks = max(g['w'] for g in games)
     g2 = [dict(w=g['w'], d=g['d'], h=g['h'], a=g['a'], hs=g['hs'], **{'as': g['as']}, **({'t': g['t']} if g.get('t') else {})) for g in games]
     s = rep(s, '<script src="games.js" onerror="void 0"></script>',
@@ -347,7 +348,7 @@ def transform(s, mp, games, seeds, teams, prior):
             "if(fin.length<20){_rg=window.BB_PRIOR?{r:window.BB_PRIOR,H:3,s:12}:{r:{},H:0,s:12};return _rg}")
     s = rep(s, "const PO_DATES={r1:'2026-11-06',r2:'2026-11-13',r3:'2026-11-20',r4:'2026-11-27'};",
             "const PO_DATES={r1:'2027-02-19',r2:'2027-02-23',r3:'2027-02-26',r4:'2027-03-01'};")
-    s = rep(s, "x.n==='Amaree Maye'", "x.n==='nobody'")
+    # (v364: the football-only position override now lives in stats.js, which basketball doesn't load)
 
     # --- positions, stats and scoring -------------------------------------------------------------------------------
     s = line_replace(s, 'const FILTERS=', "const FILTERS=['ALL','PG','SG','SF','PF','C'];")

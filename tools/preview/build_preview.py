@@ -8,7 +8,7 @@ css = re.sub(r'url\(["\']?(?:\./)?(fonts/[^)"\']+\.woff2)["\']?\)', lambda m: f'
 html = html.replace('<link rel="stylesheet" href="fonts.css">', '<style>' + css + '</style>')
 logo = b64('logo.png', 'image/png')
 html = html.replace('src="logo.png"', f'src="{logo}"').replace("g.src='logo.png'", f"g.src='{logo}'")
-for js in ('logos.js', 'games.js'):
+for js in ('logos.js', 'games.js', 'stats.js'):
     src = open(f"{root}/{js}", encoding='utf-8').read().replace('</script', '<\\/script')
     html = re.sub(r'<script src="' + re.escape(js) + r'"[^>]*></script>', lambda m: '<script>' + src + '</script>', html, count=1)
 html = re.sub(r'<link rel="(manifest|icon|apple-touch-icon)"[^>]*>', '', html)

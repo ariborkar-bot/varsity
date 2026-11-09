@@ -193,3 +193,7 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v362 (Nov 9): "to win" instead of "paying" (v363 was only a build bump)
 - Locked-in lines on Pick 'em, spread and props read "Locked in: X for 25 tokens to win 45 tokens." (was "…, paying 45 tokens."), so nothing sounds like a payout. Flagged by the marketing video review.
+
+## v364 (Nov 9): football stats moved to stats.js
+- The MaxPreps block (`window.MAXPREPS`, plus the Amaree Maye position override) moved from index.html into `stats.js` (owner: so app edits never touch the stats). index.html loads it with `<script src="stats.js" onerror="void 0">` right after games.js. index.html went from 2.3 MB to 1.3 MB.
+- sw.js caches stats.js and fetches it network-first (like games.js) so new stats show up right away. build_preview.py inlines it. merge.py / merge_w12.py / apply_tfl.py read and write stats.js. make_basketball.py swaps the stats.js tag for basketball's own inline `window.MAXPREPS`.

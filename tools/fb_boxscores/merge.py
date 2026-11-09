@@ -5,7 +5,7 @@
    weeks 1-11 and each roster, and leaves two base64-gzip strings in window.__Z (games) and window.__ZR (rosters).
 2. Save them, decoded, as data/games.json and data/rosters.json next to this file.
 3. python3 merge.py            -> dry run: prints what would change
-   python3 merge.py write      -> writes window.MAXPREPS in index.html (then run tools/make_basketball.py)
+   python3 merge.py write      -> writes window.MAXPREPS in stats.js (then run tools/make_basketball.py)
    python3 merge.py --week 12 [write]  -> only that week (other weeks untouched); see collect_w12.js / split_w12.py.
    Arrays may carry TFL/PBU at index 23/24; merge drops them, so run apply_tfl.py on the same pull afterwards.
 
@@ -18,7 +18,7 @@ import json,re,sys,unicodedata,datetime
 from collections import defaultdict,Counter
 import os
 ROOT=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..')+'/'
-s=open(ROOT+'index.html').read()
+s=open(ROOT+'stats.js').read()
 i=s.index('window.MAXPREPS=')+len('window.MAXPREPS=');j=s.index('\n',i)
 D=json.loads(s[i:j].rstrip().rstrip(';'));P=D['players']
 G=json.load(open(''+os.path.dirname(os.path.abspath(__file__))+'/data/games.json'))      # {cid:{d,h,t:[{l,p:[[slug|career,name,arr]]}]}}
@@ -151,7 +151,7 @@ pad=lambda a:(list(a)+[0]*23)[:23]
 real=[c for c in changes if c[0]=='add' or pad(c[4])!=pad(c[5])]
 print('real changes',Counter(c[0] for c in real))
 # points delta per player (season)
-s0=open(ROOT+'index.html').read()
+s0=open(ROOT+'stats.js').read()
 old={x['id']:x for x in json.loads(s0[i:j].rstrip().rstrip(';'))['players']}
 def season(x):return sum(pts(pad(a)) for a in x['w'].values())
 deltas=sorted(((season(x)-season(old[x['id']]) if x['id'] in old else season(x)),x['n'],x['s'],len(old[x['id']]['w']) if x['id'] in old else 0,len(x['w'])) for x in P)
@@ -161,4 +161,4 @@ g=[x for x in P if x['n']=='Malachi Gutierrez'][0];print(g)
 if 'write' in sys.argv:
     D['players']=P;D['updated']=datetime.date.today().strftime('%b %-d, %Y');D['games']=D.get('games') if WEEK else len([g for g in G.values() if g.get('d')])
     out=s0[:i]+json.dumps(D,separators=(',',':'),ensure_ascii=False)+';'+s0[j:]
-    open(ROOT+'index.html','w').write(out);print('written')
+    open(ROOT+'stats.js','w').write(out);print('written')
