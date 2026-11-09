@@ -2963,9 +2963,11 @@ document.addEventListener('submit',async e=>{
     const prev=myProfile()||{};
     const profile=Object.assign({},prev,{name,school,role,v:2,ob:OB_V,joinedAt:prev.joinedAt||NOW()});
     if(role==='player'){profile.sport=sport;profile.posLabel=pos;profile.pos=NM_SP[sport].map[pos]||null;if(!profile.pos)delete profile.pos}else{delete profile.pos;delete profile.posLabel;delete profile.sport}
+    /* v378: a near-miss name is saved as the box-score player's real name */
+    let fixedName='';if(role==='player'&&sport===FG_SPORT){const mn=mpFind(profile);if(mn&&mn!==profile.name){profile.name=mn;fixedName=mn}}
     await setDoc('profiles/'+ME.uid,profile);
     NM.busy=false;NM.role=NM.sport='';NM.name=NM.school=NM.pos=null;
-    closeGate();say(fresh?'Welcome to Varsity, '+name.split(' ')[0]:'Saved');
+    closeGate();say(fixedName?'Found you: '+fixedName+', '+profile.school:fresh?'Welcome to Varsity, '+name.split(' ')[0]:'Saved');
     if(role==='player'&&sport!==FG_SPORT)landGo();
   }catch(err){
     NM.busy=false;
@@ -2992,7 +2994,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v377 · Nov 9';
+const APP_BUILD='v378 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3031,12 +3033,27 @@ function mgOk(p){
 let _pl=null;
 const nmNorm=x=>String(x||'').trim().toLowerCase().replace(/[’‘`]/g,"'").replace(/\s+/g,' ');
 const nmKey=(n,s)=>nmNorm(n)+'|'+nmNorm(s);
+/* v378 (owner): a player profile whose name is off by a letter or two still finds its box-score player ("Zeed Hornby" → Zed Hornby).
+   Same school required; edit distance ≤1 (≤2 for names of 10+ letters); if two names tie, the one at the profile's position wins, else no match. */
+function nmLev(a,b){if(a===b)return 0;const m=a.length,n=b.length;let v=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){let pv=v[0];v[0]=i;for(let j=1;j<=n;j++){const t=v[j];v[j]=Math.min(v[j]+1,v[j-1]+1,pv+(a[i-1]===b[j-1]?0:1));pv=t}}return v[n]}
+let _mpS=null;
+function mpFind(pr){
+  if(!pr||pr.role!=='player'||!pr.school||!pr.name)return null;
+  if(!_mpS){_mpS={};mpP.forEach(p=>{(_mpS[nmNorm(p.school)]=_mpS[nmNorm(p.school)]||[]).push(p)})}
+  const pool=_mpS[nmNorm(pr.school)];if(!pool)return null;const n=nmNorm(pr.name);
+  const ex=pool.find(p=>nmNorm(p.name)===n);if(ex)return ex.name;
+  const maxD=n.replace(/[^a-z]/g,'').length>=10?2:1;let bd=99,best=[];
+  for(const nm of new Set(pool.map(p=>p.name))){const d=nmLev(nmNorm(nm),n);if(d<bd){bd=d;best=[nm]}else if(d===bd)best.push(nm)}
+  if(bd>maxD)return null;
+  if(best.length>1){const bp=best.filter(nm=>pool.some(p=>p.name===nm&&p.pos===pr.pos));if(bp.length!==1)return null;best=bp}
+  return best[0];
+}
 function players(){
   if(_pl&&_pl.rev===_rev)return _pl.list;
   /* v376 (owner): a player profile that matches a box-score player (same name and school) IS that player: no second, empty entry.
      Profiles with no box-score match still get their own entry, labelled with the position they picked (DL/LB/DB, not DEF). */
-  const mpKeys=new Set(mpP.map(p=>nmKey(p.name,p.school)));
-  const real=Object.entries(S.profiles).filter(([id,p])=>p&&p.role==='player'&&FIELDS[p.pos]&&!mpKeys.has(nmKey(p.name,p.school))).map(([uid,p])=>({key:uid,uid,name:p.name||'Player',school:p.school||'',pos:p.pos,sub:p.pos==='DEF'&&['DL','LB','DB'].includes(p.posLabel)?p.posLabel:p.pos,sample:false,gr:classOf(p.name,p.school),games:effGames(uid)}));
+  const real=Object.entries(S.profiles).filter(([id,p])=>p&&p.role==='player'&&FIELDS[p.pos]&&!mpFind(p)).map(([uid,p])=>({key:uid,uid,name:p.name||'Player',school:p.school||'',pos:p.pos,sub:p.pos==='DEF'&&['DL','LB','DB'].includes(p.posLabel)?p.posLabel:p.pos,sample:false,gr:classOf(p.name,p.school),games:effGames(uid)}));
   const list=[...real,...mpP,...(MP||(S.settings&&S.settings.hideSample)?[]:sampleP)];
   _pl={rev:_rev,list,map:Object.fromEntries(list.map(p=>[p.key,p]))};
   return list;
@@ -7474,7 +7491,7 @@ function weekChart(p){
 /* a two-way player claims both of their profiles (offense and defense). Each keeps its own stats and its own rankings. */
 function meSides(){
   const pr=myProfile();if(!pr)return[];
-  const k=nmKey(pr.name,pr.school);
+  const k=nmKey(mpFind(pr)||pr.name,pr.school);
   return players().filter(p=>p.mp&&nmKey(p.name,p.school)===k);
 }
 function meP(){
