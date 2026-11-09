@@ -2929,7 +2929,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v361 · Nov 9';
+const APP_BUILD='v362 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4799,7 +4799,7 @@ function picksHTML(){
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play Pick ’em.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}.</p>`:'';
     else if(gDone(g)&&b)foot=`<p class="bt-fin ${res}"><b>${res==='won'?'Correct':res==='lost'?'Wrong':'Push'}</b> · Final ${esc(g.a)} ${g.as}, ${esc(g.h)} ${g.hs} · ${res==='won'?'+'+tk(b.stake*(b.odds-1)):res==='push'?'stake back':'-'+tk(b.stake)}</p>`
-    else if(locked||b)foot=b?`<p class="muted">Locked in: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Pick ’em is closed for this game.</p>';
+    else if(locked||b)foot=b?`<p class="muted">Locked in: ${esc(b.s==='h'?g.h:g.a)} for ${tk(b.stake)} to win ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Pick ’em is closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="pkStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="pkStake" data-g="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pk" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
@@ -5051,7 +5051,7 @@ function spreadHTML(){
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}.</p>`:'';
     else if(gDone(g)&&b)foot=`<p class="bt-fin ${res}"><b>${res==='won'?'Correct':res==='lost'?'Wrong':'Push'}</b> · Final ${esc(g.a)} ${g.as}, ${esc(g.h)} ${g.hs} · ${res==='won'?'+'+tk(b.stake*(b.odds-1)):res==='push'?'stake back':'-'+tk(b.stake)}</p>`
-    else if(locked||b)foot=b?`<p class="muted">Locked in: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
+    else if(locked||b)foot=b?`<p class="muted">Locked in: ${esc(nm2(b,g))} ${lnTxt(b)} for ${tk(b.stake)} to win ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
     else if(side){
       const chips=[5,10,25,50].filter(v=>v<=room);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="atStake" data-g="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="atStake" data-g="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="at" data-g="${esc(id)}" data-o="${ATS_PAY}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
@@ -5159,7 +5159,7 @@ function propsHTML(){
     const room=bal+(b?+b.stake:0),od=side==='o'?x.over:side==='u'?x.under:0;let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'';
-    else if(locked||b)foot=b?`<p class="muted">Locked in: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}, paying ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
+    else if(locked||b)foot=b?`<p class="muted">Locked in: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)} to win ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
     else if(side){const chips=[5,10,25,50].filter(v=>v<=room);
       foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="ppStake" data-id="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="ppStake" data-id="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pp" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
       <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span></div>`}

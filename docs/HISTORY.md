@@ -190,3 +190,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v361 (Nov 9): basketball mock draft works before the season
 - `mkPool()` filtered out everyone with 0 season points, so in basketball preseason the mock draft's Best available was empty ("No one left at that position") and nothing could be drafted. With no one on points it now ranks by last season's hidden rank (`window.BB_RANK`). The mock draft's position chips in basketball are PG/SG/SF/PF/C (they showed football positions). Found while recording the marketing videos.
+
+## v362 (Nov 9): "to win" instead of "paying"
+- Locked-in lines on Pick 'em, spread and props read "Locked in: X for 25 tokens to win 45 tokens." (was "…, paying 45 tokens."), so nothing sounds like a payout. Flagged by the marketing video review.
