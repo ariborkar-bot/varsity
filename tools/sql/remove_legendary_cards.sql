@@ -13,3 +13,18 @@ update public.docs d
    and d.id in (select id from a)
    and d.data->'inv'->'fr'->'sp'->>'k' is not null
 returning d.coll, d.id, d.data->'inv'->'fr'->'sp' as starter_pick;
+
+-- v347 (owner): also take the Legendary Isaiah Garcia (Bishop's, card pc:mp461) off Zed Hornby's football account.
+-- The app does this by itself on Zed's next app open (cardFix); this makes it immediate.
+with z as (
+  select id from public.docs where coll = 'profiles' and lower(trim(data->>'name')) = 'zed hornby'
+)
+update public.docs d
+   set data = jsonb_set(
+                jsonb_set(d.data, '{inv,cards,pc:mp461,l}', '0'::jsonb, true),
+                '{inv,fr,rv}', coalesce(d.data->'inv'->'fr'->'rv','{}'::jsonb) || '{"zh-ig":1}'::jsonb, true),
+       updated_at = now()
+ where d.coll = 'picks'
+   and d.id in (select id from z)
+   and (d.data->'inv'->'cards'->'pc:mp461'->>'l') is not null
+returning d.id, d.data->'inv'->'cards'->'pc:mp461' as isaiah_garcia_card;

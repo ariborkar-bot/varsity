@@ -2792,7 +2792,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v346 · Nov 8';
+const APP_BUILD='v347 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4327,6 +4327,17 @@ function spRevoke(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly
   const id='pc:'+sp.k,cards=Object.assign({},v.cards),cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur.l=0;cards[id]=cur;
   const patch={cards,fr:Object.assign({},fr,{spx:1})};S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},v,patch)});
   upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:v})})}
+/* v347 (owner): one-time card removals by account. Each entry switches off the Legendary version of a named player's card on that
+   account's next app open (done once, marked in inv.fr.rv[id]). */
+const CARD_FIX=[{id:'zh-ig',who:/^\s*zed\s+hornby\s*$/i,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'}];
+function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
+  const nmU=String((myProfile()||{}).name||''),v=invOf(u),fr=v.fr||{},rv=fr.rv||{};
+  for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;
+    const ids=players().filter(p=>p.name===f.name&&p.school===f.school).map(p=>'pc:'+p.key).filter(id=>(cardsOf(u)[id]||{})[f.r]);
+    const cards=Object.assign({},invOf(u).cards);for(const id of ids){const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur[f.r]=0;cards[id]=cur}
+    const nfr=Object.assign({},invOf(u).fr,{rv:Object.assign({},rv,{[f.id]:1})}),patch={cards,fr:nfr},old=invOf(u);
+    S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},old,patch)});
+    upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:old})});return}}
 function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const seen=+((S.picks[ME.uid]||{}).gsn)||0,nw=giftsIn(ME.uid).filter(x=>(+x.at||0)>seen).sort((a,b)=>a.at-b.at);if(!nw.length)return;
   const c=$('#cfm');if(!c||!c.hidden)return;_gPop=true;const last=nw[nw.length-1].at;
@@ -8196,7 +8207,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
