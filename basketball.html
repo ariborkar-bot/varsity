@@ -2781,12 +2781,14 @@ function authHTML(){
   </div>`;
 }
 /* v322 (owner): no "couldn't open sign-in" popups. If the login library never loaded, quietly try to load it again and reload once it is there. */
-function libRetry(){if(SB||!NEEDS_SERVER||window.__lr)return;let n=0;try{n=+sessionStorage.getItem('vs-lr')||0}catch(_){}if(n>=3)return;window.__lr=true;
+function libRetry(){if(SB||!NEEDS_SERVER||window.__lr||ME.mode!=='offline')return;let n=0;try{n=+sessionStorage.getItem('vs-lr')||0}catch(_){}if(n>=3)return;window.__lr=true;
   (async()=>{for(const u of ['vendor/supabase.min.js?r='+Date.now(),'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js','https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js']){
     await new Promise(r=>{const el=document.createElement('script');el.src=u;el.onload=el.onerror=()=>r();document.head.appendChild(el);setTimeout(r,8000)});
     const ok=!!(window.supabase&&window.supabase.createClient);if(ok){try{sessionStorage.setItem('vs-lr',String(n+1))}catch(_){}location.reload();return}}
     window.__lr=false})()}
-function openAuth(){if(!SB){libRetry();return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
+/* v357: route() can ask for the sign-in screen before boot() has made the client. Wait for boot instead of calling
+   libRetry (which reloaded signed-out visitors' page up to 3 times, and forever where sessionStorage is blocked) */
+function openAuth(){if(!SB){if(ME.mode==='offline')libRetry();else if(!window.__oaT)window.__oaT=setTimeout(()=>{window.__oaT=0;if(ME.mode==='guest'||ME.mode==='offline')openAuth()},150);return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
 document.addEventListener('click',e=>{
   if(e.target.closest&&e.target.closest('[data-priv]')){setTimeout(()=>{if(ME.mode==='guest'&&location.hash==='#privacy')closeGate()},0);return}
   const b=e.target.closest&&e.target.closest('[data-au]');if(!b)return;e.preventDefault();
@@ -2888,7 +2890,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v356 · Nov 8';
+const APP_BUILD='v357 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;

@@ -17,7 +17,8 @@ subprocess.check_call([sys.executable, os.path.join(ROOT, 'tools', 'make_basketb
 
 FAKE = r"""<script>/* new-user preview: fake Supabase, nothing leaves this file */
 window.__NU=1;(function(){
-  const ss=sessionStorage,IN=ss.getItem('nu-in');
+  /* the claude.ai file viewer runs files in a sandbox where storage can throw: fall back to memory */
+  const ss=(()=>{try{const s=window.sessionStorage;s.setItem('nu-t','1');s.removeItem('nu-t');return s}catch(_){const m={};return {getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}}})(),IN=ss.getItem('nu-in');
   if(!IN){try{Object.keys(localStorage).forEach(k=>{if(/^(vs-|gf-|varsity|gsd-|fg|nt-|in-|intro)/i.test(k))localStorage.removeItem(k)})}catch(_){}}
   const em=()=>ss.getItem('nu-email')||'you@example.com',user=()=>({id:'nu-me',email:em()}),ok=x=>Promise.resolve({data:x,error:null});
   const any=()=>new Proxy(function(){},{get:(t,k)=>k==='then'?(r=>r({data:null,error:null})):any(),apply:()=>any()});
@@ -25,6 +26,12 @@ window.__NU=1;(function(){
   const auth={getSession:()=>ok({session:IN?{user:user(),access_token:'preview'}:null}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),
     signUp:signIn,signInWithPassword:signIn,signOut:()=>{ss.removeItem('nu-in');return ok(null)},resetPasswordForEmail:()=>ok(null),updateUser:()=>ok(null)};
   const client=new Proxy({auth,rpc:()=>ok(false)},{get:(t,k)=>k in t?t[k]:any()});
+  /* sign in without reloading the page (a reload in the viewer's sandbox would forget you) */
+  window.nuIn=email=>{ME.uid='nu-me';ME.email=email||em();ME.mode='live';S.seen=null;S.loaded.seen=true;AUTH.busy=false;touch();if(!myProfile())openName()};
+  /* the viewer's sandbox blocks real form submits: send the submit event ourselves (after the usual checks) */
+  const sub=f=>{if(f.reportValidity&&!f.reportValidity())return;f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}))};
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button[type=submit]'),f=b&&b.form;if(f&&/^(au|nm)-form$/.test(f.id)){e.preventDefault();sub(f)}},true);
+  document.addEventListener('keydown',e=>{const f=e.key==='Enter'&&e.target.form;if(f&&/^(au|nm)-form$/.test(f.id)&&e.target.tagName==='INPUT'&&e.target.type!=='checkbox'){e.preventDefault();sub(f)}},true);
   Object.defineProperty(window,'supabase',{value:Object.freeze({createClient:()=>client}),writable:false,configurable:false});
 })();</script>
 <div style="position:fixed;left:8px;bottom:8px;z-index:2147483647;display:flex;gap:6px;align-items:center;font:800 11px/1 system-ui"><span style="background:#FFC23D;color:#1b1200;padding:5px 8px;border-radius:99px;opacity:.85;pointer-events:none">NEW-USER PREVIEW · nothing is saved</span><button type="button" onclick="nuFill()" style="font:inherit;background:#fff;color:#1b1200;border:0;padding:5px 9px;border-radius:99px;cursor:pointer">Fill demo answers</button></div>
@@ -49,6 +56,9 @@ def build(src, dest, other):
     a = 'DB=supaDb(SB);'
     assert h.count(a) == 1, a
     h = h.replace(a, 'DB=window.__NU?memDb():supaDb(SB);', 1)
+    for a in ['if(data.session){location.reload();return}', 'if(!r.error){location.reload();return}', "else{const {error}=await SB.auth.signInWithPassword({email,password:pw});if(error)throw error;location.reload();return}"]:
+        assert h.count(a) == 1, a
+        h = h.replace(a, a.replace('location.reload()', 'nuIn(email)'), 1)
     h = h.replace('</head>', '<style>#tab-admin{display:none!important}</style></head>', 1)
     me, oth = ('index.html', 'basketball.html') if src == 'index.html' else ('basketball.html', 'index.html')
     h = h.replace('href="%s"' % oth, 'href="%s"' % other).replace('href="%s"' % me, 'href="%s"' % dest)
