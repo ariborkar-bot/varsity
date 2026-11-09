@@ -2973,6 +2973,11 @@ document.addEventListener('submit',async e=>{
 /* v359 (owner): a player's main sport is where the app opens. Once per visit (tab session): if you open the other sport's page,
    it switches to yours. Tapping the sport switch after that is never undone. */
 function landGo(){const a=document.querySelector('a.sport-opt:not(.on)');if(!a)return;window.__landGo=1;sportCut(a.getAttribute('href'),(a.getAttribute('title')||'').toUpperCase(),{})}
+/* v374 (owner): named accounts that must sign in again and redo the profile step, once (marker saved on the profile as redo[id]) */
+const REDO=[{id:'is-1',who:/^\s*isaac\s+smedra\s*$/i}];
+function redoCheck(){if(ME.mode!=='live'||!ME.uid||VA||!S.loaded.profiles||window.__redo)return;const p=myProfile();if(!p)return;
+  for(const r of REDO){if(!r.who.test(String(p.name||''))||(p.redo||{})[r.id])continue;window.__redo=1;
+    upsert('profiles/'+ME.uid,{ob:0,redo:Object.assign({},p.redo,{[r.id]:1})}).then(()=>{try{sessionStorage.setItem('vs-reauth','1')}catch(_){}return SB.auth.signOut({scope:'local'})}).catch(()=>{}).finally(()=>location.reload());return}}
 function setupCheck(){if(location.hash!=='#privacy'&&mustSetup()&&($('#gate').hidden||!$('#nm-form')))openName()}
 function landCheck(){
   if(window.__land||!ME.uid||ME.mode!=='live'||!S.loaded.profiles)return;window.__land=1;
@@ -2984,7 +2989,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v373 · Nov 9';
+const APP_BUILD='v374 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -8497,7 +8502,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;

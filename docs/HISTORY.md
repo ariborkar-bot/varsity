@@ -223,3 +223,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 ## v373 (Nov 9): everyone redoes sign-in and the profile step once
 - Boot: a saved session whose `user.last_sign_in_at` is before `REAUTH_AT` (2026-11-09 22:20 UTC) is signed out on that device (`signOut({scope:'local'})`), and the sign-in screen says "Varsity got an update. Sign in again with your email and password". Each device asks once; sign-ins after the cutoff are untouched.
 - Profiles now carry `ob:2` once the profile step is finished (`OB_V`, `obDone()`). `mustSetup()` also requires it, so every existing account goes through Player/Fan → (sport) → name, school, position again, with role and sport not pre-picked (name, school and position are pre-filled).
+
+## v374 (Nov 9): Isaac Smedra signs in again and redoes his profile
+- `REDO` list + `redoCheck()` (first thing in touch): a live account whose profile name matches gets `ob:0` and a `redo[id]` marker saved on its profile, is signed out, and lands on the sign-in screen ("Sign in again…"). After signing in, `mustSetup()` sends him through Player/Fan → name, school, position. Runs once per account (the marker). Entry: `is-1` Isaac Smedra.
