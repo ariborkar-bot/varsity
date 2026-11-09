@@ -2246,6 +2246,11 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 /* v260: Get tokens fits the screen and scrolls inside; X to close. Header ticker is solid so the words are easy to read. */
 #cfm .gcard{max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .tok-sheet{position:relative}
+.pt-q{width:100%;margin:6px 0 8px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:inherit}
+.pt-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:min(46vh,380px);overflow:auto;padding:2px}
+.pt-t{display:flex;align-items:center;gap:8px;padding:8px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:600 .82rem/1.15 inherit;text-align:left;cursor:pointer;min-width:0}
+.pt-t span{overflow:hidden;text-overflow:ellipsis}.pt-t[aria-pressed=true]{border-color:#FFC23D;background:rgba(255,194,61,.14)}.pt-t[hidden]{display:none}
+.lk-team .lk-art{background:linear-gradient(135deg,#FF8A3D,#B3261E);color:#fff}
 .tok-sheet .rw ul{max-height:none;overflow:visible}
 .tok-x{position:sticky;top:0;align-self:flex-end;flex:none;margin:-10px -10px -56px 0;z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(5,12,30,.9);color:#fff;font:700 1.05rem/1 inherit;cursor:pointer;display:grid;place-items:center}
 .tok-x:hover{background:#13284D}
@@ -3003,7 +3008,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v379 · Nov 9';
+const APP_BUILD='v380 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4108,15 +4113,17 @@ const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
 const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','theme','coin','icon','share','walkup','crest','lineup','field','jersey'];
 const PACKS={
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
-  player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
-  /* v342 (owner): Player + Team pack: 5 player/team cards only (no cosmetics, perks or boosts), a bit better odds than the Pro pack; the last card is Rare or better */
-  cards:{n:'Player + Team pack',c:5,tok:950,usd:'$7.99',odds:{c:20,u:32,r:26,e:12,l:6,m:4},g:'r',cards:1},
-  champs:{n:'Champion pack',c:10,tok:1250,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'},
-  /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
-  god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:33,e:35,l:17,m:8},g:'l',cos:1},
+  player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:''},
+  /* v380 (owner): Pick Your Team pack: Pro pack odds, but you pick the team; all 5 cards are that team's players or its team card */
+  team:{n:'Pick Your Team pack',c:5,tok:1100,usd:'$8.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'',cards:1,team:1},
+  /* v342 (owner): Player + Team pack: 5 player/team cards only (no cosmetics, perks or boosts), a bit better odds than the Pro pack (v380: no guaranteed last card, just the odds) */
+  cards:{n:'Player + Team pack',c:5,tok:950,usd:'$7.99',odds:{c:20,u:32,r:26,e:12,l:6,m:4},g:'',cards:1},
+  champs:{n:'Champion pack',c:10,tok:1250,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:''},
+  /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up (v380: no guaranteed last item) */
+  god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:33,e:35,l:17,m:8},g:'',cos:1},
   /* v366 (owner): Pick 1 of 5: 5 players, one is a Top 10 Immortal card, you keep 1 (odds are for the other 4, Rare or better) */
-  pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1},
-  godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1}};
+  pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1,off:1},   /* v380 (owner): removed from the Shop (off); gifts/half-done picks still open */
+  godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1,off:1}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
 const cosOwnCount=u=>{const it=invOf(u).it||{},d=gDelta(u);let n=0;for(const id of new Set([...Object.keys(it),...Object.keys(d)])){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&(+it[id]||0)+(+d[id]||0)>0)n++}return n};
@@ -4303,6 +4310,18 @@ function bndHTML(){const u=ME.uid,done=bndOf(u),all=bndSchools(),N=UI.bndN||12,q
     <p class="muted">Collect a school’s team card and its ${BND_N} best players to complete its binder. Any version counts. Each completed school pays <b>${BND_TOK.toLocaleString()} tokens</b> once and gives a permanent <b>+${BND_BOOST}%</b> on winnings from your Pick ’em picks on that team and props on its players.</p>
     <label class="fld"><span>Find a school</span><input id="bnd-q" type="search" value="${esc(UI.bndQ||'')}" placeholder="School name" autocomplete="off"></label></section>${det}
     <section class="card"><div class="bnd-l">${rows.slice(0,N).map(card).join('')||'<p class="empty">No school matches.</p>'}</div>${rows.length>N?`<button class="btn ghost" data-act="bndMore">Show more (${rows.length-N})</button>`:''}</section>`}
+/* v380: a card from one team: its team card 20% of the time, otherwise one of its players */
+function rollTeamCard(t){const pl=players().filter(p=>!p.sample&&!/x$/.test(p.key)&&p.school===t).map(p=>'pc:'+p.key);return(!pl.length||fcRnd(100)<20)?'tc:'+t:pl[fcRnd(pl.length)]}
+const PT={t:'',k:'team',h:'tok',d:null};
+function ptSheet(k,h,d){Object.assign(PT,{k:k||'team',h:h||'tok',d:d==null?null:d});const c=$('#cfm'),P=PACKS[PT.k];if(!c||!P)return;
+  const ts=Object.keys(wpTeams()).sort((a,b)=>a.localeCompare(b));
+  c.innerHTML=`<div class="gcard tok-sheet pt-sheet" role="dialog" aria-modal="true" aria-labelledby="pt-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button>
+    <h2 id="pt-t">Pick your team</h2><p class="muted">All ${P.c} cards come from this team: its players and its team card. Same odds as the Pro pack.</p>
+    <input id="pt-q" class="pt-q" type="search" placeholder="Search schools" autocomplete="off" aria-label="Search schools">
+    <div class="pt-list" role="listbox" aria-label="Teams">${ts.map(t=>`<button type="button" class="pt-t" data-act="ptPick" data-v="${esc(t)}" aria-pressed="${PT.t===t}">${slogo(t,26)}<span>${esc(t)}</span></button>`).join('')}</div>
+    <div class="gbtns"><button class="btn" data-act="ptGo" ${PT.t?'':'disabled'}>${ptLabel()}</button></div></div>`;
+  c.hidden=false}
+const ptLabel=()=>{const P=PACKS[PT.k];return (PT.t?'Open '+esc(PT.t):'Pick a team')+(PT.h==='tok'?' · '+P.tok.toLocaleString()+' tokens':'')};
 function rollCard(r){const P=cardPools(),team=fcRnd(100)<35,pool=team?P.tm:P.pl;return pool.length?pool[fcRnd(pool.length)]:''}
 /* ---------- Immortal achievement cards (v342) ----------
    A tier above Mythical, only for players who earned it: Top 25 at his position in a week, Top 50 of all players in a week,
@@ -4346,8 +4365,8 @@ function cardArt(id,r,s=54){if(id.startsWith('ac:'))return achArt(id,s);const c=
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
   const P=use.length&&!(cosOnly&&cos.length)&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
-async function packOpen(type,how,day){
-  const P=PACKS[type];if(!P)return;
+async function packOpen(type,how,day,team){
+  const P=PACKS[type];if(!P)return;if(P.team&&!team){ptSheet(type,how,day);return}
   if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
   if(ME.mode==='readonly'||ME.mode==='offline'){say('Can’t open packs right now.');return}
   if(how==='tok'&&bank(ME.uid)<P.tok){say(`You need ${P.tok} tokens for the ${P.n}.`);return}
@@ -4361,6 +4380,7 @@ async function packOpen(type,how,day){
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
+    if(P.team){const cid=rollTeamCard(team);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(fcRnd(10000)<(ACH_CHANCE[type]||0)*100){const aid=rollAch();if(aid){const cur=Object.assign({},cards[aid]),isDup=!!cur.x;if(isDup)dup+=RAR.x.dup;else{cur.x=1;cards[aid]=cur;gotCard=true}got.push({card:aid,r:'x',dup:isDup});continue}}
     if(!P.cos&&(P.cards||fcRnd(100)<CARD_CHANCE)){let cid=rollCard(r);if(P.cards)for(let k=0;!cid&&k<5;k++)cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     const id=rollItem(r,!!P.cos);
@@ -4827,13 +4847,15 @@ async function troSave(){const g=S.groups[TR.gid];if(!g||g.ownerId!==ME.uid){say
   if(!paid){const patch={sp:(+v.sp||0)+TRO_TOK,tro:Object.assign({},v.tro,{[g.id]:1})};S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
     try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){say('That did not save. Try again.');return}}
   const ok=await act(()=>upsert('groups/'+g.id,{trophy:t}),'Trophy saved');if(ok){S.groups[g.id]=Object.assign({},g,{trophy:t});closeConfirm();render()}}
-document.addEventListener('input',e=>{const t=e.target;if(t.id==='bnd-q'){UI.bndQ=t.value;UI.bndN=12;const p=t.selectionStart;render();const n=$('#bnd-q');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(_){}}}else if(t.id==='gf-q'){GF.q=t.value;GF._focus=true;giftSheet()}else if(t.id==='gf-m')GF.m=t.value;else if(t.id==='gf-a'){GF.a=+t.value;const b=document.querySelector('[data-act=gfSend]'),l=Math.floor(bank(ME.uid));if(b)b.disabled=!(GF.to&&GF.a>=1&&GF.a<=l);document.querySelectorAll('[data-act=gfAmt]').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.v===GF.a)))}else if(t.id==='tr-nm'){TR.nm=t.value;const pv=document.querySelector('.tro-prev');if(pv)pv.innerHTML=trophySVG(TR,170)}});
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='pt-q'){const q=nmNorm(t.value);document.querySelectorAll('.pt-t').forEach(x=>{x.hidden=!!q&&!nmNorm(x.dataset.v).includes(q)})}else if(t.id==='bnd-q'){UI.bndQ=t.value;UI.bndN=12;const p=t.selectionStart;render();const n=$('#bnd-q');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(_){}}}else if(t.id==='gf-q'){GF.q=t.value;GF._focus=true;giftSheet()}else if(t.id==='gf-m')GF.m=t.value;else if(t.id==='gf-a'){GF.a=+t.value;const b=document.querySelector('[data-act=gfSend]'),l=Math.floor(bank(ME.uid));if(b)b.disabled=!(GF.to&&GF.a>=1&&GF.a<=l);document.querySelectorAll('[data-act=gfAmt]').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.v===GF.a)))}else if(t.id==='tr-nm'){TR.nm=t.value;const pv=document.querySelector('.tro-prev');if(pv)pv.innerHTML=trophySVG(TR,170)}});
 document.addEventListener('change',e=>{if(e.target.id==='gf-i'){GF.i=e.target.value;giftSheet()}});
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,v=t.dataset.v;
   if(a==='ntPhone')ntPhoneAsk();
   else if(a==='ntPhoneOff'){localStorage.setItem('vs-push','off');pushOff();say('Phone notifications are off');if(UI.notifView==='settings')openNotes()}
   else if(a==='shBuy')shopBuy(v);
   else if(a==='gfOpen'){if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}if(t.dataset.to)GF.to=t.dataset.to;giftSheet()}
+  else if(a==='ptPick'){PT.t=v;document.querySelectorAll('.pt-t').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===v)));const b=document.querySelector('[data-act=ptGo]');if(b){b.disabled=false;b.innerHTML=ptLabel()}}
+  else if(a==='ptGo'){if(!PT.t)return;const c=$('#cfm');if(c)c.hidden=true;packOpen(PT.k,PT.h,PT.d,PT.t)}
   else if(a==='gfTo'){GF.to=GF.to===v?'':v;giftSheet()}
   else if(a==='gfKind'){GF.kind=v;giftSheet()}
   else if(a==='gfAmt'){GF.a=+v;giftSheet()}
@@ -4866,8 +4888,8 @@ function viewShop(){
     const extras=`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
     body=wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
-      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?'cards':'items'}</small></div><h3>${esc(P.n)}</h3>
-      <p class="muted">${P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?'cards':'items'}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:', all random'}</p>
+      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?'cards':'items'}</small></div><h3>${esc(P.n)}</h3>
+      <p class="muted">${P.team?'You pick the team · its player and team cards only':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?'cards':'items'}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button></article>`).join('')}</div>
       <p class="muted lk-note">Items have no cash value and can’t be traded.</p>`+extras;
@@ -8819,6 +8841,7 @@ document.addEventListener('click',async e=>{
   else if(a==='pkOpen'){const k=t.dataset.v,h=t.dataset.h,P=PACKS[k];if(!P)return;
     if(P.pick&&h==='gift'){pkpBuy(t.dataset.d,k);return}
     if(P.pick){if(pkpOf(ME.uid)){pkpShow();return}confirmBox('Open a '+P.n+'?',P.all?`Spend ${P.tok.toLocaleString()} tokens for ${P.c} players, all Top 10 Immortal cards (+${ACH.t10.pct}% on his props). You keep 1, your pick is final.`:`Spend ${P.tok.toLocaleString()} tokens for ${P.c} players: one is a Top 10 Immortal card (+${ACH.t10.pct}% on his props) and the other 4 are ${RAR.r.n} or better. You keep 1, your pick is final.`,'Open it',()=>pkpBuy(0,k));return}
+    if(P.team){ptSheet(k,h,t.dataset.d);return}
     if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random ${P.cards?'player and team cards':'items'}${P.g?` (the last one is ${RAR[P.g].n} or better)`:''}. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h,t.dataset.d)}
   else if(a==='lkEq'){const k=t.dataset.k,v=t.dataset.v;if(v&&!invHas(ME.uid,v))return;if(t.closest('.pko')){t.closest('.pko').querySelectorAll(`.pko-eq[data-k="${k}"]`).forEach(x=>{x.textContent='Equip';x.disabled=false});t.textContent='Equipped ✓';t.disabled=true}const inv=invOf(ME.uid),eq=Object.assign({},inv.eq,{[k]:v});
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},inv,{eq})});if(!t.closest('.pko'))render();upsert('picks/'+ME.uid,{inv:{eq}}).catch(()=>say('That did not save.'))}

@@ -241,3 +241,8 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v379 (Nov 9): Isaac Smedra's account is put on his player profile
 - `PROFILE_FIX` + `profileFix()` (runs first in touch()): an account whose sign-in email contains "smedra", or whose profile name is within 2 letters of "Isaac Smedra", gets the profile Isaac Smedra · Bishop's · player · football · DEF/DL, marked done (`ob:2`, `fx['is-p1']`, and v374's `redo['is-1']` so he isn't signed out again). Works whether or not he already has a profile; the profile step closes and he lands with his stats (30.7 pts, 7 games).
+
+## v380 (Nov 9): no pack guarantees; Pick Your Team pack; Pick 1 of 5 / God Picks out of the Shop
+- Every pack's `g` (guaranteed last-card rarity) is now '' (Pro, Player + Team, Champion, Hall of Fame had one): every card is rolled on the listed odds. Shop text reads "all random".
+- `pick` and `godpick` have `off:1` and are no longer in the Shop; gifted ones and half-finished picks can still be opened.
+- New `team` pack "Pick Your Team pack": 5 cards, Pro pack odds, 1,100 tokens. Opening it shows `ptSheet()` (search + list of teams with logos); every card is from the chosen team (`rollTeamCard()`: its team card 20%, otherwise one of its players). Works from gifts too.
