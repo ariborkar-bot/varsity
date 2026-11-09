@@ -2800,7 +2800,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v343 · Nov 8';
+const APP_BUILD='v344 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3876,7 +3876,7 @@ const PACKS={
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
   player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'r'},
   /* v342 (owner): Player + Team pack: 5 player/team cards only (no cosmetics, perks or boosts), a bit better odds than the Pro pack; the last card is Rare or better */
-  cards:{n:'Player + Team pack',c:5,tok:950,usd:'$7.99',odds:{c:25,u:33,r:24,e:10,l:5,m:3},g:'r',cards:1},
+  cards:{n:'Player + Team pack',c:5,tok:950,usd:'$7.99',odds:{c:20,u:32,r:26,e:12,l:6,m:4},g:'r',cards:1},
   champs:{n:'Champion pack',c:10,tok:1250,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'},
   /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
   god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:40,e:35,l:17,m:8},g:'l',cos:1}};
@@ -4071,7 +4071,7 @@ function rollCard(r){const P=cardPools(),team=fcRnd(100)<35,pool=team?P.tm:P.pl;
    Found in Pro and Champion packs (ACH_CHANCE % per card slot). Stored in inv.cards[id]={x:1}; they are not one of the six normal
    versions (RAR_ORD), so the normal card lists ignore them. The best one you own for a player replaces his normal card boost on his props. */
 const ACH={pos:{n:'Top 25',pct:125,pr:55,k:'TOP 25'},all:{n:'Top 50',pct:200,pr:28,k:'TOP 50'},potw:{n:'Player of the Week',pct:300,pr:12,k:'POTW'},t10:{n:'Top 10',pct:400,pr:5,k:'TOP 10'}};
-const ACH_CHANCE={player:1.5,cards:2,champs:4};   /* v343: Player + Team pack 2% (a bit better than Pro) */
+const ACH_CHANCE={player:1.5,cards:2.5,champs:4};   /* v344: Player + Team pack 2.5% (better than Pro, below Champion) */
 let _ac=null;
 function achData(){
   if(_ac&&_ac.rev===_rev)return _ac;
