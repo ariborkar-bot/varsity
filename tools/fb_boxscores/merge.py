@@ -6,6 +6,8 @@
 2. Save them, decoded, as data/games.json and data/rosters.json next to this file.
 3. python3 merge.py            -> dry run: prints what would change
    python3 merge.py write      -> writes window.MAXPREPS in index.html (then run tools/make_basketball.py)
+   python3 merge.py --week 12 [write]  -> only that week (other weeks untouched); see collect_w12.js / split_w12.py.
+   Arrays may carry TFL/PBU at index 23/24; merge drops them, so run apply_tfl.py on the same pull afterwards.
 
 Rules: box scores are the source of truth for every week a team has one; weeks with no box score are kept.
 Players are matched by roster name, then by box-score name, within the school. Existing ids never change
@@ -23,6 +25,7 @@ G=json.load(open(''+os.path.dirname(os.path.abspath(__file__))+'/data/games.json
 R=json.load(open(''+os.path.dirname(os.path.abspath(__file__))+'/data/rosters.json'))    # {career:[pos,grade]}
 def slug(n):n=unicodedata.normalize('NFKD',n).encode('ascii','ignore').decode().lower();return re.sub(r'[^a-z0-9]+','-',n).strip('-')
 schools=set(x['s'] for x in P)
+WEEK=int(sys.argv[sys.argv.index('--week')+1]) if '--week' in sys.argv else 0
 def week(d):m,dd,y=map(int,d.split('-'));return (datetime.date(y,m,dd)-datetime.date(2026,8,17)).days//7+1
 # team label -> school
 lab=Counter()
@@ -36,7 +39,7 @@ covered=defaultdict(set)  # school->weeks with a box score
 for g in G.values():
     if not g.get('d') or g.get('nostats'):continue
     w=week(g['d'])
-    if w>11:continue
+    if (WEEK and w!=WEEK) or (not WEEK and w>11):continue
     for t in g['t']:
         sc=re.sub(r'\s*\([^)]*\)\s*$','',t['l'])
         if sc not in schools:continue
@@ -44,7 +47,7 @@ for g in G.values():
         for k,nm,a in t['p']:
             sl,car=k.split('|');sl=slug(sl.replace('-',' '));key=(sc,car);names.setdefault(key,nm);slugs.setdefault(key,sl)
             acc=new[key][w]
-            for ix,v in enumerate(a):acc[ix]+=v
+            for ix,v in enumerate(a[:23]):acc[ix]+=v
 print('unmatched labels (not in app):',[x for x in unmatched][:40])
 print('app schools without box scores:',sorted(schools-set(covered)))
 OFF=list(range(0,9))+[15];DEF=list(range(9,15));KICK=list(range(16,23))
@@ -156,6 +159,6 @@ print('biggest gains',[ (round(d,1),n,s,a,b) for d,n,s,a,b in deltas[-12:]])
 print('biggest drops',[ (round(d,1),n,s,a,b) for d,n,s,a,b in deltas[:8]])
 g=[x for x in P if x['n']=='Malachi Gutierrez'][0];print(g)
 if 'write' in sys.argv:
-    D['players']=P;D['updated']=datetime.date.today().strftime('%b %-d, %Y');D['games']=len([g for g in G.values() if g.get('d')])
+    D['players']=P;D['updated']=datetime.date.today().strftime('%b %-d, %Y');D['games']=D.get('games') if WEEK else len([g for g in G.values() if g.get('d')])
     out=s0[:i]+json.dumps(D,separators=(',',':'),ensure_ascii=False)+';'+s0[j:]
     open(ROOT+'index.html','w').write(out);print('written')
