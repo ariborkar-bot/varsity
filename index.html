@@ -1786,6 +1786,90 @@ html,body{overflow-x:clip;max-width:100%}
 .gf-pv b{display:block;font-size:1.05rem}.gf-pv small{display:block;margin-top:2px}.gf-pv small:first-of-type{font-weight:800;text-transform:uppercase;letter-spacing:.04em;font-size:.72rem}
 .gf-pva{flex:none;display:grid;place-items:center;min-width:84px;min-height:84px}
 .gf-mini{display:inline-flex;vertical-align:middle;margin-right:5px}
+/* v345 welcome pack */
+.wp-ask{text-align:center}.wp-ask h2{margin:10px 0 6px}.wp-ask p{margin:6px 0}
+.wp-ask-art{width:96px;height:128px;margin:4px auto 6px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(150deg,#FFE08A,#F29A1D 45%,#7A4DFF);box-shadow:0 14px 34px -10px rgba(255,194,61,.7),inset 0 1px 0 rgba(255,255,255,.5);color:#1b1200;font:900 2.6rem/1 var(--f-display,inherit);animation:wpBob 1.6s ease-in-out infinite}
+.wp-ask-art small{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
+@keyframes wpBob{50%{transform:translateY(-6px) rotate(-2deg)}}
+.wp-odds{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;font:800 .78rem/1 var(--f-display,inherit);letter-spacing:.05em;text-transform:uppercase}
+.wp-shop{border-color:#FFC23D!important}
+.wpk{position:fixed;inset:0;z-index:10060;display:flex;flex-direction:column;align-items:center;overflow:hidden;color:#fff;--rc:#4C8DFF;background:#050a16}
+.wpk-bg{position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 45%,#112452 0%,#050a16 70%);transition:background .6s}
+.wpk.tint .wpk-bg{background:radial-gradient(80% 60% at 50% 45%,color-mix(in srgb,var(--rc) 55%,#050a16) 0%,#050a16 75%)}
+.wpk-rays{position:absolute;left:50%;top:50%;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;opacity:0;background:repeating-conic-gradient(color-mix(in srgb,var(--rc) 30%,transparent) 0 7deg,transparent 7deg 20deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 60%);mask:radial-gradient(circle,#000 0,transparent 60%);transition:opacity .5s}
+.wpk.rays .wpk-rays{opacity:1;animation:wpSpin 14s linear infinite}
+@keyframes wpSpin{to{transform:rotate(360deg)}}
+.wpk-top{position:relative;z-index:2;width:100%;max-width:520px;padding:calc(env(safe-area-inset-top,0px) + 22px) 18px 0;text-align:center}
+.wpk-top h2{margin:0 0 12px;font:900 italic 2rem/1 var(--f-display,inherit);letter-spacing:.02em;text-transform:uppercase}
+.wpk-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.wpk-steps li{padding:8px 6px;border-radius:12px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);transition:all .3s}
+.wpk-steps li b{display:block;font:800 .72rem/1 var(--f-display,inherit);letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+.wpk-steps li small{display:block;margin-top:5px;font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wpk-steps li.now{border-color:#FFC23D;box-shadow:0 0 0 2px rgba(255,194,61,.3)}
+.wpk-steps li.done{background:color-mix(in srgb,#3DDC84 18%,transparent);border-color:#3DDC84}.wpk-steps li.done b{opacity:1}
+.wpk-st{position:absolute;inset:150px 0 0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:2;padding-bottom:60px}
+.wpk-st.on{display:flex}
+.wpk-cap{margin:22px 0 0;font:800 1rem/1 var(--f-display,inherit);letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.wpk-win{position:relative;width:300px;height:396px;overflow:hidden;border-radius:22px;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.15);-webkit-mask:linear-gradient(transparent,#000 22%,#000 78%,transparent);mask:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
+.wpk-reel{position:absolute;left:0;top:0;width:100%;will-change:transform}
+.wpk-reel.blur{filter:blur(2.5px)}
+.wpk-tt{height:132px;display:flex;align-items:center;gap:16px;padding:0 22px;box-sizing:border-box}
+.wpk-tt img,.wpk-ini{width:64px;height:64px;border-radius:16px;background:#fff;object-fit:contain;padding:6px;box-sizing:border-box;flex:none}
+.wpk-ini{display:grid;place-items:center;color:#0B1626;font:900 1.4rem/1 var(--f-display,inherit)}
+.wpk-tt b{font:900 italic 1.45rem/1.05 var(--f-display,inherit);text-transform:uppercase;text-align:left}
+.wpk-tt.hit{animation:wpHit .5s cubic-bezier(.2,1.6,.4,1)}.wpk-tt.hit b{color:#FFC23D}
+@keyframes wpHit{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1.06)}}
+.wpk-mark{position:absolute;left:8px;right:8px;top:132px;height:132px;border-radius:18px;border:3px solid #FFC23D;box-shadow:0 0 30px rgba(255,194,61,.45),inset 0 0 20px rgba(255,194,61,.2);pointer-events:none}
+.wpk-win:before{content:'';position:absolute;inset:-2px;border-radius:24px;padding:3px;background:conic-gradient(from var(--wa,0deg),transparent 0 70%,#FFC23D 85%,#fff 90%,transparent 95%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;z-index:2;pointer-events:none}
+.wpk-st.punch{animation:wpPunch .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes wpPunch{0%{transform:scale(1)}30%{transform:scale(1.07)}100%{transform:scale(1)}}
+.wpk-flash{position:absolute;inset:0;z-index:4;background:#fff;opacity:0;pointer-events:none}
+.wpk-flash.go{animation:wpFlash .45s ease-out}
+@keyframes wpFlash{0%{opacity:.75}100%{opacity:0}}
+.wpk-lad{position:relative;display:flex;flex-direction:column;gap:10px;padding-left:44px}
+.wpk-meter{position:absolute;left:0;top:0;bottom:0;width:24px;border-radius:12px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.16);overflow:hidden}
+.wpk-meter i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,#4C8DFF 0 25%,#B48CFF 25% 50%,#FFC23D 50% 75%,#FF4F6D 75% 100%);background-size:100% 320px;background-position:bottom;box-shadow:0 0 22px rgba(255,255,255,.7)}
+.wpk-meter i:after{content:'';position:absolute;left:-4px;right:-4px;top:-3px;height:6px;border-radius:3px;background:#fff;box-shadow:0 0 14px #fff}
+.wpk-tier{position:relative;width:250px;height:70px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;box-sizing:border-box;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+.wpk-tier i{position:absolute;inset:0;background:linear-gradient(90deg,var(--tc),color-mix(in srgb,var(--tc) 35%,transparent));opacity:0;transition:opacity .2s}
+.wpk-tier b,.wpk-tier small{position:relative}
+.wpk-tier b{font:900 italic 1.35rem/1 var(--f-display,inherit);text-transform:uppercase;color:rgba(255,255,255,.4)}
+.wpk-tier small{font-weight:800;color:rgba(255,255,255,.45)}
+.wpk-tier.lit{border-color:var(--tc);box-shadow:0 0 22px color-mix(in srgb,var(--tc) 55%,transparent)}.wpk-tier.lit i{opacity:.8}.wpk-tier.lit b,.wpk-tier.lit small{color:#fff}
+.wpk-tier.top{transform:scale(1.05)}
+.wpk-tier.tease{border-color:var(--tc);animation:wpTease .14s steps(2) infinite}
+@keyframes wpTease{0%{box-shadow:0 0 0 transparent}50%{box-shadow:0 0 26px var(--tc)}}
+.wpk-tier.win{transform:scale(1.1);box-shadow:0 0 0 3px #fff,0 0 40px var(--tc);z-index:1}
+.wpk-stamp{position:absolute;top:auto;bottom:18%;left:50%;transform:translate(-50%,-50%) scale(3);opacity:0;font:900 italic 3.4rem/1 var(--f-display,inherit);text-transform:uppercase;color:var(--rc);text-shadow:0 0 30px var(--rc),0 6px 0 #000;pointer-events:none}
+.wpk-stamp.go{animation:wpStamp .9s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes wpStamp{0%{opacity:0;transform:translate(-50%,-50%) scale(3)}35%{opacity:1;transform:translate(-50%,-50%) scale(.95) rotate(-6deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-6deg)}}
+.wpk-s3{justify-content:center}
+.wpk-track{position:relative;display:flex;gap:14px;align-self:flex-start;will-change:transform}
+.wpk-track.blur{filter:blur(2px)}
+.wpk-pc{flex:none;width:150px;height:200px;border-radius:18px;background:linear-gradient(180deg,#16253A,#0B1626);border:2px solid rgba(255,255,255,.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:10px;box-sizing:border-box;transition:transform .3s,border-color .3s}
+.wpk-pc b{font:800 .95rem/1.1 var(--f-display,inherit);text-transform:uppercase}.wpk-pc small{opacity:.7;font-weight:700}
+.wpk-pc .av{margin:0!important}
+.wpk-pc.hit{border-color:var(--rc);box-shadow:0 0 0 3px var(--rc),0 0 40px var(--rc);transform:scale(1.12)}
+.wpk-pin{position:absolute;left:50%;top:calc(50% - 150px);margin-left:-12px;border:12px solid transparent;border-top:18px solid #FFC23D;filter:drop-shadow(0 0 8px rgba(255,194,61,.8))}
+.wpk-card{position:relative;width:250px;padding:22px 18px 22px;border-radius:24px;text-align:center;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,var(--rc) 35%,#0B1626),#0B1626 70%);border:3px solid var(--rc);box-shadow:0 0 0 6px color-mix(in srgb,var(--rc) 30%,transparent),0 0 70px var(--rc);transform:scale(.2) rotateY(180deg);opacity:0}
+.wpk.rev .wpk-card{animation:wpCard 1s cubic-bezier(.2,1.3,.35,1) forwards}
+@keyframes wpCard{0%{transform:scale(.2) rotateY(540deg);opacity:0}60%{opacity:1}100%{transform:scale(1) rotateY(0);opacity:1}}
+.wpk-card .av{margin:10px auto 8px!important}
+.wpk-ctop{display:flex;justify-content:space-between;font:900 .74rem/1 var(--f-display,inherit);letter-spacing:.12em;text-transform:uppercase;color:var(--rc)}
+.wpk-card h3{margin:4px 0 4px;font:900 italic 1.7rem/1 var(--f-display,inherit);text-transform:uppercase}
+.wpk-card p{margin:0;display:flex;align-items:center;justify-content:center;gap:6px;opacity:.85;font-weight:700}
+.wpk-card em{display:block;margin-top:12px;font-style:normal;font-weight:800;color:var(--rc)}
+.wpk-shine{position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);transform:translateX(-100%)}
+.wpk.rev .wpk-shine{animation:wpShine 1.6s .9s ease-out}
+@keyframes wpShine{to{transform:translateX(100%)}}
+.wpk.r-m.rev .wpk-card{animation:wpCard 1s cubic-bezier(.2,1.3,.35,1) forwards,wpShake .5s 1s}
+@keyframes wpShake{25%{translate:-5px 2px}50%{translate:5px -2px}75%{translate:-3px 1px}}
+.wpk-pts{position:absolute;left:50%;top:42%}
+.wpk-pts i{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--rc);box-shadow:0 0 12px var(--rc);animation:wpPt var(--t) ease-out forwards}
+@keyframes wpPt{from{transform:translate(0,0) scale(1);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.wpk-btns{display:flex;gap:10px;margin-top:26px;opacity:0;transform:translateY(12px);transition:all .35s;pointer-events:none}
+.wpk.rdy .wpk-btns{opacity:1;transform:none;pointer-events:auto}
+.wpk-skip{position:absolute;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:3;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:8px 16px;font:800 .8rem/1 var(--f-display,inherit);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .gp-l{list-style:none;margin:12px 0 16px;padding:0;display:flex;flex-direction:column;gap:12px}.gp-l li{display:flex;align-items:center;gap:10px}.gp-l li>.av{flex:none}.gp-l li>.gp-tx{flex:1;min-width:0;line-height:1.3}.gp-l li small{display:block;margin-top:2px}
 .gp-art{flex:none;margin-left:auto;display:grid;place-items:center;padding:6px;border-radius:12px;border:1.5px solid var(--rc);background:color-mix(in srgb,var(--rc) 14%,transparent)}
 .tro-card{display:flex;align-items:center;gap:16px}.tro-card h3{margin:2px 0 4px}.tro-card p{margin:0 0 8px}.tro-none{justify-content:space-between;flex-wrap:wrap}.tro-none small{display:block}
@@ -2792,7 +2876,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v347 · Nov 8';
+const APP_BUILD='v348 · Nov 8';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4316,6 +4400,94 @@ function giftSheet(){const c=$('#cfm'),fr=giftFriends(),q=GF.q.trim().toLowerCas
     ${got.length||sent.length?`<div class="rw"><div class="rw-h"><b>Recent gifts</b></div><ul>${got.map(x=>`<li><span class="rw-c">↓</span><span>${esc(nm(x.from))} sent you ${ln(x)}</span></li>`).join('')}${sent.map(x=>`<li><span class="rw-c">↑</span><span>You sent ${esc(nm(x.to))} ${ln(x)}</span></li>`).join('')}</ul></div>`:''}</div>`;
   c.hidden=false;const qi=$('#gf-q');if(qi&&GF._focus){qi.focus();qi.setSelectionRange(qi.value.length,qi.value.length)}GF._focus=false}
 
+/* ---------- Welcome pack (v348, owner) ----------
+   Once you have a profile you get one free pack, once per account: ONE player card, odds Rare 40 / Epic 30 / Legendary 20 / Mythical 10.
+   It is rolled in three steps and shown that way: the TEAM (a slot reel of school logos), the RARITY (a wheel split by the odds),
+   then the PLAYER (a carousel of that team's players). Saved as picks/<uid>.inv.wp = when opened, plus the card in inv.cards. */
+const WP_ODDS={r:40,e:30,l:20,m:10};
+const wpDone=u=>!!(invOf(u).wp);
+const wpCan=()=>ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'&&!!myProfile()&&S.loaded&&S.loaded.picks&&!wpDone(ME.uid);
+let _wpAsked=false,_wpBusy=false;
+function wpTeams(){const by={};for(const p of players())if(!p.sample&&!/x$/.test(p.key)&&p.school){(by[p.school]=by[p.school]||[]).push(p)}return by}
+function wpRoll(){const by=wpTeams(),ts=Object.keys(by).filter(t=>by[t].length);if(!ts.length)return null;
+  const team=ts[fcRnd(ts.length)],r=rollRarity(WP_ODDS),pool=by[team],p=pool[fcRnd(pool.length)];return {team,r,key:p.key,teams:ts,pool}}
+/* the invite: shown once per app session after you have a profile (Later keeps it in the Shop) */
+function wpMaybe(){if(_wpAsked||!wpCan())return;const c=$('#cfm');if(!c||!c.hidden||document.querySelector('.pko,.wpk'))return;_wpAsked=true;
+  c.innerHTML=`<div class="gcard tok-sheet wp-ask" role="dialog" aria-modal="true" aria-labelledby="wp-t"><div class="wp-ask-art" aria-hidden="true"><span>1</span><small>player</small></div><h2 id="wp-t">Welcome to Varsity!</h2>
+    <p>Here’s a free <b>player pack</b> to start you off: one player card, Rare or better.</p>
+    <p class="wp-odds">${Object.entries(WP_ODDS).map(([r,n])=>`<span style="color:${RAR[r].c}">${RAR[r].n} ${n}%</span>`).join('')}</p>
+    <div class="gbtns"><button class="btn" data-act="wpOpen">Open it</button><button class="btn ghost" data-c="no">Later</button></div></div>`;c.hidden=false}
+function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One player card, Rare or better (Rare 40% · Epic 30% · Legendary 20% · Mythical 10%).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
+async function wpOpen(){if(_wpBusy||!wpCan())return;_wpBusy=true;try{closeConfirm()}catch(_){}
+  try{const R=wpRoll();if(!R){say('No players to pull yet. Try again soon.');return}
+    const v=invOf(ME.uid),cards=Object.assign({},v.cards),cid='pc:'+R.key,cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),dup=!!cur[R.r];
+    const patch={wp:NOW()};if(dup)patch.dup=(+v.dup||0)+RAR[R.r].dup;else{cur[R.r]=1;cards[cid]=cur;patch.cards=cards}
+    S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
+    try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:v});say('That did not save. Try again.');return}
+    wpShow(R,dup)}finally{_wpBusy=false}}
+const wpEase=p=>1-Math.pow(1-Math.max(0,Math.min(1,p)),4);
+function wpShow(R,dup){
+  const o=document.createElement('div');o.className='wpk r-'+R.r;o.style.setProperty('--rc',RAR[R.r].c);o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Welcome pack');
+  const p=pByKey(R.key),calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* team reel: random teams, the rolled one near the end */
+  const others=R.teams.filter(t=>t!==R.team),reel=[];for(let i=0;i<36;i++)reel.push(others[fcRnd(others.length)]||R.team);const TI=33;reel[TI]=R.team;
+  const tile=t=>`<div class="wpk-tt">${logoFor(t)?slogo(t,64):`<span class="wpk-ini">${esc(t.split(/\s+/).map(w=>w[0]).slice(0,2).join(''))}</span>`}<b>${esc(t)}</b></div>`;
+  /* rarity power meter (v347, replaces the wheel): tiers bottom to top Rare, Epic, Legendary, Mythical. The charge climbs one tier at a
+     time, lighting each one; above your rarity it teases the next tier (flicker) and drops back, unless you hit Mythical. */
+  const LAD=['r','e','l','m'],ti=LAD.indexOf(R.r);
+  /* player carousel: the team's players, repeated, the rolled one at index PI */
+  const pool=R.pool.filter(q=>q.key!==R.key),car=[];for(let i=0;i<22;i++)car.push(pool.length?pool[fcRnd(pool.length)]:p);const PI=19;car[PI]=p;
+  const pc=q=>`<div class="wpk-pc">${av(q.name,q.school,58)}<b>${esc(q.name)}</b><small>${q.pos==='DEF'?esc(q.sub||'DEF'):esc(q.pos)}</small></div>`;
+  const pct=CARD_PCT[R.r];
+  o.innerHTML=`<div class="wpk-bg" aria-hidden="true"><i class="wpk-rays"></i></div>
+    <div class="wpk-top"><h2>Your free player</h2><ol class="wpk-steps"><li data-s="1"><b>Team</b><small>…</small></li><li data-s="2"><b>Rarity</b><small>…</small></li><li data-s="3"><b>Player</b><small>…</small></li></ol></div>
+    <div class="wpk-st wpk-s1"><div class="wpk-win"><div class="wpk-reel">${reel.map(tile).join('')}</div><i class="wpk-mark"></i></div><p class="wpk-cap">Rolling your team…</p></div>
+    <div class="wpk-st wpk-s2"><div class="wpk-lad"><div class="wpk-meter"><i></i></div>${LAD.slice().reverse().map(r=>`<div class="wpk-tier" data-r="${r}" style="--tc:${RAR[r].c}"><i></i><b>${RAR[r].n}</b><small>${WP_ODDS[r]}%</small></div>`).join('')}</div><p class="wpk-cap">Rolling your rarity…</p><div class="wpk-stamp">${RAR[R.r].n}!</div></div>
+    <div class="wpk-st wpk-s3"><div class="wpk-track">${car.map(pc).join('')}</div><i class="wpk-pin" aria-hidden="true"></i><p class="wpk-cap">Rolling your player…</p></div>
+    <div class="wpk-st wpk-s4"><div class="wpk-card"><div class="wpk-ctop"><span>${RAR[R.r].n}</span><span>Player card</span></div>${av(p.name,p.school,110)}<h3>${esc(p.name)}</h3><p>${p.pos==='DEF'?esc(p.sub||'DEF'):esc(p.pos)} · ${slogo(p.school,20)} ${esc(p.school)}</p><em>${dup?`Duplicate · +${RAR[R.r].dup} tokens`:`+${pct}% on his props`}</em><i class="wpk-shine"></i></div><i class="wpk-pts"></i>
+      <div class="wpk-btns"><button class="btn" data-w="done">Nice!</button><button class="btn ghost" data-w="see">See his card</button></div></div>
+    <button class="wpk-skip" type="button" data-w="skip">Skip</button><i class="wpk-flash" aria-hidden="true"></i>`;
+  document.body.appendChild(o);document.documentElement.style.overflow='hidden';
+  const $o=q=>o.querySelector(q),st=[...o.querySelectorAll('.wpk-st')],steps=[...o.querySelectorAll('.wpk-steps li')];
+  const reelEl=$o('.wpk-reel'),TH=132,winH=3*TH,track=$o('.wpk-track'),PW=150,PG=14;
+  const tiers=LAD.map(r=>$o(`.wpk-tier[data-r="${r}"]`)),meter=$o('.wpk-meter i');
+  const T={t1:.7,l1:4.4,t2:5.0};
+  /* meter keyframes [time, level]: climb a tier in .42 s, rest .22 s on it; then tease the next one (unless Mythical) */
+  const KF=[[T.t2+.25,0]];{let t=T.t2+.25;for(let k=0;k<=ti;k++){t+=.42;KF.push([t,k+1]);t+=.22;KF.push([t,k+1])}
+    if(ti<3){t+=.38;KF.push([t,ti+1.62]);t+=.32;KF.push([t,ti+1.62]);t+=.3;KF.push([t,ti+1])}else{t+=.3;KF.push([t,4])}
+    T.l2=t;}
+  T.t3=T.l2+.7;T.l3=T.t3+2.4;T.rev=T.l3+.2;T.end=T.rev+.9;
+  const lvl=t=>{if(t<=KF[0][0])return 0;for(let i=1;i<KF.length;i++){const[a,la]=KF[i-1],[b,lb]=KF[i];if(t<=b){const k=(t-a)/(b-a);return la+(lb-la)*(k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2)}}return KF[KF.length-1][1]};
+  let t0=performance.now(),raf=0,last=-1,fired={};
+  const fire=(k,f)=>{if(!fired[k]){fired[k]=1;f()}};
+  const buzz=pat=>{try{navigator.vibrate&&navigator.vibrate(pat)}catch(_){}};
+  const sparks=()=>{if(calm)return;const n=[0,0,18,26,36,50][RAR_ORD.indexOf(R.r)]||20,box=$o('.wpk-pts');let h='';
+    for(let i=0;i<n;i++){const a=Math.PI*2*i/n+Math.random()*.3,d=120+Math.random()*170;h+=`<i style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d)}px;--t:${(.7+Math.random()*.6).toFixed(2)}s"></i>`}box.innerHTML=h};
+  const show=i=>st.forEach((e,k)=>e.classList.toggle('on',k===i));
+  const pop=i=>{const e=st[i],f=$o('.wpk-flash');e.classList.remove('punch');f.classList.remove('go');void e.offsetWidth;e.classList.add('punch');f.classList.add('go')};
+  const step=()=>{const t=(performance.now()-t0)/1000;if(t===last){raf=requestAnimationFrame(step);return}last=t;
+    if(t<T.t2){show(0);const k=wpEase((t-T.t1)/(T.l1-T.t1));const y=k*(TI*TH)-(winH/2-TH/2);reelEl.style.transform=`translateY(${-y}px)`;
+      reelEl.classList.toggle('blur',t>T.t1&&k<.85);$o('.wpk-win').style.setProperty('--wa',(t*720%360)+'deg');
+      if(t>=T.l1)fire('l1',()=>{reelEl.children[TI].classList.add('hit');steps[0].classList.add('done');steps[0].querySelector('small').textContent=R.team;pop(0);buzz(25)})}
+    else if(t<T.t3){show(1);fire('s2',()=>steps[1].classList.add('now'));const L=lvl(t);meter.style.height=(L/4*100)+'%';
+      tiers.forEach((e,k)=>{const on=L>=k+.98;if(on&&!e.classList.contains('lit')){e.classList.add('lit');buzz(12)}e.classList.toggle('tease',!on&&L>k+.15&&t<T.l2);e.classList.toggle('top',on&&L<k+1.9)});
+      if(t>=T.l2)fire('l2',()=>{o.classList.add('tint');$o('.wpk-stamp').classList.add('go');tiers[ti].classList.add('win');pop(1);steps[1].classList.remove('now');steps[1].classList.add('done');steps[1].querySelector('small').textContent=RAR[R.r].n;buzz([30,30,60])})}
+    else if(t<T.rev){show(2);fire('s3',()=>steps[2].classList.add('now'));const k=wpEase((t-T.t3)/(T.l3-T.t3)),w=PW+PG;track.style.transform=`translateX(${-(k*(PI*w))+(innerWidth/2-PW/2)}px)`;
+      track.classList.toggle('blur',k<.8&&t>T.t3);
+      if(t>=T.l3)fire('l3',()=>{track.children[PI].classList.add('hit');pop(2);steps[2].classList.remove('now');steps[2].classList.add('done');steps[2].querySelector('small').textContent=p.name;buzz(25)})}
+    else{show(3);fire('rev',()=>{o.classList.add('rev',RAR_ORD.indexOf(R.r)>=4?'rays':'x');pop(3);sparks();buzz(R.r==='m'?[40,40,160]:R.r==='l'?[30,30,100]:[30,20,60]);$o('.wpk-skip').hidden=true})
+      if(t>=T.end)fire('end',()=>o.classList.add('rdy'))}
+    raf=requestAnimationFrame(step)};
+  if(calm)t0=performance.now()-T.end*1000;
+  raf=requestAnimationFrame(step);
+  const close=()=>{cancelAnimationFrame(raf);o.remove();document.documentElement.style.overflow='';render()};
+  o.addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b)return;const w=b.dataset.w;
+    if(w==='skip'){t0=performance.now()-T.rev*1000;['l1','s2','l2','s3','l3'].forEach(k=>{});
+      reelEl.children[TI].classList.add('hit');steps.forEach((s,i)=>{s.classList.remove('now');s.classList.add('done');s.querySelector('small').textContent=[R.team,RAR[R.r].n,p.name][i]});o.classList.add('tint');fired.l1=fired.s2=fired.l2=fired.s3=fired.l3=1}
+    else if(w==='done')close();
+    else if(w==='see'){close();openPlayer(R.key)}});
+}
+
 /* Gift pop-up: gifts you haven't seen yet open on top of everything when you open the app. Seen time saved in picks/<uid>.gsn. */
 var _gPop=false;
 /* Starter pick (v343, other contributor) was removed in v346 at the owner's request: no free Legendary card on joining.
@@ -4403,6 +4575,7 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   else if(a==='gfItem'){GF.i=GF.i===v?'':v;const g=document.querySelector('.gf-items'),y=g?g.scrollTop:0;giftSheet();const g2=document.querySelector('.gf-items');if(g2)g2.scrollTop=y}
   else if(a==='gpOk'){const at=+t.dataset.at||NOW();closeConfirm();S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{gsn:at});upsert('picks/'+ME.uid,{gsn:at}).catch(()=>{})}
   else if(a==='gfSend')giftSend();
+  else if(a==='wpOpen')wpOpen();
   else if(a==='remOpen')remSheet(t.dataset.n,t.dataset.s);
   else if(a==='remSend')remSend();
   else if(a==='troOpen'){const g=S.groups[t.dataset.gid];if(!g)return;Object.assign(TR,{gid:g.id,sh:'cup',mt:'gold',bs:'walnut',nm:''},g.trophy||{});troSheet()}
@@ -4426,7 +4599,7 @@ function viewShop(){
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
     const extras=`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
-    body=prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
+    body=wpShopCard()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?'cards':'items'}</small></div><h3>${esc(P.n)}</h3>
       <p class="muted">${P.cards?'Player and team cards only':P.cos?'Cosmetics only':'Cosmetics and cards'} · ${P.c} ${P.cards?'cards':'items'}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
@@ -8207,7 +8380,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{giftPopup()}catch(_){}try{wpMaybe()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
