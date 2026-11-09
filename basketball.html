@@ -2989,7 +2989,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v375 · Nov 9';
+const APP_BUILD='v376 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4216,7 +4216,7 @@ function invLeft(u,id){const v=invOf(u),own=invHas(u,id);
 const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)+giftBonus(u)};
 /* free packs: the starter pack, plus one Rookie pack for every 7 days you play the daily challenge */
 /* packs given to an account by the owner (v346): inv.fr.gp={id:{t:'god'}} lists them, inv.fr.gpo={id:1} marks the ones already opened */
-const giftPacks=u=>{const f=invOf(u).fr||{},o=f.gpo||{};return Object.keys(f.gp||{}).filter(id=>!o[id]&&PACKS[(f.gp[id]||{}).t]).map(id=>({id,type:f.gp[id].t}))};
+const giftPacks=u=>{const f=invOf(u).fr||{},o=f.gpo||{};return Object.keys(f.gp||{}).filter(id=>!o[id]&&PACKS[(f.gp[id]||{}).t]).map(id=>({id,type:f.gp[id].t,m:f.gp[id].m||''}))};
 function freePacks(u){const v=invOf(u),fr=v.fr||{},d=+fgRec(u).days||0;return (fr.st?0:1)+Math.max(0,Math.floor(d/7)-(+fr.d7||0))}
 function rollRarity(odds,floor){const ord=RAR_ORD,tot=ord.reduce((a,k)=>a+(+odds[k]||0),0)||100;let x=fcRnd(10000)/10000*tot,acc=0,r=ord.find(k=>odds[k]>0)||'c';for(const k of ord){acc+=odds[k]||0;if(x<acc){r=k;break}}
   if(floor&&ord.indexOf(r)<ord.indexOf(floor))r=floor;return r}
@@ -4817,7 +4817,7 @@ function viewShop(){
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
     const adDone=(v.fr||{}).ad===TODAY(),gm=FG_SPORT==='bb'?'Hoops':'Field Goal',ord=['','1st','2nd','3rd'];
-    const gifts=giftPacks(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>Gift · ${esc(PACKS[x.type].n)}</b><small class="muted">A pack from Varsity.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="gift" data-d="${esc(x.id)}">Open gift</button></section>`).join('');
+    const gifts=giftPacks(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>Gift · ${esc(PACKS[x.type].n)}</b><small class="muted">${esc(x.m||'A pack from Varsity.')}</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="gift" data-d="${esc(x.id)}">Open gift</button></section>`).join('');
     const prizes=gifts+fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('')
       +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, ${fcLabel(x.w)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('')
       +bkPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Playoff Bracket Challenge.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="bk" data-d="bk">Open prize</button></section>`).join('')
