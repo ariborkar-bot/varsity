@@ -246,3 +246,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 - Every pack's `g` (guaranteed last-card rarity) is now '' (Pro, Player + Team, Champion, Hall of Fame had one): every card is rolled on the listed odds. Shop text reads "all random".
 - `pick` and `godpick` have `off:1` and are no longer in the Shop; gifted ones and half-finished picks can still be opened.
 - New `team` pack "Pick Your Team pack": 5 cards, Pro pack odds, 1,100 tokens. Opening it shows `ptSheet()` (search + list of teams with logos); every card is from the chosen team (`rollTeamCard()`: its team card 20%, otherwise one of its players). Works from gifts too.
+
+## v381 (Nov 9): Pick Your Team pack is 1 card
+- `team` pack: c:1 (owner). Still 1,100 tokens, Pro pack odds, you pick the team; the card is one of its players or its team card. Shop text handles a 1-card pack ("1 card, random rarity").

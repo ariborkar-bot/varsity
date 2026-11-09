@@ -3008,7 +3008,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v380 · Nov 9';
+const APP_BUILD='v381 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4114,8 +4114,8 @@ const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','th
 const PACKS={
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
   player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:''},
-  /* v380 (owner): Pick Your Team pack: Pro pack odds, but you pick the team; all 5 cards are that team's players or its team card */
-  team:{n:'Pick Your Team pack',c:5,tok:1100,usd:'$8.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'',cards:1,team:1},
+  /* v380 (owner): Pick Your Team pack: Pro pack odds, but you pick the team; the card is one of that team's players or its team card. v381: 1 card */
+  team:{n:'Pick Your Team pack',c:1,tok:1100,usd:'$8.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'',cards:1,team:1},
   /* v342 (owner): Player + Team pack: 5 player/team cards only (no cosmetics, perks or boosts), a bit better odds than the Pro pack (v380: no guaranteed last card, just the odds) */
   cards:{n:'Player + Team pack',c:5,tok:950,usd:'$7.99',odds:{c:20,u:32,r:26,e:12,l:6,m:4},g:'',cards:1},
   champs:{n:'Champion pack',c:10,tok:1250,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:''},
@@ -4316,7 +4316,7 @@ const PT={t:'',k:'team',h:'tok',d:null};
 function ptSheet(k,h,d){Object.assign(PT,{k:k||'team',h:h||'tok',d:d==null?null:d});const c=$('#cfm'),P=PACKS[PT.k];if(!c||!P)return;
   const ts=Object.keys(wpTeams()).sort((a,b)=>a.localeCompare(b));
   c.innerHTML=`<div class="gcard tok-sheet pt-sheet" role="dialog" aria-modal="true" aria-labelledby="pt-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button>
-    <h2 id="pt-t">Pick your team</h2><p class="muted">All ${P.c} cards come from this team: its players and its team card. Same odds as the Pro pack.</p>
+    <h2 id="pt-t">Pick your team</h2><p class="muted">${P.c===1?'Your card comes':'All '+P.c+' cards come'} from this team: one of its players or its team card. Same odds as the Pro pack.</p>
     <input id="pt-q" class="pt-q" type="search" placeholder="Search schools" autocomplete="off" aria-label="Search schools">
     <div class="pt-list" role="listbox" aria-label="Teams">${ts.map(t=>`<button type="button" class="pt-t" data-act="ptPick" data-v="${esc(t)}" aria-pressed="${PT.t===t}">${slogo(t,26)}<span>${esc(t)}</span></button>`).join('')}</div>
     <div class="gbtns"><button class="btn" data-act="ptGo" ${PT.t?'':'disabled'}>${ptLabel()}</button></div></div>`;
@@ -4515,7 +4515,7 @@ function packShow(P,got){
     const x=ITEM[g.id];
     return `${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}`};
   o.innerHTML=`<div class="pko-bg" aria-hidden="true"><i class="pko-rays"></i></div>
-    <div class="pko-pack lk-${key}" role="button" tabindex="0" aria-label="Open the ${esc(P.n)}"><div class="pko-pk"><i class="pko-tear"></i><b>${esc(P.n)}</b><small>${P.c} ${P.cards?'cards':'items'}</small><span>V</span></div><p class="pko-hint">Tap to rip it open</p></div>
+    <div class="pko-pack lk-${key}" role="button" tabindex="0" aria-label="Open the ${esc(P.n)}"><div class="pko-pk"><i class="pko-tear"></i><b>${esc(P.n)}</b><small>${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}</small><span>V</span></div><p class="pko-hint">Tap to rip it open</p></div>
     <div class="pko-in" hidden><h2>${esc(P.n)}</h2><p class="pko-hint">Tap a card to flip it</p><div class="pko-cards">${got.map((g,i)=>`<div class="pko-c r-${g.r}" style="--rc:${RAR[g.r].c};--i:${i}" tabindex="0" role="button" aria-label="Flip card ${i+1}">
       <div class="pko-in3"><div class="pko-f pko-back"><span>V</span><i class="pko-aura"></i></div><div class="pko-f pko-front">${face(g)}<i class="pko-shine"></i></div></div><i class="pko-burst"></i><i class="pko-pts"></i></div>`).join('')}</div>
     <div class="pko-btns"><button class="btn pko-all" type="button">Flip all</button><button class="btn ghost pko-ok" type="button">Done</button></div></div>`;
@@ -4888,8 +4888,8 @@ function viewShop(){
     const extras=`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
     body=wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
-      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?'cards':'items'}</small></div><h3>${esc(P.n)}</h3>
-      <p class="muted">${P.team?'You pick the team · its player and team cards only':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?'cards':'items'}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:', all random'}</p>
+      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?(P.c===1?'card':'cards'):'items'}</small></div><h3>${esc(P.n)}</h3>
+      <p class="muted">${P.team?'You pick the team · its player and team cards only':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button></article>`).join('')}</div>
       <p class="muted lk-note">Items have no cash value and can’t be traded.</p>`+extras;
