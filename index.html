@@ -2305,6 +2305,72 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .av.avf.f_check{box-shadow:inset 0 0 0 2px #1B1B1F,inset 0 0 0 4.5px #fff!important}
 .lk-god .lk-art,.pko-pack.lk-god .pko-pk{background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.35),transparent 45%),conic-gradient(from 200deg,#FF4F6D,#FFC23D,#3DDC84,#26F0FF,#7A4DFF,#FF4FE0,#FF4F6D);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 .lk-god{border-color:#FFC23D!important;box-shadow:0 0 0 1px rgba(255,194,61,.5),0 10px 30px -10px rgba(255,79,224,.5)!important}
+/* Pick 1 of 5 pack + walkout (v366) */
+.lk-pick .lk-art{background:radial-gradient(circle at 50% 22%,rgba(255,255,255,.45),transparent 42%),linear-gradient(135deg,#26F0FF,#7A4DFF 55%,#FF4FE0);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.55)}
+.lk-pick{border-color:#7CF3FF!important;box-shadow:0 0 0 1px rgba(124,243,255,.45),0 10px 30px -10px rgba(124,243,255,.5)!important}
+.wko{position:fixed;inset:0;z-index:440;background:#02060F;color:#fff;overflow:hidden;user-select:none;-webkit-tap-highlight-color:transparent;cursor:pointer}
+.wko-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(124,243,255,.4),transparent 58%),radial-gradient(circle at 50% 38%,#0E2150,#02060F 72%)}
+.wko-beams{position:absolute;left:-40%;right:-40%;top:-10%;bottom:-30%;background:conic-gradient(from 0deg at 50% 100%,transparent 0 6%,rgba(124,243,255,.26) 8% 10%,transparent 12% 24%,rgba(255,194,61,.24) 26% 28%,transparent 30% 46%,rgba(255,79,224,.24) 48% 50%,transparent 52% 68%,rgba(124,243,255,.26) 70% 72%,transparent 74% 86%,rgba(255,194,61,.2) 88% 90%,transparent 92%);transform-origin:50% 100%;animation:wkoSweep 4.5s ease-in-out infinite alternate}
+@keyframes wkoSweep{from{transform:rotate(-16deg)}to{transform:rotate(16deg)}}
+.wko-crowd{position:absolute;left:0;right:0;bottom:0;height:19%;background:radial-gradient(circle at 50% 100%,#000 58%,transparent 60%) 0 100%/24px 34px repeat-x,radial-gradient(circle at 50% 100%,#04070f 58%,transparent 60%) 12px 100%/24px 52px repeat-x,linear-gradient(transparent,#000 70%)}
+.wko-fl{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.wko-fl.on{animation:wkoFl .55s ease-out}
+@keyframes wkoFl{0%{opacity:.85}100%{opacity:0}}
+.wko-st{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:0 16px 60px}
+.wko[data-s="0"] .wko-s0,.wko[data-s="1"] .wko-s1,.wko[data-s="2"] .wko-s2,.wko[data-s="3"] .wko-s3,.wko[data-s="4"] .wko-s4{display:flex}
+.wko-k{font-size:.8rem;letter-spacing:.38em;text-transform:uppercase;color:#7CF3FF;font-weight:800;text-shadow:0 0 12px rgba(124,243,255,.7);animation:wkoK .5s .05s both}
+@keyframes wkoK{from{opacity:0;transform:translateY(-14px)}}
+.wko-ring{width:120px;height:120px;border-radius:50%;border:3px solid #7CF3FF;box-shadow:0 0 30px #7CF3FF,inset 0 0 30px rgba(124,243,255,.5);animation:wkoRing .9s ease-out both}
+@keyframes wkoRing{from{transform:scale(.1);opacity:0}60%{opacity:1}to{transform:scale(1.8);opacity:.2}}
+.wko-pos{font-size:min(36vw,190px);font-weight:900;line-height:1;letter-spacing:.02em;background:linear-gradient(180deg,#fff,#7CF3FF 55%,#3AA7FF);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 24px rgba(124,243,255,.75));animation:wkoSlam .6s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes wkoSlam{0%{opacity:0;transform:scale(3.4)}55%{opacity:1}100%{transform:scale(1)}}
+.wko-logo{width:min(48vw,200px);height:min(48vw,200px);border-radius:50%;background:radial-gradient(circle,#fff,#dbe8ff);display:grid;place-items:center;box-shadow:0 0 0 4px #7CF3FF,0 0 50px rgba(124,243,255,.7);animation:wkoZoom .8s cubic-bezier(.2,1.4,.4,1) both}
+.wko-logo img{width:70%;height:70%;object-fit:contain}
+.wko-ini{color:#0B1626;font:900 3rem/1 var(--f-display,inherit)}
+@keyframes wkoZoom{from{opacity:0;transform:scale(.1) rotate(-200deg)}}
+.wko-sch{font-size:clamp(1.3rem,6vw,2rem);font-weight:900;letter-spacing:.04em;text-transform:uppercase;animation:wkoUp .6s .35s both}
+@keyframes wkoUp{from{opacity:0;transform:translateY(24px)}}
+.wko-num{font-size:min(30vw,150px);font-weight:900;line-height:1;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff7c8,#FFC23D 55%,#ff8a1f);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 22px rgba(255,194,61,.7));animation:wkoSlam .5s both}
+.wko-lb{font-size:clamp(1.1rem,5vw,1.7rem);font-weight:800;letter-spacing:.14em;text-transform:uppercase;animation:wkoUp .5s .25s both}
+.wko-sub{color:#9FB0CC;animation:wkoUp .5s .5s both}
+.wko-rays{position:absolute;left:50%;top:50%;width:150vmax;height:150vmax;margin:-75vmax;background:repeating-conic-gradient(from 0deg,rgba(124,243,255,.2) 0 5deg,transparent 5deg 15deg);animation:wkoSpin 14s linear infinite,wkoRayIn .8s both;-webkit-mask:radial-gradient(circle,#000 8%,transparent 55%);mask:radial-gradient(circle,#000 8%,transparent 55%)}
+@keyframes wkoSpin{to{transform:rotate(360deg)}}@keyframes wkoRayIn{from{opacity:0}}
+.wko-ttl{position:relative;font-size:clamp(1.9rem,9vw,3rem);font-weight:900;letter-spacing:.12em;background:linear-gradient(90deg,#7CF3FF,#B05CFF,#FF4F9A,#FFC93A,#3DDC84,#7CF3FF);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:wkoSlam .6s .1s both,wkoHolo 2.4s linear infinite}
+@keyframes wkoHolo{to{background-position:300% 0}}
+.wko-card{position:relative;width:min(66vw,250px);padding:14px 12px 16px;border-radius:18px;border:3px solid transparent;background:linear-gradient(#0a1124,#10204a) padding-box,linear-gradient(120deg,#7CF3FF,#B05CFF,#FF4F9A,#FFC93A,#3DDC84,#7CF3FF) border-box;background-size:100% 100%,300% 100%;box-shadow:0 0 40px rgba(124,243,255,.6),0 0 90px rgba(176,92,255,.35);display:flex;flex-direction:column;align-items:center;gap:6px;overflow:hidden;animation:wkoCard 1s .25s cubic-bezier(.2,1.2,.3,1) both,txHolo 3.2s linear infinite}
+@keyframes wkoCard{0%{opacity:0;transform:translateY(80vh) rotateY(540deg) scale(.5)}100%{opacity:1;transform:none}}
+.wko-ct{align-self:stretch;display:flex;justify-content:space-between;font-size:.72rem;font-weight:800;letter-spacing:.1em;color:#7CF3FF}
+.wko-card h3{margin:2px 0 0;font-size:1.3rem;line-height:1.1}
+.wko-card p{margin:0;display:flex;align-items:center;gap:6px;color:#C6D4EE;font-size:.9rem}
+.wko-card em{font-style:normal;font-weight:800;color:#FFC23D;font-size:.95rem}
+.wko-shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.4) 50%,transparent 65%);transform:translateX(-120%);animation:pkoShine 1.1s 1.3s ease-out forwards;pointer-events:none}
+.wko-pts{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:3}
+.wko-pts i,.pkp-pts i{position:absolute;left:0;top:0;width:var(--z);height:var(--z);margin:calc(var(--z)/-2);border-radius:50%;background:#7CF3FF;box-shadow:0 0 8px #7CF3FF,0 0 2px #fff;animation:pkoPt var(--t) cubic-bezier(.15,.7,.4,1) forwards}
+.wko-pts i:nth-child(3n),.pkp-pts i:nth-child(3n){border-radius:1px;transform:rotate(45deg);background:#fff}
+.wko-pts i:nth-child(4n),.pkp-pts i:nth-child(4n){background:#FFC23D;box-shadow:0 0 8px #FFC23D}
+.wko-go{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translateX(-50%);animation:wkoUp .5s 1.8s both;white-space:nowrap}
+.wko-skip{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:14px;z-index:5;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:8px 16px;font:700 .85rem/1 var(--f-body)}
+.wko[data-s="4"] .wko-skip{display:none}
+.pkp{position:fixed;inset:0;z-index:435;overflow-y:auto;background:radial-gradient(circle at 50% -10%,#16326f,#02060F 72%);color:#fff;padding:calc(env(safe-area-inset-top) + 18px) 14px calc(env(safe-area-inset-bottom) + 100px)}
+.pkp-in{max-width:520px;margin:0 auto}
+.pkp h2{margin:0;text-align:center;font-size:1.6rem}
+.pkp-s{margin:6px 0 0;text-align:center;color:#9FB0CC}
+.pkp-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.pkp-c{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px 12px;border-radius:16px;border:2px solid color-mix(in srgb,var(--rc) 55%,#1b2b52);background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 18%,#0B1730),#0B1730);color:inherit;font:inherit;text-align:center;cursor:pointer;animation:pkpDeal .55s calc(var(--i)*.1s) both;transition:transform .2s,opacity .35s,box-shadow .2s}
+@keyframes pkpDeal{from{opacity:0;transform:translateY(40px) rotate(-6deg) scale(.85)}}
+.pkp-c b{font-size:1.02rem;line-height:1.15}
+.pkp-c small{color:#9FB0CC}
+.pkp-r{font-size:.8rem;font-weight:800}
+.pkp-c em{font-style:normal;font-size:.82rem;color:#FFC23D;font-weight:700}
+.pkp-c.x{grid-column:1/-1;border:3px solid transparent;background:linear-gradient(#0a1124,#10204a) padding-box,linear-gradient(120deg,#7CF3FF,#B05CFF,#FF4F9A,#FFC93A,#3DDC84,#7CF3FF) border-box;background-size:100% 100%,300% 100%;box-shadow:0 0 30px rgba(124,243,255,.45);animation:pkpDeal .55s both,txHolo 3.2s linear infinite}
+.pkp-tag{font-style:normal;font-size:.7rem;font-weight:900;letter-spacing:.14em;color:#02060F;background:#7CF3FF;border-radius:999px;padding:3px 10px}
+.pkp-c.sel{transform:translateY(-3px) scale(1.02);box-shadow:0 0 0 3px #fff,0 0 26px var(--rc)}
+.pkp-c.won{box-shadow:0 0 0 3px #fff,0 0 40px var(--rc);transform:scale(1.03)}
+.pkp.done .pkp-c:not(.won){opacity:.18;transform:scale(.94);pointer-events:none}
+.pkp-pts{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:3}
+.pkp-bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;justify-content:center;padding:26px 14px calc(env(safe-area-inset-bottom) + 14px);background:linear-gradient(transparent,#02060F 45%)}
+.pkp-bar .btn{min-width:130px}
+@media (prefers-reduced-motion:reduce){.wko *,.pkp *{animation:none!important}.wko-card{opacity:1}}
 .pr-big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 6px}
 .pr-bt{display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s}
 .pr-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}@media (max-width:420px){.pr-ic svg{width:19px;height:19px}}
@@ -2888,7 +2954,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v365 · Nov 9';
+const APP_BUILD='v366 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4008,7 +4074,9 @@ const PACKS={
   cards:{n:'Player + Team pack',c:5,tok:950,usd:'$7.99',odds:{c:20,u:32,r:26,e:12,l:6,m:4},g:'r',cards:1},
   champs:{n:'Champion pack',c:10,tok:1250,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'e'},
   /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up; the last item is Legendary or better */
-  god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:33,e:35,l:17,m:8},g:'l',cos:1}};
+  god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:33,e:35,l:17,m:8},g:'l',cos:1},
+  /* v366 (owner): Pick 1 of 5: 5 players, one is a Top 10 Immortal card, you keep 1 (odds are for the other 4, Rare or better) */
+  pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
 const cosOwnCount=u=>{const it=invOf(u).it||{},d=gDelta(u);let n=0;for(const id of new Set([...Object.keys(it),...Object.keys(d)])){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&(+it[id]||0)+(+d[id]||0)>0)n++}return n};
@@ -4267,6 +4335,108 @@ async function packOpen(type,how,day){
   try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){say('That did not save. Try again.');return}
   packShow(P,got);
 }
+/* ---------- Pick 1 of 5 pack (v366, owner) ----------
+   Buy it in the Shop: you get 5 players and keep 1. One is a Top 10 Immortal card (+400%; it prefers one you don't own yet), the other
+   four are Rare or better player cards. The offer is saved the moment you pay, in inv.pkp = {o:['<card id>|<rarity>',...], g:<index of the
+   Top 10 card>, t, d}, so closing the app keeps it waiting in the Shop (d=1 once you have picked; then o is empty). A FIFA-style walkout
+   (position, team, best stat, then the player) plays for the Top 10 player, then the pick screen. Your pick is final; the other four go back. */
+const posOf=q=>q.pos==='DEF'?(q.sub||'DEF'):q.pos;
+const pkpOf=u=>{const p=invOf(u).pkp;return p&&!p.d&&Array.isArray(p.o)&&p.o.length?p:null};
+function pkpRoll(u){
+  const D=achData(),own=cardsOf(u),ids=D.pool.t10.filter(id=>pByKey(achParse(id).key));if(!ids.length)return null;
+  const fresh=ids.filter(id=>!(own[id]||{}).x),src=fresh.length?fresh:ids,god=src[fcRnd(src.length)],gk=achParse(god).key;
+  const pl=cardPools().pl.filter(id=>id.slice(3)!==gk),pick=[];
+  while(pick.length<4&&pl.length)pick.push(pl.splice(fcRnd(pl.length),1)[0]);
+  if(pick.length<4)return null;
+  const o=pick.map(id=>id+'|'+rollRarity(PACKS.pick.odds)),g=fcRnd(5);o.splice(g,0,god+'|x');return {o,g}}
+/* his best stat for the walkout: the stat that earned him the most fantasy points this season (a season total); before any real stats
+   (basketball preseason) it shows his rank in the Top 10 instead */
+function pkStat(key,rank){const p=pByKey(key),a=p?agg(p,'season'):null;
+  if(a&&a.n>0){const k=Object.keys(PTS).filter(z=>PTS[z]>0&&(a.s[z]||0)>0).sort((x,y)=>a.s[y]*PTS[y]-a.s[x]*PTS[x])[0];
+    if(k)return {n:Math.round(a.s[k]),l:LABEL[k]||k,sub:`${a.v} fantasy points this season`}}
+  return {n:0,big:'#'+rank,l:'Top 10 right now',sub:'Ranked by fantasy points'}}
+let _pkBusy=false;
+async function pkpBuy(){
+  const P=PACKS.pick;
+  if(_pkBusy)return;
+  if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
+  if(ME.mode==='readonly'||ME.mode==='offline'){say('Can’t open packs right now.');return}
+  if(pkpOf(ME.uid)){pkpShow();return}
+  if(bank(ME.uid)<P.tok){say(`You need ${P.tok} tokens for the ${P.n}.`);return}
+  _pkBusy=true;
+  try{const R=pkpRoll(ME.uid);if(!R){say('The Top 10 is not set yet. Try again soon.');return}
+    const v=invOf(ME.uid),patch={n:(+v.n||0)+1,sp:(+v.sp||0)+P.tok,pkp:{o:R.o,g:R.g,t:NOW(),d:0}};
+    S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
+    try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:v});say('That did not save. Try again.');return}
+    pkWalkout(R,pkpShow)}finally{_pkBusy=false}}
+async function pkpTake(i){
+  if(_pkBusy)return null;_pkBusy=true;
+  try{const v=invOf(ME.uid),pk=v.pkp;if(!pk||pk.d||!pk.o||!pk.o[i]){say('That pack was already used.');return null}
+    const [cid,r]=pk.o[i].split('|'),cards=Object.assign({},v.cards),cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),dup=!!cur[r];
+    const patch={pkp:{o:[],g:-1,t:pk.t,d:1,c:pk.o[i]}};
+    if(dup)patch.dup=(+v.dup||0)+RAR[r].dup;else{cur[r]=1;cards[cid]=cur;patch.cards=cards}
+    S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
+    try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:v});say('That did not save. Try again.');return null}
+    return {dup,tok:RAR[r].dup}}finally{_pkBusy=false}}
+function pkpShopCard(k,P,bal){const pend=!!pkpOf(ME.uid);
+  return `<article class="card lk-pack lk-${k}"><div class="lk-art"><span>1/${P.c}</span><small>pick one</small></div><h3>${esc(P.n)}</h3>
+    <p class="muted">${P.c} players, you keep 1 · one is a Top 10 Immortal card (+${ACH.t10.pct}% on his props), the other 4 are ${RAR.r.n} or better player cards</p>
+    <details class="lk-odds"><summary>Odds</summary><ul><li><span style="color:${RAR.x.c}">${RAR.x.n} Top 10 card (always 1 of the 5)</span><b>100%</b></li>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n} (each of the other 4)</span><b>${p}%</b></li>`).join('')}</ul><small class="muted">The Top 10 card is one you don’t own yet when there is one. Your pick is final; the other four go back. A duplicate turns into tokens.</small></details>
+    <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${!pend&&bal<P.tok?'disabled':''}>${pend?'Pick your player':P.tok.toLocaleString()+' tokens'}</button></article>`}
+function pkpBanner(){return pkpOf(ME.uid)?`<section class="card lk-free lk-prize"><div><b>Pick 1 of 5 · your pack is open</b><small class="muted">Choose the player you want to keep.</small></div><button class="btn" data-act="pkOpen" data-v="pick" data-h="tok">Pick now</button></section>`:''}
+/* the walkout: dark tunnel, then position, team, best stat and the player. Tap to move on, Skip to jump to the player. */
+function pkWalkout(R,done){
+  const id=R.o[R.g].split('|')[0],ai=achInfo(id),p=pByKey(ai.key);if(!p){done();return}
+  const pos=posOf(p),st=pkStat(ai.key,ai.rank),calm=matchMedia('(prefers-reduced-motion: reduce)').matches,ini=String(p.school).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const o=document.createElement('div');o.className='wko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Walkout');o.dataset.s='0';
+  o.innerHTML=`<div class="wko-bg" aria-hidden="true"></div><i class="wko-beams" aria-hidden="true"></i><i class="wko-crowd" aria-hidden="true"></i><i class="wko-fl" aria-hidden="true"></i>
+    <div class="wko-st wko-s0"><i class="wko-ring"></i><b class="wko-k">Immortal pull</b></div>
+    <div class="wko-st wko-s1"><b class="wko-k">Position</b><div class="wko-pos">${esc(pos)}</div></div>
+    <div class="wko-st wko-s2"><b class="wko-k">Team</b><div class="wko-logo">${logoFor(p.school)?slogo(p.school,150):`<span class="wko-ini">${esc(ini)}</span>`}</div><div class="wko-sch">${esc(p.school)}</div></div>
+    <div class="wko-st wko-s3"><b class="wko-k">${st.big?'Rank':'Season best stat'}</b><div class="wko-num">${st.big?esc(st.big):'0'}</div><div class="wko-lb">${esc(st.l)}</div><small class="wko-sub">${esc(st.sub)}</small></div>
+    <div class="wko-st wko-s4"><i class="wko-rays"></i><div class="wko-ttl">IMMORTAL!</div>
+      <div class="wko-card"><div class="wko-ct"><span>TOP 10 · #${ai.rank}</span><span>+${ai.pct}%</span></div>${av(p.name,p.school,124)}<h3>${esc(p.name)}</h3><p>${esc(pos)} · ${slogo(p.school,18)} ${esc(p.school)}</p><em>${esc(st.big?st.l:st.n.toLocaleString()+' '+st.l)}</em><i class="wko-shine"></i></div><i class="wko-pts"></i>
+      <button class="btn wko-go" type="button">Pick your player</button></div>
+    <button class="wko-skip" type="button">Skip</button>`;
+  document.body.appendChild(o);document.documentElement.style.overflow='hidden';
+  const T=[900,1500,1700,2400];let s=0,tm,raf,fin=false;
+  const fl=o.querySelector('.wko-fl'),vib=x=>{try{navigator.vibrate&&navigator.vibrate(x)}catch(_){}};
+  const sparks=()=>{if(calm)return;const box=o.querySelector('.wko-pts');let h='';for(let i=0;i<64;i++){const a=Math.PI*2*i/64+Math.random()*.3,d=110+Math.random()*210,z=3+Math.random()*6;
+    h+=`<i style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d)}px;--z:${z.toFixed(1)}px;--t:${(.8+Math.random()*.8).toFixed(2)}s"></i>`}box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},2000)};
+  const count=()=>{const el=o.querySelector('.wko-num');if(st.big||calm){if(!st.big)el.textContent=st.n.toLocaleString();return}
+    const t0=performance.now(),D=1300,step=t=>{const x=Math.min(1,(t-t0)/D);el.textContent=Math.round(st.n*(1-Math.pow(1-x,3))).toLocaleString();if(x<1)raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)};
+  const go=n=>{if(fin)return;clearTimeout(tm);cancelAnimationFrame(raf);s=n;o.dataset.s=n;
+    if(n>0&&!calm){fl.classList.remove('on');void fl.offsetWidth;fl.classList.add('on')}
+    vib(n===4?[40,40,120,40,220]:n>0?[25]:[]);
+    if(n===3)count();
+    if(n===4){fin=true;sparks();return}
+    tm=setTimeout(()=>go(n+1),T[n])};
+  const close=()=>{clearTimeout(tm);cancelAnimationFrame(raf);o.remove();document.documentElement.style.overflow='';done()};
+  o.addEventListener('click',e=>{if(e.target.closest('.wko-go')){close();return}if(e.target.closest('.wko-skip')){go(4);return}if(!fin)go(s+1)});
+  if(calm){go(4)}else go(0)}
+function pkpShow(){
+  if(document.querySelector('.pkp'))return;
+  const pk=pkpOf(ME.uid);if(!pk)return;
+  const own=cardsOf(ME.uid),M=pk.o.map((z,i)=>{const [id,r]=z.split('|');return {i,id,r,c:cardInfo(id),R:RAR[r],dup:!!(own[id]||{})[r]}});
+  const tile=m=>{const x=m.r==='x',c=m.c,q=c.key?pByKey(c.key):null,sub=x&&q?`${posOf(q)} · ${q.school}`:c.sub;
+    return `<button type="button" class="pkp-c${x?' x':''}" style="--rc:${m.R.c};--i:${m.i}" data-i="${m.i}" aria-pressed="false">${x?'<i class="pkp-tag">TOP 10 · IMMORTAL</i>':''}${cardArt(m.id,m.r,x?100:84)}
+      <b>${esc(c.name)}</b><small>${esc(sub)}</small><span class="pkp-r" style="color:${m.R.c}">${x?esc(c.line):m.R.n+' player card'}</span>
+      <em>${m.dup?`You own this · +${m.R.dup} tokens`:`+${x?c.pct:CARD_PCT[m.r]}% on his props`}</em><i class="pkp-pts"></i></button>`};
+  const o=document.createElement('div');o.className='pkp';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Pick 1 of 5');
+  o.innerHTML=`<div class="pkp-in"><h2>Pick 1 of 5</h2><p class="pkp-s">Tap the player you want to keep. Your pick is final and the other four go back in the box.</p><div class="pkp-g">${M.map(tile).join('')}</div></div>
+    <div class="pkp-bar"><button class="btn ghost pkp-later" type="button">Later</button><button class="btn pkp-take" type="button" disabled>Pick a player</button></div>`;
+  document.body.appendChild(o);document.documentElement.style.overflow='hidden';
+  const tiles=[...o.querySelectorAll('.pkp-c')],take=o.querySelector('.pkp-take'),later=o.querySelector('.pkp-later'),calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let sel=-1,done=false;
+  const close=()=>{o.remove();document.documentElement.style.overflow='';render()};
+  tiles.forEach(t=>t.addEventListener('click',()=>{if(done)return;sel=+t.dataset.i;tiles.forEach(x=>{const on=x===t;x.classList.toggle('sel',on);x.setAttribute('aria-pressed',on)});
+    take.disabled=false;take.textContent='Take '+M[sel].c.name.split(' ')[0];try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}));
+  later.onclick=close;
+  take.onclick=async()=>{if(sel<0||done)return;take.disabled=true;const res=await pkpTake(sel);if(!res){take.disabled=false;return}
+    done=true;o.classList.add('done');const w=tiles[sel];w.classList.add('won');tiles.forEach(x=>{if(x!==w)x.disabled=true});
+    if(!calm){const m=M[sel],box=w.querySelector('.pkp-pts');let h='';for(let i=0;i<36;i++){const a=Math.PI*2*i/36+Math.random()*.4,d=60+Math.random()*120,z=3+Math.random()*5;h+=`<i style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d)}px;--z:${z.toFixed(1)}px;--t:${(.7+Math.random()*.6).toFixed(2)}s"></i>`}box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},1500)}
+    o.querySelector('.pkp-s').textContent=res.dup?`Duplicate · +${res.tok} tokens`:'Added to your cards. Your props get the boost.';o.querySelector('.pkp-in h2').textContent='Nice pick!';
+    later.hidden=true;take.disabled=false;take.textContent='Done';take.onclick=close}}
 /* the opening (v256): the sealed pack shakes and rips open, the cards deal out face down. Tap one to flip it, or Flip all.
    A flip lifts the card, spins it and lands it with a pop and a spray of sparks in its rarity colour.
    Epic or better: the whole background glows in that colour (and keeps the best colour seen so far); Legendary+ adds turning light rays. */
@@ -4640,8 +4810,8 @@ function viewShop(){
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
     const extras=`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
-    body=wpShopCard()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
-      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?'cards':'items'}</small></div><h3>${esc(P.n)}</h3>
+    body=wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
+      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?'cards':'items'}</small></div><h3>${esc(P.n)}</h3>
       <p class="muted">${P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?'cards':'items'}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button></article>`).join('')}</div>
@@ -8601,6 +8771,7 @@ document.addEventListener('click',async e=>{
   else if(a==='lkMoreA'){UI.lkA=(UI.lkA||12)+12;render()}
   else if(a==='lkMore'){UI.lkN=(UI.lkN||30)+30;render()}
   else if(a==='pkOpen'){const k=t.dataset.v,h=t.dataset.h,P=PACKS[k];if(!P)return;
+    if(P.pick){if(pkpOf(ME.uid)){pkpShow();return}confirmBox('Open a '+P.n+'?',`Spend ${P.tok.toLocaleString()} tokens for ${P.c} players: one is a Top 10 Immortal card (+${ACH.t10.pct}% on his props) and the other 4 are ${RAR.r.n} or better. You keep 1, your pick is final.`,'Open it',()=>pkpBuy());return}
     if(h==='tok')confirmBox('Open a '+P.n+'?',`Spend ${P.tok} tokens for ${P.c} random ${P.cards?'player and team cards':'items'}${P.g?` (the last one is ${RAR[P.g].n} or better)`:''}. Odds are listed on the pack.`,'Open it',()=>packOpen(k,'tok'));else packOpen(k,h,t.dataset.d)}
   else if(a==='lkEq'){const k=t.dataset.k,v=t.dataset.v;if(v&&!invHas(ME.uid,v))return;if(t.closest('.pko')){t.closest('.pko').querySelectorAll(`.pko-eq[data-k="${k}"]`).forEach(x=>{x.textContent='Equip';x.disabled=false});t.textContent='Equipped ✓';t.disabled=true}const inv=invOf(ME.uid),eq=Object.assign({},inv.eq,{[k]:v});
     S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},inv,{eq})});if(!t.closest('.pko'))render();upsert('picks/'+ME.uid,{inv:{eq}}).catch(()=>say('That did not save.'))}
