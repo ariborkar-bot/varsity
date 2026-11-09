@@ -1,0 +1,55 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#stage{background:#fff}
+#cap{position:absolute;left:0;top:0;width:1080px;height:560px;background:#fff;z-index:10;display:flex;align-items:center;justify-content:center;padding:150px 70px 40px;text-align:center;color:#111;font:500 70px/1.18 TT,'Noto Color Emoji'}
+#vid{position:absolute;left:0;top:560px;width:1080px;height:1360px;overflow:hidden;background:#05070d}
+#vid .full{transform-origin:540px 960px}
+svg.ann{position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:12;pointer-events:none}
+#grade{position:absolute;left:0;top:560px;width:1080px;height:1360px;display:flex;align-items:center;justify-content:center;z-index:11;opacity:0}
+#grade b{font:900 420px/1 TT;color:#3DDC84;text-shadow:0 0 60px rgba(61,220,132,.6),0 20px 0 #0b3d22}
+#end{position:absolute;left:0;top:560px;width:1080px;height:1360px;background:#05070d;opacity:0;z-index:13;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#end img{width:280px;height:280px;border-radius:62px}
+#end h1{font:900 140px/1 TT;letter-spacing:-3px;color:#fff;margin-top:44px}
+#end p{font:600 50px/1.25 TT;color:#c9d2e6;margin-top:20px}
+#end .pill{margin-top:50px;font:800 50px TT;background:#fff;color:#05070d;padding:24px 56px;border-radius:999px}
+</style></head><body><div id="stage">
+ <div id="cap"></div>
+ <div id="vid"><div class="full" id="vf"><img id="im"></div></div>
+ <div id="grade"><b>A+</b></div>
+ <svg class="ann" viewBox="0 0 1080 1920"><path id="circ" d="" fill="none" stroke="#ff2d2d" stroke-width="12" stroke-linecap="round"/></svg>
+ <div id="end"><img src="icon.png"><h1>VARSITY</h1><p>the first high school fantasy app</p><div class="pill">free · link in bio</div></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const B=60/142,BAR=4*B;
+const cap=document.getElementById('cap'),im=document.getElementById('im'),vf=document.getElementById('vf'),circ=document.getElementById('circ'),grade=document.getElementById('grade'),end=document.getElementById('end');
+// [t0,t1,clip,f0,f1,offsetY,zoom0,zoom1,caption]
+const SEG=[
+ [0,2*BAR,'card',22,54,150,1,1.04,'POV: your fantasy RB1 sits behind you in 3rd period'],
+ [2*BAR,3*BAR,'card',63,63,150,1.0,1.04,'416 points this season <span class="emo">💀</span>'],
+ [3*BAR,4*BAR,'card',84,99,0,1.05,1.1,'55.9 in ONE game'],
+ [4*BAR,5*BAR,'league',198,206,330,1,1.05,'my draft grade:'],
+ [5*BAR,6*BAR,'league',236,284,420,1,1.04,'and now we’re in the playoffs <span class="emo">😤</span>'],
+ [6*BAR,8*BAR+.3,'end',0,0,0,1,1,'draft your classmates.<br>it’s free.'],
+];
+// hand-drawn ellipse (wobbly), drawn progressively
+function ell(cx,cy,rx,ry,k){let d='';const n=60,end=Math.floor(n*1.12*k);for(let i=0;i<=end;i++){const a=-2.2+i/n*Math.PI*2,w=1+.05*Math.sin(i*.7)+.03*Math.sin(i*1.9),x=cx+Math.cos(a)*rx*w,y=cy+Math.sin(a)*ry*w*(1+i/n*.08);d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}return d}
+async function render(t){
+  const s=SEG.find(x=>t>=x[0]&&t<x[1])||SEG[SEG.length-1];
+  cap.innerHTML='<div>'+s[8]+'</div>';
+  const k=(t-s[0])/(s[1]-s[0]);
+  if(s[2]!=='end'){await setImg(im,clip(s[2],s[3]+(s[4]-s[3])*cl(k)));
+    const z=lerp(s[6],s[7],E.io(cl(k))),h=hand(t,.5);vf.style.transform=`translate(${h.x}px,${-s[5]+h.y}px) scale(${z})`}
+  // red circle around season points in segment 2
+  if(s===SEG[1]){const ck=cl((t-s[0]-.15)/.45);circ.setAttribute('d',ell(178,885,160,80,ck))}else circ.setAttribute('d','');
+  // A+ slam on beat 3 of the punchline bar
+  const ga=4*BAR+2*B;const gk=t>=ga&&t<5*BAR?cl((t-ga)/.12):0;grade.style.opacity=gk?1:0;
+  if(gk){const hh=hit(t,ga,26,.35);tf(grade.querySelector('b'),{x:hh.x,y:hh.y,s:lerp(2.2,1,E.out(gk))})}
+  grade.style.background=gk?'rgba(5,7,13,.72)':'transparent';
+  FL.style.opacity=flashAt(t,[[ga,.55]],.15);
+  const e=t>=6*BAR?seg(t,6*BAR,6*BAR+.12):0;end.style.opacity=e;
+  if(e>0){const kk=t-6*BAR,bb=punch(t,[6*BAR,6*BAR+B,6*BAR+2*B,6*BAR+3*B,7*BAR,7*BAR+B,7*BAR+2*B,7*BAR+3*B],.04);
+    tf(end.querySelector('img'),{s:lerp(.4,1,E.back(cl(kk/.4)))+bb});tf(end.querySelector('h1'),{o:cl((kk-.15)/.2),y:lerp(40,0,E.out(cl((kk-.15)/.3)))});
+    tf(end.querySelector('p'),{o:cl((kk-.3)/.2)});tf(end.querySelector('.pill'),{o:cl((kk-.45)/.15),s:lerp(.6,1,E.back(cl((kk-.45)/.3)))})}
+}
+</script></body></html>

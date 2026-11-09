@@ -1,0 +1,81 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#stage{background:#FFC23D;color:#0b0b0b}
+#wall{position:absolute;left:30px;top:0;width:1020px}
+.tile{position:absolute;width:150px;height:150px;border-radius:34px;background:#fff;box-shadow:0 10px 0 #0b0b0b;display:flex;align-items:center;justify-content:center;border:5px solid #0b0b0b}
+.tile img{width:104px;height:104px;object-fit:contain;image-rendering:auto}
+.ttl{position:absolute;left:0;width:1080px;text-align:center;font:400 250px/0.86 Anton;letter-spacing:-2px;text-transform:uppercase;color:#0b0b0b}
+.band{position:absolute;left:-20px;width:1120px;background:#0b0b0b;color:#FFC23D;text-align:center;font:400 120px/1 Anton;padding:30px 0 34px;transform-origin:50% 50%}
+.band small{display:block;font:500 46px Brico;color:#fff;margin-top:14px;letter-spacing:.5px}
+#app{position:absolute;inset:0;opacity:0;overflow:hidden}
+#app .full{transform-origin:540px 900px}
+#app img{border-radius:0}
+.stk{position:absolute;left:70px;padding:22px 34px 26px;background:#FFC23D;color:#0b0b0b;font:400 92px/1 Anton;text-transform:uppercase;border:6px solid #0b0b0b;box-shadow:12px 12px 0 #0b0b0b;transform-origin:0 50%}
+.slam{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 200px/0.9 Anton;text-transform:uppercase;text-align:center;opacity:0}
+#end{position:absolute;inset:0;background:#FFC23D;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#0b0b0b}
+#end img{width:300px;height:300px;border-radius:66px;border:8px solid #0b0b0b;box-shadow:16px 16px 0 #0b0b0b}
+#end h1{font:400 210px/1 Anton;margin-top:50px;letter-spacing:2px}
+#end p{font:800 56px/1.2 Brico;margin-top:10px;max-width:900px}
+#end .pill{margin-top:56px;font:400 70px Anton;background:#0b0b0b;color:#FFC23D;padding:22px 60px 26px;border-radius:999px;text-transform:uppercase}
+</style></head><body><div id="stage">
+ <div id="wall"></div>
+ <div id="ttl" class="ttl">Is your<br>school<br>on here?</div>
+ <div id="band" class="band">100+ SCHOOLS<small>football + basketball · all over San Diego</small></div>
+ <div id="app"><div class="full" id="appf"><img id="im"></div><div id="stk" class="stk"></div></div>
+ <div id="s1" class="slam" style="background:#0b0b0b;color:#FFC23D">Your<br>school.</div>
+ <div id="s2" class="slam" style="background:#FFC23D;color:#0b0b0b">Your<br>players.</div>
+ <div id="s3" class="slam" style="background:#fff;color:#0b0b0b">Your<br>league.</div>
+ <div id="end"><img src="icon.png"><h1>VARSITY</h1><p>the first high school fantasy app</p><div class="pill">free · link in bio</div></div>
+</div>
+<script src="/home/claude/varsity/logos.js"></script>
+<script src="lib.js"></script>
+<script>
+const B=60/140,BAR=4*B,S16=B/4;
+const LG=Object.entries(window.SCHOOL_LOGOS);
+// put Carlsbad in a fixed spot so the zoom lands on it
+const ci=LG.findIndex(x=>x[0]==='Carlsbad');const car=LG.splice(ci,1)[0];LG.splice(39,0,car);
+const wall=document.getElementById('wall'),tiles=[];
+const COLS=6,TS=150,GAP=24;
+LG.forEach(([n,src],i)=>{const t=el(`<img src="${src}">`,'tile',wall);const c=i%COLS,r=Math.floor(i/COLS);t.style.left=(c*(TS+GAP))+'px';t.style.top=(r*(TS+GAP)+60)+'px';t.r=r;t.c=c;tiles.push(t)});
+const ROWS=Math.ceil(LG.length/COLS),WALLH=ROWS*(TS+GAP)+60;
+const im=document.getElementById('im'),app=document.getElementById('app'),appf=document.getElementById('appf'),stk=document.getElementById('stk'),ttl=document.getElementById('ttl'),band=document.getElementById('band'),end=document.getElementById('end');
+const T4=3*BAR,T5=4*BAR,T6=5*BAR,T7=6*BAR;
+async function render(t){
+  // ---- logo wall: pops in on 16ths from t=0, pans down during bars 2-3
+  const panK=seg(t,BAR,T4-.25,'io');
+  const wy=lerp(0,-(WALLH-1920+200),panK);
+  const zoom=seg(t,T4-.35,T4,'in');
+  // Carlsbad tile centre
+  const ct=tiles[39],cx=30+ct.c*(TS+GAP)+75,cy=ct.r*(TS+GAP)+60+75+wy;
+  const zs=1+zoom*9;
+  wall.style.transformOrigin=`${cx-30}px ${cy-wy}px`;
+  wall.style.transform=`translate(${(540-cx)*E.out(zoom)}px,${wy+(960-cy)*E.out(zoom)}px) scale(${zs})`;
+  tiles.forEach((tl,i)=>{const at=i*S16*.5;const k=cl((t-at)/.18);const p=punch(t,[0,B,2*B,3*B].map(x=>x+BAR*Math.floor(t/BAR)),.0);tf(tl,{s:k?lerp(.2,1,E.back(k)):0,r:(1-k)*(i%2?14:-14),o:k?1:0})});
+  wall.style.opacity=t<T4?1:0;
+  // ---- hook title: on from frame 0, slides away at bar 2
+  const tk=seg(t,BAR-.15,BAR+.25,'in');
+  tf(ttl,{y:470+lerp(0,-1400,tk)+ (t<BAR?Math.sin(t*9)*4:0),s:1+punch(t,[0,B,2*B,3*B],.04),o:1});
+  ttl.style.display=t<BAR+.3?'block':'none';
+  ttl.style.textShadow='0 10px 0 #fff';
+  // ---- black band "100+ schools"
+  const bk=seg(t,BAR+.05,BAR+.3,'back'),bo=1-seg(t,T4-.4,T4-.2);
+  band.style.top='1180px';tf(band,{r:-4,sx:bk,sy:1,o:bk>0?bo:0});
+  // ---- app (team page)
+  const ak=t>=T4&&t<T6?1:0;app.style.opacity=ak;
+  if(ak){const f=t<T5?fmap(t,[[T4,0],[T5,24]]):fmap(t,[[T5,24],[T6,108]]);await setImg(im,clip('team',f));
+    const zin=1+1.2*(1-seg(t,T4,T4+.35,'out'));const h=hand(t,.8);tf(appf,{x:h.x,y:h.y,r:h.r,s:zin*1.03});
+    const lab=t<T5?'every team. every game.':'real players. real stats.';const at=t<T5?T4+.25:T5+.1;
+    stk.textContent=lab;stk.style.top=t<T5?'1280px':'300px';const k=cl((t-at)/.2);tf(stk,{r:-3,s:k?lerp(.3,1,E.back(k)):0,o:k?1:0})}
+  // ---- three slams on beats 1,2,3 of bar 6
+  ['s1','s2','s3'].forEach((id,j)=>{const a=T6+j*B,bb=j<2?a+B:T7;const on=t>=a&&t<bb;const e=document.getElementById(id);e.style.opacity=on?1:0;
+    if(on){const k=cl((t-a)/.14);const hh=hit(t,a,24,.3);tf(e,{x:hh.x,y:hh.y,s:lerp(1.35,1,E.out(k)),o:1})}});
+  // ---- end card
+  const e=seg(t,T7,T7+.12);end.style.opacity=e;
+  if(e>0){const k=t-T7,bb=punch(t,[T7,T7+B,T7+2*B,T7+3*B],.05);
+    tf(end.querySelector('img'),{s:lerp(.3,1,E.back(cl(k/.35)))+bb,r:lerp(-20,0,E.out(cl(k/.35)))});
+    tf(end.querySelector('h1'),{y:lerp(80,0,E.out(cl((k-.1)/.3))),o:cl((k-.1)/.15),s:1+bb});
+    tf(end.querySelector('p'),{o:cl((k-.25)/.2)});
+    tf(end.querySelector('.pill'),{s:lerp(.5,1,E.back(cl((k-.4)/.3))),o:cl((k-.4)/.1),r:-2})}
+  FL.style.opacity=flashAt(t,[[T4,.6],[T6,.4],[T7,.5]],.15);
+}
+</script></body></html>

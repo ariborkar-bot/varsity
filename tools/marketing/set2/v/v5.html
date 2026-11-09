@@ -1,0 +1,70 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#stage{background:#7d0c12}
+#stripes{position:absolute;left:-600px;top:-600px;width:2400px;height:3200px;background:repeating-linear-gradient(-28deg,#8e0f16 0 90px,#a3121b 90px 180px);opacity:1}
+.chen{font:400 150px/1 Dela;color:#f6ead2;text-transform:uppercase;letter-spacing:2px;
+ text-shadow:0 0 0 #000, 6px 6px 0 #c9a227, 12px 12px 0 #3a0508;-webkit-text-stroke:6px #3a0508;paint-order:stroke fill}
+#hook{position:absolute;left:0;width:1080px;top:560px;text-align:center}
+#hook .l1{font-size:88px}#hook .l2{font-size:200px;margin-top:20px;color:#ffd23d}
+#rw{position:absolute;left:-40px;width:1160px;top:300px;height:150px;background:repeating-linear-gradient(90deg,#f6ead2 0 60px,#e8d9b8 60px 120px);border-top:10px solid #3a0508;border-bottom:10px solid #3a0508;display:flex;align-items:center;justify-content:center;font:400 80px Dela;color:#a3121b;letter-spacing:8px;transform:rotate(-4deg)}
+#split{position:absolute;inset:0;opacity:0}
+#split .h{position:absolute;top:0;width:540px;height:1920px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#split .h.a{left:0;background:#0f1d4a}#split .h.b{left:540px;background:#a3121b}
+#split .h .tile{width:400px;height:400px;border-radius:90px;background:#fff;border:12px solid #f6ead2;box-shadow:0 22px 0 rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+#split .h img{width:290px;height:290px;object-fit:contain}
+#split .nm{position:absolute;bottom:560px;left:0;width:540px;text-align:center;font:400 50px/1.1 Dela;color:#f6ead2;text-transform:uppercase;padding:0 30px}
+#vs{position:absolute;left:540px;top:960px;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;background:#ffd23d;border:12px solid #3a0508;display:flex;align-items:center;justify-content:center;font:400 110px Dela;color:#3a0508;z-index:3}
+#app{position:absolute;inset:0;opacity:0}
+#app .full{transform-origin:540px 960px}
+.stk{position:absolute;left:50%;transform-origin:50% 50%;width:960px;margin-left:-480px;text-align:center;padding:26px 30px 32px;background:#f6ead2;color:#a3121b;font:400 74px/1.1 Dela;text-transform:uppercase;border:8px solid #3a0508;box-shadow:12px 12px 0 #c9a227;border-radius:20px}
+.word{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0}
+.word span{font-size:260px}
+#end{position:absolute;inset:0;opacity:0;background:#7d0c12;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+#end .patch{width:420px;height:420px;border-radius:50%;background:#f6ead2;border:16px solid #c9a227;box-shadow:0 0 0 14px #3a0508,0 30px 60px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;position:relative}
+#end .patch img{width:260px;height:260px;border-radius:56px}
+#end h1{margin-top:70px;font-size:170px}
+#end p{font:700 52px/1.25 TT;color:#f6ead2;margin-top:24px}
+#end .pill{margin-top:56px;font:400 58px Dela;background:#ffd23d;color:#3a0508;padding:24px 60px;border-radius:999px;border:8px solid #3a0508;text-transform:uppercase}
+</style></head><body><div id="stage">
+ <div id="stripes"></div>
+ <div id="rw">RIVALRY WEEK</div>
+ <div id="hook" class="chen"><div class="l1">your school vs</div><div class="l2">your rival</div></div>
+ <div id="split"><div class="h a"><div class="tile"><img id="la"></div><div class="nm" id="na"></div></div><div class="h b"><div class="tile"><img id="lb"></div><div class="nm" id="nb"></div></div><div id="vs">VS</div></div>
+ <div id="app"><div class="full" id="appf"><img id="im"></div><div id="stk" class="stk"></div></div>
+ <div class="word chen" id="w0"><span>play</span></div><div class="word chen" id="w1"><span>for</span></div><div class="word chen" id="w2"><span>your</span></div><div class="word chen" id="w3"><span style="font-size:200px;color:#ffd23d">school.</span></div>
+ <div id="end"><div class="patch"><img src="icon.png"></div><h1 class="chen">VARSITY</h1><p>the first high school fantasy app</p><div class="pill">free · link in bio</div></div>
+</div>
+<script src="/home/claude/varsity/logos.js"></script>
+<script src="lib.js"></script>
+<script>
+const B=.5,BAR=2;const LG=window.SCHOOL_LOGOS;
+const PAIRS=[['Helix','Grossmont'],['Cathedral Catholic','St. Augustine'],['Carlsbad','La Costa Canyon'],['Mission Hills','San Marcos']];
+const $=id=>document.getElementById(id);
+const accents=[0,.375,.75,1,1.375,1.75];
+async function render(t){
+  // bar 1: hook (on from frame 0), stripes move, punches on cadence accents
+  const sp=$('stripes');sp.style.transform=`translate(${(t*80)%203}px,0)`;
+  const hookOn=t<BAR;$('hook').style.opacity=hookOn?1:0;$('rw').style.opacity=hookOn?1:0;
+  if(hookOn){const p=punch(t,accents,.05,.18);tf($('hook'),{s:1+p,r:Math.sin(t*3)*.6});const rk=t<.05?1:1;tf($('rw'),{r:-4,s:1+punch(t,[0,1],.06)})}
+  // bar 2: rivalries swap on every beat (split screen)
+  const sOn=t>=BAR&&t<2*BAR;$('split').style.opacity=sOn?1:0;
+  if(sOn){const i=Math.min(3,Math.floor((t-BAR)/B)),a=BAR+i*B,[A,Bn]=PAIRS[i];
+    $('la').src=LG[A];$('lb').src=LG[Bn];$('na').textContent=A;$('nb').textContent=Bn;
+    const k=cl((t-a)/.16);tf($('split').querySelector('.a .tile'),{x:lerp(-500,0,E.out(k)),r:lerp(-25,0,E.out(k))});tf($('split').querySelector('.b .tile'),{x:lerp(500,0,E.out(k)),r:lerp(25,0,E.out(k))});
+    const vh=hit(t,a,20,.3);tf($('vs'),{x:vh.x,y:vh.y,s:1+punch(t,[a],.25,.25)})}
+  // bars 3-4: app footage with stickers
+  const aOn=t>=2*BAR&&t<4*BAR;$('app').style.opacity=aOn?1:0;
+  if(aOn){const first=t<3*BAR,c=first?'cup':'picks',f=first?fmap(t,[[2*BAR,0],[3*BAR,70]]):fmap(t,[[3*BAR,14],[4*BAR,96]]);await setImg($('im'),clip(c,f));
+    const h=hand(t,.7),z=1.03+punch(t,[2*BAR,2*BAR+B,2*BAR+2*B,2*BAR+3*B,3*BAR,3*BAR+B,3*BAR+2*B,3*BAR+3*B],.025);tf($('appf'),{x:h.x,y:h.y,r:h.r,s:z*(1+.4*(1-seg(t,first?2*BAR:3*BAR,(first?2*BAR:3*BAR)+.3)))});
+    const stk=$('stk');stk.innerHTML=first?'win points for your school every week':'every pick counts for your school';
+    stk.style.top=first?'1380px':'1420px';const a=(first?2*BAR:3*BAR)+.2,k=cl((t-a)/.2);tf(stk,{r:-2,s:k?lerp(.3,1,E.back(k)):0,o:k?1:0})}
+  // bar 5: stomp stomp clap words, one per beat
+  ['w0','w1','w2','w3'].forEach((id,j)=>{const a=4*BAR+j*B,on=t>=a&&t<a+B;$(id).style.opacity=on?1:0;if(on){const k=cl((t-a)/.12),hh=hit(t,a,26,.3);tf($(id),{x:hh.x,y:hh.y,s:lerp(1.5,1,E.out(k))})}});
+  const wb=t>=4*BAR&&t<5*BAR;$('stripes').style.filter=wb?'brightness(.6)':'none';
+  // bar 6: end card
+  const e=seg(t,5*BAR,5*BAR+.1);$('end').style.opacity=e;
+  if(e>0){const kk=t-5*BAR;tf($('end').querySelector('.patch'),{s:lerp(.3,1,E.back(cl(kk/.35)))+punch(t,[10,10.75,11.5],.06),r:lerp(-30,0,E.out(cl(kk/.4)))});
+    tf($('end').querySelector('h1'),{o:cl((kk-.15)/.15),s:lerp(1.4,1,E.out(cl((kk-.15)/.25)))});tf($('end').querySelector('p'),{o:cl((kk-.35)/.2)});tf($('end').querySelector('.pill'),{o:cl((kk-.5)/.1),s:lerp(.5,1,E.back(cl((kk-.5)/.3)))})}
+  FL.style.opacity=flashAt(t,[[BAR,.6],[2*BAR,.35],[3*BAR,.3],[5*BAR,.5]],.15);
+}
+</script></body></html>
