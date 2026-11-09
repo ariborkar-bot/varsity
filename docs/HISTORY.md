@@ -213,3 +213,7 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 ## v369 (Nov 9): Carlsbad 80% vs Santa Fe Christian; Max London's welcome pack
 - `ODDS_PIN` (keyed 'date|home|away' → home win chance) overrides the computed chance in `oddsFor()`; odds follow with the usual 7% cut. Set: Santa Fe Christian at Carlsbad, Nov 13, Carlsbad 80% (1.16x, SFC 4.65x; it was 46% / 1.73x / 2.01x). Picks already saved keep the odds they were locked at.
 - CARD_FIX `ml-wp-1`: Max London (profile name, `ML` matcher) gets a new welcome pack the next time he opens the app.
+
+## v370 (Nov 9): sign-in and the Player/Fan profile step are both required
+- `mustSetup()`: a signed-in (live) account with no profile, no role or no school must finish the profile step. It has no Not now/Close button, `[data-nm=close]` is ignored, and `setupCheck()` (in touch() and guestGate()/route) reopens it if it is ever closed; the privacy page is the only exception. Pop-ups (welcome pack etc.) wait until it's done. Old profiles without a role don't get one picked for them. Editing a finished profile still has Close.
+- Signed-out visitors already only get the sign-in screen (no way in without an account). Football positions in the step are QB, RB, WR, TE, DL, LB, DB, K (since v358).

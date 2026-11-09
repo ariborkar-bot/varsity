@@ -2890,6 +2890,9 @@ document.addEventListener('submit',async e=>{
    The first time someone starts or joins a league, they pick the name friends will see.
    Behind the scenes this makes an anonymous Supabase account that stays on this device. */
 const NM={busy:false,err:'',role:'',sport:''};
+/* v370 (owner): signing in is required, and so is the profile step right after it: a signed-in account with no profile,
+   no Player/Fan role or no school can't close it, and it reopens whenever the app draws (touch/route). */
+const mustSetup=()=>{if(ME.mode!=='live'||!ME.uid||!S.loaded.profiles)return false;const p=myProfile();return !p||!p.role||!p.school};
 /* v359 (owner): players pick their main sport, and the positions follow it (both lists live here, so either app can make either kind) */
 const NM_SP={fb:{t:'Football',pos:[['QB','Quarterback'],['RB','Running back'],['WR','Wide receiver'],['TE','Tight end'],['DL','Defensive line'],['LB','Linebacker'],['DB','Defensive back'],['K','Kicker']],map:{QB:'QB',RB:'RB',WR:'WR',TE:'TE',DL:'DEF',LB:'DEF',DB:'DEF',K:'K'}},
   bb:{t:'Basketball',pos:[['PG','Point guard'],['SG','Shooting guard'],['SF','Small forward'],['PF','Power forward'],['C','Center']],map:{PG:'PG',SG:'SG',SF:'SF',PF:'PF',C:'C'}}};
@@ -2897,13 +2900,13 @@ const nmPosOpts=(sp,sel)=>{const L=NM_SP[sp].pos;if(!L.some(x=>x[0]===sel))sel='
 /* v358 (owner): after the email step everyone picks Player or Fan first. Fans give their name and the school they
    root for; players give their name, school and position. */
 function nameHTML(){
-  const pr=myProfile()||{},sch=pr.school||'',pos=pr.pos||'',R=NM.role||(myProfile()?(pr.role==='player'?'player':'fan'):'');
+  const pr=myProfile()||{},sch=pr.school||'',pos=pr.pos||'',R=NM.role||(myProfile()&&pr.role?(pr.role==='player'?'player':'fan'):'');
   const SP=R==='player'?(NM.sport||(pr.role==='player'?pr.sport||FG_SPORT:'')):'';
   const rb=(v,t,d,ic)=>`<button type="button" class="nm-rb${R===v?' on':''}" data-nm-role="${v}" aria-pressed="${R===v}"><span class="nm-ri" aria-hidden="true">${ic}</span><span><b>${t}</b><small>${d}</small></span></button>`;
   return `<div class="gcard nm" role="dialog" aria-modal="true" aria-labelledby="nm-t">
     <div class="au-brand"><img src="logo.png" alt=""><span>VARSITY</span></div>
-    <h2 id="nm-t">${myProfile()?'Your profile':'Are you a player or a fan?'}</h2>
-    <p class="muted">${myProfile()?'Change your name, school or position.':'Last step. Pick one to set up your profile.'}</p>
+    <h2 id="nm-t">${mustSetup()?'Are you a player or a fan?':'Your profile'}</h2>
+    <p class="muted">${mustSetup()?'Last step. Pick one, then add your name and school.':'Change your name, school or position.'}</p>
     <form id="nm-form" class="au-form">
       <div class="nm-roles" role="group" aria-label="Player or fan">${rb('player','Player','I play high school sports','<svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>')}${rb('fan','Fan','I root for a school','<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>')}</div>
       ${R==='player'?`<div class="nm-sp"><span class="nm-spl">Main sport</span><div class="nm-sps" role="group" aria-label="Main sport">${Object.entries(NM_SP).map(([k,x])=>`<button type="button" class="nm-spb${SP===k?' on':''}" data-nm-sport="${k}" aria-pressed="${SP===k}">${x.t}</button>`).join('')}</div><small class="muted">The app opens on this sport.</small></div>`:''}
@@ -2913,7 +2916,7 @@ function nameHTML(){
         ${R==='player'?`<label class="fld"><span>Position</span><select id="nm-pos">${nmPosOpts(SP,NM.pos!=null?NM.pos:(pr.posLabel||pos||''))}</select></label>`:''}
       </div>`:''}
       ${NM.err?`<p class="au-err" role="alert">${esc(NM.err)}</p>`:''}
-      <div class="btns"><button class="btn" type="submit" ${NM.busy||!R||(R==='player'&&!SP)?'disabled':''}>${NM.busy?'One moment…':myProfile()?'Save':'Let’s play'}</button><button class="btn ghost" type="button" data-nm="close">${myProfile()?'Close':'Not now'}</button></div>
+      <div class="btns"><button class="btn" type="submit" ${NM.busy||!R||(R==='player'&&!SP)?'disabled':''}>${NM.busy?'One moment…':mustSetup()?'Let’s play':'Save'}</button>${mustSetup()?'':'<button class="btn ghost" type="button" data-nm="close">Close</button>'}</div>
     </form>
   </div>`;
 }
@@ -2921,12 +2924,12 @@ function nameHTML(){
 function nmKeep(){const v=id=>{const e=$('#'+id);return e?e.value:null};const n=v('nm-name'),sc=v('nm-school'),po=v('nm-pos');if(n!=null)NM.name=n;if(sc!=null)NM.school=sc;if(po!=null)NM.pos=po}
 function openName(){const g=$('#gate');g.innerHTML=nameHTML();g.hidden=false;document.body.style.overflow='hidden';const f=$('#nm-name');if(f&&!f.value&&matchMedia('(pointer:fine)').matches)f.focus()}
 document.addEventListener('click',e=>{if(!e.target.closest)return;
-  if(e.target.closest('[data-nm=close]')){NM.err='';NM.role=NM.sport='';NM.name=NM.school=NM.pos=null;closeGate();return}
+  if(e.target.closest('[data-nm=close]')){if(mustSetup())return;NM.err='';NM.role=NM.sport='';NM.name=NM.school=NM.pos=null;closeGate();return}
   const r=e.target.closest('[data-nm-role]');if(r){nmKeep();NM.role=r.dataset.nmRole;NM.err='';openName();return}
   const sp=e.target.closest('[data-nm-sport]');if(sp){nmKeep();if(NM.sport!==sp.dataset.nmSport)NM.pos=null;NM.sport=sp.dataset.nmSport;NM.err='';openName()}});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='nm-form')return;e.preventDefault();e.stopImmediatePropagation();
-  nmKeep();const role=NM.role||((myProfile()||{}).role==='player'?'player':myProfile()?'fan':'');
+  nmKeep();const role=NM.role||((myProfile()||{}).role==='player'?'player':(myProfile()||{}).role?'fan':'');
   const pr0=myProfile()||{},sport=role==='player'?(NM.sport||(pr0.role==='player'?pr0.sport||FG_SPORT:'')):'';
   const name=(NM.name||'').trim(),school=NM.school||'',pos=role==='player'?(NM.pos||''):'';
   const fail=m=>{NM.err=m;openName()};
@@ -2955,6 +2958,7 @@ document.addEventListener('submit',async e=>{
 /* v359 (owner): a player's main sport is where the app opens. Once per visit (tab session): if you open the other sport's page,
    it switches to yours. Tapping the sport switch after that is never undone. */
 function landGo(){const a=document.querySelector('a.sport-opt:not(.on)');if(!a)return;window.__landGo=1;sportCut(a.getAttribute('href'),(a.getAttribute('title')||'').toUpperCase(),{})}
+function setupCheck(){if(location.hash!=='#privacy'&&mustSetup()&&($('#gate').hidden||!$('#nm-form')))openName()}
 function landCheck(){
   if(window.__land||!ME.uid||ME.mode!=='live'||!S.loaded.profiles)return;window.__land=1;
   let first=true;try{first=!sessionStorage.getItem('vs-landed');sessionStorage.setItem('vs-landed','1')}catch(_){first=!/vs-landed/.test(window.name);try{window.name+=' vs-landed'}catch(_){}}
@@ -2965,7 +2969,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v369 · Nov 9';
+const APP_BUILD='v370 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -8478,7 +8482,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{landCheck()}catch(_){}if(!window.__landGo){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
@@ -8507,7 +8511,7 @@ function route(){
   SHEET=false;closePlayer();closeNotes();render();window.scrollTo(0,0);guestGate();
 }
 /* v311: signed-out visitors only see the sign-in screen (and the privacy policy) */
-function guestGate(){if(ME.mode!=='guest')return;if(location.hash==='#privacy')closeGate();else if($('#gate').hidden)openAuth()}
+function guestGate(){if(ME.mode==='live'){try{setupCheck()}catch(_){}return}if(ME.mode!=='guest')return;if(location.hash==='#privacy')closeGate();else if($('#gate').hidden)openAuth()}
 window.addEventListener('hashchange',route);
 /* phones: swipe a player card (or notifications) down to close it. Works when the sheet is scrolled to the top. */
 (()=>{let y0=0,x0=0,dy=0,t0=0,dp=null,drag=false;
