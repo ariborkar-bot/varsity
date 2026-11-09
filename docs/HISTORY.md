@@ -219,3 +219,7 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 - Signed-out visitors already only get the sign-in screen (no way in without an account). Football positions in the step are QB, RB, WR, TE, DL, LB, DB, K (since v358).
 - v371 (Nov 9, owner): 10-0 / 82-0 respin buttons (`.sb-rs`) are bigger gold pills with a drawn refresh icon, a soft shine sweep, press-down depth, and on tap the icon spins once with a glow ring (`.spin` while `m.flip.i` is that slot). Reduced motion turns the animations off.
 - v372 (Nov 9, owner): gift records can carry a player card (`gft[id]={to,at,m,c:'pc:<key>',r:'l'}`): the gift pop-up shows "sent you a Legendary <name> card" with the card art. The card itself is added to the receiver's `inv.cards` separately (owner/admin gift from the database).
+
+## v373 (Nov 9): everyone redoes sign-in and the profile step once
+- Boot: a saved session whose `user.last_sign_in_at` is before `REAUTH_AT` (2026-11-09 22:20 UTC) is signed out on that device (`signOut({scope:'local'})`), and the sign-in screen says "Varsity got an update. Sign in again with your email and password". Each device asks once; sign-ins after the cutoff are untouched.
+- Profiles now carry `ob:2` once the profile step is finished (`OB_V`, `obDone()`). `mustSetup()` also requires it, so every existing account goes through Player/Fan → (sport) → name, school, position again, with role and sport not pre-picked (name, school and position are pre-filled).

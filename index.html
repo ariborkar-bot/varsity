@@ -2815,7 +2815,7 @@ function authHTML(){
   return `<div class="gcard au" role="dialog" aria-modal="true" aria-labelledby="au-t">
     <div class="au-brand"><img src="logo.png" alt=""><span>VARSITY</span></div>
     <h2 id="au-t">${rs?'Reset your password':up?'Create your account':'Sign in'}</h2>
-    <p class="muted">${rs?'Enter your email and we’ll send you a link to set a new password.':up?'Free to play. Make an account to get started.':'Sign in to keep playing. Varsity is free.'}</p>
+    <p class="muted">${rs?'Enter your email and we’ll send you a link to set a new password.':up?'Free to play. Make an account to get started.':(()=>{try{return sessionStorage.getItem('vs-reauth')}catch(_){return null}})()?'Varsity got an update. Sign in again with your email and password to keep playing.':'Sign in to keep playing. Varsity is free.'}</p>
     ${rs?'':`<div class="au-tabs" role="tablist"><button role="tab" aria-selected="${!up}" data-au="in">Sign in</button><button role="tab" aria-selected="${up}" data-au="up">Create account</button></div>`}
     <form id="au-form" class="au-form">
       <label class="fld"><span>Email</span><input id="au-email" type="email" autocomplete="email" required></label>
@@ -2892,7 +2892,11 @@ document.addEventListener('submit',async e=>{
 const NM={busy:false,err:'',role:'',sport:''};
 /* v370 (owner): signing in is required, and so is the profile step right after it: a signed-in account with no profile,
    no Player/Fan role or no school can't close it, and it reopens whenever the app draws (touch/route). */
-const mustSetup=()=>{if(ME.mode!=='live'||!ME.uid||!S.loaded.profiles)return false;const p=myProfile();return !p||!p.role||!p.school};
+/* v371 (owner): everyone already in the app redoes the whole process once: devices signed in before REAUTH_AT are signed out
+   (boot), and every profile without ob:2 goes through Player/Fan → name, school, position again (nothing pre-picked). */
+const REAUTH_AT=Date.parse('2026-11-09T22:20:00Z'),OB_V=2;
+const obDone=p=>(+((p||{}).ob)||0)>=OB_V;
+const mustSetup=()=>{if(ME.mode!=='live'||!ME.uid||!S.loaded.profiles)return false;const p=myProfile();return !p||!p.role||!p.school||!obDone(p)};
 /* v359 (owner): players pick their main sport, and the positions follow it (both lists live here, so either app can make either kind) */
 const NM_SP={fb:{t:'Football',pos:[['QB','Quarterback'],['RB','Running back'],['WR','Wide receiver'],['TE','Tight end'],['DL','Defensive line'],['LB','Linebacker'],['DB','Defensive back'],['K','Kicker']],map:{QB:'QB',RB:'RB',WR:'WR',TE:'TE',DL:'DEF',LB:'DEF',DB:'DEF',K:'K'}},
   bb:{t:'Basketball',pos:[['PG','Point guard'],['SG','Shooting guard'],['SF','Small forward'],['PF','Power forward'],['C','Center']],map:{PG:'PG',SG:'SG',SF:'SF',PF:'PF',C:'C'}}};
@@ -2900,8 +2904,8 @@ const nmPosOpts=(sp,sel)=>{const L=NM_SP[sp].pos;if(!L.some(x=>x[0]===sel))sel='
 /* v358 (owner): after the email step everyone picks Player or Fan first. Fans give their name and the school they
    root for; players give their name, school and position. */
 function nameHTML(){
-  const pr=myProfile()||{},sch=pr.school||'',pos=pr.pos||'',R=NM.role||(myProfile()&&pr.role?(pr.role==='player'?'player':'fan'):'');
-  const SP=R==='player'?(NM.sport||(pr.role==='player'?pr.sport||FG_SPORT:'')):'';
+  const pr=myProfile()||{},sch=pr.school||'',pos=pr.pos||'',R=NM.role||(myProfile()&&pr.role&&obDone(pr)?(pr.role==='player'?'player':'fan'):'');
+  const SP=R==='player'?(NM.sport||(pr.role==='player'&&obDone(pr)?pr.sport||FG_SPORT:'')):'';
   const rb=(v,t,d,ic)=>`<button type="button" class="nm-rb${R===v?' on':''}" data-nm-role="${v}" aria-pressed="${R===v}"><span class="nm-ri" aria-hidden="true">${ic}</span><span><b>${t}</b><small>${d}</small></span></button>`;
   return `<div class="gcard nm" role="dialog" aria-modal="true" aria-labelledby="nm-t">
     <div class="au-brand"><img src="logo.png" alt=""><span>VARSITY</span></div>
@@ -2929,8 +2933,8 @@ document.addEventListener('click',e=>{if(!e.target.closest)return;
   const sp=e.target.closest('[data-nm-sport]');if(sp){nmKeep();if(NM.sport!==sp.dataset.nmSport)NM.pos=null;NM.sport=sp.dataset.nmSport;NM.err='';openName()}});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='nm-form')return;e.preventDefault();e.stopImmediatePropagation();
-  nmKeep();const role=NM.role||((myProfile()||{}).role==='player'?'player':(myProfile()||{}).role?'fan':'');
-  const pr0=myProfile()||{},sport=role==='player'?(NM.sport||(pr0.role==='player'?pr0.sport||FG_SPORT:'')):'';
+  nmKeep();const role=NM.role||(obDone(myProfile())?((myProfile()||{}).role==='player'?'player':(myProfile()||{}).role?'fan':''):'');
+  const pr0=myProfile()||{},sport=role==='player'?(NM.sport||(pr0.role==='player'&&obDone(pr0)?pr0.sport||FG_SPORT:'')):'';
   const name=(NM.name||'').trim(),school=NM.school||'',pos=role==='player'?(NM.pos||''):'';
   const fail=m=>{NM.err=m;openName()};
   if(!role)return fail('Pick Player or Fan.');
@@ -2943,7 +2947,7 @@ document.addEventListener('submit',async e=>{
     if(!ME.uid){NM.busy=false;openAuth();return}
     const fresh=!myProfile();
     const prev=myProfile()||{};
-    const profile=Object.assign({},prev,{name,school,role,v:2,joinedAt:prev.joinedAt||NOW()});
+    const profile=Object.assign({},prev,{name,school,role,v:2,ob:OB_V,joinedAt:prev.joinedAt||NOW()});
     if(role==='player'){profile.sport=sport;profile.posLabel=pos;profile.pos=NM_SP[sport].map[pos]||null;if(!profile.pos)delete profile.pos}else{delete profile.pos;delete profile.posLabel;delete profile.sport}
     await setDoc('profiles/'+ME.uid,profile);
     NM.busy=false;NM.role=NM.sport='';NM.name=NM.school=NM.pos=null;
@@ -2969,7 +2973,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v372 · Nov 9';
+const APP_BUILD='v373 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -9105,6 +9109,8 @@ async function boot(){
     SB=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'varsity-auth'}});
     DB=supaDb(SB);
     let session=null;try{session=(await SB.auth.getSession()).data.session}catch(_){}
+    /* v371: a session from a sign-in before REAUTH_AT is signed out once on this device, so everyone signs in again with email + password */
+    if(session&&session.user&&session.user.last_sign_in_at&&Date.parse(session.user.last_sign_in_at)<REAUTH_AT){try{await SB.auth.signOut({scope:'local'})}catch(_){}session=null;try{sessionStorage.setItem('vs-reauth','1')}catch(_){}}
     if(session){ME.uid=session.user.id;ME.email=session.user.email;ME.mode='live';try{const a=await SB.rpc('is_admin_account');ME.adminAcct=!!a.data;if(ME.adminAcct){const {data}=await SB.rpc('is_admin');ME.admin=!!data}}catch(_){}}
     else{ME.uid=null;ME.mode='guest';ME.admin=false}
     try{const v=JSON.parse(sessionStorage.getItem('varsity-viewas')||'null');if(v&&v.uid&&ME.admin&&ME.mode==='live'&&v.uid!==ME.uid){VA={uid:v.uid,name:v.name||'this member',real:ME.uid};ME.uid=v.uid;ME.mode='readonly'}else sessionStorage.removeItem('varsity-viewas')}catch(_){}
