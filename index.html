@@ -2969,7 +2969,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v371 · Nov 9';
+const APP_BUILD='v372 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4752,9 +4752,9 @@ function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'
 function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const seen=+((S.picks[ME.uid]||{}).gsn)||0,nw=giftsIn(ME.uid).filter(x=>(+x.at||0)>seen).sort((a,b)=>a.at-b.at);if(!nw.length)return;
   const c=$('#cfm');if(!c||!c.hidden)return;_gPop=true;const last=nw[nw.length-1].at;
-  const ln=x=>x.a?`<b>${Math.floor(x.a)} tokens</b>`:`<b>${esc((ITEM[x.i]||{}).n||'an item')}</b>`;
+  const ln=x=>x.c?`<b>a ${esc((RAR[x.r]||RAR.l).n)} ${esc(cardInfo(x.c).name)} card</b>`:x.a?`<b>${Math.floor(x.a)} tokens</b>`:`<b>${esc((ITEM[x.i]||{}).n||'an item')}</b>`;
   c.innerHTML=`<div class="gcard tok-sheet gf-pop" role="dialog" aria-modal="true" aria-labelledby="gp-t"><div class="gp-ic">🎁</div><h2 id="gp-t">${nw.length>1?'You got '+nw.length+' gifts!':'You got a gift!'}</h2>
-    <ul class="gp-l">${nw.slice(-6).map(x=>`<li>${av(nm(x.from),x.from,28,x.from)}<span class="gp-tx"><b>${esc(nm(x.from))}</b> sent you ${ln(x)}${x.m?`<small class="muted">“${esc(x.m)}”</small>`:''}</span>${x.i&&ITEM[x.i]?`<span class="gp-art" style="--rc:${RAR[ITEM[x.i].r].c}" title="${esc(ITEM[x.i].n)}">${itemArt(x.i,50)}</span>`:''}</li>`).join('')}</ul>
+    <ul class="gp-l">${nw.slice(-6).map(x=>`<li>${av(nm(x.from),x.from,28,x.from)}<span class="gp-tx"><b>${esc(nm(x.from))}</b> sent you ${ln(x)}${x.m?`<small class="muted">“${esc(x.m)}”</small>`:''}</span>${x.c?`<span class="gp-art" style="--rc:${(RAR[x.r]||RAR.l).c}">${cardArt(x.c,x.r||'l',50)}</span>`:''}${x.i&&ITEM[x.i]?`<span class="gp-art" style="--rc:${RAR[ITEM[x.i].r].c}" title="${esc(ITEM[x.i].n)}">${itemArt(x.i,50)}</span>`:''}</li>`).join('')}</ul>
     <div class="gbtns"><button class="btn" data-act="gpOk" data-at="${last}">Awesome!</button></div></div>`;c.hidden=false}
 async function giftSend(){const to=GF.to;if(!to||!S.profiles[to]){say('Pick who it’s for.');return}
   const id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),x={to,at:NOW()};if(GF.m.trim())x.m=GF.m.trim().slice(0,60);
