@@ -333,3 +333,8 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - Slip parlays (`slipCalc`): an owned Duo card whose two players are both in the parlay adds its boost (`duoPct`, returned as `dp`/`duos`, inside the 500 cap) and shows a "Duo boost" row (`.sl-duo`). The per-game "Duo parlays" section is unchanged.
 - `packShow`: Epic+ Duo cards (`dc:`) and team cards (`tc:`) now get the walkout too. `pkWalkout` takes `X.c={name,school,pos,k1,kind,on,art}` for a card that is not one player.
 - `CARD_FIX` supports `{gp:'<pack type>'}`: adds a gift pack (`inv.fr.gp`). `ab-duo-1` gives Ari Borkar one Duo pack (Shop → Gift).
+
+## v409 (Nov 10, owner): bobblehead restyle, "less cute, better graphics"
+- bh.js look changed from flat cartoon shading with ink outlines to a glossy collectible: `MeshPhysicalMaterial` finishes (`FIN`: gloss, plastic, satin, cloth, skin, rubber, metal, steel), room reflections, soft shadow, blue and orange rim lights, dark stage (`.bh-host`). `ink()` is now a no-op.
+- Tougher character: taller body and smaller head (`BSX`, `BSY`, `HS`, `GAP`), squarer jaw, narrow eyes with a heavy lid line, a small closed smirk, eye black, gloved fists with fingers (`A.hand`), facemask bars at nose and chin, charcoal jersey.
+- Calmer movement: no bouncing to a beat, no waving or happy-arc eyes; it breathes, looks around, tosses the ball and nods. Tap still bobbles, drag still spins.

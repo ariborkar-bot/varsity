@@ -60,11 +60,11 @@ const BH=(function(){
           P.push(P[v*3],P[v*3+1],P[v*3+2]);N.push(N[v*3],N[v*3+1],N[v*3+2]);C.push(C[v*3],C[v*3+1],C[v*3+2]);U.push(U[v*2]+1,U[v*2+1]);idx[t+q]=P.length/3-1}}
       g.setAttribute('uv',new T.Float32BufferAttribute(U,2))}
     g.setAttribute('position',new T.Float32BufferAttribute(P,3));g.setAttribute('normal',new T.Float32BufferAttribute(N,3));g.setAttribute('color',new T.Float32BufferAttribute(C,3));g.setIndex(idx);g.userData.keep=1;return g}
-  const QH=(navigator.hardwareConcurrency||8)<=4||/Android|iPhone|iPad/i.test(navigator.userAgent)?1.22:1;
+  const QH=(navigator.hardwareConcurrency||8)<=4||/Android|iPhone|iPad/i.test(navigator.userAgent)?1.12:1;
   const GEO=new Map(),geo=(k,mk)=>{if(!GEO.has(k))GEO.set(k,mk());return GEO.get(k)};
   const nrm=v=>{const l=L3(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l]};
   /* ================= BODY (y=0 = top of the base, faces +z). A tiny chunky body under a huge head. ================= */
-  const HY=1.3;                                                   /* height of the head's centre */
+  const HY=1.3,BSX=1.07,BSY=1.2,HS=.86,GAP=.2;                                                   /* height of the head's centre */
   const torso=(x,y,z)=>smin(ell(x,y,z,0,.47,0,.27,.2,.215),ell(x,y,z,0,.36,0,.255,.13,.2),.1);
   /* shoulder pads, built like real ones: a chest/back plate laced down the middle, an epaulet from the neck out over each shoulder, and a cap hanging over the arm */
   const padL=(x,y,cx,cy,t)=>{const dx=Math.abs(x)-cx,dy=y-cy,c=Math.cos(t),sn=Math.sin(t);return[dx*c-dy*sn,dx*sn+dy*c]};
@@ -91,15 +91,16 @@ const BH=(function(){
   const bodyGeo=(k,o)=>geo('b:'+k,()=>mc(D[k],[-.6,-.02,-.36],[.6,.82,.4],.0105*QH,Object.assign({occ:bodyOcc,aoK:4.5},o||{})));
   /* one arm, in its own frame (shoulder at 0,0,0, hanging down); the other side is its mirror */
   const A={sleeve:(x,y,z)=>cone(x,y,z,0,0,0,.045,-.115,0,.108,.102),
-    skin:(x,y,z)=>smin(smin(cone(x,y,z,.045,-.115,0,.09,-.27,0,.078,.074),sph(x,y,z,.105,-.345,.005,.1),.03),sph(x,y,z,.06,-.335,.075,.042),.03),
+    skin:(x,y,z)=>cone(x,y,z,.045,-.115,0,.092,-.285,0,.08,.07),
+    hand:(x,y,z)=>{const lx=(x-.105)*.958+(y+.345)*.287,ly=-(x-.105)*.287+(y+.345)*.958,lz=z-.005;let d=ell(lx,ly,lz,0,.01,0,.07,.075,.082);for(let i=0;i<4;i++){const zz=-.054+i*.036;d=smin(d,cone(lx,ly,lz,-.03,-.052,zz,.035,-.052,zz,.024,.024),.012)}return smin(d,cone(lx,ly,lz,-.05,.02,.06,-.02,-.03,.09,.027,.024),.015)},
     cover:(x,y,z)=>cone(x,y,z,.05,-.13,0,.088,-.258,0,.088,.082),
     band:(x,y,z)=>{const a=nrm([.28,-.96,0]);return tor(x,y,z,.085,-.252,0,a[0],a[1],a[2],.074,.023)}};
-  const armOcc=(x,y,z)=>Math.min(A.sleeve(x,y,z),A.skin(x,y,z),A.band(x,y,z));
+  const armOcc=(x,y,z)=>Math.min(A.sleeve(x,y,z),A.skin(x,y,z),A.band(x,y,z),A.hand(x,y,z));
   const armGeo=(k,o)=>geo('a:'+k,()=>mc(A[k],[-.16,-.48,-.16],[.26,.14,.16],.0095*QH,Object.assign({occ:armOcc,aoK:4},o||{})));
   const coverUV=(x,y,z)=>{const dx=.29,dy=-.957,qx=x-.045,qy=y+.115,t=qx*dx+qy*dy,rx=qx-dx*t,ry=qy-dy*t,rp=rx*-dy+ry*dx;return[((Math.atan2(z,rp)/TAU+.5)%1+1)%1,Math.max(0,Math.min(1,(t-.01)/.15))]};
   const patTex=(bh,kind,w,h)=>tex('pat|'+kind+'|'+JSON.stringify(bh),w,h,(g,W,H)=>{if(window.bhPat)window.bhPat(g,W,H,bh,kind);else{g.fillStyle=bh.c||'#888';g.fillRect(0,0,W,H)}},{wrapS:1});
   /* ================= HEAD (origin = centre of the head) ================= */
-  const headF=(x,y,z)=>smin(smin(ell(x,y,z,0,0,0,.5,.47,.47),sph(Math.abs(x),y,z,.21,-.15,.2,.18),.12),ell(x,y,z,0,-.005,.475,.04,.034,.04),.05);
+  const headF=(x,y,z)=>smin(smin(ell(x,y,z,0,.02,0,.49,.45,.46),ell(x,y,z,0,-.2,.07,.37,.27,.37),.16),ell(x,y,z,0,-.02,.465,.045,.05,.05),.05);
   const HO=(x,y,z)=>ell(x,y,z,0,.03,-.02,.625,.6,.65);
   const HC=(x,y,z)=>smin(Math.max(box2(x,y,0,-.015,.44,.285,.2),.1-z),y+.47,.05);
   const H={head:headF,
@@ -114,49 +115,39 @@ const BH=(function(){
   const onHead=(x,y,out)=>{const p=hit(headF,[x,y,0],[0,0,1],0,.8),n=gradN(headF,p);return{p:p.clone().addScaledVector(n,out||0),n}};
   const onShell=(dx,dy,dz,out)=>{const d=nrm([dx,dy,dz]),p=hit(HO,[0,.03,-.02],d,0,1.3),n=gradN(HO,p);return{p:p.clone().addScaledVector(n,out||0),n}};
   /* ---------- cartoon look: banded shading + ink outlines ---------- */
-  let GM=null;const INK='#161a2c';
-  const gm=()=>{if(!GM){GM=new T.DataTexture(new Uint8Array([118,118,118,255,196,196,196,255,240,240,240,255,255,255,255,255]),4,1,T.RGBAFormat);GM.minFilter=GM.magFilter=T.NearestFilter;GM.needsUpdate=true}return GM};
-  const toonV=(c,o)=>new T.MeshToonMaterial(Object.assign({color:c,gradientMap:gm(),vertexColors:true},o||{}));
-  const toonP=(c,o)=>new T.MeshToonMaterial(Object.assign({color:c,gradientMap:gm()},o||{}));
-  const OLG=new WeakMap();let OLM=null;
-  function ink(m,w){const g=m.geometry;let og=OLG.get(g);if(!og){og=new T.BufferGeometry();const p=g.attributes.position,n=g.attributes.normal,a=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){a[i*3]=p.getX(i)+n.getX(i)*w;a[i*3+1]=p.getY(i)+n.getY(i)*w;a[i*3+2]=p.getZ(i)+n.getZ(i)*w}
-      og.setAttribute('position',new T.BufferAttribute(a,3));if(g.index)og.setIndex(g.index);og.userData.keep=g.userData.keep;OLG.set(g,og)}
-    if(!OLM)OLM=new T.MeshBasicMaterial({color:INK,side:T.BackSide});const o=new T.Mesh(og,OLM);m.add(o);return m}
-  function mesh(g,m,w){const o=new T.Mesh(g,m);o.castShadow=true;if(w)ink(o,w);return o}
+  /* v401 look: a glossy collectible figure (reflections, soft shadows, rim light). toonV = sculpted meshes with baked shading, toonP = plain meshes. */
+  const FIN={gloss:{roughness:.2,clearcoat:1,clearcoatRoughness:.05},plastic:{roughness:.32,clearcoat:.8,clearcoatRoughness:.12},satin:{roughness:.5,sheen:.6,sheenRoughness:.4,clearcoat:.15,clearcoatRoughness:.4},cloth:{roughness:.78,sheen:.5,sheenRoughness:.5},skin:{roughness:.5,sheen:.25,sheenRoughness:.5,clearcoat:.1,clearcoatRoughness:.5},rubber:{roughness:.7},metal:{metalness:1,roughness:.16},steel:{metalness:.55,roughness:.28,clearcoat:.6,clearcoatRoughness:.15}};
+  const pm=(c,o,v)=>{o=Object.assign({},o||{});const f=FIN[o.fin||'plastic'];delete o.fin;return new T.MeshPhysicalMaterial(Object.assign({color:c,vertexColors:!!v},f,o))};
+  const toonV=(c,o)=>pm(c,o,true),toonP=(c,o)=>pm(c,o,false);
+  function ink(m){return m}
+  function mesh(g,m,w){const o=new T.Mesh(g,m);o.castShadow=true;o.receiveShadow=true;if(w)ink(o,w);return o}
   function tube(pts,r,mat,w,n,closed){const c=new T.CatmullRomCurve3(pts,!!closed,'centripetal',.5),m=mesh(new T.TubeGeometry(c,n||60,r,14,!!closed),mat,w);
     if(!closed)for(const p of [pts[0],pts[pts.length-1]]){const s=mesh(new T.SphereGeometry(r,14,10),mat,w);s.position.copy(p);m.add(s)}return m}
   const SKIN=['#FFE0C7','#FBCFA6','#F0BC8C','#DDA06C','#BD7F50','#93603A','#70452A','#4E301D'];
   const W_=.011;
   /* ---------- face: simple and expressive ---------- */
   function face(G,cfg){const skin=SKIN[cfg.skin==null?2:cfg.skin|0]||SKIN[2];
-    G.add(mesh(headGeo('head',{tint:[.8,.5,.42]}),toonV(skin)));
-    const dark=new T.MeshBasicMaterial({color:'#231712'}),white=new T.MeshBasicMaterial({color:'#ffffff'}),eyes=[],happy=[];
-    /* painted bobblehead eyes: a white oval, a big dark pupil, one glint */
-    for(const s of [-1,1]){const {p,n}=onHead(s*.16,.085,.004),e=new T.Group();e.position.copy(p);e.lookAt(p.clone().add(n));e.rotateY(-s*.1);G.add(e);
-      const rimE=new T.Mesh(new T.SphereGeometry(1,32,24),dark);rimE.scale.set(.07,.078,.02);e.add(rimE);
-      const wh=new T.Mesh(new T.SphereGeometry(1,32,24),white);wh.scale.set(.062,.07,.026);e.add(wh);
-      const pu=new T.Mesh(new T.SphereGeometry(1,24,16),dark);pu.scale.set(.036,.044,.012);pu.position.set(-s*.012,-.004,.02);e.add(pu);
-      const h1=new T.Mesh(new T.SphereGeometry(1,16,10),white);h1.scale.set(.012,.014,.006);h1.position.set(-s*.012+.012,.014,.031);e.add(h1);
-      /* a flat lid across the top gives the confident look */
-      const lid=[];for(let i=0;i<=4;i++){const t=i/4-.5;lid.push(V3(t*.15,.054+s*t*.014,.02))}e.add(tube(lid,.012,dark,0,10));eyes.push(e);
-      const pts=[];for(let i=0;i<=8;i++){const t=i/8-.5;pts.push(onHead(s*.16+t*.14,.06+.07*(1-4*t*t),.012).p)}const hp=tube(pts,.018,dark,0,24);hp.visible=false;G.add(hp);happy.push(hp);
-      /* eye black */
-      const eb=[];for(let i=0;i<=6;i++){const t=i/6-.5;eb.push(onHead(s*.175+t*.15,-.03-.012*(1-4*t*t),-.006).p)}G.add(tube(eb,.021,dark,0,16))}
-    /* a wide confident grin, teeth together */
-    const y0=-.125,M=(x,y,o)=>onHead(x,y,o||.012).p,proj=(sh,o)=>{const g=new T.ShapeGeometry(sh,28),q=g.attributes.position;for(let i=0;i<q.count;i++){const v=M(q.getX(i),q.getY(i)+y0,o);q.setXYZ(i,v.x,v.y,v.z)}return g};
-    const top=t=>[-.115+.24*t,-.012*Math.sin(t*PI)+.03*t*t],bot=t=>[.125-.24*t,.03*(1-t)*(1-t)-.075*Math.sin(t*PI)];
-    const ms=new T.Shape();for(let i=0;i<=16;i++){const q=top(i/16);i?ms.lineTo(q[0],q[1]):ms.moveTo(q[0],q[1])}for(let i=1;i<16;i++){const q=bot(i/16);ms.lineTo(q[0],q[1])}ms.closePath();
-    G.add(new T.Mesh(proj(ms,.012),new T.MeshBasicMaterial({color:'#ffffff',side:T.DoubleSide})));
-    const lp=[];for(let i=0;i<16;i++){const q=top(i/16);lp.push(M(q[0],q[1]+y0,.017))}for(let i=0;i<16;i++){const q=bot(i/16);lp.push(M(q[0],q[1]+y0,.017))}G.add(tube(lp,.0095,dark,0,80,true));
-    for(const x of [-.05,.005,.06]){const a=top((x+.115)/.24),bq=bot((.125-x)/.24);G.add(tube([M(x,a[1]+y0,.016),M(x,bq[1]+y0,.016)],.004,dark,0,4))}
+    G.add(mesh(headGeo('head',{tint:[.72,.44,.38]}),toonV(skin,{fin:'skin'})));
+    const dark=new T.MeshBasicMaterial({color:'#1c1310'}),white=new T.MeshBasicMaterial({color:'#f3f1ec'}),irisM=new T.MeshBasicMaterial({color:cfg.eyes||'#3a2415'}),eyes=[],happy=[];
+    /* focused eyes: flat-topped, a heavy lid line that drops toward the nose */
+    for(const s of [-1,1]){const {p,n}=onHead(s*.165,.075,.004),e=new T.Group();e.position.copy(p);e.lookAt(p.clone().add(n));e.rotateY(-s*.1);G.add(e);
+      const rimE=new T.Mesh(new T.SphereGeometry(1,32,24),dark);rimE.scale.set(.074,.045,.02);rimE.position.y=-.006;e.add(rimE);
+      const wh=new T.Mesh(new T.SphereGeometry(1,32,24),white);wh.scale.set(.066,.037,.026);wh.position.y=-.006;e.add(wh);
+      const ir=new T.Mesh(new T.SphereGeometry(1,24,16),irisM);ir.scale.set(.034,.036,.012);ir.position.set(-s*.01,-.004,.02);e.add(ir);
+      const pu=new T.Mesh(new T.SphereGeometry(1,20,14),dark);pu.scale.set(.019,.021,.008);pu.position.set(-s*.01,-.004,.029);e.add(pu);
+      const h1=new T.Mesh(new T.SphereGeometry(1,12,8),white);h1.scale.set(.008,.009,.005);h1.position.set(-s*.01+.012,.008,.035);e.add(h1);
+      const lid=[];for(let i=0;i<=4;i++){const t=i/4-.5;lid.push(V3(t*.17,.026+s*t*.05,.022))}e.add(tube(lid,.0135,dark,0,10));eyes.push(e);
+      const eb=[];for(let i=0;i<=6;i++){const t=i/6-.5;eb.push(onHead(s*.18+t*.15,-.012-.01*(1-4*t*t),-.007).p)}G.add(tube(eb,.021,dark,0,16))}
+    /* a small closed smirk */
+    const M=(x,y)=>onHead(x,y,.006).p;G.add(tube([M(-.075,-.182),M(-.03,-.19),M(.03,-.188),M(.075,-.172),M(.1,-.15)],.0095,dark,0,30));
     return{eyes,happy}}
   /* ---------- helmet: a round bucket with one bold stripe and a chunky two-bar mask ---------- */
-  function helmet(G,cfg){const hc=cfg.helm||'#ffffff',sc=cfg.stripe||'#5b6a85',mk=cfg.mask||'#aab3c0';
-    G.add(mesh(headGeo('shell'),toonV(hc),W_));G.add(mesh(headGeo('rim'),toonV('#2b3145'),0));G.add(new T.Mesh(headGeo('liner'),toonV('#3a4158')));G.add(mesh(headGeo('stripe'),toonV(sc),0));
-    const bar=toonP(mk),R=.036,B=(t,y)=>V3(.665*Math.sin(t),y,.0+.705*Math.cos(t));
-    for(const y of [-.235,-.385]){const p=[];for(let i=0;i<=14;i++)p.push(B(-1.22+2.44*i/14,y));G.add(tube(p,R,bar,W_*.8,70))}
-    for(const t of [-.5,0,.5])G.add(tube([B(t,-.235),B(t,-.31),B(t,-.385)],R*.9,bar,W_*.8,12));
-    const dk=toonP('#2b3145');for(const s of [-1,1]){for(const y of [-.235,-.385]){const c=mesh(new T.SphereGeometry(.052,20,14),dk,0);c.position.copy(B(s*1.22,y));c.scale.set(.6,1,1);G.add(c)}
+  function helmet(G,cfg){const hc=cfg.helm||'#f7f8fa',sc=cfg.stripe||'#353d50',mk=cfg.mask||'#8d95a3';
+    G.add(mesh(headGeo('shell'),toonV(hc,{fin:'gloss'}),W_));G.add(mesh(headGeo('rim'),toonV('#1e2230',{fin:'rubber'}),0));G.add(mesh(headGeo('liner'),toonV('#262b3a',{fin:'rubber'})));G.add(mesh(headGeo('stripe'),toonV(sc,{fin:'gloss'}),0));
+    const bar=toonP(mk,{fin:'steel'}),R=.034,B=(t,y)=>V3(.665*Math.sin(t),y,.0+.705*Math.cos(t));
+    for(const y of [-.085,-.275]){const p=[];for(let i=0;i<=14;i++)p.push(B(-1.22+2.44*i/14,y));G.add(tube(p,R,bar,W_*.8,70))}
+    for(const t of [-.62,.62])G.add(tube([B(t,-.085),B(t,-.18),B(t,-.275)],R*.9,bar,W_*.8,12));
+    const dk=toonP('#2b3145');for(const s of [-1,1]){for(const y of [-.085,-.275]){const c=mesh(new T.SphereGeometry(.052,20,14),dk,0);c.position.copy(B(s*1.22,y));c.scale.set(.6,1,1);G.add(c)}
       const e=onShell(s*1,-.12,-.02,.002),d=mesh(new T.CircleGeometry(.075,32),new T.MeshBasicMaterial({color:'#2b3145'}),0);d.castShadow=false;d.position.copy(e.p);d.lookAt(e.p.clone().add(e.n));G.add(d);
       const d2=new T.Mesh(new T.RingGeometry(.075,.092,32),new T.MeshBasicMaterial({color:'#c9d0db'}));d2.position.copy(e.p);d2.lookAt(e.p.clone().add(e.n));G.add(d2)}
     /* painted shine */
@@ -166,33 +157,34 @@ const BH=(function(){
   /* ---------- body ---------- */
   function jerseyTex(j,num){return tex('jy3|'+JSON.stringify(j)+'|'+num,1024,512,(g,w,h)=>{g.fillStyle=j.c;g.fillRect(0,0,w,h);const n=String(num==null?'':num);if(!n)return;g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';
       for(const u of [.25]){g.save();g.translate(u*w,(1-(.4-.28)/.4)*h);g.scale(.5,1);const s=300;g.font=`900 ${s}px ${FONT}`;g.lineWidth=34;g.strokeStyle=j.t;g.strokeText(n,0,0);g.fillStyle=j.n;g.fillText(n,0,0);g.restore()}},{wrapS:1})}
-  function body(G,cfg){const j=Object.assign({c:'#4a5873',n:'#ffffff',t:'#262e45',pt:'#f4f6fa'},cfg.jersey||{}),skin=SKIN[cfg.skin==null?2:cfg.skin|0]||SKIN[2],pc=cfg.pads||'#b9c1cd';
-    G.add(mesh(bodyGeo('jersey',{uv:(x,y,z)=>[((Math.atan2(x,z)/TAU+.25)%1+1)%1,(y-.28)/.4]}),toonV('#ffffff',{map:jerseyTex(j,cfg.num)}),W_));
-    G.add(mesh(bodyGeo('pants'),toonV(j.pt),W_));G.add(mesh(bodyGeo('shoe'),toonV('#262b3a'),W_));G.add(mesh(bodyGeo('white'),toonV('#ffffff'),W_*.7));
+  function body(G,cfg){const j=Object.assign({c:'#353d50',n:'#ffffff',t:'#12151d',pt:'#eef0f4'},cfg.jersey||{}),skin=SKIN[cfg.skin==null?2:cfg.skin|0]||SKIN[2],pc=cfg.pads||'#9aa2af';
+    G.add(mesh(bodyGeo('jersey',{uv:(x,y,z)=>[((Math.atan2(x,z)/TAU+.25)%1+1)%1,(y-.28)/.4]}),toonV('#ffffff',{map:jerseyTex(j,cfg.num),fin:'cloth',sheenColor:new T.Color('#8fa0c4')}),W_));
+    G.add(mesh(bodyGeo('pants'),toonV(j.pt,{fin:'satin',sheenColor:new T.Color('#ffffff')}),W_));G.add(mesh(bodyGeo('shoe'),toonV('#15171d',{fin:'gloss'}),W_));G.add(mesh(bodyGeo('white'),toonV('#f4f5f7',{fin:'satin'}),W_*.7));
     G.add(mesh(bodyGeo('pads'),toonV(pc),W_));G.add(mesh(bodyGeo('trim'),toonV(shade(pc,-.45)),0));for(const sd of [-1,1])for(const a of [-.8,0,.8]){const q=hit(D.pads,[sd*.42,.57,Math.sin(a)*.1],nrm([sd*.8,.3,Math.sin(a)*.75]),0,.5),rv=new T.Mesh(new T.SphereGeometry(.016,12,8),toonP('#ffffff'));rv.position.copy(q);G.add(rv)}
     {const pl=cfg.plate,pm=pl?toonV('#ffffff',{map:patTex(pl,'plate',256,170)}):toonV(pc);G.add(mesh(bodyGeo('plate',{uv:(x,y,z)=>[(-x+.14)/.28,(y-.29)/.18]}),pm,W_));G.add(mesh(bodyGeo('strap'),toonV('#3a4158'),0));G.add(mesh(bodyGeo('plateTrim'),toonV(pl?shade(pl.c2||pl.c||'#888',-.55):shade(pc,-.45)),0))}
     const sl=cfg.sleeve,arms=[];for(const s of [1,-1]){const a=new T.Group();a.position.set(s*.335,.5,0);const in_=new T.Group();in_.scale.x=s;a.add(in_);
-      in_.add(mesh(armGeo('sleeve'),toonV(j.c),W_));in_.add(mesh(armGeo('skin',{tint:[.8,.5,.42]}),toonV(skin),W_));in_.add(mesh(armGeo('band'),toonV('#ffffff'),0));if(sl&&(sl.arm!=='L'||s===1))in_.add(mesh(armGeo('cover',{uv:coverUV}),toonV('#ffffff',{map:patTex(sl,'sleeve',256,256)}),W_*.6));G.add(a);arms.push(a)}
+      in_.add(mesh(armGeo('sleeve'),toonV(j.c,{fin:'cloth',sheenColor:new T.Color('#8fa0c4')}),W_));in_.add(mesh(armGeo('skin',{tint:[.8,.5,.42]}),toonV(skin,{fin:'skin'}),W_));in_.add(mesh(armGeo('hand'),toonV(cfg.glove||'#3a4254',{fin:'rubber'}),W_));in_.add(mesh(armGeo('band'),toonV('#ffffff'),0));if(sl&&(sl.arm!=='L'||s===1))in_.add(mesh(armGeo('cover',{uv:coverUV}),toonV('#ffffff',{map:patTex(sl,'sleeve',256,256)}),W_*.6));G.add(a);arms.push(a)}
     /* football */
     const ball=new T.Group(),pr=[];for(let i=0;i<=32;i++){const t=i/32*2-1;pr.push(new T.Vector2(.092*Math.pow(Math.max(0,1-t*t),.6)+.0005,t*.15))}
     ball.add(mesh(new T.LatheGeometry(pr,40),toonP('#ffffff',{map:tex('ball3',256,256,(g,w,h)=>{g.fillStyle='#a8551f';g.fillRect(0,0,w,h);g.fillStyle='#ffffff';g.fillRect(0,h*.16,w,h*.06);g.fillRect(0,h*.78,w,h*.06);g.fillRect(w*.24,h*.36,w*.02,h*.28);for(let i=0;i<5;i++)g.fillRect(w*.215,h*(.39+i*.05),w*.07,h*.02)})}),W_));G.add(ball);
     /* the spring */
-    const sg=new T.Group();sg.position.y=.64;const pts=[];for(let i=0;i<=90;i++){const t=i/90;pts.push(V3(Math.cos(t*TAU*3.2)*.085,t*.23,Math.sin(t*TAU*3.2)*.085))}sg.add(mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),160,.024,10),toonP('#dfe5ee'),W_*.7));G.add(sg);
+    const sg=new T.Group();sg.position.y=.64;const pts=[];for(let i=0;i<=90;i++){const t=i/90;pts.push(V3(Math.cos(t*TAU*3.2)*.085,t*.23,Math.sin(t*TAU*3.2)*.085))}sg.add(mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),160,.024,10),toonP('#eef2f6',{fin:'metal'}),W_*.7));G.add(sg);
     return{arms,ball,spring:sg}}
   function base(G,cfg){const pr=[[0,-.24],[.66,-.24],[.7,-.225],[.715,-.19],[.715,-.06],[.7,-.025],[.66,0],[0,0]].map(([x,y])=>new T.Vector2(x,y));
-    const b=mesh(new T.LatheGeometry(pr,96),toonP(cfg.base||'#27314f'),W_);b.receiveShadow=true;G.add(b);
-    const top=new T.Mesh(new T.CircleGeometry(.655,64),new T.MeshToonMaterial({color:'#34406a',gradientMap:gm()}));top.rotation.x=-PI/2;top.position.y=.002;top.receiveShadow=true;G.add(top);
-    for(const y of [-.035,-.215]){const r=new T.Mesh(new T.TorusGeometry(.716,.014,10,96),toonP('#FFC93A'));r.rotation.x=PI/2;r.position.y=y;G.add(r)}
+    const b=mesh(new T.LatheGeometry(pr,96),toonP(cfg.base||'#141a2e',{fin:'gloss'}),W_);b.receiveShadow=true;G.add(b);
+    const top=new T.Mesh(new T.CircleGeometry(.655,64),toonP('#1b2340',{fin:'gloss'}));top.rotation.x=-PI/2;top.position.y=.002;top.receiveShadow=true;G.add(top);
+    for(const y of [-.035,-.215]){const r=new T.Mesh(new T.TorusGeometry(.716,.014,10,96),toonP('#f2c04a',{fin:'metal',roughness:.22}));r.rotation.x=PI/2;r.position.y=y;G.add(r)}
     const nm=(cfg.name||'VARSITY').toUpperCase(),pt=tex('pl3|'+nm,1024,180,(g,w,h)=>{g.fillStyle='#FFC93A';g.beginPath();g.roundRect(0,0,w,h,50);g.fill();g.fillStyle='#1b2238';g.textAlign='center';g.textBaseline='middle';let s=128;g.font=`900 ${s}px ${FONT}`;while(g.measureText(nm).width>w*.84&&s>40){s-=4;g.font=`900 ${s}px ${FONT}`}g.fillText(nm,w/2,h*.55)});
     const pl=new T.Mesh(new T.CylinderGeometry(.722,.722,.11,48,1,true,-.42,.84),new T.MeshBasicMaterial({map:pt,transparent:true}));pl.position.y=-.125;G.add(pl)}
   function figure(cfg){const root=new T.Group(),hop=new T.Group(),bodyG=new T.Group(),pivot=new T.Group(),headG=new T.Group();root.add(hop);base(root,cfg);hop.add(bodyG);const B=body(bodyG,cfg);
-    pivot.position.set(0,.66,0);hop.add(pivot);headG.position.set(0,HY-.66,0);pivot.add(headG);const F=face(headG,cfg);helmet(headG,Object.assign({helm:'#ffffff'},cfg));return Object.assign({root,hop,body:bodyG,pivot,head:headG},B,F)}
+    pivot.position.set(0,.66*BSY,0);hop.add(pivot);headG.scale.setScalar(HS);headG.position.set(0,GAP+.47*HS,0);pivot.add(headG);bodyG.scale.set(BSX,BSY,BSX);const F=face(headG,cfg);helmet(headG,Object.assign({helm:'#ffffff'},cfg));return Object.assign({root,hop,body:bodyG,pivot,head:headG},B,F)}
   function disposeTree(o){o.traverse(x=>{if(x.geometry&&!x.geometry.userData.keep)x.geometry.dispose()})}
-  function setupScene(r){const scene=new T.Scene();
-    const key=new T.DirectionalLight('#ffffff',2.35);key.position.set(-2.2,4.6,4.2);key.castShadow=true;key.shadow.mapSize.set(1024,1024);const sc=key.shadow.camera;sc.left=-1.3;sc.right=1.3;sc.top=2.6;sc.bottom=-.6;sc.near=.5;sc.far=14;key.shadow.radius=4;key.shadow.bias=-.0005;scene.add(key);
-    scene.add(new T.HemisphereLight('#ffffff','#8d93b8',1.0));
-    const sh=new T.Mesh(new T.PlaneGeometry(3.6,3.6),new T.MeshBasicMaterial({map:tex('floor',256,256,(g,w,h)=>{const q=g.createRadialGradient(128,128,20,128,128,128);q.addColorStop(0,'rgba(8,10,30,.55)');q.addColorStop(.5,'rgba(8,10,30,.22)');q.addColorStop(1,'rgba(8,10,30,0)');g.fillStyle=q;g.fillRect(0,0,w,h)}),transparent:true,depthWrite:false}));sh.rotation.x=-PI/2;sh.position.y=-.241;scene.add(sh);return{scene}}
-  function mkRenderer(canvas,w,h,pr){const r=new T.WebGLRenderer({canvas,antialias:true,alpha:true});r.setPixelRatio(pr);r.setSize(w,h,false);r.toneMapping=T.NoToneMapping;r.shadowMap.enabled=true;r.shadowMap.type=T.PCFShadowMap;r.setClearColor(0,0);return r}
+  function setupScene(r){const scene=new T.Scene(),pg=new T.PMREMGenerator(r);scene.environment=pg.fromScene(new T.RoomEnvironment(),.03).texture;scene.environmentIntensity=.7;pg.dispose();
+    const key=new T.DirectionalLight('#fff1e0',2.6);key.position.set(-2.4,4.6,3.8);key.castShadow=true;key.shadow.mapSize.set(1024,1024);const sc=key.shadow.camera;sc.left=-1.4;sc.right=1.4;sc.top=2.7;sc.bottom=-.6;sc.near=.5;sc.far=14;key.shadow.radius=6;key.shadow.bias=-.0004;key.shadow.normalBias=.02;scene.add(key);
+    const r1=new T.DirectionalLight('#4f9dff',2.8);r1.position.set(3.6,2.6,-3);scene.add(r1);const r2=new T.DirectionalLight('#ffb066',1.7);r2.position.set(-3.6,2.2,-3.2);scene.add(r2);scene.add(new T.HemisphereLight('#dfe8ff','#2a2233',.45));
+    const sh=new T.Mesh(new T.PlaneGeometry(3.6,3.6),new T.MeshBasicMaterial({map:tex('floor',256,256,(g,w,h)=>{const q=g.createRadialGradient(128,128,20,128,128,128);q.addColorStop(0,'rgba(0,0,0,.6)');q.addColorStop(.5,'rgba(0,0,0,.25)');q.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=q;g.fillRect(0,0,w,h)}),transparent:true,depthWrite:false}));sh.rotation.x=-PI/2;sh.position.y=-.241;scene.add(sh);
+    const gl=new T.Mesh(new T.PlaneGeometry(6,6),new T.MeshBasicMaterial({map:tex('glow',256,256,(g,w,h)=>{const q=g.createRadialGradient(128,128,0,128,128,128);q.addColorStop(0,'rgba(110,160,255,.5)');q.addColorStop(.45,'rgba(60,100,230,.16)');q.addColorStop(1,'rgba(40,60,160,0)');g.fillStyle=q;g.fillRect(0,0,w,h)}),transparent:true,depthWrite:false,blending:T.AdditiveBlending}));gl.position.set(0,1.05,-1.6);scene.add(gl);return{scene}}
+  function mkRenderer(canvas,w,h,pr){const r=new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});r.setPixelRatio(pr);r.setSize(w,h,false);r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=1.05;r.shadowMap.enabled=true;r.shadowMap.type=T.PCFShadowMap;r.setClearColor(0,0);return r}
   /* the viewer. Always alive: bounces to a beat, head wobbles on its spring, blinks, and every few seconds tosses the ball, hops or waves. Drag to spin, tap for a boing. */
   function view(canvas,o){o=o||{};const W=()=>Math.max(50,canvas.clientWidth||300),H=()=>Math.max(50,canvas.clientHeight||300);
     const r=mkRenderer(canvas,W(),H(),o.pr||Math.min(2,window.devicePixelRatio||1)),{scene}=setupScene(r),cam=new T.PerspectiveCamera(26,W()/H(),.1,50);
@@ -205,24 +197,25 @@ const BH=(function(){
     const ease=t=>t*t*(3-2*t),cl=(t)=>Math.max(0,Math.min(1,t));
     function adv(dt){tm+=dt;frame();if(!fig){r.render(scene,cam);return}
       if(!drag){idle+=dt;yaw+=yawV*dt;yawV*=Math.pow(.15,dt);if(idle>2.5){const tg=-.35+Math.sin(tm*.3)*.45;yaw+=(tg-yaw)*Math.min(1,dt*.6)}}
-      if(!manual){nextE-=dt;if(nextE<=0&&!em){nextE=4+Math.random()*2.5;emote(['toss','hop','wave'][ei++%3])}}
+      if(!manual){nextE-=dt;if(nextE<=0&&!em){nextE=4+Math.random()*2.5;emote(['toss','nod'][ei++%2])}}
       /* groove: the body squashes to a beat and the head lags behind on the spring */
-      const beat=Math.sin(tm*5.2),sq=.028*beat;let hopY=0,sqE=0,aR=-1.05,aRz=.1,aL=.12+.05*Math.sin(tm*2.6),aLz=.0,ballFree=null;
+      const beat=Math.sin(tm*2.1)*.35,sq=.006*Math.sin(tm*2.1);let hopY=0,sqE=0,aR=-1.05,aRz=.1,aL=.12+.05*Math.sin(tm*2.6),aLz=.0,ballFree=null;
       if(em){et+=dt;
         if(em==='hop'){const T0=.16,T1=.5,T2=.2;if(et<T0)sqE=-.14*Math.sin(et/T0*PI/2);else if(et<T0+T1){const q=(et-T0)/T1;hopY=.34*4*q*(1-q);sqE=.1*(1-q);if(q<.1)bob.vy+=-9*dt}else if(et<T0+T1+T2){const q=(et-T0-T1)/T2;sqE=-.16*Math.sin(q*PI);if(q<.15){bob.vy+=14*dt;bob.vx+=10*dt}}else em=null;aL=-.5*cl(et/.3)*(em?1:0);aLz=.9*Math.sin(cl(et/(T0+T1))*PI)}
         else if(em==='toss'){const U=.22,F=.95;if(et<U){aR=-1.05-1.0*ease(et/U)}else if(et<U+F){const q=(et-U)/F;aR=-2.05+1.0*ease(cl(q*2.2))-.0;ballFree=q;if(q>.75)aR=-1.05-.25*Math.sin((q-.75)/.25*PI)}else{em=null}}
+        else if(em==='nod'){if(et<.05||et>.42&&et<.47)bob.vx+=38*dt;if(et>1)em=null}
         else if(em==='wave'){const D_=1.5;if(et<D_){const q=et/D_,up=ease(cl(q*5))*ease(cl((1-q)*5));aLz=2.5*up;aL=0;fig.arms[0].userData.w=.35*Math.sin(et*16)*up}else{em=null;fig.arms[0].userData.w=0}}}
       happyT=Math.max(0,happyT-dt);
       const k=58,c=1.7;bob.vx+=(-k*bob.x-c*bob.vx+beat*1.6)*dt;bob.vz+=(-k*bob.z-c*bob.vz+Math.cos(tm*2.6)*1.5)*dt;bob.x+=bob.vx*dt;bob.z+=bob.vz*dt;bob.vt+=(-50*bob.t-2.2*bob.vt)*dt;bob.t+=bob.vt*dt;
       const lim=.42;bob.x=Math.max(-lim,Math.min(lim,bob.x));bob.z=Math.max(-lim,Math.min(lim,bob.z));bob.vy+=(-170*bob.y-6*bob.vy)*dt;bob.y+=bob.vy*dt;
       blink-=dt;if(blink<=0){blink=2+Math.random()*2.4;bt=0}let ey=1;if(bt>=0){bt+=dt;const q=bt/.16;ey=1-.92*Math.sin(Math.min(1,q)*PI);if(q>=1)bt=-1}
-      const sy=1+sq+sqE,sx=1-(sq+sqE)*.6;fig.root.rotation.y=yaw;fig.hop.position.y=hopY;fig.body.scale.set(sx,sy,sx);
-      const py=.66*sy+Math.max(-.05,Math.min(.1,bob.y*.14));fig.pivot.position.y=py;fig.pivot.rotation.set(bob.x,bob.t+.1*Math.sin(tm*.9),bob.z);
-      fig.spring.scale.y=(py-.64*sy+.23)/.23/sy;fig.spring.rotation.set(bob.x*.5,0,bob.z*.5);
-      const hp=happyT>0||hopY>.05||ballFree!=null&&ballFree>.15&&ballFree<.7;for(const e of fig.eyes){e.visible=!hp;e.scale.y=ey}for(const h of fig.happy)h.visible=hp;
+      const sy=1+sq+sqE,sx=1-(sq+sqE)*.6;fig.root.rotation.y=yaw;fig.hop.position.y=hopY;fig.body.scale.set(sx*BSX,sy*BSY,sx*BSX);
+      const py=.66*BSY*sy+Math.max(-.05,Math.min(.1,bob.y*.14));fig.pivot.position.y=py;fig.pivot.rotation.set(bob.x,bob.t+.14*Math.sin(tm*.7),bob.z);
+      fig.spring.scale.y=Math.max(.2,(py+GAP+.03-.64*BSY*sy)/(.23*BSY*sy));fig.spring.rotation.set(bob.x*.5,0,bob.z*.5);
+      const hp=false;for(const e of fig.eyes){e.visible=!hp;e.scale.y=ey}for(const h of fig.happy)h.visible=hp;
       fig.arms[1].rotation.set(aR,0,-aRz);fig.arms[0].rotation.set(aL,0,aLz+(fig.arms[0].userData.w||0));
       /* the ball rides in the right hand, or flies */
-      fig.body.updateMatrixWorld(true);const hand=fig.arms[1].localToWorld(V3(-.115,-.36,.11));fig.hop.worldToLocal(hand);
+      fig.body.updateMatrixWorld(true);const hand=fig.arms[1].localToWorld(V3(-.115,-.37,.12));fig.hop.worldToLocal(hand);
       if(ballFree!=null&&ballFree<.92){const q=ballFree/.92;fig.ball.position.set(hand.x*(1-.0),.0,hand.z);fig.ball.position.y=.78+ .0+ (1.05)*4*q*(1-q)*.62+ (hand.y-.78)*(q>.85?(q-.85)/.15:0)+(q<.1?(hand.y-.78)*(1-q/.1):0);fig.ball.position.x=-.36;fig.ball.position.z=.36;fig.ball.rotation.set(q*TAU*2+.5,0,.4)}
       else{fig.ball.position.copy(hand);fig.ball.rotation.set(.5,0,.4)}
       r.render(scene,cam)}
@@ -231,7 +224,7 @@ const BH=(function(){
     canvas.style.touchAction='pan-y';
     canvas.addEventListener('pointerdown',e=>{drag={t:performance.now(),moved:0,lx:e.clientX,lt:performance.now()};idle=0;try{canvas.setPointerCapture(e.pointerId)}catch(_){}});
     canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.lx,now=performance.now();drag.moved+=Math.abs(dx);yaw+=dx*.012;yawV=dx*.012/Math.max(.008,(now-drag.lt)/1000);drag.lx=e.clientX;drag.lt=now;bob.vz+=-dx*.03;bob.vt+=dx*.02});
-    canvas.addEventListener('pointerup',()=>{if(!drag)return;const d=drag;drag=null;idle=0;if(d.moved<6&&performance.now()-d.t<400){kick(1.2);happyT=1.2}});canvas.addEventListener('pointercancel',()=>{drag=null});
+    canvas.addEventListener('pointerup',()=>{if(!drag)return;const d=drag;drag=null;idle=0;if(d.moved<6&&performance.now()-d.t<400)kick(1.2)});canvas.addEventListener('pointercancel',()=>{drag=null});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)start()});
     return{set,start,kick,emote,canvas,turn:y=>{yaw=y;yawV=0;idle=-1e9},film:(dt,y)=>{manual=true;if(y!=null){yaw=y;idle=-1e9}adv(dt)},dispose:()=>{alive=false;if(raf)cancelAnimationFrame(raf);r.dispose()}}}
   return{load,glOK,view,SKIN,ready:()=>!!T}})();
