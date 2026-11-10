@@ -3043,7 +3043,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v398 · Nov 9';
+const APP_BUILD='v399 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5402,12 +5402,14 @@ const PP_MK={
   td:{l:'Rushing + receiving TDs',g:'Touchdowns',pos:['QB','RB','WR','TE'],min:.4,f:s=>(s.rushTD||0)+(s.recTD||0)},
   tkl:{l:'Tackles',g:'Defense',pos:['DEF'],min:3,f:s=>s.tkl},
   sack:{l:'Sacks',g:'Defense',pos:['DEF'],min:.4,f:s=>s.sack},
-  dInt:{l:'Interceptions (defense)',g:'Interceptions',pos:['DEF'],min:.25,f:s=>s.dInt}
+  dInt:{l:'Interceptions (defense)',g:'Interceptions',pos:['DEF'],min:.25,f:s=>s.dInt},
+  xpm:{l:'PATs made',g:'Kicking',pos:['K'],min:1,f:s=>s.xpm},
+  fgm:{l:'Field goals made',g:'Kicking',pos:['K'],min:.4,f:s=>s.fgm}
 };
 const PP_ALWAYS=["JoJo Bryant|Bishop's"];   /* players who always get their lines, even outside their team's top players (owner) */
 /* v394 (owner): more players get lines: up to 4 per stat per team (was 2); the per-stat minimums in PP_MK still keep out weak stat lines */
-const PP_TOP={passYd:1,passTD:1,int:1,rushYd:4,rec:4,recYd:4,td:4,tkl:4,sack:3,dInt:3};
-const PP_GROUPS=['Passing','Rushing','Receiving','Touchdowns','Interceptions','Defense'];
+const PP_TOP={passYd:1,passTD:1,int:1,rushYd:4,rec:4,recYd:4,td:4,tkl:4,sack:3,dInt:3,xpm:1,fgm:1};
+const PP_GROUPS=['Passing','Rushing','Receiving','Touchdowns','Interceptions','Defense','Kicking'];
 const _erf=x=>{const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x))};
 const _phi=z=>.5*(1+_erf(z/Math.SQRT2));
 function _pOver(vals,mu,line,yards){
