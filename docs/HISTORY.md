@@ -308,3 +308,5 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v402 (Nov 10): free Duo gift for everyone
 - `PACKS.duogift` (off, free): once per account (`inv.fr.duog`), pick any school (`ptSheet` lists schools with duos) and get 1 of its Duo cards (`rollDuoTeam`), Epic 70 / Legendary 22 / Mythical 8. Banner at the top of the Shop (`dgShopCard`, opens with how='duog').
+## v403 (Nov 10): sign in once
+Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeeded). Cause: `route()` runs before `boot()`, `guestGate()`/`openAuth()` opened the sign-in screen while boot was still awaiting `getSession()` (ME.mode is 'guest' by default), and nothing closed it once the saved session loaded. Fix: `window.AUTH_READY` is set by boot once it knows who you are; `openAuth()` and `guestGate()` wait for it; if a session is found, an open sign-in screen is closed and the `vs-reauth` "Varsity got an update" note is cleared.

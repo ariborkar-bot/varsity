@@ -2890,7 +2890,8 @@ function libRetry(){if(SB||!NEEDS_SERVER||window.__lr||ME.mode!=='offline')retur
     window.__lr=false})()}
 /* v357: route() can ask for the sign-in screen before boot() has made the client. Wait for boot instead of calling
    libRetry (which reloaded signed-out visitors' page up to 3 times, and forever where sessionStorage is blocked) */
-function openAuth(){if(!SB){if(ME.mode==='offline')libRetry();else if(!window.__oaT)window.__oaT=setTimeout(()=>{window.__oaT=0;if(ME.mode==='guest'||ME.mode==='offline')openAuth()},150);return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
+/* v403 (owner): no sign-in screen until boot() has checked the saved login (AUTH_READY). Before, it opened while that check was still running and stayed up after it found the session, so people signed in 2-4 times */
+function openAuth(){if(!SB||!window.AUTH_READY){if(ME.mode==='offline')libRetry();else if(!window.__oaT)window.__oaT=setTimeout(()=>{window.__oaT=0;if(ME.mode==='guest'||ME.mode==='offline')openAuth()},150);return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
 /* v393 (owner): nobody uses the app (tabs, packs, buttons) before sign-in AND the profile step are done: any click outside the sign-in / profile screen reopens it */
 document.addEventListener('click',e=>{try{const t=e.target;if(!t||!t.closest||t.closest('#gate')||t.closest('[data-priv]')||t.closest('[data-admexit]'))return;
   if(ME.mode==='guest'&&location.hash!=='#privacy'){e.preventDefault();e.stopPropagation();openAuth();return}
@@ -3054,7 +3055,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v402 · Nov 10';
+const APP_BUILD='v403 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -9007,7 +9008,7 @@ function route(){
   SHEET=false;closePlayer();closeNotes();render();window.scrollTo(0,0);guestGate();
 }
 /* v311: signed-out visitors only see the sign-in screen (and the privacy policy) */
-function guestGate(){if(ME.mode==='live'){try{setupCheck()}catch(_){}return}if(ME.mode!=='guest')return;if(location.hash==='#privacy')closeGate();else if($('#gate').hidden)openAuth()}
+function guestGate(){if(!window.AUTH_READY&&NEEDS_SERVER)return;if(ME.mode==='live'){try{setupCheck()}catch(_){}return}if(ME.mode!=='guest')return;if(location.hash==='#privacy')closeGate();else if($('#gate').hidden)openAuth()}
 window.addEventListener('hashchange',route);
 /* phones: swipe a player card (or notifications) down to close it. Works when the sheet is scrolled to the top. */
 (()=>{let y0=0,x0=0,dy=0,t0=0,dp=null,drag=false;
@@ -9568,6 +9569,8 @@ async function boot(){
     if(session){ME.uid=session.user.id;ME.email=session.user.email;ME.mode='live';try{const a=await SB.rpc('is_admin_account');ME.adminAcct=!!a.data;if(ME.adminAcct){const {data}=await SB.rpc('is_admin');ME.admin=!!data}}catch(_){}}
     else{ME.uid=null;ME.mode='guest';ME.admin=false}
     try{const v=JSON.parse(sessionStorage.getItem('varsity-viewas')||'null');if(v&&v.uid&&ME.admin&&ME.mode==='live'&&v.uid!==ME.uid){VA={uid:v.uid,name:v.name||'this member',real:ME.uid};ME.uid=v.uid;ME.mode='readonly'}else sessionStorage.removeItem('varsity-viewas')}catch(_){}
+    window.AUTH_READY=true;
+    if(session){try{sessionStorage.removeItem('vs-reauth')}catch(_){}const g=$('#gate');if(g&&!g.hidden&&g.querySelector('#au-form'))closeGate()}
     SB.auth.onAuthStateChange((ev,s)=>{if((ev==='SIGNED_IN'&&s&&s.user.id!==(VA?VA.real:ME.uid))||(ev==='SIGNED_OUT'&&ME.uid))location.reload();if(ev==='PASSWORD_RECOVERY')setTimeout(newPassword,300)});
   }else if(NEEDS_SERVER){
     DB=memDb();ME.uid=null;ME.mode='offline';ME.admin=false;setTimeout(libRetry,1500);
@@ -9575,6 +9578,7 @@ async function boot(){
     DB=memDb();ME.uid='me';ME.admin=true;ME.mode='demo';
     try{const p=JSON.parse(localStorage.getItem('gsd-demo-profile')||'null');if(p)await DB.doc('profiles/me').set(p)}catch(_){}
   }
+  window.AUTH_READY=true;
   setTimeout(()=>{if(!S.loaded.profiles){S.timeout=true;touch()}},10000);
   subscribe();touch();
 }
