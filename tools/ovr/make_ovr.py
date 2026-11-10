@@ -71,7 +71,7 @@ def build(sport):
    'Football: Rating score = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
    'Basketball: Rating score = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
    'Games = games with stats behind the rating (football 2026, basketball 2025-26). Few games = low confidence.',
-   'Status Out = listed as out in the app this week. Basketball grades are 2026-27 (moved up one year); 0 = unknown.',
+   'One tab per position (best OVR first, # = rank within the position); the last tab lists everyone. DEF = defensive players MaxPreps does not split into DL/LB/DB. Status Out = listed as out in the app this week. Basketball grades are 2026-27 (moved up one year); 0 = unknown.',
    'Source: MaxPreps box scores and season stats already in the app (stats.js, tools/data/bb_2526_players.txt). Built by tools/ovr/make_ovr.py.']
   yr = '2026 season' if sport == 'Football' else '2025-26 season (the latest basketball stats; 2026-27 has not started)'
   notes = [allnotes[0], allnotes[1], allnotes[2 if sport == 'Football' else 3], 'Ratings use only this season (%s), per game, never career or season totals, so a player is not rated higher just for playing more games.' % yr] + allnotes[4:]
@@ -91,8 +91,13 @@ def build(sport):
           row[9].font = Font(name=AR, bold=True)
       for k, w in enumerate(W, 1): ws.column_dimensions[get_column_letter(k)].width = w
       ws.freeze_panes = 'C2'; ws.auto_filter.ref = f'A1:K{len(items) + 1}'
-  sheet('Players', [r for r in rows if r['sport'] == sport])
-  wb.move_sheet('Notes', offset=1)
+  order = ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'DEF', 'K'] if sport == 'Football' else ['PG', 'SG', 'SF', 'PF', 'C']
+  mine = [r for r in rows if r['sport'] == sport]
+  for pos in order:
+      L = [r for r in mine if r['pos'] == pos]
+      if L: sheet(pos, L)
+  sheet('All players', mine)   # last tab: everyone, best first
+  wb.move_sheet('Notes', offset=len(wb.sheetnames) - 1)
   wb.save(os.path.join(OUTD, 'varsity_%s_ovr.xlsx' % sport.lower()))
 
 os.makedirs(OUTD, exist_ok=True)
