@@ -266,3 +266,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 ## v386 (Nov 9): God Picks pack back in the Shop; admin messages on ban / gift / removal
 - `PACKS.godpick` lost `off:1`: back in the Shop at 25,000 tokens ($99.99 shown as 'Coming soon'), still the most expensive pack (5 Top 10 Immortal cards, keep 1). Pick 1 of 5 stays out of the Shop.
 - Admin controls has one "Message to the player (optional)" box (`CTL.msg`): it is the ban reason on Ban; on token / card / pack / item gifts and removals (`ctlNote()`) it is saved as a notice in `picks/<uid>.an` and shown once to the player as a "Message from Varsity" pop-up (`anPopup()`, seen time `ansn`, `data-act=anOk`). A notice is only sent when you type a message.
+
+## v387 (Nov 9): every Epic+ player card gets a walkout
+- `packShow(P,got)` now first plays `pkWalkout(null,next,{p,r,…})` for each Epic, Legendary, Mythical or Immortal player card in the pack (position, team, his best stat, the card; lowest rarity first, each skippable; button says Next card / See all cards), then the normal pack screen (`packShow0`). Team cards have no position, so they just flip. The Welcome pack's first card still has its own walkout, then any Epic+ cards among the other 10 get theirs.
