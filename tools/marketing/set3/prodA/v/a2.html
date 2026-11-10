@@ -1,0 +1,82 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#stage{background:#050505}
+#bgl{position:absolute;inset:-40px;background:url(/home/claude/mk/clips/A_still/fb_podium.jpg) center/cover;filter:blur(26px) brightness(.28) saturate(.6);opacity:0}
+.lb{position:absolute;left:0;width:1080px;height:200px;background:#000;z-index:60}
+.lb i{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c9a23a 30%,#f3d27a 50%,#c9a23a 70%,transparent)}
+#intro{position:absolute;left:80px;top:560px;width:860px;z-index:20}
+#intro div{font:400 italic 118px/1.02 IS;color:#f4ecd8;opacity:0}
+#intro div b{font-style:normal;font-weight:400;color:#e8c46a}
+.row{position:absolute;left:41px;width:858px;z-index:10;border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.row img{display:block;width:858px}
+.rk{position:absolute;right:70px;top:300px;font:400 360px/1 Anton;color:transparent;-webkit-text-stroke:3px #e8c46a;z-index:5;opacity:0;letter-spacing:-6px}
+.card{position:absolute;left:60px;top:470px;width:900px;height:740px;border-radius:34px;overflow:hidden;background:#0c1428;opacity:0;z-index:12;box-shadow:0 40px 120px rgba(0,0,0,.8),0 0 0 2px rgba(232,196,106,.55)}
+.card .hd{position:absolute;left:0;top:0;width:610px;height:430px;background-repeat:no-repeat;background-size:1080px 1920px}
+.card .st{position:absolute;left:0;top:450px;width:900px;height:250px;background-repeat:no-repeat;background-size:1080px 1920px}
+.card .fl{position:absolute;top:-200px;left:-600px;width:300px;height:1200px;background:linear-gradient(90deg,transparent,rgba(255,240,200,.35),transparent);transform:rotate(18deg)}
+.big{position:absolute;left:660px;top:500px;width:280px;text-align:center;font:400 380px/1 Anton;color:#e8c46a;z-index:14;opacity:0;text-shadow:0 10px 40px rgba(0,0,0,.6)}
+#pts{position:absolute;left:70px;top:1260px;font:400 120px/1 Anton;color:#f4ecd8;z-index:14;opacity:0}
+#pts small{font:400 italic 64px IS;color:#e8c46a;margin-left:12px}
+#end{position:absolute;inset:0;background:#050505;z-index:40;opacity:0;text-align:center}
+#end .q{position:absolute;left:60px;width:900px;top:560px;font:400 italic 92px/1.08 IS;color:#f4ecd8}
+#end h1{position:absolute;left:0;width:1020px;top:930px;font:900 italic 190px/1 BC;color:#e8c46a;letter-spacing:2px}
+#end p{position:absolute;left:0;width:1020px;top:1160px;font:600 52px TT;color:#f4ecd8;letter-spacing:4px;text-transform:uppercase}
+#grain{opacity:.11!important}
+#vig{position:absolute;inset:0;z-index:50;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.65))}
+</style></head><body><div id="stage">
+ <div id="bgl"></div>
+ <div id="rk" class="rk">10</div>
+ <div id="rows"></div>
+ <div id="intro"><div>san diego’s</div><div><b>top 10</b> walking</div><div>into playoff week:</div></div>
+ <div id="cardA" class="card"><div class="hd"></div><div class="st"></div><i class="fl"></i></div>
+ <div id="big" class="big">3</div>
+ <div id="pts">464.1<small>pts</small></div>
+ <div id="end"><div class="q">who’s walking in next week?<br>find your rank.</div><h1>VARSITY</h1><p>free · link in bio</p></div>
+ <div id="vig"></div>
+ <div class="lb" style="top:0"><i style="bottom:0"></i></div><div class="lb" style="bottom:0;top:auto"><i style="top:0"></i></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const $=id=>document.getElementById(id),B=.6,DROP=6.0;
+const RANKS=[10,9,8,7,6,5,4];const rows=RANKS.map((r,i)=>{const d=document.createElement('div');d.className='row';d.innerHTML=`<img src="/home/claude/mk/clips/A_still/row${r}.png">`;$('rows').appendChild(d);return d});
+const CARDS=[['webb',3,DROP],['polamalu',2,DROP+2.4],['manuel',1,DROP+4.8]];
+function setCard(name){const c=$('cardA'),u=`url(/home/claude/mk/clips/A_still/sheet_${name}.jpg)`;
+  c.querySelector('.hd').style.backgroundImage=u;c.querySelector('.hd').style.backgroundPosition='-20px -400px';
+  c.querySelector('.st').style.backgroundImage=u;c.querySelector('.st').style.backgroundPosition='-90px -860px'}
+async function render(t){
+  // intro text types in on beats 1-3
+  [...$('intro').children].forEach((d,i)=>{const a=i*B+.05;const k=cl((t-a)/.35);d.style.opacity=t<1.8?k:Math.max(0,1-(t-1.8)/.2);d.style.transform=`translateY(${lerp(30,0,E.out(k))}px)`;d.style.filter=`blur(${(1-k)*8}px)`});
+  $('bgl').style.opacity=t<DROP?cl((t-1.2)/.6):0;
+  // rows: one per beat, slow-mo slide from the right with motion blur, snap to a stop on the beat; stack builds upward
+  const rh=250,baseY=1230;
+  rows.forEach((d,i)=>{const at=1.8+i*B;const k=(t-(at-.45))/.45;
+    if(t<at-.45||t>=DROP){d.style.opacity=0;return}
+    const n=Math.floor((t-1.8)/B)-i;
+    let x=k<1?lerp(1100,0,E.out(cl(k))*.85+.15*cl(k)):0;
+    const settle=t>=at?Math.sin(Math.min(1,(t-at)/.25)*Math.PI)*-8:0;
+    let pushed=0;for(let q=i+1;q<rows.length;q++){pushed+=E.io(cl((t-(1.8+q*B-.45))/.25))}
+    d.style.top=(baseY-pushed*rh)+'px';
+    const dim=t>=at+B?.55:1;
+    d.style.opacity=1;d.style.filter=`blur(${k<1?(1-cl(k))*14:0}px) brightness(${dim})`;
+    d.style.transform=`translateX(${x+settle}px)`});
+  // big outline numeral for the current row
+  const ci=Math.floor((t-1.8)/B);const rk=$('rk');
+  if(t>=1.8&&t<DROP&&ci<7){rk.textContent=RANKS[ci];const k=cl((t-1.8-ci*B)/.18);rk.style.opacity=.9;rk.style.transform=`scale(${lerp(1.25,1,E.out(k))})`}else rk.style.opacity=0;
+  // cards #3 #2 #1
+  const c=$('cardA'),bg=$('big');let cur=null;
+  for(const cd of CARDS){if(t>=cd[2]&&t<cd[2]+2.4)cur=cd}
+  if(cur&&t<13.2){setCard(cur[0]);const k=t-cur[2],dur=cur[1]===1?2.4:2.4;
+    const s=lerp(1.0,cur[1]===1?1.06:1.08,k/dur),side=cur[1]===2?-1:1;
+    c.style.opacity=cl(k/.12);c.style.transform=`translateX(${side*lerp(30,0,E.out(cl(k/.6)))}px) scale(${s})`;
+    c.querySelector('.fl').style.transform=`translateX(${lerp(0,1900,cl((k-.15)/1.1))}px) rotate(18deg)`;
+    bg.textContent=cur[1];bg.style.opacity=cl((k-.1)/.2);bg.style.transform=`translateY(${lerp(40,0,E.out(cl((k-.1)/.4)))}px)`;
+    bg.style.color=cur[1]===1?'#f6d77e':'#e8c46a'}
+  else{c.style.opacity=0;bg.style.opacity=0}
+  const p=$('pts');if(cur&&cur[1]===1&&t<13.2){const k=t-cur[2];p.style.opacity=cl((k-.5)/.2);p.firstChild.textContent=(464.1*E.out(cl((k-.5)/1.2))).toFixed(1)}else p.style.opacity=0;
+  // flash on the drop
+  FL.style.opacity=flashAt(t,[[DROP,.85],[DROP+2.4,.35],[DROP+4.8,.5]],.08);
+  // end card
+  const e=$('end'),k=t-13.2;e.style.opacity=k>=0?1:0;
+  if(k>=0){tf(e.querySelector('.q'),{o:cl(k/.3),y:lerp(20,0,E.out(cl(k/.5)))});tf(e.querySelector('h1'),{o:cl((k-.3)/.2),s:lerp(1.08,1,E.out(cl((k-.3)/.6)))});tf(e.querySelector('p'),{o:cl((k-.55)/.3)})}
+}
+</script></body></html>

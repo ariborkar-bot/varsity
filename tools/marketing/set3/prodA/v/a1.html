@@ -1,0 +1,69 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#cam{position:absolute;inset:0;transform-origin:540px 1000px}
+#cam img{position:absolute;left:0;top:0;width:1080px;height:1920px}
+/* native TikTok "background" text: white rounded boxes, black text, hugging each line */
+.cap{position:absolute;left:70px;width:860px;text-align:center;z-index:20}
+.cap span{display:inline;background:#fff;color:#111;font:700 64px/1.42 TT;padding:6px 22px;border-radius:14px;box-decoration-break:clone;-webkit-box-decoration-break:clone;letter-spacing:-.4px}
+.cap.big span{font-size:74px}
+#count{position:absolute;left:70px;width:860px;top:640px;text-align:center;z-index:20}
+#count b{display:inline-block;background:#111;color:#fff;font:800 150px/1 TT;padding:18px 40px 22px;border-radius:26px;letter-spacing:-3px}
+#count small{display:block;margin-top:14px}
+#count small span{background:#fff;color:#111;font:700 46px/1.3 TT;padding:4px 18px;border-radius:12px}
+#tapdot{position:absolute;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.55);border:3px solid rgba(255,255,255,.9);z-index:30;opacity:0;transform:translate(-50%,-50%)}
+#end{position:absolute;inset:0;background:#fff;color:#111;z-index:40;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-right:80px}
+#end img{width:230px;height:230px;border-radius:54px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+#end h1{font:900 italic 170px/1 BC;margin-top:40px;letter-spacing:1px}
+#end p{font:700 54px/1.3 TT;margin-top:18px}
+#end .pill{margin-top:44px;background:#111;color:#fff;font:800 50px/1 TT;padding:26px 44px;border-radius:999px}
+#whip{position:absolute;inset:0;z-index:25;pointer-events:none}
+</style></head><body><div id="stage">
+ <div id="cam"><img id="im"></div>
+ <div id="whip"></div>
+ <div id="c1" class="cap big" style="top:330px"><span>every sd high school football player. ranked.</span></div>
+ <div id="count"><b id="cn">0</b><small><span>players on the leaderboard</span></small></div>
+ <div id="c2" class="cap big" style="top:1150px"><span>86 schools. let’s check some.</span></div>
+ <div id="c3" class="cap big" style="top:600px"><span>#1 in all of san diego.</span></div>
+ <div id="c4" class="cap big" style="top:600px"><span>carlsbad has #3.</span></div>
+ <div id="c5" class="cap big" style="top:760px"><span>your school’s next.<br>comment it. 👇</span></div>
+ <div id="tapdot"></div>
+ <div id="end"><img src="icon.png"><h1>VARSITY</h1><p>find your name on the leaderboard</p><div class="pill">free · link in bio</div></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const B=60/92,$=id=>document.getElementById(id);
+const T1=2*B,T2=4*B,T3=8*B,T4=11*B,T5=15*B,T6=17*B,END=19*B;
+const beats=[];for(let k=8;k<17;k+=2)beats.push(k*B);
+function show(id,t,a,b,pop=true){const e=$(id),on=t>=a&&t<b;e.style.opacity=on?1:0;if(on&&pop){const k=cl((t-a)/.16);e.style.transform=`scale(${lerp(.9,1,E.back(k))})`}}
+async function render(t){
+  let src,z=1,ox=0;
+  if(t<T1){src=clip('A_lb',fmap(t,[[0,0],[T1,69]]))}
+  else if(t<T2){src=clip('A_school',fmap(t,[[T1,4],[T2,34]]))}
+  else if(t<T3){src=clip('A_school',fmap(t,[[T2,34],[4.69,64],[T3,80]]))}
+  else if(t<T4){src=clip('A_school',fmap(t,[[T3,80],[T4,127]]))}
+  else if(t<T5){src=clip('A_school',fmap(t,[[T4,140],[8.2,196],[T5,240]]))}
+  else src=clip('A_school',fmap(t,[[T5,240],[T6,299]]));
+  await setImg($('im'),src);
+  // camera: native look (mostly still), zoom punch on the results
+  const pz=t>=T3&&t<T4?lerp(1.12,1.0,E.out(cl((t-T3)/.5)))*1+(t>=T3?.0:0):1;
+  let s=1;if(t>=T3&&t<T4)s=1+.1*E.out(cl((t-T3)/.35));
+  if(t>=8.2&&t<T5)s=1+.1*E.out(cl((t-8.2)/.35));
+  s+=punch(t,beats,.012);
+  $('cam').style.transformOrigin='540px 1010px';
+  // whip pan left into the Carlsbad search
+  let wx=0,bl=0;const w=t-T4;if(w>-.12&&w<.16){wx=w<0?lerp(0,-260,E.in(cl((w+.12)/.12))):lerp(260,0,E.out(cl(w/.16)));bl=12*(1-Math.abs(w)/.16)}
+  tf($('cam'),{x:wx,s,blur:t<T1?2.5*(1-cl((t-1.0)/.3)):bl});
+  // captions
+  show('c1',t,0,T1,false);show('c2',t,T1,T2);show('c3',t,T3+.05,T4);show('c4',t,8.2,T5);show('c5',t,T5+.1,T6);
+  const ce=$('count');ce.style.opacity=t<T1?1:0;
+  if(t<T1){$('cn').textContent=Math.round(3597*E.out(cl((t-.1)/1.0))).toLocaleString()}
+  // tap ripples (Filters at clip frame 14 ~ t 1.63; school box frame 30 ~ 2.17; search bar frame 256)
+  const taps=[[1.63,850,447],[2.17,780,1030],[T5+(16/60)*(T6-T5),420,446]];
+  let td=$('tapdot');td.style.opacity=0;
+  for(const[a,x,y]of taps){const k=t-a;if(k>=0&&k<.35){td.style.left=x+'px';td.style.top=y+'px';td.style.opacity=1-k/.35;td.style.transform=`translate(-50%,-50%) scale(${.6+k*1.6})`}}
+  // end card
+  const e=$('end'),k=t-T6;e.style.opacity=k>=0?1:0;
+  if(k>=0){tf(e.querySelector('img'),{s:lerp(.6,1,E.back(cl(k/.3)))});tf(e.querySelector('h1'),{y:lerp(40,0,E.out(cl((k-.08)/.25))),o:cl((k-.08)/.12)});
+    tf(e.querySelector('p'),{o:cl((k-.2)/.15)});tf(e.querySelector('.pill'),{s:lerp(.8,1,E.back(cl((k-.3)/.25))),o:cl((k-.3)/.1)})}
+}
+</script></body></html>

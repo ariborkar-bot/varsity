@@ -1,0 +1,27 @@
+@font-face{font-family:TT;src:url(/home/claude/mk/fonts/tiktok-sans-latin-900-normal.woff2);font-weight:900}
+@font-face{font-family:TT;src:url(/home/claude/mk/fonts/tiktok-sans-latin-800-normal.woff2);font-weight:800}
+@font-face{font-family:TT;src:url(/home/claude/mk/fonts/tiktok-sans-latin-700-normal.woff2);font-weight:700}
+@font-face{font-family:TT;src:url(/home/claude/mk/fonts/tiktok-sans-latin-600-normal.woff2);font-weight:600}
+@font-face{font-family:TT;src:url(/home/claude/mk/fonts/tiktok-sans-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:TT;src:url(/home/claude/mk/fonts/tiktok-sans-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:Anton;src:url(/home/claude/mk/fonts/anton-latin-400-normal.woff2)}
+@font-face{font-family:Mono1;src:url(/home/claude/mk/fonts/rubik-mono-one-latin-400-normal.woff2)}
+@font-face{font-family:Dela;src:url(/home/claude/mk/fonts/dela-gothic-one-latin-400-normal.woff2)}
+@font-face{font-family:Marker;src:url(/home/claude/mk/fonts/permanent-marker-latin-400-normal.woff2)}
+@font-face{font-family:Bebas;src:url(/home/claude/mk/fonts/bebas-neue-latin-400-normal.woff2)}
+@font-face{font-family:Brico;src:url(/home/claude/mk/fonts/bricolage-grotesque-latin-800-normal.woff2);font-weight:800}
+@font-face{font-family:Brico;src:url(/home/claude/mk/fonts/bricolage-grotesque-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:BC;src:url(/home/claude/varsity/fonts/barlow-condensed-latin-900-italic.woff2);font-weight:900;font-style:italic}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;color:#fff;font-family:TT,'Noto Color Emoji',sans-serif}
+.abs{position:absolute;left:0;top:0}
+.full{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.full img{position:absolute;left:0;top:0;width:1080px;height:1920px}
+/* classic TikTok caption: white, heavy black outline */
+.tk{position:absolute;left:60px;width:960px;text-align:center;font:800 78px/1.12 TT,'Noto Color Emoji';color:#fff;letter-spacing:-.5px;
+ -webkit-text-stroke:0;paint-order:stroke fill;
+ text-shadow:0 0 3px #000,0 0 3px #000,3px 3px 0 #000,-3px 3px 0 #000,3px -3px 0 #000,-3px -3px 0 #000,0 4px 0 #000,0 -4px 0 #000,4px 0 0 #000,-4px 0 0 #000,0 10px 30px rgba(0,0,0,.5)}
+.emo{font-family:'Noto Color Emoji';text-shadow:none}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:90;pointer-events:none}
+#grain{position:absolute;inset:0;width:1080px;height:1920px;opacity:.05;mix-blend-mode:overlay;z-index:95;pointer-events:none}

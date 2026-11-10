@@ -1,0 +1,53 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#cam{position:absolute;inset:0;transform-origin:540px 900px}
+#pastel{position:absolute;inset:0;z-index:6;background:linear-gradient(160deg,#ffd6e8 0%,#e3d7ff 55%,#cfe9ff 100%);mix-blend-mode:screen;opacity:0}
+#gold{position:absolute;inset:0;z-index:7;pointer-events:none;box-shadow:inset 0 0 160px 30px rgba(255,190,60,.55);opacity:0}
+#sweep{position:absolute;top:-200px;left:-600px;width:380px;height:2400px;z-index:8;background:linear-gradient(90deg,rgba(255,230,160,0),rgba(255,240,200,.55),rgba(255,230,160,0));transform:rotate(18deg);opacity:0}
+.cap{position:absolute;left:70px;top:270px;z-index:20;font:800 84px/1.05 Brico;letter-spacing:-2px;padding:16px 30px 22px;border-radius:20px;max-width:900px}
+#c1{background:#f4e9ff;color:#3b2b5a;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+#c2{background:linear-gradient(135deg,#fff1b8,#ffc93d 45%,#e09a12);color:#1a1000;box-shadow:0 10px 50px rgba(255,190,60,.45)}
+#end{position:absolute;inset:0;z-index:40;opacity:0;background:radial-gradient(ellipse at 50% 42%,#2a1f05 0%,#000 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#end img{width:210px;height:210px;border-radius:48px;box-shadow:0 0 0 6px #ffcc4d,0 0 70px rgba(255,200,80,.55)}
+#end h1{font:800 168px/1 Brico;letter-spacing:-6px;margin-top:46px;background:linear-gradient(180deg,#fff4c4,#ffc93d 55%,#c98412);-webkit-background-clip:text;color:transparent}
+#end p{font:700 52px TT;color:#f3e2b0;margin-top:16px}
+#end small{font:600 36px TT;color:#9c8d66;margin-top:46px}
+</style></head><body><div id="stage">
+<div id="cam"><div class="full"><img id="im"></div></div>
+<div id="pastel"></div><div id="gold"></div><div id="sweep"></div>
+<div id="c1" class="cap"></div><div id="c2" class="cap"></div>
+<div id="end"><img src="icon.png"><h1>VARSITY</h1><p>free · link in bio</p><small>tokens only · no real money</small></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const $=id=>document.getElementById(id);const B=60/141,D=8*B;
+// [t0,t1,clip,f0,f1,zoom0,zoom1,originY,caption,mode]
+const SEG=[[0,4*B,'B_lk0',4,28,1,1.02,900,'my varsity profile day 1:','b'],[4*B,D,'B_lk0c',4,28,1.02,1.04,700,'cards: none.','b'],
+ [D,D+2*B,'B_lk1',4,24,1.08,1.0,700,'week 11:','a'],[D+2*B,D+4*B,'B_lkcards',4,24,1.0,1.12,900,'','a'],[D+4*B,D+6*B,'B_lkcos',4,24,1.0,1.06,700,'','a'],
+ [D+6*B,D+8*B,'B_act8',4,24,1.12,1.02,700,'','a'],[D+8*B,20*B,'B_tok8',6,58,1.02,1.09,1040,'all gold everything.','a']];
+async function render(t){
+  const end=t>=20*B;
+  const s=SEG.find(x=>t>=x[0]&&t<x[1])||SEG[SEG.length-1];
+  if(!end){
+    const k=cl((t-s[0])/(s[1]-s[0]));await setImg($('im'),clip(s[2],lerp(s[3],s[4],k)));
+    let z=lerp(s[5],s[6],s[9]==='a'&&SEG.indexOf(s)>=3&&SEG.indexOf(s)<6?E.out(Math.min(1,k*2.2)):E.io(k));
+    const cut=s[0];z+=punch(t,[cut],SEG.indexOf(s)>=2?.05:0,.22);
+    // whip pan into the cosmetics shot
+    let x=0;if(s===SEG[4])x=lerp(260,0,seg(t,s[0],s[0]+.16,'out'));
+    $('cam').style.transformOrigin=`540px ${s[7]}px`;
+    tf($('cam'),{s:z,x});
+    $('cam').style.filter=s[9]==='b'?'grayscale(.78) brightness(1.08) contrast(.82)':'none';
+    $('pastel').style.opacity=s[9]==='b'?.38:0;$('gold').style.opacity=s[9]==='a'?.85+.15*Math.sin(t*5):0;
+  }
+  // sweep at the drop
+  const sw=seg(t,D,D+.55,'io');$('sweep').style.opacity=t>=D&&t<D+.6?1:0;tf($('sweep'),{x:lerp(0,2200,sw),r:18});
+  FL.style.opacity=flashAt(t,[[D,.75]],.12);
+  const cb=s[9]==='b'&&!end,ca=s[9]==='a'&&s[8]&&!end;
+  $('c1').style.opacity=cb?1:0;$('c2').style.opacity=ca?1:0;
+  if(cb){$('c1').textContent=s[8];tf($('c1'),{y:lerp(24,0,seg(t,s[0],s[0]+.2,'out')),o:1})}
+  if(ca){$('c2').textContent=s[8];tf($('c2'),{s:lerp(1.25,1,E.back(seg(t,s[0],s[0]+.25,'lin'))),o:1});$('c2').style.transformOrigin='0 50%'}
+  const e=end?seg(t,20*B,20*B+.1,'lin'):0;$('end').style.opacity=e;
+  if(e){const k=t-20*B;tf($('end').querySelector('img'),{s:lerp(.5,1,E.back(cl(k/.35)))+punch(t,[20*B,21*B,22*B,23*B],.03)});tf($('end').querySelector('h1'),{o:cl((k-.12)/.2),y:lerp(30,0,E.out(cl((k-.12)/.3)))});
+    tf($('end').querySelector('p'),{o:cl((k-.3)/.2)});tf($('end').querySelector('small'),{o:cl((k-.4)/.2)})}
+}
+</script></body></html>

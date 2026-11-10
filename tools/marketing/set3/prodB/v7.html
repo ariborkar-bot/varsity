@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#cam{position:absolute;inset:0;transform-origin:540px 1000px}
+#topband{position:absolute;left:0;top:0;width:1080px;height:520px;background:linear-gradient(180deg,#07040f 0%,#0b0718 70%,rgba(11,7,24,0) 100%);z-index:20}
+#hook{position:absolute;left:70px;width:860px;top:262px;z-index:21}
+#hook .a{font:400 76px/1.05 Anton;color:#fff;letter-spacing:.5px;text-transform:uppercase}
+#hook .b{font:400 92px/1.05 Anton;text-transform:uppercase;margin-top:10px;background:linear-gradient(90deg,#9ff0ff,#c58cff,#ff7ad9);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 22px rgba(170,120,255,.45))}
+#odds{display:none;position:absolute;left:0;width:1080px;top:520px;text-align:center;z-index:21;font:700 36px TT;letter-spacing:1px;color:#d9d2ff;opacity:0}
+#odds b{font-weight:800}
+#end{position:absolute;inset:0;z-index:40;opacity:0;background:radial-gradient(ellipse at 50% 40%,#2a1250 0%,#0a0614 65%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#end .q{font:400 120px/1 Anton;text-transform:uppercase;color:#fff}
+#end .q .emo{font-size:96px}
+#end img{width:190px;height:190px;border-radius:44px;margin-top:90px;box-shadow:0 0 60px rgba(160,110,255,.5)}
+#end h1{font:400 150px/1 Anton;letter-spacing:6px;margin-top:34px;color:#fff}
+#end p{font:700 50px TT;color:#cfc4ff;margin-top:14px}
+</style></head><body><div id="stage">
+<div id="cam"><div class="full"><img id="im"></div></div>
+<div id="topband"></div>
+<div id="hook"><div class="a">every new account<br>gets a free card.</div><div class="b">1% chance it's immortal.</div></div>
+<div id="odds"><b style="color:#c49bff">epic 49%</b> · <b style="color:#ffc84a">legendary 33%</b> · <b style="color:#ff6b8a">mythical 17%</b> · <b style="color:#8ff5ff">immortal 1%</b></div>
+<div id="end"><div class="q">what'd you pull? <span class="emo">👇</span></div><img src="icon.png"><h1>VARSITY</h1><p>free · link in bio</p></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const MAP=[[0,2],[3.5,133],[6.0,247],[7.9,340],[8.0,346],[10.0,406]];
+async function render(t){
+  if(t<10){await setImg($('im'),clip('B_wp',fmap(t,MAP)));}
+  // hook band fades out as the team lands (3.5)
+  const ho=1-seg(t,3.3,3.6,'lin');$('topband').style.opacity=ho;$('hook').style.opacity=ho;
+  tf($('hook'),{y:lerp(30,0,seg(t,0,.35,'out')),o:t<.05?0:ho});
+  // odds strip under the meter 3.8 - 6.0
+  $('odds').style.opacity=t>=3.8&&t<6.2?seg(t,3.8,4.1,'lin')*(1-seg(t,5.9,6.2,'lin')):0;
+  // camera: snap on team land, push on meter, punch on reveal
+  let s=1+.02*seg(t,0,3.5,'io');
+  s+=punch(t,[3.5,6.0],.035,.3)+punch(t,[8.0],.06,.4);
+  if(t>=4&&t<6)s+=.03*seg(t,4,6,'io');
+  const h=hand(t,.35);tf($('cam'),{x:h.x,y:h.y,s});
+  const e=t>=10?seg(t,10,10.12,'lin'):0;$('end').style.opacity=e;
+  if(e){const k=t-10;tf($('end').querySelector('.q'),{y:lerp(40,0,seg(t,10,10.35,'out')),o:cl(k/.2)});tf($('end').querySelector('img'),{s:lerp(.6,1,E.back(cl((k-.25)/.35))),o:cl((k-.25)/.15)});
+    tf($('end').querySelector('h1'),{o:cl((k-.4)/.2)});tf($('end').querySelector('p'),{o:cl((k-.55)/.2)})}
+}
+</script></body></html>

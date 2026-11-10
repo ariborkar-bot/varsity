@@ -1,0 +1,80 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#stage{background:#e3122b}
+#bg{position:absolute;inset:0;background:repeating-linear-gradient(-28deg,rgba(255,255,255,.07) 0 60px,transparent 60px 150px),radial-gradient(ellipse at 50% 40%,#f2213a,#b40c20 80%)}
+#app{position:absolute;inset:0;opacity:0}
+#app img{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#hdr{position:absolute;left:70px;top:250px;z-index:10;opacity:0}
+#hdr .n{font:900 italic 250px/.9 BC;color:#fff;letter-spacing:-4px;text-shadow:10px 10px 0 rgba(0,0,0,.25)}
+#hdr .n small{font-size:120px;color:rgba(255,255,255,.75)}
+#hdr .dv{display:inline-block;margin-top:14px;background:#fff;color:#e3122b;font:900 italic 54px/1 BC;padding:12px 26px;letter-spacing:2px;text-transform:uppercase;transform:skewX(-10deg)}
+#card{position:absolute;left:72px;top:760px;width:876px;z-index:12;opacity:0;transform-origin:50% 50%}
+#card img{display:block;width:876px;border-radius:34px;box-shadow:0 30px 80px rgba(80,0,10,.55),0 0 0 6px rgba(255,255,255,.9)}
+#q{position:absolute;left:70px;width:880px;top:1330px;text-align:center;font:900 italic 96px/1 BC;color:#fff;z-index:12;opacity:0;letter-spacing:1px;text-transform:uppercase}
+#pause{position:absolute;left:390px;top:880px;width:240px;height:240px;border-radius:50%;background:rgba(0,0,0,.55);z-index:20;opacity:0;display:flex;align-items:center;justify-content:center;gap:26px;backdrop-filter:blur(2px)}
+#pause i{display:block;width:44px;height:120px;background:#fff;border-radius:8px}
+#hook{position:absolute;left:70px;width:880px;top:300px;z-index:15}
+#hook div{display:block;width:max-content;margin-bottom:18px;background:#fff;color:#111;font:900 italic 104px/1 BC;padding:14px 30px 18px;text-transform:uppercase;transform:skewX(-8deg);box-shadow:12px 12px 0 #e3122b}
+#hook div.r{background:#e3122b;color:#fff;box-shadow:12px 12px 0 #111}
+#hp{position:absolute;left:390px;top:1050px;width:240px;height:240px;border-radius:50%;background:#e3122b;z-index:16;display:flex;align-items:center;justify-content:center;gap:26px;box-shadow:0 0 0 10px rgba(255,255,255,.9)}
+#hp i{display:block;width:44px;height:120px;background:#fff;border-radius:8px}
+#lockc{position:absolute;left:70px;width:880px;top:300px;z-index:15;opacity:0}
+#lockc div{display:inline-block;background:#fff;color:#111;font:900 italic 104px/1 BC;padding:14px 30px 18px;text-transform:uppercase;transform:skewX(-8deg);box-shadow:12px 12px 0 #e3122b}
+#end{position:absolute;inset:0;z-index:40;opacity:0;background:#e3122b;text-align:center;color:#fff}
+#end .bgs{position:absolute;inset:0;background:repeating-linear-gradient(-28deg,rgba(255,255,255,.07) 0 60px,transparent 60px 150px)}
+#end .t{position:absolute;left:0;width:1020px;top:430px;font:900 italic 120px/1 BC;text-transform:uppercase}
+#end .t b{display:inline-block;background:#fff;color:#e3122b;padding:8px 28px 14px;transform:skewX(-8deg);margin-top:16px}
+#end h1{position:absolute;left:0;width:1020px;top:820px;font:900 italic 230px/1 BC;letter-spacing:2px;text-shadow:12px 12px 0 rgba(0,0,0,.2)}
+#end p{position:absolute;left:0;width:1020px;top:1080px;font:800 56px TT}
+#end small{position:absolute;left:0;width:1020px;top:1180px;font:600 38px TT;color:rgba(255,255,255,.8)}
+</style></head><body><div id="stage">
+ <div id="bg"></div>
+ <div id="app"><img id="im"></div>
+ <div id="hook"><div>pause on every game.</div><div class="r">pick the winner.</div><div>comment your 6.</div></div>
+ <div id="hp"><i></i><i></i></div>
+ <div id="hdr"><div class="n"><span id="gn">1</span><small>/6</small></div><div class="dv" id="dv">open division</div></div>
+ <div id="card"><img id="cim"></div>
+ <div id="q">who wins?</div>
+ <div id="pause"><i></i><i></i></div>
+ <div id="lockc"><div>picks lock at kickoff.</div></div>
+ <div id="end"><i class="bgs"></i><div class="t">results saturday.<br><b>part 2.</b></div><h1>VARSITY</h1><p>free · link in bio</p><small>tokens only · no real money</small></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const $=id=>document.getElementById(id),B=60/130,BAR=4*B;
+const DV=['open division','open division','division i','division i','division i','division i'];
+const beats=[];for(let k=0;k<36;k++)beats.push(k*B);
+async function render(t){
+  const g=Math.floor(t/BAR);
+  // intro: app screen behind, hook text, pulsing pause icon
+  const intro=t<BAR;
+  $('hook').style.opacity=intro?1:0;$('hp').style.opacity=intro?1:0;
+  if(intro){[...$('hook').children].forEach((d,i)=>{const k=cl((t-i*.12)/.18);d.style.transform=`skewX(-8deg) translateX(${lerp(-1000,0,E.out(k))}px)`});
+    const p=punch(t,beats,.14,.3);$('hp').style.transform=`scale(${1+p})`}
+  // app footage: intro (blurred, dim) and the lock-in section
+  const app=$('app');
+  if(intro){await setImg($('im'),clip('A_pick',0));app.style.opacity=1;app.style.filter='brightness(.45) saturate(.6) blur(3px)'}
+  else if(g===7){await setImg($('im'),clip('A_pick',fmap(t,[[7*BAR,5],[7*BAR+.45,14],[7*BAR+1.1,44],[8*BAR,89]])));app.style.opacity=1;app.style.filter='none';
+    const k=t-7*BAR;tf(app,{s:1+.03*k+punch(t,[7*BAR+.45,7*BAR+1.0],.03)})}
+  else app.style.opacity=0;
+  $('lockc').style.opacity=g===7?1:0;if(g===7){const k=cl((t-7*BAR-.1)/.2);$('lockc').firstChild.style.transform=`skewX(-8deg) scale(${lerp(.7,1,E.back(k))})`}
+  // the six games
+  const gm=g>=1&&g<=6;const card=$('card'),hdr=$('hdr'),q=$('q'),pz=$('pause');
+  if(gm){const k=t-g*BAR,fr=k>=3*B;
+    await setImg($('cim'),`/home/claude/mk/clips/A_still/game${g}.png`);
+    $('gn').textContent=g;$('dv').textContent=DV[g-1];
+    // whip up into the card, then slam 115% -> 100%
+    const wy=lerp(700,0,E.out(cl(k/.14))),bl=(1-cl(k/.14))*18;
+    const s=lerp(1.15,1,E.out(cl((k-.04)/.2)))+(fr?.0:punch(t,[g*BAR+B,g*BAR+2*B],.02));
+    card.style.opacity=1;card.style.transform=`translateY(${wy}px) scale(${s})`;card.style.filter=`blur(${bl}px) ${fr?'saturate(.35) brightness(.85)':''}`;
+    hdr.style.opacity=1;const hk=cl(k/.16);hdr.style.transform=`translateX(${lerp(-300,0,E.out(hk))}px)`;
+    q.style.opacity=k>B*.5&&!fr?1:0;q.style.transform=`scale(${1+punch(t,[g*BAR+B,g*BAR+2*B],.06)})`;
+    pz.style.opacity=fr?1:0;if(fr){const pk=cl((k-3*B)/.1);pz.style.transform=`scale(${lerp(1.4,1,E.out(pk))})`}
+    $('bg').style.filter=fr?'saturate(.4) brightness(.8)':'none';
+  } else {card.style.opacity=0;hdr.style.opacity=0;q.style.opacity=0;pz.style.opacity=0;$('bg').style.filter='none'}
+  // end card
+  const e=$('end'),k=t-8*BAR;e.style.opacity=k>=0?1:0;
+  if(k>=0){tf(e.querySelector('.t'),{x:lerp(-900,0,E.out(cl(k/.2)))});tf(e.querySelector('h1'),{s:lerp(1.3,1,E.out(cl((k-.15)/.2))),o:cl((k-.15)/.08)});tf(e.querySelector('p'),{o:cl((k-.35)/.15)});tf(e.querySelector('small'),{o:cl((k-.5)/.15)})}
+  FL.style.opacity=flashAt(t,[[BAR,.5],[8*BAR,.4]],.1);
+}
+</script></body></html>

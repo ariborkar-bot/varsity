@@ -1,0 +1,47 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#cam{position:absolute;inset:0;transform-origin:540px 960px;filter:sepia(.38) saturate(.85) contrast(1.06) brightness(.9)}
+#warm{position:absolute;inset:0;z-index:6;background:linear-gradient(180deg,rgba(255,170,90,.10),rgba(255,120,40,.06));mix-blend-mode:screen}
+#vig{position:absolute;inset:0;z-index:7;background:radial-gradient(ellipse at 50% 48%,rgba(0,0,0,0) 45%,rgba(10,4,0,.62) 100%)}
+#leak{position:absolute;width:1400px;height:1400px;border-radius:50%;z-index:8;background:radial-gradient(circle,rgba(255,150,60,.42) 0%,rgba(255,110,40,.15) 35%,rgba(255,90,20,0) 65%);mix-blend-mode:screen}
+#flare{position:absolute;width:900px;height:900px;border-radius:50%;z-index:9;background:radial-gradient(circle,rgba(255,250,230,.9) 0%,rgba(255,220,160,.35) 18%,rgba(255,200,120,0) 60%);mix-blend-mode:screen;opacity:0}
+#topdim{position:absolute;left:0;top:0;width:1080px;height:820px;z-index:19;background:linear-gradient(180deg,rgba(12,6,2,.92) 0%,rgba(12,6,2,.86) 55%,rgba(12,6,2,0) 100%)}
+#txt{position:absolute;left:90px;width:900px;top:300px;z-index:20;text-align:center;font:500 64px/1.2 Brico;color:#fff6ea;letter-spacing:-1px;text-shadow:0 4px 30px rgba(0,0,0,.75),0 0 2px rgba(0,0,0,.6)}
+#grain{opacity:.085!important}
+#end{position:absolute;inset:0;z-index:40;opacity:0;background:radial-gradient(ellipse at 50% 45%,#2a160a 0%,#0b0604 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#end img{width:190px;height:190px;border-radius:44px;opacity:.95}
+#end h1{font:800 150px/1 Brico;letter-spacing:-5px;margin-top:44px;color:#fff3e2}
+#end p{font:500 52px Brico;color:#e7cfb3;margin-top:16px}
+</style></head><body><div id="stage">
+<div id="cam"><div class="full"><img id="im"></div></div>
+<div id="warm"></div><div id="vig"></div><div id="leak"></div><div id="flare"></div>
+<div id="topdim"></div><div id="txt"></div>
+<div id="end"><img src="icon.png"><h1>VARSITY</h1><p>free · link in bio</p></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const SEG=[[0,3.0,'B_lb10',0,94,1.0,1.04,'for some of these guys,<br>friday is the last high school<br>game they ever play.'],
+ [3.0,6.1,'B_pl10',0,94,1.0,1.06,'every friday since august.'],
+ [6.1,9.1,'B_search10',4,94,1.03,1.0,'every snap counted.'],
+ [9.1,12.15,'B_stats9',18,49,1.0,1.04,'86 schools.<br>one leaderboard.'],
+ [12.15,15.2,'B_pk10',0,94,1.0,1.08,'go make it count.']];
+async function render(t){
+  const end=t>=15.2;
+  const s=SEG.find(x=>t>=x[0]&&t<x[1])||SEG[SEG.length-1];
+  if(!end){const k=cl((t-s[0])/(s[1]-s[0]));await setImg($('im'),clip(s[2],lerp(s[3],s[4],k)));
+    const h=hand(t,.25);tf($('cam'),{x:h.x,y:h.y,s:lerp(s[5],s[6],E.io(k))+punch(t,[12.15],.03,.5)});
+    // cross-dissolve feel: brief dip at each cut except the band entry (hard)
+    const d=t-s[0];const dip=s[0]>0&&s[0]!==12.15&&d<.25?1-d/.25:0;$('cam').style.opacity=1-dip*.6;
+    $('topdim').style.opacity=1;$('txt').innerHTML=s[7];const to=cl((t-s[0]-.25)/.45)*(1-cl((t-(s[1]-.35))/.3));tf($('txt'),{o:to,y:lerp(16,0,E.out(cl((t-s[0]-.25)/.6)))});
+  }else{$('txt').style.opacity=0}
+  // light leak drifting
+  const lx=-300+Math.sin(t*.35)*260+t*30,ly=-200+Math.cos(t*.27)*240;$('leak').style.left=lx+'px';$('leak').style.top=ly+'px';$('leak').style.opacity=.75+.25*Math.sin(t*.8);
+  // stadium-light flare sweeps when the band comes in
+  const fk=seg(t,12.15,13.6,'io');$('flare').style.opacity=t>=12.1&&t<13.8?Math.sin(fk*Math.PI)*.9:0;$('flare').style.left=lerp(-500,700,fk)+'px';$('flare').style.top=lerp(150,350,fk)+'px';
+  const e=end?seg(t,15.2,15.9,'io'):0;$('end').style.opacity=e;
+  if(end){const k=t-15.2;tf($('end').querySelector('h1'),{o:cl((k-.4)/.6)});tf($('end').querySelector('p'),{o:cl((k-.8)/.6)});tf($('end').querySelector('img'),{o:cl((k-.2)/.6)});
+    // fade to black on the ringing chord (only fade in the series)
+    $('end').style.filter=`brightness(${1-seg(t,17.2,18.2,'io')})`}
+}
+</script></body></html>

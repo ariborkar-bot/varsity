@@ -1,0 +1,42 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#stage{background:#8d8d8d}
+#grey{position:absolute;inset:0;background:#8d8d8d;z-index:5}
+.tbox{position:absolute;left:90px;width:900px;display:flex;justify-content:center;z-index:30}
+.tbox span{background:#fff;color:#111;font:600 66px/1.24 TT;padding:18px 30px 22px;border-radius:22px;text-align:center;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#hook{top:690px}
+#cap{top:1340px;opacity:0}
+#cap span{font-size:64px;padding:14px 30px 18px}
+#cam{position:absolute;inset:0;transform-origin:540px 1150px}
+#end{position:absolute;inset:0;background:#8d8d8d;z-index:40;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#111}
+#end img{width:200px;height:200px;border-radius:46px}
+#end h1{font:900 150px/1 TT;letter-spacing:-4px;margin-top:40px}
+#end p{font:600 54px/1.3 TT;margin-top:18px}
+#end small{font:600 36px TT;color:#333;margin-top:40px}
+</style></head><body><div id="stage">
+<div id="cam"><div class="full"><img id="im"></div></div>
+<div id="grey"></div>
+<div id="hook" class="tbox"><span>me telling the group chat<br>amaree maye throws for 116+ friday</span></div>
+<div id="cap" class="tbox"><span id="capt"></span></div>
+<div id="end"><img src="icon.png"><h1>VARSITY</h1><p>free · link in bio</p><small>tokens only · no real money</small></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const H=3.0,B=60/90;
+async function render(t){
+  const app=t>=H&&t<7.0;
+  $('grey').style.opacity=t<H?1:0;$('hook').style.opacity=t<H?1:0;
+  if(app){
+    await setImg($('im'),clip('B_props6',fmap(t,[[3.0,12],[4.4,40],[5.2,66],[6.0,96],[7.0,126]])));
+    // 3% zoom from the cut, snap zoom onto locked in at 5.8
+    let z=1+.03*seg(t,H,H+1.2,'io');
+    if(t>=5.8)z+=.10*seg(t,5.8,6.05,'out');
+    const p=punch(t,[H],.04,.25);
+    tf($("cam"),{s:z+p});
+    const txt=t<4.4?'the line is 115.5.':t<5.8?'over.':'locked in.';
+    $('capt').textContent=txt;$('cap').style.opacity=1;
+  }else{$('cap').style.opacity=0}
+  $('end').style.opacity=t>=7.0?1:0;
+}
+</script></body></html>

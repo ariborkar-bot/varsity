@@ -1,0 +1,1034 @@
+{
+ "football": {
+  "nPlayersRanked": 3597,
+  "nSchools": 86,
+  "top": [
+   {
+    "n": "Hezekiah Manuel",
+    "s": "Hoover",
+    "pos": "QB",
+    "pts": 464.1,
+    "line": ""
+   },
+   {
+    "n": "Paisios Polamalu",
+    "s": "St. Augustine",
+    "pos": "RB",
+    "pts": 428,
+    "line": ""
+   },
+   {
+    "n": "Darian Webb",
+    "s": "Carlsbad",
+    "pos": "RB",
+    "pts": 416.7,
+    "line": ""
+   },
+   {
+    "n": "Madin Gardini",
+    "s": "Patrick Henry",
+    "pos": "QB",
+    "pts": 399.7,
+    "line": ""
+   },
+   {
+    "n": "Deandre Eleby",
+    "s": "Morse",
+    "pos": "WR",
+    "pts": 365.1,
+    "line": ""
+   },
+   {
+    "n": "Malachi Gutierrez",
+    "s": "Clairemont",
+    "pos": "WR",
+    "pts": 338.7,
+    "line": ""
+   },
+   {
+    "n": "Elisha Robinson",
+    "s": "Mountain Empire",
+    "pos": "RB",
+    "pts": 320.3,
+    "line": ""
+   },
+   {
+    "n": "Gaige Weddle",
+    "s": "Rancho Bernardo",
+    "pos": "QB",
+    "pts": 309,
+    "line": ""
+   },
+   {
+    "n": "Tyler Holmes",
+    "s": "Grossmont",
+    "pos": "QB",
+    "pts": 302.7,
+    "line": ""
+   },
+   {
+    "n": "Julian Morones",
+    "s": "Christian",
+    "pos": "RB",
+    "pts": 300.6,
+    "line": ""
+   },
+   {
+    "n": "Timothy Cox",
+    "s": "Clairemont",
+    "pos": "QB",
+    "pts": 289.3,
+    "line": ""
+   },
+   {
+    "n": "Courtney Miller-Thompson",
+    "s": "Granite Hills",
+    "pos": "WR",
+    "pts": 277.4,
+    "line": ""
+   },
+   {
+    "n": "Sam Hinrichs",
+    "s": "Escondido Charter",
+    "pos": "WR",
+    "pts": 268.9,
+    "line": ""
+   },
+   {
+    "n": "Ezekiel McIntyre",
+    "s": "San Marcos",
+    "pos": "WR",
+    "pts": 268.1,
+    "line": ""
+   },
+   {
+    "n": "Daine Gonzalez",
+    "s": "Classical Academy",
+    "pos": "RB",
+    "pts": 267.7,
+    "line": ""
+   },
+   {
+    "n": "Neke Letuli",
+    "s": "Oceanside",
+    "pos": "RB",
+    "pts": 264.2,
+    "line": ""
+   },
+   {
+    "n": "Ryder Watson",
+    "s": "Point Loma",
+    "pos": "QB",
+    "pts": 263.1,
+    "line": ""
+   },
+   {
+    "n": "Deshaun Hille",
+    "s": "University City",
+    "pos": "RB",
+    "pts": 261.7,
+    "line": ""
+   },
+   {
+    "n": "Jordan Simmons",
+    "s": "San Pasqual",
+    "pos": "WR",
+    "pts": 261.1,
+    "line": ""
+   },
+   {
+    "n": "Chase Woolley",
+    "s": "Santa Fe Christian",
+    "pos": "WR",
+    "pts": 256.6,
+    "line": ""
+   },
+   {
+    "n": "Evin Dill",
+    "s": "West Hills",
+    "pos": "QB",
+    "pts": 249.1,
+    "line": ""
+   },
+   {
+    "n": "Cole Farace",
+    "s": "Patrick Henry",
+    "pos": "WR",
+    "pts": 246.3,
+    "line": ""
+   },
+   {
+    "n": "Taylon Sheriff",
+    "s": "Canyon Hills",
+    "pos": "WR",
+    "pts": 245.7,
+    "line": ""
+   },
+   {
+    "n": "Seth Fanua",
+    "s": "Lincoln",
+    "pos": "LB",
+    "pts": 243.8,
+    "line": ""
+   },
+   {
+    "n": "Thomas Dietrich",
+    "s": "University City",
+    "pos": "QB",
+    "pts": 243,
+    "line": ""
+   },
+   {
+    "n": "Kobe Anousinh",
+    "s": "Mt. Carmel",
+    "pos": "WR",
+    "pts": 242.2,
+    "line": ""
+   },
+   {
+    "n": "Xavier Wilson",
+    "s": "San Diego",
+    "pos": "LB",
+    "pts": 241,
+    "line": ""
+   },
+   {
+    "n": "Owen Dorros",
+    "s": "La Jolla Country Day",
+    "pos": "WR",
+    "pts": 239.2,
+    "line": ""
+   },
+   {
+    "n": "Mitchell Stehly",
+    "s": "Valley Center",
+    "pos": "RB",
+    "pts": 238.4,
+    "line": ""
+   },
+   {
+    "n": "Niko Cato",
+    "s": "Mira Mesa",
+    "pos": "LB",
+    "pts": 236,
+    "line": ""
+   },
+   {
+    "n": "Dareyen Bridges",
+    "s": "Lincoln",
+    "pos": "WR",
+    "pts": 233.2,
+    "line": ""
+   },
+   {
+    "n": "Kolten Thornton",
+    "s": "Santana",
+    "pos": "RB",
+    "pts": 232.2,
+    "line": ""
+   },
+   {
+    "n": "Anthony Hellum Jr",
+    "s": "Imperial",
+    "pos": "WR",
+    "pts": 232.1,
+    "line": ""
+   },
+   {
+    "n": "Zachary Benitez",
+    "s": "Granite Hills",
+    "pos": "QB",
+    "pts": 231.1,
+    "line": ""
+   },
+   {
+    "n": "Isaac Mu\u00f1oz",
+    "s": "Southwest SD",
+    "pos": "QB",
+    "pts": 229.2,
+    "line": ""
+   },
+   {
+    "n": "Santonio Urena",
+    "s": "Imperial",
+    "pos": "QB",
+    "pts": 228,
+    "line": ""
+   },
+   {
+    "n": "Caleb McNickle",
+    "s": "Mt. Carmel",
+    "pos": "LB",
+    "pts": 226.6,
+    "line": ""
+   },
+   {
+    "n": "Kymani Joeseph",
+    "s": "Patrick Henry",
+    "pos": "WR",
+    "pts": 226.4,
+    "line": ""
+   },
+   {
+    "n": "Noah Bedia",
+    "s": "Ramona",
+    "pos": "WR",
+    "pts": 223,
+    "line": ""
+   },
+   {
+    "n": "Reese Pagon",
+    "s": "Coronado",
+    "pos": "WR",
+    "pts": 222.2,
+    "line": ""
+   }
+  ],
+  "props": [
+   {
+    "player": "Amaree Maye",
+    "school": "Bishop's",
+    "market": "Passing yards",
+    "line": 115.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Amaree Maye",
+    "school": "Bishop's",
+    "market": "Passing TDs",
+    "line": 1.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Amaree Maye",
+    "school": "Bishop's",
+    "market": "Interceptions thrown",
+    "line": 0.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Michael Ogdahl",
+    "school": "Bishop's",
+    "market": "Rushing yards",
+    "line": 70.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Amaree Maye",
+    "school": "Bishop's",
+    "market": "Rushing yards",
+    "line": 47.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Zed Hornby",
+    "school": "Bishop's",
+    "market": "Receptions",
+    "line": 4.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Nick Pfister",
+    "school": "Bishop's",
+    "market": "Receptions",
+    "line": 2.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Zed Hornby",
+    "school": "Bishop's",
+    "market": "Receiving yards",
+    "line": 60.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Nick Pfister",
+    "school": "Bishop's",
+    "market": "Receiving yards",
+    "line": 45.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Amaree Maye",
+    "school": "Bishop's",
+    "market": "Rushing + receiving TDs",
+    "line": 1.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Zed Hornby",
+    "school": "Bishop's",
+    "market": "Rushing + receiving TDs",
+    "line": 0.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Reid Dielman",
+    "school": "Bishop's",
+    "market": "Tackles",
+    "line": 10.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Isaiah Garcia",
+    "school": "Bishop's",
+    "market": "Tackles",
+    "line": 5.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "JoJo Bryant",
+    "school": "Bishop's",
+    "market": "Tackles",
+    "line": 5.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Isaiah Garcia",
+    "school": "Bishop's",
+    "market": "Sacks",
+    "line": 1.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Zed Hornby",
+    "school": "Bishop's",
+    "market": "Interceptions (defense)",
+    "line": 0.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Austin Stefl",
+    "school": "Mission Bay",
+    "market": "Passing yards",
+    "line": 143.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Austin Stefl",
+    "school": "Mission Bay",
+    "market": "Passing TDs",
+    "line": 1.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Austin Stefl",
+    "school": "Mission Bay",
+    "market": "Interceptions thrown",
+    "line": 1.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Nestor Bautista",
+    "school": "Mission Bay",
+    "market": "Rushing yards",
+    "line": 54.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Jayden Marcelino",
+    "school": "Mission Bay",
+    "market": "Receptions",
+    "line": 3.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Sean Lander",
+    "school": "Mission Bay",
+    "market": "Receptions",
+    "line": 3.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Sean Lander",
+    "school": "Mission Bay",
+    "market": "Receiving yards",
+    "line": 54.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Jayden Marcelino",
+    "school": "Mission Bay",
+    "market": "Receiving yards",
+    "line": 44.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Jayden Marcelino",
+    "school": "Mission Bay",
+    "market": "Rushing + receiving TDs",
+    "line": 0.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Sean Lander",
+    "school": "Mission Bay",
+    "market": "Rushing + receiving TDs",
+    "line": 0.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Jack Fabrega",
+    "school": "Mission Bay",
+    "market": "Tackles",
+    "line": 8.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Mario Ramirez",
+    "school": "Mission Bay",
+    "market": "Tackles",
+    "line": 5.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Fernando Bautista",
+    "school": "Mission Bay",
+    "market": "Sacks",
+    "line": 0.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   },
+   {
+    "player": "Major Scott",
+    "school": "Mission Bay",
+    "market": "Interceptions (defense)",
+    "line": 0.5,
+    "game": "Mission Bay at Bishop's",
+    "date": "2026-11-13"
+   }
+  ],
+  "upcoming": [
+   "Santa Fe Christian at Carlsbad 2026-11-13 (Open Division)",
+   "Mission Hills at Cathedral Catholic 2026-11-13 (Open Division)",
+   "Torrey Pines at Helix 2026-11-13 (Division I)",
+   "San Marcos at Granite Hills 2026-11-13 (Division I)",
+   "Lincoln at Oceanside 2026-11-13 (Division I)",
+   "Rancho Bernardo at La Costa Canyon 2026-11-13 (Division I)",
+   "Holtville at Poway 2026-11-13 (Division II)",
+   "Mater Dei Catholic at Point Loma 2026-11-13 (Division II)",
+   "Patrick Henry at Del Norte 2026-11-13 (Division II)",
+   "El Camino at St. Augustine 2026-11-13 (Division II)",
+   "Valhalla at Steele Canyon 2026-11-13 (Division III)",
+   "La Jolla at University City 2026-11-13 (Division III)",
+   "Mira Mesa at San Diego High 2026-11-13 (Division III)",
+   "Scripps Ranch at San Pasqual 2026-11-13 (Division III)",
+   "El Capitan at Valley Center 2026-11-13 (Division IV)"
+  ],
+  "recentFinals": [
+   "Army and Navy Academy 0 at Mission Bay 49 2026-11-06",
+   "Rancho Buena Vista 14 at West Hills 24 2026-11-06",
+   "Brawley 14 at Westview 7 2026-11-06",
+   "Monte Vista 44 at Morse 63 2026-11-06",
+   "Southwest San Diego 10 at Coronado 17 2026-11-06",
+   "Classical Academy 13 at La Jolla Country Day 32 2026-11-06",
+   "Olympian 28 at Bonita Vista 21 2026-11-06",
+   "Hilltop 13 at Mount Carmel 17 2026-11-06",
+   "Mar Vista 22 at Fallbrook 42 2026-11-06",
+   "Coastal Academy 33 at Chula Vista 35 2026-11-06",
+   "Canyon Hills 13 at Hoover 35 2026-11-06",
+   "Foothills Christian 14 at Escondido Charter 49 2026-11-06",
+   "Clairemont 28 at Mountain Empire 55 2026-11-06",
+   "Calipatria 0 at Palo Verde Valley 30 2026-11-06",
+   "O'Farrell 0 at Vincent Memorial 43 2026-11-06"
+  ],
+  "packs": [
+   {
+    "k": "rookie",
+    "name": "Rookie pack",
+    "price": 150,
+    "odds": {
+     "c": 50,
+     "u": 30,
+     "r": 15,
+     "e": 3,
+     "l": 1.5,
+     "m": 0.5
+    }
+   },
+   {
+    "k": "player",
+    "name": "Pro pack",
+    "price": 450,
+    "odds": {
+     "c": 30,
+     "u": 35,
+     "r": 22,
+     "e": 8,
+     "l": 3,
+     "m": 2
+    }
+   },
+   {
+    "k": "cards",
+    "name": "Player + Team pack",
+    "price": 950,
+    "odds": {
+     "c": 20,
+     "u": 32,
+     "r": 26,
+     "e": 12,
+     "l": 6,
+     "m": 4
+    }
+   },
+   {
+    "k": "champs",
+    "name": "Champion pack",
+    "price": 1250,
+    "odds": {
+     "c": 20,
+     "u": 30,
+     "r": 25,
+     "e": 13,
+     "l": 7,
+     "m": 5
+    }
+   },
+   {
+    "k": "god",
+    "name": "Hall of Fame pack",
+    "price": 3500,
+    "odds": {
+     "r": 33,
+     "e": 35,
+     "l": 17,
+     "m": 8
+    }
+   }
+  ],
+  "rarities": [
+   "Common",
+   "Uncommon",
+   "Rare",
+   "Epic",
+   "Legendary",
+   "Mythical",
+   "Immortal"
+  ],
+  "scoring": null,
+  "gameOfWeek": "Santa Fe Christian at Carlsbad 2026-11-13",
+  "bbTop10": null
+ },
+ "basketball": {
+  "nPlayersRanked": 890,
+  "nSchools": 116,
+  "top": [
+   {
+    "n": "Iden Naami",
+    "s": "Liberty Charter",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Henry Appelquist",
+    "s": "Liberty Charter",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Jayvin Cousins",
+    "s": "Liberty Charter",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Reilly Burr",
+    "s": "Liberty Charter",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Adam Byrd",
+    "s": "Liberty Charter",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Valentine Limon",
+    "s": "Palo Verde Valley",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Aarik Cavazos",
+    "s": "Palo Verde Valley",
+    "pos": "C",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "James Nwisu",
+    "s": "Palo Verde Valley",
+    "pos": "C",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Matthew Conte",
+    "s": "Palo Verde Valley",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Christian Rodriguez",
+    "s": "Palo Verde Valley",
+    "pos": "PF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Camden Henry",
+    "s": "Bonsall",
+    "pos": "SG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Damien Moreno-Molina",
+    "s": "Bonsall",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Corten Robinson",
+    "s": "Bonsall",
+    "pos": "SG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Christian Hernandez",
+    "s": "Bonsall",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Rowan Collup",
+    "s": "Bonsall",
+    "pos": "PF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Isaiah Jimenez",
+    "s": "Bonsall",
+    "pos": "PF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Aaron Sumler",
+    "s": "Bonsall",
+    "pos": "C",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Adam Aguilera",
+    "s": "Bonsall",
+    "pos": "SG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Kash Villa",
+    "s": "Bonsall",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Colin Hill",
+    "s": "Bonsall",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Angel Fernandez",
+    "s": "Borrego Springs",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Lionel Vilchis",
+    "s": "Borrego Springs",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Ethan Hernandez",
+    "s": "Borrego Springs",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Dominic Hollowell",
+    "s": "Borrego Springs",
+    "pos": "SG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Angelo Navarro",
+    "s": "Borrego Springs",
+    "pos": "SG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Mason Stevens",
+    "s": "Borrego Springs",
+    "pos": "PF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Keny Navarro",
+    "s": "Borrego Springs",
+    "pos": "PF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Cameron Campbell",
+    "s": "Borrego Springs",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Devin Kelley",
+    "s": "Brawley",
+    "pos": "C",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Jayden Bates",
+    "s": "Brawley",
+    "pos": "PF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Edgar Mendoza",
+    "s": "Calexico",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Sabino Martinez",
+    "s": "Calexico",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Alexander Padulo",
+    "s": "Calexico",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Emilio Pinzon",
+    "s": "Calexico",
+    "pos": "SF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Noel Gonzalez",
+    "s": "Calexico",
+    "pos": "SG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Jacob Duffy",
+    "s": "Calexico",
+    "pos": "SG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Dominick Flores",
+    "s": "Calexico",
+    "pos": "SG",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Leo Longino",
+    "s": "Calexico",
+    "pos": "PF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Nico Borboa",
+    "s": "Calexico",
+    "pos": "PF",
+    "pts": 0,
+    "line": ""
+   },
+   {
+    "n": "Sergio Jacobo",
+    "s": "Calexico Mission",
+    "pos": "PG",
+    "pts": 0,
+    "line": ""
+   }
+  ],
+  "props": [],
+  "upcoming": [
+   "Westview at La Jolla 2026-11-14",
+   "Hoover at Morse 2026-11-14",
+   "Bonita Vista at Mount Miguel 2026-11-14",
+   "West Hills at San Ysidro 2026-11-14",
+   "Horizon Prep at Warner 2026-11-14",
+   "Southern California Yeshiva at Castle Park 2026-11-16",
+   "Calexico Mission at Desert Mirage 2026-11-16",
+   "Temecula Valley at Sage Creek 2026-11-16",
+   "Vista at Sage Creek 2026-11-16",
+   "Mar Vista at San Ysidro 2026-11-16",
+   "El Cajon Valley at Southwest EC 2026-11-16",
+   "Point Loma at West Hills 2026-11-16",
+   "Capistrano Valley Christian at Canyon Crest Academy 2026-11-17",
+   "University City at Eastlake 2026-11-17",
+   "San Pasqual at El Capitan 2026-11-17"
+  ],
+  "recentFinals": [],
+  "packs": [
+   {
+    "k": "rookie",
+    "name": "Rookie pack",
+    "price": 150,
+    "odds": {
+     "c": 50,
+     "u": 30,
+     "r": 15,
+     "e": 3,
+     "l": 1.5,
+     "m": 0.5
+    }
+   },
+   {
+    "k": "player",
+    "name": "Pro pack",
+    "price": 450,
+    "odds": {
+     "c": 30,
+     "u": 35,
+     "r": 22,
+     "e": 8,
+     "l": 3,
+     "m": 2
+    }
+   },
+   {
+    "k": "cards",
+    "name": "Player + Team pack",
+    "price": 950,
+    "odds": {
+     "c": 20,
+     "u": 32,
+     "r": 26,
+     "e": 12,
+     "l": 6,
+     "m": 4
+    }
+   },
+   {
+    "k": "champs",
+    "name": "Champion pack",
+    "price": 1250,
+    "odds": {
+     "c": 20,
+     "u": 30,
+     "r": 25,
+     "e": 13,
+     "l": 7,
+     "m": 5
+    }
+   },
+   {
+    "k": "god",
+    "name": "Hall of Fame pack",
+    "price": 3500,
+    "odds": {
+     "r": 33,
+     "e": 35,
+     "l": 17,
+     "m": 8
+    }
+   }
+  ],
+  "rarities": [
+   "Common",
+   "Uncommon",
+   "Rare",
+   "Epic",
+   "Legendary",
+   "Mythical",
+   "Immortal"
+  ],
+  "scoring": null,
+  "gameOfWeek": "Westview at La Jolla 2026-11-14",
+  "bbTop10": [
+   "Tristan Anderson (Olympian, PG)",
+   "Josiah Roy (Horizon Prep, C)",
+   "Brewster Gale (St. Joseph Academy, PF)",
+   "Tavid Johnson (Francis Parker, PG)",
+   "Zach Baker (Escondido Adventist Academy, SG)",
+   "Malekai Dillon (West Hills, SG)",
+   "Aiden Bestul (Ramona, C)",
+   "Tayden Bryant (Ramona, PG)",
+   "Sean Howard (St. Joseph Academy, PG)",
+   "Cameron Ackerman (Kearny, SF)"
+  ]
+ }
+}

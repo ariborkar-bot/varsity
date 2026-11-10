@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="lib.css">
+<style>
+#stage{background:#f6f5f1;color:#111}
+#day{position:absolute;left:96px;top:262px;font:700 34px TT;letter-spacing:4px;color:#8a877e;text-transform:uppercase}
+#clock{position:absolute;left:90px;top:304px;font:400 118px/1 Mono1;color:#111;letter-spacing:-2px;transform-origin:0 60%}
+#lab{position:absolute;left:96px;top:446px;font:800 54px TT;color:#111;z-index:3}
+#hl{position:absolute;left:84px;top:458px;height:52px;background:#ffe23d;border-radius:6px;z-index:2;transform-origin:0 50%}
+#phone{position:absolute;left:162px;top:570px;width:756px;height:1344px;border-radius:46px;overflow:hidden;background:#090e1c;box-shadow:0 30px 80px rgba(0,0,0,.22),0 0 0 10px #111}
+#phone .in{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(.7);transform-origin:0 0}
+#phone img{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#blur{position:absolute;inset:0}
+#end{position:absolute;inset:0;background:#f6f5f1;z-index:40;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#end img{width:200px;height:200px;border-radius:46px;box-shadow:0 18px 50px rgba(0,0,0,.2)}
+#end .w{position:relative;margin-top:50px}
+#end .w i{position:absolute;left:-20px;right:-20px;top:58%;height:46%;background:#ffe23d;border-radius:8px;transform-origin:0 50%}
+#end h1{position:relative;font:400 132px/1 Mono1;letter-spacing:-4px;color:#111}
+#end p{font:800 56px TT;margin-top:30px;color:#111}
+#end small{font:600 36px TT;color:#8a877e;margin-top:40px}
+</style></head><body><div id="stage">
+<div id="day">friday · playoffs</div>
+<div id="clock"></div><div id="hl"></div><div id="lab"></div>
+<div id="phone"><div class="in" id="pin"><img id="im"></div><div id="cover" style="position:absolute;left:0;bottom:0;width:756px;height:250px;background:linear-gradient(180deg,rgba(9,14,28,0),#090e1c 45%);opacity:0"></div></div>
+<div id="end"><img src="icon.png"><div class="w"><i></i><h1>VARSITY</h1></div><p>free · link in bio</p><small>tokens only · no real money</small></div>
+</div>
+<script src="lib.js"></script>
+<script>
+const $=id=>document.getElementById(id);const B=60/154,BAR=4*B;
+// clip, f0, f1, time, label
+const SEG=[['B_daily',2,48,'6:58 am','daily bonus'],['B_sim',2,58,'7:40 am','10-0 sim'],['B_ogdahl',17,37,'12:15 pm','lunch props'],['B_fg',8,69,'3:30 pm','field goal'],
+ ['B_pick',6,48,'6:30 pm','game of the week'],['B_act9',4,48,'6:59 pm','picks locked'],['B_gotw',4,48,'7:00 pm','kickoff'],['B_stats9',8,49,'9:45 pm','checking the leaderboard'],['B_pack9',104,178,'10:30 pm','opening a pack']];
+const W=document.createElement('canvas');const ctx=W.getContext('2d');W.width=1;W.height=1;
+function textW(s){ctx.font='800 54px TT';return ctx.measureText(s).width}
+async function render(t){
+  const i=Math.min(SEG.length-1,Math.floor(t/BAR)),s=SEG[i],t0=i*BAR,k=cl((t-t0)/BAR);
+  const end=t>=9*BAR;
+  if(!end){
+    await setImg($('im'),clip(s[0],lerp(s[1],s[2],k)));
+    // whip pan between shots (alternating), with motion blur
+    const w=t-t0,dir=i%2?1:-1;let x=0,bl=0;
+    if(i>0&&w<.16){const q=w/.16;x=dir*lerp(420,0,E.out(q));bl=lerp(14,0,q)}
+    let zf=1+punch(t,[t0],i===6?.06:.025,.25);
+    if(i===2||i===4)zf*=1+.08*seg(t,t0+.35,t0+.6,'out');   // snap zoom on the tap
+    const sc=.7*zf,cx=540,cy=1000,tx=cx*.7-cx*sc,ty=cy*.7-cy*sc;
+    $('pin').style.transformOrigin='0 0';$('pin').style.transform=`translate(${x+tx}px,${ty}px) scale(${sc})`;$('pin').style.filter=bl?`blur(${bl}px)`:'none';
+    $('cover').style.opacity=i===2?1:0;
+    // clock flip
+    $('clock').textContent=s[3];const f=t-t0;tf($('clock'),{sy:i>0&&f<.12?lerp(.2,1,f/.12):1,sx:1});
+    $('lab').textContent=s[4];const lw=textW(s[4]);$('hl').style.width=(lw+26)+'px';
+    tf($('hl'),{sx:i===0&&f<.2?f/.2:(f<.18?lerp(.0,1,E.out(f/.18)):1),sy:1});
+  }
+  FL.style.opacity=flashAt(t,[[6*BAR,.6]],.12);
+  const e=end?seg(t,9*BAR,9*BAR+.1,'lin'):0;$('end').style.opacity=e;
+  if(e){const q=t-9*BAR;tf($('end').querySelector('img'),{s:lerp(.6,1,E.back(cl(q/.3)))});tf($('end').querySelector('.w i'),{sx:E.out(cl((q-.15)/.3)),sy:1});
+    tf($('end').querySelector('p'),{o:cl((q-.3)/.2)});tf($('end').querySelector('small'),{o:cl((q-.4)/.2)})}
+}
+</script></body></html>
