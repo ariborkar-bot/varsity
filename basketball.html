@@ -1741,7 +1741,6 @@ html,body{overflow-x:clip;max-width:100%}
 .tw-o{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
 .tw-note{font-size:.9rem;color:var(--muted);background:rgba(255,194,61,.08);border:1px solid rgba(255,194,61,.25);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:8px 0}.tw-note b{color:var(--ink,#fff)}.ppg-u{font-size:.55em;text-decoration:none;opacity:.7;margin-left:3px}
 /* admin dashboard */
-.adm .adm-card input,.adm .adm-card select{background:#fff;color:#1B1F3B;border:1px solid #E4E7EF}.adm .adm-card input::placeholder{color:#8A90A6}
 .adm-pill.r{background:#FDECEE;color:#D6334D}.adm-pill.x{background:#F1F3F8;color:#6B7189}
 .adm-alerts{display:grid;gap:8px;margin:-4px 0 16px}.adm-alert{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-radius:12px;padding:10px 14px;border:1px solid;cursor:pointer;font:600 13px/1.3 inherit}
 .adm-alert svg{width:18px;height:18px;flex:none}.adm-alert span{flex:1}.adm-alert b{font-weight:700;white-space:nowrap}.adm-alert.r{background:#FDF1F3;border-color:#F8C9D0;color:#9B1C2E}.adm-alert.o{background:#FFF6EE;border-color:#FFD9BF;color:#A04712}
@@ -2536,6 +2535,8 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 
 /* Starter pick CSS removed in v346 */
 
+/* Admin controls page (v384): the app's own look */
+.ctl-i{padding:9px 11px;border-radius:10px;min-width:0;font:inherit}.ctl-tw{overflow-x:auto}.ctl-t{width:100%;border-collapse:collapse}.ctl-t td{padding:6px 8px;border-top:1px solid var(--line);vertical-align:middle}.ctl-t td.n{text-align:right}
 #ban-scr{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 35%,#3a0a12,#07090f 75%);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff}
 #ban-scr .ban-c{max-width:360px;display:flex;flex-direction:column;gap:10px;align-items:center}#ban-scr .ban-m{background:#ffffff14;border-radius:12px;padding:10px 12px;font-weight:700;max-width:100%;overflow-wrap:anywhere}#ban-scr .ban-ap{width:100%;display:flex;flex-direction:column;gap:8px;text-align:left}#ban-scr .ban-ap textarea{width:100%;border-radius:12px;border:1px solid #ffffff33;background:#ffffff10;color:#fff;padding:10px;font:inherit}#ban-scr .ban-ap p{margin:0;overflow-wrap:anywhere}#ban-scr .ban-ic{font-size:3.4rem}#ban-scr h2{margin:0;font:900 1.9rem/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:#FF4F6D}#ban-scr p{margin:0;font-size:1.05rem}#ban-scr small{color:#b9c0d4}
 </style><style id="bb-theme">
@@ -3009,7 +3010,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v383 · Nov 9';
+const APP_BUILD='v384 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -8031,7 +8032,7 @@ function useAd(){if(!USE.doc)return;const k=useDay();USE.doc.ads[k]=(+USE.doc.ad
 const useTab=()=>{try{if(typeof FG!=='undefined'&&FG)return 'mg:fgplay';const d=$('#drawer');if(d&&!d.hidden)return 'player';const v=UI.view;
   if(v==='minigames')return 'mg:'+(UI.mtab||'picks');if(v==='groups')return UI.ltab==='mock'?'mock':UI.ltab==='cup'?'cup':UI.lgk==='pk'?'pkl':'leagues';if(v==='league')return 'stats:'+(UI.stab||'players');return v}catch(_){return 'other'}};
 setInterval(()=>{if(!useOn())return;if(!USE.doc){if(++USE.tick%8===0)useLoad();return}
-  const k=useDay(),t=useTab();if(t==='admin'||t==='desk')return;
+  const k=useDay(),t=useTab();if(t==='admin'||t==='desk'||t==='controls')return;
   if(t!==USE.tab){USE.tab=t;const c=USE.doc.tc[k]||(USE.doc.tc[k]={});c[t]=(+c[t]||0)+1;USE.dirty=true}
   if(document.visibilityState==='visible'&&Date.now()-USE.lastAct<120000){USE.doc.days[k]=(+USE.doc.days[k]||0)+2;const v=USE.doc.tv[k]||(USE.doc.tv[k]={});v[t]=(+v[t]||0)+2;USE.dirty=true}
   if(++USE.tick%30===0)useSave()},2000);
@@ -8143,10 +8144,10 @@ const ADM_NAV=[['overview','Overview','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4
   ['users','Users','M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21c0-4 4-6 8-6s8 2 8 6'],['engagement','Engagement','M4 20V10M10 20V4M16 20v-7M22 20H2'],['sponsors','Sponsors & tokens','M4 5h16v14H4zM10 9l5 3-5 3z'],
   ['games','Games','M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a5 5 0 0 1 5 5v2a4 4 0 0 1-7 2.5L13.5 14h-3L9 15.5A4 4 0 0 1 2 13v-2a5 5 0 0 1 5-5z'],['leagues','Leagues','M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4'],
   ['health','Data health','M22 12h-4l-3 9L9 3l-3 9H2'],['removals','Removal requests','M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3'],['errors','Error log','M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'],['announce','Announcements','M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8'],
-  ['weekly','Weekly report','M8 2v4M16 2v4M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],['controls','Admin controls','M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4'],['tools','Accounts & tools','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z']];
-const ADM_GROUPS=[['Dashboard',['overview','weekly']],['People',['users','growth','engagement','leagues']],['App',['usage','games','sponsors']],['Problems',['removals','errors','health']],['Manage',['controls','announce','tools']]];
-const ADM_DESC={overview:'Big numbers and alerts',weekly:'Last 7 days in one page',users:'Everyone who signed up',growth:'Sign-ups, retention, funnel',engagement:'Who plays what, busy times',leagues:'League health and drafts',usage:'Time spent per tab',games:'Scores and schedule',sponsors:'Videos, tokens, rewards',errors:'App crashes and bugs',removals:'Player removal requests',health:'Missing scores and stats',announce:'Banner for all users',controls:'Bans, appeals, gifts, cards',tools:'Admin accounts, resets'};
-const ADM_MAIN=['overview','users','controls','errors'];
+  ['weekly','Weekly report','M8 2v4M16 2v4M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],['tools','Accounts & tools','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z']];
+const ADM_GROUPS=[['Dashboard',['overview','weekly']],['People',['users','growth','engagement','leagues']],['App',['usage','games','sponsors']],['Problems',['removals','errors','health']],['Manage',['announce','tools']]];
+const ADM_DESC={overview:'Big numbers and alerts',weekly:'Last 7 days in one page',users:'Everyone who signed up',growth:'Sign-ups, retention, funnel',engagement:'Who plays what, busy times',leagues:'League health and drafts',usage:'Time spent per tab',games:'Scores and schedule',sponsors:'Videos, tokens, rewards',errors:'App crashes and bugs',removals:'Player removal requests',health:'Missing scores and stats',announce:'Banner for all users',tools:'Admin accounts, resets'};
+const ADM_MAIN=['overview','users','usage','errors'];
 const admIco=(d,c='')=>`<svg viewBox="0 0 24 24" class="${c}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const admAgo=t=>{if(!t)return'never';const m=Math.round((Date.now()-new Date(t))/6e4);if(m<1)return'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<24)return h+(h===1?' hour ago':' hours ago');const d=Math.round(h/24);return d<31?d+(d===1?' day ago':' days ago'):adWhen(t).split(',')[0]};
 function admSpark(v,c){const W=120,H=34,mx=Math.max(1,...v),n=v.length,pts=v.map((x,i)=>[i/(Math.max(1,n-1))*W,H-3-(x/mx)*(H-8)]);
@@ -8165,7 +8166,7 @@ function admDonut(parts){const tot=parts.reduce((a,p)=>a+p[1],0)||1,R=52,C=2*Mat
 function admHTML(){
   if(DASH.use===null&&!DASH.loading)dashLoad();else if(!ADMR.busy&&Date.now()-ADMR.at>60000)setTimeout(admRefresh,0);
   const P=UI.admp||'overview',loading=AD.rows===null||DASH.use===null;
-  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',removals:'Removals',announce:'Announce',weekly:'Weekly',controls:'Controls',tools:'Tools'};
+  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',removals:'Removals',announce:'Announce',weekly:'Weekly',tools:'Tools'};
   /* v290: sidebar grouped into sections, problem counts as badges, phones get 4 main tabs + a More sheet with every page */
   const NV=k=>ADM_NAV.find(x=>x[0]===k);let BDG={};
   const grpOf=k=>(ADM_GROUPS.find(g=>g[1].includes(k))||['',[]])[0];
@@ -8238,7 +8239,6 @@ function admHTML(){
       <div class="adm-card"><div class="adm-ch"><h3>Share of time</h3></div>${admDonut(Object.entries(grp).sort((a,b)=>b[1]-a[1]).map(([g,v])=>[g,Math.round(v/60),cols[g]]))}<p class="adm-mut" style="margin:10px 0 0;font-size:12px">Center number is total minutes.</p></div>
       <div class="adm-card adm-span3"><div class="adm-ch"><h3>Every tab</h3>${sel}</div><div class="adm-tw"><table class="adm-t"><thead><tr><th>Tab</th><th class="n">Time</th><th class="n">Share</th><th class="n">Opens</th><th class="n adm-hs">Avg per open</th><th class="n adm-hs">People</th></tr></thead><tbody>
       ${T.map(x=>`<tr><td><b>${esc(x.n)}</b>${x.mg?' <span class="adm-pill g">Minigame</span>':''}</td><td class="n"><b>${fmtDur(x.t)}</b></td><td class="n">${Math.round(x.t/tot*100)}%</td><td class="n">${x.c}</td><td class="n adm-hs">${fmtDur(x.c?x.t/x.c:0)}</td><td class="n adm-hs">${x.u}</td></tr>`).join('')||'<tr><td colspan="6" class="adm-mut">No tab data yet. It starts collecting the day this ships.</td></tr>'}</tbody></table></div></div></div>`}
-  else if(P==='controls')body=ctlHTML();
   else if(P==='users')body=title('Users','Everyone with an account. Tap a row to open their account.')+usersTable();
   else if(P==='engagement')body=title('Engagement','Time spent and visits. Time counts only while the app is open and in use.')+`<div class="adm-kpis">${kpi('M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z','#F26B3A','Total time',fmtDur(K.time),dl(K.time,D.prev.time),D.time)}${kpi('M3 12h18','#5B5FEF','Time per person / day',fmtDur(K.perUserDay),'',D.time)}${kpi('M5 12h14M12 5l7 7-7 7','#22B07D','Visits',K.ses.toLocaleString(),dl(K.ses,D.prev.ses),D.ses)}${kpi('M12 7v5','#E0455B','Avg visit',fmtDur(K.perSes),'',D.ses)}</div>
     <div class="adm-grid"><div class="adm-card adm-span2"><div class="adm-ch"><h3>Minutes on the app</h3>${sel}</div>${admBars(D.days,D.time.map(x=>Math.round(x/60)),{c:'#5B5FEF',label:'Minutes per day'})}</div>
@@ -8347,14 +8347,15 @@ const ctlCardRes=q=>{q=nmNorm(q);if(q.length<2)return[];const out=[];
   for(const p of players()){if(p.sample||/x$/.test(p.key))continue;if(nmNorm(p.name+' '+p.school).includes(q)){out.push({id:'pc:'+p.key,n:p.name,s:posOf(p)+' · '+p.school});if(out.length>=8)return out}}
   for(const t of Object.keys(wpTeams())){if(nmNorm(t).includes(q)){out.push({id:'tc:'+t,n:t,s:'Team card'});if(out.length>=10)break}}return out};
 const ctlResHTML=()=>ctlCardRes(CTL.cq).map(x=>`<button type="button" class="adm-btn" style="justify-content:flex-start;text-align:left" data-ctl="pick" data-id="${esc(x.id)}"><b>${esc(x.n)}</b>&nbsp;<span class="adm-mut">${esc(x.s)}</span></button>`).join('')||(CTL.cq.length>1?'<p class="adm-mut">No matches.</p>':'');
+function viewControls(){if(AD.rows===null&&!AD.loading)try{adLoad()}catch(_){}return ctlHTML()}
 function ctlHTML(){
-  const rows=AD.rows;if(rows===null)return '<div class="adm-ph"><div><h1>Admin controls</h1><p>Loading accounts…</p></div></div>';
-  const inp='style="padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit;min-width:0"';
+  const rows=AD.rows;if(rows===null)return '<div class="head"><h2>Admin controls</h2><p>Loading accounts…</p></div>';
+  const inp='class="ctl-i"';
   const banned=Object.entries(S.picks||{}).filter(([u,p])=>p&&p.ban).map(([u,p])=>({u,b:p.ban,a:p.appeal}));
   const appeals=banned.filter(x=>x.a&&x.a.st==='open');
-  const bn=banned.length?banned.map(x=>`<tr><td><b>${esc(ctlName(x.u))}</b></td><td class="adm-mut">${esc(x.b.m||'No message')}</td><td>${x.a?(x.a.st==='open'?'<span class="adm-pill r">Appeal waiting</span>':'<span class="adm-pill x">Appeal denied</span>'):'<span class="adm-mut">No appeal</span>'}</td><td class="n"><button class="adm-btn" data-ctl="unban" data-id="${esc(x.u)}">Lift ban</button></td></tr>
-      ${x.a&&x.a.st==='open'?`<tr><td colspan="4" style="background:#FAFBFE"><div class="adm-mut" style="margin-bottom:6px">Appeal ${admAgo(x.a.at)}:</div><div style="margin-bottom:8px;overflow-wrap:anywhere">${esc(x.a.t||'')}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-r-${esc(x.u)}" ${inp} placeholder="Reply (shown to them if denied)" maxlength="200" style="flex:1;min-width:160px;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit"><button class="adm-btn" data-ctl="approve" data-id="${esc(x.u)}">Approve and lift ban</button><button class="adm-btn" data-ctl="deny" data-id="${esc(x.u)}">Deny</button></div></td></tr>`:''}`).join('')
-    :'<tr><td colspan="4" class="adm-mut">Nobody is banned.</td></tr>';
+  const bn=banned.length?banned.map(x=>`<tr><td><b>${esc(ctlName(x.u))}</b></td><td class="muted">${esc(x.b.m||'No message')}</td><td>${x.a?(x.a.st==='open'?'<span class="ad-tag">Appeal waiting</span>':'<span class="ad-tag">Appeal denied</span>'):'<span class="muted">No appeal</span>'}</td><td class="n"><button class="btn sm" data-ctl="unban" data-id="${esc(x.u)}">Lift ban</button></td></tr>
+      ${x.a&&x.a.st==='open'?`<tr><td colspan="4"><div class="muted" style="margin-bottom:6px">Appeal ${admAgo(x.a.at)}:</div><div style="margin-bottom:8px;overflow-wrap:anywhere">${esc(x.a.t||'')}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-r-${esc(x.u)}" class="ctl-i" placeholder="Reply (shown to them if denied)" maxlength="200"><button class="btn sm" data-ctl="approve" data-id="${esc(x.u)}">Approve and lift ban</button><button class="btn sm" data-ctl="deny" data-id="${esc(x.u)}">Deny</button></div></td></tr>`:''}`).join('')
+    :'<tr><td colspan="4" class="muted">Nobody is banned.</td></tr>';
   const q=nmNorm(CTL.q),list=rows.filter(r=>!q||nmNorm(((r.p&&r.p.name)||'')+' '+(r.email||'')+' '+((r.p&&r.p.school)||'')).includes(q)).slice(0,8);
   const sel=CTL.uid&&rows.find(r=>r.uid===CTL.uid);
   let acct='';
@@ -8363,29 +8364,29 @@ function ctlHTML(){
     const gp=giftPacks(u),pkOpts=Object.keys(PACKS).map(k=>`<option value="${k}" ${CTL.pk===k?'selected':''}>${esc(PACKS[k].n)} (${PACKS[k].c})</option>`).join('');
     const itOpts=ITEMS.filter(x=>!x.ex).map(x=>`<option value="${esc(x.id)}" ${CTL.it===x.id?'selected':''}>${esc(x.n)} · ${RAR[x.r].n}</option>`).join('');
     const it=v.it||{},myIt=Object.keys(it).filter(k=>+it[k]>0&&ITEM[k]);
-    acct=`<div class="adm-card" style="margin-top:16px"><div class="adm-ch"><h3>${esc(ctlName(u))}${sel.is_admin?' <span class="adm-pill b">Admin</span>':''}</h3><span class="adm-mut">${esc(sel.email||'')} · ${bank(u).toLocaleString()} tokens</span></div>
+    acct=`<div class="card" style="margin-top:14px"><div class="qh"><h3>${esc(ctlName(u))}${sel.is_admin?' <span class="ad-tag">Admin</span>':''}</h3><span class="muted">${esc(sel.email||'')} · ${bank(u).toLocaleString()} tokens</span></div>
       <h4 style="margin:6px 0">Ban</h4>
-      ${isB?`<p><span class="adm-pill r">Banned</span> <span class="adm-mut">${esc(b.m||'No message')}</span></p><button class="adm-btn" data-ctl="unban" data-id="${esc(u)}">Lift ban</button>`
-        :sel.is_admin||u===ME.uid?'<p class="adm-mut">Admin accounts can’t be banned here.</p>'
-        :`<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-bm" ${inp} style="flex:1;min-width:200px;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit" maxlength="200" placeholder="Message they will see (the reason)" value="${esc(CTL.bm)}"><button class="adm-btn" data-ctl="ban" data-id="${esc(u)}">Ban account</button></div><p class="adm-mut" style="font-size:12px;margin:6px 0 0">They get a full-screen ban notice with your message and can send one appeal.</p>`}
+      ${isB?`<p><span class="ad-tag">Banned</span> <span class="muted">${esc(b.m||'No message')}</span></p><button class="btn sm" data-ctl="unban" data-id="${esc(u)}">Lift ban</button>`
+        :sel.is_admin||u===ME.uid?'<p class="muted">Admin accounts can’t be banned here.</p>'
+        :`<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-bm" class="ctl-i" maxlength="200" placeholder="Message they will see (the reason)" value="${esc(CTL.bm)}"><button class="btn sm" data-ctl="ban" data-id="${esc(u)}">Ban account</button></div><p class="muted" style="font-size:12px;margin:6px 0 0">They get a full-screen ban notice with your message and can send one appeal.</p>`}
       <h4 style="margin:16px 0 6px">Tokens</h4>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-tk" type="number" min="1" ${inp} placeholder="Amount" value="${esc(CTL.tk)}" style="width:110px;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit"><button class="adm-btn" data-ctl="tok" data-d="1" data-id="${esc(u)}">Give tokens</button><button class="adm-btn" data-ctl="tok" data-d="-1" data-id="${esc(u)}">Take tokens</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-tk" type="number" min="1" class="ctl-i" placeholder="Amount" value="${esc(CTL.tk)}"><button class="btn sm" data-ctl="tok" data-d="1" data-id="${esc(u)}">Give tokens</button><button class="btn sm" data-ctl="tok" data-d="-1" data-id="${esc(u)}">Take tokens</button></div>
       <h4 style="margin:16px 0 6px">Cards in their locker (${cardRows.length})</h4>
-      <div style="max-height:260px;overflow:auto;border:1px solid #ECEEF4;border-radius:10px"><table class="adm-t"><tbody>${cardRows.map(x=>`<tr><td><b>${esc(cardInfo(x.id).name)}</b> <span class="adm-mut">${esc(cardInfo(x.id).sub||'')}</span></td><td class="n">${x.rs.map(r=>`<button class="adm-btn" style="color:${RAR[r].c}" data-ctl="cardrm" data-id="${esc(u)}" data-c="${esc(x.id)}" data-r="${r}" title="Remove this card">${RAR[r].n} ✕</button>`).join(' ')}</td></tr>`).join('')||'<tr><td class="adm-mut">No cards.</td></tr>'}</tbody></table></div>
+      <div style="max-height:260px;overflow:auto;border:1px solid #ECEEF4;border-radius:10px"><table class="ctl-t"><tbody>${cardRows.map(x=>`<tr><td><b>${esc(cardInfo(x.id).name)}</b> <span class="muted">${esc(cardInfo(x.id).sub||'')}</span></td><td class="n">${x.rs.map(r=>`<button class="btn sm" style="color:${RAR[r].c}" data-ctl="cardrm" data-id="${esc(u)}" data-c="${esc(x.id)}" data-r="${r}" title="Remove this card">${RAR[r].n} ✕</button>`).join(' ')}</td></tr>`).join('')||'<tr><td class="muted">No cards.</td></tr>'}</tbody></table></div>
       <h4 style="margin:16px 0 6px">Give a card</h4>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-cq" type="search" ${inp} placeholder="Search a player or school" value="${esc(CTL.cq)}" style="flex:1;min-width:180px;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit"><select id="ctl-cr" ${inp}>${['c','u','r','e','l','m'].map(r=>`<option value="${r}" ${CTL.cr===r?'selected':''}>${RAR[r].n}</option>`).join('')}</select></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-cq" type="search" class="ctl-i" placeholder="Search a player or school" value="${esc(CTL.cq)}"><select id="ctl-cr" class="ctl-i">${['c','u','r','e','l','m'].map(r=>`<option value="${r}" ${CTL.cr===r?'selected':''}>${RAR[r].n}</option>`).join('')}</select></div>
       <div id="ctl-res" style="display:flex;flex-direction:column;gap:6px;margin:8px 0">${ctlResHTML()}</div>
-      ${CTL.card?`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span>Selected: <b>${esc(cardInfo(CTL.card).name)}</b> · ${RAR[CTL.cr].n}</span><button class="adm-btn" data-ctl="cardadd" data-id="${esc(u)}">Give this card</button></div>`:''}
+      ${CTL.card?`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span>Selected: <b>${esc(cardInfo(CTL.card).name)}</b> · ${RAR[CTL.cr].n}</span><button class="btn sm" data-ctl="cardadd" data-id="${esc(u)}">Give this card</button></div>`:''}
       <h4 style="margin:16px 0 6px">Packs</h4>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="ctl-pk" ${inp}>${pkOpts}</select><button class="adm-btn" data-ctl="pack" data-id="${esc(u)}">Gift this pack</button>${v.sp2?`<button class="adm-btn" data-ctl="wpreset" data-id="${esc(u)}">Let them open the Welcome pack again</button>`:''}</div>
-      ${gp.length?`<p class="adm-mut" style="margin:8px 0 4px">Unopened gift packs:</p>${gp.map(g=>`<div style="display:flex;gap:8px;align-items:center;margin:4px 0"><span>${esc(PACKS[g.type].n)}</span><button class="adm-btn" data-ctl="packrm" data-id="${esc(u)}" data-g="${esc(g.id)}">Take back</button></div>`).join('')}`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="ctl-pk" class="ctl-i">${pkOpts}</select><button class="btn sm" data-ctl="pack" data-id="${esc(u)}">Gift this pack</button>${v.sp2?`<button class="btn sm" data-ctl="wpreset" data-id="${esc(u)}">Let them open the Welcome pack again</button>`:''}</div>
+      ${gp.length?`<p class="muted" style="margin:8px 0 4px">Unopened gift packs:</p>${gp.map(g=>`<div style="display:flex;gap:8px;align-items:center;margin:4px 0"><span>${esc(PACKS[g.type].n)}</span><button class="btn sm" data-ctl="packrm" data-id="${esc(u)}" data-g="${esc(g.id)}">Take back</button></div>`).join('')}`:''}
       <h4 style="margin:16px 0 6px">Items</h4>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="ctl-it" ${inp} style="max-width:260px">${itOpts}</select><button class="adm-btn" data-ctl="item" data-d="1" data-id="${esc(u)}">Give item</button><button class="adm-btn" data-ctl="item" data-d="-1" data-id="${esc(u)}">Take one</button></div>
-      ${myIt.length?`<p class="adm-mut" style="margin:8px 0 0;font-size:12px">Has: ${myIt.map(k=>esc(ITEM[k].n)+' ×'+it[k]).join(', ')}</p>`:''}</div>`}
-  return `<div class="adm-ph"><div><h1>Admin controls</h1><p>Ban accounts, answer appeals, and gift or take back cards, packs, items and tokens. Works on this app’s data (${FG_SPORT==='bb'?'basketball':'football'}).</p></div></div>
-    <div class="adm-card"><div class="adm-ch"><h3>Banned accounts (${banned.length})</h3>${appeals.length?`<span class="adm-pill r">${appeals.length} appeal${appeals.length>1?'s':''}</span>`:''}</div><div class="adm-tw"><table class="adm-t"><tbody>${bn}</tbody></table></div></div>
-    <div class="adm-card" style="margin-top:16px"><div class="adm-ch"><h3>Pick an account</h3></div><input id="ctl-q" type="search" ${inp} placeholder="Search name, email or school" value="${esc(CTL.q)}" style="width:100%;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit">
-      <div id="ctl-acc" style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${list.map(r=>`<button class="adm-btn" style="justify-content:flex-start;text-align:left" data-ctl="sel" data-id="${esc(r.uid)}"><b>${esc((r.p&&r.p.name)||r.email||'Account')}</b>&nbsp;<span class="adm-mut">${esc(r.email||'')}${r.p&&r.p.school?' · '+esc(r.p.school):''}</span></button>`).join('')||'<p class="adm-mut">No matches.</p>'}</div></div>${acct}`}
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="ctl-it" class="ctl-i" style="max-width:260px">${itOpts}</select><button class="btn sm" data-ctl="item" data-d="1" data-id="${esc(u)}">Give item</button><button class="btn sm" data-ctl="item" data-d="-1" data-id="${esc(u)}">Take one</button></div>
+      ${myIt.length?`<p class="muted" style="margin:8px 0 0;font-size:12px">Has: ${myIt.map(k=>esc(ITEM[k].n)+' ×'+it[k]).join(', ')}</p>`:''}</div>`}
+  return `<div class="head"><h2>Admin controls</h2><p>Ban accounts, answer appeals, and gift or take back cards, packs, items and tokens. Works on this app’s data (${FG_SPORT==='bb'?'basketball':'football'}). Only admins can see this page.</p></div><div class="btns"><a class="btn sm ghost" href="#me">← Back</a><a class="btn sm ghost" href="#admin">Admin systems</a></div>
+    <div class="card"><div class="qh"><h3>Banned accounts (${banned.length})</h3>${appeals.length?`<span class="ad-tag">${appeals.length} appeal${appeals.length>1?'s':''}</span>`:''}</div><div class="ctl-tw"><table class="ctl-t"><tbody>${bn}</tbody></table></div></div>
+    <div class="card" style="margin-top:14px"><div class="qh"><h3>Pick an account</h3></div><input id="ctl-q" type="search" class="ctl-i" placeholder="Search name, email or school" value="${esc(CTL.q)}">
+      <div id="ctl-acc" style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${list.map(r=>`<button class="btn sm ghost" style="justify-content:flex-start;text-align:left;width:100%" data-ctl="sel" data-id="${esc(r.uid)}"><b>${esc((r.p&&r.p.name)||r.email||'Account')}</b>&nbsp;<span class="muted">${esc(r.email||'')}${r.p&&r.p.school?' · '+esc(r.p.school):''}</span></button>`).join('')||'<p class="muted">No matches.</p>'}</div></div>${acct}`}
 async function ctlSave(u,patch,msg,top){const v=invOf(u);
   const body=top||{inv:patch},ok=await act(()=>upsert('picks/'+u,body),msg);
   if(ok){const cur=S.picks[u]||{};S.picks[u]=top?Object.assign({},cur,top):Object.assign({},cur,{inv:Object.assign({},v,patch)});_gIn&&(_gIn.at=0);try{banCheck()}catch(_){}}render()}
@@ -8559,7 +8560,7 @@ function viewAdmin(){
     ${sel.p&&!sel.is_admin?`<div class="btns"><label class="fld" style="max-width:220px"><span>School</span><input id="ad-school" value="${esc(p.school||'')}"></label><button class="btn sm" data-ad="saveSchool" data-id="${esc(sel.uid)}">Save school</button></div>`:''}
     ${sel.is_admin||sel.uid===ME.uid?'':`<div class="btns"><button class="btn sm ghost" data-ad="remove" data-id="${esc(sel.uid)}">Remove this member</button></div><p class="muted">Removing deletes their profile, stats, lineups and login. It cannot be undone.</p>`}</section>`})():'';
   return `<div class="head"><h2>Admin systems</h2><p>Everyone with an account, the controls for the site, and view-as for any account. Only the two admin accounts can see this.</p></div>
-  <div class="btns">${adTabs}<a class="btn sm" href="#desk">Stat desk and approvals</a><button class="btn sm ghost" data-ad="lock">Lock admin</button><button class="btn sm ghost" data-ad="reload">Refresh</button></div>
+  <div class="btns">${adTabs}<a class="btn sm" href="#desk">Stat desk and approvals</a><a class="btn sm" href="#controls">Admin controls</a><button class="btn sm ghost" data-ad="lock">Lock admin</button><button class="btn sm ghost" data-ad="reload">Refresh</button></div>
   ${detail}
   ${VA?'':`<section class="card"><div class="qh"><h3>Test the games</h3><span class="muted">Your account only</span></div><p class="muted">Wipe your own game progress so you can play it again from the start. Nobody else's hands, picks or tokens are touched.</p>
     <div class="btns"><button class="btn sm" data-ad="rstFc">Replay 5 Card Draw</button><button class="btn sm" data-ad="rstBets">Replay Pick ’em</button><button class="btn sm" data-ad="rstAts">Replay Player props</button><button class="btn sm ghost" data-ad="rstAll">Reset all three</button></div></section>`}
@@ -8606,8 +8607,8 @@ document.addEventListener('click',async e=>{
 });
 
 /* ---------- render ---------- */
-const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk','privacy','locker','shop'];
-const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk());
+const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk','controls','privacy','locker','shop'];
+const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk())&&(v!=='controls'||ME.admin);
 function bannerHTML(){
   const b=[];
   {const a=S.settings&&S.settings.ann;let x='';try{x=localStorage.getItem('vs-ann-x')||''}catch(_){}
@@ -8667,7 +8668,7 @@ function render(bg){
   try{cosApplyRoot()}catch(_){}
   T10S=null;POTW_C=null;
   if(location.hash==='#simulate'){UI.mtab='sim';history.replaceState(null,'','#minigames')}
-  const V={shop:viewShop,locker:viewLocker,team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,scoring:viewScoring,privacy:viewPrivacy,admin:viewAdmin};
+  const V={shop:viewShop,locker:viewLocker,team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,controls:viewControls,scoring:viewScoring,privacy:viewPrivacy,admin:viewAdmin};
   let v=UI.view;
   const html=V[v]();
   if(bg===true&&html===LAST_HTML&&v===LAST_V){chrome(v);return}
@@ -8713,7 +8714,7 @@ let ADM_LEAVE=false;
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-admexit]'))ADM_LEAVE=true},true);
 function route(){
   let v=location.hash.slice(1);if(v==='hub')v='me';
-  if(UI.view==='admin'&&ME.admin&&v!=='admin'&&v!=='desk'&&!ADM_LEAVE){try{history.pushState(null,'','#admin')}catch(_){location.hash='admin'}return}
+  if(UI.view==='admin'&&ME.admin&&v!=='admin'&&v!=='desk'&&v!=='controls'&&!ADM_LEAVE){try{history.pushState(null,'','#admin')}catch(_){location.hash='admin'}return}
   ADM_LEAVE=false;
   if(v.startsWith('join=')){UI.joinCode=decodeURIComponent(v.slice(5)).toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,12);v='groups';try{history.replaceState(null,'','#groups')}catch(_){};if(UI.joinCode){try{localStorage.setItem('vs-invite',JSON.stringify({c:UI.joinCode,at:Date.now()}))}catch(_){}if(typeof runInvite==='function')runInvite()}}
   if(v.startsWith('team/')){try{UI.team=decodeURIComponent(v.slice(5))}catch(_){UI.team=''}v='team'}
@@ -8744,7 +8745,7 @@ document.addEventListener('click',e=>{
   const a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
   const v=a.getAttribute('href').slice(1);if(!viewOK(v))return;
   e.preventDefault();
-  if(UI.view==='admin'&&ME.admin&&v!=='admin'&&v!=='desk'&&!a.hasAttribute('data-admexit'))return;   /* admin: only Exit leaves */
+  if(UI.view==='admin'&&ME.admin&&v!=='admin'&&v!=='desk'&&v!=='controls'&&!a.hasAttribute('data-admexit'))return;   /* admin: only Exit leaves */
   ADM_LEAVE=false;
   /* each tab is its own history entry, so the phone's Back button goes to the previous tab.
      From an open sheet, the new tab takes the sheet's entry, so Back still lands on the tab before. */
@@ -9532,7 +9533,7 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
       '<a role="menuitem" href="#account">Account information</a>'+
       '<button role="menuitem" data-act="consent">'+(joined?'Edit profile':ME.mode==='guest'?'Sign in or create account':'Pick a name')+'</button>'+
       '<button role="menuitem" data-act="ntSettings">Notification settings</button>'+
-      (ME.admin?'<a role="menuitem" href="#admin">Admin systems</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
+      (ME.admin?'<a role="menuitem" href="#admin">Admin systems</a><a role="menuitem" href="#controls">Admin controls</a>':'<button role="menuitem" id="sm-admin">Admin sign in</button>')+
       '<hr><div class="setv" aria-hidden="true">Version '+APP_BUILD+'</div>'+
       '<a role="menuitem" href="#privacy">Privacy policy</a>'+
       '<button role="menuitem" data-act="remOpen">Request player removal</button>'+

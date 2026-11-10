@@ -256,3 +256,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 - **Ban screen** now shows the admin's message and lets the person send one appeal (`picks/<uid>.appeal={t,at,st:'open'|'denied',r}`); `banCheck()` + `[data-ban=appeal]`.
 
 ## v383 (Nov 9): Admin controls is one of the 4 main admin tabs on phones (replaces App usage there; usage is still under More and in the desktop sidebar)
+
+## v384 (Nov 9): Admin controls is its own page (owner: not inside the admin console)
+- `#controls` (`viewControls()` in the `V` map, `VIEWS`, `viewOK`: admins only) in the app's own look. Linked from the Settings menu ("Admin controls", under Admin systems) and from the Admin systems page next to "Stat desk and approvals". Removed from the admin console nav (v382/v383 had it there); `ADM_MAIN` is back to overview/users/usage/errors. Same tools as v382 (`ctlHTML()`): bans with a message, appeals, tokens, cards, packs, items, Welcome pack reset.
