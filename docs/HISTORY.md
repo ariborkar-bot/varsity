@@ -351,3 +351,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - v2 (Nov 10): OVR blends three percentiles (weights on the Notes sheet, default 40% fantasy pts/game, 30% season total, 30% rank in the position's key stats), re-ranked among peers so the range stays 40-99.
 - OVR scale (Nov 10, owner): lowest OVR is 50 (was 40); mean 72, spread 11, ceiling 99.
 - OVR scale (Nov 10, owner): lowest OVR is 45; mean 70, spread 11, ceiling 99.
+- OVR v3 (Nov 10, owner): a 4th part, schedule strength (5%; weights 38/28.5/28.5/5): football = average win% of the opponents played (completed games, Laplace-smoothed), basketball = average 2025-26 scoring margin (`BB_PRIOR`) of the 2026-27 opponents; percentile among schools. Division is not used directly (the app only has division brackets for some schools). `dump.py` now also writes fbgames.json and bbsched.json.
