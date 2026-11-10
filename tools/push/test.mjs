@@ -49,3 +49,13 @@ const t = 'NAMES:Poway|Ramona\n1114 1900 0 1\n1114 0000 ~Outside 0 64-58\n0103 1
 const gs = parseBbGames(t);
 assert.equal(gs.length, 3); assert.equal(gs[0].t, '19:00'); assert.equal(gs[1].h, 'Outside'); assert.equal(gs[1].hs, 64); assert.equal(gs[2].d, '2027-01-03');
 console.log('push planner: all checks passed');
+// Monday reveal (football): 8-11 AM on the Monday of a week with games, only when no hand is dealt
+{ const fb = [{ w: 13, d: '2026-11-13', t: '19:00', h: 'Poway', a: 'Ramona', hs: null, as: null }], f = sub({ sport: 'fb', school: '' });
+  const run = (d, hm, picks = {}) => plan(I(at(d, hm), [f], { games: { fb, bb: [] }, picks })).filter(x => x.cat === 'hand');
+  assert.equal(run('2026-11-09', '08:30').length, 1);
+  assert.match(run('2026-11-09', '08:30')[0].body, /Week 13/);
+  assert.equal(run('2026-11-09', '12:00').length, 0);
+  assert.equal(run('2026-11-10', '08:30').length, 0);
+  assert.equal(run('2026-11-09', '08:30', { 'fb|u1': { fc: { 13: { h: [] } } } }).length, 0);
+  assert.equal(plan(I(at('2026-11-09', '08:30'), [sub({ sport: 'fb', school: '', cats: { hand: false } })], { games: { fb, bb: [] } })).filter(x => x.cat === 'hand').length, 0); }
+console.log('monday ok');

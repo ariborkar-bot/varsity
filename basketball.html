@@ -1504,6 +1504,15 @@ select option{background:#0B1730;color:#EAF0F8}
 .me-lks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.me-lks .me-lk{margin:0;flex-direction:row}
 .lk-mys{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1.5px dashed var(--line);font:900 1.2rem var(--f-display,inherit);color:var(--muted,#8FA3C3)}.lk-mys.sm{width:18px;height:18px;font-size:.7rem;border-radius:5px}
 .pko-eq{margin-top:4px;padding:4px 10px!important;font-size:.7rem!important}.lk-top .btn{align-self:center}
+.cup-bn{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 14px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,201,58,.35);background:linear-gradient(120deg,rgba(229,72,59,.28),rgba(255,201,58,.16));color:inherit;text-align:left;cursor:pointer;font:inherit}
+.cup-bn .cb-t{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}.cup-bn small{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.cup-bn b{font:800 1.15rem/1.1 var(--f-display,inherit)}.cup-bn em{font-style:normal;font-size:.78rem;opacity:.8}
+.cup-bn .cb-go{font-size:1.6rem;color:var(--muted)}
+.ii{display:inline-grid;place-items:center;min-width:22px;height:22px;margin-left:6px;padding:0 4px;border-radius:99px;border:1px solid var(--line,rgba(255,255,255,.25));background:transparent;color:var(--accent);font:700 .85rem/1 var(--f-body,inherit);cursor:pointer;vertical-align:middle}
+.ii:hover{background:rgba(255,255,255,.08)}
+.mg-help{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin:2px 2px 12px;font-size:.82rem;color:var(--muted)}
+.mg-help .ii{margin-left:2px}
+.info-sheet p{margin:8px 0 14px;line-height:1.45}
 .me-lks{grid-template-columns:1fr 1fr!important;gap:12px!important}
 .me-tile{position:relative;display:flex;flex-direction:column;gap:3px;padding:16px 14px 14px;border-radius:18px;text-decoration:none;color:#fff;overflow:hidden;min-height:128px;box-shadow:var(--shadow);transition:transform .15s}
 .me-tile:active{transform:scale(.97)}
@@ -3034,7 +3043,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v395 · Nov 9';
+const APP_BUILD='v396 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3907,7 +3916,7 @@ function fcHTML(){
   const top=rows.slice(0,25),me=rows.find(x=>x.u===ME.uid);
   const lrow=x=>`<li class="fc-tap ${x.u===ME.uid?'me':''}" data-act="fcView" data-u="${esc(x.u)}" data-w="${w}" role="button" tabindex="0" aria-label="See ${esc(x.u===ME.uid?'your':nm(x.u)+'’s')} hand"><span class="rk">${x.r}</span>${av(nm(x.u),x.u,34)}<span class="who"><b>${esc(x.u===ME.uid?'You':nm(x.u))}</b><small class="muted">${esc((fcHand(x.u,w)||{h:[]}).h.map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(byS?x.s:x.t)}</b><small>${byS?'season':byW?'week '+wkOf:FC_DAILY?'day':'week '+w}</small></span><span class="chev" aria-hidden="true">›</span></li>`;
   return `<section class="card fc-hero ${eqOf(ME.uid,'cback')?'cb '+eqOf(ME.uid,'cback')+cbCls(eqOf(ME.uid,'cback')):''}" style="${eqOf(ME.uid,'cback')?cosStyle(eqOf(ME.uid,'cback')):''}"><div class="qh"><h3>5 Card Draw</h3><span class="pill live">${FC_DAILY&&dayOf(cw)!==TODAY()?'Next · ':''}${fcLabel(cw)}</span></div>
-    <p class="muted">${FC_DAILY?'5 players from today’s games. A new hand every game day.':'5 random players a week.'} ${FC_REDRAWS} redraws.</p>
+    <p class="muted">${FC_DAILY?'5 players from today’s games. A new hand every game day.':'5 random players a week.'} ${FC_REDRAWS} redraws.${ii('redraw')}</p>
     ${wk.length>1?`<div class="chips" role="group" aria-label="${FC_DAILY?'Day':'Week'}">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">${fcLabel(n)}</button>`).join('')}</div>`:''}
     ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&!lkd&&invLeft(ME.uid,'p_redraw')>0?`<button class="btn sm ghost fc-x" data-act="perkRedraw">+1 redraw (${invLeft(ME.uid,'p_redraw')})</button>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(!lkd&&!fcOpen(w)?`<p class="hint" style="margin-top:12px"><b>Hand closed at tip-off.</b> This hand counts as it stands.</p>`:lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> Good luck this ${fcUnit()}.</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand</button></div>`):''}`
       :w!==cw?`<p class="hint">You had no hand that ${fcUnit()}.</p><button class="btn sm" data-act="fcWeek" data-v="${cw}">Back to week ${cw}</button>`
@@ -4350,6 +4359,19 @@ function bndHTML(){const u=ME.uid,done=bndOf(u),all=bndSchools(),N=UI.bndN||12,q
     <section class="card"><div class="bnd-l">${rows.slice(0,N).map(card).join('')||'<p class="empty">No school matches.</p>'}</div>${rows.length>N?`<button class="btn ghost" data-act="bndMore">Show more (${rows.length-N})</button>`:''}</section>`}
 /* v380: a card from one team: its team card 20% of the time, otherwise one of its players */
 function rollTeamCard(t){const pl=players().filter(p=>!p.sample&&!/x$/.test(p.key)&&p.school===t).map(p=>'pc:'+p.key);return(!pl.length||fcRnd(100)<20)?'tc:'+t:pl[fcRnd(pl.length)]}
+/* v396 (owner): small ⓘ buttons next to game words; tap one for a one-line definition (INFO) */
+const INFO={
+  pickem:['Pick ’em','Pick the winner of each game. You score for every game you call right.'],
+  ou:['Over / Under',()=>'Each player gets a stat line (like '+(FG_SPORT==='bb'?'18 points':'80 rushing yards')+'). Pick whether he finishes over or under it.'],
+  cup:['School Cup','Your school’s weekly points from you and your classmates. Schools face off each week.'],
+  redraw:['Redraw','Swap one of your 5 players for a new random one, before that player’s game starts. You get a few per hand.'],
+  walkout:['Epic+ walkout','Epic, Legendary and Mythical cards are revealed with a short walk-out: position, team, stats, then the player.'],
+  sim:[()=>(FG_SPORT==='bb'?'82-0':'82-0'),()=>'A perfect season: build a team from random players and see if it can win every game ('+(FG_SPORT==='bb'?'82':'10')+' wins, 0 losses).']};
+const ii=(k,t)=>`<button type="button" class="ii" data-info="${k}" aria-label="What is ${esc(typeof INFO[k][0]==='function'?INFO[k][0]():INFO[k][0])}?">${t||'ⓘ'}</button>`;
+function infoSheet(k){const x=INFO[k],c=$('#cfm');if(!x||!c)return;const f=v=>typeof v==='function'?v():v;
+  c.innerHTML=`<div class="gcard tok-sheet info-sheet" role="dialog" aria-modal="true" aria-labelledby="inf-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button><h2 id="inf-t">${esc(f(x[0]))}</h2><p>${esc(f(x[1]))}</p><div class="gbtns"><button class="btn" data-c="no">Got it</button></div></div>`;
+  c.hidden=false}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-info]');if(!b)return;e.preventDefault();e.stopPropagation();infoSheet(b.dataset.info)});
 const PT={t:'',k:'team',h:'tok',d:null};
 function ptSheet(k,h,d){Object.assign(PT,{k:k||'team',h:h||'tok',d:d==null?null:d});const c=$('#cfm'),P=PACKS[PT.k];if(!c||!P)return;
   const ts=Object.keys(wpTeams()).sort((a,b)=>a.localeCompare(b));
@@ -4986,7 +5008,8 @@ function viewShop(){
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
     const adDone=(v.fr||{}).ad===TODAY(),gm=FG_SPORT==='bb'?'Hoops':'Field Goal',ord=['','1st','2nd','3rd'];
     const gifts=giftPacks(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>Gift · ${esc(PACKS[x.type].n)}</b><small class="muted">${esc(x.m||'A pack from Varsity.')}</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="gift" data-d="${esc(x.id)}">Open gift</button></section>`).join('');
-    const prizes=gifts+fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('')
+    const pend=fcPending(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🕒 5 Card Draw prizes · ${fcLabel(x.w)}</b><small class="muted">${x.open?'Waiting on '+x.open+' '+(x.open===1?'game':'games')+' to finish.':'Waiting on '+x.wait+' '+(x.wait===1?'stat line':'stat lines')+' from MaxPreps.'} Prizes pay out once every player in every hand has a line.</small></div></section>`).join('');
+    const prizes=pend+gifts+fgPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Daily ${gm} challenge, ${fmtDay(x.day)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="lb" data-d="${x.day}">Open prize</button></section>`).join('')
       +fcPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">5 Card Draw, ${fcLabel(x.w)}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="fclb" data-d="${x.w}">Open prize</button></section>`).join('')
       +bkPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 ${ord[x.place]} place · ${esc(PACKS[x.type].n)}</b><small class="muted">Playoff Bracket Challenge.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="bk" data-d="bk">Open prize</button></section>`).join('')
       +cupPrizes(ME.uid).map(x=>`<section class="card lk-free lk-prize"><div><b>🏆 Top scorer · ${esc(PACKS[x.type].n)}</b><small class="muted">School Cup, week ${x.w}.</small></div><button class="btn" data-act="pkOpen" data-v="${x.type}" data-h="cup" data-d="${x.w}">Open prize</button></section>`).join('');
@@ -5003,7 +5026,7 @@ function viewShop(){
 }
 function viewLocker(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>My Locker</h2><p>Everything you have pulled. Tap a cosmetic to equip it.</p></div>`;
+  const head=`<div class="head"><h2>My Locker</h2><p>Everything you have pulled. Tap a cosmetic to equip it. Epic+ pulls get a walkout ${ii('walkout')}</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to keep your items.</p>';
   const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0)+achOwned(ME.uid).length,pct=Math.min(100,ownN/Math.max(1,totN)*100);
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
@@ -5788,6 +5811,9 @@ const fcPrizeRank=s=>FC_DAILY?Object.keys(S.picks).filter(u=>fcHand(u,s)).map(u=
 const fcLbWeeks=()=>{const out=[];
   if(FC_DAILY){for(const d of Object.keys(fcIdx().d).sort().reverse()){const s=dayNo(d);if(s<FC_LB_START)break;if(fcDayDone(s)){out.push(s);if(out.length>=FC_LB_DAYS)break}}return out}
   for(let w=fcMaxW();w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
+/* v396 (owner): a finished-looking week whose prizes are still held shows why (stat lines / games still missing) */
+function fcPending(u){if(!u||FC_DAILY)return[];const out=[];for(const k of Object.keys(fcDoc(u))){const w=+k;if(w<FC_LB_START||w>=fcCur()&&false)continue;const gs=fcGamesOf(w);if(!gs.length||fcWeekDone(w))continue;
+  const open=gs.filter(g=>!gDone(g)).length;if(w===fcCur()&&open===gs.length)continue;out.push({w,open,wait:open?0:fcWaiting(w)})}return out.sort((a,b)=>b.w-a.w)}
 function fcPrizes(u){if(!u)return[];const cl=((invOf(u).fr||{}).fc)||{},out=[];
   for(const w of fcLbWeeks()){if(cl[w])continue;const pl=fcPrizeRank(w).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({w,place:pl+1,type:FG_LB_PRIZE[pl]})}return out}
 /* v293/v311: daily bonus. +25 tokens the first time you play any game each day (Pacific time), claimed automatically by playMark().
@@ -5864,12 +5890,20 @@ async function cupRcWin(){
   const rc=Object.assign({},cupDoc(ME.uid).rc),n=(+rc[day]||0)+1;rc[day]=n;
   S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{cup:Object.assign({},cupDoc(ME.uid),{rc})});
   try{await upsert('picks/'+ME.uid,{cup:{rc:{[day]:n}}});say(`+${CUP_RC} School Cup points`)}catch(_){}}
+/* v396 (owner): home-screen banner with your school's School Cup rank this week */
+function cupBanner(){try{
+  const sc=ME.uid&&ME.mode!=='guest'?cupSchool(ME.uid):'';if(!sc)return '';
+  const cw=cupCurW();if(cw<cupFirst())return '';
+  const B=cupBoard(cw),all=Object.values(B).filter(x=>x.ok).sort((a,b)=>b.score-a.score||(a.s<b.s?-1:1)),mine=B[sc],i=all.findIndex(x=>x.s===sc);
+  const body=i>=0?`<b>#${i+1}</b> of ${all.length} schools · ${f1(mine.score)} pts`:`${mine?mine.n:0} of ${CUP_MIN} players`;
+  const sub=i>=0?'Tap to see your school’s matchup.':'Your school needs '+CUP_MIN+' players with points to enter. Play 5 Card Draw or pick winners.';
+  return `<button type="button" class="cup-bn" data-act="cupGo" aria-label="Open the School Cup">${slogo(sc)}<span class="cb-t"><small>School Cup · Week ${cw}</small><b>${esc(sc)}</b><span>${body}</span><em>${sub}</em></span><span class="cb-go" aria-hidden="true">›</span></button>`}catch(_){return ''}}
 function cupHTML(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',my=can?cupSchool(ME.uid):'';
   const f=cupFirst(),cw=cupCurW(),W=cupWeeks().filter(x=>x.w>=f&&x.w<=cw).map(x=>x.w);
   const w=W.includes(+UI.cupw)?+UI.cupw:cw,done=cupWeekDone(w),B=cupBoard(w),ms=cupMatches(w,B);
   const dleft=d=>Math.round((new Date(d+'T12:00:00Z')-new Date(TODAY()+'T12:00:00Z'))/864e5);
-  const head=`<section class="card cup-hd"><div class="qh"><h3>Week ${w}</h3><span class="muted">${done?'Final':'Live'}</span></div>
+  const head=`<section class="card cup-hd"><div class="qh"><h3>Week ${w}</h3><span class="muted">${done?'Final':'Live'}${ii('cup')}</span></div>
     <div class="wks" role="group" aria-label="Week">${W.map(x=>`<button class="chip" data-act="cupWk" data-w="${x}" aria-pressed="${x===w}">Wk ${x}${x===cw?' •':''}</button>`).join('')}</div>
     </section>`;
   const how=`<section class="card cup-hw"><div class="cup-how"><b>How the School Cup works</b>
@@ -6816,8 +6850,9 @@ const MGI=(()=>{const w=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</sv
   hoop:w('<circle cx="12" cy="4.6" r="2.6"/><ellipse cx="12" cy="11" rx="7" ry="2"/><path d="M5.4 12l2.6 7M18.6 12l-2.6 7M10 13l.8 6.4M14 13l-.8 6.4"/>')}})();
   const tabs=`<div class="mg-tiles" role="group" aria-label="Minigames">${[['predict','Predict',MGI.predict,'#2F6BFF'],['draw','5 Card Draw',MGI.draw,'#7A4DFF'],['sim','82-0',MGI.sim,'#FF4F6D'],['rc','Ring Chaser',MGI.rc,'#3DDC84'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal',FG_SPORT==='bb'?MGI.hoop:MGI.fg,'#FF9A1F']].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="mtab" data-v="${v}" aria-pressed="${v===T}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="pr-big" role="group" aria-label="Predict">${[['props','Player props','Over or under on player stats','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5-5 5 5M7 14l5 5 5-5"/></svg>'],['picks','Pick ’em','Pick the winners of the games','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h12l-3 4.5 3 4.5H6"/></svg>']].map(([v,l,d,ic])=>`<button class="pr-bt" data-act="mtab" data-v="${v}" aria-pressed="${PT===v}"><span class="pr-ic" aria-hidden="true">${ic}</span><span class="pr-tx"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`:'';
+  const help=({predict:`<div class="mg-help"><span>Over / Under ${ii('ou')}</span><span>Pick ’em ${ii('pickem')}</span></div>`,draw:`<div class="mg-help"><span>Redraw ${ii('redraw')}</span></div>`,sim:`<div class="mg-help"><span>${FG_SPORT==='bb'?'82-0':'82-0'} ${ii('sim')}</span></div>`})[T]||'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
-  return head+tabs+sub+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
+  return head+tabs+sub+help+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
 }
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
@@ -7001,7 +7036,7 @@ function viewLeague(){
   const schools=[...new Set(players().map(p=>p.school))].filter(Boolean).sort();
   const fN=(UI.scope!=='season'?1:0)+(UI.school!=='ALL'?1:0)+(UI.grade?1:0);
   return `<div class="head"><h2>Players</h2><p>Every player, ranked by fantasy points.</p></div>
-  ${seg}
+  ${cupBanner()}${seg}
   <div class="tools lite">
     <div class="sb"><span class="sw"><input id="q" type="search" placeholder="Search players" aria-label="Search players" value="${esc(UI.q)}"></span>
       <button type="button" class="fbtn" data-act="ftoggle" aria-expanded="${!!UI.fOpen}">Filters${fN?`<b>${fN}</b>`:''}</button></div>
@@ -7699,7 +7734,7 @@ function viewMe(){
     ${UI.meEdit?`<div class="pform">
         <label class="fld"><span>Name</span><input id="me-name" maxlength="40" value="${esc(pr.name)}" autocomplete="off" data-act="meName"></label>
         <label class="fld"><span>School</span><select id="me-school" data-act="meSchool">${(SD_SCHOOLS.includes(pr.school)?SD_SCHOOLS:[...SD_SCHOOLS,pr.school]).map(s=>`<option ${s===pr.school?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
-        <label class="fld"><span>Position</span><select id="me-pos" data-act="mePos">${POSITIONS.map(x=>`<option ${x===pr.pos?'selected':''}>${x}</option>`).join('')}</select></label>
+        ${pr.role==='fan'?'':`<label class="fld"><span>Position</span><select id="me-pos" data-act="mePos">${POSITIONS.map(x=>`<option ${x===pr.pos?'selected':''}>${x}</option>`).join('')}</select></label>`}
       </div>`:''}
       ${meSides().length>1?`<div class="side-sw"><small>You play both ways. Pick which profile to view. Each one has its own stats and rankings.</small><div class="chips" role="group" aria-label="Profile">${meSides().map(p=>`<button class="chip" data-act="meSide" data-v="${esc(p.key)}" aria-pressed="${me.key===p.key}">${esc(p.pos==='DEF'?(p.sub||'DEF'):p.pos)}</button>`).join('')}</div></div>`:''}
       ${info?`<div class="big"><div><span class="lbl">${UI.scope==='season'?'Season pts':'Week pts'}</span><b>${f1(info.a.v)}</b></div><div><span class="lbl">Games</span><b>${PRE()?0:info.a.n}</b></div><div><span class="lbl">Per game</span><b>${f1(info.a.v/info.a.n)}</b></div></div>`:''}
@@ -7842,7 +7877,7 @@ const NT_KINDS=[
   ['streak','Streak reminders','In the evening, a reminder if you haven’t played yet today.'],
   ['lock','Picks and hands','Games starting today you haven’t picked, and an undealt 5 Card Draw hand.'],
   ['gstart','Game day','On days your school plays.'],
-  ['recap','Sunday recap','Sunday evening, your week in review.'],
+  ['hand','New hand','Monday morning, when the week’s 5 Card Draw hand opens.'],['recap','Sunday recap','Sunday evening, your week in review.'],
   ['shop','Daily shop','Once a day, what’s new in the shop.'],
   ['sound','Draft sounds','The chime when a pick is in and when you are on the clock.']
 ];
@@ -8910,6 +8945,7 @@ document.addEventListener('click',async e=>{
   else if(a==='lgSet'){UI.lgSet=!UI.lgSet;render()}
   else if(a==='mtab'){UI.mtab=t.dataset.v==='predict'?(propCands().length?'props':'picks'):t.dataset.v;render()}
   else if(a==='ltab'){UI.ltab=t.dataset.v;render()}
+  else if(a==='cupGo'){UI.ltab='cup';location.hash='#groups'}
   else if(a==='fgPlay'){if(t.dataset.v==='free'&&UI.fgm!=='free'){UI.fgm='free';render()}fgOpen(t.dataset.v)}
   else if(a==='fgm'){UI.fgm=t.dataset.v;UI.mgMore=false;render()}
   else if(a==='fgb'){UI.fgb=t.dataset.v;UI.mgMore=false;render()}

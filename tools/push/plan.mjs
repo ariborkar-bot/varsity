@@ -90,6 +90,17 @@ export function plan(I) {
           add(sub, `lk|${today}`, 'lock', '5 Card Draw', sub.sport === 'bb' ? `Your hand for today isn’t dealt. It closes at the first tip-off, ${fmtT(day.map(g => g.t || KICK).sort()[0])}.` : `Your week ${slot} hand isn’t dealt yet. Deal in before kickoff.`, url);
       }
     }
+    // Monday reveal (football): the week's 5 Card Draw hand opens on its Monday, 8 to 11 AM, if the hand isn't dealt yet
+    if (catOn(sub, 'hand') && sub.sport !== 'bb') {
+      const p = parts(now, sub.tz || PT);
+      if (p.dow === 'Mon' && p.hour >= 8 && p.hour < 11) {
+        const wk = {}; for (const g of games) if (g.w && (!wk[g.w] || g.d < wk[g.w])) wk[g.w] = g.d;
+        const end = new Date(Date.parse(p.date + 'T12:00:00Z') + 6 * 864e5).toISOString().slice(0, 10);
+        const w = Object.keys(wk).map(Number).find(k => wk[k] >= p.date && wk[k] <= end);
+        const doc = (I.picks[sub.sport + '|' + sub.uid] || {}).fc || {};
+        if (w && !doc[w]) add(sub, `nh|${p.date}`, 'hand', 'Your new hand is ready', `Week ${w} 5 Card Draw is open. Deal in and set your five.`, url);
+      }
+    }
     // Sunday recap, between 5 and 6 PM
     if (catOn(sub, 'recap')) {
       const p = parts(now, sub.tz);
