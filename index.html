@@ -3032,7 +3032,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v396 · Nov 9';
+const APP_BUILD='v397 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3928,7 +3928,7 @@ function fcHTML(){
   const cards=mine?mine.h.map((k,i)=>{const p=pByKey(k);if(!p)return '';const x=fcPts(p,w),lk=w===cw&&(!!x||fcStarted(p,w));
     const an=UI.fcAnim&&UI.fcAnim.w===w&&UI.fcAnim.i===i?UI.fcAnim:null,dl=UI.fcDeal&&UI.fcDeal.w===w?UI.fcDeal.st[i]:null;
     const mode=dl?{back:'fc-mys fc-back',flip:'fc-flip'}[dl]:an?(an.rev?'fc-flip':'fc-mys'):'',fdel=dl==='flip'?i*.13:0;
-    return `<div class="fc-card ${x?'in':''} ${mode}" ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}${T10W(p,`<b class="fc-nm">${esc(p.name)}</b>`)}<small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
+    return `<div class="fc-card ${x?'in':''} ${mode}" ${mode?'':`data-act="fcPl" data-id="${esc(k)}" role="button" tabindex="0" aria-label="See ${esc(p.name)}’s profile" style="cursor:pointer"`} ${mode==='fc-flip'?`style="animation-delay:${fdel}s"`:''}>${mode==='fc-flip'?'<div class="fc-cover">?</div>':''}${mode.includes('fc-mys')?'<div class="fc-mq">?</div><i class="fc-sp s1"></i><i class="fc-sp s2"></i><i class="fc-sp s3"></i><i class="fc-sp s4"></i><i class="fc-sp s5"></i><i class="fc-sp s6"></i><span class="fc-dr">Drawing…</span>':''}<div class="fc-top"><span class="fc-pos">${p.pos==='DEF'?esc(p.sub||'DEF'):p.pos}</span>${gtag(p)}</div>${av(p.name,p.school,56)}${T10W(p,`<b class="fc-nm">${esc(p.name)}</b>`)}<small class="fc-sc">${slogo(p.school)}${esc(p.school)}</small>
       <div class="fc-ppg">${(()=>{const a=agg(p,'season');return a.n?`<b>${f1(a.v/a.n)}</b> PPG<small>${a.n} ${a.n===1?'game':'games'}</small>`:'<small>No games yet</small>'})()}</div>
       <div class="fc-pts"><b>${x?f1(pts(x.stat)):fcDnp(p,w)?'0.0':'—'}</b><small>${x?(FC_DAILY?'game pts':'week '+w+' pts'):fcDnp(p,w)?'did not play':'waiting on game'}</small></div>
       ${w===cw&&can?`<button class="btn sm ${left>0&&!lk&&!lkd&&fcOpen(w)?'':'ghost'}" data-act="fcRedraw" data-i="${i}" ${left>0&&!lk&&!lkd&&fcOpen(w)&&!UI.fcAnim?'':'disabled'}>${lk||!fcOpen(w)?'Locked':'Redraw'}</button>`:''}</div>`}).join(''):'';
@@ -8633,6 +8633,8 @@ function dashWeekly(D,X){const N=7,days=[...Array(14)].map((_,i)=>dKey(new Date(
   return {rows,text}}
 document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-ann]');if(!b||!ME.admin)return;const k=b.dataset.ann;
   if(k==='copy'){const t=($('#adm-weekly')||{}).textContent||'';try{await navigator.clipboard.writeText(t);say('Copied')}catch(_){say('Could not copy')}return}
+  if(k==='post'||k==='remove'){let ok=false;try{ok=!!(await SB.rpc('is_admin')).data}catch(_){}
+    if(!ok){ME.admin=false;say('Your admin unlock expired. Tap Admin sign in and enter your PIN again.');return}}
   if(k==='post'){const text=($('#ann-text').value||'').trim();if(!text){say('Write a message first');return}const d=+$('#ann-days').value,ann={id:'a'+Date.now().toString(36),text,kind:$('#ann-kind').value,at:NOW(),until:d?Date.now()+d*864e5:null,by:ME.uid};
     if(await act(()=>upsert('config/settings',{ann}),'Announcement posted')){S.settings=Object.assign({},S.settings,{ann});render()}}
   if(k==='remove'){if(!confirm('Remove the announcement for everyone?'))return;if(await act(()=>upsert('config/settings',{ann:{id:'',text:''}}),'Announcement removed')){S.settings=Object.assign({},S.settings,{ann:{id:'',text:''}});render()}}});
@@ -9414,6 +9416,7 @@ async function boot(){
   if(window.supabase&&window.supabase.createClient){
     SB=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'varsity-auth'}});
     DB=supaDb(SB);
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(_){}   /* v397: ask the browser not to clear the saved sign-in */
     let session=null;try{session=(await SB.auth.getSession()).data.session}catch(_){}
     /* v371: a session from a sign-in before REAUTH_AT is signed out once on this device, so everyone signs in again with email + password */
     if(session&&session.user&&session.user.last_sign_in_at&&Date.parse(session.user.last_sign_in_at)<REAUTH_AT){try{await SB.auth.signOut({scope:'local'})}catch(_){}session=null;try{sessionStorage.setItem('vs-reauth','1')}catch(_){}}
