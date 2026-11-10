@@ -2458,6 +2458,15 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 @media (min-width:760px){.mast .sport-opt span,.mast .brand h1{display:none}.mast .sport-opt{padding:6px 9px}.mast-in{gap:12px!important}.mast-in .mast-r{gap:8px!important}.mast-in .tabs{min-width:0}.mast-in .tabs a{padding-inline:12px!important}}
 @media (min-width:760px) and (max-width:1149px){.mast-in .tabs a span{display:none}}
 @media (min-width:760px) and (max-width:899px){.mast .wk{display:none}}
+.tc-duo{perspective:500px}.tc-duo .duo-in{position:absolute;inset:0;transform-style:preserve-3d;animation:duoFlip 5s ease-in-out infinite}
+.tc-duo .duo-f{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.tc-duo .duo-f.bk{transform:rotateY(180deg)}.tc-duo .duo-f b{font:800 .5rem/1 var(--f-display,inherit);color:#fff;max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes duoFlip{0%,40%{transform:rotateY(0)}50%,90%{transform:rotateY(180deg)}100%{transform:rotateY(360deg)}}
+@media (prefers-reduced-motion:reduce){.tc-duo .duo-in{animation:none}}
+.lk-duo .lk-art,.pko-pack.lk-duo .pko-pk{background:linear-gradient(135deg,#B48CFF 0%,#5B2BD9 48%,#FFC23D 52%,#C2281E 100%);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5)}
+.parl-c{border:1px solid color-mix(in srgb,var(--rc) 55%,transparent)}.parl-h{display:flex;gap:10px;align-items:center;margin-bottom:8px}.parl-h small{display:block}
+.parl-leg{display:flex;flex-direction:column;gap:6px}.parl-who{display:flex;gap:8px;align-items:center}.parl-plus{text-align:center;font:900 1.1rem/1 var(--f-display,inherit);color:var(--rc);margin:4px 0}
+.parl-won{color:#3DDC84}.parl-lost{color:#FF4F6D}
 /* v256 pack opening: rip, lift-spin-land flips, sparks, rarity background glow */
 .pko{isolation:isolate}
 .pko-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s ease;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--gc,#7A4DFF) 55%,transparent),color-mix(in srgb,var(--gc,#7A4DFF) 18%,transparent) 45%,transparent 75%)}
@@ -3045,7 +3054,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v400 · Nov 10';
+const APP_BUILD='v401 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3643,6 +3652,7 @@ function bank(u){
   const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+(+rcRec(u).wn||0);
   Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
+  Object.values(parlOf(u)).forEach(b=>{const st=+b.stake||0,res=parlResult(b,gm);t-=st;if(res==='won')t+=st+parlWin(b,gm);else if(res==='push')t+=st});
   Object.values(propsOf(u)).forEach(b=>{const st=+b.stake||0,res=propResult(b,gm);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   return Math.round(t);
 }
@@ -3675,6 +3685,7 @@ function earned(u){
   Object.entries(betsOf(u)).forEach(([id,b])=>{if(betResult(b,gm[id])==='won')t+=win(b)});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0;if(atsResult(b,gm[id])==='won')t+=st*b.odds-st});
   Object.values(propsOf(u)).forEach(b=>{if(propResult(b,gm)==='won')t+=win(b)});
+  Object.values(parlOf(u)).forEach(b=>{if(parlResult(b,gm)==='won')t+=parlWin(b,gm)});
   return Math.round(t);
 }
 function tokRows(){const ids=new Set(Object.keys(S.picks).filter(u=>S.profiles[u]));if(ME.uid&&ME.mode!=='guest')ids.add(ME.uid);
@@ -3832,7 +3843,7 @@ const fcLeft=(u,w)=>{const h=fcHand(u,w);return Math.max(0,fcAllow(u,w)-(h?h.r||
 const fcDoc=u=>(S.picks[u]||{}).fc||{};
 const fcHand=(u,w)=>fcDoc(u)[w]||null;
 function fcSet(w,v){const d=S.picks[ME.uid]=S.picks[ME.uid]||{};d.fc=Object.assign({},d.fc||{},{[w]:v})}
-const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;for(const k of ['gft','gsn','bnd','cup','bk','str']){const kv=(S.picks[ME.uid]||{})[k];if(kv)o[k]=kv}const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
+const fcKeep=()=>{const f=fcDoc(ME.uid),o={},a=atsOf(ME.uid),sm=(S.picks[ME.uid]||{}).sim,ad=(S.picks[ME.uid]||{}).ad,fgx=(S.picks[ME.uid]||{}).fg,rcx=(S.picks[ME.uid]||{}).rc;if(rcx)o.rc=rcx;{const rwx=(S.picks[ME.uid]||{}).rw;if(rwx)o.rw=rwx;const lbx=(S.picks[ME.uid]||{}).lbt;if(lbx)o.lbt=lbx;const dlx=(S.picks[ME.uid]||{}).dly;if(dlx)o.dly=dlx;for(const k of ['gft','gsn','bnd','cup','bk','str','parl']){const kv=(S.picks[ME.uid]||{})[k];if(kv)o[k]=kv}const pk=(S.picks[ME.uid]||{}).pkl;if(pk)o.pkl=pk;const iv=(S.picks[ME.uid]||{}).inv;if(iv)o.inv=iv}if(sm)o.sim=sm;if(ad)o.ad=ad;if(fgx)o.fg=fgx;if(Object.keys(f).length)o.fc=f;if(Object.keys(a).length)o.ats=a;const pr=propsOf(ME.uid);if(Object.keys(pr).length)o.props=pr;return o};   /* keeps a hand when a Pick 'em save rewrites the document */
 function fcScore(u,w){const hd=fcHand(u,w);if(!hd)return 0;let t=0;for(const k of hd.h||[]){const x=fcPts(pByKey(k),w);if(x)t+=pts(x.stat)}return Math.round(t*10)/10}
 const fcSeason=u=>Math.round(Object.keys(fcDoc(u)).reduce((a,w)=>a+fcScore(u,+w),0)*10)/10;
 const fcRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n}catch(_){return Math.floor(Math.random()*n)}};
@@ -4199,6 +4210,8 @@ const PACKS={
   pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1,off:1},   /* v380 (owner): removed from the Shop (off); gifts/half-done picks still open */
   /* v382 (owner): the Welcome pack: you pick a team and get a walkout player (Epic or better) + 10 more cards (Champion pack odds), once per account (off: not in the Shop) */
   welcome:{n:'Welcome pack',c:10,tok:0,odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'',cards:1,off:1},
+  /* v401 (owner): Duo pack: 3 Duo cards (two teammates on one double-sided card), Epic or better; they unlock parlays */
+  duo:{n:'Duo pack',c:3,tok:2000,usd:'$14.99',odds:{e:70,l:22,m:8},g:'',cards:1,duo:1},
   godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1}};   /* v386 (owner): back in the Shop, still the most expensive pack */
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
@@ -4386,6 +4399,72 @@ function bndHTML(){const u=ME.uid,done=bndOf(u),all=bndSchools(),N=UI.bndN||12,q
     <p class="muted">Collect a school’s team card and its ${BND_N} best players to complete its binder. Any version counts. Each completed school pays <b>${BND_TOK.toLocaleString()} tokens</b> once and gives a permanent <b>+${BND_BOOST}%</b> on winnings from your Pick ’em picks on that team and props on its players.</p>
     <label class="fld"><span>Find a school</span><input id="bnd-q" type="search" value="${esc(UI.bndQ||'')}" placeholder="School name" autocomplete="off"></label></section>${det}
     <section class="card"><div class="bnd-l">${rows.slice(0,N).map(card).join('')||'<p class="empty">No school matches.</p>'}</div>${rows.length>N?`<button class="btn ghost" data-act="bndMore">Show more (${rows.length-N})</button>`:''}</section>`}
+/* ---------- Duo cards and parlays (v401, owner) ----------
+   A Duo card is double sided: two teammates on one card (it flips between them). Every school has DUO_N duos, made from pairs of its
+   top 3 players (by season fantasy points). Duos only come Epic, Legendary or Mythical and only drop from the Duo pack.
+   Id = 'dc:<player key>~<player key>'. Owning a duo unlocks a 2-leg parlay on those two players' Over / Under lines in each of their
+   games: pick a line and a side for each, the odds multiply, and both have to hit. The duo's best version adds its boost
+   (CARD_PCT) to the parlay winnings. Saved in picks/<uid>.parl = {'<week>|<duo id>': {d,w,g,legs:[{k,m,line,s,odds}x2],stake,odds,cb,at}}.
+   A leg whose stats never post is dropped (the parlay pays on the other leg); both dropped = tokens back. */
+
+var _du={rev:-1,m:{},all:[]};
+function duoSets(){if(_du.rev===_rev)return _du;const m={},all=[];
+  SD_SCHOOLS.forEach(sc=>{const top=bndSet(sc).filter(i=>i.startsWith('pc:')).slice(0,3).map(i=>i.slice(3));const ids=[];
+    for(let a=0;a<top.length;a++)for(let b=a+1;b<top.length;b++)ids.push('dc:'+top[a]+'~'+top[b]);
+    if(ids.length){m[sc]=ids;all.push(...ids)}});
+  return _du={rev:_rev,m,all}}
+const duoKeys=id=>id.slice(3).split('~');
+function rollDuo(){const a=duoSets().all;return a.length?a[fcRnd(a.length)]:''}
+function duoInfo(id){const [a,b]=duoKeys(id).map(pByKey),A=a||{name:'Player',school:''},B=b||{name:'Player',school:''};
+  return {team:0,duo:1,name:lastN(A.name)+' & '+lastN(B.name),full:A.name+' & '+B.name,school:A.school||B.school,sub:A.name+' & '+B.name+' · '+(A.school||B.school),a:A,b:B}}
+const lastN=n=>{const p=String(n||'').trim().split(/\s+/);return p[p.length-1]||''};
+function duoArt(id,r,s=54){const c=duoInfo(id),R=RAR[r]||RAR.e,w=Math.round(s*.78),z=Math.round(s*.42);
+  const face=(p,cl)=>`<span class="duo-f ${cl}">${av(p.name,p.school,z)}<b>${esc(lastN(p.name))}</b><i>DUO</i></span>`;
+  return `<span class="tcard tc-duo ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${w}px;height:${s}px" title="${esc(c.name)}"><span class="duo-in">${face(c.a,'fr')}${face(c.b,'bk')}</span></span>`}
+const parlOf=u=>((S.picks[u]||{}).parl)||{};
+function parlLegs(b,gm){return (b.legs||[]).map(l=>({l,r:propResult(Object.assign({w:b.w,g:b.g},l),gm)}))}
+function parlResult(b,gm){const L=parlLegs(b,gm);if(L.some(x=>x.r==='lost'))return 'lost';if(L.some(x=>x.r==='open'))return 'open';
+  return L.every(x=>x.r==='push')?'push':'won'}
+const parlEff=(b,gm)=>parlLegs(b,gm).filter(x=>x.r==='won').reduce((o,x)=>o*(+x.l.odds||1),1);
+const parlWin=(b,gm)=>{const st=+b.stake||0;return (st*parlEff(b,gm)-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100)};
+function duoPct(u,id){const r=cardR(u,id);return r?CARD_PCT[r]:0}
+UI.pl={};
+function parlHTML(cur,L){
+  if(!ME.uid||ME.mode==='guest')return '';
+  const mine=parlOf(ME.uid),can=ME.mode!=='readonly'&&ME.mode!=='offline',bal=bank(ME.uid),gm=gameMap();
+  const own=Object.keys(cardsOf(ME.uid)).filter(id=>id.startsWith('dc:')&&cardVers(ME.uid,id).length);
+  const by={};L.forEach(x=>{(by[x.k]=by[x.k]||[]).push(x)});
+  const ok=own.filter(id=>duoKeys(id).every(k=>by[k]));
+  const head=`<div class="qh"><h3>Duo parlays</h3><span class="muted">${ok.length} for this game</span></div>`;
+  if(!ok.length)return `<section class="card parl"><div>${head}<p class="muted">${own.length?'None of your Duo cards play in this game.':'Own a Duo card to parlay its two players: pick a line for each, the odds multiply, and both have to hit.'} Duo cards come from the <a href="#shop"><b>Duo pack</b></a>.</p></div></section>`;
+  const one=id=>{const key=cur.g.w+'|'+id,b=mine[key],ks=duoKeys(id),u=UI.pl[id]=UI.pl[id]||{},r=cardR(ME.uid,id),R=RAR[r],c=duoInfo(id),locked=started(cur.g);
+    const legRow=(k,i)=>{const grp=by[k],sel=(u['l'+i]&&grp.find(y=>y.id===u['l'+i].id))||grp[0],s=u['l'+i]&&u['l'+i].s,p=pByKey(k)||{};
+      return `<div class="parl-leg"><div class="parl-who">${av(p.name,p.school,26)}<b>${esc(p.name||'')}</b><small class="muted">${esc(p.pos||'')}</small></div>
+        ${grp.length>1?`<div class="pp-mk">${grp.map(y=>`<button class="pp-mc${y===sel?' on':''}" data-act="plLine" data-d="${esc(id)}" data-i="${i}" data-id="${esc(y.id)}" aria-pressed="${y===sel}"><span>${esc(PP_MK[y.m].l)}</span><b>${fmtN(y.line)}</b></button>`).join('')}</div>`:`<div class="pp-m">${esc(PP_MK[sel.m].l)}</div>`}
+        <div class="bt-row">${[['o','Over',sel.over],['u','Under',sel.under]].map(([sd,t,od])=>`<button class="bt-t ${s===sd?'on':''}" data-act="plSide" data-d="${esc(id)}" data-i="${i}" data-id="${esc(sel.id)}" data-s="${sd}" ${b||locked||!can?'disabled':''}><b>${t} ${fmtN(sel.line)}</b><span class="bt-o">${od.toFixed(2)}x</span></button>`).join('')}</div></div>`};
+    let foot='';
+    if(b){const res=parlResult(b,gm);foot=`<p class="muted">Locked in: ${b.legs.map(l=>`${esc(lastN((pByKey(l.k)||{}).name))} ${l.s==='o'?'Over':'Under'} ${fmtN(l.line)} ${esc(PP_MK[l.m].l.toLowerCase())}`).join(' + ')} for ${tk(b.stake)} at ${(+b.odds).toFixed(2)}x${b.cb?` (+${b.cb}% duo boost)`:''}.${res!=='open'?` <b class="parl-${res}">${res==='won'?'Won +'+n1(parlWin(b,gm)):res==='push'?'Push':'Lost'}</b>`:''}</p>`}
+    else if(locked)foot='<p class="muted">Closed for this game.</p>';
+    else{const both=u.l0&&u.l0.s&&u.l1&&u.l1.s;
+      if(!both)foot='<p class="muted">Pick Over or Under for both players.</p>';
+      else{const pm=propMap(),o0=pm[u.l0.id],o1=pm[u.l1.id],od=Math.round((u.l0.s==='o'?o0.over:o0.under)*(u.l1.s==='o'?o1.over:o1.under)*100)/100,stake=Math.min(u.stake||10,Math.floor(bal)),pct=duoPct(ME.uid,id);
+        foot=`<div class="bt-stk"><span class="muted">Wager</span>${[5,10,25,50,100].filter(v=>v<=bal).map(v=>`<button class="chip" data-act="plStake" data-d="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
+          <div class="bt-go"><span>${od.toFixed(2)}x · win <b>${tk(stake*od-stake+(stake*od-stake)*pct/100+stake)}</b> with your +${pct}% duo boost</span><button class="btn" data-act="plGo" data-d="${esc(id)}" ${stake<1?'disabled':''}>Lock in parlay</button></div>`}}
+    return `<article class="gm parl-c" style="--rc:${R.c}"><div class="parl-h">${duoArt(id,r,64)}<div><b>${esc(c.full)}</b><small style="color:${R.c}">${R.n} duo · +${CARD_PCT[r]}% on parlay winnings</small></div></div>${legRow(ks[0],0)}<div class="parl-plus" aria-hidden="true">+</div>${legRow(ks[1],1)}${foot}</article>`};
+  return `<section class="card parl">${head}<p class="muted">Both players have to hit. The odds multiply, and your Duo card boosts the winnings.</p><div class="gm-grid">${ok.map(one).join('')}</div></section>`}
+async function parlGo(id){
+  const u=UI.pl[id]||{},pm=propMap(),a=u.l0&&pm[u.l0.id],b=u.l1&&pm[u.l1.id];
+  if(!a||!b||!u.l0.s||!u.l1.s){say('Pick Over or Under for both players.');return}
+  if(gid(a.game)!==gid(b.game)||started(a.game)){say('That game has started.');return}
+  const key=a.w+'|'+id,cur=parlOf(ME.uid);if(cur[key]){say('You already have a parlay on this duo for this game.');return}
+  if(!cardR(ME.uid,id)){say('You need that Duo card.');return}
+  const stake=Math.floor(Math.min(u.stake||10,bank(ME.uid)));if(stake<1||stake>bank(ME.uid)){say('Not enough tokens.');return}
+  if(!await stakeOk(stake,bank(ME.uid)))return;
+  const leg=(x,s)=>({k:x.k,m:x.m,line:x.line,s,odds:s==='o'?x.over:x.under}),legs=[leg(a,u.l0.s),leg(b,u.l1.s)];
+  const rec={d:id,w:a.w,g:a.g,legs,stake,odds:Math.round(legs[0].odds*legs[1].odds*100)/100,cb:duoPct(ME.uid,id),at:NOW()};
+  S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:Object.assign({},cur,{[key]:rec})});
+  if(await act(()=>upsert('picks/'+ME.uid,{parl:{[key]:rec}}),'Parlay locked in')){delete UI.pl[id]}else S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:cur});
+  render()}
 /* v380: a card from one team: its team card 20% of the time, otherwise one of its players */
 function rollTeamCard(t){const pl=players().filter(p=>!p.sample&&!/x$/.test(p.key)&&p.school===t).map(p=>'pc:'+p.key);return(!pl.length||fcRnd(100)<20)?'tc:'+t:pl[fcRnd(pl.length)]}
 /* v396 (owner): small ⓘ buttons next to game words; tap one for a one-line definition (INFO) */
@@ -4446,10 +4525,10 @@ function achInfo(id){const a=achParse(id);if(!a)return {name:'Player',school:'',
 function achArt(id,s=54){const a=achInfo(id),w=Math.round(s*.78);
   return `<span class="tcard tc-x ax-${a.t}" style="width:${w}px;height:${s}px"><b class="tcx-k">${a.k}</b>${av(a.name,a.school,Math.round(s*.34))}<i>${a.w?'WK '+a.w:'SEASON'}</i><u class="tcx-s"></u></span>`}
 const achOwned=u=>Object.keys(cardsOf(u)).filter(id=>id.startsWith('ac:')&&cardsOf(u)[id].x);
-function cardInfo(id){if(id.startsWith('ac:')){const a=achInfo(id);return {team:0,ach:1,at:a.t,name:a.name,school:a.school,sub:a.sub,key:a.key,pct:a.pct,line:a.line}}
+function cardInfo(id){if(id.startsWith('dc:'))return duoInfo(id);if(id.startsWith('ac:')){const a=achInfo(id);return {team:0,ach:1,at:a.t,name:a.name,school:a.school,sub:a.sub,key:a.key,pct:a.pct,line:a.line}}
   if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
   const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
-function cardArt(id,r,s=54){if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
+function cardArt(id,r,s=54){if(id.startsWith('dc:'))return duoArt(id,r,s);if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
   return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${c.team?slogo(c.school,Math.round(s*.5)):av(c.name,c.school,Math.round(s*.46))}<i>${c.team?'TEAM':'PLAYER'}</i></span>`}
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollGear(r){let i=RAR_ORD.indexOf(r);for(;i>=0;i--){const pool=ITEMS.filter(x=>x.r===RAR_ORD[i]&&BH_K.includes(x.k));if(pool.length)return pool[fcRnd(pool.length)].id}return 'bhs_black'}
@@ -4472,6 +4551,7 @@ async function packOpen(type,how,day,team){
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
+    if(P.duo){const cid=rollDuo();if(cid){const cur=Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(P.team){const cid=rollTeamCard(team);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(fcRnd(10000)<(ACH_CHANCE[type]||0)*100){const aid=rollAch();if(aid){const cur=Object.assign({},cards[aid]),isDup=!!cur.x;if(isDup)dup+=RAR.x.dup;else{cur.x=1;cards[aid]=cur;gotCard=true}got.push({card:aid,r:'x',dup:isDup});continue}}
     if(!P.cos&&!P.gear&&(P.cards||fcRnd(100)<CARD_CHANCE)){let cid=rollCard(r);if(P.cards)for(let k=0;!cid&&k<5;k++)cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
@@ -4616,7 +4696,7 @@ function packShow0(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
   const ORD=['c','u','r','e','l','m','x'],calm=matchMedia('(prefers-reduced-motion: reduce)').matches,key=Object.keys(PACKS).find(k=>PACKS[k]===P)||'rookie';
   const face=g=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
-      return `${cardArt(g.card,g.r,c.ach?66:58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${c.ach?esc(c.line):R.n+' '+(c.team?'team':'player')+' card'}</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${c.ach?c.pct:CARD_PCT[g.r]}% on ${c.team?'Pick ’em picks':'his props'}`}</em>`}
+      return `${cardArt(g.card,g.r,c.ach?66:c.duo?50:58)}<b>${esc(c.name)}</b><small style="color:${R.c}">${c.ach?esc(c.line):(c.duo?R.n+' duo':R.n+' '+(c.team?'team':'player')+' card')}</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${c.ach?c.pct:CARD_PCT[g.r]}% on ${c.duo?'parlays':c.team?'Pick ’em picks':'his props'}`}</em>`}
     const x=ITEM[g.id];
     return `${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}`};
   o.innerHTML=`<div class="pko-bg" aria-hidden="true"><i class="pko-rays"></i></div>
@@ -5080,7 +5160,7 @@ function viewShop(){
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
     body=spShopCard()+wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off&&!(P.gear&&FG_SPORT==='bb')).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?(P.c===1?'card':'cards'):'items'}</small></div><h3>${esc(P.n)}</h3>
-      <p class="muted">${P.team?'You pick the team · its player and team cards only':P.gear?'Bobblehead gear only · arm sleeves and back plates':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
+      <p class="muted">${P.duo?'Duo cards only · two teammates on one double-sided card · Epic or better · unlocks parlays':P.team?'You pick the team · its player and team cards only':P.gear?'Bobblehead gear only · arm sleeves and back plates':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button></article>`).join('')}</div>
       <p class="muted lk-note">Items have no cash value and can’t be traded.</p>`+extras;
@@ -5107,9 +5187,9 @@ function viewLocker(){
           <div class="lk-grid"><button class="lk-it ${on?'':'on'}" data-act="lkEq" data-k="${k}" data-v="">${bhArt(dx,48)}<b>${dn}</b><small class="muted">Default</small></button>
           ${list.map(x=>`<button class="lk-it r-${x.r} ${cur===x.id?'on':''}" style="--rc:${RAR[x.r].c}" data-act="lkEq" data-k="${k}" data-v="${x.id}" title="${esc(x.d)}">${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${RAR[x.r].n}</small></button>`).join('')}</div></section>`}).join('');
   }else if(tab==='cards'){
-    const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=UI.lkC==='t'?'t':'p',N=UI.lkN||30;
+    const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=UI.lkC==='t'?'t':UI.lkC==='d'?'d':'p',N=UI.lkN||30;
     const best=id=>cardR(ME.uid,id);
-    const ids=Object.keys(mine).filter(id=>cardVers(ME.uid,id).length&&(T==='t')===id.startsWith('tc:')).sort((a,b)=>ord[best(a)]-ord[best(b)]||cardInfo(a).name.localeCompare(cardInfo(b).name));
+    const ids=Object.keys(mine).filter(id=>cardVers(ME.uid,id).length&&id.startsWith(T==='t'?'tc:':T==='d'?'dc:':'pc:')).sort((a,b)=>ord[best(a)]-ord[best(b)]||cardInfo(a).name.localeCompare(cardInfo(b).name));
     const vers=Object.keys(mine).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),nP=Object.keys(mine).filter(i=>i.startsWith('pc:')&&cardVers(ME.uid,i).length).length,nT=Object.keys(mine).filter(i=>i.startsWith('tc:')&&cardVers(ME.uid,i).length).length;
     const tiers=RAR_ORD.slice().reverse().map(r=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>+${CARD_PCT[r]}%</b></li>`).join('');
     const dots=id=>`<span class="lk-vers">${RAR_ORD.map(r=>`<i style="--rc:${RAR[r].c}" class="${(mine[id]||{})[r]?'on':''}" title="${RAR[r].n}"></i>`).join('')}</span>`;
@@ -5120,9 +5200,9 @@ function viewLocker(){
     body=achSec+`<section class="card"><div class="qh"><h3>Player & team cards</h3><span class="muted">${vers} of ${(P.nP+P.nT)*6} versions</span></div>
       <p class="muted">Player and team cards boost your winning picks. Better versions boost more.</p>
       <ul class="lk-tiers">${tiers}</ul><small class="muted">Boost on the winnings, added on top of a +25% token boost. It is saved on the pick when you lock it in.</small></section>
-      <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button></div>
+      <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button><button class="chip" data-act="lkC" data-v="d" aria-pressed="${T==='d'}">Duos <small class="muted">${Object.keys(mine).filter(i=>i.startsWith('dc:')&&cardVers(ME.uid,i).length).length}/${duoSets().all.length}</small></button></div>
       ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.key?'button type="button" data-act="player" data-id="'+esc(c.key)+'"':'div'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,64)}<span><b>${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">Best: ${R.n} · +${CARD_PCT[r]}%</small>${dots(id)}</span></${c.key?'button':'div'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
-        :`<p class="empty">No ${T==='t'?'team':'player'} cards yet. Open packs to pull some.</p>`}</section>`;
+        :`<p class="empty">No ${T==='t'?'team':T==='d'?'Duo':'player'} cards yet. ${T==='d'?'Open a Duo pack to pull some.':'Open packs to pull some.'}</p>`}</section>`;
   }else if(tab==='bnd'){body=bndHTML()
   }else if(tab==='cos'){
     const dflt={ball:`<span class="ia ia-ball" style="width:48px;height:48px"></span>`,frame:`<span class="ia ia-frame" style="width:48px;height:48px"><i></i></span>`,
@@ -5608,6 +5688,7 @@ function propsHTML(){
     UI.ppSel=UI.ppSel||{};
     const cards=byP.map(grp=>{const k=grp[0].k,sel=grp.find(y=>y.id===UI.ppSel[k])||grp.find(y=>UI.pp[y.id]&&UI.pp[y.id].s)||grp.find(y=>mine[y.id])||grp[0];return card(sel,grp)});
     body=`<div class="qh pp-gh"><h3>${esc(cur.g.a)} at ${esc(cur.g.h)}</h3><span class="muted">${esc(fmtDate(cur.g.d))}${cur.g.time?' · '+esc(cur.g.time):''} · ${byP.length} players · ${L.length} lines</span></div><div class="gm-grid">${cards.join('')}</div>`;
+    body+=parlHTML(cur,L);
   }
   return boardCard+activeCard()+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+allBar+ppPick+body+histCard;
 }
@@ -9075,6 +9156,10 @@ document.addEventListener('click',async e=>{
   else if(a==='ppG'){UI.ppG=t.dataset.v;render();const h=document.querySelector('.pp-gh');if(h&&h.getBoundingClientRect().top>innerHeight*.6)h.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(a==='ppMore'){UI.ppN+=24;render()}
   else if(a==='ppSide'){const id=t.dataset.id;if(UI.pp[id]&&UI.pp[id].s===t.dataset.s)delete UI.pp[id];else UI.pp[id]=Object.assign({},UI.pp[id],{s:t.dataset.s});render()}
+  else if(a==='plLine'){const d=t.dataset.d,u=UI.pl[d]=UI.pl[d]||{};u['l'+t.dataset.i]={id:t.dataset.id,s:''};render(true)}
+  else if(a==='plSide'){const d=t.dataset.d,u=UI.pl[d]=UI.pl[d]||{},k='l'+t.dataset.i;u[k]=(u[k]&&u[k].id===t.dataset.id&&u[k].s===t.dataset.s)?{id:t.dataset.id,s:''}:{id:t.dataset.id,s:t.dataset.s};render(true)}
+  else if(a==='plStake'){const d=t.dataset.d;UI.pl[d]=Object.assign({},UI.pl[d],{stake:+t.dataset.v});render(true)}
+  else if(a==='plGo'){if(needJoin('make a parlay'))return;await parlGo(t.dataset.d)}
   else if(a==='ppStake'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{stake:+t.dataset.v});render()}
   else if(a==='ppClear'){UI.pp={};render()}
   else if(a==='mkSet'){const f=t.dataset.f;UI.mk.set[f]=f==='level'?t.dataset.v:+t.dataset.v;render()}

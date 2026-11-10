@@ -299,3 +299,9 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 - Gear = cosmetics of kind `bhSleeve` (arm sleeves) and `bhPlate` (back plate), `BH_K`, 84 items, Common to Mythical, each with a `bh` spec `{c,c2,d,arm,txt}`. `bhPat()` paints the pattern for both the Locker tile (`bhArt`) and the 3D texture. Brand names (Tenfold, Halo, Ironside, Northfield, Kiln) are made up: the owner asked for Nike/Jordan/Adidas/Battle/NXTRND and was told real brand names and logos are not used.
 - Gear only drops from the new Accessories pack (`PACKS.gear`, 3 items, 300 tokens, `rollGear()`); `rollItem()` skips `BH_K`, so other packs are unchanged. Equip in the Avatar tab or from the pack reveal (`lkEq`).
 - Earlier drafts (a realistic version and a ~190-item gear list with helmets, visors, bases, effects) were dropped at the owner's request; only sleeves and back plates exist so far.
+
+## v401 (Nov 10): Duo cards, Duo pack, duo parlays
+- Duo cards (`dc:<key>~<key>`): two teammates on one double-sided card that flips (`duoArt`, CSS `.tc-duo`). Each school has 3 duos from pairs of its top 3 players (`duoSets()`, uses `bndSet`). Epic/Legendary/Mythical only.
+- Duo pack (`PACKS.duo`): 3 Duo cards, 2,000 tokens, odds Epic 70 / Legendary 22 / Mythical 8. Only source of duos.
+- Parlays (`parlHTML`, `parlGo`, Over/Under tab under the chosen game): owning a duo unlocks a 2-leg parlay on its two players' lines in a game. Odds multiply, both must hit, duo boost (CARD_PCT) on winnings. Saved in `picks/<uid>.parl['<week>|<duo id>']`; one per duo per game. A leg with no stats is dropped; both dropped = push. Counted in `bank()` and `earned()`; kept by `fcKeep()`.
+- Locker → Cards has a Duos chip.
