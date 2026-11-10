@@ -342,3 +342,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 ## v410 (Nov 10, owner): Isaac Smedra's Immortal and Legendary cards removed
 - New `CARD_FIX` entry type `{rar:['x','l']}` removes every card of those rarities (x Immortal, l Legendary; `pc:` player cards and `ac:` achievement cards) from the matching profile, once (`is-lx`, name /isaac smedra/i), the next time he opens the app. Other rarities and his tokens are untouched. Tested with a fake account (Epic/Rare/Common kept, all Legendary/Immortal set to 0).
 - Selling cards: the app has no sell feature (the only token-for-card thing is a duplicate pulled from a pack turning into tokens automatically, `RAR[r].dup`), so nothing was changed there.
+
+## v411 (Nov 10, owner): Ryan O'Donovan and Cooper Armstrong shown as out
+- `INJ` (read by `injOf`) gets Ryan O'Donovan and Cooper Armstrong (both Bishop's DEF) with `until:13`, "Out for week 13", the same as Jackson Binn (already listed). To change how long, edit `until` (99 = season).

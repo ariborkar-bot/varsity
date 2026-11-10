@@ -3077,7 +3077,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v410 · Nov 10';
+const APP_BUILD='v411 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3500,7 +3500,7 @@ const subV=a=>UI.rank==='prev'?(a.w?`week ${a.w} game`:'no games'):UI.scope!=='s
 const scopeSel=(id,off)=>`<label class="fld"><span>Scoring period</span><select id="${id}" data-act="scope" ${off?'disabled title="Previous ranks by each player’s last game"':''}>${['season',...Array.from({length:WEEKS},(_,i)=>i+1)].map(v=>`<option value="${v}" ${String(UI.scope)===String(v)?'selected':''}>${v==='season'?'Season total':'Week '+v+(v===CURW()?' (current)':'')}</option>`).join('')}</select></label>`;
 const rankSw=()=>`<div class="fld"><span>Rank by</span><div class="chips" role="group" aria-label="Rank by">${[['total','Total'],['prev','Previous']].map(([v,l])=>`<button class="chip" data-act="rank" data-v="${v}" aria-pressed="${UI.rank===v}">${l}</button>`).join('')}</div></div>`;
 /* v274 injuries (owner): name|school -> {until: last week he misses, or 99 for the season}. Shown as an OUT tag; no props while out. */
-const INJ={"Khai Agbayani|Bishop's":{until:99,note:'Out for the season'},"Jackson Binn|Bishop's":{until:13,note:'Out for week 13'}};
+const INJ={"Khai Agbayani|Bishop's":{until:99,note:'Out for the season'},"Jackson Binn|Bishop's":{until:13,note:'Out for week 13'},"Ryan O'Donovan|Bishop's":{until:13,note:'Out for week 13'},"Cooper Armstrong|Bishop's":{until:13,note:'Out for week 13'}};
 const injOf=(p,w)=>{const x=p&&INJ[p.name+'|'+p.school];return x&&(w==null?CURW()+1:w)<=x.until?x:null};
 const injTag=p=>{const x=injOf(p,Math.max(CURW(),CURW()+1));return x?`<span class="vt inj" title="${esc(x.note)}">OUT</span>`:''};
 const vtag=(p,a)=>injTag(p)+(p.mp?(p.tw?'<span class="vt tw">'+(p.pos==='DEF'?'2-way · D':'2-way · O')+'</span>':''):p.sample?'':(a.unv?'<span class="vt un">unverified</span>':''));
