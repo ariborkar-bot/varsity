@@ -3043,7 +3043,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v397 · Nov 9';
+const APP_BUILD='v398 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5420,7 +5420,9 @@ function _pOver(vals,mu,line,yards){
 const _dec=p=>Math.round(Math.min(8,Math.max(1.05,.93/p))*100)/100;
 let _ppC=null;
 function propCands(){
-  const gs=((GAMES&&GAMES.games)||[]).filter(g=>!gDone(g)),key=gs.length+'|'+_rev+'|'+((window.MAXPREPS&&MAXPREPS.updated)||'');
+  const gs=((GAMES&&GAMES.games)||[]).filter(g=>!gDone(g)),
+    own=new Set(ME.uid?Object.keys(cardsOf(ME.uid)).map(id=>id.startsWith('pc:')?id.slice(3):id.startsWith('ac:')?id.split(':')[2]:'').filter(Boolean):[]),
+    key=gs.length+'|'+_rev+'|'+((window.MAXPREPS&&MAXPREPS.updated)||'')+'|'+[...own].sort().join(',');
   if(_ppC&&_ppC.k===key)return _ppC.list;
   const by={};players().forEach(p=>{if(p.mp&&p.school&&mgOk(p)){(by[p.school]=by[p.school]||[]).push(p)}});
   const list=[];
@@ -5439,6 +5441,19 @@ function propCands(){
       });
     });
     Object.entries(rows).forEach(([m,a])=>{a.sort((x,y)=>y.mean-x.mean);const top=a.slice(0,PP_TOP[m]||1);list.push(...top,...a.filter(x=>!top.includes(x)&&PP_ALWAYS.includes(x.name+'|'+x.school)))});
+    /* v398 (owner): a player whose card you own always has a prop line in each of his team's games, so the card boost can be used. If the normal rules left him without one (weak stat line, under 3 games, outside the top 4), he gets his best-fitting stat with the minimums waived. */
+    (by[sc]||[]).forEach(p=>{
+      if(!own.has(p.key)||injOf(p,g.w))return;
+      if(list.some(x=>x.w===g.w&&x.k===p.key&&x.school===sc&&gid(x.game)===gid(g)))return;
+      const old=Object.values(rows).flat().filter(x=>x.k===p.key).sort((x,y)=>y.mean-x.mean)[0];
+      if(old){list.push(old);return}
+      const ms=Object.entries(PP_MK).filter(([m,M])=>M.pos.includes(p.pos));if(!ms.length)return;
+      let played=p.games.map((x,i)=>x&&i+1<g.w?x.stat:null).filter(Boolean);if(!played.length)played=[{}];
+      let bm=null;
+      ms.forEach(([m,M])=>{const vals=played.map(s=>+M.f(s)||0),mean=vals.reduce((a,b)=>a+b,0)/vals.length;if(!bm||mean/M.min>bm.r)bm={m,M,vals,mean,r:mean/M.min}});
+      const {m,M,vals,mean}=bm,n=vals.length,last=vals.slice(-3),rc=last.reduce((a,b)=>a+b,0)/last.length,mu=Math.max(.05,.6*mean+.4*rc),line=Math.max(.5,Math.floor(mu)+.5),po=_pOver(vals,mu,line,!!M.y);
+      list.push({id:g.w+'|'+p.key+'|'+m,k:p.key,m,w:g.w,g:gid(g),game:g,school:sc,opp,name:p.name,pos:p.pos,line,mean,rc,n,hits:vals.filter(v=>v>line).length,over:_dec(po),under:_dec(1-po),po,mu});
+    });
   })});
   const mo=Object.keys(PP_MK);
   list.sort((a,b)=>a.w-b.w||(a.game.d<b.game.d?-1:a.game.d>b.game.d?1:0)||a.game.h.localeCompare(b.game.h)||a.school.localeCompare(b.school)||mo.indexOf(a.m)-mo.indexOf(b.m)||b.mean-a.mean);
