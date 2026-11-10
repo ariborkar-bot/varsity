@@ -3005,7 +3005,7 @@ function nameHTML(){
     <form id="nm-form" class="au-form">
       <div class="nm-roles" role="group" aria-label="Player or fan">${rb('player','Player','I play high school sports','<svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>')}${rb('fan','Fan','I root for a school','<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>')}</div>
       ${R==='player'?`<div class="nm-sp"><span class="nm-spl">Main sport</span><div class="nm-sps" role="group" aria-label="Main sport">${Object.entries(NM_SP).map(([k,x])=>`<button type="button" class="nm-spb${SP===k?' on':''}" data-nm-sport="${k}" aria-pressed="${SP===k}">${x.t}</button>`).join('')}</div><small class="muted">The app opens on this sport.</small></div>`:''}
-      ${R&&(R==='fan'||SP)?`<label class="fld"><span>Your name</span><input id="nm-name" maxlength="40" autocomplete="name" value="${esc(NM.name!=null?NM.name:pr.name||'')}" placeholder="Ari B." required></label>
+      ${R&&(R==='fan'||SP)?`<label class="fld"><span>Your full name</span><input id="nm-name" maxlength="40" autocomplete="name" value="${esc(NM.name!=null?NM.name:pr.name||'')}" placeholder="First and last name" required></label>
       <div class="nm-play${R==='fan'?' fan':''}">
         <label class="fld"><span>${R==='fan'?'School you’re a fan of':'Your school'}</span><select id="nm-school"><option value="">Pick a school</option>${nmSchools().map(x=>`<option ${x===(NM.school!=null?NM.school:sch)?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
         ${R==='player'?`<label class="fld"><span>Position</span><select id="nm-pos">${nmPosOpts(SP,NM.pos!=null?NM.pos:(pr.posLabel||pos||''))}</select></label>`:''}
@@ -3080,7 +3080,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v412 · Nov 10';
+const APP_BUILD='v413 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
