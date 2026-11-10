@@ -4,7 +4,7 @@ fb.json / bb.json = players() dumped from the football / basketball preview (nam
 Football: per-game fantasy points (the app's pts()), shrunk toward the position mean (k=2 games), percentile among the same
 position group. Basketball: per-game fantasy (pt+1.2reb+1.5ast+3stl+3blk-2tov) from 2025-26 MaxPreps, shrunk (k=3 games),
 percentile among all players; no stat line = 0.6 x the average (low-confidence estimate). OVR is a bell curve over the percentile:
-ROUND(mean + sd * NORMSINV(pct)) clamped to floor..ceiling, all four as editable cells on the Notes sheet (floor 40 per the owner, ceiling 99)."""
+ROUND(mean + sd * NORMSINV(pct)) clamped to floor..ceiling, all four as editable cells on the Notes sheet (floor 50 per the owner, ceiling 99)."""
 import sys, json, os, io, contextlib, importlib.util
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
@@ -81,16 +81,16 @@ def build(sport):
   AR = 'Arial'
   hdr = Font(name=AR, bold=True, color='FFFFFF'); fill = PatternFill('solid', fgColor='1B2A4A')
   nt['A1'] = 'Varsity %s OVR sheet' % sport; nt['A1'].font = Font(name=AR, bold=True, size=14)
-  nt['A3'] = 'Floor (lowest OVR)'; nt['B3'] = 40
+  nt['A3'] = 'Floor (lowest OVR)'; nt['B3'] = 50
   nt['A4'] = 'Ceiling (highest OVR)'; nt['B4'] = 99
-  nt['A5'] = 'Mean (the average player)'; nt['B5'] = 64
-  nt['A6'] = 'Spread (standard deviation)'; nt['B6'] = 12
+  nt['A5'] = 'Mean (the average player)'; nt['B5'] = 72
+  nt['A6'] = 'Spread (standard deviation)'; nt['B6'] = 11
   nt['A7'] = 'Weight: points per game'; nt['B7'] = 0.4
   nt['A8'] = 'Weight: season total points'; nt['B8'] = 0.3
   nt['A9'] = 'Weight: rank in his position\'s key stats'; nt['B9'] = 0.3
   for r in (3, 4, 5, 6, 7, 8, 9): nt.cell(r, 2).font = Font(name=AR, color='0000FF'); nt.cell(r, 2).fill = PatternFill('solid', fgColor='FFFF00'); nt.cell(r, 1).font = Font(name=AR)
-  allnotes = ['OVR = Mean + Spread x (how many standard deviations the player is above or below average, from his percentile), rounded and kept between Floor and Ceiling, so most players land in the 50s-70s, 90+ is rare and nobody is below 40. Blue/yellow cells are inputs: change them and every OVR recalculates.',
-   'Three percentiles (0 = worst, 1 = best among his peers): (1) fantasy points per game, (2) total fantasy points this season (rewards playing more and scoring more) and (3) his rank in the stats that matter at his position, the average percentile of the Position stats columns. Weighted score = the three percentiles combined with the yellow weights (40%/30%/30% by default, they do not have to add to 1). Because averaging squeezes everyone toward the middle, the weighted scores are re-ranked among his peers (Combined percentile) and OVR comes from that, so the best player at a position is near the ceiling and the worst near the floor. Key stats: QB pass yd, pass TD, rush yd; RB rush yd, rush TD, rec yd; WR/TE rec yd, rec, rec TD; DL sack, TFL, tkl; LB tkl, TFL, sack; DB tkl, INT, PBU; DEF tkl, TFL, sack, INT; K FG, PAT; basketball PG ast, pts, stl; SG pts, 3pm, stl; SF pts, reb, stl; PF reb, pts, blk; C reb, blk, pts (season totals).',
+  allnotes = ['OVR = Mean + Spread x (how many standard deviations the player is above or below average, from his percentile), rounded and kept between Floor and Ceiling, so most players land in the 60s-80s, 90+ is rare and nobody is below 50. Blue/yellow cells are inputs: change them and every OVR recalculates.',
+   'Three percentiles (0 = worst, 1 = best among his peers): (1) fantasy points per game, (2) total fantasy points this season (rewards playing more and scoring more) and (3) his rank in the stats that matter at his position, the average percentile of the Position stats columns. Weighted score = the three percentiles combined with the yellow weights (40%/30%/30% by default, they do not have to add to 1). Because averaging squeezes everyone toward the middle, the weighted scores are re-ranked among his peers (Combined percentile) and OVR comes from that, so the best player at a position is near the ceiling and the worst at the floor (50). Key stats: QB pass yd, pass TD, rush yd; RB rush yd, rush TD, rec yd; WR/TE rec yd, rec, rec TD; DL sack, TFL, tkl; LB tkl, TFL, sack; DB tkl, INT, PBU; DEF tkl, TFL, sack, INT; K FG, PAT; basketball PG ast, pts, stl; SG pts, 3pm, stl; SF pts, reb, stl; PF reb, pts, blk; C reb, blk, pts (season totals).',
    'Football: Pts per game = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
    'Basketball: Pts per game = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
    'Games = games with stats behind the rating (football 2026, basketball 2025-26). Few games = low confidence.',
