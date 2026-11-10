@@ -2468,6 +2468,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
   background:linear-gradient(165deg,color-mix(in srgb,var(--rc) 55%,#0b1428) 0%,#0a1224 52%,#05080f 100%) padding-box,linear-gradient(135deg,#fff,var(--rc) 30%,color-mix(in srgb,var(--rc) 40%,#000) 55%,var(--rc) 75%,#fff) border-box;
   box-shadow:0 0 1.2em color-mix(in srgb,var(--rc) 60%,transparent),0 .5em 1em rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
 .tc-duo .duo-f.bk{transform:rotateY(180deg);background:linear-gradient(195deg,#05080f 0%,#0a1224 45%,color-mix(in srgb,var(--rc) 60%,#0b1428) 100%) padding-box,linear-gradient(225deg,#fff,var(--rc) 30%,color-mix(in srgb,var(--rc) 40%,#000) 55%,var(--rc) 75%,#fff) border-box}
+.tc-duo .duo-f.fr{visibility:visible;transition:visibility 0s linear .4s}.tc-duo .duo-f.bk{visibility:hidden;transition:visibility 0s linear .4s}.tc-duo.fl .duo-f.fr{visibility:hidden}.tc-duo.fl .duo-f.bk{visibility:visible}   /* v406: hide the face that is turned away at the half-way point of the flip instead of trusting backface-visibility (phones drew the front through the back, mirrored) */
 .tc-duo .duo-sl{position:absolute;inset:0;background:repeating-linear-gradient(118deg,transparent 0 .9em,rgba(255,255,255,.045) .9em 1em),linear-gradient(118deg,transparent 46%,color-mix(in srgb,var(--rc) 55%,transparent) 46.5% 49%,transparent 49.5% 52%,rgba(255,255,255,.35) 52.2% 53%,transparent 53.5%)}
 .tc-duo .bk .duo-sl{transform:scaleX(-1)}
 .tc-duo .duo-wm{position:absolute;right:-18%;top:-6%;width:85%;opacity:.16;filter:grayscale(1) brightness(2)}.tc-duo .duo-wm img{width:100%;height:auto}
@@ -2475,7 +2476,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .tc-duo .duo-tag{position:absolute;top:.5em;left:.5em;display:flex;align-items:center;gap:.3em;font:900 .9em/1 var(--f-display,inherit);letter-spacing:.1em;color:#05080f;background:var(--rc);padding:.25em .45em;border-radius:.4em;transform:skewX(-10deg);z-index:2}
 .tc-duo .duo-tag em{font-style:normal;opacity:.7;font-size:.85em}
 .tc-duo .bk .duo-tag{left:auto;right:.5em}
-.tc-duo .duo-av{position:absolute;top:19%;left:50%;transform:translateX(-50%) translateZ(0);border-radius:50%;padding:.2em;z-index:1;display:flex}
+.tc-duo .duo-av{position:absolute;top:19%;left:50%;transform:translateX(-50%);border-radius:50%;padding:.2em;z-index:1;display:flex}
 .tc-duo .duo-av::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,var(--rc),#fff,var(--rc),color-mix(in srgb,var(--rc) 30%,#000),var(--rc));animation:duoSpin 3s linear infinite}
 .tc-duo .duo-av>*{position:relative}
 .tc-duo .duo-nm{position:relative;z-index:2;width:100%;text-align:center;padding:.5em .3em .55em;background:linear-gradient(180deg,transparent,rgba(0,0,0,.75) 35%)}
@@ -3086,7 +3087,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v405 · Nov 10';
+const APP_BUILD='v406 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4459,7 +4460,7 @@ function duoArt(id,r,s=54){const c=duoInfo(id),R=RAR[r]||RAR.e,w=Math.round(s*.7
   const face=(p,cl,n)=>`<span class="duo-f ${cl}"><span class="duo-sl"></span><span class="duo-wm">${slogo(p.school,Math.round(s*.6))}</span><span class="duo-tag">DUO<em>${n}/2</em></span><span class="duo-av">${av(p.name,p.school,z)}</span><span class="duo-nm"><b>${esc(lastN(p.name))}</b><small>${esc(p.pos==='DEF'?(p.sub||'DEF'):(p.pos||''))}</small></span><span class="duo-sp"></span><span class="duo-foil"></span></span>`;
   return `<span class="tc-duo r-${r}" style="--rc:${R.c};width:${w}px;height:${s}px;font-size:${(s/11).toFixed(2)}px" title="${esc(c.full)} · tap to flip" role="img" aria-label="${esc(c.full)} duo card"><span class="duo-tilt"><span class="duo-in">${face(c.a,'fr',1)}${face(c.b,'bk',2)}</span></span></span>`}
 /* v403 (owner): duo cards flip on their own every 5 seconds and when tapped. Each flip keeps turning the same way, lifts the card and fires a ring in its rarity colour. */
-function duoFlip(el){const inn=el.querySelector('.duo-in');if(!inn)return;el._r=(el._r||0)+180;inn.style.transform='rotateY('+el._r+'deg)';el._t=Date.now();el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}
+function duoFlip(el){const inn=el.querySelector('.duo-in');if(!inn)return;el._r=(el._r||0)+180;inn.style.transform='rotateY('+el._r+'deg)';el.classList.toggle('fl');el._t=Date.now();el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}
 setInterval(()=>{const n=Date.now();document.querySelectorAll('.tc-duo').forEach(el=>{if(!el._t){el._t=n;return}if(n-el._t>=5000)duoFlip(el)})},250);
 document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.tc-duo');if(!el)return;duoFlip(el);if(!el.closest('.pks,.pko-c')){e.stopPropagation();e.preventDefault()}},true);
 const parlOf=u=>((S.picks[u]||{}).parl)||{};
