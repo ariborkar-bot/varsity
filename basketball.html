@@ -2871,6 +2871,10 @@ function libRetry(){if(SB||!NEEDS_SERVER||window.__lr||ME.mode!=='offline')retur
 /* v357: route() can ask for the sign-in screen before boot() has made the client. Wait for boot instead of calling
    libRetry (which reloaded signed-out visitors' page up to 3 times, and forever where sessionStorage is blocked) */
 function openAuth(){if(!SB){if(ME.mode==='offline')libRetry();else if(!window.__oaT)window.__oaT=setTimeout(()=>{window.__oaT=0;if(ME.mode==='guest'||ME.mode==='offline')openAuth()},150);return}const g=$('#gate');g.innerHTML=authHTML();g.hidden=false;document.body.style.overflow='hidden';const f=g.querySelector('#au-email');if(f&&matchMedia('(pointer:fine)').matches)f.focus()}
+/* v393 (owner): nobody uses the app (tabs, packs, buttons) before sign-in AND the profile step are done: any click outside the sign-in / profile screen reopens it */
+document.addEventListener('click',e=>{try{const t=e.target;if(!t||!t.closest||t.closest('#gate')||t.closest('[data-priv]')||t.closest('[data-admexit]'))return;
+  if(ME.mode==='guest'&&location.hash!=='#privacy'){e.preventDefault();e.stopPropagation();openAuth();return}
+  if(mustSetup()&&location.hash!=='#privacy'){e.preventDefault();e.stopPropagation();setupCheck()}}catch(_){}},true);
 document.addEventListener('click',e=>{
   if(e.target.closest&&e.target.closest('[data-priv]')){setTimeout(()=>{if(ME.mode==='guest'&&location.hash==='#privacy')closeGate()},0);return}
   const b=e.target.closest&&e.target.closest('[data-au]');if(!b)return;e.preventDefault();
@@ -3030,7 +3034,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v392 · Nov 9';
+const APP_BUILD='v393 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4400,8 +4404,10 @@ const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" titl
 function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
   const P=use.length&&!(cosOnly&&cos.length)&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
 async function packOpen(type,how,day,team){
-  const P=PACKS[type];if(!P)return;if(P.team&&!team){ptSheet(type,how,day);return}
-  if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
+  const P=PACKS[type];if(!P)return;
+  if(!ME.uid||ME.mode==='guest'){try{openAuth()}catch(_){}return}
+  if(mustSetup()){setupCheck();return}
+  if(P.team&&!team){ptSheet(type,how,day);return}
   if(ME.mode==='readonly'||ME.mode==='offline'){say('Can’t open packs right now.');return}
   if(how==='tok'&&bank(ME.uid)<P.tok){say(`You need ${P.tok} tokens for the ${P.n}.`);return}
   if(how==='free'&&freePacks(ME.uid)<1){say('No free packs right now.');return}
@@ -4459,7 +4465,8 @@ let _pkBusy=false;
 async function pkpBuy(gid,key){
   key=key||'pick';const P=PACKS[key];
   if(_pkBusy)return;
-  if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}
+  if(!ME.uid||ME.mode==='guest'){try{openAuth()}catch(_){}return}
+  if(mustSetup()){setupCheck();return}
   if(ME.mode==='readonly'||ME.mode==='offline'){say('Can’t open packs right now.');return}
   if(pkpOf(ME.uid)){pkpShow();return}
   if(gid&&!giftPacks(ME.uid).some(x=>x.id===gid&&x.type===key)){say('That pack was already opened.');return}
