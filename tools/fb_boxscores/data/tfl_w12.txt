@@ -1,4 +1,4 @@
-Clairemont|Mountain Empire|Southwest SD|Coronado|Calipatria|Palo Verde Valley|Canyon Hills|Hoover|Olympian|Bonita Vista|Mar Vista|Fallbrook|Army-Navy|Mission Bay|Monte Vista|Morse|Coastal Academy|Chula Vista|Foothills Christian|Escondido Charter|Classical Academy|La Jolla Country Day|Mira Mesa|Madison|Rancho Buena Vista|West Hills|Santana|El Capitan|Mount Miguel|Mater Dei Catholic|Hilltop|Mt. Carmel|Grossmont|El Camino|Brawley|Westview|Ramona|Holtville
+Clairemont|Mountain Empire|Southwest SD|Coronado|Calipatria|Palo Verde Valley|Canyon Hills|Hoover|Olympian|Bonita Vista|Mar Vista|Fallbrook|Army-Navy|Mission Bay|Monte Vista|Morse|Coastal Academy|Chula Vista|Foothills Christian|Escondido Charter|Classical Academy|La Jolla Country Day|Mira Mesa|Madison|Rancho Buena Vista|West Hills|Santana|El Capitan|Mount Miguel|Mater Dei Catholic|Hilltop|Mt. Carmel|Grossmont|El Camino|Patrick Henry|Imperial|Brawley|Westview|Ramona|Holtville
 3|fu9jatj55u2qa|c10
 3|c3j5i2eel5a22|c01
 3|4m17kg01eqgm6|c01
@@ -31,6 +31,7 @@ Clairemont|Mountain Empire|Southwest SD|Coronado|Calipatria|Palo Verde Valley|Ca
 7|eqds6v1pifvm6|c20
 7|u7g8kgahs3b88|c20
 8|tjsapidhcuhj3|c11
+8|hoi7lhsaauco8|c10
 9|gurnpbkb9j6qa|c40
 9|vd8v3kvtkp277|c20
 9|ludvfcoo7rpue|c20
@@ -104,6 +105,8 @@ t|g167l89n970ue|c02
 t|bki3dcctg25g0|c01
 t|6g45cttr8edp9|c01
 t|pfhha9ed8ofi2|c01
+u|76jaf4f9ta3n7|c20
+u|udtjtqtrp5uvf|c30
 v|0h5cig0vm9j33|c10
 v|okc9qpd9qij00|c10
 v|4eit368lf02l5|c10
@@ -111,7 +114,7 @@ v|ubmnkmh66h3k4|c10
 v|nihvi75jutog0|c10
 v|jirhfekp1e9ee|c10
 v|dek2rhvopdmj3|c70
-y|q1n6up99g4gff|c30
-y|ib8ksgjtthgm6|c40
-y|53ajfrp7sn4n7|c10
-y|urkgvjb86oij3|c40
+10|q1n6up99g4gff|c30
+10|ib8ksgjtthgm6|c40
+10|53ajfrp7sn4n7|c10
+10|urkgvjb86oij3|c40
