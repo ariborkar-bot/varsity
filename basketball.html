@@ -1741,6 +1741,7 @@ html,body{overflow-x:clip;max-width:100%}
 .tw-o{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
 .tw-note{font-size:.9rem;color:var(--muted);background:rgba(255,194,61,.08);border:1px solid rgba(255,194,61,.25);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:8px 0}.tw-note b{color:var(--ink,#fff)}.ppg-u{font-size:.55em;text-decoration:none;opacity:.7;margin-left:3px}
 /* admin dashboard */
+.adm .adm-card input,.adm .adm-card select{background:#fff;color:#1B1F3B;border:1px solid #E4E7EF}.adm .adm-card input::placeholder{color:#8A90A6}
 .adm-pill.r{background:#FDECEE;color:#D6334D}.adm-pill.x{background:#F1F3F8;color:#6B7189}
 .adm-alerts{display:grid;gap:8px;margin:-4px 0 16px}.adm-alert{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-radius:12px;padding:10px 14px;border:1px solid;cursor:pointer;font:600 13px/1.3 inherit}
 .adm-alert svg{width:18px;height:18px;flex:none}.adm-alert span{flex:1}.adm-alert b{font-weight:700;white-space:nowrap}.adm-alert.r{background:#FDF1F3;border-color:#F8C9D0;color:#9B1C2E}.adm-alert.o{background:#FFF6EE;border-color:#FFD9BF;color:#A04712}
@@ -2536,7 +2537,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 /* Starter pick CSS removed in v346 */
 
 #ban-scr{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 35%,#3a0a12,#07090f 75%);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff}
-#ban-scr .ban-c{max-width:360px;display:flex;flex-direction:column;gap:10px;align-items:center}#ban-scr .ban-ic{font-size:3.4rem}#ban-scr h2{margin:0;font:900 1.9rem/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:#FF4F6D}#ban-scr p{margin:0;font-size:1.05rem}#ban-scr small{color:#b9c0d4}
+#ban-scr .ban-c{max-width:360px;display:flex;flex-direction:column;gap:10px;align-items:center}#ban-scr .ban-m{background:#ffffff14;border-radius:12px;padding:10px 12px;font-weight:700;max-width:100%;overflow-wrap:anywhere}#ban-scr .ban-ap{width:100%;display:flex;flex-direction:column;gap:8px;text-align:left}#ban-scr .ban-ap textarea{width:100%;border-radius:12px;border:1px solid #ffffff33;background:#ffffff10;color:#fff;padding:10px;font:inherit}#ban-scr .ban-ap p{margin:0;overflow-wrap:anywhere}#ban-scr .ban-ic{font-size:3.4rem}#ban-scr h2{margin:0;font:900 1.9rem/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:#FF4F6D}#ban-scr p{margin:0;font-size:1.05rem}#ban-scr small{color:#b9c0d4}
 </style><style id="bb-theme">
 .bb-pre{display:flex;flex-direction:column;gap:4px;margin:12px 0;border-color:rgba(255,194,61,.45);background:radial-gradient(120% 100% at 0 0,rgba(255,194,61,.14),transparent 60%),var(--card,#132235)}
 .bb-pre b{font:800 1.15rem/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#FFC23D}.bb-pre span{opacity:.8}
@@ -3008,7 +3009,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v381 · Nov 9';
+const APP_BUILD='v382 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4123,6 +4124,8 @@ const PACKS={
   god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:33,e:35,l:17,m:8},g:'',cos:1},
   /* v366 (owner): Pick 1 of 5: 5 players, one is a Top 10 Immortal card, you keep 1 (odds are for the other 4, Rare or better) */
   pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1,off:1},   /* v380 (owner): removed from the Shop (off); gifts/half-done picks still open */
+  /* v382 (owner): the Welcome pack: you pick a team and get a walkout player (Epic or better) + 10 more cards (Champion pack odds), once per account (off: not in the Shop) */
+  welcome:{n:'Welcome pack',c:10,tok:0,odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'',cards:1,off:1},
   godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1,off:1}};
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
@@ -4321,7 +4324,7 @@ function ptSheet(k,h,d){Object.assign(PT,{k:k||'team',h:h||'tok',d:d==null?null:
     <div class="pt-list" role="listbox" aria-label="Teams">${ts.map(t=>`<button type="button" class="pt-t" data-act="ptPick" data-v="${esc(t)}" aria-pressed="${PT.t===t}">${slogo(t,26)}<span>${esc(t)}</span></button>`).join('')}</div>
     <div class="gbtns"><button class="btn" data-act="ptGo" ${PT.t?'':'disabled'}>${ptLabel()}</button></div></div>`;
   c.hidden=false}
-const ptLabel=()=>{const P=PACKS[PT.k];return (PT.t?'Open '+esc(PT.t):'Pick a team')+(PT.h==='tok'?' · '+P.tok.toLocaleString()+' tokens':'')};
+const ptLabel=()=>{if(PT.k==='sp')return PT.t?'Open '+esc(PT.t):'Pick a team';const P=PACKS[PT.k];return (PT.t?'Open '+esc(PT.t):'Pick a team')+(PT.h==='tok'?' · '+P.tok.toLocaleString()+' tokens':'')};
 function rollCard(r){const P=cardPools(),team=fcRnd(100)<35,pool=team?P.tm:P.pl;return pool.length?pool[fcRnd(pool.length)]:''}
 /* ---------- Immortal achievement cards (v342) ----------
    A tier above Mythical, only for players who earned it: Top 25 at his position in a week, Top 50 of all players in a week,
@@ -4452,18 +4455,20 @@ function pkpShopCard(k,P,bal){const pend=!!pkpOf(ME.uid);
     <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${!pend&&bal<P.tok?'disabled':''}>${pend?'Pick your player':P.tok.toLocaleString()+' tokens'}</button></article>`}
 function pkpBanner(){return pkpOf(ME.uid)?`<section class="card lk-free lk-prize"><div><b>Pick 1 of 5 · your pack is open</b><small class="muted">Choose the player you want to keep.</small></div><button class="btn" data-act="pkOpen" data-v="pick" data-h="tok">Pick now</button></section>`:''}
 /* the walkout: dark tunnel, then position, team, best stat and the player. Tap to move on, Skip to jump to the player. */
-function pkWalkout(R,done){
-  const id=R.o[R.g].split('|')[0],ai=achInfo(id),p=pByKey(ai.key);if(!p){done();return}
-  const pos=posOf(p),st=pkStat(ai.key,ai.rank),calm=matchMedia('(prefers-reduced-motion: reduce)').matches,ini=String(p.school).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+function pkWalkout(R,done,X){
+  /* X = {p,r,dup}: a Welcome pack walkout for a player card of rarity r (R is null); otherwise R is a Pick 1 of 5 offer */
+  const id=X?'':R.o[R.g].split('|')[0],ai=X?{key:X.p.key,rank:0,pct:CARD_PCT[X.r]}:achInfo(id),p=X?X.p:pByKey(ai.key);if(!p){done();return}
+  let st=pkStat(ai.key,ai.rank);if(X&&st.big==='#0')st={n:0,big:'+'+ai.pct+'%',l:'on his props',sub:'Card boost'};
+  const pos=posOf(p),calm=matchMedia('(prefers-reduced-motion: reduce)').matches,ini=String(p.school).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
   const o=document.createElement('div');o.className='wko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Walkout');o.dataset.s='0';
   o.innerHTML=`<div class="wko-bg" aria-hidden="true"></div><i class="wko-beams" aria-hidden="true"></i><i class="wko-crowd" aria-hidden="true"></i><i class="wko-fl" aria-hidden="true"></i>
-    <div class="wko-st wko-s0"><i class="wko-ring"></i><b class="wko-k">Immortal pull</b></div>
+    <div class="wko-st wko-s0"><i class="wko-ring"></i><b class="wko-k">${X?'Welcome pack':'Immortal pull'}</b></div>
     <div class="wko-st wko-s1"><b class="wko-k">Position</b><div class="wko-pos">${esc(pos)}</div></div>
     <div class="wko-st wko-s2"><b class="wko-k">Team</b><div class="wko-logo">${logoFor(p.school)?slogo(p.school,150):`<span class="wko-ini">${esc(ini)}</span>`}</div><div class="wko-sch">${esc(p.school)}</div></div>
     <div class="wko-st wko-s3"><b class="wko-k">${st.big?'Rank':'Season best stat'}</b><div class="wko-num">${st.big?esc(st.big):'0'}</div><div class="wko-lb">${esc(st.l)}</div><small class="wko-sub">${esc(st.sub)}</small></div>
-    <div class="wko-st wko-s4"><i class="wko-rays"></i><div class="wko-ttl">IMMORTAL!</div>
-      <div class="wko-card"><div class="wko-ct"><span>TOP 10 · #${ai.rank}</span><span>+${ai.pct}%</span></div>${av(p.name,p.school,124)}<h3>${esc(p.name)}</h3><p>${esc(pos)} · ${slogo(p.school,18)} ${esc(p.school)}</p><em>${esc(st.big?st.l:st.n.toLocaleString()+' '+st.l)}</em><i class="wko-shine"></i></div><i class="wko-pts"></i>
-      <button class="btn wko-go" type="button">Pick your player</button></div>
+    <div class="wko-st wko-s4"><i class="wko-rays"></i><div class="wko-ttl">${X?esc(RAR[X.r].n.toUpperCase())+'!':'IMMORTAL!'}</div>
+      <div class="wko-card"><div class="wko-ct"><span>${X?esc(RAR[X.r].n)+' player card':'TOP 10 · #'+ai.rank}</span><span>+${ai.pct}%</span></div>${av(p.name,p.school,124)}<h3>${esc(p.name)}</h3><p>${esc(pos)} · ${slogo(p.school,18)} ${esc(p.school)}</p><em>${esc(st.big?st.l:st.n.toLocaleString()+' '+st.l)}</em><i class="wko-shine"></i></div><i class="wko-pts"></i>
+      <button class="btn wko-go" type="button">${X?'Open 10 more cards':'Pick your player'}</button></div>
     <button class="wko-skip" type="button">Skip</button>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
   const T=[900,1500,1700,2400];let s=0,tm,raf,fin=false;
@@ -4661,7 +4666,7 @@ function giftSheet(){const c=$('#cfm'),fr=giftFriends(),q=GF.q.trim().toLowerCas
    then the PLAYER (a carousel of that team's players). Saved as picks/<uid>.inv.wp = when opened, plus the card in inv.cards. */
 const WP_ODDS={e:49,l:33,m:17},WP_ACH=1,WPO={e:49,l:33,m:17,x:1};   /* v355 (owner): 1% Immortal card (rolled first), Epic 49 / Legendary 33 / Mythical 17 */   /* v349 (owner): Epic or better (was Rare 40 / Epic 30 / Legendary 20 / Mythical 10) */
 const wpDone=u=>!!(invOf(u).wp);
-const wpCan=()=>ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'&&!!myProfile()&&S.loaded&&S.loaded.picks&&!wpDone(ME.uid);
+const wpCan=()=>false&&ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'&&!!myProfile()&&S.loaded&&S.loaded.picks&&!wpDone(ME.uid);
 let _wpAsked=false,_wpBusy=false;
 function wpTeams(){const by={};for(const p of players())if(!p.sample&&!/x$/.test(p.key)&&p.school){(by[p.school]=by[p.school]||[]).push(p)}return by}
 /* v352: the player was one of the team's top 10 (replaced in v360 by the best player at each position, below) */
@@ -4682,6 +4687,38 @@ function wpMaybe(){if(_wpAsked||!wpCan())return;const c=$('#cfm');if(!c||!c.hidd
     <p>Here’s a free <b>player pack</b> to start you off: one card of a random team’s best player at one position, Epic or better.</p>
     <p class="wp-odds">${Object.entries(WPO).map(([r,n])=>`<span style="color:${RAR[r].c}">${RAR[r].n} ${n}%</span>`).join('')}</p>
     <div class="gbtns"><button class="btn" data-act="wpOpen">Open it</button><button class="btn ghost" data-c="no">Later</button></div></div>`;c.hidden=false}
+/* ---------- Welcome pack (v382, owner) ----------
+   Replaces the old random-team welcome pack (wpCan() is now false). Every account gets it once (inv.sp2 = when opened, inv.spc = walkout
+   card:rarity): YOU choose the team, it rolls a random player from that team's whole roster at Epic or better (SPO) and plays the walkout
+   (position, team, his best stat, the card), then 10 more cards (PACKS.welcome, Champion odds, player/team cards only). */
+const SPO={e:50,l:33,m:17};
+function wpCan0(){return ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'&&!!myProfile()&&S.loaded&&S.loaded.picks}
+const spCan=()=>wpCan0()&&!invOf(ME.uid).sp2;
+let _spAsked=false,_spBusy=false;
+function spSheet(){if(!spCan())return;PT.k='sp';PT.t='';const c=$('#cfm');if(!c)return;
+  const ts=Object.keys(wpTeams()).sort((a,b)=>a.localeCompare(b));
+  c.innerHTML=`<div class="gcard tok-sheet pt-sheet" role="dialog" aria-modal="true" aria-labelledby="pt-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button>
+    <h2 id="pt-t">Choose your team</h2><p class="muted">Your Welcome pack has one random player from this team (Epic or better) plus 10 more cards.</p>
+    <input id="pt-q" class="pt-q" type="search" placeholder="Search schools" autocomplete="off" aria-label="Search schools">
+    <div class="pt-list" role="listbox" aria-label="Teams">${ts.map(t=>`<button type="button" class="pt-t" data-act="ptPick" data-v="${esc(t)}" aria-pressed="false">${slogo(t,26)}<span>${esc(t)}</span></button>`).join('')}</div>
+    <div class="gbtns"><button class="btn" data-act="spGo" disabled>${ptLabel()}</button></div></div>`;c.hidden=false}
+function spMaybe(){if(_spAsked||!spCan())return;const c=$('#cfm');if(!c||!c.hidden||document.querySelector('.pko,.wpk,.wko'))return;_spAsked=true;
+  c.innerHTML=`<div class="gcard tok-sheet wp-ask" role="dialog" aria-modal="true" aria-labelledby="sp-t"><div class="wp-ask-art" aria-hidden="true"><span>11</span><small>cards</small></div><h2 id="sp-t">Welcome to Varsity!</h2>
+    <p>Your free <b>Welcome pack</b>: pick <b>any team</b> and walk out a random player from it, <b>Epic or better</b>, plus <b>10 more cards</b>.</p>
+    <p class="wp-odds">${Object.entries(SPO).map(([r,n])=>`<span style="color:${RAR[r].c}">${RAR[r].n} ${n}%</span>`).join('')}</p>
+    <div class="gbtns"><button class="btn" data-act="spOpen">Choose my team</button><button class="btn ghost" data-c="no">Later</button></div></div>`;c.hidden=false}
+function spShopCard(){return spCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">Choose a team: one random player from it (${Object.entries(SPO).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}) plus 10 more cards.</small></div><button class="btn" data-act="spOpen">Open</button></section>`:''}
+async function spGo(){if(_spBusy||!spCan()||!PT.t)return;_spBusy=true;const team=PT.t;
+  try{const pool=players().filter(p=>!p.sample&&!/x$/.test(p.key)&&p.school===team);if(!pool.length){say('No players on that team yet. Pick another.');return}
+    try{closeConfirm()}catch(_){}
+    const p=pool[fcRnd(pool.length)],r=rollRarity(SPO),P=PACKS.welcome,v=invOf(ME.uid),cards=Object.assign({},v.cards);let dup=0;
+    const add=(cid,rr)=>{const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),d=!!cur[rr];if(d)dup+=RAR[rr].dup;else{cur[rr]=1;cards[cid]=cur}return d};
+    const wdup=add('pc:'+p.key,r),got=[];
+    for(let i=0;i<P.c;i++){const rr=rollRarity(P.odds);let cid=rollCard(rr);for(let k=0;!cid&&k<5;k++)cid=rollCard(rr);if(cid)got.push({card:cid,r:rr,dup:add(cid,rr)})}
+    const patch={sp2:NOW(),spc:'pc:'+p.key+':'+r,cards,n:(+v.n||0)+1};if(dup)patch.dup=(+v.dup||0)+dup;
+    S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:Object.assign({},v,patch)});
+    try{await upsert('picks/'+ME.uid,{inv:patch})}catch(_){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{inv:v});say('That did not save. Try again.');return}
+    pkWalkout(null,()=>packShow(P,got),{p,r,dup:wdup})}finally{_spBusy=false}}
 function wpShopCard(){return wpCan()?`<section class="card lk-free wp-shop"><div><b>Welcome pack · free</b><small class="muted">One card of a team’s best player at one position, Epic or better (${Object.entries(WPO).map(([r,n])=>RAR[r].n+' '+n+'%').join(' · ')}).</small></div><button class="btn" data-act="wpOpen">Open</button></section>`:''}
 async function wpOpen(){if(_wpBusy||!wpCan())return;_wpBusy=true;try{closeConfirm()}catch(_){}
   try{const R=wpRoll();if(!R){say('No players to pull yet. Try again soon.');return}
@@ -4699,15 +4736,15 @@ function wpShow(R,dup){
   const tile=t=>`<div class="wpk-tt">${logoFor(t)?slogo(t,64):`<span class="wpk-ini">${esc(t.split(/\s+/).map(w=>w[0]).slice(0,2).join(''))}</span>`}<b>${esc(t)}</b></div>`;
   /* rarity power meter (v347, replaces the wheel; v349: Epic, Legendary, Mythical): tiers bottom to top. The charge climbs one tier at a
      time, lighting each one; above your rarity it teases the next tier (flicker) and drops back, unless you hit Mythical. */
-  const LAD=Object.keys(WPO),ti=LAD.indexOf(R.r);
+  const ODS=R.pick?SPO:WPO,LAD=Object.keys(ODS),ti=LAD.indexOf(R.r);
   /* player carousel: the team's players, repeated, the rolled one at index PI */
   const pool=R.pool.filter(q=>q.key!==R.key),car=[];for(let i=0;i<22;i++)car.push(pool.length?pool[fcRnd(pool.length)]:p);const PI=19;car[PI]=p;
   const pc=q=>`<div class="wpk-pc">${av(q.name,q.school,58)}<b>${esc(q.name)}</b><small>${q.pos==='DEF'?esc(q.sub||'DEF'):esc(q.pos)}</small></div>`;
   const ai=R.ach?achInfo(R.ach):null,pct=ai?ai.pct:CARD_PCT[R.r],RI=R.r==='x'?6:RAR_ORD.indexOf(R.r);
   o.innerHTML=`<div class="wpk-bg" aria-hidden="true"><i class="wpk-rays"></i></div>
-    <div class="wpk-top"><h2>Your free player</h2><ol class="wpk-steps"><li data-s="1"><b>Team</b><small>…</small></li><li data-s="2"><b>Rarity</b><small>…</small></li><li data-s="3"><b>Player</b><small>…</small></li></ol></div>
+    <div class="wpk-top"><h2>${R.pick?'Your starter player':'Your free player'}</h2><ol class="wpk-steps"><li data-s="1"><b>Team</b><small>…</small></li><li data-s="2"><b>Rarity</b><small>…</small></li><li data-s="3"><b>Player</b><small>…</small></li></ol></div>
     <div class="wpk-st wpk-s1"><div class="wpk-win"><div class="wpk-reel">${reel.map(tile).join('')}</div><i class="wpk-mark"></i></div><p class="wpk-cap">Rolling your team…</p></div>
-    <div class="wpk-st wpk-s2"><div class="wpk-lad"><div class="wpk-meter"><i></i></div>${LAD.slice().reverse().map(r=>`<div class="wpk-tier" data-r="${r}" style="--tc:${RAR[r].c}"><i></i><b>${RAR[r].n}</b><small>${WPO[r]}%</small></div>`).join('')}</div><p class="wpk-cap">Rolling your rarity…</p><div class="wpk-stamp">${RAR[R.r].n}!</div></div>
+    <div class="wpk-st wpk-s2"><div class="wpk-lad"><div class="wpk-meter"><i></i></div>${LAD.slice().reverse().map(r=>`<div class="wpk-tier" data-r="${r}" style="--tc:${RAR[r].c}"><i></i><b>${RAR[r].n}</b><small>${ODS[r]}%</small></div>`).join('')}</div><p class="wpk-cap">Rolling your rarity…</p><div class="wpk-stamp">${RAR[R.r].n}!</div></div>
     <div class="wpk-st wpk-s3"><div class="wpk-track">${car.map(pc).join('')}</div><i class="wpk-pin" aria-hidden="true"></i><p class="wpk-cap">Rolling your player…</p></div>
     <div class="wpk-st wpk-s4"><div class="wpk-card"><div class="wpk-ctop"><span>${RAR[R.r].n}</span><span>${ai?'Achievement card':'Player card'}</span></div>${av(p.name,p.school,110)}<h3>${esc(p.name)}</h3><p>${p.pos==='DEF'?esc(p.sub||'DEF'):esc(p.pos)} · ${slogo(p.school,20)} ${esc(p.school)}</p><em>${dup?`Duplicate · +${RAR[R.r].dup} tokens`:ai?`${esc(ai.line)} · +${pct}% on his props`:`+${pct}% on his props`}</em><i class="wpk-shine"></i></div><i class="wpk-pts"></i>
       <div class="wpk-btns"><button class="btn" data-w="done">Nice!</button><button class="btn ghost" data-w="see">See his card</button></div></div>
@@ -4743,6 +4780,7 @@ function wpShow(R,dup){
     else{show(3);fire('rev',()=>{o.classList.add('rev',RI>=4?'rays':'x');pop(3);sparks();buzz(RI>=5?[40,40,160]:RI===4?[30,30,100]:[30,20,60]);$o('.wpk-skip').hidden=true})
       if(t>=T.end)fire('end',()=>o.classList.add('rdy'))}
     raf=requestAnimationFrame(step)};
+  if(R.pick){t0=performance.now()-(T.t2-.15)*1000;fired.l1=1;reelEl.children[TI].classList.add('hit');steps[0].classList.add('done');steps[0].querySelector('small').textContent=R.team}
   if(calm)t0=performance.now()-T.end*1000;
   raf=requestAnimationFrame(step);
   const close=()=>{cancelAnimationFrame(raf);o.remove();document.documentElement.style.overflow='';render()};
@@ -4790,11 +4828,19 @@ function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'
   S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},old,patch)});
   upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:old})})}
 /* account notice (v374): picks/<uid>.ban={m:reason} shows a full-screen "Account banned" screen to that user only. Remove the field to lift it. */
-function banCheck(){const b=ME.uid&&(S.picks[ME.uid]||{}).ban;let el=document.getElementById('ban-scr');
+function banCheck(){const pk=ME.uid&&(S.picks[ME.uid]||{}),b=pk&&pk.ban,ap=pk&&pk.appeal;let el=document.getElementById('ban-scr');
   if(!b){if(el)el.remove();return}
   if(!el){el=document.createElement('div');el.id='ban-scr';el.setAttribute('role','alertdialog');el.setAttribute('aria-modal','true');document.body.appendChild(el)}
-  const h=`<div class="ban-c"><div class="ban-ic" aria-hidden="true">⛔</div><h2>Account banned</h2><p>Your Varsity account has been banned${b.m?' for <b>'+esc(b.m)+'</b>':''}.</p><small>Contact a Varsity admin if you think this is a mistake.</small></div>`;
+  /* v382: the admin's message is shown, and the person can send one appeal (picks/<uid>.appeal = {t,at,st:'open'|'denied',r:reply}) */
+  const A=!ap?`<div class="ban-ap"><label for="ban-t">Think this is a mistake? Tell an admin why.</label><textarea id="ban-t" maxlength="500" rows="4" placeholder="Write your appeal"></textarea><button class="btn" type="button" data-ban="appeal">Send appeal</button></div>`
+    :ap.st==='denied'?`<div class="ban-ap"><b>Appeal denied</b>${ap.r?`<p>${esc(ap.r)}</p>`:''}</div>`
+    :`<div class="ban-ap"><b>Appeal sent</b><p>An admin will look at it. Your message: ${esc(ap.t||'')}</p></div>`;
+  const h=`<div class="ban-c"><div class="ban-ic" aria-hidden="true">⛔</div><h2>Account banned</h2><p>Your Varsity account has been banned${b.m?':':'.'}</p>${b.m?`<p class="ban-m">${esc(b.m)}</p>`:''}${A}</div>`;
   if(el.innerHTML!==h)el.innerHTML=h}
+document.addEventListener('click',async e=>{const x=e.target.closest&&e.target.closest('[data-ban=appeal]');if(!x||!ME.uid)return;
+  const t=(($('#ban-t')||{}).value||'').trim();if(t.length<5){say('Write a few words first.');return}
+  const ap={t:t.slice(0,500),at:NOW(),st:'open'};x.disabled=true;
+  try{await upsert('picks/'+ME.uid,{appeal:ap});S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{appeal:ap});banCheck()}catch(_){x.disabled=false;say('That did not send. Try again.')}});
 function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const seen=+((S.picks[ME.uid]||{}).gsn)||0,nw=giftsIn(ME.uid).filter(x=>(+x.at||0)>seen).sort((a,b)=>a.at-b.at);if(!nw.length)return;
   const c=$('#cfm');if(!c||!c.hidden)return;_gPop=true;const last=nw[nw.length-1].at;
@@ -4854,7 +4900,7 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   else if(a==='ntPhoneOff'){localStorage.setItem('vs-push','off');pushOff();say('Phone notifications are off');if(UI.notifView==='settings')openNotes()}
   else if(a==='shBuy')shopBuy(v);
   else if(a==='gfOpen'){if(!ME.uid||ME.mode==='guest'){openGate&&openGate();return}if(t.dataset.to)GF.to=t.dataset.to;giftSheet()}
-  else if(a==='ptPick'){PT.t=v;document.querySelectorAll('.pt-t').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===v)));const b=document.querySelector('[data-act=ptGo]');if(b){b.disabled=false;b.innerHTML=ptLabel()}}
+  else if(a==='ptPick'){PT.t=v;document.querySelectorAll('.pt-t').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===v)));const b=document.querySelector('[data-act=ptGo],[data-act=spGo]');if(b){b.disabled=false;b.innerHTML=ptLabel()}}
   else if(a==='ptGo'){if(!PT.t)return;const c=$('#cfm');if(c)c.hidden=true;packOpen(PT.k,PT.h,PT.d,PT.t)}
   else if(a==='gfTo'){GF.to=GF.to===v?'':v;giftSheet()}
   else if(a==='gfKind'){GF.kind=v;giftSheet()}
@@ -4863,6 +4909,8 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   else if(a==='gpOk'){const at=+t.dataset.at||NOW();closeConfirm();S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{gsn:at});upsert('picks/'+ME.uid,{gsn:at}).catch(()=>{})}
   else if(a==='gfSend')giftSend();
   else if(a==='wpOpen')wpOpen();
+  else if(a==='spOpen')spSheet();
+  else if(a==='spGo')spGo();
   else if(a==='remOpen')remSheet(t.dataset.n,t.dataset.s);
   else if(a==='remSend')remSend();
   else if(a==='troOpen'){const g=S.groups[t.dataset.gid];if(!g)return;Object.assign(TR,{gid:g.id,sh:'cup',mt:'gold',bs:'walnut',nm:''},g.trophy||{});troSheet()}
@@ -4887,7 +4935,7 @@ function viewShop(){
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
     const extras=`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
-    body=wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
+    body=spShopCard()+wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?(P.c===1?'card':'cards'):'items'}</small></div><h3>${esc(P.n)}</h3>
       <p class="muted">${P.team?'You pick the team · its player and team cards only':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
@@ -8095,9 +8143,9 @@ const ADM_NAV=[['overview','Overview','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4
   ['users','Users','M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21c0-4 4-6 8-6s8 2 8 6'],['engagement','Engagement','M4 20V10M10 20V4M16 20v-7M22 20H2'],['sponsors','Sponsors & tokens','M4 5h16v14H4zM10 9l5 3-5 3z'],
   ['games','Games','M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a5 5 0 0 1 5 5v2a4 4 0 0 1-7 2.5L13.5 14h-3L9 15.5A4 4 0 0 1 2 13v-2a5 5 0 0 1 5-5z'],['leagues','Leagues','M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4'],
   ['health','Data health','M22 12h-4l-3 9L9 3l-3 9H2'],['removals','Removal requests','M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3'],['errors','Error log','M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'],['announce','Announcements','M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8'],
-  ['weekly','Weekly report','M8 2v4M16 2v4M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],['tools','Accounts & tools','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z']];
-const ADM_GROUPS=[['Dashboard',['overview','weekly']],['People',['users','growth','engagement','leagues']],['App',['usage','games','sponsors']],['Problems',['removals','errors','health']],['Manage',['announce','tools']]];
-const ADM_DESC={overview:'Big numbers and alerts',weekly:'Last 7 days in one page',users:'Everyone who signed up',growth:'Sign-ups, retention, funnel',engagement:'Who plays what, busy times',leagues:'League health and drafts',usage:'Time spent per tab',games:'Scores and schedule',sponsors:'Videos, tokens, rewards',errors:'App crashes and bugs',removals:'Player removal requests',health:'Missing scores and stats',announce:'Banner for all users',tools:'Admin accounts, resets'};
+  ['weekly','Weekly report','M8 2v4M16 2v4M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],['controls','Admin controls','M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4'],['tools','Accounts & tools','M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z']];
+const ADM_GROUPS=[['Dashboard',['overview','weekly']],['People',['users','growth','engagement','leagues']],['App',['usage','games','sponsors']],['Problems',['removals','errors','health']],['Manage',['controls','announce','tools']]];
+const ADM_DESC={overview:'Big numbers and alerts',weekly:'Last 7 days in one page',users:'Everyone who signed up',growth:'Sign-ups, retention, funnel',engagement:'Who plays what, busy times',leagues:'League health and drafts',usage:'Time spent per tab',games:'Scores and schedule',sponsors:'Videos, tokens, rewards',errors:'App crashes and bugs',removals:'Player removal requests',health:'Missing scores and stats',announce:'Banner for all users',controls:'Bans, appeals, gifts, cards',tools:'Admin accounts, resets'};
 const ADM_MAIN=['overview','users','usage','errors'];
 const admIco=(d,c='')=>`<svg viewBox="0 0 24 24" class="${c}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const admAgo=t=>{if(!t)return'never';const m=Math.round((Date.now()-new Date(t))/6e4);if(m<1)return'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<24)return h+(h===1?' hour ago':' hours ago');const d=Math.round(h/24);return d<31?d+(d===1?' day ago':' days ago'):adWhen(t).split(',')[0]};
@@ -8117,7 +8165,7 @@ function admDonut(parts){const tot=parts.reduce((a,p)=>a+p[1],0)||1,R=52,C=2*Mat
 function admHTML(){
   if(DASH.use===null&&!DASH.loading)dashLoad();else if(!ADMR.busy&&Date.now()-ADMR.at>60000)setTimeout(admRefresh,0);
   const P=UI.admp||'overview',loading=AD.rows===null||DASH.use===null;
-  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',removals:'Removals',announce:'Announce',weekly:'Weekly',tools:'Tools'};
+  const SH={usage:'Usage',overview:'Home',growth:'Growth',users:'Users',engagement:'Activity',sponsors:'Tokens',games:'Games',leagues:'Leagues',health:'Health',errors:'Errors',removals:'Removals',announce:'Announce',weekly:'Weekly',controls:'Controls',tools:'Tools'};
   /* v290: sidebar grouped into sections, problem counts as badges, phones get 4 main tabs + a More sheet with every page */
   const NV=k=>ADM_NAV.find(x=>x[0]===k);let BDG={};
   const grpOf=k=>(ADM_GROUPS.find(g=>g[1].includes(k))||['',[]])[0];
@@ -8190,6 +8238,7 @@ function admHTML(){
       <div class="adm-card"><div class="adm-ch"><h3>Share of time</h3></div>${admDonut(Object.entries(grp).sort((a,b)=>b[1]-a[1]).map(([g,v])=>[g,Math.round(v/60),cols[g]]))}<p class="adm-mut" style="margin:10px 0 0;font-size:12px">Center number is total minutes.</p></div>
       <div class="adm-card adm-span3"><div class="adm-ch"><h3>Every tab</h3>${sel}</div><div class="adm-tw"><table class="adm-t"><thead><tr><th>Tab</th><th class="n">Time</th><th class="n">Share</th><th class="n">Opens</th><th class="n adm-hs">Avg per open</th><th class="n adm-hs">People</th></tr></thead><tbody>
       ${T.map(x=>`<tr><td><b>${esc(x.n)}</b>${x.mg?' <span class="adm-pill g">Minigame</span>':''}</td><td class="n"><b>${fmtDur(x.t)}</b></td><td class="n">${Math.round(x.t/tot*100)}%</td><td class="n">${x.c}</td><td class="n adm-hs">${fmtDur(x.c?x.t/x.c:0)}</td><td class="n adm-hs">${x.u}</td></tr>`).join('')||'<tr><td colspan="6" class="adm-mut">No tab data yet. It starts collecting the day this ships.</td></tr>'}</tbody></table></div></div></div>`}
+  else if(P==='controls')body=ctlHTML();
   else if(P==='users')body=title('Users','Everyone with an account. Tap a row to open their account.')+usersTable();
   else if(P==='engagement')body=title('Engagement','Time spent and visits. Time counts only while the app is open and in use.')+`<div class="adm-kpis">${kpi('M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z','#F26B3A','Total time',fmtDur(K.time),dl(K.time,D.prev.time),D.time)}${kpi('M3 12h18','#5B5FEF','Time per person / day',fmtDur(K.perUserDay),'',D.time)}${kpi('M5 12h14M12 5l7 7-7 7','#22B07D','Visits',K.ses.toLocaleString(),dl(K.ses,D.prev.ses),D.ses)}${kpi('M12 7v5','#E0455B','Avg visit',fmtDur(K.perSes),'',D.ses)}</div>
     <div class="adm-grid"><div class="adm-card adm-span2"><div class="adm-ch"><h3>Minutes on the app</h3>${sel}</div>${admBars(D.days,D.time.map(x=>Math.round(x/60)),{c:'#5B5FEF',label:'Minutes per day'})}</div>
@@ -8288,6 +8337,83 @@ function admHeat(hr){const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mx=M
 function admAlerts(X){const a=[];if(X.health.noScore.length)a.push(['r',`${X.health.noScore.length} played games have no score`,'health']);if(X.health.gaps.length)a.push(['o',`${X.health.gaps.reduce((t,x)=>t+x.miss.length,0)} scored games have no player stats yet`,'health']);
   const e7=X.errs.filter(e=>Date.now()-new Date(e.t)<7*864e5).length;if(e7)a.push(['r',`${e7} app errors in the last week`,'errors']);const st=X.lg.filter(x=>x.health==='Stuck').length;if(st)a.push(['o',`${st} leagues are stuck before their draft`,'leagues']);
   return a.length?`<div class="adm-alerts">${a.map(([c,t,p])=>`<button class="adm-alert ${c}" data-admp="${p}">${admIco('M12 8v4M12 16h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z')}<span>${t}</span><b>View →</b></button>`).join('')}</div>`:''}
+/* ---------- Admin controls (v382, owner): ban with a message, appeals, and gift / add / remove cards, packs, items and tokens on any account ----------
+   Admins can write every picks doc (is_admin() policy). Cards are removed by setting that rarity to 0 (merges can't delete keys); tokens are
+   given or taken through inv.dup (it counts into the balance and the earned total); gift packs go in inv.fr.gp (opened ones in inv.fr.gpo).
+   Applies to the app you are in (football or basketball); the other app has its own data. */
+const CTL={q:'',uid:'',cq:'',card:'',cr:'e',pk:'player',it:'',tk:'',bm:''};
+const ctlName=u=>{const r=(AD.rows||[]).find(x=>x.uid===u),p=S.profiles[u]||(r&&r.p)||{};return p.name||(r&&r.email)||'Account'};
+const ctlCardRes=q=>{q=nmNorm(q);if(q.length<2)return[];const out=[];
+  for(const p of players()){if(p.sample||/x$/.test(p.key))continue;if(nmNorm(p.name+' '+p.school).includes(q)){out.push({id:'pc:'+p.key,n:p.name,s:posOf(p)+' · '+p.school});if(out.length>=8)return out}}
+  for(const t of Object.keys(wpTeams())){if(nmNorm(t).includes(q)){out.push({id:'tc:'+t,n:t,s:'Team card'});if(out.length>=10)break}}return out};
+const ctlResHTML=()=>ctlCardRes(CTL.cq).map(x=>`<button type="button" class="adm-btn" style="justify-content:flex-start;text-align:left" data-ctl="pick" data-id="${esc(x.id)}"><b>${esc(x.n)}</b>&nbsp;<span class="adm-mut">${esc(x.s)}</span></button>`).join('')||(CTL.cq.length>1?'<p class="adm-mut">No matches.</p>':'');
+function ctlHTML(){
+  const rows=AD.rows;if(rows===null)return '<div class="adm-ph"><div><h1>Admin controls</h1><p>Loading accounts…</p></div></div>';
+  const inp='style="padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit;min-width:0"';
+  const banned=Object.entries(S.picks||{}).filter(([u,p])=>p&&p.ban).map(([u,p])=>({u,b:p.ban,a:p.appeal}));
+  const appeals=banned.filter(x=>x.a&&x.a.st==='open');
+  const bn=banned.length?banned.map(x=>`<tr><td><b>${esc(ctlName(x.u))}</b></td><td class="adm-mut">${esc(x.b.m||'No message')}</td><td>${x.a?(x.a.st==='open'?'<span class="adm-pill r">Appeal waiting</span>':'<span class="adm-pill x">Appeal denied</span>'):'<span class="adm-mut">No appeal</span>'}</td><td class="n"><button class="adm-btn" data-ctl="unban" data-id="${esc(x.u)}">Lift ban</button></td></tr>
+      ${x.a&&x.a.st==='open'?`<tr><td colspan="4" style="background:#FAFBFE"><div class="adm-mut" style="margin-bottom:6px">Appeal ${admAgo(x.a.at)}:</div><div style="margin-bottom:8px;overflow-wrap:anywhere">${esc(x.a.t||'')}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-r-${esc(x.u)}" ${inp} placeholder="Reply (shown to them if denied)" maxlength="200" style="flex:1;min-width:160px;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit"><button class="adm-btn" data-ctl="approve" data-id="${esc(x.u)}">Approve and lift ban</button><button class="adm-btn" data-ctl="deny" data-id="${esc(x.u)}">Deny</button></div></td></tr>`:''}`).join('')
+    :'<tr><td colspan="4" class="adm-mut">Nobody is banned.</td></tr>';
+  const q=nmNorm(CTL.q),list=rows.filter(r=>!q||nmNorm(((r.p&&r.p.name)||'')+' '+(r.email||'')+' '+((r.p&&r.p.school)||'')).includes(q)).slice(0,8);
+  const sel=CTL.uid&&rows.find(r=>r.uid===CTL.uid);
+  let acct='';
+  if(sel){const u=sel.uid,v=invOf(u),own=cardsOf(u),isB=!!((S.picks[u]||{}).ban),b=(S.picks[u]||{}).ban||{};
+    const cardRows=Object.keys(own).map(id=>({id,rs:RAR_ORD.concat(['x']).filter((r,i,a)=>a.indexOf(r)===i&&own[id][r])})).filter(x=>x.rs.length).sort((a,b)=>cardInfo(a.id).name.localeCompare(cardInfo(b.id).name));
+    const gp=giftPacks(u),pkOpts=Object.keys(PACKS).map(k=>`<option value="${k}" ${CTL.pk===k?'selected':''}>${esc(PACKS[k].n)} (${PACKS[k].c})</option>`).join('');
+    const itOpts=ITEMS.filter(x=>!x.ex).map(x=>`<option value="${esc(x.id)}" ${CTL.it===x.id?'selected':''}>${esc(x.n)} · ${RAR[x.r].n}</option>`).join('');
+    const it=v.it||{},myIt=Object.keys(it).filter(k=>+it[k]>0&&ITEM[k]);
+    acct=`<div class="adm-card" style="margin-top:16px"><div class="adm-ch"><h3>${esc(ctlName(u))}${sel.is_admin?' <span class="adm-pill b">Admin</span>':''}</h3><span class="adm-mut">${esc(sel.email||'')} · ${bank(u).toLocaleString()} tokens</span></div>
+      <h4 style="margin:6px 0">Ban</h4>
+      ${isB?`<p><span class="adm-pill r">Banned</span> <span class="adm-mut">${esc(b.m||'No message')}</span></p><button class="adm-btn" data-ctl="unban" data-id="${esc(u)}">Lift ban</button>`
+        :sel.is_admin||u===ME.uid?'<p class="adm-mut">Admin accounts can’t be banned here.</p>'
+        :`<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-bm" ${inp} style="flex:1;min-width:200px;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit" maxlength="200" placeholder="Message they will see (the reason)" value="${esc(CTL.bm)}"><button class="adm-btn" data-ctl="ban" data-id="${esc(u)}">Ban account</button></div><p class="adm-mut" style="font-size:12px;margin:6px 0 0">They get a full-screen ban notice with your message and can send one appeal.</p>`}
+      <h4 style="margin:16px 0 6px">Tokens</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-tk" type="number" min="1" ${inp} placeholder="Amount" value="${esc(CTL.tk)}" style="width:110px;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit"><button class="adm-btn" data-ctl="tok" data-d="1" data-id="${esc(u)}">Give tokens</button><button class="adm-btn" data-ctl="tok" data-d="-1" data-id="${esc(u)}">Take tokens</button></div>
+      <h4 style="margin:16px 0 6px">Cards in their locker (${cardRows.length})</h4>
+      <div style="max-height:260px;overflow:auto;border:1px solid #ECEEF4;border-radius:10px"><table class="adm-t"><tbody>${cardRows.map(x=>`<tr><td><b>${esc(cardInfo(x.id).name)}</b> <span class="adm-mut">${esc(cardInfo(x.id).sub||'')}</span></td><td class="n">${x.rs.map(r=>`<button class="adm-btn" style="color:${RAR[r].c}" data-ctl="cardrm" data-id="${esc(u)}" data-c="${esc(x.id)}" data-r="${r}" title="Remove this card">${RAR[r].n} ✕</button>`).join(' ')}</td></tr>`).join('')||'<tr><td class="adm-mut">No cards.</td></tr>'}</tbody></table></div>
+      <h4 style="margin:16px 0 6px">Give a card</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-cq" type="search" ${inp} placeholder="Search a player or school" value="${esc(CTL.cq)}" style="flex:1;min-width:180px;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit"><select id="ctl-cr" ${inp}>${['c','u','r','e','l','m'].map(r=>`<option value="${r}" ${CTL.cr===r?'selected':''}>${RAR[r].n}</option>`).join('')}</select></div>
+      <div id="ctl-res" style="display:flex;flex-direction:column;gap:6px;margin:8px 0">${ctlResHTML()}</div>
+      ${CTL.card?`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span>Selected: <b>${esc(cardInfo(CTL.card).name)}</b> · ${RAR[CTL.cr].n}</span><button class="adm-btn" data-ctl="cardadd" data-id="${esc(u)}">Give this card</button></div>`:''}
+      <h4 style="margin:16px 0 6px">Packs</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="ctl-pk" ${inp}>${pkOpts}</select><button class="adm-btn" data-ctl="pack" data-id="${esc(u)}">Gift this pack</button>${v.sp2?`<button class="adm-btn" data-ctl="wpreset" data-id="${esc(u)}">Let them open the Welcome pack again</button>`:''}</div>
+      ${gp.length?`<p class="adm-mut" style="margin:8px 0 4px">Unopened gift packs:</p>${gp.map(g=>`<div style="display:flex;gap:8px;align-items:center;margin:4px 0"><span>${esc(PACKS[g.type].n)}</span><button class="adm-btn" data-ctl="packrm" data-id="${esc(u)}" data-g="${esc(g.id)}">Take back</button></div>`).join('')}`:''}
+      <h4 style="margin:16px 0 6px">Items</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="ctl-it" ${inp} style="max-width:260px">${itOpts}</select><button class="adm-btn" data-ctl="item" data-d="1" data-id="${esc(u)}">Give item</button><button class="adm-btn" data-ctl="item" data-d="-1" data-id="${esc(u)}">Take one</button></div>
+      ${myIt.length?`<p class="adm-mut" style="margin:8px 0 0;font-size:12px">Has: ${myIt.map(k=>esc(ITEM[k].n)+' ×'+it[k]).join(', ')}</p>`:''}</div>`}
+  return `<div class="adm-ph"><div><h1>Admin controls</h1><p>Ban accounts, answer appeals, and gift or take back cards, packs, items and tokens. Works on this app’s data (${FG_SPORT==='bb'?'basketball':'football'}).</p></div></div>
+    <div class="adm-card"><div class="adm-ch"><h3>Banned accounts (${banned.length})</h3>${appeals.length?`<span class="adm-pill r">${appeals.length} appeal${appeals.length>1?'s':''}</span>`:''}</div><div class="adm-tw"><table class="adm-t"><tbody>${bn}</tbody></table></div></div>
+    <div class="adm-card" style="margin-top:16px"><div class="adm-ch"><h3>Pick an account</h3></div><input id="ctl-q" type="search" ${inp} placeholder="Search name, email or school" value="${esc(CTL.q)}" style="width:100%;padding:9px 11px;border:1px solid #E4E7EF;border-radius:10px;font:inherit">
+      <div id="ctl-acc" style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${list.map(r=>`<button class="adm-btn" style="justify-content:flex-start;text-align:left" data-ctl="sel" data-id="${esc(r.uid)}"><b>${esc((r.p&&r.p.name)||r.email||'Account')}</b>&nbsp;<span class="adm-mut">${esc(r.email||'')}${r.p&&r.p.school?' · '+esc(r.p.school):''}</span></button>`).join('')||'<p class="adm-mut">No matches.</p>'}</div></div>${acct}`}
+async function ctlSave(u,patch,msg,top){const v=invOf(u);
+  const body=top||{inv:patch},ok=await act(()=>upsert('picks/'+u,body),msg);
+  if(ok){const cur=S.picks[u]||{};S.picks[u]=top?Object.assign({},cur,top):Object.assign({},cur,{inv:Object.assign({},v,patch)});_gIn&&(_gIn.at=0);try{banCheck()}catch(_){}}render()}
+document.addEventListener('input',e=>{const t=e.target;if(!ME.admin)return;
+  if(t.id==='ctl-q'){CTL.q=t.value;const h=document.getElementById('ctl-acc');if(h){const q=nmNorm(CTL.q);h.innerHTML=(AD.rows||[]).filter(r=>!q||nmNorm(((r.p&&r.p.name)||'')+' '+(r.email||'')+' '+((r.p&&r.p.school)||'')).includes(q)).slice(0,8).map(r=>`<button class="adm-btn" style="justify-content:flex-start;text-align:left" data-ctl="sel" data-id="${esc(r.uid)}"><b>${esc((r.p&&r.p.name)||r.email||'Account')}</b>&nbsp;<span class="adm-mut">${esc(r.email||'')}${r.p&&r.p.school?' · '+esc(r.p.school):''}</span></button>`).join('')||'<p class="adm-mut">No matches.</p>'}}
+  else if(t.id==='ctl-cq'){CTL.cq=t.value;const h=document.getElementById('ctl-res');if(h)h.innerHTML=ctlResHTML()}
+  else if(t.id==='ctl-bm')CTL.bm=t.value;else if(t.id==='ctl-tk')CTL.tk=t.value});
+document.addEventListener('change',e=>{const t=e.target;if(!ME.admin)return;if(t.id==='ctl-cr'){CTL.cr=t.value;render()}else if(t.id==='ctl-pk')CTL.pk=t.value;else if(t.id==='ctl-it')CTL.it=t.value});
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('[data-ctl]');if(!t||!ME.admin)return;
+  const a=t.dataset.ctl,u=t.dataset.id,v=u?invOf(u):{};
+  if(a==='sel'){CTL.uid=u;CTL.card='';CTL.cq='';CTL.bm='';render();return}
+  if(a==='pick'){CTL.card=u;render();return}
+  if(a==='ban'){const m=(($('#ctl-bm')||{}).value||'').trim();if(!confirm('Ban '+ctlName(u)+'? They will see a full-screen ban notice'+(m?' with your message':'')+'.'))return;
+    await ctlSave(u,null,ctlName(u)+' banned',{ban:{m:m.slice(0,200),at:NOW(),by:ME.uid},appeal:null});return}
+  if(a==='unban'){if(!confirm('Lift the ban on '+ctlName(u)+'?'))return;await ctlSave(u,null,'Ban lifted',{ban:null,appeal:null});return}
+  if(a==='approve'){await ctlSave(u,null,'Appeal approved, ban lifted',{ban:null,appeal:null});return}
+  if(a==='deny'){const r=((document.getElementById('ctl-r-'+u)||{}).value||'').trim().slice(0,200),ap=Object.assign({},((S.picks[u]||{}).appeal),{st:'denied',r,rat:NOW()});await ctlSave(u,null,'Appeal denied',{appeal:ap});return}
+  if(a==='tok'){const n=Math.floor(+(($('#ctl-tk')||{}).value||0)),d=+t.dataset.d;if(!(n>=1)){say('Enter an amount first.');return}
+    await ctlSave(u,{dup:(+v.dup||0)+d*n},(d>0?'Gave ':'Took ')+n+' tokens');CTL.tk='';return}
+  if(a==='cardadd'){if(!CTL.card)return;const cards=Object.assign({},v.cards),id=CTL.card,cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur[CTL.cr]=1;cards[id]=cur;
+    await ctlSave(u,{cards},'Card given');return}
+  if(a==='cardrm'){const id=t.dataset.c,r=t.dataset.r;if(!confirm('Remove the '+RAR[r].n+' '+cardInfo(id).name+' card from '+ctlName(u)+'?'))return;
+    const cards=Object.assign({},v.cards),cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur[r]=0;cards[id]=cur;await ctlSave(u,{cards},'Card removed');return}
+  if(a==='pack'){const k=CTL.pk,id='ad'+Date.now().toString(36);if(!PACKS[k])return;const fr=Object.assign({},v.fr,{gp:Object.assign({},(v.fr||{}).gp,{[id]:{t:k,m:'From the Varsity team'}})});
+    await ctlSave(u,{fr},PACKS[k].n+' gifted');return}
+  if(a==='packrm'){const g=t.dataset.g,fr=Object.assign({},v.fr,{gpo:Object.assign({},(v.fr||{}).gpo,{[g]:1})});await ctlSave(u,{fr},'Pack taken back');return}
+  if(a==='wpreset'){await ctlSave(u,{sp2:0},'They can open the Welcome pack again');return}
+  if(a==='item'){const id=CTL.it||(($('#ctl-it')||{}).value),d=+t.dataset.d;if(!id||!ITEM[id])return;const it=Object.assign({},v.it);it[id]=Math.max(0,(+it[id]||0)+d);await ctlSave(u,{it},d>0?'Item given':'Item taken')}});
 function admPages(P,D,K,X,kpi,title,sel,hbars,dl){
   const pc=x=>x==null?'—':Math.round(x*100)+'%';
   if(P==='growth'){const f0=X.funnel[0][1]||1;
@@ -8566,7 +8692,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{profileFix()}catch(_){}if(window.__pfx===1&&!(myProfile()||{}).fx)return;try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{profileFix()}catch(_){}if(window.__pfx===1&&!(myProfile()||{}).fx)return;try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}try{spMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
