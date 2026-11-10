@@ -2816,7 +2816,7 @@ function authHTML(){
     <form id="au-admin" class="au-form">
       ${live?`<p class="muted">Signed in as ${esc(ME.email||'')}.</p>`:`<label class="fld"><span>Your email</span><input id="aa-email" type="email" autocomplete="email" required></label>
       <label class="fld"><span>Password</span><input id="aa-pass" type="password" autocomplete="current-password" required></label>`}
-      <label class="fld"><span>Admin PIN</span><input id="aa-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="## - ## - ####" required></label>
+      <label class="fld"><span>Admin PIN</span><input id="aa-pin" type="text" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="## - ## - ####" required></label>
       ${AUTH.err?`<p class="au-err" role="alert">${esc(AUTH.err)}</p>`:''}${AUTH.msg?`<p class="au-ok" role="status">${esc(AUTH.msg)}</p>`:''}
       <button class="btn" type="submit" ${AUTH.busy?'disabled':''}>${AUTH.busy?'One moment…':'Continue'}</button>
     </form>
@@ -2835,7 +2835,7 @@ function authHTML(){
       ${AUTH.err?`<p class="au-err" role="alert">${esc(AUTH.err)}</p>`:''}${AUTH.msg?`<p class="au-ok" role="status">${esc(AUTH.msg)}</p>`:''}
       <button class="btn" type="submit" ${AUTH.busy?'disabled':''}>${AUTH.busy?'One moment…':rs?'Send reset link':up?'Create account':'Sign in'}</button>
     </form>
-    <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button>'}<a class="link" href="#privacy" data-priv>Privacy</a></div>
+    <div class="au-links">${rs?'<button class="link" data-au="in">Back to sign in</button>':'<button class="link" data-au="reset">Forgot password?</button><button class="link" data-au="admin">Admin sign in</button>'}<a class="link" href="#privacy" data-priv>Privacy</a></div>
   </div>`;
 }
 /* v322 (owner): no "couldn't open sign-in" popups. If the login library never loaded, quietly try to load it again and reload once it is there. */
@@ -2852,7 +2852,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest&&e.target.closest('[data-au]');if(!b)return;e.preventDefault();
   const v=b.dataset.au;
   if(v==='browse'){if(ME.mode==='guest'){AUTH.mode='in';openAuth();return}try{localStorage.setItem('gf-browse','1')}catch(_){}closeGate();render();return}
-  AUTH.mode=v;AUTH.err='';AUTH.msg='';openAuth();
+  AUTH.mode=v;AUTH.err='';AUTH.msg='';if(v==='admin'){AUTH.step=1;AUTH.pin=''}openAuth();
 });
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='au-admin')return;e.preventDefault();e.stopImmediatePropagation();
@@ -2879,6 +2879,12 @@ document.addEventListener('click',async e=>{
   AUTH.busy=false;openAuth();
 });
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='au-age')AUTH.age=e.target.checked});
+/* v390 (owner): codes put their own dashes in as you type. Admin PIN: ## - ## - #### (digits only). Invite codes (league, Pick 'em league): ABC-1234 (letters and digits, upper case). */
+document.addEventListener('input',e=>{const t=e.target,id=t&&t.id;if(!id)return;let v;
+  if(id==='aa-pin'||id==='ad-pin'){const d=t.value.replace(/\D/g,'').slice(0,8);v=d.slice(0,2)+(d.length>2?' - '+d.slice(2,4):'')+(d.length>4?' - '+d.slice(4):'')}
+  else if(id==='join-code'||id==='pkl-code'){const a=t.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,7);v=a.slice(0,3)+(a.length>3?'-'+a.slice(3):'')}
+  else return;
+  if(t.value!==v){t.value=v;try{t.setSelectionRange(v.length,v.length)}catch(_){}}});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='au-form')return;e.preventDefault();e.stopImmediatePropagation();
   const email=$('#au-email').value.trim(),pw=$('#au-pass')?$('#au-pass').value:'';
@@ -3000,7 +3006,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v389 · Nov 9';
+const APP_BUILD='v390 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -8609,7 +8615,7 @@ function viewAdmin(){
   if(ME.mode==='demo'&&ME.admin&&AD.rows===null)AD.rows=[];
   if(!ME.uid||(ME.mode!=='live'&&ME.mode!=='demo'))return `<div class="head"><h2>Admin systems</h2><p>Sign in, then use Settings → Admin sign in.</p></div>`;
   if(!ME.admin)return `<div class="head"><h2>Admin systems</h2><p>Enter your admin account and PIN to unlock the admin tools.</p></div>
-    <section class="card"><form id="ad-unlock" class="au-form"><label class="fld"><span>Admin PIN</span><input id="ad-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="## - ## - ####" required></label><p class="au-err" id="ad-err" role="alert" hidden></p><button class="btn" type="submit">Continue</button></form></section>`;
+    <section class="card"><form id="ad-unlock" class="au-form"><label class="fld"><span>Admin PIN</span><input id="ad-pin" type="text" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="## - ## - ####" required></label><p class="au-err" id="ad-err" role="alert" hidden></p><button class="btn" type="submit">Continue</button></form></section>`;
   if(AD.rows===null)adLoad();
   const adTabs=`<button class="btn sm" data-adtab="dash">← Back to dashboard</button>`;
   if((UI.adtab||'dash')==='dash')return admHTML();
@@ -8763,7 +8769,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{if(ME.admin&&AD.rows===null&&!AD.loading)adLoad()}catch(_){}try{profileFix()}catch(_){}if(window.__pfx===1&&!(myProfile()||{}).fx)return;try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{anPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}try{spMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{if(ME.admin&&AD.rows===null&&!AD.loading)adLoad();if(ME.admin&&DASH.use===null&&!DASH.loading)dashLoad()}catch(_){}try{profileFix()}catch(_){}if(window.__pfx===1&&!(myProfile()||{}).fx)return;try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{anPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}try{spMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;

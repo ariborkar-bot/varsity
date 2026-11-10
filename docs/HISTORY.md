@@ -275,3 +275,7 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v389 (Nov 9): Admin controls: remove several cards at once
 - Each card row in "Cards in their locker" has a checkbox per rarity (`data-ctl=ck`, `CTL.sel` = {'card id|rarity':1}), plus Select all / Clear / "Remove selected (N)" (`ckall`, `ckclr`, `ckrm`). One confirm, one save, one notice ("We removed N cards from your locker") if a message is typed. The old one-at-a-time ✕ buttons are gone (`cardrm` handler left unused).
+
+## v390 (Nov 9): Admin sign in on the normal sign-in screen; codes add their own dashes
+- The normal Sign in / Create account screen has an "Admin sign in" link (`data-au="admin"`, resets `AUTH.step=1`) next to Forgot password. After the admin unlock the app reloads onto `#admin`, and an unlocked admin's account list (`adLoad`) and dashboards (`dashLoad`) are fetched in `touch()` straight away so they are ready.
+- Codes format themselves while you type (one `input` listener after the `au-age` change listener): admin PIN fields `aa-pin` / `ad-pin` become `## - ## - ####` (digits only; they are plain text now, not password, so the dashes show), league invite `join-code` and Pick 'em league `pkl-code` become `ABC-1234` (upper case). Ring Chaser party codes have no dash. Add new code inputs to that listener.
