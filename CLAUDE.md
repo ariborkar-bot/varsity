@@ -9,7 +9,16 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - `stats.js`: football's MaxPreps box-score stats (`window.MAXPREPS`, about 1 MB), moved out of index.html in v364. **Only open or read it when the owner explicitly asks about player stats/MaxPreps data**; app changes never need it. `tools/fb_boxscores/merge.py` writes it. Basketball still bakes its own stats into basketball.html.
 - `games.js`, `logos.js` (school logos), `sw.js` (service worker). **Bump `const CACHE='varsity-vNN'` in `sw.js` and `APP_BUILD` in `index.html` on every change.** Another contributor also pushes, so `git pull --rebase` before pushing; on a conflict keep both people's work and take max+1 for the version.
 - Never commit conflict markers: after any rebase run `grep -c "<<<<<<<" basketball.html tools/make_basketball.py sw.js index.html`.
-- Tools: `python3 tools/preview/check_syntax.py` (syntax-checks every inline script) and `python3 tools/preview/make_previews.py [out_dir]` (builds the two single-file demo previews).
+- Tools: `python3 tools/preview/check_syntax.py` (syntax-checks every inline script) and `python3 tools/preview/make_previews.py [out_dir]` (builds the two single-file demo previews). `python3 tools/preview/make_newuser_preview.py [out_dir]` builds `varsity-*-newuser.html`: the real sign-up flow with a fake in-memory Supabase ("Fill demo answers" button), works inside the claude.ai file viewer's sandbox. `tools/cleanup/` (v365): dead-CSS/JS finders and a 130-screen pixel-diff harness (`shots.py` + `diff.py`) for checking big refactors.
+
+## Accounts, sign-in and profiles (Nov 9, v357-v379)
+- Sign-in is required (signed-out visitors only get the sign-in screen). Right after it, the profile step is required too (`mustSetup()`, `setupCheck()`, no Not now): Player or Fan → players pick a main sport (`NM_SP`, football QB/RB/WR/TE/DL/LB/DB/K, basketball PG/SG/SF/PF/C) → name, school (fans: school they root for), position. Saved profiles carry `ob:2`, `sport`, `posLabel`.
+- Everyone signed in before 2026-11-09 22:20 UTC is signed out once per device (`REAUTH_AT`) and redoes the step.
+- A player profile IS its box-score player when name+school match (`mpFind()`: exact, else edit distance ≤1, ≤2 for long names, same school; the name is corrected on save). No duplicate empty entry; the Me tab shows their stats.
+- The app opens on a player's main sport once per visit (`landCheck()`).
+- One-off account fixes live in the app and run when that person next opens it: `CARD_FIX` (remove/restore cards, new welcome pack), `PROFILE_FIX` (put an account on a player profile, e.g. Isaac Smedra), `REDO` (force sign-out + profile redo). Match by profile name (or email for PROFILE_FIX). `ODDS_PIN` sets a game's win chance (Carlsbad 80% vs Santa Fe Christian, Nov 13).
+- Tokens: start 200 (`TOK0`), starter rewards 10 each (`RW_PAY`). Token leaderboard ranks by lifetime tokens earned (`earned()`), shows current balance too. Packs have no guaranteed rarities (v380). Pick Your Team pack = 1 card from a team you choose, Pro odds, 1,100 tokens.
+- Another contributor (maybe another Claude chat) pushes often (v382-v387: new welcome pack with team choice + walkout + 10 cards, Admin controls page, God Picks back in the Shop). Always `git pull --rebase` first and read the newest HISTORY.md notes.
 
 ## Standing preferences from the owner
 - After each change: commit and push to `main`. Do NOT send preview files after app changes (owner, Nov 9 2026): only send them (`make_previews.py`, then SendUserFile both `varsity-basketball.html` and `varsity-football.html`) when the owner asks for them.
@@ -44,6 +53,7 @@ Use Claude in Chrome. `javascript_tool` output is cut off at about 1 KB and bloc
 
 
 ## Marketing
+- Set 3 (Nov 9): 10 videos planned by a strategy agent and built by two producer agents. Plan, data, build files and two independent reviews are on branch `marketing-videos` in `tools/marketing/set3/` (read its README). The rendered drafts were sent to the owner but every video is marked FIX (phone-speaker audio, wrong callouts, banned wording on screen, safe area, short end cards). The owner stopped the fix pass; don't restart it unless asked. Real trending songs can't be embedded: ship each video with original music plus a `_nomusic` copy and name the trending sound to add in TikTok/IG.
 - Six TikTok/Reels videos (Nov 5) and the tools that made them are on branch `marketing-videos` (`tools/marketing/`, read its README). Player names in videos 1-6 are made up; video 7 ("6 ways to play", Nov 6) uses real players at the owner's request (Darian Webb, Hezekiah Manuel, top 5 Card Draw hand); the owner was told California needs consent (a parent's for minors) to use names in ads. Music is synthesized.
 
 
@@ -60,7 +70,7 @@ Use Claude in Chrome. `javascript_tool` output is cut off at about 1 KB and bloc
 - Field Goal / Hoops: the daily course must be identical for everyone (everything random is seeded per goal). Pack card backs never glow; Epic+ cards get the full-screen reveal.
 - `games.js` was filled from MaxPreps schedule pages on Nov 8 (v335); `Castle` = `Castle Park` in team_aliases.txt is wrong for MaxPreps' 'Castle'.
 
-## Things only the owner can do (still open as of Nov 8)
+## Things only the owner can do (still open as of Nov 9)
 - Supabase SQL editor: run `tools/sql/push.sql`, `owner_brief.sql`, `league_cap_32.sql`, `ring_chaser_online.sql`, `mocks_policies.sql`.
 - GitHub secrets for the push sender: SUPABASE_URL, SUPABASE_SERVICE_KEY, VAPID_PRIVATE_KEY, then run the workflow once as a dry run.
 - Fill the `[contact email]` placeholder on the privacy page; allow host urdkamhsdjhzhrjwzyoq.supabase.co in claude.ai network settings (owner brief).
