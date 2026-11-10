@@ -1462,6 +1462,8 @@ select option{background:#0B1730;color:#EAF0F8}
 .lk-pack{display:flex;flex-direction:column;gap:8px;text-align:center}.lk-pack h3{margin:4px 0 0}.lk-pack .btn{width:100%}
 .lk-art{height:120px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font:900 italic 3rem var(--f-display,inherit);line-height:1;color:#fff;text-shadow:0 4px 14px rgba(0,0,0,.5)}
 .lk-art small{font:800 .7rem var(--f-body,inherit);letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.bh-host{height:min(60vh,430px);border-radius:16px;margin-bottom:8px;position:relative;overflow:hidden;background:radial-gradient(ellipse 75% 60% at 50% 45%,#5b7cff 0,#3346c8 40%,#1a1f6b 100%)}.bh-host canvas{width:100%;height:100%;display:block;cursor:grab}.bh-load{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:800;text-align:center;padding:16px}.ia-bh{display:inline-grid;place-items:center}.ia-bh img{display:block;box-shadow:0 0 0 2px rgba(10,14,30,.85)}
+.lk-gear .lk-art,.pko-pack.lk-gear .pko-pk{background:linear-gradient(135deg,#FF8A3D,#C2281E);color:#fff}
 .lk-rookie .lk-art{background:linear-gradient(135deg,#2F6BFF,#1C3E91)}.lk-player .lk-art{background:linear-gradient(135deg,#7A4DFF,#2A0E6B)}.lk-cards .lk-art,.pko-pack.lk-cards .pko-pk{background:linear-gradient(135deg,#19C2A0,#0B4F6C);color:#fff}
 .lk-champs .lk-art{background:radial-gradient(circle at 30% 25%,#FFF6C8,#F2BE2C 45%,#9C6F00);color:#2A1C00;text-shadow:none}
 .lk-odds{text-align:left;font-size:.85rem}.lk-odds summary{cursor:pointer;color:var(--muted)}.lk-odds ul{list-style:none;margin:6px 0;padding:0}.lk-odds li{display:flex;justify-content:space-between;padding:3px 0}
@@ -3032,7 +3034,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v399 · Nov 9';
+const APP_BUILD='v400 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4177,9 +4179,36 @@ const CREST_SHAPES={shield:'polygon(50% 0,100% 12%,100% 60%,50% 100%,0 60%,0 12%
   }
   for(const [shape,r] of Object.entries(SPECIAL))for(const pk of SP_PAL){const P=PALS.find(p=>p[0]===pk);add({id:`cr_${shape}_${pk}`,k:'crest',r,n:`${P[1]} ${shape} crest`,d:'Your team crest in league standings and matchups.',cr:[P[2],P[3],shape]})}
 })();
+/* v400 (owner, Nov 10): bobblehead gear. Everyone has the base bobblehead (Locker → Avatar, drawn by bh.js); these dress it and only drop from the Accessories pack.
+   bh = the look: c/c2 colours, d design (see bhPat), arm 'L' = one sleeve, txt = words on a back plate. Brand names are made up for Varsity (no real brands). */
+const BH_K=['bhSleeve','bhPlate'];
+(function(){const add=x=>ITEMS.push(Object.assign({sp:'fb'},x));
+  const COL=[['black','Black','#1b1d24'],['white','White','#f4f6fa'],['grey','Grey','#8d96a5'],['navy','Navy','#1c2c5e'],['red','Red','#d42a35'],['royal','Royal','#2456d6'],['gold','Gold','#f2b632'],['pink','Hot pink','#ff4f9a'],['volt','Volt','#c8f526'],['orange','Orange','#ff7a1f'],['purple','Purple','#6a35c9'],['teal','Teal','#12a5a0']];
+  COL.forEach(([k,n,c],i)=>{add({id:'bhs_'+k,k:'bhSleeve',r:i<6?'c':'u',n:`Tenfold ${n.toLowerCase()} sleeves`,d:`${n} arm sleeves on both arms.`,bh:{c,d:'solid'}});
+    add({id:'bhp_'+k,k:'bhPlate',r:i<6?'c':'u',n:`Ironside ${n.toLowerCase()} back plate`,d:`A ${n.toLowerCase()} back plate.`,bh:{c,d:'solid'}})});
+  for(const [k,n,c] of [['black','Black','#1b1d24'],['white','White','#f4f6fa'],['red','Red','#d42a35'],['volt','Volt','#c8f526']])add({id:'bhs1_'+k,k:'bhSleeve',r:'u',n:`Tenfold ${n.toLowerCase()} single sleeve`,d:`One ${n.toLowerCase()} sleeve, on the free arm.`,bh:{c,d:'solid',arm:'L'}});
+  const DS=[['stripe','striped','r',[['#f4f6fa','#d42a35','Red stripe'],['#1b1d24','#f2b632','Black and gold'],['#1c2c5e','#f4f6fa','Navy stripe'],['#2456d6','#ff7a1f','Royal and orange']]],
+    ['split','two-tone','r',[['#d42a35','#1b1d24','Red and black'],['#f4f6fa','#2456d6','White and royal'],['#6a35c9','#f2b632','Purple and gold']]],
+    ['camo','camo','r',[['#5b6b3a','#2a2f1c','Woodland'],['#9aa3b0','#3a4150','Snow']]],
+    ['digi','digital camo','e',[['#2456d6','#0d1b4d','Blue'],['#ff4f9a','#5a0f3a','Pink']]],
+    ['checker','checkered','e',[['#f4f6fa','#1b1d24','Race day'],['#f2b632','#1b1d24','Hornet']]],
+    ['bolt','lightning','e',[['#1b1d24','#ffe14d','Storm'],['#2456d6','#f4f6fa','Blue strike']]],
+    ['star','star','e',[['#1c2c5e','#f4f6fa','All-star'],['#d42a35','#f2b632','Captain']]],
+    ['flame','flame','l',[['#1b1d24','#ff5a1f','Inferno'],['#1c2c5e','#26d7ff','Blue fire']]],
+    ['drip','drip','l',[['#f4f6fa','#ff4f9a','Pink drip'],['#1b1d24','#f2b632','Gold drip']]],
+    ['ice','iced','l',[['#bfe9ff','#f4fbff','Frozen']]],
+    ['galaxy','galaxy','m',[['#1b0f3d','#b48cff','Galaxy']]],['gold','24K','m',[['#f2b632','#fff3b0','24K']]],['holo','holo','m',[['#b7c4ff','#ff9de6','Holo']]]];
+  for(const [d,dn,r,cs] of DS)cs.forEach(([c,c2,n],i)=>{const hi='lm'.includes(r);
+    add({id:`bhs_${d}${i}`,k:'bhSleeve',r,n:`${hi?'Kiln':'Halo'} ${n.toLowerCase()} sleeves`,d:`${dn[0].toUpperCase()+dn.slice(1)} arm sleeves.`,bh:{c,c2,d}});
+    add({id:`bhp_${d}${i}`,k:'bhPlate',r,n:`${hi?'Kiln':'Northfield'} ${n.toLowerCase()} back plate`,d:`A ${dn} back plate.`,bh:{c,c2,d}})});
+  for(const [k,txt,r,c,c2] of [['him','HIM','r','#1b1d24','#f4f6fa'],['dawg','DAWG','r','#d42a35','#f4f6fa'],['lock','LOCKDOWN','e','#1c2c5e','#f2b632'],['diff','BUILT DIFFERENT','e','#f4f6fa','#1b1d24'],['one','1 OF 1','l','#f2b632','#1b1d24'],['goat','G.O.A.T.','m','#1b1d24','#f2b632']])
+    add({id:'bhp_t_'+k,k:'bhPlate',r,n:`Northfield "${txt}" back plate`,d:`A back plate that says ${txt}.`,bh:{c,c2,d:'solid',txt}});
+})();
 const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
-const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','theme','coin','icon','share','walkup','crest','lineup','field','jersey'];
+const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','theme','coin','icon','share','walkup','crest','lineup','field','jersey','bhSleeve','bhPlate'];
 const PACKS={
+  /* v400 (owner): Accessories pack: 3 pieces of bobblehead gear (arm sleeves, back plates), nothing else */
+  gear:{n:'Accessories pack',c:3,tok:300,usd:'$2.99',odds:{c:40,u:30,r:18,e:8,l:3,m:1},g:'',gear:1},
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
   player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:''},
   /* v380 (owner): Pick Your Team pack: Pro pack odds, but you pick the team; the card is one of that team's players or its team card. v381: 1 card */
@@ -4446,7 +4475,8 @@ function cardInfo(id){if(id.startsWith('ac:')){const a=achInfo(id);return {team:
 function cardArt(id,r,s=54){if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
   return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${c.team?slogo(c.school,Math.round(s*.5)):av(c.name,c.school,Math.round(s*.46))}<i>${c.team?'TEAM':'PLAYER'}</i></span>`}
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
-function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
+function rollGear(r){let i=RAR_ORD.indexOf(r);for(;i>=0;i--){const pool=ITEMS.filter(x=>x.r===RAR_ORD[i]&&BH_K.includes(x.k));if(pool.length)return pool[fcRnd(pool.length)].id}return 'bhs_black'}
+function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)&&!BH_K.includes(x.k)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
   const P=use.length&&!(cosOnly&&cos.length)&&(!cos.length||fcRnd(100)<18)?use:cos;return P[fcRnd(P.length)].id}
 async function packOpen(type,how,day,team){
   const P=PACKS[type];if(!P)return;
@@ -4467,8 +4497,8 @@ async function packOpen(type,how,day,team){
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
     if(P.team){const cid=rollTeamCard(team);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(fcRnd(10000)<(ACH_CHANCE[type]||0)*100){const aid=rollAch();if(aid){const cur=Object.assign({},cards[aid]),isDup=!!cur.x;if(isDup)dup+=RAR.x.dup;else{cur.x=1;cards[aid]=cur;gotCard=true}got.push({card:aid,r:'x',dup:isDup});continue}}
-    if(!P.cos&&(P.cards||fcRnd(100)<CARD_CHANCE)){let cid=rollCard(r);if(P.cards)for(let k=0;!cid&&k<5;k++)cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
-    const id=rollItem(r,!!P.cos);
+    if(!P.cos&&!P.gear&&(P.cards||fcRnd(100)<CARD_CHANCE)){let cid=rollCard(r);if(P.cards)for(let k=0;!cid&&k<5;k++)cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
+    const id=P.gear?rollGear(r):rollItem(r,!!P.cos);
     const was=Math.max(+it[id]||0,invHas(ME.uid,id)),isDup=isCos(id)&&was>0;if(isDup)dup+=RAR[r].dup;else it[id]=(+it[id]||0)+1;got.push({id,r,dup:isDup})}
   const patch={it,n:(+v.n||0)+1};if(gotCard)patch.cards=cards;
   if(how==='tok')patch.sp=(+v.sp||0)+P.tok;
@@ -4665,7 +4695,39 @@ function packShow0(P,got){
   okB.onclick=close;o.addEventListener('click',e=>{if((e.target===o||e.target.classList.contains('pko-bg'))&&ripped&&!left())close()});
 }
 /* small picture of an item, for packs and the Locker */
+/* v400: patterns for bobblehead gear. One painter draws both the Locker tile pictures and the textures on the 3D figure (bh.js calls window.bhPat). */
+function bhPat(g,w,h,b,kind){const c=b.c||'#8d96a5',c2=b.c2||'#ffffff',d=b.d||'solid',pl=kind==='plate';let sd=7;const R=()=>(sd=(sd*16807)%2147483647)/2147483647;
+  g.fillStyle=c;g.fillRect(0,0,w,h);
+  if(d==='stripe'){g.fillStyle=c2;if(pl){g.fillRect(w*.34,0,w*.1,h);g.fillRect(w*.56,0,w*.1,h)}else{g.fillRect(0,h*.12,w,h*.1);g.fillRect(0,h*.28,w,h*.05);g.fillRect(0,h*.78,w,h*.1)}}
+  else if(d==='split'){g.fillStyle=c2;g.beginPath();if(pl){g.moveTo(w,0);g.lineTo(w,h);g.lineTo(0,h);g.closePath()}else g.rect(0,0,w,h*.5);g.fill()}
+  else if(d==='camo'){for(let i=0;i<70;i++){g.fillStyle=i%3?c2:i%2?'rgba(255,255,255,.18)':'rgba(0,0,0,.25)';g.beginPath();const x=R()*w,y=R()*h,r=w*(.05+R()*.1);for(let k=0;k<8;k++){const a=k/8*6.283,rr=r*(.6+R()*.7);g.lineTo(x+Math.cos(a)*rr*1.5,y+Math.sin(a)*rr*.8)}g.fill()}}
+  else if(d==='digi'){const q=w/16;for(let y=0;y<h;y+=q)for(let x=0;x<w;x+=q){const v=R();if(v<.3){g.fillStyle=c2;g.fillRect(x,y,q,q)}else if(v<.45){g.fillStyle='rgba(255,255,255,.22)';g.fillRect(x,y,q,q)}}}
+  else if(d==='checker'){const q=w/(pl?8:6);g.fillStyle=c2;for(let y=0,j=0;y<h;y+=q,j++)for(let x=0,i=0;x<w;x+=q,i++)if((i+j)%2)g.fillRect(x,y,q,q)}
+  else if(d==='bolt'){g.fillStyle=c2;for(const cx of pl?[.5]:[.25,.75]){g.save();g.translate(cx*w,h*.5);g.scale(w*(pl?.3:.2),h*.42);g.beginPath();g.moveTo(.25,-1);g.lineTo(-.6,.12);g.lineTo(-.05,.12);g.lineTo(-.3,1);g.lineTo(.6,-.2);g.lineTo(.05,-.2);g.closePath();g.fill();g.restore()}}
+  else if(d==='star'){g.fillStyle=c2;const st=(x,y,r)=>{g.beginPath();for(let i=0;i<10;i++){const a=-1.571+i*.6283,rr=i%2?r*.42:r;g.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}g.fill()};if(pl)st(w*.5,h*.52,h*.36);else for(let i=0;i<9;i++)st((i%3+.5)/3*w+(i%2?w*.08:0),(Math.floor(i/3)+.5)/3*h,w*.09)}
+  else if(d==='flame'){const gr=g.createLinearGradient(0,h,0,h*.2);gr.addColorStop(0,'#fff3a0');gr.addColorStop(.35,c2);gr.addColorStop(1,c2);g.fillStyle=gr;g.beginPath();g.moveTo(0,h);const n=pl?7:6;for(let i=0;i<n;i++){const x0=i/n*w,x1=(i+1)/n*w,t=h*(.25+R()*.35);g.quadraticCurveTo(x0+(x1-x0)*.1,h*.7,(x0+x1)/2,t);g.quadraticCurveTo(x1-(x1-x0)*.1,h*.7,x1,h*.86)}g.lineTo(w,h);g.fill()}
+  else if(d==='drip'){g.fillStyle=c2;g.fillRect(0,0,w,h*.16);const n=pl?9:7;for(let i=0;i<n;i++){const x=(i+.5)/n*w,l=h*(.25+R()*.5),r=w/n*.3;g.fillRect(x-r,0,r*2,l);g.beginPath();g.arc(x,l,r,0,6.3);g.fill()}}
+  else if(d==='ice'){g.strokeStyle=c2;g.lineWidth=Math.max(1,w/90);for(let i=0;i<26;i++){g.beginPath();let x=R()*w,y=R()*h;g.moveTo(x,y);for(let k=0;k<4;k++){x+=(R()-.5)*w*.3;y+=(R()-.5)*h*.3;g.lineTo(x,y)}g.stroke()}}
+  else if(d==='galaxy'){for(const col of [c2,'#4c8dff','#ff4fc8'])for(let i=0;i<4;i++){const x=R()*w,y=R()*h,r=w*(.2+R()*.3),q=g.createRadialGradient(x,y,0,x,y,r);q.addColorStop(0,col);q.addColorStop(1,'rgba(0,0,0,0)');g.globalAlpha=.55;g.fillStyle=q;g.fillRect(0,0,w,h)}g.globalAlpha=1;g.fillStyle='#fff';for(let i=0;i<90;i++)g.fillRect(R()*w,R()*h,R()<.15?3:1.5,R()<.15?3:1.5)}
+  else if(d==='gold'||d==='holo'){const gr=g.createLinearGradient(0,0,w,h),cs=d==='gold'?['#a8740d','#ffe9a0','#e0a21c','#fff3b0','#b8860b']:['#7cf3ff','#b7c4ff','#ff9de6','#fff3b0','#7cf3ff'];cs.forEach((x,i)=>gr.addColorStop(i/4,x));g.fillStyle=gr;g.fillRect(0,0,w,h);g.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<30;i++){const x=R()*w,y=R()*h;g.fillRect(x-4,y,9,1.5);g.fillRect(x,y-4,1.5,9)}}
+  if(b.txt&&pl){const ws=String(b.txt).split(' '),ls=ws.length>1?[ws[0],ws.slice(1).join(' ')]:[b.txt];let fs=h*(ls.length>1?.34:.5);g.font=`900 ${fs}px "Barlow Condensed","Arial Narrow",Arial,sans-serif`;for(const l of ls)while(g.measureText(l).width>w*.84&&fs>8){fs-=2;g.font=`900 ${fs}px "Barlow Condensed","Arial Narrow",Arial,sans-serif`}
+    g.textAlign='center';g.textBaseline='middle';g.fillStyle=c2;ls.forEach((l,i)=>g.fillText(l,w/2,h*(ls.length>1?.34+i*.36:.54)))}}
+const BH_ART={};
+function bhArt(x,s){const pl=x.k==='bhPlate',key=x.id||('d'+x.k);let u=BH_ART[key];if(!u){try{const c=document.createElement('canvas');c.width=pl?128:96;c.height=pl?88:128;bhPat(c.getContext('2d'),c.width,c.height,x.bh||{},pl?'plate':'sleeve');u=BH_ART[key]=c.toDataURL()}catch(_){u=''}}
+  const w=Math.round(pl?s*1.15:s*.6),h=Math.round(pl?s*.8:s);return `<span class="ia ia-bh" style="width:${Math.round(s*1.2)}px;height:${s}px"><img src="${u}" alt="" style="width:${w}px;height:${h}px;border-radius:${pl?Math.round(s*.2):Math.round(s*.3)}px"></span>`}
+/* the bobblehead itself: one canvas kept alive across redraws and moved into the Avatar tab each time it is drawn */
+let BH_V=null,BH_ST=0;
+function bhCfg(){const p=myProfile()||{},sl=ITEM[eqOf(ME.uid,'bhSleeve')],pl=ITEM[eqOf(ME.uid,'bhPlate')],n=p.num!=null&&p.num!==''?p.num:p.number!=null&&p.number!==''?p.number:'';
+  return {name:String(p.name||'Varsity').slice(0,22),num:String(n).slice(0,2),sleeve:sl?sl.bh:null,plate:pl?pl.bh:null}}
+function bhMount(){const host=document.getElementById('bh-host');if(!host)return;
+  const fail=()=>{BH_ST=0;const h=document.getElementById('bh-host');if(h)h.innerHTML='<div class="bh-load">Your bobblehead could not load on this device.</div>'};
+  const show=()=>{const h=document.getElementById('bh-host');if(!h||!BH_V)return;if(BH_V.canvas.parentNode!==h){h.innerHTML='';h.appendChild(BH_V.canvas)}try{BH_V.set(bhCfg());BH_V.start()}catch(e){console.error(e);fail()}};
+  if(BH_V){show();return}if(BH_ST)return;BH_ST=1;
+  const js=src=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+  (window.BH?Promise.resolve():js('bh.js')).then(()=>{if(!BH.glOK())throw new Error('webgl');return BH.load('vendor/three-bh.min.js')}).then(()=>(document.fonts&&document.fonts.load?document.fonts.load('900 20px "Barlow Condensed"').catch(()=>{}):0))
+    .then(()=>new Promise(ok=>setTimeout(ok,40))).then(()=>{const c=document.createElement('canvas');c.setAttribute('aria-label','Your bobblehead. Drag to spin, tap to bobble.');const h=document.getElementById('bh-host');if(h)h.innerHTML='';(h||document.body).appendChild(c);if(!h)c.style.cssText='position:fixed;left:-999px;width:320px;height:380px';BH_V=BH.view(c);if(!h){c.remove();c.style.cssText=''}show()}).catch(e=>{console.error(e);fail()})}
 function itemArt(id,s=48){const x=ITEM[id];if(!x)return'';
+  if(x.bh)return bhArt(x,s);
   if(x.k==='ball')return `<span class="ia ia-ball ${id}" style="width:${s}px;height:${s}px"></span>`;
   if(x.k==='frame')return `<span class="ia ia-frame ${id}" style="width:${s}px;height:${s}px;${cosStyle(id)}"><i></i></span>`;
   if(x.k==='banner')return `<span class="ia ia-bn bn ${id}" style="width:${Math.round(s*1.6)}px;height:${s}px;${cosStyle(id)}"></span>`;
@@ -4708,7 +4770,7 @@ function shopHTML(){const ids=shopToday(),bal=bank(ME.uid);
       return `<article class="sh-it" style="--rc:${R.c}"><div class="sh-art">${itemArt(id,52)}</div><b>${esc(x.n)}</b><small style="color:${R.c}">${R.n} · ${esc(KIND_N[x.k]||x.k)}</small>
         <button class="btn sm" data-act="shBuy" data-v="${id}" ${own||bal<pr?'disabled':''}>${own?'Owned':pr.toLocaleString()+' tokens'}</button></article>`}).join('')}</div>
     <p class="muted sh-note">Same four items for everyone today. Can’t afford one? Playing any game each day adds ${DLY_PAY} tokens.</p></section>`}
-const KIND_N={ball:'ball skin',frame:'profile frame',banner:'banner',name:'name colour',cback:'card back',bubble:'chat bubble',title:'title',badge:'badge',theme:'app theme',coin:'token coin',icon:'app icon',share:'share card',walkup:'draft walk-up',crest:'league crest',lineup:'lineup style',field:'field skin',jersey:'jerseys'};
+const KIND_N={ball:'ball skin',frame:'profile frame',banner:'banner',name:'name colour',cback:'card back',bubble:'chat bubble',title:'title',badge:'badge',theme:'app theme',coin:'token coin',icon:'app icon',share:'share card',walkup:'draft walk-up',crest:'league crest',lineup:'lineup style',field:'field skin',jersey:'jerseys',bhSleeve:'arm sleeves',bhPlate:'back plate'};
 async function shopBuy(id){const x=ITEM[id],pr=x&&SHOP_PRICE[x.r];
   if(!x||!shopToday().includes(id)){say('That item left the shop.');return}
   if(invHas(ME.uid,id)>0){say('You already have it.');return}
@@ -5040,8 +5102,8 @@ function viewShop(){
     const extras=`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
     body=spShopCard()+wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
-      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?(P.c===1?'card':'cards'):'items'}</small></div><h3>${esc(P.n)}</h3>
-      <p class="muted">${P.team?'You pick the team · its player and team cards only':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
+      ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off&&!(P.gear&&FG_SPORT==='bb')).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?(P.c===1?'card':'cards'):'items'}</small></div><h3>${esc(P.n)}</h3>
+      <p class="muted">${P.team?'You pick the team · its player and team cards only':P.gear?'Bobblehead gear only · arm sleeves and back plates':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button></article>`).join('')}</div>
       <p class="muted lk-note">Items have no cash value and can’t be traded.</p>`+extras;
@@ -5053,13 +5115,20 @@ function viewLocker(){
   if(!can)return head+'<p class="empty">Sign in to keep your items.</p>';
   const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0)+achOwned(ME.uid).length,pct=Math.min(100,ownN/Math.max(1,totN)*100);
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
-  const tab=['cards','cos','boost','bnd'].includes(UI.lk)?UI.lk:'cos';
-  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${[['cos','Cosmetics'],['cards','Cards'],['boost','Boosts'],['bnd','Binder']].map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const BHON=FG_SPORT!=='bb',tab=['cards','cos','boost','bnd'].concat(BHON?['av']:[]).includes(UI.lk)?UI.lk:(BHON?'av':'cos');
+  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${(BHON?[['av','Avatar']]:[]).concat([['cos','Cosmetics'],['cards','Cards'],['boost','Boosts'],['bnd','Binder']]).map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
   const top=`<section class="lk-hero"><div class="lk-ring" style="--p:${pct.toFixed(1)}"><b>${pct>0&&pct<1?'<1':Math.floor(pct)}%</b><small>collected</small></div>
     <div class="lk-hs"><div><b>${ownN}</b><small>cosmetics</small></div><div><b>${cardN}</b><small>cards</small></div><div><b>${coinIc(ME.uid)}${Math.round(bal)}</b><small>tokens</small></div></div>
     <a class="btn lk-shopb" href="#shop">Shop${fp?` · ${fp} free`:''}</a></section>`;
   let body='';
-  if(false){
+  if(tab==='av'){
+    /* v400: your bobblehead + its gear slots (arm sleeves, back plate). Gear comes from the Accessories pack. */
+    const ord={m:0,l:1,e:2,r:3,u:4,c:5},slots=[['bhSleeve','Arm sleeves','No sleeves',{k:'bhSleeve',bh:{c:'#f0bc8c'}}],['bhPlate','Back plate','Grey plate',{k:'bhPlate',bh:{c:'#b9c1cd'}}]];
+    body=`<section class="card bh-card"><div id="bh-host" class="bh-host"><div class="bh-load">Loading your bobblehead…</div></div><small class="muted">Drag to spin it. Tap it for a bobble. Dress it with gear from the <a href="#shop">Accessories pack</a>.</small></section>`+
+      slots.map(([k,l,dn,dx])=>{const cur=eq[k],list=ITEMS.filter(x=>x.k===k&&invHas(ME.uid,x.id)).sort((p,q)=>ord[p.r]-ord[q.r]),on=cur&&invHas(ME.uid,cur);
+        return `<section class="card lk-items"><div class="qh"><h3>${l}</h3><span class="muted">${list.length} of ${ITEMS.filter(x=>x.k===k).length}</span></div>
+          <div class="lk-grid"><button class="lk-it ${on?'':'on'}" data-act="lkEq" data-k="${k}" data-v="">${bhArt(dx,48)}<b>${dn}</b><small class="muted">Default</small></button>
+          ${list.map(x=>`<button class="lk-it r-${x.r} ${cur===x.id?'on':''}" style="--rc:${RAR[x.r].c}" data-act="lkEq" data-k="${k}" data-v="${x.id}" title="${esc(x.d)}">${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${RAR[x.r].n}</small></button>`).join('')}</div></section>`}).join('');
   }else if(tab==='cards'){
     const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=UI.lkC==='t'?'t':'p',N=UI.lkN||30;
     const best=id=>cardR(ME.uid,id);
@@ -8846,6 +8915,7 @@ function render(bg){
   document.querySelectorAll('#main .br').forEach(b=>{const c=b.querySelector('.br-col.cur');if(c&&b.scrollWidth>b.clientWidth)b.scrollLeft=c.offsetLeft-b.firstElementChild.offsetLeft});
   document.querySelectorAll('#main .gm-wks,#main .wks,#main .gm-tabs').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
   chrome(v);
+  try{bhMount()}catch(_){}
 }
 const typing=()=>{const a=document.activeElement;return a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)&&($('#main').contains(a))};
 let rq=false,dirty=false,gateChecked=false;
