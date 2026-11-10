@@ -305,3 +305,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 - Duo pack (`PACKS.duo`): 3 Duo cards, 2,000 tokens, odds Epic 70 / Legendary 22 / Mythical 8. Only source of duos.
 - Parlays (`parlHTML`, `parlGo`, Over/Under tab under the chosen game): owning a duo unlocks a 2-leg parlay on its two players' lines in a game. Odds multiply, both must hit, duo boost (CARD_PCT) on winnings. Saved in `picks/<uid>.parl['<week>|<duo id>']`; one per duo per game. A leg with no stats is dropped; both dropped = push. Counted in `bank()` and `earned()`; kept by `fcKeep()`.
 - Locker → Cards has a Duos chip.
+
+## v402 (Nov 10): free Duo gift for everyone
+- `PACKS.duogift` (off, free): once per account (`inv.fr.duog`), pick any school (`ptSheet` lists schools with duos) and get 1 of its Duo cards (`rollDuoTeam`), Epic 70 / Legendary 22 / Mythical 8. Banner at the top of the Shop (`dgShopCard`, opens with how='duog').

@@ -3054,7 +3054,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v401 · Nov 10';
+const APP_BUILD='v402 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4212,6 +4212,8 @@ const PACKS={
   welcome:{n:'Welcome pack',c:10,tok:0,odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'',cards:1,off:1},
   /* v401 (owner): Duo pack: 3 Duo cards (two teammates on one double-sided card), Epic or better; they unlock parlays */
   duo:{n:'Duo pack',c:3,tok:2000,usd:'$14.99',odds:{e:70,l:22,m:8},g:'',cards:1,duo:1},
+  /* v402 (owner): a free gift for everyone: 1 Duo card from a school you choose, once per account (off: not sold) */
+  duogift:{n:'Duo gift',c:1,tok:0,odds:{e:70,l:22,m:8},g:'',cards:1,duo:1,team:1,off:1},
   godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1}};   /* v386 (owner): back in the Shop, still the most expensive pack */
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
@@ -4414,6 +4416,9 @@ function duoSets(){if(_du.rev===_rev)return _du;const m={},all=[];
     if(ids.length){m[sc]=ids;all.push(...ids)}});
   return _du={rev:_rev,m,all}}
 const duoKeys=id=>id.slice(3).split('~');
+function rollDuoTeam(t){const a=duoSets().m[t]||[];return a.length?a[fcRnd(a.length)]:''}
+const dgCan=()=>ME.uid&&ME.mode!=='guest'&&!(invOf(ME.uid).fr||{}).duog;
+function dgShopCard(){return dgCan()?`<section class="card lk-free wp-shop"><div><b>Free Duo card · gift</b><small class="muted">Pick any school and get one of its Duo cards, Epic or better. Use it to parlay those two players.</small></div><button class="btn" data-act="pkOpen" data-v="duogift" data-h="duog">Pick a school</button></section>`:''}
 function rollDuo(){const a=duoSets().all;return a.length?a[fcRnd(a.length)]:''}
 function duoInfo(id){const [a,b]=duoKeys(id).map(pByKey),A=a||{name:'Player',school:''},B=b||{name:'Player',school:''};
   return {team:0,duo:1,name:lastN(A.name)+' & '+lastN(B.name),full:A.name+' & '+B.name,school:A.school||B.school,sub:A.name+' & '+B.name+' · '+(A.school||B.school),a:A,b:B}}
@@ -4482,9 +4487,9 @@ function infoSheet(k){const x=INFO[k],c=$('#cfm');if(!x||!c)return;const f=v=>ty
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-info]');if(!b)return;e.preventDefault();e.stopPropagation();infoSheet(b.dataset.info)});
 const PT={t:'',k:'team',h:'tok',d:null};
 function ptSheet(k,h,d){Object.assign(PT,{k:k||'team',h:h||'tok',d:d==null?null:d});const c=$('#cfm'),P=PACKS[PT.k];if(!c||!P)return;
-  const ts=Object.keys(wpTeams()).sort((a,b)=>a.localeCompare(b));
+  const ts=(P.duo?Object.keys(duoSets().m):Object.keys(wpTeams())).sort((a,b)=>a.localeCompare(b));
   c.innerHTML=`<div class="gcard tok-sheet pt-sheet" role="dialog" aria-modal="true" aria-labelledby="pt-t"><button type="button" class="tok-x" data-c="no" aria-label="Close">✕</button>
-    <h2 id="pt-t">Pick your team</h2><p class="muted">${P.c===1?'Your card comes':'All '+P.c+' cards come'} from this team: one of its players or its team card. Same odds as the Pro pack.</p>
+    <h2 id="pt-t">Pick your team</h2><p class="muted">${P.duo?'You get one of this school’s Duo cards (two of its top players on one card), Epic or better.':(P.c===1?'Your card comes':'All '+P.c+' cards come')+' from this team: one of its players or its team card. Same odds as the Pro pack.'}</p>
     <input id="pt-q" class="pt-q" type="search" placeholder="Search schools" autocomplete="off" aria-label="Search schools">
     <div class="pt-list" role="listbox" aria-label="Teams">${ts.map(t=>`<button type="button" class="pt-t" data-act="ptPick" data-v="${esc(t)}" aria-pressed="${PT.t===t}">${slogo(t,26)}<span>${esc(t)}</span></button>`).join('')}</div>
     <div class="gbtns"><button class="btn" data-act="ptGo" ${PT.t?'':'disabled'}>${ptLabel()}</button></div></div>`;
@@ -4541,6 +4546,7 @@ async function packOpen(type,how,day,team){
   if(P.team&&!team){ptSheet(type,how,day);return}
   if(ME.mode==='readonly'||ME.mode==='offline'){say('Can’t open packs right now.');return}
   if(how==='tok'&&bank(ME.uid)<P.tok){say(`You need ${P.tok} tokens for the ${P.n}.`);return}
+  if(how==='duog'&&!dgCan()){say('You already opened your Duo gift.');return}
   if(how==='free'&&freePacks(ME.uid)<1){say('No free packs right now.');return}
   if(how==='ad'&&((invOf(ME.uid).fr||{}).ad===TODAY())){say('You already got today’s free pack. Come back tomorrow.');return}
   if(how==='lb'&&!fgPrizes(ME.uid).some(x=>x.day===day&&x.type===type)){say('That prize was already opened.');return}
@@ -4551,7 +4557,7 @@ async function packOpen(type,how,day,team){
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
-    if(P.duo){const cid=rollDuo();if(cid){const cur=Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
+    if(P.duo){const cid=team?rollDuoTeam(team):rollDuo();if(cid){const cur=Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(P.team){const cid=rollTeamCard(team);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(fcRnd(10000)<(ACH_CHANCE[type]||0)*100){const aid=rollAch();if(aid){const cur=Object.assign({},cards[aid]),isDup=!!cur.x;if(isDup)dup+=RAR.x.dup;else{cur.x=1;cards[aid]=cur;gotCard=true}got.push({card:aid,r:'x',dup:isDup});continue}}
     if(!P.cos&&!P.gear&&(P.cards||fcRnd(100)<CARD_CHANCE)){let cid=rollCard(r);if(P.cards)for(let k=0;!cid&&k<5;k++)cid=rollCard(r);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
@@ -4562,6 +4568,7 @@ async function packOpen(type,how,day,team){
   if(dup)patch.dup=(+v.dup||0)+dup;
   if(how==='free'){const fr=Object.assign({},v.fr);if(!fr.st)fr.st=NOW();else fr.d7=(+fr.d7||0)+1;patch.fr=fr}
   if(how==='ad'){patch.fr=Object.assign({},v.fr,{ad:TODAY()})}
+  if(how==='duog'){patch.fr=Object.assign({},v.fr,{duog:NOW()})}
   if(how==='lb'){patch.fr=Object.assign({},v.fr,{lb:Object.assign({},(v.fr||{}).lb,{[day]:1})})}
   if(how==='gift'){patch.fr=Object.assign({},v.fr,{gpo:Object.assign({},(v.fr||{}).gpo,{[day]:1})})}
   if(how==='bk'){patch.fr=Object.assign({},v.fr,{bk:1})}
@@ -5158,7 +5165,7 @@ function viewShop(){
     const myLg=myGroups().filter(g=>g.ownerId===ME.uid);
     const extras=`<div class="sh-two"><section class="card sh-gift"><div><b>Send a gift</b><small class="muted">Any amount of tokens, or a cosmetic, to a friend.</small></div><button class="btn" data-act="gfOpen">Send a gift</button></section>
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
-    body=spShopCard()+wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
+    body=dgShopCard()+spShopCard()+wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off&&!(P.gear&&FG_SPORT==='bb')).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?(P.c===1?'card':'cards'):'items'}</small></div><h3>${esc(P.n)}</h3>
       <p class="muted">${P.duo?'Duo cards only · two teammates on one double-sided card · Epic or better · unlocks parlays':P.team?'You pick the team · its player and team cards only':P.gear?'Bobblehead gear only · arm sleeves and back plates':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
