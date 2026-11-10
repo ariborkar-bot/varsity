@@ -259,3 +259,6 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v384 (Nov 9): Admin controls is its own page (owner: not inside the admin console)
 - `#controls` (`viewControls()` in the `V` map, `VIEWS`, `viewOK`: admins only) in the app's own look. Linked from the Settings menu ("Admin controls", under Admin systems) and from the Admin systems page next to "Stat desk and approvals". Removed from the admin console nav (v382/v383 had it there); `ADM_MAIN` is back to overview/users/usage/errors. Same tools as v382 (`ctlHTML()`): bans with a message, appeals, tokens, cards, packs, items, Welcome pack reset.
+
+## v385 (Nov 9): Admin controls loading screen + faster load
+- `viewControls()` shows a spinner ("Loading admin controls…") while `AD.rows` is null, a "Try again" card if the account load fails, and re-renders itself when `adLoad()` finishes. The account list is now fetched as soon as an admin is unlocked (`touch()`), so it is usually ready before you open the page. Demo previews show an empty list.

@@ -2536,6 +2536,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 /* Starter pick CSS removed in v346 */
 
 /* Admin controls page (v384): the app's own look */
+.ctl-ld{display:flex;flex-direction:column;align-items:center;gap:8px;padding:60px 20px;text-align:center}.ctl-ld small{color:var(--muted)}.ctl-sp{width:44px;height:44px;border-radius:50%;border:4px solid #ffffff22;border-top-color:var(--gold,#FFC23D);animation:ctlspin .8s linear infinite}@keyframes ctlspin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.ctl-sp{animation-duration:2.4s}}
 .ctl-i{padding:9px 11px;border-radius:10px;min-width:0;font:inherit}.ctl-tw{overflow-x:auto}.ctl-t{width:100%;border-collapse:collapse}.ctl-t td{padding:6px 8px;border-top:1px solid var(--line);vertical-align:middle}.ctl-t td.n{text-align:right}
 #ban-scr{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 35%,#3a0a12,#07090f 75%);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff}
 #ban-scr .ban-c{max-width:360px;display:flex;flex-direction:column;gap:10px;align-items:center}#ban-scr .ban-m{background:#ffffff14;border-radius:12px;padding:10px 12px;font-weight:700;max-width:100%;overflow-wrap:anywhere}#ban-scr .ban-ap{width:100%;display:flex;flex-direction:column;gap:8px;text-align:left}#ban-scr .ban-ap textarea{width:100%;border-radius:12px;border:1px solid #ffffff33;background:#ffffff10;color:#fff;padding:10px;font:inherit}#ban-scr .ban-ap p{margin:0;overflow-wrap:anywhere}#ban-scr .ban-ic{font-size:3.4rem}#ban-scr h2{margin:0;font:900 1.9rem/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:#FF4F6D}#ban-scr p{margin:0;font-size:1.05rem}#ban-scr small{color:#b9c0d4}
@@ -3010,7 +3011,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v384 · Nov 9';
+const APP_BUILD='v385 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -8347,7 +8348,11 @@ const ctlCardRes=q=>{q=nmNorm(q);if(q.length<2)return[];const out=[];
   for(const p of players()){if(p.sample||/x$/.test(p.key))continue;if(nmNorm(p.name+' '+p.school).includes(q)){out.push({id:'pc:'+p.key,n:p.name,s:posOf(p)+' · '+p.school});if(out.length>=8)return out}}
   for(const t of Object.keys(wpTeams())){if(nmNorm(t).includes(q)){out.push({id:'tc:'+t,n:t,s:'Team card'});if(out.length>=10)break}}return out};
 const ctlResHTML=()=>ctlCardRes(CTL.cq).map(x=>`<button type="button" class="adm-btn" style="justify-content:flex-start;text-align:left" data-ctl="pick" data-id="${esc(x.id)}"><b>${esc(x.n)}</b>&nbsp;<span class="adm-mut">${esc(x.s)}</span></button>`).join('')||(CTL.cq.length>1?'<p class="adm-mut">No matches.</p>':'');
-function viewControls(){if(AD.rows===null&&!AD.loading)try{adLoad()}catch(_){}return ctlHTML()}
+function viewControls(){
+  if(AD.rows===null&&ME.mode==='demo')AD.rows=[];
+  if(AD.rows===null){if(!AD.loading)try{adLoad()}catch(_){}
+    return `<div class="head"><h2>Admin controls</h2></div><div class="ctl-ld" role="status" aria-live="polite"><i class="ctl-sp" aria-hidden="true"></i><b>Loading admin controls…</b><small>Getting every account</small></div>`}
+  return (AD.err?`<section class="card"><p class="au-err">${esc(AD.err)}</p><div class="btns"><button class="btn sm" data-ad="reload">Try again</button></div></section>`:'')+ctlHTML()}
 function ctlHTML(){
   const rows=AD.rows;if(rows===null)return '<div class="head"><h2>Admin controls</h2><p>Loading accounts…</p></div>';
   const inp='class="ctl-i"';
@@ -8536,7 +8541,7 @@ async function adLoad(){
   if(!ME.admin||AD.loading||ME.mode==='demo')return;AD.loading=true;AD.err='';
   try{const {data,error}=await SB.rpc('admin_users');if(error)throw error;AD.rows=data||[]}
   catch(e){AD.err='Could not load accounts. Your admin unlock may have timed out. Lock admin and unlock again.';AD.rows=AD.rows||[]}
-  AD.loading=false;if(UI.view==='admin'&&!ADMR.busy)render();
+  AD.loading=false;if((UI.view==='admin'&&!ADMR.busy)||UI.view==='controls')render();
 }
 const adWhen=t=>t?new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'never';
 function viewAdmin(){
@@ -8693,7 +8698,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{profileFix()}catch(_){}if(window.__pfx===1&&!(myProfile()||{}).fx)return;try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}try{spMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{if(ME.admin&&AD.rows===null&&!AD.loading)adLoad()}catch(_){}try{profileFix()}catch(_){}if(window.__pfx===1&&!(myProfile()||{}).fx)return;try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}try{spMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
