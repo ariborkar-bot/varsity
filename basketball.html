@@ -1504,7 +1504,20 @@ select option{background:#0B1730;color:#EAF0F8}
 .me-lks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.me-lks .me-lk{margin:0;flex-direction:row}
 .lk-mys{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1.5px dashed var(--line);font:900 1.2rem var(--f-display,inherit);color:var(--muted,#8FA3C3)}.lk-mys.sm{width:18px;height:18px;font-size:.7rem;border-radius:5px}
 .pko-eq{margin-top:4px;padding:4px 10px!important;font-size:.7rem!important}.lk-top .btn{align-self:center}
-@media (max-width:420px){.me-lks{grid-template-columns:1fr}}
+.me-lks{grid-template-columns:1fr 1fr!important;gap:12px!important}
+.me-tile{position:relative;display:flex;flex-direction:column;gap:3px;padding:16px 14px 14px;border-radius:18px;text-decoration:none;color:#fff;overflow:hidden;min-height:128px;box-shadow:var(--shadow);transition:transform .15s}
+.me-tile:active{transform:scale(.97)}
+.me-tile.lk{background:linear-gradient(145deg,#2563EB,#12315A 75%)}
+.me-tile.sh{background:linear-gradient(145deg,#FFC93A,#E8860C 80%);color:#2A1700}
+.me-tile::after{content:"";position:absolute;right:-26px;top:-26px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.14)}
+.me-tile .mt-ic{width:34px;height:34px;margin-bottom:8px}
+.me-tile b{font:800 1.45rem/1 var(--f-display,inherit);letter-spacing:.02em;text-transform:uppercase}
+.me-tile small{font-size:.8rem;line-height:1.25;opacity:.9}
+.me-tile .mt-go{margin-top:auto;padding-top:8px;font-weight:800;font-size:.8rem;opacity:.95}
+.me-tile .mt-bd{position:absolute;right:10px;top:10px;z-index:1;background:#E11D48;color:#fff;font:800 .68rem var(--f-body,inherit);padding:3px 8px;border-radius:99px;animation:mtp 1.6s ease-in-out infinite}
+@keyframes mtp{50%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.me-tile .mt-bd{animation:none}}
+@media (max-width:420px){.me-lks{grid-template-columns:1fr 1fr}}
 /* v243 cosmetics: banners, name colours, card backs, chat bubbles */
 .ia-bn,.ia-cb{border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#22324f,#141f33);border:1px solid rgba(255,255,255,.12)}
 .ia-nc{border-radius:10px;background:var(--surface,#14213a);border:1px solid var(--line);font-weight:900;font-family:var(--f-display,inherit)}
@@ -3017,7 +3030,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v391 · Nov 9';
+const APP_BUILD='v392 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7671,8 +7684,8 @@ function viewMe(){
   }else ranks=`<p class="hint">No approved games for this period yet. Your rank and breakdown appear as soon as games are posted.</p>`;
   const wk=UI.meEntry.week;
   return head+`
-  <div class="me-lks"><a class="card me-lk" href="#locker"><span class="ia ia-perk tboost" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16v13H4zM9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>My Locker</b><small class="muted">Equip what you’ve pulled</small></span><b aria-hidden="true">›</b></a>
-  <a class="card me-lk" href="#shop"><span class="ia ia-perk perk" style="width:42px;height:42px"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>Shop</b><small class="muted">${freePacks(ME.uid)?freePacks(ME.uid)+' free '+(freePacks(ME.uid)===1?'pack':'packs')+' · ':''}Packs</small></span><b aria-hidden="true">›</b></a></div>
+  <div class="me-lks"><a class="me-tile lk" href="#locker"><svg class="mt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM12 3v18M9 11h.01M15 11h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><b>My Locker</b><small>Your cards &amp; gear. Tap to equip.</small><span class="mt-go" aria-hidden="true">Open ›</span></a>
+  <a class="me-tile sh" href="#shop">${freePacks(ME.uid)?`<span class="mt-bd">${freePacks(ME.uid)} FREE</span>`:''}<svg class="mt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><b>Shop</b><small>${freePacks(ME.uid)?'Free '+(freePacks(ME.uid)===1?'pack':'packs')+' waiting. Open now!':'Open packs, pull stars.'}</small><span class="mt-go" aria-hidden="true">Open ›</span></a></div>
   <section class="card me-pro ${eqOf(ME.uid,'banner')?'has-bn':''}">${eqOf(ME.uid,'banner')?`<div class="me-bn bn ${eqOf(ME.uid,'banner')}" style="${cosStyle(eqOf(ME.uid,'banner'))}" aria-hidden="true"></div>`:''}
     <div class="me-top">${av(pr.name,pr.school,56,ME.uid)}<div class="me-id"><h3>${nmC(ME.uid,esc(pr.name))}</h3>${titleOf(ME.uid)?`<span class="ti r-${ITEM[eqOf(ME.uid,'title')].r}">${esc(titleOf(ME.uid))}</span>`:''}<span class="muted">${esc(pr.school)} · ${esc(me.pos==='DEF'?(me.sub||'DEF'):me.pos)}</span></div><button class="btn sm ghost" data-act="meEdit" aria-expanded="${!!UI.meEdit}">${UI.meEdit?'Done':'Edit'}</button></div>
     ${UI.meEdit?`<div class="pform">
