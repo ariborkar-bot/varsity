@@ -361,3 +361,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v413 (Nov 10, owner): sign-up name field
 - The profile step asks for "Your full name" and the box shows the hint "First and last name" instead of the demo name "Ari B." (`nameHTML()`). Not enforced: one-word names still save.
+- OVR: at most 10 players per sport can be 99 (Notes B11, via Raw OVR column P); schedule strength weight 6% (weights 37.6/28.2/28.2/6).

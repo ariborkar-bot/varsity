@@ -106,13 +106,14 @@ def build(sport):
   nt['A4'] = 'Ceiling (highest OVR)'; nt['B4'] = 99
   nt['A5'] = 'Mean (the average player)'; nt['B5'] = 70
   nt['A6'] = 'Spread (standard deviation)'; nt['B6'] = 11
-  nt['A7'] = 'Weight: points per game'; nt['B7'] = 0.368
-  nt['A8'] = 'Weight: season total points'; nt['B8'] = 0.276
-  nt['A9'] = 'Weight: rank in his position\'s key stats'; nt['B9'] = 0.276
-  nt['A10'] = 'Weight: schedule strength'; nt['B10'] = 0.08
-  for r in (3, 4, 5, 6, 7, 8, 9, 10): nt.cell(r, 2).font = Font(name=AR, color='0000FF'); nt.cell(r, 2).fill = PatternFill('solid', fgColor='FFFF00'); nt.cell(r, 1).font = Font(name=AR)
+  nt['A7'] = 'Weight: points per game'; nt['B7'] = 0.376
+  nt['A8'] = 'Weight: season total points'; nt['B8'] = 0.282
+  nt['A9'] = 'Weight: rank in his position\'s key stats'; nt['B9'] = 0.282
+  nt['A10'] = 'Weight: schedule strength'; nt['B10'] = 0.06
+  nt['A11'] = 'Most players allowed at the ceiling (99)'; nt['B11'] = 10
+  for r in (3, 4, 5, 6, 7, 8, 9, 10, 11): nt.cell(r, 2).font = Font(name=AR, color='0000FF'); nt.cell(r, 2).fill = PatternFill('solid', fgColor='FFFF00'); nt.cell(r, 1).font = Font(name=AR)
   allnotes = ['OVR = Mean + Spread x (how many standard deviations the player is above or below average, from his percentile), rounded and kept between Floor and Ceiling, so most players land in the 60s-80s, 90+ is rare and nobody is below 45. Blue/yellow cells are inputs: change them and every OVR recalculates.',
-   'Four percentiles (0 = worst, 1 = best among his peers): (1) fantasy points per game, (2) total fantasy points this season (rewards playing more and scoring more) and (3) his rank in the stats that matter at his position, the average percentile of the Position stats columns, and (4) schedule strength. Schedule-strength percentile (default weight 8%) = how tough his school’s schedule is compared with other schools: football = the average win% of the opponents it played this season (counting only completed games, smoothed so 1-0 is not 100%); basketball = the average 2025-26 scoring margin of the opponents on its 2026-27 schedule. Division is not used on its own because the app only has division brackets for some schools; strength of schedule captures the same thing. Weighted score = the four percentiles combined with the yellow weights (36.8%/27.6%/27.6%/8% by default, they do not have to add to 1). Because averaging squeezes everyone toward the middle, the weighted scores are re-ranked among his peers (Combined percentile) and OVR comes from that, so the best player at a position is near the ceiling and the worst at the floor (45). Key stats: QB pass yd, pass TD, rush yd; RB rush yd, rush TD, rec yd; WR/TE rec yd, rec, rec TD; DL sack, TFL, tkl; LB tkl, TFL, sack; DB tkl, INT, PBU; DEF tkl, TFL, sack, INT; K FG, PAT; basketball PG ast, pts, stl; SG pts, 3pm, stl; SF pts, reb, stl; PF reb, pts, blk; C reb, blk, pts (season totals).',
+   'Four percentiles (0 = worst, 1 = best among his peers): (1) fantasy points per game, (2) total fantasy points this season (rewards playing more and scoring more) and (3) his rank in the stats that matter at his position, the average percentile of the Position stats columns, and (4) schedule strength. Schedule-strength percentile (default weight 6%) = how tough his school’s schedule is compared with other schools: football = the average win% of the opponents it played this season (counting only completed games, smoothed so 1-0 is not 100%); basketball = the average 2025-26 scoring margin of the opponents on its 2026-27 schedule. Division is not used on its own because the app only has division brackets for some schools; strength of schedule captures the same thing. Weighted score = the four percentiles combined with the yellow weights (37.6%/28.2%/28.2%/6% by default, they do not have to add to 1). Because averaging squeezes everyone toward the middle, the weighted scores are re-ranked among his peers (Combined percentile) and OVR comes from that (Raw OVR = mean + spread x his standard deviations above average). Only the top N players in the sport by Raw OVR (the yellow cell, 10) can be a 99; everyone else is capped at 98, so the best player at a position is near the ceiling and the worst at the floor (45). Key stats: QB pass yd, pass TD, rush yd; RB rush yd, rush TD, rec yd; WR/TE rec yd, rec, rec TD; DL sack, TFL, tkl; LB tkl, TFL, sack; DB tkl, INT, PBU; DEF tkl, TFL, sack, INT; K FG, PAT; basketball PG ast, pts, stl; SG pts, 3pm, stl; SF pts, reb, stl; PF reb, pts, blk; C reb, blk, pts (season totals).',
    'Football: Pts per game = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
    'Basketball: Pts per game = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
    'Games = games with stats behind the rating (football 2026, basketball 2025-26). Few games = low confidence.',
@@ -120,10 +121,10 @@ def build(sport):
    'Source: MaxPreps box scores and season stats already in the app (stats.js, tools/data/bb_2526_players.txt). Built by tools/ovr/make_ovr.py.']
   yr = '2026 season' if sport == 'Football' else '2025-26 season (the latest basketball stats; 2026-27 has not started)'
   notes = [allnotes[0], allnotes[1], allnotes[2 if sport == 'Football' else 3], 'Ratings use only this season (%s). Season total fantasy pts = fantasy points per game x games (basketball totals use the 2025-26 averages).' % yr] + allnotes[4:]
-  for i, t in enumerate(notes): c = nt.cell(12 + i, 1, t); c.font = Font(name=AR); c.alignment = Alignment(wrap_text=True, vertical='top'); nt.merge_cells(start_row=12 + i, start_column=1, end_row=12 + i, end_column=6); nt.row_dimensions[12 + i].height = 48
+  for i, t in enumerate(notes): c = nt.cell(13 + i, 1, t); c.font = Font(name=AR); c.alignment = Alignment(wrap_text=True, vertical='top'); nt.merge_cells(start_row=13 + i, start_column=1, end_row=13 + i, end_column=6); nt.row_dimensions[13 + i].height = 48
   nt.column_dimensions['A'].width = 40; [nt.column_dimensions[c].__setattr__('width', 14) for c in 'BCDEF']
-  H = ['#', 'Name', 'School', 'Sport', 'Pos', 'Grade', 'Games', 'Fantasy pts per game (adj.)', 'Season total fantasy pts', 'Per-game percentile', 'Total percentile', 'Position-stats percentile', 'Schedule-strength percentile', 'Weighted score', 'Combined percentile', 'OVR', 'Status', 'Position stats (season totals)']
-  W = [6, 24, 26, 11, 7, 7, 8, 16, 16, 14, 13, 16, 17, 12, 14, 8, 9, 42]
+  H = ['#', 'Name', 'School', 'Sport', 'Pos', 'Grade', 'Games', 'Fantasy pts per game (adj.)', 'Season total fantasy pts', 'Per-game percentile', 'Total percentile', 'Position-stats percentile', 'Schedule-strength percentile', 'Weighted score', 'Combined percentile', 'Raw OVR (before cap)', 'OVR', 'Status', 'Position stats (season totals)']
+  W = [6, 24, 26, 11, 7, 7, 8, 16, 16, 14, 13, 16, 17, 12, 14, 14, 8, 9, 42]
   NN = len([r for r in rows if r['sport'] == sport]) + 1   # last data row of the All players tab
   def pctf(n):
       # where the weighted score ranks among his peers (football: same position; basketball: all players), ties split; read from the All players tab
@@ -134,15 +135,15 @@ def build(sport):
   def sheet(title, items):
       ws = wb.create_sheet(title); ws.append(H)
       for c in ws[1]: c.font = hdr; c.fill = fill; c.alignment = Alignment(horizontal='center')
-      items = sorted(items, key=lambda r: (-(.368 * r['pcg'] + .276 * r['pct_t'] + .276 * r['pct_k'] + .08 * r['pct_s']), r['name']))
+      items = sorted(items, key=lambda r: (-(.376 * r['pcg'] + .282 * r['pct_t'] + .282 * r['pct_k'] + .06 * r['pct_s']), r['name']))
       for i, r in enumerate(items, 1):
           n = i + 1
-          ws.append([i, r['name'], r['school'], r['sport'], r['pos'], r['gr'], r['gp'], r['score'], r['tot'], round(r['pcg'], 4), round(r['pct_t'], 4), round(r['pct_k'], 4), round(r['pct_s'], 4), f'=(Notes!$B$7*J{n}+Notes!$B$8*K{n}+Notes!$B$9*L{n}+Notes!$B$10*M{n})/(Notes!$B$7+Notes!$B$8+Notes!$B$9+Notes!$B$10)', pctf(n), f'=MAX(Notes!$B$3,MIN(Notes!$B$4,ROUND(Notes!$B$5+Notes!$B$6*NORMSINV(O{n}),0)))', r['status'], r['keys']])
+          ws.append([i, r['name'], r['school'], r['sport'], r['pos'], r['gr'], r['gp'], r['score'], r['tot'], round(r['pcg'], 4), round(r['pct_t'], 4), round(r['pct_k'], 4), round(r['pct_s'], 4), f'=(Notes!$B$7*J{n}+Notes!$B$8*K{n}+Notes!$B$9*L{n}+Notes!$B$10*M{n})/(Notes!$B$7+Notes!$B$8+Notes!$B$9+Notes!$B$10)', pctf(n), f'=Notes!$B$5+Notes!$B$6*NORMSINV(O{n})', f"=MAX(Notes!$B$3,MIN(IF(COUNTIF('All players'!$P$2:$P${NN},\">\"&P{n})<Notes!$B$11,Notes!$B$4,Notes!$B$4-1),ROUND(P{n},0)))", r['status'], r['keys']])
       for row in ws.iter_rows(min_row=2):
           for c in row: c.font = Font(name=AR)
-          row[15].font = Font(name=AR, bold=True)
+          row[16].font = Font(name=AR, bold=True); row[15].number_format = '0.0'
       for k, w in enumerate(W, 1): ws.column_dimensions[get_column_letter(k)].width = w
-      ws.freeze_panes = 'C2'; ws.auto_filter.ref = f'A1:R{len(items) + 1}'
+      ws.freeze_panes = 'C2'; ws.auto_filter.ref = f'A1:S{len(items) + 1}'
   order = ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'DEF', 'K'] if sport == 'Football' else ['PG', 'SG', 'SF', 'PF', 'C']
   mine = [r for r in rows if r['sport'] == sport]
   for pos in order:
