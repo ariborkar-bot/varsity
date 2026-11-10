@@ -328,3 +328,8 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v407 (Nov 10, owner): single prop picks are back, parlays pay better
 - The slip (v405) takes 1 to 6 picks. One pick = a normal single: "Lock in pick" (`slipGo`) saves it to `picks/<uid>.props` exactly like before (card boost `cb`, +25%/insure chips still work after saving). Two or more = a parlay with a bonus: `SL_BONUS`=5% of extra odds per added pick (2 picks +5%, 6 picks +25%), shown in the slip as "incl. +N% parlay bonus". The record stores `odds` (with the bonus) and `pb` (the multiplier); `parlEff()` multiplies the winning legs' odds by `pb` so the payout matches. Duo parlays have no `pb`, so they are unchanged.
+
+## v408 (Nov 10): Duo boost in the slip, walkouts for Duo and team cards, free Duo pack for Ari
+- Slip parlays (`slipCalc`): an owned Duo card whose two players are both in the parlay adds its boost (`duoPct`, returned as `dp`/`duos`, inside the 500 cap) and shows a "Duo boost" row (`.sl-duo`). The per-game "Duo parlays" section is unchanged.
+- `packShow`: Epic+ Duo cards (`dc:`) and team cards (`tc:`) now get the walkout too. `pkWalkout` takes `X.c={name,school,pos,k1,kind,on,art}` for a card that is not one player.
+- `CARD_FIX` supports `{gp:'<pack type>'}`: adds a gift pack (`inv.fr.gp`). `ab-duo-1` gives Ari Borkar one Duo pack (Shop → Gift).

@@ -2499,6 +2499,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .parl-c{border:1px solid color-mix(in srgb,var(--rc) 55%,transparent)}.parl-h{display:flex;gap:10px;align-items:center;margin-bottom:8px}.parl-h small{display:block}
 .parl-leg{display:flex;flex-direction:column;gap:6px}.parl-who{display:flex;gap:8px;align-items:center}.parl-plus{text-align:center;font:900 1.1rem/1 var(--f-display,inherit);color:var(--rc);margin:4px 0}
 .sl-leg{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)}.sl-leg>span:first-child{flex:1;min-width:0}.sl-leg small{display:block}.sl-o{font:800 .9rem/1 var(--f-display,inherit)}.sl-bar .bt-go{flex-wrap:wrap;gap:8px}.sl-bar{padding:10px 12px!important}.sl-bar .qh{margin:0 0 2px!important}.sl-bar .qh h3{font-size:1rem}.sl-bar p{margin:2px 0}.sl-leg{padding:3px 0!important}.sl-leg .btn{padding:0 10px;min-height:28px}.sl-bar .bt-stk{margin:6px 0 4px;flex-wrap:wrap;gap:6px}.sl-bar .bt-stk .chip{padding:5px 11px;min-height:0}.sl-bar .bt-amt{width:76px;flex:none}.sl-bar{position:fixed;left:8px;right:8px;bottom:76px;z-index:40;max-width:560px;margin:0 auto;max-height:56vh;overflow:auto;box-shadow:0 -6px 24px rgba(0,0,0,.55);border:1px solid var(--gold,#FFB800)}.sl-sp{height:56vh}.parl-won{color:#3DDC84}.parl-lost{color:#FF4F6D}
+.sl-duo{display:flex;gap:10px;align-items:center;margin:8px 0}.sl-duo small{display:block}.wko-pos.sm{font-size:clamp(2.6rem,15vw,5rem)}
 /* v256 pack opening: rip, lift-spin-land flips, sparks, rarity background glow */
 .pko{isolation:isolate}
 .pko-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s ease;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--gc,#7A4DFF) 55%,transparent),color-mix(in srgb,var(--gc,#7A4DFF) 18%,transparent) 45%,transparent 75%)}
@@ -3076,7 +3077,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v407 · Nov 10';
+const APP_BUILD='v408 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4694,17 +4695,17 @@ function pkpBanner(){return pkpOf(ME.uid)?`<section class="card lk-free lk-prize
 /* the walkout: dark tunnel, then position, team, best stat and the player. Tap to move on, Skip to jump to the player. */
 function pkWalkout(R,done,X){
   /* X = {p,r,dup}: a Welcome pack walkout for a player card of rarity r (R is null); otherwise R is a Pick 1 of 5 offer */
-  const id=X?'':R.o[R.g].split('|')[0],ai=X?{key:X.p.key,rank:0,pct:X.pct||CARD_PCT[X.r]}:achInfo(id),p=X?X.p:pByKey(ai.key);if(!p){done();return}
-  let st=pkStat(ai.key,ai.rank);if(X&&st.big==='#0')st={n:0,big:'+'+ai.pct+'%',l:'on his props',sub:'Card boost'};
-  const pos=posOf(p),calm=matchMedia('(prefers-reduced-motion: reduce)').matches,ini=String(p.school).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const C=X&&X.c,id=X?'':R.o[R.g].split('|')[0],ai=X?{key:C?'':X.p.key,rank:0,pct:X.pct||CARD_PCT[X.r]}:achInfo(id),p=C?{name:C.name,school:C.school}:X?X.p:pByKey(ai.key);if(!p){done();return}
+  let st=C?{n:0,big:'+'+ai.pct+'%',l:C.on,sub:'Card boost'}:pkStat(ai.key,ai.rank);if(!C&&X&&st.big==='#0')st={n:0,big:'+'+ai.pct+'%',l:'on his props',sub:'Card boost'};
+  const pos=C?C.pos:posOf(p),calm=matchMedia('(prefers-reduced-motion: reduce)').matches,ini=String(p.school).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
   const o=document.createElement('div');o.className='wko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Walkout');o.dataset.s='0';
   o.innerHTML=`<div class="wko-bg" aria-hidden="true"></div><i class="wko-beams" aria-hidden="true"></i><i class="wko-crowd" aria-hidden="true"></i><i class="wko-fl" aria-hidden="true"></i>
     <div class="wko-st wko-s0"><i class="wko-ring"></i><b class="wko-k">${X?esc(X.k||'Walkout'):'Immortal pull'}</b></div>
-    <div class="wko-st wko-s1"><b class="wko-k">Position</b><div class="wko-pos">${esc(pos)}</div></div>
+    <div class="wko-st wko-s1"><b class="wko-k">${C?esc(C.k1):'Position'}</b><div class="wko-pos${C?' sm':''}">${esc(pos)}</div></div>
     <div class="wko-st wko-s2"><b class="wko-k">Team</b><div class="wko-logo">${logoFor(p.school)?slogo(p.school,150):`<span class="wko-ini">${esc(ini)}</span>`}</div><div class="wko-sch">${esc(p.school)}</div></div>
-    <div class="wko-st wko-s3"><b class="wko-k">${st.big?'Rank':'Season best stat'}</b><div class="wko-num">${st.big?esc(st.big):'0'}</div><div class="wko-lb">${esc(st.l)}</div><small class="wko-sub">${esc(st.sub)}</small></div>
+    <div class="wko-st wko-s3"><b class="wko-k">${C?'Boost':st.big?'Rank':'Season best stat'}</b><div class="wko-num">${st.big?esc(st.big):'0'}</div><div class="wko-lb">${esc(st.l)}</div><small class="wko-sub">${esc(st.sub)}</small></div>
     <div class="wko-st wko-s4"><i class="wko-rays"></i><div class="wko-ttl">${X?esc(RAR[X.r].n.toUpperCase())+'!':'IMMORTAL!'}</div>
-      <div class="wko-card"><div class="wko-ct"><span>${X?esc(RAR[X.r].n)+' player card':'TOP 10 · #'+ai.rank}</span><span>+${ai.pct}%</span></div>${av(p.name,p.school,124)}<h3>${esc(p.name)}</h3><p>${esc(pos)} · ${slogo(p.school,18)} ${esc(p.school)}</p><em>${esc(st.big?st.l:st.n.toLocaleString()+' '+st.l)}</em><i class="wko-shine"></i></div><i class="wko-pts"></i>
+      <div class="wko-card"><div class="wko-ct"><span>${X?esc(RAR[X.r].n)+' '+(C?C.kind:'player')+' card':'TOP 10 · #'+ai.rank}</span><span>+${ai.pct}%</span></div>${C?C.art:av(p.name,p.school,124)}<h3>${esc(p.name)}</h3><p>${esc(pos)} · ${slogo(p.school,18)} ${esc(p.school)}</p><em>${esc(st.big?st.l:st.n.toLocaleString()+' '+st.l)}</em><i class="wko-shine"></i></div><i class="wko-pts"></i>
       <button class="btn wko-go" type="button">${X?esc(X.btn||'Next'):'Pick your player'}</button></div>
     <button class="wko-skip" type="button">Skip</button>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
@@ -4755,6 +4756,9 @@ function packShow(P,got){
   const OR=['e','l','m','x'],wk=[];
   for(const g of got||[]){if(!g.card||!OR.includes(g.r))continue;let key='',pct=0;
     if(g.card.startsWith('pc:'))key=g.card.slice(3);else if(g.card.startsWith('ac:')){const a=achInfo(g.card);key=a&&a.key;pct=a&&a.pct}
+    /* v408 (owner): Duo cards and team cards get the walkout too, so every Epic or better card is a walkout */
+    if(g.card.startsWith('dc:')){const c=duoInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.full,school:c.school,pos:[c.a,c.b].map(q=>q.key?posOf(q):'').filter(Boolean).join(' + ')||'DUO',k1:'Duo',kind:'duo',on:'on parlays',art:duoArt(g.card,g.r,170)}});continue}
+    if(g.card.startsWith('tc:')){const c=cardInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school||c.name,pos:'TEAM',k1:'Card',kind:'team',on:'on Pick ’em picks',art:cardArt(g.card,g.r,124)}});continue}
     const p=key&&pByKey(key);if(p)wk.push({p,r:g.r,dup:g.dup,pct,k:P.n})}
   wk.sort((a,b)=>OR.indexOf(a.r)-OR.indexOf(b.r));
   const next=i=>{if(i>=wk.length){packShow0(P,got);return}pkWalkout(null,()=>next(i+1),Object.assign({btn:i+1<wk.length?'Next card':'See all cards'},wk[i]))};
@@ -5092,18 +5096,20 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'wp-2',who:ABZH,wp:1},
   {id:'zh-ch',who:ZH,name:'Carson Hasting',school:'Granite Hills',r:'*'},   /* v352 */
   {id:'wp-3',who:ZH,wp:1},
-  {id:'ml-wp-1',who:ML,wp:1}];   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
+  {id:'ml-wp-1',who:ML,wp:1},
+  {id:'ab-duo-1',who:AB,gp:'duo'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
-  const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0;
+  const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),gp=Object.assign({},(old.fr||{}).gp),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0,ng=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
   /* v355 (owner, "refresh all packs"): every welcome pack opened before the v355 rules (Epic+, top 10 player, 1% Immortal; wpv 3) is refreshed once */
   if(+old.wp>0&&(+old.wpv||1)<3&&!rv['wp-v3']){rv['wp-v3']=1;patch.wp=0;n++}
   for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;rv[f.id]=1;n++;
     if(f.wp){patch.wp=0;continue}
+    if(f.gp){gp[f.id]={t:f.gp,m:'A free '+PACKS[f.gp].n+' for you'};ng++;continue}
     if(f.restore){const raw=old.cards&&old.cards[f.card];if(raw&&typeof raw==='object'){const zs=Object.keys(raw).filter(r=>raw[r]===0);if(zs.length)put(f.card,c=>zs.forEach(r=>c[r]=1))}continue}
     for(const p of players().filter(p=>p.name===f.name&&p.school===f.school)){const id='pc:'+p.key,have=own[id]||{};
       const rs=f.r==='*'?Object.keys(have).filter(r=>have[r]):have[f.r]?[f.r]:[];if(rs.length)put(id,c=>rs.forEach(r=>c[r]=0))}}
-  if(!n)return;patch.fr=Object.assign({},old.fr,{rv});
+  if(!n)return;patch.fr=Object.assign({},old.fr,{rv},ng?{gp}:{});
   S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},old,patch)});
   upsert('picks/'+u,{inv:patch}).catch(()=>{S.picks[u]=Object.assign({},S.picks[u],{inv:old})})}
 /* account notice (v374): picks/<uid>.ban={m:reason} shows a full-screen "Account banned" screen to that user only. Remove the field to lift it. */
@@ -5719,8 +5725,11 @@ function slipLegs(){
 const SL_BONUS=.05;   /* v407: each extra pick in a parlay adds 5% to the combined odds (2 picks +5%, 6 picks +25%) */
 function slipCalc(legs){
   const raw=legs.reduce((o,l)=>o*(l.s==='o'?l.x.over:l.x.under),1),pb=1+SL_BONUS*(legs.length-1),odds=Math.round(raw*pb*100)/100;
-  const pct=Math.min(500,legs.reduce((t,l)=>t+(ME.uid?cardPct(ME.uid,'pc:'+l.x.k):0),0));
-  return {odds,pct,pb,bonus:Math.round(SL_BONUS*(legs.length-1)*100),win:st=>st+(st*odds-st)*(1+pct/100)};
+  /* v408 (owner): a Duo card you own boosts any parlay that has both of its players */
+  const ks=new Set(legs.map(l=>l.x.k)),duos=ME.uid&&legs.length>1?Object.keys(cardsOf(ME.uid)).filter(id=>id.startsWith('dc:')&&duoKeys(id).every(k=>ks.has(k))&&cardR(ME.uid,id)):[];
+  const dp=duos.reduce((t,id)=>t+duoPct(ME.uid,id),0);
+  const pct=Math.min(500,legs.reduce((t,l)=>t+(ME.uid?cardPct(ME.uid,'pc:'+l.x.k):0),0)+dp);
+  return {odds,pct,pb,duos,dp,bonus:Math.round(SL_BONUS*(legs.length-1)*100),win:st=>st+(st*odds-st)*(1+pct/100)};
 }
 function slipHTML(bal){
   const legs=slipLegs();if(!legs.length)return '';
@@ -5728,6 +5737,7 @@ function slipHTML(bal){
   const row=l=>`<div class="sl-leg"><span><b>${esc(lastN(l.x.name))} ${l.s==='o'?'Over':'Under'} ${fmtN(l.x.line)}</b><small class="muted">${esc(PP_MK[l.x.m].l)} · ${esc(abbr(l.x.game.a))} at ${esc(abbr(l.x.game.h))}</small></span><span class="sl-o">${(l.s==='o'?l.x.over:l.x.under).toFixed(2)}x</span><button class="btn sm ghost" data-act="slLeg" data-id="${esc(l.x.id)}" data-s="${l.s}" aria-label="Remove this pick">×</button></div>`;
   const chips=[5,10,25,50,100].filter(v=>v<=max);
   return `<section class="card bt-all sl-bar"><div class="qh"><h3>${one?'Your pick':'Your parlay'}</h3><span class="muted">${one?'single pick':legs.length+' picks · all must hit'}</span></div>${legs.map(row).join('')}
+    ${c.duos&&c.duos.length?`<p class="sl-duo">${c.duos.map(id=>duoArt(id,cardR(ME.uid,id),44)).join('')}<span><b>Duo boost +${c.dp}%</b><small class="muted">${c.duos.map(id=>esc(duoInfo(id).name)).join(', ')} · both players are in this parlay</small></span></p>`:''}
     ${one?`<p class="muted">Add another player to make it a parlay: ${Math.round(SL_BONUS*100)}% better odds for each extra pick.</p>`:legs.length>=SL_MAX?`<p class="muted">That is the most picks in one parlay (${SL_MAX}).</p>`:''}
     <div class="bt-stk"><span class="muted">One wager</span>${chips.map(v=>`<button class="chip" data-act="slStake" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${max>=1?`<button class="chip allin" data-act="slStake" data-v="${max}" aria-pressed="${stake===max}">All in</button>`:''}<input class="bt-amt sl-amt" type="number" min="1" max="${max}" step="1" inputmode="numeric" value="${stake||''}" data-room="${max}" aria-label="Parlay wager in tokens"></div>
     <div class="bt-go"><span>${c.odds.toFixed(2)}x${c.bonus?` (incl. +${c.bonus}% parlay bonus)`:''} · win <b id="sl-win">${tk(c.win(stake))}</b>${c.pct?` with +${c.pct}% card boost`:''}</span><button class="btn" data-act="slGo" ${ok?'':'disabled'}>${one?'Lock in pick':'Lock in parlay'}</button><button class="btn ghost" data-act="slClear">Clear</button></div></section>`;
