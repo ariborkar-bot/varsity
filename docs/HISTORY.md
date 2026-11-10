@@ -338,3 +338,7 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - bh.js look changed from flat cartoon shading with ink outlines to a glossy collectible: `MeshPhysicalMaterial` finishes (`FIN`: gloss, plastic, satin, cloth, skin, rubber, metal, steel), room reflections, soft shadow, blue and orange rim lights, dark stage (`.bh-host`). `ink()` is now a no-op.
 - Tougher character: taller body and smaller head (`BSX`, `BSY`, `HS`, `GAP`), squarer jaw, narrow eyes with a heavy lid line, a small closed smirk, eye black, gloved fists with fingers (`A.hand`), facemask bars at nose and chin, charcoal jersey.
 - Calmer movement: no bouncing to a beat, no waving or happy-arc eyes; it breathes, looks around, tosses the ball and nods. Tap still bobbles, drag still spins.
+
+## v410 (Nov 10, owner): Isaac Smedra's Immortal and Legendary cards removed
+- New `CARD_FIX` entry type `{rar:['x','l']}` removes every card of those rarities (x Immortal, l Legendary; `pc:` player cards and `ac:` achievement cards) from the matching profile, once (`is-lx`, name /isaac smedra/i), the next time he opens the app. Other rarities and his tokens are untouched. Tested with a fake account (Epic/Rare/Common kept, all Legendary/Immortal set to 0).
+- Selling cards: the app has no sell feature (the only token-for-card thing is a duplicate pulled from a pack turning into tokens automatically, `RAR[r].dup`), so nothing was changed there.

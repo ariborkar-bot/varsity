@@ -3077,7 +3077,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v409 · Nov 10';
+const APP_BUILD='v410 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5088,7 +5088,7 @@ function spRevoke(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly
 /* v347 (owner): one-time card removals by account. Each entry switches off the Legendary version of a named player's card on that
    account's next app open (done once, marked in inv.fr.rv[id]). */
 const ML=/^\s*max\s+london\s*$/i,AB=/^\s*ari\s+borkar\s*$/i,ZH=/^\s*zed\s+hornby\s*$/i,ABZH=/^\s*(ari\s+borkar|zed\s+hornby)\s*$/i;
-/* entries: remove {name,school,r ('*' = every version)} · restore {card}: versions set to 0 go back to 1 · wp: a new welcome pack */
+/* entries: remove {name,school,r ('*' = every version)} · remove every card of some rarities {rar:['x','l']} (x Immortal, l Legendary) · restore {card}: versions set to 0 go back to 1 · wp: a new welcome pack */
 const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'},
   {id:'ab-dg',who:AB,name:'Daine Gonzalez',school:'Classical Academy',r:'*'},
   {id:'zh-rd-back',who:ZH,card:'pc:mp955',restore:1},   /* v350: owner gave Rory Dunn back (the v349 removal is gone) */
@@ -5097,6 +5097,7 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'zh-ch',who:ZH,name:'Carson Hasting',school:'Granite Hills',r:'*'},   /* v352 */
   {id:'wp-3',who:ZH,wp:1},
   {id:'ml-wp-1',who:ML,wp:1},
+  {id:'is-lx',who:/^\s*isaac\s+smedra\s*$/i,rar:['x','l']},   /* v409 (owner): every Immortal and Legendary card removed from Isaac Smedra */
   {id:'ab-duo-1',who:AB,gp:'duo'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),gp=Object.assign({},(old.fr||{}).gp),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0,ng=0;
@@ -5106,6 +5107,7 @@ function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'
   for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;rv[f.id]=1;n++;
     if(f.wp){patch.wp=0;continue}
     if(f.gp){gp[f.id]={t:f.gp,m:'A free '+PACKS[f.gp].n+' for you'};ng++;continue}
+    if(f.rar){for(const [id,have] of Object.entries(own)){const rs=f.rar.filter(r=>have[r]);if(rs.length)put(id,c=>rs.forEach(r=>c[r]=0))}continue}
     if(f.restore){const raw=old.cards&&old.cards[f.card];if(raw&&typeof raw==='object'){const zs=Object.keys(raw).filter(r=>raw[r]===0);if(zs.length)put(f.card,c=>zs.forEach(r=>c[r]=1))}continue}
     for(const p of players().filter(p=>p.name===f.name&&p.school===f.school)){const id='pc:'+p.key,have=own[id]||{};
       const rs=f.r==='*'?Object.keys(have).filter(r=>have[r]):have[f.r]?[f.r]:[];if(rs.length)put(id,c=>rs.forEach(r=>c[r]=0))}}
