@@ -3076,7 +3076,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v406 · Nov 10';
+const APP_BUILD='v407 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4490,7 +4490,7 @@ const parlOf=u=>((S.picks[u]||{}).parl)||{};
 function parlLegs(b,gm){return (b.legs||[]).map(l=>({l,r:propResult(Object.assign({w:b.w,g:b.g},l),gm)}))}
 function parlResult(b,gm){const L=parlLegs(b,gm);if(L.some(x=>x.r==='lost'))return 'lost';if(L.some(x=>x.r==='open'))return 'open';
   return L.every(x=>x.r==='push')?'push':'won'}
-const parlEff=(b,gm)=>parlLegs(b,gm).filter(x=>x.r==='won').reduce((o,x)=>o*(+x.l.odds||1),1);
+const parlEff=(b,gm)=>parlLegs(b,gm).filter(x=>x.r==='won').reduce((o,x)=>o*(+x.l.odds||1),1)*(+b.pb||1);   /* pb = the parlay bonus multiplier saved with a prop slip (v407) */
 const parlWin=(b,gm)=>{const st=+b.stake||0;return (st*parlEff(b,gm)-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100)};
 function duoPct(u,id){const r=cardR(u,id);return r?CARD_PCT[r]:0}
 UI.pl={};
@@ -4535,7 +4535,7 @@ function rollTeamCard(t){const pl=players().filter(p=>!p.sample&&!/x$/.test(p.ke
 /* v396 (owner): small ⓘ buttons next to game words; tap one for a one-line definition (INFO) */
 const INFO={
   pickem:['Pick ’em','Pick the winner of each game. You score for every game you call right.'],
-  ou:['Over / Under',()=>'Each player gets a stat line (like '+(FG_SPORT==='bb'?'18 points':'80 rushing yards')+'). Pick whether he finishes over or under it. Combine 2 or more picks into one parlay: all of them have to hit, and you wager once on the total.'],
+  ou:['Over / Under',()=>'Each player gets a stat line (like '+(FG_SPORT==='bb'?'18 points':'80 rushing yards')+'). Pick whether he finishes over or under it. Combine 2 or more picks into one parlay for better odds: all of them have to hit, and you wager once on the total.'],
   cup:['School Cup','Your school’s weekly points from you and your classmates. Schools face off each week.'],
   redraw:['Redraw','Swap one of your 5 players for a new random one, before that player’s game starts. You get a few per hand.'],
   walkout:['Epic+ walkout','Epic, Legendary and Mythical cards are revealed with a short walk-out: position, team, stats, then the player.'],
@@ -5716,30 +5716,36 @@ function slipLegs(){
   Object.keys(L).forEach(id=>{const x=pm[id];if(!x||started(x.game)){delete L[id];return}out.push({x,s:L[id]})});
   return out;
 }
+const SL_BONUS=.05;   /* v407: each extra pick in a parlay adds 5% to the combined odds (2 picks +5%, 6 picks +25%) */
 function slipCalc(legs){
-  const odds=Math.round(legs.reduce((o,l)=>o*(l.s==='o'?l.x.over:l.x.under),1)*100)/100;
+  const raw=legs.reduce((o,l)=>o*(l.s==='o'?l.x.over:l.x.under),1),pb=1+SL_BONUS*(legs.length-1),odds=Math.round(raw*pb*100)/100;
   const pct=Math.min(500,legs.reduce((t,l)=>t+(ME.uid?cardPct(ME.uid,'pc:'+l.x.k):0),0));
-  return {odds,pct,win:st=>st+(st*odds-st)*(1+pct/100)};
+  return {odds,pct,pb,bonus:Math.round(SL_BONUS*(legs.length-1)*100),win:st=>st+(st*odds-st)*(1+pct/100)};
 }
 function slipHTML(bal){
   const legs=slipLegs();if(!legs.length)return '';
-  const c=slipCalc(legs),max=Math.floor(bal),stake=Math.max(0,Math.min(Math.floor(UI.sl.stake||0),max)),ok=legs.length>=2&&stake>=1;
+  const c=slipCalc(legs),max=Math.floor(bal),stake=Math.max(0,Math.min(Math.floor(UI.sl.stake||0),max)),ok=legs.length>=1&&stake>=1,one=legs.length===1;
   const row=l=>`<div class="sl-leg"><span><b>${esc(lastN(l.x.name))} ${l.s==='o'?'Over':'Under'} ${fmtN(l.x.line)}</b><small class="muted">${esc(PP_MK[l.x.m].l)} · ${esc(abbr(l.x.game.a))} at ${esc(abbr(l.x.game.h))}</small></span><span class="sl-o">${(l.s==='o'?l.x.over:l.x.under).toFixed(2)}x</span><button class="btn sm ghost" data-act="slLeg" data-id="${esc(l.x.id)}" data-s="${l.s}" aria-label="Remove this pick">×</button></div>`;
   const chips=[5,10,25,50,100].filter(v=>v<=max);
-  return `<section class="card bt-all sl-bar"><div class="qh"><h3>Your parlay</h3><span class="muted">${legs.length} ${legs.length===1?'pick':'picks'} · all must hit</span></div>${legs.map(row).join('')}
-    ${legs.length<2?'<p class="muted">Add at least one more player to build a parlay.</p>':legs.length>=SL_MAX?`<p class="muted">That is the most picks in one parlay (${SL_MAX}).</p>`:''}
+  return `<section class="card bt-all sl-bar"><div class="qh"><h3>${one?'Your pick':'Your parlay'}</h3><span class="muted">${one?'single pick':legs.length+' picks · all must hit'}</span></div>${legs.map(row).join('')}
+    ${one?`<p class="muted">Add another player to make it a parlay: ${Math.round(SL_BONUS*100)}% better odds for each extra pick.</p>`:legs.length>=SL_MAX?`<p class="muted">That is the most picks in one parlay (${SL_MAX}).</p>`:''}
     <div class="bt-stk"><span class="muted">One wager</span>${chips.map(v=>`<button class="chip" data-act="slStake" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${max>=1?`<button class="chip allin" data-act="slStake" data-v="${max}" aria-pressed="${stake===max}">All in</button>`:''}<input class="bt-amt sl-amt" type="number" min="1" max="${max}" step="1" inputmode="numeric" value="${stake||''}" data-room="${max}" aria-label="Parlay wager in tokens"></div>
-    <div class="bt-go"><span>${c.odds.toFixed(2)}x · win <b id="sl-win">${tk(c.win(stake))}</b>${c.pct?` with +${c.pct}% card boost`:''}</span><button class="btn" data-act="slGo" ${ok?'':'disabled'}>Lock in parlay</button><button class="btn ghost" data-act="slClear">Clear</button></div></section>`;
+    <div class="bt-go"><span>${c.odds.toFixed(2)}x${c.bonus?` (incl. +${c.bonus}% parlay bonus)`:''} · win <b id="sl-win">${tk(c.win(stake))}</b>${c.pct?` with +${c.pct}% card boost`:''}</span><button class="btn" data-act="slGo" ${ok?'':'disabled'}>${one?'Lock in pick':'Lock in parlay'}</button><button class="btn ghost" data-act="slClear">Clear</button></div></section>`;
 }
 async function slipGo(){
   const legs=slipLegs();
-  if(legs.length<2){say('A parlay needs at least 2 players.');return}
+  if(!legs.length){say('Pick Over or Under first.');return}
   if(legs.length>SL_MAX){say('A parlay can have up to '+SL_MAX+' picks.');return}
   if(new Set(legs.map(l=>l.x.k)).size!==legs.length){say('Pick each player only once.');return}
   const bal=bank(ME.uid),stake=Math.floor(Math.min(UI.sl.stake||0,bal));
   if(stake<1){say('Pick a wager first.');return}
   if(!await stakeOk(stake,bal))return;
-  const c=slipCalc(legs),rec={d:'',legs:legs.map(l=>({k:l.x.k,m:l.x.m,w:l.x.w,g:l.x.g,line:l.x.line,s:l.s,odds:l.s==='o'?l.x.over:l.x.under})),stake,odds:c.odds,cb:c.pct,at:NOW()},key='p|'+NOW()+'|'+Math.random().toString(36).slice(2,6),cur=parlOf(ME.uid);
+  if(legs.length===1){const x=legs[0].x,sd=legs[0].s,cur1=propsOf(ME.uid);
+    if(cur1[x.id]){say('You already picked that line.');return}
+    const cb=ME.uid?cardPct(ME.uid,'pc:'+x.k):0,r1={k:x.k,m:x.m,w:x.w,g:x.g,s:sd,stake,line:x.line,odds:sd==='o'?x.over:x.under,at:NOW(),...(cb?{cb}:{})};
+    if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:{...cur1,[x.id]:r1}}),'Pick locked in')){UI.sl={legs:{},stake:UI.sl.stake}}
+    render();return}
+  const c=slipCalc(legs),rec={d:'',pb:c.pb,legs:legs.map(l=>({k:l.x.k,m:l.x.m,w:l.x.w,g:l.x.g,line:l.x.line,s:l.s,odds:l.s==='o'?l.x.over:l.x.under})),stake,odds:c.odds,cb:c.pct,at:NOW()},key='p|'+NOW()+'|'+Math.random().toString(36).slice(2,6),cur=parlOf(ME.uid);
   S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:Object.assign({},cur,{[key]:rec})});
   if(await act(()=>upsert('picks/'+ME.uid,{parl:{[key]:rec}}),'Parlay locked in')){UI.sl={legs:{},stake:UI.sl.stake}}else S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:cur});
   render()}
@@ -5747,7 +5753,7 @@ function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
   const staked=Object.values(mine).reduce((a,b)=>a+(propResult(b,gm)==='open'?+b.stake||0:0),0)+Object.values(parlOf(ME.uid||'')).reduce((a,b)=>a+(parlResult(b,gm)==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under on at least 2 players to build a parlay: every pick has to hit, the odds multiply, and you wager once on the total. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, that pick is dropped from the parlay.</div></section>`;
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under on one player, or on 2 or more to build a parlay: every pick has to hit, the odds multiply (plus a parlay bonus), and you wager once on the total. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, that pick is dropped from the parlay.</div></section>`;
   const mkChips=`<div class="chips bf-mk" role="group" aria-label="Stat type">${['ALL',...PP_GROUPS].map(v=>`<button class="chip" data-act="ppM" data-v="${v}" aria-pressed="${UI.pm===v}">${v==='ALL'?'All stats':v}</button>`).join('')}</div>`;
   const all=propCands().filter(x=>bfOK(x.game)&&(UI.pm==='ALL'||PP_MK[x.m].g===UI.pm));
   const shown=all.slice(0,UI.ppN);
@@ -5758,8 +5764,8 @@ function propsHTML(){
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'';
     else if(locked||b)foot=b?`<p class="muted">Locked in: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)} to win ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
-    else if(side)foot='<p class="muted">In your parlay.</p>';
-    else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under to add it to a parlay.</p>';
+    else if(side)foot='<p class="muted">In your slip below.</p>';
+    else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under to pick it.</p>';
     if(b&&!locked)foot+=bxChips('pp',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
     if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'pc:'+x.k))foot+=`<p class="bx-tag cbx">Your ${esc(x.name)} card adds +${cardPct(ME.uid,'pc:'+x.k)}% to the parlay winnings</p>`;
     return `<article class="gm bt-g pp"><div class="gm-h"><span>${esc(fmtDate(x.game.d))} · vs ${esc(x.opp)}</span>${x.game.dv?`<span class="gm-k p">${esc(x.game.dv)}</span>`:''}</div>
