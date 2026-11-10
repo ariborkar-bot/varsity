@@ -2497,7 +2497,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .lk-duo .lk-art,.pko-pack.lk-duo .pko-pk{background:linear-gradient(135deg,#B48CFF 0%,#5B2BD9 48%,#FFC23D 52%,#C2281E 100%);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5)}
 .parl-c{border:1px solid color-mix(in srgb,var(--rc) 55%,transparent)}.parl-h{display:flex;gap:10px;align-items:center;margin-bottom:8px}.parl-h small{display:block}
 .parl-leg{display:flex;flex-direction:column;gap:6px}.parl-who{display:flex;gap:8px;align-items:center}.parl-plus{text-align:center;font:900 1.1rem/1 var(--f-display,inherit);color:var(--rc);margin:4px 0}
-.parl-won{color:#3DDC84}.parl-lost{color:#FF4F6D}
+.sl-leg{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)}.sl-leg>span:first-child{flex:1;min-width:0}.sl-leg small{display:block}.sl-o{font:800 .9rem/1 var(--f-display,inherit)}.sl-bar .bt-go{flex-wrap:wrap;gap:8px}.sl-bar{padding:10px 12px!important}.sl-bar .qh{margin:0 0 2px!important}.sl-bar .qh h3{font-size:1rem}.sl-bar p{margin:2px 0}.sl-leg{padding:3px 0!important}.sl-leg .btn{padding:0 10px;min-height:28px}.sl-bar .bt-stk{margin:6px 0 4px;flex-wrap:wrap;gap:6px}.sl-bar .bt-stk .chip{padding:5px 11px;min-height:0}.sl-bar .bt-amt{width:76px;flex:none}.sl-bar{position:fixed;left:8px;right:8px;bottom:76px;z-index:40;max-width:560px;margin:0 auto;max-height:56vh;overflow:auto;box-shadow:0 -6px 24px rgba(0,0,0,.55);border:1px solid var(--gold,#FFB800)}.sl-sp{height:56vh}.parl-won{color:#3DDC84}.parl-lost{color:#FF4F6D}
 /* v256 pack opening: rip, lift-spin-land flips, sparks, rarity background glow */
 .pko{isolation:isolate}
 .pko-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s ease;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--gc,#7A4DFF) 55%,transparent),color-mix(in srgb,var(--gc,#7A4DFF) 18%,transparent) 45%,transparent 75%)}
@@ -3086,7 +3086,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v404 · Nov 10';
+const APP_BUILD='v405 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4511,7 +4511,7 @@ function rollTeamCard(t){const pl=players().filter(p=>!p.sample&&!/x$/.test(p.ke
 /* v396 (owner): small ⓘ buttons next to game words; tap one for a one-line definition (INFO) */
 const INFO={
   pickem:['Pick ’em','Pick the winner of each game. You score for every game you call right.'],
-  ou:['Over / Under',()=>'Each player gets a stat line (like '+(FG_SPORT==='bb'?'18 points':'80 rushing yards')+'). Pick whether he finishes over or under it.'],
+  ou:['Over / Under',()=>'Each player gets a stat line (like '+(FG_SPORT==='bb'?'18 points':'80 rushing yards')+'). Pick whether he finishes over or under it. Combine 2 or more picks into one parlay: all of them have to hit, and you wager once on the total.'],
   cup:['School Cup','Your school’s weekly points from you and your classmates. Schools face off each week.'],
   redraw:['Redraw','Swap one of your 5 players for a new random one, before that player’s game starts. You get a few per hand.'],
   walkout:['Epic+ walkout','Epic, Legendary and Mythical cards are revealed with a short walk-out: position, team, stats, then the player.'],
@@ -5306,9 +5306,12 @@ function activeCard(){
     return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)} to win</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${started(x.g)?' · locked':''}</small></span></span>${right(x.b)}</div>`};
   const ppRow=x=>{const p=pByKey(x.b.k),M=PP_MK[x.b.m]||{l:x.b.m||''},g=x.g;
     return `<div class="bt-h"><span class="bt-pk">${slogo(p?p.school:'',30)}<span><b>${esc(p?p.name:'Player')} ${x.b.s==='o'?'Over':'Under'} ${fmtN(+x.b.line)}</b><small class="muted">${esc(M.l)}${g?' · '+esc(abbr(g.a))+' at '+esc(abbr(g.h))+' · '+esc(fmtDate(g.d)):''}${g&&started(g)?' · locked':''}</small></span></span>${right(x.b)}</div>`};
-  const n=pk.length+pp.length,wag=[...pk,...pp].reduce((t,x)=>t+(+x.b.stake||0),0);
+  const par=Object.values(parlOf(ME.uid)).filter(b=>parlResult(b,gm)==='open');
+  const parRow=b=>{const st=+b.stake||0,pot=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100);
+    return `<div class="bt-h"><span class="bt-pk"><span><b>${b.legs.length}-pick parlay</b><small class="muted">${b.legs.map(l=>esc(lastN((pByKey(l.k)||{}).name))+' '+(l.s==='o'?'O':'U')+' '+fmtN(+l.line)).join(' · ')}</small></span></span><span class="bt-pay"><b>${tk(pot)}</b><small class="muted">${tk(st)} at ${(+b.odds).toFixed(2)}x</small></span></div>`};
+  const n=pk.length+pp.length+par.length,wag=[...pk,...pp,...par].reduce((t,x)=>t+(+(x.b||x).stake||0),0);
   const sec=(l,arr,f)=>arr.length?`<div class="act-l">${l} <span class="muted">${arr.length}</span></div>${arr.map(f).join('')}`:'';
-  return `<section class="card bt-mine act-picks"><div class="qh"><h3>Active picks</h3>${n?`<span class="muted">${n} open · ${tk(wag)} wagered</span>`:''}</div>${n?sec('Pick ’em',pk,pkRow)+sec('Player props',pp,ppRow):'<p class="muted">Nothing open right now. Your Pick ’em picks and player props show here until they are settled.</p>'}</section>`;
+  return `<section class="card bt-mine act-picks"><div class="qh"><h3>Active picks</h3>${n?`<span class="muted">${n} open · ${tk(wag)} wagered</span>`:''}</div>${n?sec('Pick ’em',pk,pkRow)+sec('Player props',pp,ppRow)+sec('Parlays',par,parRow):'<p class="muted">Nothing open right now. Your Pick ’em picks and player props show here until they are settled.</p>'}</section>`;
 }
 function mgBoard(title,rows,empty,sub){
   if(!rows.length)return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div><p class="muted">${empty||'No one is on the board yet. Lock in a pick to be first.'}</p></section>`;
@@ -5665,7 +5668,7 @@ function propResult(b,gm){
 }
 const fmtN=v=>Math.abs(v-Math.round(v))<.05?String(Math.round(v)):(Math.round(v*10)/10).toFixed(1);
 /* filters shared by Pick ’em and Over / Under */
-UI.bf={dv:'',w:'',sc:''};UI.pp={};UI.pm='ALL';UI.ppN=24;
+UI.bf={dv:'',w:'',sc:''};UI.pp={};UI.pm='ALL';UI.ppN=24;UI.sl={legs:{},stake:10};   /* v405: the prop slip: legs {lineId:'o'|'u'} and ONE stake for the whole parlay */
 const bfOK=g=>{const f=UI.bf;return(!f.dv||(g.dv||'')===f.dv)&&(!f.w||g.w===+f.w)&&(!f.sc||g.h===f.sc||g.a===f.sc)};
 function bfBar(extra){
   const gs=((GAMES&&GAMES.games)||[]).filter(g=>!gDone(g)),f=UI.bf;
@@ -5675,40 +5678,72 @@ function bfBar(extra){
   return `<section class="card bf-bar">${sel('dv','Division','All divisions',dvs.map(d=>[d,d]))}${sel('w','Week','All weeks',ws.map(w=>['' +w,'Week '+w]))}${sel('sc','School','All schools',scs.map(s=>[s,s]))}${any?'<button class="btn sm ghost" data-act="bfClear">Clear filters</button>':''}${extra||''}</section>`;
 }
 const abbr=n=>!n?'TBD':n.length<=11?n:n.split(/\s+/).map(w=>w[0]).join('').slice(0,4).toUpperCase();
+/* v405 (owner): player props are parlays only. Tap Over/Under on 2-6 different players (any games), then ONE wager on the whole parlay. Saved in picks/<uid>.parl under key 'p|<time>|<rand>' (same record as duo parlays, but each leg carries its own w and g); bank(), earned(), parlResult() and fcKeep() already handle it. Boost = sum of the legs' card percents (cap 500). Older single prop picks still settle. */
+const SL_MAX=6;
+function slipLegs(){
+  const pm=propMap(),L=UI.sl.legs,out=[];
+  Object.keys(L).forEach(id=>{const x=pm[id];if(!x||started(x.game)){delete L[id];return}out.push({x,s:L[id]})});
+  return out;
+}
+function slipCalc(legs){
+  const odds=Math.round(legs.reduce((o,l)=>o*(l.s==='o'?l.x.over:l.x.under),1)*100)/100;
+  const pct=Math.min(500,legs.reduce((t,l)=>t+(ME.uid?cardPct(ME.uid,'pc:'+l.x.k):0),0));
+  return {odds,pct,win:st=>st+(st*odds-st)*(1+pct/100)};
+}
+function slipHTML(bal){
+  const legs=slipLegs();if(!legs.length)return '';
+  const c=slipCalc(legs),max=Math.floor(bal),stake=Math.max(0,Math.min(Math.floor(UI.sl.stake||0),max)),ok=legs.length>=2&&stake>=1;
+  const row=l=>`<div class="sl-leg"><span><b>${esc(lastN(l.x.name))} ${l.s==='o'?'Over':'Under'} ${fmtN(l.x.line)}</b><small class="muted">${esc(PP_MK[l.x.m].l)} · ${esc(abbr(l.x.game.a))} at ${esc(abbr(l.x.game.h))}</small></span><span class="sl-o">${(l.s==='o'?l.x.over:l.x.under).toFixed(2)}x</span><button class="btn sm ghost" data-act="slLeg" data-id="${esc(l.x.id)}" data-s="${l.s}" aria-label="Remove this pick">×</button></div>`;
+  const chips=[5,10,25,50,100].filter(v=>v<=max);
+  return `<section class="card bt-all sl-bar"><div class="qh"><h3>Your parlay</h3><span class="muted">${legs.length} ${legs.length===1?'pick':'picks'} · all must hit</span></div>${legs.map(row).join('')}
+    ${legs.length<2?'<p class="muted">Add at least one more player to build a parlay.</p>':legs.length>=SL_MAX?`<p class="muted">That is the most picks in one parlay (${SL_MAX}).</p>`:''}
+    <div class="bt-stk"><span class="muted">One wager</span>${chips.map(v=>`<button class="chip" data-act="slStake" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${max>=1?`<button class="chip allin" data-act="slStake" data-v="${max}" aria-pressed="${stake===max}">All in</button>`:''}<input class="bt-amt sl-amt" type="number" min="1" max="${max}" step="1" inputmode="numeric" value="${stake||''}" data-room="${max}" aria-label="Parlay wager in tokens"></div>
+    <div class="bt-go"><span>${c.odds.toFixed(2)}x · win <b id="sl-win">${tk(c.win(stake))}</b>${c.pct?` with +${c.pct}% card boost`:''}</span><button class="btn" data-act="slGo" ${ok?'':'disabled'}>Lock in parlay</button><button class="btn ghost" data-act="slClear">Clear</button></div></section>`;
+}
+async function slipGo(){
+  const legs=slipLegs();
+  if(legs.length<2){say('A parlay needs at least 2 players.');return}
+  if(legs.length>SL_MAX){say('A parlay can have up to '+SL_MAX+' picks.');return}
+  if(new Set(legs.map(l=>l.x.k)).size!==legs.length){say('Pick each player only once.');return}
+  const bal=bank(ME.uid),stake=Math.floor(Math.min(UI.sl.stake||0,bal));
+  if(stake<1){say('Pick a wager first.');return}
+  if(!await stakeOk(stake,bal))return;
+  const c=slipCalc(legs),rec={d:'',legs:legs.map(l=>({k:l.x.k,m:l.x.m,w:l.x.w,g:l.x.g,line:l.x.line,s:l.s,odds:l.s==='o'?l.x.over:l.x.under})),stake,odds:c.odds,cb:c.pct,at:NOW()},key='p|'+NOW()+'|'+Math.random().toString(36).slice(2,6),cur=parlOf(ME.uid);
+  S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:Object.assign({},cur,{[key]:rec})});
+  if(await act(()=>upsert('picks/'+ME.uid,{parl:{[key]:rec}}),'Parlay locked in')){UI.sl={legs:{},stake:UI.sl.stake}}else S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:cur});
+  render()}
 function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
-  const staked=Object.values(mine).reduce((a,b)=>a+(propResult(b,gm)==='open'?+b.stake||0:0),0);
-  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, your tokens come back.</div></section>`;
+  const staked=Object.values(mine).reduce((a,b)=>a+(propResult(b,gm)==='open'?+b.stake||0:0),0)+Object.values(parlOf(ME.uid||'')).reduce((a,b)=>a+(parlResult(b,gm)==='open'?+b.stake||0:0),0);
+  const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under on at least 2 players to build a parlay: every pick has to hit, the odds multiply, and you wager once on the total. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, that pick is dropped from the parlay.</div></section>`;
   const mkChips=`<div class="chips bf-mk" role="group" aria-label="Stat type">${['ALL',...PP_GROUPS].map(v=>`<button class="chip" data-act="ppM" data-v="${v}" aria-pressed="${UI.pm===v}">${v==='ALL'?'All stats':v}</button>`).join('')}</div>`;
   const all=propCands().filter(x=>bfOK(x.game)&&(UI.pm==='ALL'||PP_MK[x.m].g===UI.pm));
   const shown=all.slice(0,UI.ppN);
   const card=(x,grp)=>{
-    const id=x.id,b=mine[id],M=PP_MK[x.m],locked=started(x.game),ui=UI.pp[id]||{},side=ui.s||(b&&b.s)||'',stake=ui.stake||(b&&b.stake)||5;
-    const btn=(sd,t,odd)=>`<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="ppSide" data-id="${esc(id)}" data-s="${sd}" ${locked||b||!can?'disabled':''}><b>${t} ${fmtN(x.line)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${Math.round((sd==='o'?x.po:1-x.po)*100)}% chance</small></button>`;
+    const id=x.id,b=mine[id],M=PP_MK[x.m],locked=started(x.game),side=UI.sl.legs[id]||(b&&b.s)||'';
+    const btn=(sd,t,odd)=>`<button class="bt-t ${side===sd?'on':''} ${b&&b.s===sd?'saved':''}" data-act="slLeg" data-id="${esc(id)}" data-s="${sd}" ${locked||b||!can?'disabled':''}><b>${t} ${fmtN(x.line)}</b><span class="bt-o">${odd.toFixed(2)}x</span><small>${Math.round((sd==='o'?x.po:1-x.po)*100)}% chance</small></button>`;
     const room=bal+(b?+b.stake:0),od=side==='o'?x.over:side==='u'?x.under:0;let foot='';
     if(!ME.uid||ME.mode==='guest')foot='<p class="muted">Sign in to play.</p>';
     else if(ME.mode==='readonly')foot=b?`<p class="muted">Picked ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'';
     else if(locked||b)foot=b?`<p class="muted">Locked in: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)} to win ${tk(b.stake*b.odds)}.</p>`:'<p class="muted">Closed for this game.</p>';
-    else if(side){const chips=[5,10,25,50].filter(v=>v<=room);
-      foot=`<div class="bt-stk"><span class="muted">Wager</span>${chips.map(v=>`<button class="chip" data-act="ppStake" data-id="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}${room>=1?`<button class="chip allin" data-act="ppStake" data-id="${esc(id)}" data-v="${Math.floor(room)}" aria-pressed="${stake===Math.floor(room)}">All in</button>`:''}<input class="bt-amt" type="number" min="1" max="${Math.floor(room)}" step="1" inputmode="numeric" value="${Math.floor(stake)}" data-k="pp" data-g="${esc(id)}" data-o="${od}" data-room="${Math.floor(room)}" aria-label="Wager amount in tokens"></div>
-      <div class="bt-go"><span>Win <b>${tk(Math.min(stake,room)*od)}</b></span></div>`}
-    else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under.</p>';
+    else if(side)foot='<p class="muted">In your parlay.</p>';
+    else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under to add it to a parlay.</p>';
     if(b&&!locked)foot+=bxChips('pp',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
-    if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'pc:'+x.k))foot+=`<p class="bx-tag cbx">Your ${esc(x.name)} card adds +${cardPct(ME.uid,'pc:'+x.k)}% if it hits</p>`;
+    if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'pc:'+x.k))foot+=`<p class="bx-tag cbx">Your ${esc(x.name)} card adds +${cardPct(ME.uid,'pc:'+x.k)}% to the parlay winnings</p>`;
     return `<article class="gm bt-g pp"><div class="gm-h"><span>${esc(fmtDate(x.game.d))} · vs ${esc(x.opp)}</span>${x.game.dv?`<span class="gm-k p">${esc(x.game.dv)}</span>`:''}</div>
       <button class="pp-who" type="button" data-act="player" data-id="${esc(x.k)}" aria-label="${esc(x.name)}, open player profile">${slogo(x.school,30)}<div><b>${esc(x.name)}</b>${ME.uid?cardTag(ME.uid,'pc:'+x.k):''}<small class="muted">${esc(x.school)} · ${esc(x.pos)}</small></div><span class="pp-go" aria-hidden="true">›</span></button>
-      ${grp&&grp.length>1?`<div class="pp-mk" role="group" aria-label="${esc(x.name)} lines">${grp.map(y=>`<button class="pp-mc${y===x?' on':''}" data-act="ppSel" data-k="${esc(x.k)}" data-id="${esc(y.id)}" aria-pressed="${y===x}"><span>${esc(PP_MK[y.m].l)}</span><b>${fmtN(y.line)}</b>${mine[y.id]?'<i aria-label="picked"></i>':''}</button>`).join('')}</div>`:`<div class="pp-m">${esc(M.l)}</div>`}
+      ${grp&&grp.length>1?`<div class="pp-mk" role="group" aria-label="${esc(x.name)} lines">${grp.map(y=>`<button class="pp-mc${y===x?' on':''}" data-act="ppSel" data-k="${esc(x.k)}" data-id="${esc(y.id)}" aria-pressed="${y===x}"><span>${esc(PP_MK[y.m].l)}</span><b>${fmtN(y.line)}</b>${mine[y.id]||UI.sl.legs[y.id]?'<i aria-label="picked"></i>':''}</button>`).join('')}</div>`:`<div class="pp-m">${esc(M.l)}</div>`}
       <div class="bt-row">${btn('o','Over',x.over)}${btn('u','Under',x.under)}</div>
       <div class="pp-stat muted">Avg <b>${fmtN(x.mean)}</b> · last 3 <b>${fmtN(x.rc)}</b> · over ${fmtN(x.line)} in <b>${x.hits}</b> of ${x.n} games</div>${foot}</article>`};
-  const stagedList=can?Object.entries(UI.pp).filter(([id,u])=>{const x=pm[id],b=mine[id];return x&&u&&u.s&&!started(x.game)&&(!b||b.s!==u.s||(u.stake&&u.stake!==b.stake))}).map(([id])=>pm[id]):[];
-  const stakeOf=x=>{const u=UI.pp[x.id],b=mine[x.id];return Math.floor(u.stake||(b&&b.stake)||5)};
-  const need=stagedList.reduce((t,x)=>t+stakeOf(x)-(mine[x.id]?+mine[x.id].stake:0),0),over=need-bal;
-  const allBar=stagedList.length?`<section class="card bt-all"><div><b>${stagedList.length} ${stagedList.length===1?'pick':'picks'} ready</b><div class="muted">${over>0?`That is ${tk(need)}, and you have ${tk(bal)}. Lower some wagers to lock them in together.`:`Wagering ${tk(need)} in total. Hit the button to save your picks.`}</div></div><div class="bt-go"><button class="btn" data-act="ppAll" ${over>0?'disabled':''}>${stagedList.length===1?'Lock in pick':'Lock in all '+stagedList.length}</button><button class="btn ghost" data-act="ppClear">Clear</button></div></section>`:'';
+  const allBar=can?slipHTML(bal):'';
   const hist=Object.entries(mine).map(([id,b])=>({id,b,res:propResult(b,gm)})).filter(x=>x.res!=='open').sort((a,b)=>b.b.w-a.b.w);
   const more=!!UI.mgRes,HL=more?hist:hist.slice(0,5);
-  const histCard=hist.length?`<section class="card bt-res"><div class="qh"><h3>Your results</h3></div>${HL.map(x=>{const p=pByKey(x.b.k),a=propActual(x.b),M=PP_MK[x.b.m]||{l:x.b.m};
-    return `<div class="bt-r ${x.res}"><b>${esc(p?p.name:'Player')} ${x.b.s==='o'?'Over':'Under'} ${fmtN(x.b.line)} ${esc(M.l.toLowerCase())}</b><small class="muted">${a===null?'no stats':fmtN(a)}</small><b class="d">${x.res==='won'?'+'+n1(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+n1(x.b.stake)}</b></div>`}).join('')}${hist.length>5?`<button class="btn sm ghost bt-more" data-act="mgRes">${more?'Show less':'Show all ('+hist.length+')'}</button>`:''}</section>`:'';
+  const phist=Object.values(parlOf(ME.uid||'')).map(b=>({b,res:parlResult(b,gm)})).filter(x=>x.res!=='open').sort((a,b)=>(+b.b.at||0)-(+a.b.at||0));
+  const parRes=(more?phist:phist.slice(0,5)).map(x=>{const L=parlLegs(x.b,gm),hit=L.filter(y=>y.r==='won').length;
+    return `<div class="bt-r ${x.res}"><b>${x.b.legs.length}-pick parlay: ${x.b.legs.map(l=>esc(lastN((pByKey(l.k)||{}).name))+' '+(l.s==='o'?'O':'U')+' '+fmtN(+l.line)).join(', ')}</b><small class="muted">${hit} of ${L.length} hit</small><b class="d">${x.res==='won'?'+'+n1(parlWin(x.b,gm)):x.res==='push'?'Push':'-'+n1(+x.b.stake||0)}</b></div>`}).join('');
+  const histCard=(hist.length||phist.length)?`<section class="card bt-res"><div class="qh"><h3>Your results</h3></div>${parRes}${HL.map(x=>{const p=pByKey(x.b.k),a=propActual(x.b),M=PP_MK[x.b.m]||{l:x.b.m};
+    return `<div class="bt-r ${x.res}"><b>${esc(p?p.name:'Player')} ${x.b.s==='o'?'Over':'Under'} ${fmtN(x.b.line)} ${esc(M.l.toLowerCase())}</b><small class="muted">${a===null?'no stats':fmtN(a)}</small><b class="d">${x.res==='won'?'+'+n1(x.b.stake*(x.b.odds-1)):x.res==='push'?'Push':'-'+n1(x.b.stake)}</b></div>`}).join('')}${hist.length>5||phist.length>5?`<button class="btn sm ghost bt-more" data-act="mgRes">${more?'Show less':'Show all ('+(hist.length+phist.length)+')'}</button>`:''}</section>`:'';
   const board=Object.keys(S.picks).filter(u=>Object.keys(propsOf(u)).length).map(u=>{const r=Object.values(propsOf(u)).map(b=>propResult(b,gm));return {u,w:r.filter(x=>x==='won').length,l:r.filter(x=>x==='lost').length}}).filter(x=>x.w+x.l).sort((a,b)=>(b.w/(b.w+b.l))-(a.w/(a.w+a.l))||b.w-a.w);
   if(ME.uid&&ME.mode!=='guest'&&!board.some(x=>x.u===ME.uid))board.push({u:ME.uid,w:0,l:0});
   const boardCard=tokBoard();   /* one leaderboard: total tokens (owner, v239) */
@@ -5717,7 +5752,7 @@ function propsHTML(){
   else if(!all.length)body='<p class="empty">No lines match those filters. Try clearing them.</p>';
   else{
     /* v270: pick a game, then see that game's player lines (no long scroll through every line) */
-    const gl=[],seen={};all.forEach(x=>{const id=gid(x.game);if(!seen[id]){seen[id]={id,g:x.game,n:0,mine:0};gl.push(seen[id])}seen[id].n++;if(mine[x.id])seen[id].mine++});
+    const gl=[],seen={};all.forEach(x=>{const id=gid(x.game);if(!seen[id]){seen[id]={id,g:x.game,n:0,mine:0};gl.push(seen[id])}seen[id].n++;if(mine[x.id]||UI.sl.legs[x.id])seen[id].mine++});
     gl.sort((a,b)=>(a.g.d+(a.g.t||KICK))<(b.g.d+(b.g.t||KICK))?-1:1);
     const glOpen=gl.filter(x=>!started(x.g)||x.mine);gl.length=0;gl.push(...(glOpen.length?glOpen:gl.slice()));
     const myS=(myProfile()||{}).school,mine1=myS&&gl.find(x=>!started(x.g)&&(x.g.h===myS||x.g.a===myS));
@@ -5729,11 +5764,11 @@ function propsHTML(){
     /* v273: one card per player (like Sleeper): the main line shows, the player's other lines are chips to switch to */
     const byP=[],pi={};L.forEach(x=>{if(!pi[x.k]){pi[x.k]=[];byP.push(pi[x.k])}pi[x.k].push(x)});
     UI.ppSel=UI.ppSel||{};
-    const cards=byP.map(grp=>{const k=grp[0].k,sel=grp.find(y=>y.id===UI.ppSel[k])||grp.find(y=>UI.pp[y.id]&&UI.pp[y.id].s)||grp.find(y=>mine[y.id])||grp[0];return card(sel,grp)});
+    const cards=byP.map(grp=>{const k=grp[0].k,sel=grp.find(y=>y.id===UI.ppSel[k])||grp.find(y=>UI.sl.legs[y.id])||grp.find(y=>mine[y.id])||grp[0];return card(sel,grp)});
     body=`<div class="qh pp-gh"><h3>${esc(cur.g.a)} at ${esc(cur.g.h)}</h3><span class="muted">${esc(fmtDate(cur.g.d))}${cur.g.time?' · '+esc(cur.g.time):''} · ${byP.length} players · ${L.length} lines</span></div><div class="gm-grid">${cards.join('')}</div>`;
     body+=parlHTML(cur,L);
   }
-  return boardCard+activeCard()+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+allBar+ppPick+body+histCard;
+  return boardCard+activeCard()+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+ppPick+body+histCard+allBar+(allBar?'<div class="sl-sp"></div>':'');
 }
 
 /* ---- Mock drafts: practice against AI teams, or join other people's mock draft ---- */
@@ -8898,12 +8933,14 @@ document.addEventListener('submit',async e=>{
   btn.disabled=false;
 });
 document.addEventListener('input',e=>{if(e.target.id==='sim-q'){UI.simQ=e.target.value;const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.sim-sc').forEach(b=>{b.hidden=!!q&&!b.dataset.n.includes(q)})}});
-document.addEventListener('input',e=>{const t=e.target;if(!t.classList||!t.classList.contains('bt-amt')||t.id==='sim-q')return;
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('sl-amt')){const room=+t.dataset.room||0;let v=Math.floor(+t.value);if(!(v>=1))v=0;UI.sl.stake=v;const w=document.getElementById('sl-win');if(w)w.textContent=tk(slipCalc(slipLegs()).win(Math.min(v,room)));t.closest('.sl-bar').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(+c.dataset.v===v)));return}
+  if(!t.classList||!t.classList.contains('bt-amt')||t.id==='sim-q')return;
   const room=+t.dataset.room||0;let v=Math.floor(+t.value);if(!(v>=1))v=0;const st=Math.min(v,room),B=({at:UI.at,pp:UI.pp})[t.dataset.k]||UI.pk,id=t.dataset.g;
   B[id]=Object.assign({},B[id],{stake:v||undefined});
   const w=t.closest('article').querySelector('.bt-go b');if(w)w.textContent=tk(st*(+t.dataset.o));
   t.closest('.bt-stk').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(+c.dataset.v===v)))});
-document.addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('bt-amt')||t.id==='sim-q')return;   /* the 82-0 school search shares the bt-amt look: its blur used to run this wager handler, which redrew the list under your finger so the tap on a school was lost */
+document.addEventListener('change',e=>{const t=e.target;if(t.classList&&t.classList.contains('sl-amt')){const room=+t.dataset.room||0;let v=Math.floor(+t.value);if(!(v>=1))v=1;if(v>room)v=Math.max(1,room);UI.sl.stake=v;render(true);return}
+  if(!t.classList||!t.classList.contains('bt-amt')||t.id==='sim-q')return;   /* the 82-0 school search shares the bt-amt look: its blur used to run this wager handler, which redrew the list under your finger so the tap on a school was lost */
   const room=+t.dataset.room||0,B=({at:UI.at,pp:UI.pp})[t.dataset.k]||UI.pk,id=t.dataset.g;let v=Math.floor(+t.value);if(!(v>=1))v=1;if(v>room)v=Math.max(1,room);
   B[id]=Object.assign({},B[id],{stake:v});render()});
 document.addEventListener('input',e=>{if(e.target.id==='ad-q'){AD.q=e.target.value;const pos=e.target.selectionStart;render();const f=$('#ad-q');if(f){f.focus();try{f.setSelectionRange(pos,pos)}catch(_){}}}});
@@ -9203,6 +9240,14 @@ document.addEventListener('click',async e=>{
   else if(a==='plSide'){const d=t.dataset.d,u=UI.pl[d]=UI.pl[d]||{},k='l'+t.dataset.i;u[k]=(u[k]&&u[k].id===t.dataset.id&&u[k].s===t.dataset.s)?{id:t.dataset.id,s:''}:{id:t.dataset.id,s:t.dataset.s};render(true)}
   else if(a==='plStake'){const d=t.dataset.d;UI.pl[d]=Object.assign({},UI.pl[d],{stake:+t.dataset.v});render(true)}
   else if(a==='plGo'){if(needJoin('make a parlay'))return;await parlGo(t.dataset.d)}
+  else if(a==='slLeg'){const id=t.dataset.id,L=UI.sl.legs,pm=propMap(),x=pm[id];
+    if(L[id]===t.dataset.s)delete L[id];
+    else{if(!x)return;if(!L[id]&&Object.keys(L).length>=SL_MAX){say('A parlay can have up to '+SL_MAX+' picks.');return}
+      Object.keys(L).forEach(o=>{if(o!==id&&pm[o]&&pm[o].k===x.k)delete L[o]});L[id]=t.dataset.s}
+    render(true)}
+  else if(a==='slStake'){UI.sl.stake=+t.dataset.v;render(true)}
+  else if(a==='slClear'){UI.sl.legs={};render(true)}
+  else if(a==='slGo'){if(needJoin('make a parlay'))return;await slipGo()}
   else if(a==='ppStake'){const id=t.dataset.id;UI.pp[id]=Object.assign({},UI.pp[id],{stake:+t.dataset.v});render()}
   else if(a==='ppClear'){UI.pp={};render()}
   else if(a==='mkSet'){const f=t.dataset.f;UI.mk.set[f]=f==='level'?t.dataset.v:+t.dataset.v;render()}

@@ -317,3 +317,8 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v404 (Nov 10, owner): daily Field Goal/Hoops can set your all-time best
 - `fgSave()` daily branch: a daily run whose score beats `fg.best` (the Unlimited all-time best) also writes `best`, `t` and `lt`, so it shows on the Unlimited "All-time best runs" leaderboard; a toast says so. Daily runs still do not add to `runs` or `tot`. Applies to both Field Goal and Hoops (same code).
+
+## v405 (Nov 10, owner): player props are parlays only
+- Over/Under cards no longer take a wager each. Tap Over or Under (`slLeg`) to add a leg to the slip `UI.sl={legs:{lineId:'o'|'u'},stake}`; 2 to 6 picks (`SL_MAX`), one leg per player (adding another line of the same player replaces it), any games, started games drop out. A fixed bottom panel (`slipHTML`, `.sl-bar`) lists the legs, ONE wager (chips, All in, number box `.sl-amt`) and the payout; "Lock in parlay" (`slipGo`) needs 2+ legs and `stakeOk`.
+- Saved in `picks/<uid>.parl['p|<time>|<rand>']` = `{d:'',legs:[{k,m,w,g,line,s,odds}],stake,odds,cb,at}`, the same record duo parlays use, so `bank()`, `earned()`, `parlResult()` and `fcKeep()` already settle it (a leg with no stats is dropped, all legs must win, all pushed = stake back). Legs carry their own `w`/`g` because a slip can span games. Boost `cb` = sum of the legs' `cardPct` (player card + binder), capped at 500; the +25% boost and insure chips do not apply to parlays.
+- Active picks has a Parlays section, Your results lists settled parlays (`parRes`). Older single prop picks (`picks/<uid>.props`) still show, settle and pay as before; `ppSide`/`ppStake`/`ppAll` handlers are now unused.
