@@ -310,3 +310,7 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 - `PACKS.duogift` (off, free): once per account (`inv.fr.duog`), pick any school (`ptSheet` lists schools with duos) and get 1 of its Duo cards (`rollDuoTeam`), Epic 70 / Legendary 22 / Mythical 8. Banner at the top of the Shop (`dgShopCard`, opens with how='duog').
 ## v403 (Nov 10): sign in once
 Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeeded). Cause: `route()` runs before `boot()`, `guestGate()`/`openAuth()` opened the sign-in screen while boot was still awaiting `getSession()` (ME.mode is 'guest' by default), and nothing closed it once the saved session loaded. Fix: `window.AUTH_READY` is set by boot once it knows who you are; `openAuth()` and `guestGate()` wait for it; if a session is found, an open sign-in screen is closed and the `vs-reauth` "Varsity got an update" note is cleared.
+
+## v403 (Nov 10): Duo card redesign
+- `duoArt` is a real trading card now (own class `.tc-duo`, not `.tcard`; sizes in em from `font-size:s/11`): foil border in the rarity colour, diagonal slash, school logo watermark, DUO 1/2 tag, spinning ring round the player, name plate, moving holo foil, sparkles on Legendary+, pulsing glow on Mythical, slow idle tilt.
+- Flips on its own every 5 s and on tap (`duoFlip`, one 250 ms interval + a capture click listener): always turns the same way, lifts and fires a ring. Tapping resets its 5 s timer.
