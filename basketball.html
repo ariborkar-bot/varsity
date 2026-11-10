@@ -3086,7 +3086,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v403 · Nov 10';
+const APP_BUILD='v404 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6440,7 +6440,7 @@ async function fgSave(g){
   if(g.saved)return;g.saved=true;
   if(!(ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline'))return;
   const my=fgRec(ME.uid),t=Math.round(g.t*10)/10;let patch;
-  if(g.mode==='daily'){const d=fgDay(ME.uid)||{d:TODAY(),tries:1},b=+d.best||0,dd={...d,d:TODAY(),tries:+d.tries||1,best:Math.max(b,g.score),t:g.score>b?t:(+d.t||0)};patch={dd,dh:{[TODAY()]:{b:dd.best,t:dd.t}}}}
+  if(g.mode==='daily'){const d=fgDay(ME.uid)||{d:TODAY(),tries:1},b=+d.best||0,dd={...d,d:TODAY(),tries:+d.tries||1,best:Math.max(b,g.score),t:g.score>b?t:(+d.t||0)};patch={dd,dh:{[TODAY()]:{b:dd.best,t:dd.t}}};if(g.score>(+my.best||0)){patch.best=g.score;patch.t=t;patch.lt=Math.max(+my.lt||0,t);setTimeout(()=>say('New all-time best: added to the Unlimited leaderboard'),600)}}   /* v404 (owner): a daily run that beats your all-time best also counts on the Unlimited leaderboard (not runs/total) */
   else patch={best:Math.max(+my.best||0,g.score),t:g.score>(+my.best||0)?t:(+my.t||0),lt:Math.max(+my.lt||0,t),runs:(+my.runs||0)+1,tot:(+my.tot||0)+g.score,at:NOW()};
   S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:{...my,...patch}};
   try{await upsert('picks/'+ME.uid,{fg:patch})}catch(_){}

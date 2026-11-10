@@ -314,3 +314,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 ## v403 (Nov 10): Duo card redesign
 - `duoArt` is a real trading card now (own class `.tc-duo`, not `.tcard`; sizes in em from `font-size:s/11`): foil border in the rarity colour, diagonal slash, school logo watermark, DUO 1/2 tag, spinning ring round the player, name plate, moving holo foil, sparkles on Legendary+, pulsing glow on Mythical, slow idle tilt.
 - Flips on its own every 5 s and on tap (`duoFlip`, one 250 ms interval + a capture click listener): always turns the same way, lifts and fires a ring. Tapping resets its 5 s timer.
+
+## v404 (Nov 10, owner): daily Field Goal/Hoops can set your all-time best
+- `fgSave()` daily branch: a daily run whose score beats `fg.best` (the Unlimited all-time best) also writes `best`, `t` and `lt`, so it shows on the Unlimited "All-time best runs" leaderboard; a toast says so. Daily runs still do not add to `runs` or `tot`. Applies to both Field Goal and Hoops (same code).
