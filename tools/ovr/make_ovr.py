@@ -32,9 +32,9 @@ for p in fb: grp.setdefault(p['sub'], []).append(p)
 for g, L in grp.items():
     mu = sum(p['tot'] for p in L) / max(1, sum(p['gp'] for p in L))
     sc = [(i, (p['tot'] + K * mu) / (p['gp'] + K)) for i, p in enumerate(L)]
-    pc = pctiles(sc); S = dict(sc)
+    pc = pctiles(sc); S = dict(sc); pt = pctiles([(i, p['tot']) for i, p in enumerate(L)])
     for i, p in enumerate(L):
-        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), pct=pc[i], status='Out' if p['inj'] else ''))
+        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], status='Out' if p['inj'] else ''))
 bbapp = json.load(open(os.path.join(D, 'bb.json')))
 stats = {}
 for t in mb.load_real():
@@ -50,10 +50,12 @@ for i, p in enumerate(bbapp):
     s = stats.get((p['school'], p['name']))
     sc.append((i, (s[0] * s[1] + KB * mu) / (s[0] + KB) if s else .6 * mu))
 pc = pctiles(sc); S = dict(sc)
+totv = [(i, (stats[(p['school'], p['name'])][0] * stats[(p['school'], p['name'])][1]) if (p['school'], p['name']) in stats else 0) for i, p in enumerate(bbapp)]
+pt = pctiles(totv); TV = dict(totv)
 nostat = 0
 for i, p in enumerate(bbapp):
     s = stats.get((p['school'], p['name'])); nostat += 0 if s else 1
-    rows.append(dict(name=p['name'], school=p['school'], sport='Basketball', pos=p['pos'], gr=p['gr'], gp=s[0] if s else 0, score=round(S[i], 2), pct=pc[i], status=''))
+    rows.append(dict(name=p['name'], school=p['school'], sport='Basketball', pos=p['pos'], gr=p['gr'], gp=s[0] if s else 0, score=round(S[i], 2), tot=round(TV[i], 1), pcg=pc[i], pct_t=pt[i], status=''))
 print('football', len(fb), 'basketball', len(bbapp), 'bb without stat line', nostat)
 
 def build(sport):
@@ -65,32 +67,33 @@ def build(sport):
   nt['A4'] = 'Ceiling (highest OVR)'; nt['B4'] = 99
   nt['A5'] = 'Mean (the average player)'; nt['B5'] = 64
   nt['A6'] = 'Spread (standard deviation)'; nt['B6'] = 12
-  for r in (3, 4, 5, 6): nt.cell(r, 2).font = Font(name=AR, color='0000FF'); nt.cell(r, 2).fill = PatternFill('solid', fgColor='FFFF00'); nt.cell(r, 1).font = Font(name=AR)
+  nt['A7'] = 'Weight on per-game (the rest is season total)'; nt['B7'] = 0.5
+  for r in (3, 4, 5, 6, 7): nt.cell(r, 2).font = Font(name=AR, color='0000FF'); nt.cell(r, 2).fill = PatternFill('solid', fgColor='FFFF00'); nt.cell(r, 1).font = Font(name=AR)
   allnotes = ['OVR = Mean + Spread x (how many standard deviations the player is above or below average, from his percentile), rounded and kept between Floor and Ceiling, so most players land in the 50s-70s, 90+ is rare and nobody is below 40. Blue/yellow cells are inputs: change them and every OVR recalculates.',
-   'Percentile = where the player ranks among his peers (0 = worst, 1 = best) on the Rating score column.',
-   'Football: Rating score = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
-   'Basketball: Rating score = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
+   'Two percentiles (0 = worst, 1 = best among his peers): one on points per game (the Fantasy pts per game column) and one on total points this season (Season total fantasy pts, which rewards playing more games and scoring more). Combined percentile = the weight on the yellow cell x per-game + the rest x total (50/50 by default); OVR comes from the combined percentile.',
+   'Football: Pts per game = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
+   'Basketball: Pts per game = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
    'Games = games with stats behind the rating (football 2026, basketball 2025-26). Few games = low confidence.',
    'One tab per position (best OVR first, # = rank within the position); the last tab lists everyone. DEF = defensive players MaxPreps does not split into DL/LB/DB. Status Out = listed as out in the app this week. Basketball grades are 2026-27 (moved up one year); 0 = unknown.',
    'Source: MaxPreps box scores and season stats already in the app (stats.js, tools/data/bb_2526_players.txt). Built by tools/ovr/make_ovr.py.']
   yr = '2026 season' if sport == 'Football' else '2025-26 season (the latest basketball stats; 2026-27 has not started)'
-  notes = [allnotes[0], allnotes[1], allnotes[2 if sport == 'Football' else 3], 'Ratings use only this season (%s), per game, never career or season totals, so a player is not rated higher just for playing more games.' % yr] + allnotes[4:]
-  for i, t in enumerate(notes): c = nt.cell(8 + i, 1, t); c.font = Font(name=AR); c.alignment = Alignment(wrap_text=True, vertical='top'); nt.merge_cells(start_row=8 + i, start_column=1, end_row=8 + i, end_column=6); nt.row_dimensions[8 + i].height = 48
+  notes = [allnotes[0], allnotes[1], allnotes[2 if sport == 'Football' else 3], 'Ratings use only this season (%s). Season total fantasy pts = fantasy points per game x games (basketball totals use the 2025-26 averages).' % yr] + allnotes[4:]
+  for i, t in enumerate(notes): c = nt.cell(9 + i, 1, t); c.font = Font(name=AR); c.alignment = Alignment(wrap_text=True, vertical='top'); nt.merge_cells(start_row=9 + i, start_column=1, end_row=9 + i, end_column=6); nt.row_dimensions[9 + i].height = 48
   nt.column_dimensions['A'].width = 40; [nt.column_dimensions[c].__setattr__('width', 14) for c in 'BCDEF']
-  H = ['#', 'Name', 'School', 'Sport', 'Pos', 'Grade', 'Games', 'Rating score', 'Peer percentile', 'OVR', 'Status']
-  W = [6, 24, 26, 11, 7, 7, 8, 13, 15, 8, 9]
+  H = ['#', 'Name', 'School', 'Sport', 'Pos', 'Grade', 'Games', 'Fantasy pts per game (adj.)', 'Season total fantasy pts', 'Per-game percentile', 'Total percentile', 'Combined percentile', 'OVR', 'Status']
+  W = [6, 24, 26, 11, 7, 7, 8, 16, 16, 14, 13, 14, 8, 9]
   def sheet(title, items):
       ws = wb.create_sheet(title); ws.append(H)
       for c in ws[1]: c.font = hdr; c.fill = fill; c.alignment = Alignment(horizontal='center')
-      items = sorted(items, key=lambda r: (-r['pct'], r['name']))
+      items = sorted(items, key=lambda r: (-(.5 * r['pcg'] + .5 * r['pct_t']), r['name']))
       for i, r in enumerate(items, 1):
           n = i + 1
-          ws.append([i, r['name'], r['school'], r['sport'], r['pos'], r['gr'], r['gp'], r['score'], round(r['pct'], 4), f'=MAX(Notes!$B$3,MIN(Notes!$B$4,ROUND(Notes!$B$5+Notes!$B$6*NORMSINV(I{n}),0)))', r['status']])
+          ws.append([i, r['name'], r['school'], r['sport'], r['pos'], r['gr'], r['gp'], r['score'], r['tot'], round(r['pcg'], 4), round(r['pct_t'], 4), f'=Notes!$B$7*J{n}+(1-Notes!$B$7)*K{n}', f'=MAX(Notes!$B$3,MIN(Notes!$B$4,ROUND(Notes!$B$5+Notes!$B$6*NORMSINV(L{n}),0)))', r['status']])
       for row in ws.iter_rows(min_row=2):
           for c in row: c.font = Font(name=AR)
-          row[9].font = Font(name=AR, bold=True)
+          row[12].font = Font(name=AR, bold=True)
       for k, w in enumerate(W, 1): ws.column_dimensions[get_column_letter(k)].width = w
-      ws.freeze_panes = 'C2'; ws.auto_filter.ref = f'A1:K{len(items) + 1}'
+      ws.freeze_panes = 'C2'; ws.auto_filter.ref = f'A1:N{len(items) + 1}'
   order = ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'DEF', 'K'] if sport == 'Football' else ['PG', 'SG', 'SF', 'PF', 'C']
   mine = [r for r in rows if r['sport'] == sport]
   for pos in order:
