@@ -3006,7 +3006,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v390 · Nov 9';
+const APP_BUILD='v391 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3801,7 +3801,12 @@ let _fgA=null,_fgD=null,_fgW=null;
 function fcIdx(){const A=(GAMES&&GAMES.games)||[];if(_fgA!==A||!_fgD){_fgA=A;_fgD={};_fgW={};A.forEach(g=>{(_fgD[g.d]=_fgD[g.d]||[]).push(g);(_fgW[g.w]=_fgW[g.w]||[]).push(g)})}return{d:_fgD,w:_fgW}}
 const fcGamesOf=s=>{const x=fcIdx();return (FC_DAILY?x.d[dayOf(s)]:x.w[s])||[]};
 const fcSlotsOf=w=>FC_DAILY?[...new Set((fcIdx().w[w]||[]).map(g=>dayNo(g.d)))].sort((a,b)=>a-b):[w];
-function fcCur(){if(!FC_DAILY)return CURW();const ds=Object.keys(fcIdx().d).sort(),t=TODAY();return dayNo(ds.find(x=>x>=t)||ds[ds.length-1]||t)}
+/* v391 (owner): the new week's hand opens on its own Monday, even while last week's prizes wait on missing stats.
+   Calendar week = the latest week whose Monday (on or before its first game) has come; never behind the admin's week setting. */
+const fcMon=d=>{const t=new Date(d+'T12:00:00Z'),k=(t.getUTCDay()+6)%7;return new Date(t.getTime()-k*864e5).toISOString().slice(0,10)};
+const fcMaxW=()=>Math.max(WEEKS,...Object.keys(fcIdx().w).map(Number));
+function fcCalW(){const t=TODAY();let best=0;const W=fcIdx().w;for(const k of Object.keys(W)){const d=W[k].map(g=>g.d).sort()[0];if(d&&fcMon(d)<=t&&+k>best)best=+k}return best}
+function fcCur(){if(!FC_DAILY)return Math.min(fcMaxW(),Math.max(CURW(),fcCalW()));const ds=Object.keys(fcIdx().d).sort(),t=TODAY();return dayNo(ds.find(x=>x>=t)||ds[ds.length-1]||t)}
 const fcLabel=s=>FC_DAILY?new Date(dayOf(s)+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'}):'Week '+s;
 const fcUnit=()=>FC_DAILY?'day':'week';
 /* the player's stat line for that slot, or null. A basketball day uses the player's own game line (gl) for that date; week-only data counts only when his team played once that week. */
@@ -3911,11 +3916,16 @@ function fcHTML(){
     <p class="muted">${FC_DAILY?'5 players from today’s games. A new hand every game day.':'5 random players a week.'} ${FC_REDRAWS} redraws.</p>
     ${wk.length>1?`<div class="chips" role="group" aria-label="${FC_DAILY?'Day':'Week'}">${wk.map(n=>`<button class="chip" data-act="fcWeek" data-v="${n}" aria-pressed="${n===w}">${fcLabel(n)}</button>`).join('')}</div>`:''}
     ${mine?`<div class="fc-bar"><div><small>Hand total</small><b>${f1(fcScore(ME.uid,w))}</b></div><div><small>Redraws left</small><b>${w===cw?left:'-'}</b>${w===cw&&!lkd&&invLeft(ME.uid,'p_redraw')>0?`<button class="btn sm ghost fc-x" data-act="perkRedraw">+1 redraw (${invLeft(ME.uid,'p_redraw')})</button>`:''}</div><div><small>Season</small><b>${f1(fcSeason(ME.uid))}</b></div></div><div class="fc-hand${lkd||w!==cw?' done':''}">${cards}</div>${w===cw&&can?(!lkd&&!fcOpen(w)?`<p class="hint" style="margin-top:12px"><b>Hand closed at tip-off.</b> This hand counts as it stands.</p>`:lkd?`<p class="hint" style="margin-top:12px"><b>Hand locked in.</b> Good luck this ${fcUnit()}.</p>`:`<div class="btns" style="margin-top:12px;justify-content:center"><button class="btn" data-act="fcLock" ${UI.fcAnim?'disabled':''}>Lock in hand</button></div>`):''}`
-      :w!==cw?`<p class="hint">You had no hand that ${fcUnit()}.</p>`
+      :w!==cw?`<p class="hint">You had no hand that ${fcUnit()}.</p><button class="btn sm" data-act="fcWeek" data-v="${cw}">Back to week ${cw}</button>`
       :can&&!S.loaded.picks?`<div class="fc-deal"><p class="muted">Loading your hand…</p></div>`
       :can&&!fcOpen(cw)?(()=>{const nx=dayOf(cw)===TODAY()?fcNextDay():cw;return `<div class="fc-deal"><p>${dayOf(cw)!==TODAY()?'No games today.':'Today’s hand closed at tip-off.'}</p><p class="muted">${nx?'The next hand opens '+fcLabel(nx)+', before the first game.':'No more game days on the schedule.'}</p></div>`})()
       :can?`<div class="fc-deal"><p>Your ${FC_DAILY?fcLabel(cw):'week '+cw} hand is waiting.</p>${FC_DAILY?`<p class="muted">Deal before the first game, ${esc(new Date(fcClose(cw).replace('T',' ')+':00').toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}))}.</p>`:''}<button class="btn" data-act="fcDeal">Deal me in</button></div>`
       :`<p class="hint">${ME.mode==='guest'?'Sign in to get a hand.':'You have view-only access.'}</p>`}</section>
+    ${(()=>{if(FC_DAILY||!ME.uid)return '';const ps=Object.keys(fcDoc(ME.uid)).map(Number).filter(n=>n<cw).sort((a,b)=>b-a);if(!ps.length)return '';
+      const row=n=>{const hd=fcHand(ME.uid,n),wt=(hd.h||[]).filter(k=>{const p=pByKey(k);return p&&!fcPts(p,n)&&!fcDnp(p,n)}).length,done=fcWeekDone(n);
+        const st=done?'Final':wt?'Waiting on '+wt+' '+(wt===1?'stat line':'stat lines'):'Waiting on other hands';
+        return `<li class="fc-tap ${n===w?'me':''}" data-act="fcWeek" data-v="${n}" role="button" tabindex="0" aria-label="See your week ${n} hand"><span class="rk">${n}</span><span class="who"><b>Week ${n}</b><small class="muted">${esc((hd.h||[]).map(k=>{const p=pByKey(k);return p?p.name.split(' ').slice(-1)[0]:''}).join(', '))}</small></span><span class="pt"><b>${f1(fcScore(ME.uid,n))}</b><small>${st}</small></span></li>`};
+      return `<section class="card"><div class="qh"><h3>Your previous hands</h3></div><p class="muted">Tap a week to see that hand. Prizes for a week pay out once every stat is in; the new week stays playable meanwhile.</p><ol class="fc-board">${ps.map(row).join('')}</ol></section>`})()}
     <section class="card"><div class="qh"><h3>Leaderboard</h3><div class="chips"><button class="chip" data-act="fcBoard" data-v="week" aria-pressed="${!byS&&!byW}">${FC_DAILY?fcLabel(w):'Week '+w}</button><button class="chip" data-act="fcBoard" data-v="season" aria-pressed="${byS}">Season</button></div></div>
     ${fcWaitNote(FC_DAILY?w:wkOf)}<p class="fg-prize">${FC_DAILY?'Daily':'Weekly'} prizes: <b>1st</b> ${esc(PACKS.player.n)} · <b>2nd–3rd</b> ${esc(PACKS.rookie.n)} · <b>Top ${FC_DAILY?25:50}%</b> +${LB_TOK} tokens${ME.uid&&fcPrizes(ME.uid).length?` <a href="#shop"><b>You have a prize waiting →</b></a>`:''}</p>
     ${top.length?`<ol class="fc-board">${top.map(lrow).join('')}${me&&me.r>25?'<li class="fc-gap">…</li>'+lrow(me):''}</ol>`:'<p class="hint">No hands yet. Be the first to get dealt in.</p>'}</section>`;
@@ -5778,7 +5788,7 @@ function fcDayDone(s){const gs=fcGamesOf(s);if(!gs.length||!gs.every(gDone))retu
 const fcPrizeRank=s=>FC_DAILY?Object.keys(S.picks).filter(u=>fcHand(u,s)).map(u=>({u,t:fcScore(u,s)})).sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1)):fcRank(s);
 const fcLbWeeks=()=>{const out=[];
   if(FC_DAILY){for(const d of Object.keys(fcIdx().d).sort().reverse()){const s=dayNo(d);if(s<FC_LB_START)break;if(fcDayDone(s)){out.push(s);if(out.length>=FC_LB_DAYS)break}}return out}
-  for(let w=WEEKS;w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
+  for(let w=fcMaxW();w>=FC_LB_START&&out.length<FC_LB_BACK+3;w--)if(fcWeekDone(w))out.push(w);return out.slice(0,FC_LB_BACK)};
 function fcPrizes(u){if(!u)return[];const cl=((invOf(u).fr||{}).fc)||{},out=[];
   for(const w of fcLbWeeks()){if(cl[w])continue;const pl=fcPrizeRank(w).findIndex(x=>x.u===u);if(pl>=0&&pl<3)out.push({w,place:pl+1,type:FG_LB_PRIZE[pl]})}return out}
 /* v293/v311: daily bonus. +25 tokens the first time you play any game each day (Pacific time), claimed automatically by playMark().
