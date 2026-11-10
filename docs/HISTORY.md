@@ -262,3 +262,7 @@ Moved out of CLAUDE.md on Nov 8 2026 (v336) to keep the always-loaded notes shor
 
 ## v385 (Nov 9): Admin controls loading screen + faster load
 - `viewControls()` shows a spinner ("Loading admin controls…") while `AD.rows` is null, a "Try again" card if the account load fails, and re-renders itself when `adLoad()` finishes. The account list is now fetched as soon as an admin is unlocked (`touch()`), so it is usually ready before you open the page. Demo previews show an empty list.
+
+## v386 (Nov 9): God Picks pack back in the Shop; admin messages on ban / gift / removal
+- `PACKS.godpick` lost `off:1`: back in the Shop at 25,000 tokens ($99.99 shown as 'Coming soon'), still the most expensive pack (5 Top 10 Immortal cards, keep 1). Pick 1 of 5 stays out of the Shop.
+- Admin controls has one "Message to the player (optional)" box (`CTL.msg`): it is the ban reason on Ban; on token / card / pack / item gifts and removals (`ctlNote()`) it is saved as a notice in `picks/<uid>.an` and shown once to the player as a "Message from Varsity" pop-up (`anPopup()`, seen time `ansn`, `data-act=anOk`). A notice is only sent when you type a message.

@@ -3011,7 +3011,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v385 · Nov 9';
+const APP_BUILD='v386 · Nov 9';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4128,7 +4128,7 @@ const PACKS={
   pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1,off:1},   /* v380 (owner): removed from the Shop (off); gifts/half-done picks still open */
   /* v382 (owner): the Welcome pack: you pick a team and get a walkout player (Epic or better) + 10 more cards (Champion pack odds), once per account (off: not in the Shop) */
   welcome:{n:'Welcome pack',c:10,tok:0,odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'',cards:1,off:1},
-  godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1,off:1}};
+  godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1}};   /* v386 (owner): back in the Shop, still the most expensive pack */
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
 const cosOwnCount=u=>{const it=invOf(u).it||{},d=gDelta(u);let n=0;for(const id of new Set([...Object.keys(it),...Object.keys(d)])){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&(+it[id]||0)+(+d[id]||0)>0)n++}return n};
@@ -4850,6 +4850,15 @@ function giftPopup(){if(_gPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'|
   c.innerHTML=`<div class="gcard tok-sheet gf-pop" role="dialog" aria-modal="true" aria-labelledby="gp-t"><div class="gp-ic">🎁</div><h2 id="gp-t">${nw.length>1?'You got '+nw.length+' gifts!':'You got a gift!'}</h2>
     <ul class="gp-l">${nw.slice(-6).map(x=>`<li>${av(nm(x.from),x.from,28,x.from)}<span class="gp-tx"><b>${esc(nm(x.from))}</b> sent you ${ln(x)}${x.m?`<small class="muted">“${esc(x.m)}”</small>`:''}</span>${x.c?`<span class="gp-art" style="--rc:${(RAR[x.r]||RAR.l).c}">${cardArt(x.c,x.r||'l',50)}</span>`:''}${x.i&&ITEM[x.i]?`<span class="gp-art" style="--rc:${RAR[ITEM[x.i].r].c}" title="${esc(ITEM[x.i].n)}">${itemArt(x.i,50)}</span>`:''}</li>`).join('')}</ul>
     <div class="gbtns"><button class="btn" data-act="gpOk" data-at="${last}">Awesome!</button></div></div>`;c.hidden=false}
+/* v386 (owner): admin messages. Admin controls can attach a message to a ban, gift or removal: picks/<uid>.an = {id:{m,t,at}} (m = the admin's
+   message, t = what happened); shown once as a "Message from Varsity" pop-up, seen time in picks/<uid>.ansn. */
+var _anPop=false;
+function anPopup(){if(_anPop||!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
+  const pk=S.picks[ME.uid]||{},seen=+pk.ansn||0,nw=Object.entries(pk.an||{}).map(([id,x])=>Object.assign({id},x)).filter(x=>x&&(+x.at||0)>seen).sort((a,b)=>a.at-b.at);if(!nw.length)return;
+  const c=$('#cfm');if(!c||!c.hidden)return;_anPop=true;const last=nw[nw.length-1].at;
+  c.innerHTML=`<div class="gcard tok-sheet gf-pop" role="dialog" aria-modal="true" aria-labelledby="an-t"><div class="gp-ic">📣</div><h2 id="an-t">Message from Varsity</h2>
+    <ul class="gp-l">${nw.slice(-5).map(x=>`<li><span class="gp-tx"><b>${esc(x.t||'')}</b>${x.m?`<small class="muted">“${esc(x.m)}”</small>`:''}</span></li>`).join('')}</ul>
+    <div class="gbtns"><button class="btn" data-act="anOk" data-at="${last}">OK</button></div></div>`;c.hidden=false}
 async function giftSend(){const to=GF.to;if(!to||!S.profiles[to]){say('Pick who it’s for.');return}
   const id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),x={to,at:NOW()};if(GF.m.trim())x.m=GF.m.trim().slice(0,60);
   if(GF.kind==='t'){const left=Math.floor(bank(ME.uid));if(!(GF.a>=1)||GF.a>left){say('You can’t send that many tokens right now.');return}x.a=Math.floor(GF.a)}
@@ -4908,6 +4917,7 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   else if(a==='gfKind'){GF.kind=v;giftSheet()}
   else if(a==='gfAmt'){GF.a=+v;giftSheet()}
   else if(a==='gfItem'){GF.i=GF.i===v?'':v;const g=document.querySelector('.gf-items'),y=g?g.scrollTop:0;giftSheet();const g2=document.querySelector('.gf-items');if(g2)g2.scrollTop=y}
+  else if(a==='anOk'){const at=+t.dataset.at||NOW();closeConfirm();_anPop=false;S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{ansn:at});upsert('picks/'+ME.uid,{ansn:at}).catch(()=>{})}
   else if(a==='gpOk'){const at=+t.dataset.at||NOW();closeConfirm();S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{gsn:at});upsert('picks/'+ME.uid,{gsn:at}).catch(()=>{})}
   else if(a==='gfSend')giftSend();
   else if(a==='wpOpen')wpOpen();
@@ -8342,7 +8352,8 @@ function admAlerts(X){const a=[];if(X.health.noScore.length)a.push(['r',`${X.hea
    Admins can write every picks doc (is_admin() policy). Cards are removed by setting that rarity to 0 (merges can't delete keys); tokens are
    given or taken through inv.dup (it counts into the balance and the earned total); gift packs go in inv.fr.gp (opened ones in inv.fr.gpo).
    Applies to the app you are in (football or basketball); the other app has its own data. */
-const CTL={q:'',uid:'',cq:'',card:'',cr:'e',pk:'player',it:'',tk:'',bm:''};
+const CTL={q:'',uid:'',cq:'',card:'',cr:'e',pk:'player',it:'',tk:'',msg:''};
+const ctlNote=t=>{const m=(CTL.msg||'').trim().slice(0,200);return m?{id:'n'+Date.now().toString(36),v:{m,t,at:NOW()}}:null};
 const ctlName=u=>{const r=(AD.rows||[]).find(x=>x.uid===u),p=S.profiles[u]||(r&&r.p)||{};return p.name||(r&&r.email)||'Account'};
 const ctlCardRes=q=>{q=nmNorm(q);if(q.length<2)return[];const out=[];
   for(const p of players()){if(p.sample||/x$/.test(p.key))continue;if(nmNorm(p.name+' '+p.school).includes(q)){out.push({id:'pc:'+p.key,n:p.name,s:posOf(p)+' · '+p.school});if(out.length>=8)return out}}
@@ -8370,10 +8381,11 @@ function ctlHTML(){
     const itOpts=ITEMS.filter(x=>!x.ex).map(x=>`<option value="${esc(x.id)}" ${CTL.it===x.id?'selected':''}>${esc(x.n)} · ${RAR[x.r].n}</option>`).join('');
     const it=v.it||{},myIt=Object.keys(it).filter(k=>+it[k]>0&&ITEM[k]);
     acct=`<div class="card" style="margin-top:14px"><div class="qh"><h3>${esc(ctlName(u))}${sel.is_admin?' <span class="ad-tag">Admin</span>':''}</h3><span class="muted">${esc(sel.email||'')} · ${bank(u).toLocaleString()} tokens</span></div>
+      <label class="fld" style="margin:0 0 10px"><span>Message to the player (optional)</span><input id="ctl-msg" class="ctl-i" maxlength="200" placeholder="Used as the ban reason, or sent with a gift or removal" value="${esc(CTL.msg)}"></label>
       <h4 style="margin:6px 0">Ban</h4>
       ${isB?`<p><span class="ad-tag">Banned</span> <span class="muted">${esc(b.m||'No message')}</span></p><button class="btn sm" data-ctl="unban" data-id="${esc(u)}">Lift ban</button>`
         :sel.is_admin||u===ME.uid?'<p class="muted">Admin accounts can’t be banned here.</p>'
-        :`<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-bm" class="ctl-i" maxlength="200" placeholder="Message they will see (the reason)" value="${esc(CTL.bm)}"><button class="btn sm" data-ctl="ban" data-id="${esc(u)}">Ban account</button></div><p class="muted" style="font-size:12px;margin:6px 0 0">They get a full-screen ban notice with your message and can send one appeal.</p>`}
+        :`<button class="btn sm" data-ctl="ban" data-id="${esc(u)}">Ban account</button><p class="muted" style="font-size:12px;margin:6px 0 0">They get a full-screen ban notice with your message above and can send one appeal.</p>`}
       <h4 style="margin:16px 0 6px">Tokens</h4>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-tk" type="number" min="1" class="ctl-i" placeholder="Amount" value="${esc(CTL.tk)}"><button class="btn sm" data-ctl="tok" data-d="1" data-id="${esc(u)}">Give tokens</button><button class="btn sm" data-ctl="tok" data-d="-1" data-id="${esc(u)}">Take tokens</button></div>
       <h4 style="margin:16px 0 6px">Cards in their locker (${cardRows.length})</h4>
@@ -8392,34 +8404,35 @@ function ctlHTML(){
     <div class="card"><div class="qh"><h3>Banned accounts (${banned.length})</h3>${appeals.length?`<span class="ad-tag">${appeals.length} appeal${appeals.length>1?'s':''}</span>`:''}</div><div class="ctl-tw"><table class="ctl-t"><tbody>${bn}</tbody></table></div></div>
     <div class="card" style="margin-top:14px"><div class="qh"><h3>Pick an account</h3></div><input id="ctl-q" type="search" class="ctl-i" placeholder="Search name, email or school" value="${esc(CTL.q)}">
       <div id="ctl-acc" style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${list.map(r=>`<button class="btn sm ghost" style="justify-content:flex-start;text-align:left;width:100%" data-ctl="sel" data-id="${esc(r.uid)}"><b>${esc((r.p&&r.p.name)||r.email||'Account')}</b>&nbsp;<span class="muted">${esc(r.email||'')}${r.p&&r.p.school?' · '+esc(r.p.school):''}</span></button>`).join('')||'<p class="muted">No matches.</p>'}</div></div>${acct}`}
-async function ctlSave(u,patch,msg,top){const v=invOf(u);
-  const body=top||{inv:patch},ok=await act(()=>upsert('picks/'+u,body),msg);
-  if(ok){const cur=S.picks[u]||{};S.picks[u]=top?Object.assign({},cur,top):Object.assign({},cur,{inv:Object.assign({},v,patch)});_gIn&&(_gIn.at=0);try{banCheck()}catch(_){}}render()}
+async function ctlSave(u,patch,msg,top,note){const v=invOf(u);
+  let body=top||{inv:patch};if(note)body=Object.assign({},body,{an:{[note.id]:note.v}});
+  const ok=await act(()=>upsert('picks/'+u,body),msg);
+  if(ok){const cur=S.picks[u]||{};S.picks[u]=top?Object.assign({},cur,top):Object.assign({},cur,{inv:Object.assign({},v,patch)});if(note)S.picks[u].an=Object.assign({},cur.an,{[note.id]:note.v});if(note)CTL.msg='';_gIn&&(_gIn.at=0);try{banCheck()}catch(_){}}render()}
 document.addEventListener('input',e=>{const t=e.target;if(!ME.admin)return;
   if(t.id==='ctl-q'){CTL.q=t.value;const h=document.getElementById('ctl-acc');if(h){const q=nmNorm(CTL.q);h.innerHTML=(AD.rows||[]).filter(r=>!q||nmNorm(((r.p&&r.p.name)||'')+' '+(r.email||'')+' '+((r.p&&r.p.school)||'')).includes(q)).slice(0,8).map(r=>`<button class="adm-btn" style="justify-content:flex-start;text-align:left" data-ctl="sel" data-id="${esc(r.uid)}"><b>${esc((r.p&&r.p.name)||r.email||'Account')}</b>&nbsp;<span class="adm-mut">${esc(r.email||'')}${r.p&&r.p.school?' · '+esc(r.p.school):''}</span></button>`).join('')||'<p class="adm-mut">No matches.</p>'}}
   else if(t.id==='ctl-cq'){CTL.cq=t.value;const h=document.getElementById('ctl-res');if(h)h.innerHTML=ctlResHTML()}
-  else if(t.id==='ctl-bm')CTL.bm=t.value;else if(t.id==='ctl-tk')CTL.tk=t.value});
+  else if(t.id==='ctl-msg')CTL.msg=t.value;else if(t.id==='ctl-tk')CTL.tk=t.value});
 document.addEventListener('change',e=>{const t=e.target;if(!ME.admin)return;if(t.id==='ctl-cr'){CTL.cr=t.value;render()}else if(t.id==='ctl-pk')CTL.pk=t.value;else if(t.id==='ctl-it')CTL.it=t.value});
 document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('[data-ctl]');if(!t||!ME.admin)return;
   const a=t.dataset.ctl,u=t.dataset.id,v=u?invOf(u):{};
-  if(a==='sel'){CTL.uid=u;CTL.card='';CTL.cq='';CTL.bm='';render();return}
+  if(a==='sel'){CTL.uid=u;CTL.card='';CTL.cq='';CTL.msg='';render();return}
   if(a==='pick'){CTL.card=u;render();return}
-  if(a==='ban'){const m=(($('#ctl-bm')||{}).value||'').trim();if(!confirm('Ban '+ctlName(u)+'? They will see a full-screen ban notice'+(m?' with your message':'')+'.'))return;
-    await ctlSave(u,null,ctlName(u)+' banned',{ban:{m:m.slice(0,200),at:NOW(),by:ME.uid},appeal:null});return}
+  if(a==='ban'){const m=(CTL.msg||'').trim();if(!confirm('Ban '+ctlName(u)+'? They will see a full-screen ban notice'+(m?' with your message':'')+'.'))return;
+    await ctlSave(u,null,ctlName(u)+' banned',{ban:{m:m.slice(0,200),at:NOW(),by:ME.uid},appeal:null});CTL.msg='';render();return}
   if(a==='unban'){if(!confirm('Lift the ban on '+ctlName(u)+'?'))return;await ctlSave(u,null,'Ban lifted',{ban:null,appeal:null});return}
   if(a==='approve'){await ctlSave(u,null,'Appeal approved, ban lifted',{ban:null,appeal:null});return}
   if(a==='deny'){const r=((document.getElementById('ctl-r-'+u)||{}).value||'').trim().slice(0,200),ap=Object.assign({},((S.picks[u]||{}).appeal),{st:'denied',r,rat:NOW()});await ctlSave(u,null,'Appeal denied',{appeal:ap});return}
   if(a==='tok'){const n=Math.floor(+(($('#ctl-tk')||{}).value||0)),d=+t.dataset.d;if(!(n>=1)){say('Enter an amount first.');return}
-    await ctlSave(u,{dup:(+v.dup||0)+d*n},(d>0?'Gave ':'Took ')+n+' tokens');CTL.tk='';return}
+    await ctlSave(u,{dup:(+v.dup||0)+d*n},(d>0?'Gave ':'Took ')+n+' tokens',null,ctlNote((d>0?'You were given ':'We took ')+n+' tokens'));CTL.tk='';return}
   if(a==='cardadd'){if(!CTL.card)return;const cards=Object.assign({},v.cards),id=CTL.card,cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur[CTL.cr]=1;cards[id]=cur;
-    await ctlSave(u,{cards},'Card given');return}
+    await ctlSave(u,{cards},'Card given',null,ctlNote('You were given a '+RAR[CTL.cr].n+' '+cardInfo(id).name+' card'));return}
   if(a==='cardrm'){const id=t.dataset.c,r=t.dataset.r;if(!confirm('Remove the '+RAR[r].n+' '+cardInfo(id).name+' card from '+ctlName(u)+'?'))return;
-    const cards=Object.assign({},v.cards),cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur[r]=0;cards[id]=cur;await ctlSave(u,{cards},'Card removed');return}
+    const cards=Object.assign({},v.cards),cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);cur[r]=0;cards[id]=cur;await ctlSave(u,{cards},'Card removed',null,ctlNote('We removed your '+RAR[r].n+' '+cardInfo(id).name+' card'));return}
   if(a==='pack'){const k=CTL.pk,id='ad'+Date.now().toString(36);if(!PACKS[k])return;const fr=Object.assign({},v.fr,{gp:Object.assign({},(v.fr||{}).gp,{[id]:{t:k,m:'From the Varsity team'}})});
-    await ctlSave(u,{fr},PACKS[k].n+' gifted');return}
-  if(a==='packrm'){const g=t.dataset.g,fr=Object.assign({},v.fr,{gpo:Object.assign({},(v.fr||{}).gpo,{[g]:1})});await ctlSave(u,{fr},'Pack taken back');return}
+    await ctlSave(u,{fr},PACKS[k].n+' gifted',null,ctlNote('You were gifted a '+PACKS[k].n+'. Open it in the Shop.'));return}
+  if(a==='packrm'){const g=t.dataset.g,fr=Object.assign({},v.fr,{gpo:Object.assign({},(v.fr||{}).gpo,{[g]:1})});await ctlSave(u,{fr},'Pack taken back',null,ctlNote('We took back an unopened gift pack'));return}
   if(a==='wpreset'){await ctlSave(u,{sp2:0},'They can open the Welcome pack again');return}
-  if(a==='item'){const id=CTL.it||(($('#ctl-it')||{}).value),d=+t.dataset.d;if(!id||!ITEM[id])return;const it=Object.assign({},v.it);it[id]=Math.max(0,(+it[id]||0)+d);await ctlSave(u,{it},d>0?'Item given':'Item taken')}});
+  if(a==='item'){const id=CTL.it||(($('#ctl-it')||{}).value),d=+t.dataset.d;if(!id||!ITEM[id])return;const it=Object.assign({},v.it);it[id]=Math.max(0,(+it[id]||0)+d);await ctlSave(u,{it},d>0?'Item given':'Item taken',null,ctlNote((d>0?'You were given ':'We took ')+ITEM[id].n))}});
 function admPages(P,D,K,X,kpi,title,sel,hbars,dl){
   const pc=x=>x==null?'—':Math.round(x*100)+'%';
   if(P==='growth'){const f0=X.funnel[0][1]||1;
@@ -8698,7 +8711,7 @@ const browsing=()=>{try{return localStorage.getItem('gf-browse')==='1'}catch(_){
 function needJoin(what){if(myProfile())return false;openGate();return true}
 function touch(){
   _rev++;
-  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{if(ME.admin&&AD.rows===null&&!AD.loading)adLoad()}catch(_){}try{profileFix()}catch(_){}if(window.__pfx===1&&!(myProfile()||{}).fx)return;try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}try{spMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
+  maybeInitSeen();stWatchNew();rwClaim();try{pushSync()}catch(_){}try{lbTokClaim()}catch(_){}try{banCheck()}catch(_){}try{if(ME.admin&&AD.rows===null&&!AD.loading)adLoad()}catch(_){}try{profileFix()}catch(_){}if(window.__pfx===1&&!(myProfile()||{}).fx)return;try{redoCheck()}catch(_){}if(window.__redo)return;try{landCheck()}catch(_){}try{setupCheck()}catch(_){}if(!window.__landGo&&!mustSetup()){try{giftPopup()}catch(_){}try{anPopup()}catch(_){}try{spRevoke()}catch(_){}try{cardFix()}catch(_){}try{wpMaybe()}catch(_){}try{spMaybe()}catch(_){}}try{pushAskMaybe()}catch(_){}try{bndClaim()}catch(_){}
   if(ME.mode==='guest'){if(AUTH.mode==='admin'&&!AUTH.step)AUTH.mode='in';guestGate()}
   if(!gateChecked&&S.loaded.profiles){gateChecked=true;if((ME.mode==='demo'&&!browsing()||ME.mode==='live')&&!myProfile())openGate()}
   if(rq)return;rq=true;
