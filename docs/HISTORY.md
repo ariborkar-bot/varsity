@@ -352,3 +352,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - OVR scale (Nov 10, owner): lowest OVR is 50 (was 40); mean 72, spread 11, ceiling 99.
 - OVR scale (Nov 10, owner): lowest OVR is 45; mean 70, spread 11, ceiling 99.
 - OVR v3 (Nov 10, owner): a 4th part, schedule strength (5%; weights 38/28.5/28.5/5): football = average win% of the opponents played (completed games, Laplace-smoothed), basketball = average 2025-26 scoring margin (`BB_PRIOR`) of the 2026-27 opponents; percentile among schools. Division is not used directly (the app only has division brackets for some schools). `dump.py` now also writes fbgames.json and bbsched.json.
+- OVR (Nov 10, owner): schedule strength weight raised to 8% (36.8/27.6/27.6/8).
