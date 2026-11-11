@@ -2265,8 +2265,8 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .cv-close{width:100%;min-height:56px;font-size:1.05rem;margin:4px 0 calc(env(safe-area-inset-bottom,0px) + 8px)}
 .cv-x::after{content:"";position:absolute;inset:-12px}
 
-.lk-big{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:18px 10px;margin-top:12px;justify-items:center;align-items:start;perspective:900px}
-.lk-bc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px 10px;border:0;background:none;color:inherit;font:inherit;text-align:center;cursor:pointer;min-width:0;-webkit-tap-highlight-color:transparent}.lk-bc{width:100%;max-width:230px}.lk-bc.duo{grid-column:span 2;max-width:none}
+.lk-big{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:26px 14px;margin-top:12px;justify-items:center;align-items:start;perspective:900px}
+.lk-bc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px 10px;border:0;background:none;color:inherit;font:inherit;text-align:center;cursor:pointer;min-width:0;-webkit-tap-highlight-color:transparent}.lk-bc{width:100%;max-width:230px}.lk-bc.duo{grid-column:auto}
 .lk-bc b{font:900 .9rem/1.15 var(--f-display,inherit);overflow-wrap:anywhere}.lk-bc small{font-size:.72rem;line-height:1.25}.lk-bc .lk-vers{justify-content:center}
 .lk-ba{display:flex;align-items:flex-start;justify-content:center;width:100%;min-height:var(--h);margin-bottom:6px;transform-style:preserve-3d;animation:lkFloat 6s ease-in-out infinite;animation-delay:calc(var(--i)*-1s);filter:drop-shadow(0 10px 12px rgba(0,0,0,.55)) drop-shadow(0 0 12px color-mix(in srgb,var(--rc) 40%,transparent))}
 @keyframes lkFloat{0%,100%{transform:rotateY(-8deg) rotateX(3deg) translateY(0)}50%{transform:rotateY(8deg) rotateX(-3deg) translateY(-4px)}}
@@ -2274,6 +2274,9 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 @keyframes lkHolo{0%,100%{background-position:0 0,0 0}50%{background-position:0 0,100% 0}}
 .lk-bc:active .lk-ba{transform:scale(.97)}
 @media (max-width:480px){.lk-big{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* v435: Locker cards in an even grid: every card (player, team, Duo, special) is the same size, one per cell, info text lines up under each */
+.lk-bc,.lk-bc.duo{width:100%;max-width:210px}.lk-bc small{min-height:0}.lk-bc>b{min-height:2.3em;display:flex;align-items:flex-end;justify-content:center}
+
 @media (prefers-reduced-motion:reduce){.lk-ba,.lk-big .pc2 .pc-fx{animation:none!important}}
 
 .lk-flt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 6px}.lk-flt #lk-q{grid-column:1/-1}.lk-flt input,.lk-flt select{width:100%;min-width:0}.lk-flt .btn{grid-column:1/-1;justify-self:start}
@@ -3308,7 +3311,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v435 · Nov 10';
+const APP_BUILD='v436 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4758,7 +4761,7 @@ function rollDuo(){const a=duoSets().all;return a.length?a[fcRnd(a.length)]:''}
 function duoInfo(id){const [a,b]=duoKeys(id).map(pByKey),A=a||{name:'Player',school:''},B=b||{name:'Player',school:''};
   return {team:0,duo:1,name:lastN(A.name)+' & '+lastN(B.name),full:A.name+' & '+B.name,school:A.school||B.school,sub:A.name+' & '+B.name+' · '+(A.school||B.school),a:A,b:B}}
 const lastN=n=>{const p=String(n||'').trim().split(/\s+/);return p[p.length-1]||''};
-function duoArt(id,r,s=54){const c=duoInfo(id),R=RAR[r]||RAR.e,w=Math.round(s*.74),z=Math.round(s*.4);
+function duoArt(id,r,s=54){const c=duoInfo(id),R=RAR[r]||RAR.e,w=Math.round(s*.72),z=Math.round(s*.4);
   const face=(p,cl,n)=>`<span class="duo-f ${cl}"><span class="duo-sl"></span><span class="duo-wm">${slogo(p.school,Math.round(s*.6))}</span><span class="duo-tag">DUO<em>${n}/2</em></span><span class="duo-av">${av(p.name,p.school,z)}</span><span class="duo-nm"><b>${esc(lastN(p.name))}</b><small>${esc(p.pos==='DEF'?(p.sub||'DEF'):(p.pos||''))}</small></span><span class="duo-sp"></span><span class="duo-foil"></span></span>`;
   return `<span class="tc-duo r-${r}" style="--rc:${R.c};width:${w}px;height:${s}px;font-size:${(s/11).toFixed(2)}px" title="${esc(c.full)} · tap to flip" role="img" aria-label="${esc(c.full)} duo card"><span class="duo-tilt"><span class="duo-in">${face(c.a,'fr',1)}${face(c.b,'bk',2)}</span></span></span>`}
 /* v403 (owner): duo cards flip on their own every 5 seconds and when tapped. Each flip keeps turning the same way, lifts the card and fires a ring in its rarity colour. */
@@ -4883,7 +4886,7 @@ function pcBack(id,r,s){const c=cardInfo(id),R=RAR[r]||RAR.c,sp=c.spc?SPEC[c.spc
     :`<b class="pb-k">On your winnings</b><i class="pb-d">Win an Over/Under prop on ${ln} and this card adds ${pct}% to your winnings.</i><span class="pb-w"><small>Works on</small>Every prop you bet on ${ln}</span>`;
   return `<span class="tcard pc2 pc-bk pc-${r||'c'}${cls}" style="${sk}--rc:${R.c};width:${Math.round(s*.72)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span><span class="pb"><i class="pb-h">What it does to your bets</i><b class="pb-n">${big}</b>${body}</span><span class="pc-fx"></span></span></span>`}
 function cardArt(id,r,s=54){if(id.startsWith('dc:'))return duoArt(id,r,s);if(id.startsWith('sc:')){const st=id.split(':')[1],S=SPEC[st]||SPEC.prizm,h=cardArt('pc:'+id.split(':')[2],r,s);return h.replace('class="tcard pc2 ',`class="tcard pc2 spc sp-${st} `).replace('style="--rc:',`style="--sk:${S.c};--rc:`).replace('<span class="pc-fx">',`<i class="sp-tag">${esc(S.n)}</i><span class="sp-fx"></span><span class="pc-fx">`)}if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
-  if(c.team)return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${cutImg(c.school,Math.round(s*.56))||slogo(c.school,Math.round(s*.5))}<i>TEAM</i></span>`;
+  if(c.team)return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.72)}px;height:${s}px">${cutImg(c.school,Math.round(s*.56))||slogo(c.school,Math.round(s*.5))}<i>TEAM</i></span>`;
   /* v415 player card (shield): OVR (ovr.js, from the OVR sheets), position and class top-left, school crest, last name, and on full-size cards the school and
      this season's key stats. Under 80 px tall only the OVR and the crest fit. */
   const q=c.key?pByKey(c.key):null,o=ovrOf(c.key),sm=s<80,xl=s>=200,ps=q?(q.pos==='DEF'?(q.sub||'DEF'):q.pos):'',gr=q?(['','FR','SO','JR','SR'][q.gr]||''):'',lg=logoFor(c.school),st=xl?pcStats(q):[],full=xl&&st.length>0,hz=Math.round(s*(sm?.34:full?.41:.47));

@@ -448,3 +448,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v435
 - Card view (`openCard`): the X is bigger (60px, fixed top-right below the notch, extra 12px tap padding), there is a full-width Close button at the bottom (`.cv-close`), and tapping the dark area closes it (the old backdrop handler never ran because the global click handler returns when there is no `data-act`).
+- v436 (Nov 10, owner): Locker cards in an even grid (`.lk-big`): Duo cards no longer span two columns; player, team and Duo cards are all 72% as wide as tall; 190 px columns, 2 on phones. Also restored `sw.js`, which the v428 push had emptied to 0 bytes (restored from v426, CACHE bumped).
