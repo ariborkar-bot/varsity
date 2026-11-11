@@ -2666,6 +2666,14 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pc2 .pc-a,.pc2.pc-xl .pc-a{left:4em;top:4em;width:59.6em;height:56em;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 5em 7em 0;box-sizing:border-box}
 .pc2 .pb-w{margin-bottom:8em}
 
+/* v437: Transfer Portal trades */
+.tr-sec{margin:14px 2px 6px;font:900 .95rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase}.tr-h{margin:12px 0 6px;font:800 .8rem/1 var(--f-display,inherit);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tr-row,.tr-new{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}.tr-top b{font:800 .95rem/1.2 var(--f-display,inherit)}
+.tr-pair{display:flex;align-items:center;justify-content:center;gap:12px}.tr-sw{font-size:1.6rem;opacity:.7}.tr-m{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;max-width:120px}.tr-m b{font-size:.8rem;line-height:1.15}.tr-m small{font-size:.68rem}
+.tr-lb{text-align:center}.tr-done{opacity:.75}.tr-sum{padding:8px 0;border-top:1px solid var(--line)}
+.tr-users{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}.tr-u{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:inherit;text-align:left}
+.tp-s.on{outline:2px solid var(--accent);outline-offset:1px}
+
 /* v423: flip + back of single player cards (card view) */
 .cv-card>.pc-flip{display:block;position:relative;transform-style:preserve-3d;transition:transform .12s ease-out;will-change:transform;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pc-flipin{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.25,.45,1)}.pc-flip.fl .pc-flipin{transform:rotateY(180deg)}
@@ -3311,7 +3319,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v436 · Nov 10';
+const APP_BUILD='v437 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4949,7 +4957,8 @@ async function cardSell(id,r){const u=ME.uid,v=invOf(u),raw=v.cards&&v.cards[id]
 /* v419 (owner): Varsity Transfer Portal. Cards are auctioned for tokens only (no real money). The server (tools/sql/transfer_portal.sql) holds the
    card while it is listed and moves cards and tokens when it ends. Tokens from the Portal sit in inv.tp (counted in the balance by invBonus).
    A 5% fee comes off every sale. A bid in the last 2 minutes adds 2 minutes. */
-const TP={rows:[],t:0,tab:'browse',err:'',ok:0,sel:null};
+const TP={rows:[],t:0,tab:'browse',err:'',ok:0,sel:null,tr:[],trOk:0,trErr:''};
+const TRX={to:'',q:'',give:null,want:null};
 const tpPre=()=>FG_SPORT==='bb'?'bb_':'';
 const TP_FEE=5,TP_HRS=[1,6,12,24,48];
 const tpMin=l=>l.bid==null?l.start_bid:l.bid+Math.max(1,Math.ceil(l.bid*.05));
@@ -4960,6 +4969,8 @@ async function tpLoad(force){
   if(!force&&Date.now()-TP.t<8000)return;TP.t=Date.now();
   try{await SB.rpc('tp_settle');const {data,error}=await SB.from('tp_listings').select('*').eq('pre',tpPre()).or('status.eq.open,seller.eq.'+ME.uid+',bidder.eq.'+ME.uid).order('ends_at');if(error)throw error;TP.rows=data||[];TP.err='';TP.ok=1}
   catch(e){TP.err=String((e&&e.message)||e);TP.ok=0}
+  try{await SB.rpc('tp_trade_settle');const {data,error}=await SB.from('tp_trades').select('*').eq('pre',tpPre()).order('created_at',{ascending:false}).limit(60);if(error)throw error;TP.tr=data||[];TP.trOk=1;TP.trErr=''}
+  catch(e){TP.tr=[];TP.trOk=0;TP.trErr=String((e&&e.message)||e)}
   if(UI.view==='portal')render(true)}
 async function tpCall(fn,args,ok){
   if(!SB)return false;
@@ -4975,14 +4986,15 @@ function tpCardRow(l,mode){
     ${open?`<div class="tp-pr">${price}</div><small class="tp-left" data-e="${tpEnd(l)}">${tpLeft(left)}</small>`:`<small class="tp-st">${esc(st)}</small>`}</div><div class="tp-bt">${btns}</div></article>`}
 function viewPortal(){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
-  const head=`<div class="head"><h2>Transfer Portal</h2><p>Auction your cards for tokens and bid on other players’ cards. Tokens only, no real money.</p></div>`;
+  const head=`<div class="head"><h2>Transfer Portal</h2><p>Auction your cards for tokens, bid on other players’ cards, or trade cards with another player. Tokens only, no real money.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to use the Transfer Portal.</p>';
   tpLoad();
-  const bal=bank(ME.uid),tab=['browse','mine','sell'].includes(TP.tab)?TP.tab:'browse',now=Date.now();
-  const tabs=`<div class="lk-seg" role="tablist" aria-label="Transfer Portal">${[['browse','Auctions'],['mine','My bids & listings'],['sell','Sell a card']].map(([k,l])=>`<button role="tab" data-act="tpTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const bal=bank(ME.uid),tab=['browse','mine','sell','trade'].includes(TP.tab)?TP.tab:'browse',now=Date.now(),inTr=TP.tr.filter(x=>x.to_uid===ME.uid&&x.status==='pending').length;
+  const tabs=`<div class="lk-seg" role="tablist" aria-label="Transfer Portal">${[['browse','Auctions'],['mine','My bids & listings'],['sell','Sell a card'],['trade','Trades'+(inTr?' ('+inTr+')':'')]].map(([k,l])=>`<button role="tab" data-act="tpTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
   const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
   let body='';
   if(!SB)body='<p class="empty">The Transfer Portal needs the live app. It does not run in the demo.</p>';
+  else if(tab==='trade')body=trHTML();
   else if(TP.err&&!TP.ok)body=`<p class="empty">The Portal is not open yet (${esc(TP.err)}). Try again soon.</p>`;
   else if(tab==='browse'){
     const rows=TP.rows.filter(l=>l.status==='open'&&tpEnd(l)>now).sort((a,b)=>tpEnd(a)-tpEnd(b));
@@ -5010,6 +5022,31 @@ function tpBidSheet(l){
   confirmBox('Bid on '+c.name,`<span class="tp-f"><label>Your bid (min ${min})<input id="tp-a" type="number" min="${min}" inputmode="numeric" value="${min}"></label></span><small class="muted">You have ${Math.round(bal)} tokens. Your bid is held until you are outbid or it ends. If you win, the card lands in your locker.</small>`,'Place bid',async()=>{
     const a=Math.round(+$('#tp-a').value);if(!(a>=min)){say('Bid at least '+min+' tokens.');return}
     await tpCall('tp_bid',{p_id:l.id,p_amt:a,p_bal:Math.round(bank(ME.uid))},'Bid placed')})}
+
+/* v437 (owner): card-for-card trades. Server: tools/sql/transfer_trades.sql (owner runs it once). The proposer's card is held while the offer is open. */
+const trMini=(id,r,z)=>{const c=cardInfo(id),R=RAR[r]||RAR.c;return `<span class="tr-m" style="--rc:${R.c}">${cardArt(id,r,z||64)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n}</small></span>`};
+const trUsers=()=>{const q=nmNorm(TRX.q||'');return Object.keys(S.picks).filter(u=>u!==ME.uid&&S.profiles[u]&&Object.keys(cardsOf(u)).some(id=>cardVers(u,id).length)).map(u=>({u,n:nm(u)})).filter(x=>!q||nmNorm(x.n).includes(q)).sort((a,b)=>a.n.localeCompare(b.n)).slice(0,12)};
+const trUsersHTML=()=>{const L=trUsers();return L.length?L.map(x=>`<button type="button" class="tr-u" data-act="trTo" data-id="${esc(x.u)}"><b>${esc(x.n)}</b><small class="muted">${Object.keys(cardsOf(x.u)).filter(id=>cardVers(x.u,id).length).length} cards</small></button>`).join(''):'<p class="empty">No players found.</p>'};
+function trPick(u,mine,sel,act){const own=cardsOf(u),other=cardsOf(mine?ME.uid:TRX.to),items=[];
+  Object.keys(own).forEach(id=>cardVers(u,id).forEach(r=>{if(!cardVers(mine?TRX.to:ME.uid,id).includes(r))items.push({id,r})}));
+  const ord={m:0,x:0,l:1,e:2,r:3,u:4,c:5};items.sort((a,b)=>ord[a.r]-ord[b.r]||cardInfo(a.id).name.localeCompare(cardInfo(b.id).name));
+  return items.length?`<div class="tp-sell">${items.map(x=>{const c=cardInfo(x.id),R=RAR[x.r],on=sel&&sel.id===x.id&&sel.r===x.r;return `<button type="button" class="card tp-s${on?' on':''}" style="--rc:${R.c}" aria-pressed="${on}" data-act="${act}" data-id="${esc(x.id)}" data-r="${x.r}">${cardArt(x.id,x.r,c.duo?80:56)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n}</small></button>`}).join('')}</div>`:'<p class="empty">No cards to pick from.</p>'}
+function trHTML(){
+  if(!TP.trOk)return `<p class="empty">Trading is not open yet${TP.trErr?' ('+esc(TP.trErr)+')':''}. Try again soon.</p>`;
+  const me=ME.uid,P=TP.tr.filter(x=>x.status==='pending'),inc=P.filter(x=>x.to_uid===me),out=P.filter(x=>x.from_uid===me),done=TP.tr.filter(x=>x.status!=='pending').slice(0,8);
+  const row=(x,kind)=>{const who=kind==='in'?x.from_uid:x.to_uid;
+    return `<article class="card tr-row"><div class="tr-top"><b>${kind==='in'?esc(nm(who))+' offers you a trade':'Your offer to '+esc(nm(who))}</b></div><div class="tr-pair">${trMini(x.give_card,x.give_ver)}<span class="tr-sw" aria-hidden="true">⇄</span>${trMini(x.want_card,x.want_ver)}</div><div class="tr-lb"><small class="muted">${kind==='in'?'You get the first card and give the second.':'You give the first card and get the second.'}</small></div><div class="tp-bt">${kind==='in'?`<button class="btn sm" data-act="trAccept" data-id="${x.id}">Accept</button><button class="btn ghost sm" data-act="trDecline" data-id="${x.id}">Decline</button>`:`<button class="btn ghost sm" data-act="trCancel" data-id="${x.id}">Take it back</button>`}</div></article>`};
+  const stl={accepted:'Accepted',declined:'Declined',cancelled:'Cancelled',expired:'Ended with no answer, card returned'};
+  const hist=x=>`<article class="card tr-row tr-done"><div class="tr-top"><b>${x.from_uid===me?'To '+esc(nm(x.to_uid)):'From '+esc(nm(x.from_uid))}</b><small class="muted"> · ${stl[x.status]||x.status}</small></div><div class="tr-pair">${trMini(x.give_card,x.give_ver,44)}<span class="tr-sw" aria-hidden="true">⇄</span>${trMini(x.want_card,x.want_ver,44)}</div></article>`;
+  let prop;
+  if(!TRX.to)prop=`<section class="card tr-new"><h3>Propose a trade</h3><p class="muted">Pick a player to trade with.</p><input id="tr-q" class="pt-q" type="search" placeholder="Search players" autocomplete="off" value="${esc(TRX.q||'')}" aria-label="Search players"><div id="tr-users" class="tr-users">${trUsersHTML()}</div></section>`;
+  else{const ok=TRX.give&&TRX.want;
+    prop=`<section class="card tr-new"><div class="qh"><h3>Trade with ${esc(nm(TRX.to))}</h3><button type="button" class="btn ghost sm" data-act="trClear">Change player</button></div>
+      <h4 class="tr-h">You give</h4>${trPick(me,true,TRX.give,'trGive')}<h4 class="tr-h">You get</h4>${trPick(TRX.to,false,TRX.want,'trWant')}
+      ${ok?`<div class="tr-pair tr-sum">${trMini(TRX.give.id,TRX.give.r)}<span class="tr-sw" aria-hidden="true">⇄</span>${trMini(TRX.want.id,TRX.want.r)}</div>`:''}
+      <div class="gbtns"><button class="btn" data-act="trSend" ${ok?'':'disabled'}>Send trade offer</button></div><small class="muted">Your card is held while the offer is open. If ${esc(nm(TRX.to))} declines or doesn’t answer in 7 days, it comes back.</small></section>`}
+  return (inc.length?`<h3 class="tr-sec">Offers to you</h3>`+inc.map(x=>row(x,'in')).join(''):'')+prop+(out.length?`<h3 class="tr-sec">Your open offers</h3>`+out.map(x=>row(x,'out')).join(''):'')+(done.length?`<h3 class="tr-sec">Recent</h3>`+done.map(hist).join(''):'')}
+document.addEventListener('input',e=>{const q=e.target&&e.target.id==='tr-q';if(!q)return;TRX.q=e.target.value;const u=document.getElementById('tr-users');if(u)u.innerHTML=trUsersHTML()});
 setInterval(()=>{if(UI.view!=='portal'||document.hidden)return;const n=Date.now();let end=0;document.querySelectorAll('.tp-left').forEach(e=>{const ms=+e.dataset.e-n;e.textContent=tpLeft(ms);if(ms<=0)end=1});if(end)tpLoad(true);else if(n-TP.t>15000)tpLoad(true)},1000);
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollGear(r){let i=RAR_ORD.indexOf(r);for(;i>=0;i--){const pool=ITEMS.filter(x=>x.r===RAR_ORD[i]&&BH_K.includes(x.k));if(pool.length)return pool[fcRnd(pool.length)].id}return 'bhs_black'}
@@ -9713,6 +9750,14 @@ document.addEventListener('click',async e=>{
   if(a==='tpBid'){const l=TP.rows.find(x=>x.id===id);if(l)tpBidSheet(l);return}
   if(a==='tpBuy'){const l=TP.rows.find(x=>x.id===id);if(l)confirmBox('Buy now?',`Pay <b>${l.buy_now} tokens</b> for the ${RAR[l.ver].n} ${esc(cardInfo(l.card).name)} card. You can’t undo this.`,'Buy',()=>tpCall('tp_buy',{p_id:l.id,p_bal:Math.round(bank(ME.uid))},'It’s yours. Check your locker.'));return}
   if(a==='tpCancel'){tpCall('tp_cancel',{p_id:id},'Card back in your locker');return}
+  if(a==='trTo'){TRX.to=id;TRX.give=TRX.want=null;render();return}
+  if(a==='trClear'){TRX.to='';TRX.give=TRX.want=null;render();return}
+  if(a==='trGive'){TRX.give={id,r:t.dataset.r};render();return}
+  if(a==='trWant'){TRX.want={id,r:t.dataset.r};render();return}
+  if(a==='trSend'){if(!(TRX.to&&TRX.give&&TRX.want))return;const g=TRX.give,w=TRX.want,to=TRX.to;confirmBox('Send this trade?',`Offer your ${RAR[g.r].n} <b>${esc(cardInfo(g.id).name)}</b> to ${esc(nm(to))} for their ${RAR[w.r].n} <b>${esc(cardInfo(w.id).name)}</b>. Your card is held until they answer.`,'Send offer',async()=>{if(await tpCall('tp_trade_offer',{p_pre:tpPre(),p_to:to,p_give:g.id,p_gv:g.r,p_want:w.id,p_wv:w.r},'Trade offer sent')){TRX.to='';TRX.give=TRX.want=null;render()}});return}
+  if(a==='trAccept'){const x=TP.tr.find(y=>y.id===id);if(x)confirmBox('Accept this trade?',`You give your ${RAR[x.want_ver].n} <b>${esc(cardInfo(x.want_card).name)}</b> and get ${esc(nm(x.from_uid))}’s ${RAR[x.give_ver].n} <b>${esc(cardInfo(x.give_card).name)}</b>. You can’t undo this.`,'Accept',()=>tpCall('tp_trade_accept',{p_id:id},'Trade done'));return}
+  if(a==='trDecline'){tpCall('tp_trade_decline',{p_id:id},'Offer declined');return}
+  if(a==='trCancel'){tpCall('tp_trade_cancel',{p_id:id},'Card back in your locker');return}
   if(a==='cvProfile'){closeCard();openPlayer(id);return}
   if(a==='player')openPlayer(id);
   else if(a==='close')sheetClose();
