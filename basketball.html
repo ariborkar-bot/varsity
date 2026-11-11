@@ -1533,7 +1533,7 @@ select option{background:#0B1730;color:#EAF0F8}
 /* card view: tap a card to see it big; the name opens the profile */
 .cv{position:fixed;inset:0;z-index:400;background:rgba(3,7,15,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;overflow:auto;animation:cvIn .18s ease-out}@keyframes cvIn{from{opacity:0}}
 .cv-in{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(360px,100%);position:relative;margin-top:44px}
-.cv-x{position:absolute;top:-48px;right:0;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:700 1.3rem/1 system-ui;z-index:3}
+.cv-x{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;width:60px;height:60px;font-size:2.2rem!important;background:rgba(0,0,0,.6)!important;border:2px solid rgba(255,255,255,.55)!important;-webkit-tap-highlight-color:transparent;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:700 1.3rem/1 system-ui;z-index:3}
 .cv-card{perspective:900px;touch-action:none;animation:cvPop .34s cubic-bezier(.2,1.3,.4,1)}@keyframes cvPop{from{transform:scale(.7) rotate(-4deg);opacity:0}}.cv-card>.tcard,.cv-card>.tc-duo{transition:transform .12s ease-out;will-change:transform}
 .cv-name{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:#fff;font:inherit;padding:4px 10px}.cv-name b{font:900 1.35rem/1.1 var(--f-display,inherit);text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:4px}.cv-name small{color:var(--muted);font-size:.78rem}
 .cv-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}.cv-st div{border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:8px 4px;text-align:center;background:rgba(255,255,255,.05)}.cv-st b{display:block;font:900 1.15rem/1.1 var(--f-display,inherit);color:#fff}.cv-st small{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em}
@@ -2262,6 +2262,9 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .lk-ring b{font:900 1.5rem/1 var(--f-display,inherit)}.lk-ring small{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .lk-hs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.lk-hs div{display:flex;flex-direction:column}.lk-hs b{font:900 1.35rem/1.1 var(--f-display,inherit)}.lk-hs small{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .lk-shopb{align-self:center}
+.cv-close{width:100%;min-height:56px;font-size:1.05rem;margin:4px 0 calc(env(safe-area-inset-bottom,0px) + 8px)}
+.cv-x::after{content:"";position:absolute;inset:-12px}
+
 .lk-big{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:18px 10px;margin-top:12px;justify-items:center;align-items:start;perspective:900px}
 .lk-bc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px 10px;border:0;background:none;color:inherit;font:inherit;text-align:center;cursor:pointer;min-width:0;-webkit-tap-highlight-color:transparent}.lk-bc{width:100%;max-width:230px}.lk-bc.duo{grid-column:span 2;max-width:none}
 .lk-bc b{font:900 .9rem/1.15 var(--f-display,inherit);overflow-wrap:anywhere}.lk-bc small{font-size:.72rem;line-height:1.25}.lk-bc .lk-vers{justify-content:center}
@@ -3316,7 +3319,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v434 · Nov 10';
+const APP_BUILD='v435 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4902,6 +4905,8 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
     ${c.spc?`<div class="cv-back"><b>His boost</b><small>${esc(SPEC[c.spc].d)}</small><b>Where it works</b><small>${esc(SPEC[c.spc].w)}</small></div>`:''}
     ${ach||c.duo?'':`<div class="cv-vs" role="group" aria-label="Versions you own">${RAR_ORD.filter(x=>c.spc?SPC_R.includes(x):CARD_PCT[x]).map(x=>`<button type="button" class="cv-v ${own.includes(x)?'on':''}" style="--rc:${RAR[x].c}" ${own.includes(x)?`data-act="cvVer" data-r="${x}"`:'disabled'} aria-pressed="${x===r}">${RAR[x].n}</button>`).join('')}</div>`}
     ${!ach&&own.includes(r)&&SELL[r]&&ME.mode!=='readonly'&&ME.mode!=='offline'?`<button type="button" class="btn ghost sm cv-sell" data-act="cvSell" data-r="${r}">Sell this ${RAR[r].n} for ${SELL[r]} tokens</button>`:''}</div>`;
+  el.querySelector('.cv-in').insertAdjacentHTML('beforeend','<button type="button" class="btn cv-close" data-act="cvClose">Close</button>');   /* v435 (owner): big Close button at the bottom too, tapping the dark area closes it */
+  el.addEventListener('click',ev=>{if(ev.target===el)closeCard()});
   document.body.appendChild(el);const cd=el.querySelector('.cv-card'),art=cd.firstElementChild;
   if(art&&!c.duo){const mv=e=>{const b=cd.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.transform=`rotateY(${(x*22).toFixed(1)}deg) rotateX(${(-y*18).toFixed(1)}deg)`;art.style.setProperty('--mx',((x+.5)*100).toFixed(0)+'%');art.style.setProperty('--my',((y+.5)*100).toFixed(0)+'%')},rs=()=>{art.style.transform='';art.style.removeProperty('--mx');art.style.removeProperty('--my')};
     cd.addEventListener('pointermove',mv);cd.addEventListener('pointerleave',rs);cd.addEventListener('pointerup',rs);cd.addEventListener('pointercancel',rs)}

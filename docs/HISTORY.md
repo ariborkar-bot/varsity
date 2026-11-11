@@ -445,3 +445,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v434
 - Fix: Locker big cards overlapped on screens wider than a phone (card size followed the screen width but the grid columns did not). Card height is now fixed (`LKH`=224, 161px wide), columns are `minmax(176px,1fr)`, every tile has the same art slot height (`--h`) so names line up, order is still highest overall first.
+
+## v435
+- Card view (`openCard`): the X is bigger (60px, fixed top-right below the notch, extra 12px tap padding), there is a full-width Close button at the bottom (`.cv-close`), and tapping the dark area closes it (the old backdrop handler never ran because the global click handler returns when there is no `data-act`).
