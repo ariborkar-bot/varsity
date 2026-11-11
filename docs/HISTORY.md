@@ -419,3 +419,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v425: Cards tab opens on All
 - Locker > Cards defaults to an All chip (players, teams, duos, special), every filter sorted by overall, highest first (`cOvr` in viewLocker: players/specials use ovr.js, teams = average of their top 3 players, duos = average of the two). Immortal cards still have their own section above.
+- v426 (Nov 10, owner): card layout fixes. The art window was 3.6em too narrow (off centre) and the special-card tag strip had a huge em padding that covered the OVR; window is now 59.6em wide (4em margin each side) and special cards (`.tcard.pc2.spc`) start the window at 11em under a slim tag strip. Check cards with a gallery of every position, rarity, special style and the 300/170/124/64 px sizes before shipping card CSS.
