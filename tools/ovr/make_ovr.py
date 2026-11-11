@@ -57,6 +57,18 @@ SCH_FB = school_pct(sos_fb()); SCH_BB = school_pct(sos_bb())
 rows = []   # dict(name, school, sport, pos, gr, gp, score, pct, status)
 fb = json.load(open(os.path.join(D, 'fb.json')))
 K = 2
+# The app has no position for ~375 defenders: estimate DL/LB/DB from their stat mix (model trained on defenders whose position is known)
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+def _f(p):
+    s = p['st']; g = max(p['gp'], 1); t = s['tkl']
+    return [t / g, s['tfl'] / g, s['sack'] / g, s['dInt'] / g, s['pbu'] / g, s['ff'] / g, s['fr'] / g, s['sack'] / (t + 1), s['tfl'] / (t + 1), s['dInt'] / (t + 1), s['pbu'] / (t + 1)]
+_known = [p for p in fb if p['pos'] == 'DEF' and p['sub'] in ('DL', 'LB', 'DB')]
+_unk = [p for p in fb if p['pos'] == 'DEF' and p['sub'] not in ('DL', 'LB', 'DB')]
+_m = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)).fit(np.array([_f(p) for p in _known]), [p['sub'] for p in _known])
+for p, q in zip(_unk, _m.predict(np.array([_f(p) for p in _unk]))): p['sub'] = str(q); p['est'] = True
 grp = {}
 for p in fb: grp.setdefault(p['sub'], []).append(p)
 for g, L in grp.items():
@@ -65,7 +77,7 @@ for g, L in grp.items():
     pc = pctiles(sc); S = dict(sc); pt = pctiles([(i, p['tot']) for i, p in enumerate(L)])
     ks = FBKEY.get(g, FBKEY['DEF']); kr = keyrank(L, [[p['st'].get(k, 0) for k in ks] for p in L])
     for i, p in enumerate(L):
-        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], pct_k=kr[i], pct_s=SCH_FB.get(p['school'], .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status='Out' if p['inj'] else ''))
+        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], pct_k=kr[i], pct_s=SCH_FB.get(p['school'], .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '') if x)))
 bbapp = json.load(open(os.path.join(D, 'bb.json')))
 stats = {}
 for t in mb.load_real():
@@ -144,7 +156,7 @@ def build(sport):
           row[16].font = Font(name=AR, bold=True); row[15].number_format = '0.0'
       for k, w in enumerate(W, 1): ws.column_dimensions[get_column_letter(k)].width = w
       ws.freeze_panes = 'C2'; ws.auto_filter.ref = f'A1:S{len(items) + 1}'
-  order = ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'DEF', 'K'] if sport == 'Football' else ['PG', 'SG', 'SF', 'PF', 'C']
+  order = ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'K'] if sport == 'Football' else ['PG', 'SG', 'SF', 'PF', 'C']
   mine = [r for r in rows if r['sport'] == sport]
   for pos in order:
       L = [r for r in mine if r['pos'] == pos]
