@@ -1492,21 +1492,44 @@ select option{background:#0B1730;color:#EAF0F8}
 .pko-m .pko-front{box-shadow:0 0 0 2px #FF4F6D,0 0 24px #FF4F6D,0 0 48px rgba(255,177,61,.6);animation:pkoMy 1.4s ease-in-out infinite}@keyframes pkoMy{50%{box-shadow:0 0 0 2px #FFB13D,0 0 30px #FFB13D,0 0 60px rgba(255,79,109,.7)}}
 .tcard{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:8px;border:2px solid var(--rc);background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--rc) 35%,#13213a),#0a1324 80%);box-shadow:0 0 10px color-mix(in srgb,var(--rc) 45%,transparent);flex:none;position:relative;overflow:hidden}
 .tcard i{font:900 .48rem/1 var(--f-display,inherit);letter-spacing:.08em;color:var(--rc);font-style:normal}.tcard .av{flex:none}.tc-m{animation:pkoMy 1.4s ease-in-out infinite}
-/* v414 player cards: OVR top-left, position under it, photo/initials, last name plate, rarity label. Sizes are in em: font-size = 1% of the card's height */
-.pc2{display:inline-block;border-width:max(1.5px,1.4em);border-radius:max(6px,5.5em);background:linear-gradient(158deg,color-mix(in srgb,var(--rc) 62%,#16233d) 0%,color-mix(in srgb,var(--rc) 22%,#0c1528) 42%,#070d1a 70%,color-mix(in srgb,var(--rc) 34%,#0a1324) 100%);box-shadow:0 0 max(8px,7em) color-mix(in srgb,var(--rc) 50%,transparent),inset 0 0 0 max(1px,.7em) rgba(255,255,255,.14);line-height:1;isolation:isolate}
-.pc2::before{content:"";position:absolute;inset:0;z-index:-1;background:repeating-linear-gradient(118deg,transparent 0 9em,rgba(255,255,255,.045) 9em 10.5em),radial-gradient(circle at 64% 36%,color-mix(in srgb,var(--rc) 55%,transparent),transparent 58%)}
-.pc2::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.34) 50%,transparent 62%);background-size:260% 100%;background-position:130% 0;opacity:0}
-.pc2.pc-e::after,.pc2.pc-l::after,.pc2.pc-m::after,.pc2.pc-x::after{opacity:1;animation:pc2Sh 3.4s ease-in-out infinite}@keyframes pc2Sh{0%,55%{background-position:130% 0}100%{background-position:-60% 0}}
-@media (prefers-reduced-motion:reduce){.pc2::after{animation:none!important;opacity:0!important}}
-.pc2.pc-l{border-image:linear-gradient(150deg,#FFE9A6,#FFC23D 35%,#B8791A 65%,#FFE08A) 1;border-radius:0;clip-path:inset(0 round max(6px,5.5em))}
-.pc2 .pc-o{position:absolute;left:6em;top:6em;display:flex;flex-direction:column;align-items:center;gap:1.5em;z-index:2}
-.pc2 .pc-n{font:900 22em/.86 var(--f-display,inherit);color:#fff;letter-spacing:-.02em;text-shadow:0 .08em .2em rgba(0,0,0,.6),0 0 .5em color-mix(in srgb,var(--rc) 70%,transparent)}
-.pc2 .pc-p{font:900 7.6em/1 var(--f-display,inherit);letter-spacing:.06em;color:var(--rc);font-style:normal;padding-top:.4em;border-top:.14em solid color-mix(in srgb,var(--rc) 60%,transparent);min-width:2.1em;text-align:center}
-.pc2 .pc-a{position:absolute;left:31em;top:16em;z-index:1;border-radius:50%;box-shadow:0 0 0 max(1.5px,1.1em) color-mix(in srgb,var(--rc) 70%,#fff),0 1.6em 3em rgba(0,0,0,.55)}
-.pc2 .pc-b{position:absolute;left:0;right:0;bottom:0;padding:7em 3em 5.5em;background:linear-gradient(180deg,transparent,rgba(3,7,15,.86) 46%);display:flex;flex-direction:column;align-items:center;gap:2.6em;z-index:2}
-.pc2 .pc-nm{font:900 10.4em/1 var(--f-display,inherit);color:#fff;text-transform:uppercase;letter-spacing:.03em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pc2 .pc-r{font:800 5.4em/1 var(--f-display,inherit);letter-spacing:.16em;text-transform:uppercase;color:var(--rc);font-style:normal}
-.pc2.pc-s .pc-o{left:5em;top:5em}.pc2.pc-s .pc-n{font-size:27em}.pc2.pc-s .pc-a{left:auto;right:6em;top:auto;bottom:7em}
+/* v415 player cards (owner: "make it cooler"): shield-shaped card. Layers: .pc-f foil frame, .pc-in face (pattern .pc-pt, light rays .pc-ry, school crest .pc-a,
+   OVR block .pc-o, name/school/season stats/rarity .pc-b, shine .pc-fx). Sizes are in em: font-size = 1% of the card's height. Three sizes: small (<80 px, .pc-s:
+   OVR + crest), medium, full (>=200 px, .pc-xl: adds school, class and season stats). Each rarity has its own foil and pattern. */
+.pc2{display:inline-block;position:relative;border:0;border-radius:0;background:none;box-shadow:none;overflow:visible;line-height:1;animation:none;filter:drop-shadow(0 0 max(3px,3.2em) color-mix(in srgb,var(--rc) 70%,transparent));
+  --fr:linear-gradient(150deg,color-mix(in srgb,var(--rc) 40%,#fff),var(--rc) 32%,color-mix(in srgb,var(--rc) 45%,#000) 66%,var(--rc) 88%,color-mix(in srgb,var(--rc) 40%,#fff));--sh:polygon(10% 0,90% 0,100% 5.5%,100% 85%,50% 100%,0 85%,0 5.5%)}
+.pc2 .pc-f{position:absolute;inset:0;clip-path:var(--sh);background:var(--fr);background-size:220% 220%}
+.pc2 .pc-in{position:absolute;inset:max(1.5px,1.8em);clip-path:var(--sh);overflow:hidden;isolation:isolate;background:radial-gradient(120% 62% at 66% 30%,color-mix(in srgb,var(--rc) 62%,#101a33),transparent 72%),linear-gradient(180deg,color-mix(in srgb,var(--rc) 34%,#0c1528),#070c18 60%,#02050b)}
+.pc2 .pc-pt{position:absolute;inset:0;z-index:0;opacity:.9;background:repeating-linear-gradient(118deg,transparent 0 8em,rgba(255,255,255,.05) 8em 9.2em)}
+.pc2 .pc-ry{position:absolute;left:50%;top:36%;width:120em;height:120em;margin:-60em 0 0 -52em;z-index:0;background:repeating-conic-gradient(from 8deg,color-mix(in srgb,var(--rc) 55%,#fff) 0 3.5deg,transparent 3.5deg 15deg);opacity:.2;-webkit-mask-image:radial-gradient(circle,#000 12%,transparent 60%);mask-image:radial-gradient(circle,#000 12%,transparent 60%)}
+.pc2 .pc-o{position:absolute;left:5em;top:6.5em;display:flex;flex-direction:column;align-items:center;gap:1.2em;z-index:3}
+.pc2 .pc-n{font:900 21em/.84 var(--f-display,inherit);color:#fff;letter-spacing:-.03em;text-shadow:0 .07em .16em rgba(0,0,0,.65),0 0 .45em color-mix(in srgb,var(--rc) 80%,transparent)}
+.pc2 .pc-p{font:900 7.4em/1 var(--f-display,inherit);letter-spacing:.07em;color:color-mix(in srgb,var(--rc) 70%,#fff);font-style:normal;padding-top:.36em;border-top:.14em solid color-mix(in srgb,var(--rc) 70%,transparent);min-width:2.2em;text-align:center}
+.pc2 .pc-g{font:800 4.6em/1 var(--f-display,inherit);letter-spacing:.12em;color:rgba(255,255,255,.72);font-style:normal;margin-top:.5em}
+.pc2 .pc-a{position:absolute;left:27em;top:9.5em;width:47em;height:47em;z-index:2;display:grid;place-items:center}
+.tcard .lg-cut{display:block;margin:0;padding:0;background:none;border-radius:0;object-fit:contain;filter:drop-shadow(0 0 max(1px,.012em) rgba(255,255,255,.95)) drop-shadow(0 0 max(2px,.05em) rgba(255,255,255,.45)) drop-shadow(0 .05em .09em rgba(0,0,0,.55))}
+.pc2 .pc-a .av{box-shadow:none}.pc2.pc-xl .pc-a{left:31em;top:6.5em;width:41em;height:41em}
+.pc2 .pc-b{position:absolute;left:0;right:0;top:46.5em;bottom:0;padding:6em 4em 0;background:linear-gradient(180deg,transparent,rgba(2,5,11,.9) 26%);display:flex;flex-direction:column;align-items:center;gap:2.2em;z-index:3}.pc2 .pc-b>*{flex:none}
+.pc2 .pc-nm{font:900 10.6em/1 var(--f-display,inherit);color:#fff;text-transform:uppercase;letter-spacing:.03em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 .1em .2em rgba(0,0,0,.6)}
+.pc2 .pc-sc{font:700 3.7em/1 var(--f-display,inherit);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:normal}
+.pc2 .pc-st{display:flex;justify-content:center;gap:1.4em;width:92%;margin-top:.6em}.pc2 .pc-st span{flex:1;display:flex;flex-direction:column;align-items:center;gap:.9em;padding:1.5em .5em 1.3em;border-radius:1.6em;background:color-mix(in srgb,var(--rc) 16%,rgba(255,255,255,.05));border:max(1px,.3em) solid color-mix(in srgb,var(--rc) 45%,transparent)}
+.pc2 .pc-st b{font:900 6.2em/1 var(--f-display,inherit);color:#fff}.pc2 .pc-st i{font:700 2.9em/1 var(--f-display,inherit);letter-spacing:.1em;color:color-mix(in srgb,var(--rc) 60%,#fff);font-style:normal}
+.pc2 .pc-r{font:800 4.3em/1 var(--f-display,inherit);letter-spacing:.2em;text-transform:uppercase;color:var(--rc);font-style:normal;margin-top:auto;margin-bottom:6.6em}
+.pc2:not(.pc-xl) .pc-b{top:57em;padding-top:6em;gap:2.6em}.pc2:not(.pc-xl) .pc-r{font-size:5em;margin-top:0}
+.pc2 .pc-fx{position:absolute;inset:0;z-index:4;pointer-events:none;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.36) 50%,transparent 62%);background-size:260% 100%;background-position:130% 0;opacity:0}
+.pc2.pc-e .pc-fx,.pc2.pc-l .pc-fx,.pc2.pc-m .pc-fx,.pc2.pc-x .pc-fx{opacity:1;animation:pc2Sh 3.4s ease-in-out infinite}@keyframes pc2Sh{0%,55%{background-position:130% 0}100%{background-position:-60% 0}}
+.pc2.pc-s .pc-o{left:0;right:0;top:9em}.pc2.pc-s .pc-n{font-size:31em}.pc2.pc-s .pc-a{left:22em;top:41em;width:34em;height:34em}
+/* rarity foils and patterns */
+.pc2.pc-c{--fr:linear-gradient(150deg,#f3f6fb,#9FB0CC 30%,#55637d 62%,#c7d2e6 88%,#f3f6fb)}
+.pc2.pc-u .pc-pt{background:radial-gradient(circle,rgba(255,255,255,.1) 0 18%,transparent 20%) 0 0/5em 5em}
+.pc2.pc-r .pc-pt{background:repeating-linear-gradient(60deg,transparent 0 6em,rgba(255,255,255,.06) 6em 6.8em),repeating-linear-gradient(-60deg,transparent 0 6em,rgba(255,255,255,.06) 6em 6.8em)}
+.pc2.pc-e .pc-pt{background:radial-gradient(circle at 18% 22%,#fff 0 .5em,transparent .7em),radial-gradient(circle at 82% 12%,#fff 0 .4em,transparent .6em),radial-gradient(circle at 12% 55%,#fff 0 .35em,transparent .55em),radial-gradient(circle at 90% 48%,#fff 0 .5em,transparent .7em),radial-gradient(circle at 40% 8%,#fff 0 .3em,transparent .5em),radial-gradient(circle at 64% 60%,#fff 0 .3em,transparent .5em),radial-gradient(60% 40% at 20% 30%,rgba(255,120,220,.28),transparent),radial-gradient(60% 40% at 85% 62%,rgba(90,150,255,.3),transparent)}
+.pc2.pc-l{--fr:linear-gradient(150deg,#FFF6CF,#FFC23D 26%,#8A5A12 52%,#FFD86B 76%,#FFF6CF)}.pc2.pc-l .pc-in{background:radial-gradient(120% 62% at 66% 30%,#b9841f,transparent 72%),linear-gradient(180deg,#6b4a10,#1a1206 58%,#070502)}.pc2.pc-l .pc-ry{opacity:.34}.pc2.pc-l .pc-n,.pc2.pc-l .pc-nm{background:linear-gradient(180deg,#fff,#FFE08A 55%,#FFB52B);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 .06em .1em rgba(0,0,0,.6))}
+.pc2.pc-m{--fr:linear-gradient(120deg,#FF4F6D,#FFB13D,#FF2E88,#FFB13D,#FF4F6D)}.pc2.pc-m .pc-f,.pc2.pc-x .pc-f{background-size:300% 100%;animation:pc2Fr 3.2s linear infinite}@keyframes pc2Fr{to{background-position:300% 0}}
+.pc2.pc-m .pc-in{background:radial-gradient(120% 62% at 66% 30%,#c2264a,transparent 72%),radial-gradient(90% 40% at 50% 100%,rgba(255,150,40,.55),transparent 70%),linear-gradient(180deg,#5a1026,#16050c 60%,#050203)}.pc2.pc-m .pc-ry{opacity:.3;animation:pc2Sp 26s linear infinite}@keyframes pc2Sp{to{transform:rotate(360deg)}}
+.pc2.pc-x{--fr:linear-gradient(120deg,#7CF3FF,#B48CFF,#FF8AD8,#FFE27A,#7CF3FF,#B48CFF)}.pc2.pc-x .pc-pt{background:linear-gradient(125deg,rgba(124,243,255,.22),rgba(180,140,255,.2) 35%,rgba(255,138,216,.2) 60%,rgba(255,226,122,.2));mix-blend-mode:screen}.pc2.pc-x .pc-ry{opacity:.32;animation:pc2Sp 26s linear infinite}
+@media (prefers-reduced-motion:reduce){.pc2 .pc-fx,.pc2 .pc-f,.pc2 .pc-ry{animation:none!important}.pc2 .pc-fx{opacity:0!important}}
+/* in the big card view the shine follows your finger (--mx/--my set by openCard) */
+.cv-card .pc2 .pc-fx{opacity:1;animation:none;background:radial-gradient(circle at var(--mx,62%) var(--my,24%),rgba(255,255,255,.5),transparent 42%),linear-gradient(115deg,rgba(255,60,120,.0) 20%,rgba(255,220,90,.22) 36%,rgba(90,255,200,.2) 50%,rgba(110,150,255,.24) 64%,rgba(255,60,220,0) 80%);background-size:100% 100%,240% 100%;background-position:0 0,var(--mx,62%) 0;mix-blend-mode:screen}
 /* card view: tap a card to see it big; the name opens the profile */
 .cv{position:fixed;inset:0;z-index:400;background:rgba(3,7,15,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;overflow:auto;animation:cvIn .18s ease-out}@keyframes cvIn{from{opacity:0}}
 .cv-in{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(360px,100%);position:relative;margin-top:44px}
@@ -3116,7 +3139,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v414 · Nov 10';
+const APP_BUILD='v415 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4600,10 +4623,39 @@ function cardInfo(id){if(id.startsWith('dc:'))return duoInfo(id);if(id.startsWit
   if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
   const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
 function cardArt(id,r,s=54){if(id.startsWith('dc:'))return duoArt(id,r,s);if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
-  if(c.team)return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${slogo(c.school,Math.round(s*.5))}<i>TEAM</i></span>`;
-  /* v414 player card: OVR (ovr.js, from the OVR sheets) top-left with the position, initials/photo, last name and rarity. Under 80 px tall only the OVR and the photo fit. */
-  const q=c.key?pByKey(c.key):null,o=ovrOf(c.key),big=s>=80,ps=q?(q.pos==='DEF'?(q.sub||'DEF'):q.pos):'';
-  return `<span class="tcard pc2 pc-${r||'c'} ${big?'':'pc-s'} ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-o"><b class="pc-n">${o||'–'}</b>${big?`<i class="pc-p">${esc(ps||'')}</i>`:''}</span><span class="pc-a">${av(c.name,c.school,Math.round(s*(big?.42:.44)))}</span>${big?`<span class="pc-b"><b class="pc-nm">${esc(lastN(c.name))}</b><i class="pc-r">${R.n}</i></span>`:''}</span>`}
+  if(c.team)return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${cutImg(c.school,Math.round(s*.56))||slogo(c.school,Math.round(s*.5))}<i>TEAM</i></span>`;
+  /* v415 player card (shield): OVR (ovr.js, from the OVR sheets), position and class top-left, school crest, last name, and on full-size cards the school and
+     this season's key stats. Under 80 px tall only the OVR and the crest fit. */
+  const q=c.key?pByKey(c.key):null,o=ovrOf(c.key),sm=s<80,xl=s>=200,ps=q?(q.pos==='DEF'?(q.sub||'DEF'):q.pos):'',gr=q?(['','FR','SO','JR','SR'][q.gr]||''):'',lg=logoFor(c.school),st=xl?pcStats(q):[],full=xl&&st.length>0,hz=Math.round(s*(sm?.34:full?.41:.47));
+  return `<span class="tcard pc2 pc-${r||'c'} ${sm?'pc-s':''} ${full?'pc-xl':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span><span class="pc-o"><b class="pc-n">${o||'–'}</b>${sm?'':`<i class="pc-p">${esc(ps||'')}</i>${gr?`<i class="pc-g">${gr}</i>`:''}`}</span><span class="pc-a">${lg?cutImg(c.school,hz):av(c.name,c.school,Math.round(s*(sm?.26:.4)))}</span>${sm?'':`<span class="pc-b"><b class="pc-nm">${esc(lastN(c.name))}</b>${xl?`<i class="pc-sc">${esc(c.school||'')}</i>${st.length?`<span class="pc-st">${st.map(x=>`<span><b>${esc(String(x[0]))}</b><i>${x[1]}</i></span>`).join('')}</span>`:''}`:''}<i class="pc-r">${R.n}</i></span>`}<span class="pc-fx"></span></span></span>`}
+/* the season stats on a full-size card: the position's three key stats (football); fantasy points per game when there are no key stats or in basketball once it has stats */
+const PC_KEYS={QB:[['passYd','PASS YD'],['passTD','PASS TD'],['rushYd','RUSH YD']],RB:[['rushYd','RUSH YD'],['rushTD','RUSH TD'],['recYd','REC YD']],WR:[['recYd','REC YD'],['rec','CATCHES'],['recTD','REC TD']],TE:[['recYd','REC YD'],['rec','CATCHES'],['recTD','REC TD']],DL:[['tkl','TACKLES'],['sack','SACKS'],['tfl','TFL']],LB:[['tkl','TACKLES'],['tfl','TFL'],['sack','SACKS']],DB:[['tkl','TACKLES'],['dInt','INT'],['pbu','PBU']],K:[['fgm','FG MADE'],['xpm','PAT MADE']]};
+function pcStats(q){if(!q)return [];const g=(q.games||[]).filter(x=>x&&x.stat);if(!g.length)return [];const ks=FG_SPORT==='bb'?null:PC_KEYS[q.pos==='DEF'?q.sub:q.pos];
+  if(!ks){const t=g.reduce((a,x)=>a+pts(x.stat),0);return t>0?[[f1(t/g.length),'PTS / GAME'],[g.length,'GAMES']]:[]}
+  const out=ks.map(([k,l])=>[(Math.round(g.reduce((a,x)=>a+(+x.stat[k]||0),0)*10)/10).toLocaleString('en-US'),l]);return out.some(x=>x[0]!=='0')?out:[]}
+/* school logos on cards with their background removed (owner, v415): logos.js images have a flat (mostly white) background baked in. The first time a card
+   needs a school, the image is drawn to a canvas, the flat colour connected to the edges is made transparent (edge pixels feathered), and every card image for that
+   school (img[data-cut]) is swapped to the cut-out. Logos whose edges are not one flat colour are left alone. Other screens keep the normal logo. */
+const _cut={},CUT_T={Central:150,'Preuss UCSD':0};   /* per-school colour tolerance for the few logos the default gets wrong (0 = leave the logo as it is) */
+function cutLogo(sc){const u=logoFor(sc);if(!u)return '';if(_cut[u])return _cut[u]===1?u:_cut[u];_cut[u]=1;
+  const im=new Image();im.onload=()=>{let out=u;try{const w=im.naturalWidth,h=im.naturalHeight,N=w*h,cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d');x.drawImage(im,0,0);
+    const d=x.getImageData(0,0,w,h),a=d.data,T0=CUT_T[sc]!=null?CUT_T[sc]:48;let c=[255,255,255],bd=[];for(let i=0;i<w;i++)bd.push(i,(h-1)*w+i);for(let j=0;j<h;j++)bd.push(j*w,j*w+w-1);
+    const df=i=>a[i*4+3]<16?0:Math.abs(a[i*4]-c[0])+Math.abs(a[i*4+1]-c[1])+Math.abs(a[i*4+2]-c[2]);
+    /* the most common colour among a set of pixels, and the share of them that have it */
+    const mode=L=>{const bk={};let top='';L.forEach(i=>{const k=a[i*4+3]<16?'t':(a[i*4]>>4)+','+(a[i*4+1]>>4)+','+(a[i*4+2]>>4);(bk[k]=bk[k]||[]).push(i);if(!top||bk[k].length>bk[top].length)top=k});
+      const m=bk[top];c=[0,1,2].map(j=>Math.round(m.reduce((t,i)=>t+a[i*4+j],0)/m.length));return L.filter(i=>df(i)<=48).length/L.length};
+    /* flood from the start pixels through everything within T of the background colour */
+    const run=(T,from,seen0)=>{const seen=seen0?seen0.slice():new Uint8Array(N),st=from.filter(i=>!seen[i]&&df(i)<=T);st.forEach(i=>seen[i]=1);
+      while(st.length){const i=st.pop(),px=i%w,py=(i-px)/w;for(const q of [px>0?i-1:-1,px<w-1?i+1:-1,py>0?i-w:-1,py<h-1?i+w:-1])if(q>=0&&!seen[q]&&df(q)<=T){seen[q]=1;st.push(q)}}let n=0;for(let i=0;i<N;i++)n+=seen[i];return {seen,n}};
+    const edge=seen=>{const L=[];for(let i=0;i<N;i++){if(seen[i])continue;const px=i%w;if((px>0&&seen[i-1])||(px<w-1&&seen[i+1])||(i>=w&&seen[i-w])||(i<N-w&&seen[i+w]))L.push(i)}return L};
+    if(T0&&mode(bd)>=.5){let r=run(T0,bd);if(r.n<N*.18){const r2=run(Math.max(96,T0),bd);if(r2.n<N*.92)r=r2}
+      /* only a thin frame came off (a flat square logo): peel again (up to 3 times) from the new edge while that edge is one flat colour */
+      for(let k=0;k<3&&r.n<N*.18&&r.n>0;k++){const L=edge(r.seen);if(!L.length||mode(L)<.5)break;const r2=run(72,L,r.seen);if(r2.n>=N*.92||r2.n===r.n)break;r=r2}
+      const seen=r.seen,L=edge(seen);for(let i=0;i<N;i++)if(seen[i])a[i*4+3]=0;L.forEach(i=>{a[i*4+3]=Math.min(a[i*4+3],Math.round(Math.min(1,df(i)/150)*255))});
+      if(r.n>0&&r.n<N*.92){x.putImageData(d,0,0);out=cv.toDataURL('image/png')}}}catch(_){}
+    _cut[u]=out;if(out!==u)document.querySelectorAll('img[data-cut]').forEach(g=>{if(logoFor(g.dataset.cut)===u)g.src=out})};
+  im.onerror=()=>{_cut[u]=u};im.src=u;return u}
+const cutImg=(sc,z)=>{const u=cutLogo(sc);return u?`<img class="lg-cut" data-cut="${esc(sc)}" src="${u}" alt="" width="${z}" height="${z}">`:''};
 const ovrOf=k=>{const v=k&&((window.OVR_ALL||{})[FG_SPORT]||{})[k];return v?+v:0};
 /* card view (v414, owner): tapping a card shows it big (tilts under the finger); only the name opens the profile */
 function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsWith('ac:'),own=ach?['x']:cardVers(u,id);r=r||(ach?'x':cardR(u,id))||'c';
@@ -4615,7 +4667,7 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
     <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>+${ach?c.pct:CARD_PCT[r]||0}%</b><small>${c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
     ${ach||c.duo?'':`<div class="cv-vs" role="group" aria-label="Versions you own">${RAR_ORD.filter(x=>CARD_PCT[x]).map(x=>`<button type="button" class="cv-v ${own.includes(x)?'on':''}" style="--rc:${RAR[x].c}" ${own.includes(x)?`data-act="cvVer" data-r="${x}"`:'disabled'} aria-pressed="${x===r}">${RAR[x].n}</button>`).join('')}</div>`}</div>`;
   document.body.appendChild(el);const cd=el.querySelector('.cv-card'),art=cd.firstElementChild;
-  if(art&&!c.duo){const mv=e=>{const b=cd.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.transform=`rotateY(${(x*22).toFixed(1)}deg) rotateX(${(-y*18).toFixed(1)}deg)`},rs=()=>{art.style.transform=''};
+  if(art&&!c.duo){const mv=e=>{const b=cd.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.transform=`rotateY(${(x*22).toFixed(1)}deg) rotateX(${(-y*18).toFixed(1)}deg)`;art.style.setProperty('--mx',((x+.5)*100).toFixed(0)+'%');art.style.setProperty('--my',((y+.5)*100).toFixed(0)+'%')},rs=()=>{art.style.transform='';art.style.removeProperty('--mx');art.style.removeProperty('--my')};
     cd.addEventListener('pointermove',mv);cd.addEventListener('pointerleave',rs);cd.addEventListener('pointerup',rs);cd.addEventListener('pointercancel',rs)}
   const x=el.querySelector('.cv-x');if(x)x.focus();sheetPush()}
 function closeCard(){const e=document.getElementById('cardview');if(e)e.remove()}
