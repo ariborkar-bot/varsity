@@ -54,6 +54,9 @@ def school_pct(sos):
     pc = pctiles(list(enumerate(sos.values()))); names = list(sos)
     return {names[i]: pc[i] for i in range(len(names))}
 SCH_FB = school_pct(sos_fb()); SCH_BB = school_pct(sos_bb())
+# Owner overrides (Nov 10): Raw OVR typed in by hand for these players (yellow cell); the 99 cap still applies, so Raw 110 = a top-10 99
+MANUAL = {('Paisios Polamalu', 'St. Augustine', 'RB'): (110, 'set to 99'), ('Daine Gonzalez', 'Classical Academy', 'RB'): (94, 'set to 94'),
+          ('Courtney Miller-Thompson', 'Granite Hills', 'WR'): (100.847707, 'swapped with Deandre Eleby (WR)'), ('Deandre Eleby', 'Morse', 'WR'): (97.710369, 'swapped with Courtney Miller-Thompson')}
 rows = []   # dict(name, school, sport, pos, gr, gp, score, pct, status)
 fb = json.load(open(os.path.join(D, 'fb.json')))
 K = 2
@@ -129,7 +132,7 @@ def build(sport):
    'Football: Pts per game = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
    'Basketball: Pts per game = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
    'Games = games with stats behind the rating (football 2026, basketball 2025-26). Few games = low confidence.',
-   'One tab per position (best OVR first, # = rank within the position); the last tab lists everyone. DEF = defensive players MaxPreps does not split into DL/LB/DB. Status Out = listed as out in the app this week. Basketball grades are 2026-27 (moved up one year); 0 = unknown.',
+   'One tab per position (best OVR first, # = rank within the position); the last tab lists everyone. Position estimated = the app had no DL/LB/DB position for this defender, so it was guessed from his stats. Manual OVR = set by the owner (yellow Raw OVR cell). Status Out = listed as out in the app this week. Basketball grades are 2026-27 (moved up one year); 0 = unknown.',
    'Source: MaxPreps box scores and season stats already in the app (stats.js, tools/data/bb_2526_players.txt). Built by tools/ovr/make_ovr.py.']
   yr = '2026 season' if sport == 'Football' else '2025-26 season (the latest basketball stats; 2026-27 has not started)'
   notes = [allnotes[0], allnotes[1], allnotes[2 if sport == 'Football' else 3], 'Ratings use only this season (%s). Season total fantasy pts = fantasy points per game x games (basketball totals use the 2025-26 averages).' % yr] + allnotes[4:]
@@ -154,6 +157,8 @@ def build(sport):
       for row in ws.iter_rows(min_row=2):
           for c in row: c.font = Font(name=AR)
           row[16].font = Font(name=AR, bold=True); row[15].number_format = '0.0'
+          mk = MANUAL.get((row[1].value, row[2].value, row[4].value))
+          if mk: row[15].value = mk[0]; row[15].fill = PatternFill('solid', start_color='FFFF00'); row[17].value = ' · '.join(x for x in (row[17].value, 'Manual OVR: ' + mk[1]) if x)
       for k, w in enumerate(W, 1): ws.column_dimensions[get_column_letter(k)].width = w
       ws.freeze_panes = 'C2'; ws.auto_filter.ref = f'A1:S{len(items) + 1}'
   order = ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'K'] if sport == 'Football' else ['PG', 'SG', 'SF', 'PF', 'C']
