@@ -3303,7 +3303,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v430 · Nov 10';
+const APP_BUILD='v431 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5542,7 +5542,7 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'wp-3',who:ZH,wp:1},
   {id:'ml-wp-1',who:ML,wp:1},
   {id:'is-lx',who:/^\s*isaac\s+smedra\s*$/i,rar:['x','l']},   /* v409 (owner): every Immortal and Legendary card removed from Isaac Smedra */
-  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'},{id:'se-all-1',who:ABZH,gp:'alls',m:'Here’s all of the new special edition cards'},{id:'se-all-2',who:AB,gp:'alls',m:'Here’s another Special Edition pack'},{id:'se-all-3',who:AB,gp:'alls',m:'Here’s a new Special Edition pack'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
+  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'},{id:'se-all-1',who:ABZH,gp:'alls',m:'Here’s all of the new special edition cards'},{id:'se-all-2',who:AB,gp:'alls',m:'Here’s another Special Edition pack'},{id:'se-all-3',who:AB,gp:'alls',m:'Here’s a new Special Edition pack'},{id:'zh-spot-1',who:ZH,gp:'spot',m:'Here’s a Spotlight pack with the new special player cards'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),gp=Object.assign({},(old.fr||{}).gp),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0,ng=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};

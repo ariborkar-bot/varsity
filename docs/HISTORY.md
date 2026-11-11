@@ -433,3 +433,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v430
 - Compare players (`compareHTML`, `cmpTop`) snaps to the top of the screen after a pick/Change/Clear (no centering, no smooth scroll); its search results (`.cmp-res`) and the admin card search results (`#ctl-res`) are fixed-height scroll boxes so nothing shifts; `overflow-anchor:none` inside them.
+
+## v431
+- CARD_FIX `zh-spot-1`: a Spotlight pack (special player cards only) gift for Zed Hornby.
