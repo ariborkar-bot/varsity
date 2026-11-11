@@ -2674,6 +2674,13 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .tr-users{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}.tr-u{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:inherit;text-align:left}
 .tp-s.on{outline:2px solid var(--accent);outline-offset:1px}
 
+/* v438: Advisor */
+.adv{display:flex;flex-direction:column;gap:10px}.adv-r{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface2)}
+.adv-w{display:flex;align-items:center;gap:8px;grid-column:1/-1}.adv-w b{display:block;font:800 .95rem/1.15 var(--f-display,inherit)}.adv-w small{display:block}
+.adv-m b{display:block;font:800 .9rem/1.2 var(--f-body,inherit)}.adv-m small,.adv-p small{display:block;font-size:.72rem}.adv-p{text-align:right}.adv-p b{font:900 1.25rem/1 var(--f-display,inherit);color:#4DE6A0}
+.adv-c{grid-column:1/-1;color:#FFC23D;font-weight:700;font-size:.74rem}.adv-r .btn{grid-column:1/-1}
+.adv-h{margin:6px 0 0;font:800 .8rem/1 var(--f-display,inherit);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.adv-n{display:block}
+
 /* v423: flip + back of single player cards (card view) */
 .cv-card>.pc-flip{display:block;position:relative;transform-style:preserve-3d;transition:transform .12s ease-out;will-change:transform;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pc-flipin{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.25,.45,1)}.pc-flip.fl .pc-flipin{transform:rotateY(180deg)}
@@ -3377,7 +3384,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v439 · Nov 10';
+const APP_BUILD='v438 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6389,6 +6396,29 @@ async function slipGo(){
   S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:Object.assign({},cur,{[key]:rec})});
   if(await act(()=>upsert('picks/'+ME.uid,{parl:{[key]:rec}}),'Parlay locked in')){UI.sl={legs:{},stake:UI.sl.stake}}else S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:cur});
   render()}
+/* v438 (owner): Advisor on the Props tab: the best-return picks for the cards you own, and a few strong ones without a card. Return = what 10 tokens wins, with your card boost on the winnings. */
+function advRows(){const u=ME.uid,mine=propsOf(u),rows=[];
+  propCands().forEach(x=>{if(started(x.game)||mine[x.id])return;let best=null;
+    ['o','u'].forEach(sd=>{const od=sd==='o'?x.over:x.under,p=sd==='o'?x.po:1-x.po,b=cardPct(u,'pc:'+x.k,{s:sd,game:x.game}),win=(od-1)*(1+b/100),ev=p*win-(1-p),r={x,sd,od,p,b,win,ev};if(!best||ev>best.ev)best=r});
+    if(best&&best.p>=.4)rows.push(best)});
+  return rows}
+function advCardTxt(k){const u=ME.uid,r=cardR(u,'pc:'+k),sp=Object.keys(SPEC).filter(st=>specRaw(u,st,k)).map(st=>SPEC[st].n);
+  return r||sp.length?`Your ${r?RAR[r].n+' card':'special card'}${sp.length?(r?' + ':' ')+sp.join(' + '):''}`:'Your cards'}
+function advisorHTML(){
+  if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return '';
+  const R=advRows();if(!R.length)return '';
+  const one=L=>{const k=new Set();return L.filter(r=>k.has(r.x.k)?0:(k.add(r.x.k),1))},withC=one(R.filter(r=>r.b>0).sort((a,b)=>b.ev-a.ev)).slice(0,5),seenK=new Set(withC.map(r=>r.x.k)),
+    free=one(R.filter(r=>!r.b&&!seenK.has(r.x.k)&&r.p>=.5).sort((a,b)=>b.ev-a.ev)).slice(0,3);
+  const row=r=>{const x=r.x,M=PP_MK[x.m],id=x.id,inS=UI.sl.legs[id]===r.sd;
+    return `<article class="adv-r"><div class="adv-w">${slogo(x.school,28)}<div><b>${esc(x.name)}</b><small class="muted">${esc(x.school)} · ${esc(x.pos)} · vs ${esc(x.opp)} · ${esc(fmtDate(x.game.d))}</small></div></div>
+      <div class="adv-m"><b>${r.sd==='o'?'Over':'Under'} ${fmtN(x.line)} ${esc(M.l.toLowerCase())}</b><small class="muted">${Math.round(r.p*100)}% chance · ${r.od.toFixed(2)}x odds</small></div>
+      <div class="adv-p"><b>+${n1(10*r.win)}</b><small class="muted">on a 10 token pick</small></div>
+      ${r.b?`<small class="adv-c">${esc(advCardTxt(x.k))} adds +${r.b}% to the winnings</small>`:''}
+      <button type="button" class="btn sm${inS?' ghost':''}" data-act="slLeg" data-id="${esc(id)}" data-s="${r.sd}">${inS?'In your slip ✓':'Add to slip'}</button></article>`};
+  return `<section class="card adv"><div class="qh"><h3>Advisor</h3><span class="muted">Best returns for your cards</span></div>
+    ${withC.length?withC.map(row).join(''):'<p class="muted">You have no cards that boost this week’s lines yet. Open packs in the Shop to get some.</p>'}
+    ${free.length?`<h4 class="adv-h">Also worth a look</h4>`+free.map(row).join(''):''}
+    <small class="muted adv-n">A guide from each player’s recent stats and your card boosts. Nothing is guaranteed.</small></section>`}
 function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
@@ -6445,7 +6475,7 @@ function propsHTML(){
     body=`<div class="qh pp-gh"><h3>${esc(cur.g.a)} at ${esc(cur.g.h)}</h3><span class="muted">${esc(fmtDate(cur.g.d))}${cur.g.time?' · '+esc(cur.g.time):''} · ${byP.length} players · ${L.length} lines</span></div><div class="gm-grid">${cards.join('')}</div>`;
     body+=parlHTML(cur,L);
   }
-  return boardCard+activeCard()+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+bfBar(mkChips)+ppPick+body+histCard+allBar+(allBar?'<div class="sl-sp"></div>':'');
+  return boardCard+activeCard()+recordCard(Object.values(mine).map(b=>propResult(b,gm)))+advisorHTML()+bfBar(mkChips)+ppPick+body+histCard+allBar+(allBar?'<div class="sl-sp"></div>':'');
 }
 
 /* ---- Mock drafts: practice against AI teams, or join other people's mock draft ---- */
