@@ -3404,7 +3404,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v444 · Nov 10';
+const APP_BUILD='v445 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6377,42 +6377,24 @@ async function slipGo(){
   S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:Object.assign({},cur,{[key]:rec})});
   if(await act(()=>upsert('picks/'+ME.uid,{parl:{[key]:rec}}),'Parlay locked in')){UI.sl={legs:{},stake:UI.sl.stake}}else S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{parl:cur});
   render()}
-/* v438 (owner): Advisor on the Props tab: the best-return picks for the cards you own, and a few strong ones without a card. Return = what 10 tokens wins, with your card boost on the winnings. */
-function advRows(){const u=ME.uid,mine=propsOf(u),rows=[];
-  propCands().forEach(x=>{if(started(x.game)||mine[x.id])return;let best=null;
-    ['o','u'].forEach(sd=>{const od=sd==='o'?x.over:x.under,p=sd==='o'?x.po:1-x.po,b=cardPct(u,'pc:'+x.k,{s:sd,game:x.game}),win=(od-1)*(1+b/100),ev=p*win-(1-p),r={x,sd,od,p,b,win,ev};if(!best||ev>best.ev)best=r});
-    if(best&&best.p>=.4)rows.push(best)});
-  return rows}
-function advCardTxt(k){const u=ME.uid,r=cardR(u,'pc:'+k),sp=Object.keys(SPEC).filter(st=>specRaw(u,st,k)).map(st=>SPEC[st].n);
-  return r||sp.length?`Your ${r?RAR[r].n+' card':'special card'}${sp.length?(r?' + ':' ')+sp.join(' + '):''}`:'Your cards'}
-function advArt(k){const u=ME.uid,r=cardR(u,'pc:'+k);if(r)return cardArt('pc:'+k,r,58);const st=Object.keys(SPEC).find(x=>specRaw(u,x,k));return st?cardArt('sc:'+st+':'+k,specRaw(u,st,k),58):''}
-const advLeg=r=>({x:r.x,s:r.sd});
+/* v445 (owner): Top Cards on the Props tab: your cards ranked by the advantage they give on bets (no bet suggestions, just what each card adds). */
+function topCardsList(){const u=ME.uid,m=cardsOf(u),out=[],ro={m:0,l:1,e:2,r:3,u:4,c:5};
+  Object.keys(m).forEach(id=>{
+    if(id.startsWith('ac:')){if(!m[id].x)return;const a=achParse(id);if(!a)return;out.push({id,r:'x',v:ACH[a.t].pct,t:'+'+ACH[a.t].pct+'%',w:'on his props · '+ACH[a.t].n+' Immortal'});return}
+    const r=cardR(u,id);if(!r)return;
+    if(id.startsWith('sc:')){const st=id.split(':')[1],S=SPEC[st];if(!S)return;out.push({id,r,v:S.pc[r]||0,t:spcLine(st,r),w:S.n+' · '+S.w.charAt(0).toLowerCase()+S.w.slice(1)})}
+    else if(id.startsWith('dc:'))out.push({id,r,v:DUO_PCT[r]||0,t:'+'+(DUO_PCT[r]||0)+'%',w:'on parlays with both players'});
+    else if(id.startsWith('tc:'))out.push({id,r,v:CARD_PCT[r]||0,t:'+'+(CARD_PCT[r]||0)+'%',w:'on Pick ’em picks on his team'});
+    else if(id.startsWith('pc:'))out.push({id,r,v:CARD_PCT[r]||0,t:'+'+(CARD_PCT[r]||0)+'%',w:'on his props'})});
+  return out.sort((a,b)=>b.v-a.v||(ro[a.r]??-1)-(ro[b.r]??-1)||cardInfo(a.id).name.localeCompare(cardInfo(b.id).name))}
 function advisorHTML(){
   if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return '';
-  const R=advRows();if(!R.length)return '';
-  const u=ME.uid,one=L=>{const k=new Set();return L.filter(r=>k.has(r.x.k)?0:(k.add(r.x.k),1))},
-    singles=one(R.filter(r=>r.b>0).sort((a,b)=>b.b-a.b||b.win-a.win)).slice(0,6),
-    byK={};one(R.slice().sort((a,b)=>b.ev-a.ev)).forEach(r=>{byK[r.x.k]=r});
-  /* parlays: your Duo cards, and your best boosted singles stacked together */
-  const C=[];
-  Object.keys(cardsOf(u)).filter(id=>id.startsWith('dc:')&&cardR(u,id)).forEach(id=>{const [a,b]=duoKeys(id).map(k=>byK[k]);if(a&&b&&gid(a.x.game)===gid(b.x.game))C.push({rs:[a,b],t:'Duo card'})});
-  const top=one(R.filter(r=>r.b>0).sort((a,b)=>b.ev-a.ev)).slice(0,4);
-  for(let n=2;n<=Math.min(3,top.length);n++)C.push({rs:top.slice(0,n),t:n+' of your best cards'});
-  const seen=new Set(),PL=C.map(c=>{const legs=c.rs.map(advLeg),k=slipCalc(legs),pr=c.rs.reduce((t,r)=>t*r.p,1),win=k.win(10)-10;return {c,legs,k,pr,win,ev:pr*k.win(10)-10,key:c.rs.map(r=>r.x.id+r.sd).sort().join()}})
-    .filter(x=>!seen.has(x.key)&&seen.add(x.key)).sort((a,b)=>b.ev-a.ev).slice(0,4);
-  const sRow=(r,i)=>{const x=r.x,M=PP_MK[x.m],id=x.id,inS=UI.sl.legs[id]===r.sd;
-    return `<li class="adv-r"><span class="adv-k">${i+1}</span><span class="adv-a">${advArt(x.k)}</span><div class="adv-i"><b>${esc(x.name)}</b><small class="muted">${esc(x.school)} · vs ${esc(x.opp)} · ${esc(fmtDate(x.game.d))}</small>
-      <span class="adv-m">${r.sd==='o'?'Over':'Under'} ${fmtN(x.line)} ${esc(M.l.toLowerCase())} · ${Math.round(r.p*100)}% chance</span><span class="adv-c">${esc(advCardTxt(x.k))}: <b>+${r.b}%</b> on winnings</span></div>
-      <div class="adv-p"><b>+${n1(10*r.win)}</b><small class="muted">on 10 tokens</small><button type="button" class="btn sm${inS?' ghost':''}" data-act="slLeg" data-id="${esc(id)}" data-s="${r.sd}">${inS?'In slip ✓':'Add'}</button></div></li>`};
-  const pRow=(x,i)=>{const v=x.c.rs.map(r=>r.x.id+'~'+r.sd).join(',');
-    return `<li class="adv-r"><span class="adv-k">${i+1}</span><div class="adv-i"><b>${esc(x.c.t)} · ${x.c.rs.length}-pick parlay</b>${x.c.rs.map(r=>`<span class="adv-m">${esc(lastN(r.x.name))} ${r.sd==='o'?'Over':'Under'} ${fmtN(r.x.line)} ${esc(PP_MK[r.x.m].l.toLowerCase())}</span>`).join('')}
-      <span class="adv-c">Cards add <b>+${x.k.pct}%</b> · ${Math.round(x.pr*100)}% all hit · ${x.k.odds.toFixed(2)}x odds</span></div>
-      <div class="adv-p"><b>+${n1(x.win)}</b><small class="muted">on 10 tokens</small><button type="button" class="btn sm" data-act="advParl" data-v="${esc(v)}">Add all</button></div></li>`};
+  const N=UI.tcN||8,L=topCardsList();
+  const row=(x,i)=>{const c=cardInfo(x.id),R=RAR[x.r]||RAR.c;
+    return `<li class="adv-r" style="--rc:${R.c}"><span class="adv-k">${i+1}</span><span class="adv-a">${x.id.startsWith('ac:')?achArt(x.id,58):cardArt(x.id,x.r,c.duo?72:58)}</span><div class="adv-i"><b>${esc(c.name)}</b><small style="color:${R.c}">${x.r==='x'?'Immortal':R.n}${c.spc?' · '+esc(SPEC[c.spc].n):c.duo?' Duo':c.team?' team card':''}</small><span class="adv-m">${esc(x.w)}</span></div><div class="adv-p"><b>${esc(x.t)}</b></div></li>`};
   return `<section class="card adv"><div class="qh"><h3>Top Cards</h3><span class="muted">Best advantage in your Locker</span></div>
-    <h4 class="adv-h">Best to worst</h4>
-    ${singles.length?`<ol class="adv-l">${singles.map(sRow).join('')}</ol>`:'<p class="muted">No players in your Locker have an advantage on this week’s lines yet. Open packs in the Shop to get some.</p>'}
-    ${PL.length?`<h4 class="adv-h">Best parlays from your Locker</h4><ol class="adv-l">${PL.map(pRow).join('')}</ol>`:''}
-    <small class="muted adv-n">Ranked by what your card boosts are worth. A guide from each player’s recent stats. Nothing is guaranteed.</small></section>`}
+    ${L.length?`<ol class="adv-l">${L.slice(0,N).map(row).join('')}</ol>${L.length>N?`<button type="button" class="btn ghost sm" data-act="tcMore">Show more (${L.length-N})</button>`:''}`:'<p class="muted">You have no cards yet. Open packs in the Shop to get some.</p>'}
+    <small class="muted adv-n">Each card adds this much to your winnings when you win a bet it applies to. Best to worst.</small></section>`}
 function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
@@ -9978,7 +9960,7 @@ document.addEventListener('click',async e=>{
     else{if(!x)return;if(!L[id]&&Object.keys(L).length>=SL_MAX){say('A parlay can have up to '+SL_MAX+' picks.');return}
       Object.keys(L).forEach(o=>{if(o!==id&&pm[o]&&pm[o].k===x.k)delete L[o]});L[id]=t.dataset.s}
     render(true)}
-  else if(a==='advParl'){const pm=propMap(),L=UI.sl.legs;Object.keys(L).forEach(k=>delete L[k]);let n=0;(t.dataset.v||'').split(',').forEach(z=>{const [pid,sd]=[z.slice(0,z.lastIndexOf('~')),z.slice(z.lastIndexOf('~')+1)];if(pm[pid]&&!started(pm[pid].game)&&n<SL_MAX){L[pid]=sd;n++}});say(n?'Parlay added to your slip':'Those lines are closed');render(true)}
+  else if(a==='tcMore'){UI.tcN=(UI.tcN||8)+10;render(true)}
   else if(a==='slStake'){UI.sl.stake=+t.dataset.v;render(true)}
   else if(a==='slClear'){UI.sl.legs={};render(true)}
   else if(a==='slGo'){if(needJoin('make a parlay'))return;await slipGo()}
