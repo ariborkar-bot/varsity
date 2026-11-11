@@ -442,3 +442,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v433
 - Locker > Cards shows each card big (`.lk-big` / `.lk-bc`, art height `LKH` from the screen width, two per row, Duos span two) with the holo shine (`lkHolo`) and a slow tilt (`lkFloat`) always on, like the tap-to-view card. Replaces the small `.lk-card` rows in that grid.
+
+## v434
+- Fix: Locker big cards overlapped on screens wider than a phone (card size followed the screen width but the grid columns did not). Card height is now fixed (`LKH`=224, 161px wide), columns are `minmax(176px,1fr)`, every tile has the same art slot height (`--h`) so names line up, order is still highest overall first.
