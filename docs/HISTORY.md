@@ -366,3 +366,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - OVR manual overrides (Nov 10, owner): MANUAL dict in make_ovr.py pins Raw OVR for Paisios Polamalu RB (99), Daine Gonzalez RB (94), swaps Courtney Miller-Thompson / Deandre Eleby WR; shown in yellow with 'Manual OVR' in Status.
 - OVR manual: swapped Owen Dorros / DJ Ferguson WR (Nov 10, owner).
 - OVR manual: Marvin Jones III moved LB->DB (POS_FIX), Caden Bessler LB set to 90 (Nov 10, owner).
+- OVR manual: Caden Bessler 80, Zachary Benitez QB 96, Thomas Dietrich QB 94 (Nov 10, owner).
