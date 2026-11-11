@@ -33,6 +33,22 @@ def keyrank(L, vals):
     """L: list of players, vals: list of lists of the key-stat totals -> (mean percentile of the key stats, per player)"""
     m = len(vals[0]); ps = [pctiles([(i, v[j]) for i, v in enumerate(vals)]) for j in range(m)]
     return [sum(ps[j][i] for j in range(m)) / m for i in range(len(L))]
+DIV_RATE = {'Open Division': 1.0, 'Division I': .85, 'Division II': .70, 'Division III': .55, 'Division IV': .40, 'Division V': .25, 'Division V-AA': .10}
+def fb_divisions():
+    import re
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'index.html')).read()
+    src = src[src.index('const PO_DEFS='):src.index('function buildBrackets')]; div = {}
+    for ln in src.split('\n'):
+        m = re.search(r"(Open Division|Division [IVA-]+)'", ln)
+        if not m: continue
+        names = [x or y for x, y in re.findall(r"T\((?:'([^']+)'|\"([^\"]+)\")", ln)]
+        by = re.search(r"\]\],\[(.+?)\]\)", ln)
+        if by: names += [x or y for x, y in re.findall(r"'([^']+)'|\"([^\"]+)\"", by.group(1))]
+        div.update({nm: m.group(1) for nm in names})
+    return div
+FB_DIV = fb_divisions()
+# player school names that differ from the schedule's team names
+SCH_ALIAS = {'Army-Navy': 'Army and Navy Academy', 'Central': 'Central Union', 'Christian': 'Christian High', 'Mt. Carmel': 'Mount Carmel', "O'Farrell Charter": "O'Farrell", 'San Diego': 'San Diego High', 'Southwest EC': 'Southwest (El Centro)', 'Southwest SD': 'Southwest San Diego'}
 def sos_fb():
     g = json.load(open(os.path.join(D, 'fbgames.json'))); w = {}; n = {}
     for h, a, hs, as_ in g:
@@ -40,6 +56,9 @@ def sos_fb():
         for t, f, ag in ((h, hs, as_), (a, as_, hs)):
             n[t] = n.get(t, 0) + 1; w[t] = w.get(t, 0) + (1 if f > ag else .5 if f == ag else 0)
     strength = {t: (w[t] + 1) / (n[t] + 2) for t in n}   # Laplace-smoothed win%
+    # Owner (Nov 10): an opponent's playoff division counts too. Opponents in a 2026 bracket (PO_DEFS in index.html) are rated
+    # half on win% and half on their division; opponents not in a bracket (no division in the app) stay on win% alone.
+    strength = {t: (.5 * v + .5 * DIV_RATE[FB_DIV[t]] if t in FB_DIV else v) for t, v in strength.items()}
     opp = {}
     for h, a, hs, as_ in g:
         if hs is None or as_ is None: continue
@@ -93,7 +112,7 @@ for g, L in grp.items():
     pc = pctiles(sc); S = dict(sc); pt = pctiles([(i, p['tot']) for i, p in enumerate(L)])
     ks = FBKEY.get(g, FBKEY['DEF']); kr = keyrank(L, [[p['st'].get(k, 0) for k in ks] for p in L])
     for i, p in enumerate(L):
-        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], pct_k=kr[i], pct_s=SCH_FB.get(p['school'], .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '', 'Position set to DB (owner)' if p.get('fixed') else '') if x)))
+        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], pct_k=kr[i], pct_s=SCH_FB.get(SCH_ALIAS.get(p['school'], p['school']), .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '', 'Position set to DB (owner)' if p.get('fixed') else '') if x)))
 bbapp = json.load(open(os.path.join(D, 'bb.json')))
 stats = {}
 for t in mb.load_real():
@@ -143,7 +162,7 @@ def build(sport):
   nt['A13'] = 'DB adjustment (every DB OVR is multiplied by this; 0.97 = 3% lower)'; nt['B13'] = 0.97 if sport == 'Football' else 1
   for r in (3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13): nt.cell(r, 2).font = Font(name=AR, color='0000FF'); nt.cell(r, 2).fill = PatternFill('solid', fgColor='FFFF00'); nt.cell(r, 1).font = Font(name=AR)
   allnotes = ['OVR = Mean + Spread x (how many standard deviations the player is above or below average, from his percentile), rounded and kept between Floor and Ceiling, so most players land in the 60s-80s, 90+ is rare and nobody is below 45. Blue/yellow cells are inputs: change them and every OVR recalculates.',
-   'Four percentiles (0 = worst, 1 = best among his peers): (1) fantasy points per game, (2) total fantasy points this season (rewards playing more and scoring more) and (3) his rank in the stats that matter at his position, the average percentile of the Position stats columns, and (4) schedule strength. Schedule-strength percentile (default weight 6%) = how tough his school’s schedule is compared with other schools: football = the average win% of the opponents it played this season (counting only completed games, smoothed so 1-0 is not 100%); basketball = the average 2025-26 scoring margin of the opponents on its 2026-27 schedule. Division is not used on its own because the app only has division brackets for some schools; strength of schedule captures the same thing. Weighted score = the four percentiles combined with the yellow weights (37.6%/28.2%/28.2%/6% by default, they do not have to add to 1). Because averaging squeezes everyone toward the middle, the weighted scores are re-ranked among his peers (Combined percentile) and OVR comes from that (Raw OVR = mean + spread x his standard deviations above average). Only the top N players in the sport by Raw OVR (the yellow cell, 10) can be a 99; everyone else is capped at 98, so the best player at a position is near the ceiling and the worst at the floor (45). Key stats: QB pass yd, pass TD, rush yd; RB rush yd, rush TD, rec yd; WR/TE rec yd, rec, rec TD; DL sack, TFL, tkl; LB tkl, TFL, sack; DB tkl, INT, PBU; DEF tkl, TFL, sack, INT; K FG, PAT; basketball PG ast, pts, stl; SG pts, 3pm, stl; SF pts, reb, stl; PF reb, pts, blk; C reb, blk, pts (season totals).',
+   'Four percentiles (0 = worst, 1 = best among his peers): (1) fantasy points per game, (2) total fantasy points this season (rewards playing more and scoring more) and (3) his rank in the stats that matter at his position, the average percentile of the Position stats columns, and (4) schedule strength. Schedule-strength percentile (default weight 6%) = how tough his school’s schedule is compared with other schools: football = the average rating of the opponents it played this season, where an opponent in a 2026 playoff bracket is rated half on its win% and half on its playoff division (Open 1.00, D-I .85, D-II .70, D-III .55, D-IV .40, D-V .25, D-V-AA .10) and an opponent that is not in a bracket is rated on win% alone (completed games only, smoothed so 1-0 is not 100%); basketball = the average 2025-26 scoring margin of the opponents on its 2026-27 schedule. Basketball does not use division (the app has no basketball divisions yet). Weighted score = the four percentiles combined with the yellow weights (37.6%/28.2%/28.2%/6% by default, they do not have to add to 1). Because averaging squeezes everyone toward the middle, the weighted scores are re-ranked among his peers (Combined percentile) and OVR comes from that (Raw OVR = mean + spread x his standard deviations above average). Only the top N players in the sport by Raw OVR (the yellow cell, 10) can be a 99; everyone else is capped at 98, so the best player at a position is near the ceiling and the worst at the floor (45). Key stats: QB pass yd, pass TD, rush yd; RB rush yd, rush TD, rec yd; WR/TE rec yd, rec, rec TD; DL sack, TFL, tkl; LB tkl, TFL, sack; DB tkl, INT, PBU; DEF tkl, TFL, sack, INT; K FG, PAT; basketball PG ast, pts, stl; SG pts, 3pm, stl; SF pts, reb, stl; PF reb, pts, blk; C reb, blk, pts (season totals).',
    'Football: Pts per game = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
    'Basketball: Pts per game = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
    'Games = games with stats behind the rating (football 2026, basketball 2025-26). Few games = low confidence.',
