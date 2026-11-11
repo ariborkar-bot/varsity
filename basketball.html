@@ -2547,6 +2547,42 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .parl-leg{display:flex;flex-direction:column;gap:6px}.parl-who{display:flex;gap:8px;align-items:center}.parl-plus{text-align:center;font:900 1.1rem/1 var(--f-display,inherit);color:var(--rc);margin:4px 0}
 .sl-leg{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)}.sl-leg>span:first-child{flex:1;min-width:0}.sl-leg small{display:block}.sl-o{font:800 .9rem/1 var(--f-display,inherit)}.sl-bar .bt-go{flex-wrap:wrap;gap:8px}.sl-bar{padding:10px 12px!important}.sl-bar .qh{margin:0 0 2px!important}.sl-bar .qh h3{font-size:1rem}.sl-bar p{margin:2px 0}.sl-leg{padding:3px 0!important}.sl-leg .btn{padding:0 10px;min-height:28px}.sl-bar .bt-stk{margin:6px 0 4px;flex-wrap:wrap;gap:6px}.sl-bar .bt-stk .chip{padding:5px 11px;min-height:0}.sl-bar .bt-amt{width:76px;flex:none}.sl-bar{position:fixed;left:8px;right:8px;bottom:76px;z-index:40;max-width:560px;margin:0 auto;max-height:56vh;overflow:auto;box-shadow:0 -6px 24px rgba(0,0,0,.55);border:1px solid var(--gold,#FFB800)}.sl-sp{height:56vh}.parl-won{color:#3DDC84}.parl-lost{color:#FF4F6D}
 .sl-duo{display:flex;gap:10px;align-items:center;margin:8px 0}.sl-duo small{display:block}.wko-pos.sm{font-size:clamp(2.6rem,15vw,5rem)}
+.wko-door{position:absolute;top:0;bottom:0;width:50.5%;z-index:4;background:linear-gradient(90deg,#0b1220,#1a2640 48%,#0b1220),repeating-linear-gradient(0deg,transparent 0 46px,rgba(255,255,255,.05) 46px 48px);box-shadow:inset 0 0 60px #000;pointer-events:none;animation:wkoDoorL 1s .15s cubic-bezier(.7,0,.3,1) forwards}
+.wko-door.l{left:0;border-right:3px solid var(--rc)}.wko-door.r{right:0;border-left:3px solid var(--rc);animation-name:wkoDoorR}
+.wko-door::after{content:"";position:absolute;top:50%;width:12px;height:90px;margin-top:-45px;border-radius:6px;background:var(--rc);box-shadow:0 0 18px var(--rc)}
+.wko-door.l::after{right:16px}.wko-door.r::after{left:16px}
+@keyframes wkoDoorL{to{transform:translateX(-102%)}}@keyframes wkoDoorR{to{transform:translateX(102%)}}
+.wko-lamps{position:absolute;left:0;right:0;top:0;height:46px;z-index:1;opacity:0;background:radial-gradient(circle,#fff 0 5px,transparent 6px) 0 6px/22px 16px repeat-x,radial-gradient(circle,#fff 0 5px,transparent 6px) 11px 22px/22px 16px repeat-x;filter:drop-shadow(0 0 12px #fff) drop-shadow(0 18px 40px rgba(255,255,255,.55));-webkit-mask:linear-gradient(90deg,#000 0 30%,transparent 34% 66%,#000 70%);mask:linear-gradient(90deg,#000 0 30%,transparent 34% 66%,#000 70%)}
+.wko[data-s="4"] .wko-lamps{animation:wkoLamp .9s steps(1) forwards}
+@keyframes wkoLamp{0%{opacity:0}12%{opacity:1}20%{opacity:.1}34%{opacity:1}42%{opacity:.3}55%,100%{opacity:1}}
+.wko-bolt{position:absolute;inset:0;z-index:1;opacity:0;pointer-events:none;background:linear-gradient(100deg,transparent 47%,#fff 49%,var(--rc) 50%,transparent 52%),linear-gradient(76deg,transparent 22%,var(--rc) 23%,transparent 24.5%),linear-gradient(112deg,transparent 73%,var(--rc) 74%,transparent 75.5%)}
+.wko.wk-big[data-s="4"] .wko-bolt{animation:wkoBolt 2.6s ease-out}
+@keyframes wkoBolt{0%,6%,14%,40%,46%{opacity:.9}3%,10%,20%,43%,50%,100%{opacity:0}}
+.wko.wk-big[data-s="4"]{animation:wkoShake .7s linear}
+@keyframes wkoShake{0%,100%{transform:none}10%{transform:translate(-9px,6px)}25%{transform:translate(8px,-7px)}40%{transform:translate(-7px,-4px)}55%{transform:translate(6px,5px)}70%{transform:translate(-4px,3px)}85%{transform:translate(3px,-2px)}}
+.wko.wk-big .wko-rays{background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--rc) 45%,transparent) 0 5deg,transparent 5deg 15deg)}
+.wko.wk-big .wko-card{box-shadow:0 0 70px var(--rc),0 0 22px #fff}
+.wko.wk-big .wko-pts i{background:var(--rc);box-shadow:0 0 10px var(--rc),0 0 2px #fff}
+.wko.wr-m .wko-bg,.wko.wr-x .wko-bg{animation:wkoPulse 1.2s ease-in-out infinite}
+@keyframes wkoPulse{50%{filter:brightness(1.6) saturate(1.4)}}
+.wko-snd{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 26px);left:12px;z-index:5;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:8px 14px;font:700 .8rem/1 var(--f-body)}
+.wko-snd[aria-pressed=false]{opacity:.6}
+.wko-split{position:relative;display:flex;width:min(92vw,460px);height:min(56vh,360px);border-radius:18px;overflow:hidden;box-shadow:0 0 40px rgba(124,243,255,.4)}
+.wko-h{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px}
+.wko-h.l{background:linear-gradient(160deg,color-mix(in srgb,var(--rc) 60%,#0b1428),#0a1224);clip-path:polygon(0 0,100% 0,84% 100%,0 100%);margin-right:-8%;animation:wkoInL .6s cubic-bezier(.2,1.2,.4,1) both}
+.wko-h.r{background:linear-gradient(200deg,#10204a,color-mix(in srgb,var(--rc) 45%,#0b1428));clip-path:polygon(16% 0,100% 0,100% 100%,0 100%);margin-left:-8%;animation:wkoInR .6s .12s cubic-bezier(.2,1.2,.4,1) both}
+.wko-h b{font:900 clamp(2.4rem,13vw,4.2rem)/1 var(--f-display,inherit);text-shadow:0 0 20px var(--rc)}
+.wko-h span{font:800 1rem/1 var(--f-display,inherit);letter-spacing:.1em;text-transform:uppercase}
+.wko-slash{position:absolute;left:50%;top:-5%;bottom:-5%;width:6px;margin-left:-3px;background:#fff;box-shadow:0 0 18px #fff,0 0 40px var(--rc);transform:rotate(9deg);animation:wkoK .4s .5s both}
+@keyframes wkoInL{from{transform:translateX(-110%)}}@keyframes wkoInR{from{transform:translateX(110%)}}
+.pko-pack{--tp:0}.pko-tear{transform-origin:0 50%}
+.pko-tear::after{content:"";position:absolute;left:0;top:-3px;height:4px;width:calc(var(--tp,0)*100%);background:#fff;box-shadow:0 0 14px #fff,0 0 30px #FFC23D;border-radius:2px}
+.pko-pack .pko-pk{transform:rotate(calc(var(--tp)*-4deg)) scale(calc(1 + var(--tp)*.06))}
+.pko-pack.nudge .pko-pk{animation:pkoNudge .4s}
+@keyframes pkoNudge{25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
+.cv-sell{margin-top:10px;align-self:center}
+#cfm{z-index:460}
+@media (prefers-reduced-motion:reduce){.wko-door{display:none}.wko.wk-big[data-s="4"],.wko-bg{animation:none!important}}
 /* v256 pack opening: rip, lift-spin-land flips, sparks, rarity background glow */
 .pko{isolation:isolate}
 .pko-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s ease;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--gc,#7A4DFF) 55%,transparent),color-mix(in srgb,var(--gc,#7A4DFF) 18%,transparent) 45%,transparent 75%)}
@@ -3139,7 +3175,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v415 · Nov 10';
+const APP_BUILD='v416 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4296,9 +4332,9 @@ const PACKS={
   /* v382 (owner): the Welcome pack: you pick a team and get a walkout player (Epic or better) + 10 more cards (Champion pack odds), once per account (off: not in the Shop) */
   welcome:{n:'Welcome pack',c:10,tok:0,odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'',cards:1,off:1},
   /* v401 (owner): Duo pack: 3 Duo cards (two teammates on one double-sided card), Epic or better; they unlock parlays */
-  duo:{n:'Duo pack',c:3,tok:2000,usd:'$14.99',odds:{e:70,l:22,m:8},g:'',cards:1,duo:1},
+  duo:{n:'Duo pack',c:3,tok:2000,usd:'$14.99',odds:{e:80,l:16,m:4},g:'',cards:1,duo:1},
   /* v402 (owner): a free gift for everyone: 1 Duo card from a school you choose, once per account (off: not sold) */
-  duogift:{n:'Duo gift',c:1,tok:0,odds:{e:70,l:22,m:8},g:'',cards:1,duo:1,team:1,off:1},
+  duogift:{n:'Duo gift',c:1,tok:0,odds:{e:80,l:16,m:4},g:'',cards:1,duo:1,team:1,off:1},
   godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1}};   /* v386 (owner): back in the Shop, still the most expensive pack */
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
@@ -4495,10 +4531,15 @@ function bndHTML(){const u=ME.uid,done=bndOf(u),all=bndSchools(),N=UI.bndN||12,q
    A leg whose stats never post is dropped (the parlay pays on the other leg); both dropped = tokens back. */
 
 var _du={rev:-1,m:{},all:[]};
-function duoSets(){if(_du.rev===_rev)return _du;const m={},all=[];
-  SD_SCHOOLS.forEach(sc=>{const top=bndSet(sc).filter(i=>i.startsWith('pc:')).slice(0,3).map(i=>i.slice(3));const ids=[];
-    for(let a=0;a<top.length;a++)for(let b=a+1;b<top.length;b++)ids.push('dc:'+top[a]+'~'+top[b]);
-    if(ids.length){m[sc]=ids;all.push(...ids)}});
+/* v416 (owner): duos are real combos only: QB + top WR, QB + top RB, QB + top TE (or the top two WRs), and the top two defenders.
+   A school with none of those (basketball, tiny rosters) keeps the old rule: pairs of its top 3 players. */
+function duoSets(){if(_du.rev===_rev)return _du;const m={},all=[],by={};
+  players().forEach(p=>{if(p.sample||/x$/.test(p.key))return;(by[p.school]=by[p.school]||[]).push({k:p.key,pos:p.pos,v:agg(p,'season').v,n:p.name})});
+  SD_SCHOOLS.forEach(sc=>{const pl=(by[sc]||[]).sort((a,b)=>b.v-a.v||a.n.localeCompare(b.n)),top=(pos,n)=>pl.filter(x=>x.pos===pos).slice(0,n||1);
+    const qb=top('QB')[0],wr=top('WR',2),rb=top('RB')[0],te=top('TE')[0],d=top('DEF',2),pr=[];
+    if(qb&&wr[0])pr.push([qb,wr[0]]);if(qb&&rb)pr.push([qb,rb]);if(qb&&te)pr.push([qb,te]);else if(wr[1])pr.push([wr[0],wr[1]]);if(d.length===2)pr.push(d);
+    if(!pr.length){const t=pl.slice(0,3);for(let a=0;a<t.length;a++)for(let b=a+1;b<t.length;b++)pr.push([t[a],t[b]])}
+    const ids=pr.map(x=>'dc:'+x[0].k+'~'+x[1].k);if(ids.length){m[sc]=ids;all.push(...ids)}});
   return _du={rev:_rev,m,all}}
 const duoKeys=id=>id.slice(3).split('~');
 function rollDuoTeam(t){const a=duoSets().m[t]||[];return a.length?a[fcRnd(a.length)]:''}
@@ -4513,15 +4554,18 @@ function duoArt(id,r,s=54){const c=duoInfo(id),R=RAR[r]||RAR.e,w=Math.round(s*.7
   return `<span class="tc-duo r-${r}" style="--rc:${R.c};width:${w}px;height:${s}px;font-size:${(s/11).toFixed(2)}px" title="${esc(c.full)} · tap to flip" role="img" aria-label="${esc(c.full)} duo card"><span class="duo-tilt"><span class="duo-in">${face(c.a,'fr',1)}${face(c.b,'bk',2)}</span></span></span>`}
 /* v403 (owner): duo cards flip on their own every 5 seconds and when tapped. Each flip keeps turning the same way, lifts the card and fires a ring in its rarity colour. */
 function duoFlip(el){const inn=el.querySelector('.duo-in');if(!inn)return;el._r=(el._r||0)+180;inn.style.transform='rotateY('+el._r+'deg)';el.classList.toggle('fl');el._t=Date.now();el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}
+const duoBuzz=()=>{try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}};
 setInterval(()=>{const n=Date.now();document.querySelectorAll('.tc-duo').forEach(el=>{if(!el._t){el._t=n;return}if(n-el._t>=5000)duoFlip(el)})},250);
-document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.tc-duo');if(!el)return;duoFlip(el);if(!el.closest('.pks,.pko-c')){e.stopPropagation();e.preventDefault()}},true);
+document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.tc-duo');if(!el)return;duoFlip(el);duoBuzz();if(!el.closest('.pks,.pko-c')){e.stopPropagation();e.preventDefault()}},true);
 const parlOf=u=>((S.picks[u]||{}).parl)||{};
 function parlLegs(b,gm){return (b.legs||[]).map(l=>({l,r:propResult(Object.assign({w:b.w,g:b.g},l),gm)}))}
 function parlResult(b,gm){const L=parlLegs(b,gm);if(L.some(x=>x.r==='lost'))return 'lost';if(L.some(x=>x.r==='open'))return 'open';
   return L.every(x=>x.r==='push')?'push':'won'}
 const parlEff=(b,gm)=>parlLegs(b,gm).filter(x=>x.r==='won').reduce((o,x)=>o*(+x.l.odds||1),1)*(+b.pb||1);   /* pb = the parlay bonus multiplier saved with a prop slip (v407) */
 const parlWin=(b,gm)=>{const st=+b.stake||0;return (st*parlEff(b,gm)-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100)};
-function duoPct(u,id){const r=cardR(u,id);return r?CARD_PCT[r]:0}
+/* v416 (owner): a Duo's parlay boost is bigger than a player card's */
+const DUO_PCT={e:75,l:100,m:150};
+function duoPct(u,id){const r=cardR(u,id);return r?DUO_PCT[r]||0:0}
 UI.pl={};
 function parlHTML(cur,L){
   if(!ME.uid||ME.mode==='guest')return '';
@@ -4544,7 +4588,7 @@ function parlHTML(cur,L){
       else{const pm=propMap(),o0=pm[u.l0.id],o1=pm[u.l1.id],od=Math.round((u.l0.s==='o'?o0.over:o0.under)*(u.l1.s==='o'?o1.over:o1.under)*100)/100,stake=Math.min(u.stake||10,Math.floor(bal)),pct=duoPct(ME.uid,id);
         foot=`<div class="bt-stk"><span class="muted">Wager</span>${[5,10,25,50,100].filter(v=>v<=bal).map(v=>`<button class="chip" data-act="plStake" data-d="${esc(id)}" data-v="${v}" aria-pressed="${stake===v}">${v}</button>`).join('')}</div>
           <div class="bt-go"><span>${od.toFixed(2)}x · win <b>${tk(stake*od-stake+(stake*od-stake)*pct/100+stake)}</b> with your +${pct}% duo boost</span><button class="btn" data-act="plGo" data-d="${esc(id)}" ${stake<1?'disabled':''}>Lock in parlay</button></div>`}}
-    return `<article class="gm parl-c" style="--rc:${R.c}"><div class="parl-h">${duoArt(id,r,120)}<div><b>${esc(c.full)}</b><small style="color:${R.c}">${R.n} duo · +${CARD_PCT[r]}% on parlay winnings</small></div></div>${legRow(ks[0],0)}<div class="parl-plus" aria-hidden="true">+</div>${legRow(ks[1],1)}${foot}</article>`};
+    return `<article class="gm parl-c" style="--rc:${R.c}"><div class="parl-h">${duoArt(id,r,120)}<div><b>${esc(c.full)}</b><small style="color:${R.c}">${R.n} duo · +${DUO_PCT[r]}% on parlay winnings</small></div></div>${legRow(ks[0],0)}<div class="parl-plus" aria-hidden="true">+</div>${legRow(ks[1],1)}${foot}</article>`};
   return `<section class="card parl">${head}<p class="muted">Both players have to hit. The odds multiply, and your Duo card boosts the winnings.</p><div class="gm-grid">${ok.map(one).join('')}</div></section>`}
 async function parlGo(id){
   const u=UI.pl[id]||{},pm=propMap(),a=u.l0&&pm[u.l0.id],b=u.l1&&pm[u.l1.id];
@@ -4664,13 +4708,21 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
   el.innerHTML=`<div class="cv-in" style="--rc:${R.c}"><button type="button" class="cv-x" data-act="cvClose" aria-label="Close">×</button>
     <div class="cv-card">${ach?achArt(id,H):cardArt(id,r,H)}</div>
     ${c.key?`<button type="button" class="cv-name" data-act="cvProfile" data-id="${esc(c.key)}"><b>${esc(c.name)}</b><small>${esc(c.sub||'')} · Tap the name for the profile</small></button>`:`<div class="cv-name"><b>${esc(c.name)}</b><small>${c.team?'Team card':esc(c.sub||'')}</small></div>`}
-    <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>+${ach?c.pct:CARD_PCT[r]||0}%</b><small>${c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
-    ${ach||c.duo?'':`<div class="cv-vs" role="group" aria-label="Versions you own">${RAR_ORD.filter(x=>CARD_PCT[x]).map(x=>`<button type="button" class="cv-v ${own.includes(x)?'on':''}" style="--rc:${RAR[x].c}" ${own.includes(x)?`data-act="cvVer" data-r="${x}"`:'disabled'} aria-pressed="${x===r}">${RAR[x].n}</button>`).join('')}</div>`}</div>`;
+    <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>+${ach?c.pct:c.duo?DUO_PCT[r]||0:CARD_PCT[r]||0}%</b><small>${c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
+    ${ach||c.duo?'':`<div class="cv-vs" role="group" aria-label="Versions you own">${RAR_ORD.filter(x=>CARD_PCT[x]).map(x=>`<button type="button" class="cv-v ${own.includes(x)?'on':''}" style="--rc:${RAR[x].c}" ${own.includes(x)?`data-act="cvVer" data-r="${x}"`:'disabled'} aria-pressed="${x===r}">${RAR[x].n}</button>`).join('')}</div>`}
+    ${!ach&&own.includes(r)&&SELL[r]&&ME.mode!=='readonly'&&ME.mode!=='offline'?`<button type="button" class="btn ghost sm cv-sell" data-act="cvSell" data-r="${r}">Sell this ${RAR[r].n} for ${SELL[r]} tokens</button>`:''}</div>`;
   document.body.appendChild(el);const cd=el.querySelector('.cv-card'),art=cd.firstElementChild;
   if(art&&!c.duo){const mv=e=>{const b=cd.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.transform=`rotateY(${(x*22).toFixed(1)}deg) rotateX(${(-y*18).toFixed(1)}deg)`;art.style.setProperty('--mx',((x+.5)*100).toFixed(0)+'%');art.style.setProperty('--my',((y+.5)*100).toFixed(0)+'%')},rs=()=>{art.style.transform='';art.style.removeProperty('--mx');art.style.removeProperty('--my')};
     cd.addEventListener('pointermove',mv);cd.addEventListener('pointerleave',rs);cd.addEventListener('pointerup',rs);cd.addEventListener('pointercancel',rs)}
   const x=el.querySelector('.cv-x');if(x)x.focus();sheetPush()}
 function closeCard(){const e=document.getElementById('cardview');if(e)e.remove()}
+/* v416 (owner): sell a card version for tokens (cheap on purpose: about a third of what a duplicate pays). The version is set to 0, like a removed card. */
+const SELL={c:3,u:5,r:8,e:20,l:50,m:130};
+async function cardSell(id,r){const u=ME.uid,v=invOf(u),raw=v.cards&&v.cards[id],cur=typeof raw==='string'?{[raw]:1}:Object.assign({},raw);if(!u||!cur[r]||!SELL[r])return;
+  cur[r]=0;const patch={cards:Object.assign({},v.cards,{[id]:cur}),dup:(+v.dup||0)+SELL[r]};
+  S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},v,patch)});
+  if(await act(()=>upsert('picks/'+u,{inv:patch}),'Sold for '+SELL[r]+' tokens')){closeCard();SFX.coin()}else S.picks[u]=Object.assign({},S.picks[u],{inv:v});
+  render()}
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollGear(r){let i=RAR_ORD.indexOf(r);for(;i>=0;i--){const pool=ITEMS.filter(x=>x.r===RAR_ORD[i]&&BH_K.includes(x.k));if(pool.length)return pool[fcRnd(pool.length)].id}return 'bhs_black'}
 function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)&&!BH_K.includes(x.k)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
@@ -4773,18 +4825,20 @@ function pkWalkout(R,done,X){
   const C=X&&X.c,id=X?'':R.o[R.g].split('|')[0],ai=X?{key:C?'':X.p.key,rank:0,pct:X.pct||CARD_PCT[X.r]}:achInfo(id),p=C?{name:C.name,school:C.school}:X?X.p:pByKey(ai.key);if(!p){done();return}
   let st=C?{n:0,big:'+'+ai.pct+'%',l:C.on,sub:'Card boost'}:pkStat(ai.key,ai.rank);if(!C&&X&&st.big==='#0')st={n:0,big:'+'+ai.pct+'%',l:'on his props',sub:'Card boost'};
   const pos=C?C.pos:posOf(p),calm=matchMedia('(prefers-reduced-motion: reduce)').matches,ini=String(p.school).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  const o=document.createElement('div');o.className='wko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Walkout');o.dataset.s='0';
-  o.innerHTML=`<div class="wko-bg" aria-hidden="true"></div><i class="wko-beams" aria-hidden="true"></i><i class="wko-crowd" aria-hidden="true"></i><i class="wko-fl" aria-hidden="true"></i>
+  const o=document.createElement('div');const rr=X?X.r:'x',big=['l','m','x'].includes(rr),lock=['m','x'].includes(rr)&&!calm,mult={e:1,l:1.3,m:1.6,x:1.8}[rr]||1;
+  o.className='wko wr-'+rr+(big?' wk-big':'');o.style.setProperty('--rc',(RAR[rr]||RAR.e).c);o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Walkout');o.dataset.s='0';
+  o.innerHTML=`<div class="wko-bg" aria-hidden="true"></div><i class="wko-beams" aria-hidden="true"></i><i class="wko-crowd" aria-hidden="true"></i><i class="wko-lamps" aria-hidden="true"></i><i class="wko-bolt" aria-hidden="true"></i><i class="wko-fl" aria-hidden="true"></i>
+    <i class="wko-door l" aria-hidden="true"></i><i class="wko-door r" aria-hidden="true"></i>
     <div class="wko-st wko-s0"><i class="wko-ring"></i><b class="wko-k">${X?esc(X.k||'Walkout'):'Immortal pull'}</b></div>
-    <div class="wko-st wko-s1"><b class="wko-k">${C?esc(C.k1):'Position'}</b><div class="wko-pos${C?' sm':''}">${esc(pos)}</div></div>
+    <div class="wko-st wko-s1"><b class="wko-k">${C?esc(C.k1):'Position'}</b>${C&&C.duo?`<div class="wko-split">${C.duo.map((q,i)=>`<div class="wko-h ${i?'r':'l'}">${av(q.name,q.school,84)}<b>${esc(q.key?posOf(q):'')}</b><span>${esc(lastN(q.name))}</span></div>`).join('')}<i class="wko-slash"></i></div>`:`<div class="wko-pos${C?' sm':''}">${esc(pos)}</div>`}</div>
     <div class="wko-st wko-s2"><b class="wko-k">Team</b><div class="wko-logo">${logoFor(p.school)?slogo(p.school,150):`<span class="wko-ini">${esc(ini)}</span>`}</div><div class="wko-sch">${esc(p.school)}</div></div>
     <div class="wko-st wko-s3"><b class="wko-k">${C?'Boost':st.big?'Rank':'Season best stat'}</b><div class="wko-num">${st.big?esc(st.big):'0'}</div><div class="wko-lb">${esc(st.l)}</div><small class="wko-sub">${esc(st.sub)}</small></div>
     <div class="wko-st wko-s4"><i class="wko-rays"></i><div class="wko-ttl">${X?esc(RAR[X.r].n.toUpperCase())+'!':'IMMORTAL!'}</div>
       <div class="wko-card"><div class="wko-ct"><span>${X?esc(RAR[X.r].n)+' '+(C?C.kind:'player')+' card':'TOP 10 · #'+ai.rank}</span><span>+${ai.pct}%</span></div>${C?C.art:av(p.name,p.school,124)}<h3>${esc(p.name)}</h3><p>${esc(pos)} · ${slogo(p.school,18)} ${esc(p.school)}</p><em>${esc(st.big?st.l:st.n.toLocaleString()+' '+st.l)}</em><i class="wko-shine"></i></div><i class="wko-pts"></i>
       <button class="btn wko-go" type="button">${X?esc(X.btn||'Next'):'Pick your player'}</button></div>
-    <button class="wko-skip" type="button">Skip</button>`;
+    ${lock?'':'<button class="wko-skip" type="button">Skip</button>'}<button class="wko-snd" type="button" aria-pressed="${SFX.on()}" aria-label="Sound">${SFX.on()?'Sound on':'Sound off'}</button>`;
   document.body.appendChild(o);document.documentElement.style.overflow='hidden';
-  const T=[900,1500,1700,2400];let s=0,tm,raf,fin=false;
+  const T=[1100,1500,1700,2400].map(x=>Math.round(x*mult));let s=0,tm,raf,fin=false;
   const fl=o.querySelector('.wko-fl'),vib=x=>{try{navigator.vibrate&&navigator.vibrate(x)}catch(_){}};
   const sparks=()=>{if(calm)return;const box=o.querySelector('.wko-pts');let h='';for(let i=0;i<64;i++){const a=Math.PI*2*i/64+Math.random()*.3,d=110+Math.random()*210,z=3+Math.random()*6;
     h+=`<i style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d)}px;--z:${z.toFixed(1)}px;--t:${(.8+Math.random()*.8).toFixed(2)}s"></i>`}box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},2000)};
@@ -4792,12 +4846,14 @@ function pkWalkout(R,done,X){
     const t0=performance.now(),D=1300,step=t=>{const x=Math.min(1,(t-t0)/D);el.textContent=Math.round(st.n*(1-Math.pow(1-x,3))).toLocaleString();if(x<1)raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)};
   const go=n=>{if(fin)return;clearTimeout(tm);cancelAnimationFrame(raf);s=n;o.dataset.s=n;
     if(n>0&&!calm){fl.classList.remove('on');void fl.offsetWidth;fl.classList.add('on')}
-    vib(n===4?[40,40,120,40,220]:n>0?[25]:[]);
+    vib(n===4?(big?[60,40,160,40,300,60,400]:[40,40,120,40,220]):n>0?[35,30,35]:[20]);
+    if(!calm){if(n===0){SFX.door();SFX.crowd(T[0]/1000+1.2,.05)}else if(n<4){SFX.thump(n);SFX.crowd(T[n]/1000,.04+n*.015)}if(n===3)SFX.riser(T[3]/1000);if(n===4)SFX.hit(big)}
     if(n===3)count();
-    if(n===4){fin=true;sparks();return}
+    if(n===4){fin=true;sparks();if(big&&!calm){setTimeout(sparks,700);setTimeout(sparks,1500);if(lock)setTimeout(sparks,2300)}return}
     tm=setTimeout(()=>go(n+1),T[n])};
   const close=()=>{clearTimeout(tm);cancelAnimationFrame(raf);o.remove();document.documentElement.style.overflow='';done()};
-  o.addEventListener('click',e=>{if(e.target.closest('.wko-go')){close();return}if(e.target.closest('.wko-skip')){go(4);return}if(!fin)go(s+1)});
+  o.addEventListener('click',e=>{const sb=e.target.closest('.wko-snd');if(sb){const v=!SFX.on();SFX.set(v);sb.setAttribute('aria-pressed',v);sb.textContent=v?'Sound on':'Sound off';return}
+    if(e.target.closest('.wko-go')){close();return}if(e.target.closest('.wko-skip')){go(4);return}if(!fin&&!lock)go(s+1)});
   if(calm){go(4)}else go(0)}
 function pkpShow(){
   if(document.querySelector('.pkp'))return;
@@ -4825,6 +4881,27 @@ function pkpShow(){
 /* the opening (v256): the sealed pack shakes and rips open, the cards deal out face down. Tap one to flip it, or Flip all.
    A flip lifts the card, spins it and lands it with a pop and a spray of sparks in its rarity colour.
    Epic or better: the whole background glows in that colour (and keeps the best colour seen so far); Legendary+ adds turning light rays. */
+/* ---------- v416 (owner): sound for walkouts and packs ----------
+   All synthesized (no audio files): crowd = filtered noise, thump = falling sine, riser = rising noise + saw, hit = bass + noise + chord.
+   Off switch: the speaker button in the walkout (saved in localStorage 'v_snd'). Nothing plays under prefers-reduced-motion. */
+const SFX={c:null,
+  on(){try{return localStorage.getItem('v_snd')!=='0'}catch(_){return true}},
+  set(v){try{localStorage.setItem('v_snd',v?'1':'0')}catch(_){}if(!v&&this.c)try{this.c.close();this.c=null}catch(_){}},
+  ac(){if(!this.on())return null;try{this.c=this.c||new (window.AudioContext||window.webkitAudioContext)();if(this.c.state==='suspended')this.c.resume();return this.c}catch(_){return null}},
+  tone(f,d,o){const a=this.ac();if(!a)return;o=o||{};try{const t=a.currentTime+(o.at||0),os=a.createOscillator(),g=a.createGain();os.type=o.type||'sine';os.frequency.setValueAtTime(f,t);if(o.to)os.frequency.exponentialRampToValueAtTime(o.to,t+d);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(o.v||.2,t+(o.a||.01));g.gain.exponentialRampToValueAtTime(.0001,t+d);os.connect(g).connect(a.destination);os.start(t);os.stop(t+d+.05)}catch(_){}},
+  noise(d,o){const a=this.ac();if(!a)return;o=o||{};try{const t=a.currentTime+(o.at||0),n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=Math.random()*2-1;
+    const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=b;f.type=o.ft||'bandpass';f.Q.value=o.q||.7;f.frequency.setValueAtTime(o.f||900,t);if(o.to)f.frequency.exponentialRampToValueAtTime(o.to,t+d);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(o.v||.15,t+(o.a||d*.4));g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(f).connect(g).connect(a.destination);s.start(t);s.stop(t+d+.05)}catch(_){}},
+  thump(k){this.tone(120+(k||0)*18,.3,{to:42,v:.5});this.noise(.08,{f:2500,v:.05,a:.005})},
+  door(){this.tone(70,.5,{to:30,v:.5});this.noise(.5,{f:300,to:120,v:.12,a:.02})},
+  crowd(d,v){this.noise(d,{f:850,q:.5,v:v||.07,a:d*.6})},
+  riser(d){this.noise(d,{f:400,to:6000,q:1.2,v:.12,a:d*.9});this.tone(110,d,{type:'sawtooth',to:880,v:.05,a:d*.9})},
+  hit(big){this.tone(90,.9,{to:32,v:.7});this.noise(.5,{f:1800,v:.2,a:.005});
+    [261.6,329.6,392,523.3].concat(big?[659.3,784,1046.5]:[]).forEach((f,i)=>this.tone(f,big?2.4:1.5,{type:'triangle',v:.09,at:i*.06,a:.02}));
+    this.crowd(big?4:2.2,big?.16:.1);if(big)[0.5,0.9,1.3].forEach(t=>this.noise(.35,{f:3000,to:900,v:.09,at:t,a:.01}))},
+  tear(){this.noise(.4,{f:3500,to:1200,q:2,v:.18,a:.01})},
+  coin(){this.tone(988,.08,{type:'square',v:.06});this.tone(1319,.25,{type:'square',v:.06,at:.08})}};
 /* v387 (owner): every Epic or better player card in a pack gets a walkout (position, team, his best stat, then the player) before the cards
    are shown, lowest rarity first. Team cards have no position, so they just flip. */
 function packShow(P,got){
@@ -4832,21 +4909,22 @@ function packShow(P,got){
   for(const g of got||[]){if(!g.card||!OR.includes(g.r))continue;let key='',pct=0;
     if(g.card.startsWith('pc:'))key=g.card.slice(3);else if(g.card.startsWith('ac:')){const a=achInfo(g.card);key=a&&a.key;pct=a&&a.pct}
     /* v408 (owner): Duo cards and team cards get the walkout too, so every Epic or better card is a walkout */
-    if(g.card.startsWith('dc:')){const c=duoInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.full,school:c.school,pos:[c.a,c.b].map(q=>q.key?posOf(q):'').filter(Boolean).join(' + ')||'DUO',k1:'Duo',kind:'duo',on:'on parlays',art:duoArt(g.card,g.r,170)}});continue}
+    if(g.card.startsWith('dc:')){const c=duoInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.full,school:c.school,pos:[c.a,c.b].map(q=>q.key?posOf(q):'').filter(Boolean).join(' + ')||'DUO',k1:'Duo',kind:'duo',on:'on parlays',art:duoArt(g.card,g.r,170),duo:[c.a,c.b]},pct:DUO_PCT[g.r]});continue}
     if(g.card.startsWith('tc:')){const c=cardInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school||c.name,pos:'TEAM',k1:'Card',kind:'team',on:'on Pick ’em picks',art:cardArt(g.card,g.r,124)}});continue}
     const p=key&&pByKey(key);if(p)wk.push({p,r:g.r,dup:g.dup,pct,k:P.n})}
-  wk.sort((a,b)=>OR.indexOf(a.r)-OR.indexOf(b.r));
-  const next=i=>{if(i>=wk.length){packShow0(P,got);return}pkWalkout(null,()=>next(i+1),Object.assign({btn:i+1<wk.length?'Next card':'See all cards'},wk[i]))};
-  next(0)}
+  /* v416 (owner): only the best card in the pack gets the walkout */
+  wk.sort((a,b)=>OR.indexOf(b.r)-OR.indexOf(a.r));
+  if(!wk.length){packShow0(P,got);return}
+  pkWalkout(null,()=>packShow0(P,got),Object.assign({btn:'See all cards'},wk[0]))}
 function packShow0(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
   const ORD=['c','u','r','e','l','m','x'],calm=matchMedia('(prefers-reduced-motion: reduce)').matches,key=Object.keys(PACKS).find(k=>PACKS[k]===P)||'rookie';
   const face=g=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
-      return `${cardArt(g.card,g.r,c.ach?66:c.duo?84:58)}${c.duo?'':`<b>${esc(c.name)}</b>`}<small style="color:${R.c}">${c.ach?esc(c.line):(c.duo?R.n+' duo':R.n+' '+(c.team?'team':'player')+' card')}</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${c.ach?c.pct:CARD_PCT[g.r]}% on ${c.duo?'parlays':c.team?'Pick ’em picks':'his props'}`}</em>`}
+      return `${cardArt(g.card,g.r,c.ach?66:c.duo?84:58)}${c.duo?'':`<b>${esc(c.name)}</b>`}<small style="color:${R.c}">${c.ach?esc(c.line):(c.duo?R.n+' duo':R.n+' '+(c.team?'team':'player')+' card')}</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${c.ach?c.pct:c.duo?DUO_PCT[g.r]:CARD_PCT[g.r]}% on ${c.duo?'parlays':c.team?'Pick ’em picks':'his props'}`}</em>`}
     const x=ITEM[g.id];
     return `${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}`};
   o.innerHTML=`<div class="pko-bg" aria-hidden="true"><i class="pko-rays"></i></div>
-    <div class="pko-pack lk-${key}" role="button" tabindex="0" aria-label="Open the ${esc(P.n)}"><div class="pko-pk"><i class="pko-tear"></i><b>${esc(P.n)}</b><small>${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}</small><span>V</span></div><p class="pko-hint">Tap to rip it open</p></div>
+    <div class="pko-pack lk-${key}" role="button" tabindex="0" aria-label="Open the ${esc(P.n)}"><div class="pko-pk"><i class="pko-tear"></i><b>${esc(P.n)}</b><small>${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}</small><span>V</span></div><p class="pko-hint">${calm?'Tap to open':'Swipe across the top to rip it open'}</p></div>
     <div class="pko-in" hidden><h2>${esc(P.n)}</h2><p class="pko-hint">Tap a card to flip it</p><div class="pko-cards">${got.map((g,i)=>`<div class="pko-c r-${g.r}" style="--rc:${RAR[g.r].c};--i:${i}" tabindex="0" role="button" aria-label="Flip card ${i+1}">
       <div class="pko-in3"><div class="pko-f pko-back"><span>V</span><i class="pko-aura"></i></div><div class="pko-f pko-front">${face(g)}<i class="pko-shine"></i></div></div><i class="pko-burst"></i><i class="pko-pts"></i></div>`).join('')}</div>
     <div class="pko-btns"><button class="btn pko-all" type="button">Flip all</button><button class="btn ghost pko-ok" type="button">Done</button></div></div>`;
@@ -4856,8 +4934,17 @@ function packShow0(P,got){
     if(calm){pack.remove();inn.hidden=false;return}
     pack.classList.add('rip');try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}
     setTimeout(()=>{pack.remove();inn.hidden=false;o.classList.add('open')},560)};
-  const auto=setTimeout(rip,1600);
-  pack.addEventListener('click',rip);pack.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();rip()}});
+  /* v416 (owner): you tear the pack yourself: drag across it and the tear line follows your finger; past 60% it rips. A plain tap just nudges it. */
+  const auto=0,tl=pack.querySelector('.pko-tear');let sx=null,pw=1,moved=false;
+  if(calm)pack.addEventListener('click',rip);
+  else{pack.style.touchAction='none';
+    pack.addEventListener('pointerdown',e=>{sx=e.clientX;pw=pack.getBoundingClientRect().width||1;moved=false;try{pack.setPointerCapture(e.pointerId)}catch(_){}});
+    pack.addEventListener('pointermove',e=>{if(sx==null||ripped)return;const f=Math.min(1,Math.abs(e.clientX-sx)/pw);if(f>.05&&!moved){moved=true;SFX.tear()}
+      tl.style.setProperty('--tp',f);pack.style.setProperty('--tp',f);if(f>.2)try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}
+      if(f>=.6){sx=null;try{navigator.vibrate&&navigator.vibrate([30,20,60])}catch(_){}rip()}});
+    const up=()=>{if(sx==null||ripped)return;sx=null;tl.style.setProperty('--tp',0);pack.style.setProperty('--tp',0);if(!moved){pack.classList.remove('nudge');void pack.offsetWidth;pack.classList.add('nudge')}};
+    pack.addEventListener('pointerup',up);pack.addEventListener('pointercancel',up)}
+  pack.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();rip()}});
   const cards=[...o.querySelectorAll('.pko-c')],allB=o.querySelector('.pko-all'),okB=o.querySelector('.pko-ok');
   const left=()=>cards.filter(c=>!c.classList.contains('fl')).length;
   const sync=()=>{if(!left()){allB.hidden=true;okB.classList.remove('ghost');okB.textContent='Nice';o.querySelector('.pko-in .pko-hint').textContent='All cards revealed'}};
@@ -9250,6 +9337,7 @@ document.addEventListener('click',async e=>{
   if(a==='cardView'){openCard(id);return}
   if(a==='cvClose'){sheetClose();return}
   if(a==='cvVer'){openCard($('#cardview').dataset.card,t.dataset.r);return}
+  if(a==='cvSell'){const cid=$('#cardview').dataset.card,r=t.dataset.r,c=cardInfo(cid);confirmBox('Sell this card?',`You get <b>${SELL[r]} tokens</b> for your ${RAR[r].n} ${esc(c.name)} card. You can’t undo this.`,'Sell',()=>cardSell(cid,r));return}
   if(a==='cvProfile'){closeCard();openPlayer(id);return}
   if(a==='player')openPlayer(id);
   else if(a==='close')sheetClose();
