@@ -491,3 +491,5 @@ A stand-alone one-file basketball game in the style of "Basketball Battle". NOT 
 
 ## Hoops Battle v4 (Nov 11, tools/battle/hoops-battle.html)
 Run cycle was ~12 strides/s (`p.ph*6`), now `p.ph*1.45` (~3/s) with foot lift on the forward swing, opposite arm swing when running. Shot meter removed. Harder shooting: window q falls to 0 at ±.22 s (was .30), perfect = within ~.026 s, error `pow(1-q,1.1)*140`, perfect shots can rim out a little; AI timing error x1.35. Double jump: push .72*JV, front/back flip over .5 s (`p.djt`), two expanding rings, own sound (`sfx('dj')`).
+
+- v451 (Nov 11, owner): OVR. Exactly eight football 99s (raw 110 in MANUAL): Dax Labrum, Zachary Benitez, Paisios Polamalu, Darian Webb, Seth Fanua (LB), Ryder Molchanoff (DL), Honor Faalave (DB), Gaige Weddle (DB). Hezekiah Manuel QB 97, Ezekiel McIntyre and Courtney Miller-Thompson 98. New Notes cell B14 (0.3) subtracted from every WR and DL raw OVR (402 players dropped 1 at rounding). ovr.js rebuilt.
