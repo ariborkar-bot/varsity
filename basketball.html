@@ -2500,6 +2500,15 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 @media (min-width:760px) and (max-width:819px){.mast .hdr-shop span{display:none}}
 @media (max-width:420px){.mast-r .wk,.mast-mini .wk{display:none}}
 @media (max-width:359px){.hdr-shop span{display:none}.hdr-shop{padding:0 9px}}
+/* v416 (owner): Locker button next to Shop, red badge = packs waiting + resulted bets you have not looked at */
+.hdr-lkb{position:relative;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;font:800 .9rem/1 inherit;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;border:2px solid rgba(255,255,255,.6);background:rgba(5,12,30,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.hdr-lkb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.hdr-lkb:hover{filter:brightness(1.15)}.hdr-lkb.on{box-shadow:0 0 0 2px #fff}
+.hdr-bd{position:absolute;top:-7px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#FF3B4E;color:#fff;font:900 .7rem/19px system-ui,sans-serif;font-style:normal;text-align:center;box-shadow:0 0 0 2px #0B1530}.hdr-bd[hidden]{display:none}
+@media (max-width:759px){.hdr-lkb{height:34px;padding:0 10px;font-size:.82rem}}
+@media (max-width:519px){.hdr-lkb span{display:none}.hdr-lkb{padding:0 9px}}
+@media (min-width:760px){.mast .hdr-lkb span{display:none}.mast .hdr-lkb{padding:0 10px}}
+@media (min-width:1200px){.mast .mast-in .tabs a,.mast-in .tabs a{padding-inline:9px!important;gap:6px!important}.mast-in .tabs{gap:4px}}   /* room for the Locker button on wide screens */
 @media (max-width:420px){.mast .brand h1{font-size:1.25rem}}
 @media (max-width:359px){.mast-r .wk,.mast-mini .wk{display:none}}
 @media (min-width:760px){.mast .sport-opt span,.mast .brand h1{display:none}.mast .sport-opt{padding:6px 9px}.mast-in{gap:12px!important}.mast-in .mast-r{gap:8px!important}.mast-in .tabs{min-width:0}.mast-in .tabs a{padding-inline:12px!important}}
@@ -2708,7 +2717,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
     </a>
     <div class="mast-r">
       <div class="sport-sw" role="group" aria-label="Sport"><a class="sport-opt" href="index.html" title="Football" aria-label="Football"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 19.8C2.6 14 6 6.2 14.6 4.4c2.5-.5 4.4-.3 5.2-.2.2.8.4 2.7-.2 5.2C17.8 18 10 21.4 4.2 19.8z"/><path d="M9.2 14.8l5.6-5.6M11.4 10.4l2.2 2.2M9.4 12.4l2.2 2.2M13.2 8.6l2.2 2.2"/></svg></i><span>Football</span></a><a class="sport-opt on" href="basketball.html" title="Basketball" aria-label="Basketball"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.3 3.2 3.3 9.6 0 12.8M18.4 5.6c-3.3 3.2-3.3 9.6 0 12.8"/></svg></i><span>Basketball</span></a></div>
-      <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens"><span class="hdr-tokn"></span><span class="hdr-plus" aria-hidden="true">+</span></button><a class="hdr-shop" href="#shop" aria-label="Shop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a></div>
+      <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens"><span class="hdr-tokn"></span><span class="hdr-plus" aria-hidden="true">+</span></button><a class="hdr-shop" href="#shop" aria-label="Shop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a><a class="hdr-lkb" href="#locker" aria-label="My Locker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM12 3v18M9 11h.01M15 11h.01"/></svg><span>Locker</span><i class="hdr-bd" hidden></i></a></div>
       <div class="wk"><span class="live"></span><span id="wk">Week 10</span></div>
       <button class="bell" id="gear" aria-label="Settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
@@ -2725,7 +2734,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 </header>
 <div class="mast-mini" id="mastMini" aria-hidden="true">
   <button class="mm-brand" type="button" data-act="toTop" aria-label="Back to top" tabindex="-1"><img src="logo.png" alt=""><b>Varsity</b></button>
-  <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens" tabindex="-1"><span class="hdr-tokn"></span><span class="hdr-plus" aria-hidden="true">+</span></button><a class="hdr-shop" href="#shop" aria-label="Shop" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a></div>
+  <div class="hdr-tk" hidden><button class="hdr-tok" type="button" data-act="tokOpen" aria-label="Your tokens" tabindex="-1"><span class="hdr-tokn"></span><span class="hdr-plus" aria-hidden="true">+</span></button><a class="hdr-shop" href="#shop" aria-label="Shop" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Shop</span></a><a class="hdr-lkb" href="#locker" aria-label="My Locker" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM12 3v18M9 11h.01M15 11h.01"/></svg><span>Locker</span><i class="hdr-bd" hidden></i></a></div>
   <div class="wk mm-wk"><span class="live"></span><span id="wk2"></span></div>
   <button class="bell mm-gear" id="gear2" type="button" aria-label="Settings" aria-haspopup="menu" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div>
@@ -3175,7 +3184,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v416 · Nov 10';
+const APP_BUILD='v417 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4773,6 +4782,27 @@ async function packOpen(type,how,day,team){
    (position, team, best stat, then the player) plays for the Top 10 player, then the pick screen. Your pick is final; the other four go back. */
 const posOf=q=>q.pos==='DEF'?(q.sub||'DEF'):q.pos;
 const pkpOf=u=>{const p=invOf(u).pkp;return p&&!p.d&&Array.isArray(p.o)&&p.o.length?p:null};
+/* v416 (owner): the header Locker button has a red badge = packs waiting to be opened + bets that have a result you have not looked at.
+   "Looked at" = you opened Pick ’em (its picks) or Player props (props + parlays) after they were settled. Kept per device in localStorage vs-betseen-<uid>. */
+function lkPacksWaiting(u){let n=0;if(!u)return 0;
+  for(const f of [()=>freePacks(u),()=>giftPacks(u).length,()=>fgPrizes(u).length,()=>fcPrizes(u).length,()=>bkPrizes(u).length,()=>cupPrizes(u).length,()=>pkpOf(u)?1:0])try{n+=+f()||0}catch(_){}
+  return n}
+function lkBetKeys(u){const gm=gameMap(),o={pk:[],pp:[]};
+  try{Object.entries(betsOf(u)).forEach(([id,b])=>{if(betResult(b,gm[id])!=='open')o.pk.push('p|'+id)})}catch(_){}
+  try{Object.entries(propsOf(u)).forEach(([id,b])=>{if(propResult(b,gm)!=='open')o.pp.push('o|'+id)})}catch(_){}
+  try{Object.entries(parlOf(u)).forEach(([id,b])=>{if(parlResult(b,gm)!=='open')o.pp.push('l|'+id)})}catch(_){}
+  return o}
+const lkSeenKey=()=>'vs-betseen-'+(ME.uid||'');
+function lkSeen(){try{return new Set(JSON.parse(localStorage.getItem(lkSeenKey())||'[]'))}catch(_){return new Set()}}
+function lkUnseen(u){const k=lkBetKeys(u),s=lkSeen();return{pk:k.pk.filter(x=>!s.has(x)),pp:k.pp.filter(x=>!s.has(x))}}
+function lkMarkSeen(which){if(!ME.uid)return;const s=lkSeen();let ch=false;lkBetKeys(ME.uid)[which].forEach(x=>{if(!s.has(x)){s.add(x);ch=true}});
+  if(ch){try{localStorage.setItem(lkSeenKey(),JSON.stringify([...s]))}catch(_){}}}
+function lkCount(){if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return 0;const b=lkUnseen(ME.uid);return lkPacksWaiting(ME.uid)+b.pk.length+b.pp.length}
+/* what is new, at the top of the Locker */
+function lkNote(){const u=ME.uid,pk=lkPacksWaiting(u),b=lkUnseen(u),nb=b.pk.length+b.pp.length;
+  const row=(t,sub,btn)=>`<section class="card lk-free"><div><b>${t}</b><small class="muted">${sub}</small></div>${btn}</section>`;
+  return (pk?row(`${pk} ${pk===1?'pack is':'packs are'} waiting to be opened`,'Open them in the Shop.','<a class="btn" href="#shop">Open packs</a>'):'')
+    +(nb?row(`${nb} ${nb===1?'bet has':'bets have'} a result`,'Settled since you last looked.','<button class="btn" data-act="lkBets">See results</button>'):'')}
 function pkpRoll(u,all){
   if(all){const D0=achData(),own0=cardsOf(u),ids0=D0.pool.t10.filter(id=>pByKey(achParse(id).key)),fr=ids0.filter(id=>!(own0[id]||{}).x),pool=fr.concat(ids0.filter(id=>(own0[id]||{}).x)),o=[];
     while(o.length<5&&pool.length)o.push(pool.shift()+'|x');if(o.length<5)return null;for(let i=o.length-1;i>0;i--){const j=fcRnd(i+1);[o[i],o[j]]=[o[j],o[i]]}return {o,g:0}}
@@ -5476,7 +5506,7 @@ function viewLocker(){
     body=`<section class="card"><div class="qh"><h3>Boosts & perks</h3></div><div class="lk-list">${ITEMS.filter(x=>x.k==='perk'||x.k==='tboost').map(x=>`<div class="lk-row">${itemArt(x.id,42)}<span><b>${esc(x.n)}</b><small class="muted">${esc(x.d)}</small></span><b class="lk-n">${invLeft(ME.uid,x.id)}</b></div>`).join('')}</div>
       <p class="muted">Token boosts go on a Pick ’em or player prop pick from the pick itself, before the game starts. Perks show up in the game they belong to.</p></section>`;
   }
-  return head+top+tabs+body;
+  return head+lkNote()+top+tabs+body;
 }
 /* boost chips on a locked-in pick that hasn't started */
 async function invUse(id,extra){const v=invOf(ME.uid),use=Object.assign({},v.use,{[id]:(+((v.use||{})[id])||0)+1}),patch=Object.assign({use},extra||{});
@@ -9212,7 +9242,8 @@ function chrome(v){
   /* tokens + Shop in the header on every tab (v258) */
   try{const on=!!(ME.uid&&ME.mode!=='guest'),h=on?coinIc(ME.uid)+'<b>'+Math.round(bank(ME.uid)).toLocaleString()+'</b>':'';
     document.querySelectorAll('.hdr-tk').forEach(e=>{e.hidden=!on});document.querySelectorAll('.hdr-tokn').forEach(e=>{if(e.innerHTML!==h)e.innerHTML=h});
-    document.querySelectorAll('.hdr-shop').forEach(a=>a.classList.toggle('on',v==='shop'))}catch(_){}
+    document.querySelectorAll('.hdr-shop').forEach(a=>a.classList.toggle('on',v==='shop'));
+    const lc=lkCount();document.querySelectorAll('.hdr-lkb').forEach(a=>{a.classList.toggle('on',v==='locker');const bd=a.querySelector('.hdr-bd');if(bd){bd.hidden=!lc;bd.textContent=lc>9?'9+':String(lc)}a.setAttribute('aria-label','My Locker'+(lc?', '+lc+' new':''))})}catch(_){}
   const bn=$('#banner');if(bn)bn.innerHTML=bannerHTML();
   infoIcons();bbPre();
 }
@@ -9245,6 +9276,7 @@ function render(bg){
   {const c=document.querySelector('#main .lk-catrow');if(c){if(crx>=0)c.scrollLeft=crx;const p=c.querySelector('[aria-pressed="true"]');if(p){const L=p.offsetLeft-c.offsetLeft;if(L<c.scrollLeft||L+p.offsetWidth>c.scrollLeft+c.clientWidth)c.scrollLeft=Math.max(0,L-(c.clientWidth-p.offsetWidth)/2)}}}
   document.querySelectorAll('#main .br').forEach(b=>{const c=b.querySelector('.br-col.cur');if(c&&b.scrollWidth>b.clientWidth)b.scrollLeft=c.offsetLeft-b.firstElementChild.offsetLeft});
   document.querySelectorAll('#main .gm-wks,#main .wks,#main .gm-tabs').forEach(c=>{const b=c.querySelector('[aria-pressed="true"]');if(b&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,b.offsetLeft-c.offsetLeft-(c.clientWidth-b.offsetWidth)/2)});
+  if(v==='minigames'&&ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'){try{if(UI.mtab==='picks')lkMarkSeen('pk');else if(UI.mtab==='props'||UI.mtab==='spread')lkMarkSeen('pp')}catch(_){}}
   chrome(v);
   try{bhMount()}catch(_){}
 }
@@ -9536,6 +9568,7 @@ document.addEventListener('click',async e=>{
   else if(a==='copyRank'){const me=meP(),info=me&&myRanks(me);if(info)copyText(rankText(info,me),'Copied. Paste it anywhere.')}
   else if(a==='meSide'){UI.meSide=t.dataset.v;render()}
   else if(a==='meEdit'){UI.meEdit=!UI.meEdit;render()}
+  else if(a==='lkBets'){const b=lkUnseen(ME.uid);UI.mtab=b.pp.length?'props':'picks';location.hash='#minigames';render()}
   else if(a==='goLocker'){const c=$('#cfm');if(c&&!c.hidden&&typeof closeConfirm==='function')closeConfirm();location.hash='#shop'}
   else if(a==='lkTab'){UI.lk=t.dataset.v;render()}
   else if(a==='pkAd'){if(((invOf(ME.uid).fr||{}).ad)===TODAY()){say('Come back tomorrow for another free pack.');return}adPlay(()=>packOpen('rookie','ad'))}
