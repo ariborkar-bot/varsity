@@ -112,8 +112,11 @@ h1 span{color:#FFC23D}
 const H=540,GY=468,GR=1500,PG=1180,BR=14,PW=21,PH=112,PS=PH/88,JV=585,SPD=255,RIMY=236,RIMH=30,TP=305,SC=14,APEX=JV/PG,WALL=36,TICK=1/60;
 /* energy: running drains it, standing still refills it, every jump costs some. Tired players run slower, jump lower and shoot worse. */
 const EN={run:.085,rest:.26,jump:.09,dj:.12,score:.3};
-const DIFF={easy:{sig:.2,three:.2,mid:.5,gap:92,react:.32,block:.2,reb:.5,slow:.5,dj:.15},med:{sig:.11,three:.3,mid:.42,gap:70,react:.2,block:.4,reb:.8,dj:.4},hard:{sig:.055,three:.38,mid:.34,gap:60,react:.12,block:.6,reb:1,dj:.7}};
-const TEAM=[{n:'YOU',c:'#FFC23D',d:'#0b1a3a',s:'#f1c9a0'},{n:'CPU',c:'#FF4F6D',d:'#3a0b16',s:'#c98f63'}];
+/* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
+   STEAL = seconds of standing chest-to-chest in front of the dribbler before the ball is taken (was .5). Dribbling through a defender is allowed but slow (PRESS). */
+const HOLD=.14,STEAL=1.3,PRESS=.5;
+const DIFF={easy:{sig:.2,three:.2,mid:.5,gap:92,react:.32,block:.2,reb:.5,slow:.5,dj:.15,bite:.6,fake:0},med:{sig:.11,three:.3,mid:.42,gap:70,react:.2,block:.3,reb:.8,dj:.4,bite:.4,fake:.15},hard:{sig:.055,three:.38,mid:.34,gap:60,react:.13,block:.42,reb:1,dj:.6,bite:.2,fake:.3}};
+const TEAM=[{n:'YOU',c:'#FFC23D',c2:'#FFE08A',d:'#10224a',s:'#f0c49a',s2:'#d9a377',hair:'#3a2414',num:'1'},{n:'CPU',c:'#FF4F6D',c2:'#ff8fa3',d:'#4a0f1f',s:'#b97a4e',s2:'#9a6038',hair:'#141017',num:'2'}];
 const NOIN={l:false,r:false,j:false},rnd=Math.random,gauss=()=>(rnd()+rnd()+rnd()-1.5)*2;
 let g=null,OPT={mode:'ai',diff:'med',len:120},paused=false,muted=false;
 try{const s=JSON.parse(localStorage.getItem('hb-opt')||'null');if(s&&DIFF[s.diff]&&[60,120,180].includes(s.len)&&['ai','2p'].includes(s.mode))OPT=s;muted=localStorage.getItem('hb-mute')==='1'}catch(_){}
@@ -128,14 +131,14 @@ const sfx=n=>{if(SFX[n])SFX[n]()};
 
 /* ---------------- game state ---------------- */
 function hoops(W){return [{cx:112,bd:72,dir:1},{cx:W-112,bd:W-72,dir:-1}]}
-function mkP(i,x){return {i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,dj:false,en:1,pj:false,cd:0,stun:0,st:0,ph:0}}
+function mkP(i,x){return {i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,dj:false,en:1,pj:false,cd:0,stun:0,st:0,ph:0,gath:false,gt:0,pump:0,slow:false}}
 function newGame(o,W){
   g={W,o,hp:hoops(W),t:0,P:[mkP(0,W/2-84),mkP(1,W/2+84)],ball:{x:W/2,y:210,vx:0,vy:-430,st:'loose',live:true,own:-1,sh:-1,pts:2,t:0,rot:0,cd:.25,hit:false,dunk:false,done:false},
     score:[0,0],clock:o.len,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false};
   pop('TIP OFF',W/2,150,'#fff',1.1);return g}
 function pop(t,x,y,c,d){g.pop.push({t:d||1,d:d||1,s:t,x,y,c:c||'#fff'})}
 /* player i attacks hoop 1-i and defends hoop i (player 0 defends the left hoop) */
-function setup(i){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.dj=false;p.en=Math.min(1,p.en+EN.score)});
+function setup(i){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.dj=false;p.gath=false;p.pump=0;p.en=Math.min(1,p.en+EN.score)});
   g.P[i].x=a.cx+a.dir*150;g.P[1-i].x=g.W/2+a.dir*46;g.P[i].has=true;g.P[i].face=a.dir;g.P[1-i].face=-a.dir;
   Object.assign(b,{st:'held',own:i,sh:-1,vx:0,vy:0,live:false,hit:false,dunk:false,done:false,cd:0,t:0});g.sc=SC;g.phase='live';g.hold=.55;g.ai=[{},{}]}
 
@@ -144,23 +147,27 @@ function step(dt,inp){
   g.t+=dt;for(const q of g.pop)q.t-=dt;g.pop=g.pop.filter(q=>q.t>0);for(const q of g.fx)q.t-=dt;g.fx=g.fx.filter(q=>q.t>0);g.shake=Math.max(0,g.shake-dt*3.5);g.net[0]=Math.max(0,g.net[0]-dt*2.2);g.net[1]=Math.max(0,g.net[1]-dt*2.2);
   if(g.phase==='over')return;
   const live=g.phase==='live'&&g.hold<=0;if(g.hold>0)g.hold-=dt;
+  const a=g.P[0],b=g.P[1],close=!a.air&&!b.air&&Math.abs(b.x-a.x)<PW*2+4;a.slow=close&&a.has;b.slow=close&&b.has;
   for(const p of g.P)stepP(p,live?inp[p.i]:NOIN,dt);
-  const a=g.P[0],b=g.P[1];
-  if(!a.air&&!b.air){const dx=b.x-a.x,ad=Math.abs(dx);if(ad<PW*2+2){const s=dx>=0?1:-1,ov=(PW*2+2-ad)/2;a.x-=s*ov;b.x+=s*ov;clampP(a);clampP(b)}}
+  if(!a.air&&!b.air&&!a.has&&!b.has){const dx=b.x-a.x,ad=Math.abs(dx);if(ad<PW*2+2){const s=dx>=0?1:-1,ov=(PW*2+2-ad)/2;a.x-=s*ov;b.x+=s*ov;clampP(a);clampP(b)}}
   stepBall(dt);
   if(g.phase==='live'){if(live){steals(dt);blocks();pickups();clocks(dt)}}
   else{g.dead-=dt;if(g.dead<=0)afterDead()}}
 function clampP(p){p.x=Math.max(WALL+PW,Math.min(g.W-WALL-PW,p.x))}
 function stepP(p,c,dt){
-  p.cd=Math.max(0,p.cd-dt);if(p.stun>0){p.stun-=dt;c=NOIN}
-  const mv=(c.r?1:0)-(c.l?1:0),sp=SPD*(p.has?.9:1)*(.58+.42*Math.min(1,p.en/.3));
+  p.cd=Math.max(0,p.cd-dt);if(p.pump>0)p.pump-=dt;if(p.stun>0){p.stun-=dt;c=NOIN}if(!p.has)p.gath=false;
+  const mv=(c.r?1:0)-(c.l?1:0),sp=SPD*(p.has?.9:1)*(.58+.42*Math.min(1,p.en/.3))*(p.slow?PRESS:1)*(p.gath?.5:1);
   if(!p.air){p.vx+=(mv*sp-p.vx)*Math.min(1,dt*14);if(mv)p.face=mv;else if(p.has)p.face=g.hp[1-p.i].cx>p.x?1:-1;else if(Math.abs(g.ball.x-p.x)>8)p.face=g.ball.x>p.x?1:-1;
     p.en=mv?Math.max(0,p.en-dt*EN.run):Math.min(1,p.en+dt*EN.rest)}
   else p.vx+=(mv*sp*.8-p.vx)*Math.min(1,dt*3);
-  if(p.shoot)p.face=g.hp[1-p.i].cx>p.x?1:-1;
-  const jp=c.j&&!p.pj;
-  if(jp&&!p.air){const v=JV*(.8+.2*Math.min(1,p.en/.25));p.air=true;p.vy=-v;p.ap=v/PG;p.jt=0;p.dj=false;p.en=Math.max(0,p.en-EN.jump);if(p.has)p.shoot=true;sfx('jump')}
-  else if(p.air){
+  if(p.shoot||p.gath)p.face=g.hp[1-p.i].cx>p.x?1:-1;
+  const jp=c.j&&!p.pj,jump=()=>{const v=JV*(.8+.2*Math.min(1,p.en/.25));p.air=true;p.vy=-v;p.ap=v/PG;p.jt=0;p.dj=false;p.gath=false;p.en=Math.max(0,p.en-EN.jump);if(p.has)p.shoot=true;sfx('jump')};
+  if(!p.air&&p.has){
+    /* with the ball: a quick tap is a pump fake, holding JUMP for HOLD seconds goes up for the shot */
+    if(p.gath){if(!c.j){p.gath=false;p.pump=.3}else{p.gt+=dt;if(p.gt>=HOLD)jump()}}
+    else if(jp&&p.pump<=.06){p.gath=true;p.gt=0}}
+  else if(!p.air){if(jp)jump()}
+  else{
     /* double jump: a second push in the air, only without the ball (it is for blocks and rebounds) */
     if(jp&&!p.has&&!p.dj&&p.en>=EN.dj*.6){p.dj=true;p.vy=-JV*.62;p.en=Math.max(0,p.en-EN.dj);g.fx.push({x:p.x,y:p.y,t:.32,d:.32});sfx('jump')}
     p.jt+=dt;p.vy+=PG*dt;p.y+=p.vy*dt;
@@ -183,6 +190,7 @@ function release(p,late){
 function stepBall(dt){
   const b=g.ball;b.cd=Math.max(0,b.cd-dt);
   if(b.st==='held'){const p=g.P[b.own];if(p.air&&p.shoot){b.x=p.x+p.face*8;b.y=p.y-PH-16}else if(p.air){b.x=p.x+p.face*(PW+8);b.y=p.y-PH*.56}
+    else if(p.gath||p.pump>0){const k=p.gath?Math.min(1,p.gt/HOLD):Math.sin(Math.max(0,p.pump)/.3*Math.PI);b.x=p.x+p.face*(PW+BR-3-(PW+BR-11)*k);b.y=p.y-PH*.5-(PH*.5+12)*k}
     else{const d=Math.abs(Math.sin(g.t*9+p.i*1.7));b.x=p.x+p.face*(PW+BR-3);b.y=GY-BR-d*56;if(d<.08&&!b._b){b._b=true;if(g.hold<=0)sfx('bounce')}else if(d>.3)b._b=false}
     b.vx=b.vy=0;return}
   b.t+=dt;const n=3,h=dt/n,W=g.W;
@@ -199,10 +207,11 @@ function scored(hi){const b=g.ball,team=hi===1?0:1,pts=b.sh===team?b.pts:2,hp=g.
   pop('+'+pts,hp.cx,RIMY-34,TEAM[team].c,1.3);pop(b.dunk?'SLAM!':pts===3?'FROM DEEP!':b.hit?'':'SWISH',hp.cx+hp.dir*70,RIMY-70,'#fff',1.1);
   sfx('swish');if(b.dunk)g.shake=.7;g.phase='dead';g.dead=1.35;g.next=1-team}
 function afterDead(){if(g.clock<=0){if(g.score[0]===g.score[1]){g.ot++;g.clock=20;setup(g.next>=0?g.next:(rnd()<.5?0:1));pop('OVERTIME',g.W/2,150,'#FFC23D',1.4)}else{g.phase='over';sfx('buzz');onEnd()}}else setup(g.next)}
+/* a steal needs STEAL seconds of standing right in front of the dribbler (he is facing you). Getting past, turning away, jumping or a pump fake all reset it. */
 function steals(dt){const b=g.ball;if(b.st!=='held')return;const h=g.P[b.own],d=g.P[1-b.own];
-  if(!h.air&&!d.air&&d.stun<=0&&Math.abs(h.x-d.x)<PW*2+12){d.st+=dt*((d.x-h.x)*h.face>0?1:.3);
-    if(d.st>.5){h.has=false;h.stun=.45;h.cd=.7;d.has=true;d.st=0;b.own=d.i;g.sc=SC;g.stat[d.i].stl++;pop('STEAL!',d.x,d.y-PH-30,TEAM[d.i].c,1);sfx('steal')}}
-  else d.st=Math.max(0,d.st-dt*2);h.st=0}
+  if(!h.air&&!d.air&&d.stun<=0&&Math.abs(h.x-d.x)<PW*2+4&&(d.x-h.x)*h.face>0&&!h.gath&&h.pump<=0){d.st+=dt;
+    if(d.st>STEAL){h.has=false;h.stun=.45;h.cd=.7;d.has=true;d.st=0;b.own=d.i;g.sc=SC;g.stat[d.i].stl++;pop('STEAL!',d.x,d.y-PH-30,TEAM[d.i].c,1);sfx('steal')}}
+  else d.st=Math.max(0,d.st-dt*2.5);h.st=0}
 function blocks(){const b=g.ball;let d=null,s=null;
   if(b.st==='held'){s=g.P[b.own];d=g.P[1-b.own];if(!(s.air&&s.shoot&&d.air))return}
   else if(b.st==='shot'&&!b.live&&b.t<.7&&!b.dunk){s=g.P[b.sh];d=g.P[1-b.sh]}else return;
@@ -222,20 +231,25 @@ function ai(p,dt){const m=g.ai[p.i],D=DIFF[g.o.diff],o=g.P[1-p.i],b=g.ball,h=g.h
   const go=x=>{if(x>p.x+7)c.r=true;else if(x<p.x-7)c.l=true};
   if(p.has){
     if(p.air){if(p.shoot)c.j=p.jt<Math.max(.06,Math.min(p.ap*2-.06,p.ap+m.off));return c}
+    if(p.gath){if(m.fk){m.fk=false;m.fkd=true;m.wait=.36}else c.j=true;return c}   /* keep holding through the gather, or let go at once for a pump fake */
+    if(p.pump>0)return c;
     if(!m.plan){const r=rnd();m.plan=r<D.three?'three':r<D.three+D.mid?'mid':'drive';m.d=m.plan==='three'?TP+14+rnd()*34:m.plan==='mid'?150+rnd()*120:42;m.wait=.15+rnd()*.25+(D.slow||0)*(1+rnd())}
     m.wait-=dt;const dist=Math.abs(h.cx-p.x),between=(o.x-p.x)*(h.cx-p.x)>0&&Math.abs(o.x-p.x)<dist;
     if(!between&&m.plan!=='three'&&dist>84){m.plan='drive';m.d=42}
     /* out of breath with time on the shot clock: stand still and get some energy back */
-    if(p.en<.22)m.rest=true;else if(p.en>.5)m.rest=false;if(m.rest&&g.sc>5&&g.clock>3&&o.st<.1&&Math.abs(o.x-p.x)>PW*2+16)return c;
+    if(p.en<.22)m.rest=true;else if(p.en>.5)m.rest=false;if(m.rest&&g.sc>5&&g.clock>3&&o.st<.3&&Math.abs(o.x-p.x)>PW*2+16)return c;
     const spot=h.cx+h.dir*m.d,blocked=between&&Math.abs(o.x-p.x)<PW*2+18&&Math.abs(spot-h.cx)<Math.abs(o.x-h.cx);
-    if(m.wait<=0&&(Math.abs(p.x-spot)<11||g.sc<2.2||g.clock<1.2||blocked||o.st>.18)){c.j=true;m.off=(dist<74?-.02:0)+gauss()*D.sig*(dist<74?.4:1)}
+    if(m.wait<=0&&(Math.abs(p.x-spot)<11||g.sc<2.2||g.clock<1.2||blocked||o.st>.7||(m.fkd&&o.air))){c.j=true;m.off=(dist<74?-.02:0)+gauss()*D.sig*(dist<74?.4:1);
+      m.fk=!m.fkd&&between&&!o.air&&Math.abs(o.x-p.x)<125&&g.sc>4&&g.clock>3&&rnd()<D.fake}
     else go(spot);
     return c}
-  m.plan=null;
+  m.plan=null;m.fkd=false;m.fk=false;
   if(b.st==='held'){const s=Math.sign(my.cx-o.x)||1;go(o.x+s*(o.air&&o.shoot?PW+24:D.gap));   /* close in on a shooter who has left the floor */
     if(o.air&&o.shoot){if(m.rt==null){m.rt=D.react*(.6+rnd()*.8);m.will=rnd()<D.block}m.rt-=dt;if(m.will&&m.rt<=0&&Math.abs(o.x-p.x)<130&&!p.air)c.j=true;
       /* second jump when the shooter is still above me near the top of my first one */
       else if(p.air&&!p.dj&&!p.pj&&p.vy>-140&&o.has&&o.y<p.y-14&&Math.abs(o.x-p.x)<130&&rnd()<D.dj*.2)c.j=true}else m.rt=null;
+    /* a pump fake can get the defender off his feet */
+    if(o.gath||o.pump>0){if(m.bite==null)m.bite=rnd()<D.bite;if(m.bite&&o.pump>.18&&!p.air&&Math.abs(o.x-p.x)<130)c.j=true}else m.bite=null;
     return c}
   let tx=b.x+b.vx*.22;if(b.st==='shot'&&!b.live){const th=g.hp[1-b.sh];tx=th.cx+th.dir*(54+p.i*16)}
   go(tx);if(b.live&&!b.done&&Math.abs(b.x-p.x)<50&&b.y<p.y-PH-8&&b.y>p.y-PH-150&&b.vy>0&&!p.air&&rnd()<D.reb*.25)c.j=true;
@@ -270,32 +284,60 @@ function drawHoopFront(hp,hi){const sw=g.net[hi],k=Math.sin(sw*14)*sw*7;X.stroke
   for(let i=0;i<=6;i++){X.beginPath();X.moveTo(hp.cx-RIMH+i*(RIMH/3),RIMY+2);X.lineTo(hp.cx-18+i*6+k*(i/6-.5),RIMY+42+sw*8);X.stroke()}
   for(let r=1;r<=2;r++){X.beginPath();const w=RIMH-r*4.5;X.moveTo(hp.cx-w,RIMY+r*14);X.lineTo(hp.cx+w,RIMY+r*14);X.stroke()}
   X.strokeStyle='#ff6a1f';X.lineWidth=5;X.lineCap='round';X.beginPath();X.moveTo(hp.cx-RIMH,RIMY);X.lineTo(hp.cx+RIMH,RIMY);X.stroke();X.lineCap='butt'}
-function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.vx)>30,sw=run?Math.sin(p.ph*6):0,b=g.ball,LH=88;   /* the figure is drawn 88 tall and scaled by PS */
-  X.fillStyle='rgba(0,0,0,.28)';X.beginPath();X.ellipse(x,GY+6,(22-Math.min(12,(GY-y)*.08))*PS,5,0,0,7);X.fill();
+/* v3 player art: outlined cartoon figure with jointed arms and legs, shoes and socks, striped shorts, a trimmed jersey, headband, hair and a face.
+   Everything is drawn in an 88-tall space with the feet at (x,y) and scaled by PS. */
+const INK='#0a1020';
+function limb(pts,w,col){X.lineCap='round';X.lineJoin='round';for(const pass of [[w+3.4,INK],[w,col]]){X.lineWidth=pass[0];X.strokeStyle=pass[1];X.beginPath();X.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)X.lineTo(pts[i],pts[i+1]);X.stroke()}}
+function bend(x1,y1,x2,y2,k){const dx=x2-x1,dy=y2-y1,l=Math.hypot(dx,dy)||1;return [(x1+x2)/2-dy/l*k,(y1+y2)/2+dx/l*k]}
+function shape(pts,fill,lw){X.beginPath();X.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)X.lineTo(pts[i],pts[i+1]);X.closePath();X.fillStyle=fill;X.fill();X.lineJoin='round';X.lineWidth=lw||2;X.strokeStyle=INK;X.stroke()}
+function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.vx)>30,sw=run?Math.sin(p.ph*6):0,b=g.ball,LH=88;
+  X.fillStyle='rgba(0,0,0,.3)';X.beginPath();X.ellipse(x,GY+6,(24-Math.min(13,(GY-y)*.08))*PS,5.5,0,0,7);X.fill();
   if(p.stun>0)X.globalAlpha=.6+.4*Math.sin(g.t*40);
   X.save();X.translate(x,y);X.scale(PS,PS);X.translate(-x,-y);
-  /* legs */
-  X.strokeStyle=T.s;X.lineWidth=9;X.lineCap='round';const hy=y-38,tuck=p.air?Math.min(1,p.jt*4):0;
-  for(const s of [1,-1]){const kx=x+s*sw*13+(p.air?s*5:0),fy=y-tuck*10;X.beginPath();X.moveTo(x+s*5,hy);X.lineTo(kx+f*4,hy+19-tuck*4);X.lineTo(kx-(p.air?f*6:0)+s*sw*4,fy-4);X.stroke();
-    X.strokeStyle='#fff';X.lineWidth=7;X.beginPath();X.moveTo(kx-(p.air?f*6:0)+s*sw*4,fy-3);X.lineTo(kx-(p.air?f*6:0)+s*sw*4+f*8,fy-3);X.stroke();X.strokeStyle=T.s;X.lineWidth=9}
-  /* shorts and jersey */
-  X.fillStyle=T.d;rr(x-15,hy-6,30,20,5);X.fill();X.fillStyle=T.c;rr(x-15,y-76,30,36,7);X.fill();X.fillStyle=T.d;X.fillRect(x-15,y-46,30,3);
-  X.font='900 15px system-ui';X.textAlign='center';X.fillText(p.i?'2':'1',x,y-52);
-  /* arms (hand targets in the figure's own 88-tall space) */
-  X.strokeStyle=T.s;X.lineWidth=8;const sx=x,sy=y-70;let ax,ay,bx,by;
-  if(p.has&&p.shoot&&p.air){ax=bx=x+f*8/PS;ay=by=y-LH-10}
-  else if(p.air&&!p.has){ax=x+f*8/PS;ay=y-LH-16;bx=x+f*2;by=y-LH-8}
-  else if(p.has){ax=x+(b.x-f*4-x)/PS;ay=y+(Math.min(b.y-6,y-34*PS)-y)/PS;bx=x-f*10;by=y-44}
-  else{ax=x+f*24;ay=y-62-Math.abs(sw)*4;bx=x+f*14;by=y-84}
-  X.beginPath();X.moveTo(sx+f*8,sy);X.lineTo(ax,ay);X.stroke();X.beginPath();X.moveTo(sx-f*6,sy);X.lineTo(bx,by);X.stroke();
-  /* head */
-  X.fillStyle=T.s;X.beginPath();X.arc(x+f*2,y-82,12,0,7);X.fill();X.fillStyle=T.d;X.beginPath();X.arc(x+f*2,y-85,12,Math.PI,0);X.fill();X.fillStyle='#111';X.beginPath();X.arc(x+f*7,y-81,1.8,0,7);X.fill();
-  if(p.en<.25&&!p.air){X.fillStyle='rgba(140,210,255,.9)';for(const k of [0,1]){const a=g.t*5+k*2.1;X.beginPath();X.arc(x-f*(10+k*6),y-92+((a%1)*10),2,0,7);X.fill()}}   /* sweat when out of breath */
+  const up=p.gath||p.pump>0||(p.shoot&&p.air),lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*4,bob=run?Math.abs(Math.cos(p.ph*6))*1.6:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*4:0;
+  const hipY=y-39+crouch-bob*.3,shY=y-71+crouch-bob,hx=x+lean+f*1.5,hy=y-85+crouch-bob;
+  /* hand targets (in the figure's own space) */
+  let ax,ay,bx,by;
+  if(p.has&&up){ax=x+(b.x-f*3-x)/PS;ay=y+(b.y+5-y)/PS;bx=x+(b.x+f*5-x)/PS;by=y+(b.y+3-y)/PS}
+  else if(p.air&&!p.has){ax=x+f*8/PS;ay=y-LH-15;bx=x+f*1;by=y-LH-7}
+  else if(p.has){ax=x+(b.x-f*4-x)/PS;ay=y+(Math.min(b.y-7,y-30*PS)-y)/PS;bx=x-f*13;by=y-42+sw*3}
+  else if(p.air){ax=x+f*14;ay=y-58;bx=x-f*12;by=y-52}
+  else{ax=x+f*23;ay=y-60-Math.abs(sw)*3;bx=x+f*15;by=y-80}
+  const sF=[x+lean+f*11,shY+2],sB=[x+lean-f*10,shY+2];
+  const arm=(S,hx2,hy2,k,dark)=>{const e=bend(S[0],S[1],hx2,hy2,k);limb([S[0],S[1],e[0],e[1],hx2,hy2],6.5,dark?T.s2:T.s);X.beginPath();X.arc(hx2,hy2,4.3,0,7);X.fillStyle=dark?T.s2:T.s;X.fill();X.lineWidth=1.6;X.strokeStyle=INK;X.stroke()};
+  /* back arm, then legs */
+  arm(sB,bx,by,-f*5,true);
+  for(const s of [-1,1]){const fx=p.air?x+s*7-f*5*tuck:x+s*4+s*sw*15,fy=p.air?y-3-tuck*9:y-3-Math.max(0,s*sw*f)*7,hp=[x+s*5,hipY],k=bend(hp[0],hp[1],fx,fy,-f*(p.air?9:5+Math.abs(sw)*5)),col=s<0?T.s2:T.s;
+    limb([hp[0],hp[1],k[0],k[1],fx,fy],8,col);
+    const sx0=fx+(k[0]-fx)*.3,sy0=fy+(k[1]-fy)*.3;limb([sx0,sy0,fx,fy],7,'#f4f7fb');          /* sock */
+    X.beginPath();X.moveTo(fx-f*6,fy+3.5);X.lineTo(fx-f*6,fy-2);X.quadraticCurveTo(fx-f*2,fy-5,fx+f*4,fy-2.5);X.quadraticCurveTo(fx+f*11,fy-1,fx+f*11,fy+3.5);X.closePath();
+    X.fillStyle='#ffffff';X.fill();X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();X.fillStyle=T.c;X.fillRect(Math.min(fx-f*2,fx+f*3),fy-1.5,5,3);X.fillStyle=INK;X.fillRect(Math.min(fx-f*6,fx+f*11),fy+2.2,17,1.6)}
+  /* shorts */
+  shape([x-13+lean*.4,hipY-9,x+13+lean*.4,hipY-9,x+16,hipY+11,x+2.5,hipY+11,x,hipY+4,x-2.5,hipY+11,x-16,hipY+11],T.d);
+  X.fillStyle=T.c;X.fillRect(x+f*11.5-1.5,hipY-7,3,16);X.fillStyle=T.c2;X.fillRect(x-13+lean*.4,hipY-9.5,26,2.6);
+  /* jersey: wider at the shoulders, trim at the neck and arm holes */
+  X.beginPath();X.moveTo(x-12+lean*.4,hipY-8);X.lineTo(x+12+lean*.4,hipY-8);X.lineTo(x+16+lean,shY+7);X.quadraticCurveTo(x+16+lean,shY-2,x+8+lean,shY-3);X.lineTo(x-8+lean,shY-3);X.quadraticCurveTo(x-16+lean,shY-2,x-16+lean,shY+7);X.closePath();
+  const jg=X.createLinearGradient(x-16,0,x+16,0);jg.addColorStop(f>0?0:1,T.c);jg.addColorStop(f>0?1:0,T.c2);X.fillStyle=jg;X.fill();X.lineWidth=2;X.strokeStyle=INK;X.lineJoin='round';X.stroke();
+  X.strokeStyle=T.d;X.lineWidth=2.4;X.beginPath();X.moveTo(x-6+lean,shY-2.5);X.quadraticCurveTo(x+lean,shY+5,x+6+lean,shY-2.5);X.stroke();
+  X.beginPath();X.moveTo(x-15.5+lean,shY+8);X.lineTo(x-13+lean*.5,hipY-9);X.moveTo(x+15.5+lean,shY+8);X.lineTo(x+13+lean*.5,hipY-9);X.lineWidth=1.6;X.stroke();
+  X.font='900 15px system-ui';X.textAlign='center';X.lineWidth=3;X.strokeStyle=T.c2;X.strokeText(T.num,x+lean*.7,shY+24);X.fillStyle=T.d;X.fillText(T.num,x+lean*.7,shY+24);
+  /* neck and head */
+  X.fillStyle=T.s2;X.fillRect(hx-4,shY-8,8,7);
+  X.beginPath();X.arc(hx-f*11,hy+2,3.2,0,7);X.fillStyle=T.s2;X.fill();X.lineWidth=1.5;X.strokeStyle=INK;X.stroke();                      /* ear */
+  X.beginPath();X.arc(hx,hy,12.5,0,7);X.fillStyle=T.s;X.fill();X.lineWidth=2;X.strokeStyle=INK;X.stroke();
+  X.save();X.beginPath();X.arc(hx,hy,12.5,0,7);X.clip();X.fillStyle=T.hair;X.fillRect(hx-14,hy-14,28,9.5);X.fillRect(hx-f*14,hy-14,f*7,17);X.fillStyle=T.c;X.fillRect(hx-14,hy-5.5,28,3.6);X.restore();
+  X.fillStyle=T.hair;X.fillRect(hx-9,hy-15.5,18,4);X.beginPath();X.arc(hx,hy,12.5,0,7);X.lineWidth=2;X.strokeStyle=INK;X.stroke();
+  X.fillStyle='#fff';X.beginPath();X.ellipse(hx+f*6,hy+1.5,2.9,3.2,0,0,7);X.fill();X.fillStyle=INK;X.beginPath();X.arc(hx+f*7,hy+1.8,1.7,0,7);X.fill();
+  X.strokeStyle=INK;X.lineWidth=1.6;X.lineCap='round';X.beginPath();X.moveTo(hx+f*3,hy-2.8);X.lineTo(hx+f*9,hy-(p.has&&up||(p.air&&!p.has)?4.4:2.2));X.stroke();
+  X.beginPath();if(p.en<.25){X.arc(hx+f*7,hy+8,2,0,7)}else{X.moveTo(hx+f*4.5,hy+7.2);X.quadraticCurveTo(hx+f*7.5,hy+8.6,hx+f*10,hy+6.6)}X.stroke();
+  if(p.en<.25&&!p.air){X.fillStyle='rgba(140,210,255,.95)';for(const k of [0,1]){const a=(g.t*1.6+k*.5)%1;X.beginPath();X.arc(hx-f*(9+k*5),hy-6+a*14,1.9,0,7);X.fill()}}   /* sweat when out of breath */
+  /* front arm on top */
+  arm(sF,ax,ay,f*5,false);
   X.restore();X.lineCap='butt';X.globalAlpha=1;
   /* shot meter: the white mark follows your jump up and back down; let go while it is in the green band at the very top */
-  if(p.shoot&&p.has){const mx=x-f*(PW+24),mh=78,my=y-PH-2,hm=p.ap*p.ap*PG/2,k=Math.max(0,Math.min(1,(GY-y)/hm));X.fillStyle='rgba(4,8,16,.78)';rr(mx-7,my-3,14,mh+6,6);X.fill();
+  if(p.shoot&&p.has){const mx=x-f*(PW+26),mh=78,my=y-PH-2,hm=p.ap*p.ap*PG/2,k=Math.max(0,Math.min(1,(GY-y)/hm));X.fillStyle='rgba(4,8,16,.78)';rr(mx-7,my-3,14,mh+6,6);X.fill();
     X.fillStyle='#3DFF9A';rr(mx-5,my,10,mh*.13,3);X.fill();X.fillStyle=Math.abs(p.jt-p.ap)<.042?'#3DFF9A':'#fff';X.fillRect(mx-8,my+mh*(1-k)-2.5,16,5)}
-  if(!p.has&&p.st>.08){X.fillStyle='rgba(4,8,16,.7)';rr(x-20,y-PH-24,40,6,3);X.fill();X.fillStyle=T.c;rr(x-20,y-PH-24,40*Math.min(1,p.st/.5),6,3);X.fill()}
+  if(!p.has&&p.st>.15){X.fillStyle='rgba(4,8,16,.7)';rr(x-20,y-PH-24,40,6,3);X.fill();X.fillStyle=T.c;rr(x-20,y-PH-24,40*Math.min(1,p.st/STEAL),6,3);X.fill()}
   /* energy bar under the feet */
   X.fillStyle='rgba(4,8,16,.6)';rr(x-24,GY+13,48,6,3);X.fill();X.fillStyle=p.en<.25?'#ff6a7f':p.en<.5?'#FFC23D':'#3DFF9A';if(p.en>.02){rr(x-24,GY+13,48*p.en,6,3);X.fill()}}
 function drawBall(){const b=g.ball;X.fillStyle='rgba(0,0,0,.25)';X.beginPath();X.ellipse(b.x,GY+6,13-Math.min(7,(GY-b.y)*.02),4,0,0,7);X.fill();
@@ -350,7 +392,7 @@ function onEnd(){const a=g.score[0],b=g.score[1],two=OPT.mode==='2p',s=g.stat;
 function seg(id,key,cast){const el=document.getElementById(id);const paint=()=>{el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(cast(b.dataset.v)===OPT[key])));document.getElementById('w-diff').style.display=OPT.mode==='ai'?'':'none';how()};
   el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;OPT[key]=cast(b.dataset.v);paint()});paint()}
 function how(){const touch=matchMedia('(pointer:coarse)').matches,two=OPT.mode==='2p';
-  document.getElementById('how').innerHTML=`<b>With the ball:</b> hold JUMP to go up and let go to shoot. Let go at the very top of your jump (the green mark) for a perfect shot. Jump next to the rim to dunk. Behind the line is worth 3.<br><b>Without the ball:</b> JUMP to block, and tap JUMP again in the air for a second jump. Stand in front of the dribbler to steal.<br><b>Energy:</b> running and jumping use it up; stand still to get it back. When it is low you are slower, jump lower and shoot worse.<br><b>Controls:</b> ${touch?(two?'Player 1 uses the buttons on the left, Player 2 the buttons on the right.':'◀ ▶ on the left, JUMP on the right.'):(two?'Player 1: A, D and W. Player 2: ←, → and ↑.':'A / D or ← / → to move, W, ↑ or Space to jump. P pauses.')}`}
+  document.getElementById('how').innerHTML=`<b>With the ball:</b> hold JUMP to go up and let go to shoot. Let go at the very top of your jump (the green mark) for a perfect shot. A quick tap of JUMP is a pump fake. Jump next to the rim to dunk. Behind the line is worth 3.<br><b>Without the ball:</b> JUMP to block, and tap JUMP again in the air for a second jump. Stay right in front of the dribbler long enough and you steal it.<br><b>Energy:</b> running and jumping use it up; stand still to get it back. When it is low you are slower, jump lower and shoot worse.<br><b>Controls:</b> ${touch?(two?'Player 1 uses the buttons on the left, Player 2 the buttons on the right.':'◀ ▶ on the left, JUMP on the right.'):(two?'Player 1: A, D and W. Player 2: ←, → and ↑.':'A / D or ← / → to move, W, ↑ or Space to jump. P pauses.')}`}
 seg('s-mode','mode',v=>v);seg('s-diff','diff',v=>v);seg('s-len','len',v=>+v);
 document.getElementById('play').addEventListener('click',start);document.getElementById('again').addEventListener('click',start);
 document.getElementById('tomenu').addEventListener('click',toMenu);document.getElementById('quit').addEventListener('click',toMenu);document.getElementById('resume').addEventListener('click',togglePause);document.getElementById('pz').addEventListener('click',togglePause);
@@ -367,7 +409,7 @@ window.__hb={get g(){return g},sim(sec,d0,d1){OPT.mode='ai';newGame({mode:'ai',d
   const r={score:g.score.slice(),stat:g.stat,ot:g.ot,t:g.t};g=null;return r},
   /* a perfectly timed, open jump shot from x: does it go in? (it always should) */
   shot(x,W,off){newGame({mode:'ai',diff:'med',len:60},W||1100);g._off=off;g.hold=0;g.started=true;const p=g.P[0],o=g.P[1],b=g.ball;o.x=60;p.x=x;p.has=true;Object.assign(b,{st:'held',own:0,live:false,cd:0});
-    let t=0,pressed=false;while(t<4&&g.phase==='live'){const j=!pressed||(p.air&&p.jt<p.ap-TICK/2);pressed=true;step(TICK,[{l:false,r:false,j},NOIN]);t+=TICK}
+    let t=0;while(t<4&&g.phase==='live'){const j=p.has&&(!p.air||p.jt<p.ap-TICK/2);step(TICK,[{l:false,r:false,j},NOIN]);t+=TICK}
     const r={in:g.score[0],pts:b.pts,dunk:b.dunk};g=null;return r}};
 </script>
 </body>
