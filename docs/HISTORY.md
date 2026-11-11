@@ -377,3 +377,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - OVR (Nov 10, owner): manual overrides restored for 17 entries (see MANUAL in make_ovr.py): Bessler 80, T. Williams WR 87, Dorros WR 89, Cox QB 90, Holmes QB 93, Dietrich 94, D. Gonzalez RB 95, Gardini 95, Benitez 96, Dunn DB 96, Labrum 96, Eleby WR 97, L. Nelson DL 98, Weddle QB 94 / DB 99, Polamalu RB 99, Parker Rab DB 83.
 - OVR (Nov 10, owner): football per-game and total points are position-adjusted (z-score within position: zs/zt) and ranked against all football players; Combined percentile is across all players in the sport for football too. Manual overrides, QB +3, DB x0.97 kept.
 - OVR manual (Nov 10, owner): Nicolas Bardaro TE 98, Hezekiah Manuel QB 98, Neke Letuli RB 98.
+- OVR (Nov 10, owner): football 99 cap set to 8 (Notes B11) so the spots Bardaro and Letuli left stay empty.

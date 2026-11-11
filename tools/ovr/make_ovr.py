@@ -168,7 +168,7 @@ def build(sport):
   nt['A8'] = 'Weight: season total points'; nt['B8'] = 0.282
   nt['A9'] = 'Weight: rank in his position\'s key stats'; nt['B9'] = 0.282
   nt['A10'] = 'Weight: schedule strength'; nt['B10'] = 0.06
-  nt['A11'] = 'Most players allowed at the ceiling (99)'; nt['B11'] = 10
+  nt['A11'] = 'Most players allowed at the ceiling (99)'; nt['B11'] = 8 if sport == 'Football' else 10   # football: 8 (owner, Nov 10: the two spots Bardaro and Letuli left stay empty)
   nt['A12'] = 'QB bonus (OVR points added to every QB)'; nt['B12'] = 3 if sport == 'Football' else 0
   nt['A13'] = 'DB adjustment (every DB OVR is multiplied by this; 0.97 = 3% lower)'; nt['B13'] = 0.97 if sport == 'Football' else 1
   for r in (3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13): nt.cell(r, 2).font = Font(name=AR, color='0000FF'); nt.cell(r, 2).fill = PatternFill('solid', fgColor='FFFF00'); nt.cell(r, 1).font = Font(name=AR)
