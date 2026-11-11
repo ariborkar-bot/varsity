@@ -143,35 +143,37 @@ def build(sport):
    'Football: Pts per game = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
    'Basketball: Pts per game = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
    'Games = games with stats behind the rating (football 2026, basketball 2025-26). Few games = low confidence.',
-   'One tab per position (best OVR first, # = rank within the position); the last tab lists everyone. Position estimated = the app had no DL/LB/DB position for this defender, so it was guessed from his stats. Manual OVR = set by the owner (yellow Raw OVR cell). Status Out = listed as out in the app this week. Basketball grades are 2026-27 (moved up one year); 0 = unknown.',
+   'One tab per position (best OVR first, # = rank within the position, highest OVR first); the last tab lists everyone. Position estimated = the app had no DL/LB/DB position for this defender, so it was guessed from his stats. Manual OVR = set by the owner (yellow Raw OVR cell). Status Out = listed as out in the app this week. Basketball grades are 2026-27 (moved up one year); 0 = unknown.',
    'Source: MaxPreps box scores and season stats already in the app (stats.js, tools/data/bb_2526_players.txt). Built by tools/ovr/make_ovr.py.']
   yr = '2026 season' if sport == 'Football' else '2025-26 season (the latest basketball stats; 2026-27 has not started)'
   notes = [allnotes[0], allnotes[1], allnotes[2 if sport == 'Football' else 3], 'Ratings use only this season (%s). Season total fantasy pts = fantasy points per game x games (basketball totals use the 2025-26 averages).' % yr] + allnotes[4:]
   for i, t in enumerate(notes): c = nt.cell(13 + i, 1, t); c.font = Font(name=AR); c.alignment = Alignment(wrap_text=True, vertical='top'); nt.merge_cells(start_row=13 + i, start_column=1, end_row=13 + i, end_column=6); nt.row_dimensions[13 + i].height = 48
   nt.column_dimensions['A'].width = 40; [nt.column_dimensions[c].__setattr__('width', 14) for c in 'BCDEF']
-  H = ['#', 'Name', 'School', 'Sport', 'Pos', 'Grade', 'Games', 'Fantasy pts per game (adj.)', 'Season total fantasy pts', 'Per-game percentile', 'Total percentile', 'Position-stats percentile', 'Schedule-strength percentile', 'Weighted score', 'Combined percentile', 'Raw OVR (before cap)', 'OVR', 'Status', 'Position stats (season totals)']
-  W = [6, 24, 26, 11, 7, 7, 8, 16, 16, 14, 13, 16, 17, 12, 14, 14, 8, 9, 42]
+  H = ['#', 'Name', 'OVR', 'School', 'Sport', 'Pos', 'Grade', 'Games', 'Fantasy pts per game (adj.)', 'Season total fantasy pts', 'Per-game percentile', 'Total percentile', 'Position-stats percentile', 'Schedule-strength percentile', 'Weighted score', 'Combined percentile', 'Raw OVR (before cap)', 'Status', 'Position stats (season totals)']
+  W = [6, 24, 8, 26, 11, 7, 7, 8, 16, 16, 14, 13, 16, 17, 12, 14, 14, 9, 42]
   NN = len([r for r in rows if r['sport'] == sport]) + 1   # last data row of the All players tab
   def pctf(n):
       # where the weighted score ranks among his peers (football: same position; basketball: all players), ties split; read from the All players tab
       A = "'All players'!"
       if sport == 'Football':
-          return (f'=(COUNTIFS({A}$E$2:$E${NN},E{n},{A}$N$2:$N${NN},"<"&N{n})+0.5*COUNTIFS({A}$E$2:$E${NN},E{n},{A}$N$2:$N${NN},N{n}))/COUNTIFS({A}$E$2:$E${NN},E{n})')
-      return f'=(COUNTIF({A}$N$2:$N${NN},"<"&N{n})+0.5*COUNTIF({A}$N$2:$N${NN},N{n}))/COUNT({A}$N$2:$N${NN})'
+          return (f'=(COUNTIFS({A}$F$2:$F${NN},F{n},{A}$O$2:$O${NN},"<"&O{n})+0.5*COUNTIFS({A}$F$2:$F${NN},F{n},{A}$O$2:$O${NN},O{n}))/COUNTIFS({A}$F$2:$F${NN},F{n})')
+      return f'=(COUNTIF({A}$O$2:$O${NN},"<"&O{n})+0.5*COUNTIF({A}$O$2:$O${NN},O{n}))/COUNT({A}$O$2:$O${NN})'
   def sheet(title, items):
       ws = wb.create_sheet(title); ws.append(H)
       for c in ws[1]: c.font = hdr; c.fill = fill; c.alignment = Alignment(horizontal='center')
-      items = sorted(items, key=lambda r: (-(.376 * r['pcg'] + .282 * r['pct_t'] + .282 * r['pct_k'] + .06 * r['pct_s']), r['name']))
+      wsc = lambda r: .376 * r['pcg'] + .282 * r['pct_t'] + .282 * r['pct_k'] + .06 * r['pct_s']
+      # rows are listed highest OVR first (final OVR from the first, recalculated pass: see ORDER), ties by Raw OVR
+      items = sorted(items, key=lambda r: (-ORDER.get((r['name'], r['school'], r['pos'], r['score'], r['tot']), (0, 0))[0], -ORDER.get((r['name'], r['school'], r['pos'], r['score'], r['tot']), (0, 0))[1], -wsc(r), r['name']))
       for i, r in enumerate(items, 1):
           n = i + 1
-          ws.append([i, r['name'], r['school'], r['sport'], r['pos'], r['gr'], r['gp'], r['score'], r['tot'], round(r['pcg'], 4), round(r['pct_t'], 4), round(r['pct_k'], 4), round(r['pct_s'], 4), f'=(Notes!$B$7*J{n}+Notes!$B$8*K{n}+Notes!$B$9*L{n}+Notes!$B$10*M{n})/(Notes!$B$7+Notes!$B$8+Notes!$B$9+Notes!$B$10)', pctf(n), f'=Notes!$B$5+Notes!$B$6*NORMSINV(O{n})' + ('+Notes!$B$12' if r['pos'] == 'QB' else ''), f"=MAX(Notes!$B$3,MIN(IF(COUNTIF('All players'!$P$2:$P${NN},\">\"&P{n})<Notes!$B$11,Notes!$B$4,Notes!$B$4-1),ROUND(P{n},0)))", r['status'], r['keys']])
+          ws.append([i, r['name'], f"=MAX(Notes!$B$3,MIN(IF(COUNTIF('All players'!$Q$2:$Q${NN},\">\"&Q{n})<Notes!$B$11,Notes!$B$4,Notes!$B$4-1),ROUND(Q{n},0)))", r['school'], r['sport'], r['pos'], r['gr'], r['gp'], r['score'], r['tot'], round(r['pcg'], 4), round(r['pct_t'], 4), round(r['pct_k'], 4), round(r['pct_s'], 4), f'=(Notes!$B$7*K{n}+Notes!$B$8*L{n}+Notes!$B$9*M{n}+Notes!$B$10*N{n})/(Notes!$B$7+Notes!$B$8+Notes!$B$9+Notes!$B$10)', pctf(n), f'=Notes!$B$5+Notes!$B$6*NORMSINV(P{n})' + ('+Notes!$B$12' if r['pos'] == 'QB' else ''), r['status'], r['keys']])
       for row in ws.iter_rows(min_row=2):
           for c in row: c.font = Font(name=AR)
-          row[16].font = Font(name=AR, bold=True); row[15].number_format = '0.0'
-          mk = MANUAL.get((row[1].value, row[2].value, row[4].value))
-          if mk: row[15].value = mk[0]; row[15].fill = PatternFill('solid', start_color='FFFF00'); row[17].value = ' · '.join(x for x in (row[17].value, 'Manual OVR: ' + mk[1]) if x)
+          row[2].font = Font(name=AR, bold=True); row[2].alignment = Alignment(horizontal='center'); row[16].number_format = '0.0'
+          mk = MANUAL.get((row[1].value, row[3].value, row[5].value))
+          if mk: row[16].value = mk[0]; row[16].fill = PatternFill('solid', start_color='FFFF00'); row[17].value = ' · '.join(x for x in (row[17].value, 'Manual OVR: ' + mk[1]) if x)
       for k, w in enumerate(W, 1): ws.column_dimensions[get_column_letter(k)].width = w
-      ws.freeze_panes = 'C2'; ws.auto_filter.ref = f'A1:S{len(items) + 1}'
+      ws.freeze_panes = 'D2'; ws.auto_filter.ref = f'A1:S{len(items) + 1}'
   order = ['QB', 'RB', 'WR', 'TE', 'DL', 'LB', 'DB', 'K'] if sport == 'Football' else ['PG', 'SG', 'SF', 'PF', 'C']
   mine = [r for r in rows if r['sport'] == sport]
   for pos in order:
@@ -182,4 +184,16 @@ def build(sport):
   wb.save(os.path.join(OUTD, 'varsity_%s_ovr.xlsx' % sport.lower()))
 
 os.makedirs(OUTD, exist_ok=True)
-build('Football'); build('Basketball')
+# Two passes so rows can be listed by final OVR (a formula): build, recalculate with LibreOffice, read each OVR, build again in that order.
+import glob, subprocess
+from openpyxl import load_workbook
+ORDER = {}
+RECALC = os.environ.get('RECALC') or (glob.glob(os.path.expanduser('~/.claude/skills/synced/*/xlsx/scripts/recalc.py')) or [''])[0]
+for sport in ('Football', 'Basketball'):
+    build(sport)
+    f = os.path.join(OUTD, 'varsity_%s_ovr.xlsx' % sport.lower())
+    if not RECALC: print('no recalc.py: rows stay in weighted-score order'); continue
+    subprocess.run([sys.executable, RECALC, f, '900'], check=True, capture_output=True)
+    for row in load_workbook(f, data_only=True)['All players'].iter_rows(min_row=2, values_only=True):
+        ORDER[(row[1], row[3], row[5], row[8], row[9])] = (row[2] or 0, row[16] or 0)
+    build(sport)

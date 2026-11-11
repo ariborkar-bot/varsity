@@ -369,3 +369,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - OVR manual: Caden Bessler 80, Zachary Benitez QB 96, Thomas Dietrich QB 94 (Nov 10, owner).
 - OVR: QB bonus +3 on Raw OVR (Notes B12) since QBs ranked lower than other positions (Nov 10, owner).
 - OVR manual: QBs Dax Labrum 97, Gaige Weddle 94, Timothy Cox 90, Santonio Urena 91 (Nov 10, owner).
+- OVR sheets: OVR is column C (next to Name) and every tab lists highest OVR first (make_ovr.py builds twice: recalc, read OVR, rebuild in that order) (Nov 10, owner).
