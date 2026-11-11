@@ -229,11 +229,13 @@ for sport in ('Football', 'Basketball'):
     for row in load_workbook(f, data_only=True)['All players'].iter_rows(min_row=2, values_only=True):
         ORDER[(row[1], row[3], row[5], row[8], row[9])] = (row[2] or 0, row[16] or 0)
     build(sport)
-# ovr.js for the app (v414): window.OVR_ALL = {fb:{player key: OVR}, bb:{...}}; copy it to the repo root after a rebuild.
+# ovr.js for the app: window.OVR_ALL = {fb:{player key: [OVR, per-game pct, season-total pct, position-stats pct, schedule pct]}, bb:{...}} (v434: the four
+# percentiles, 1-99, feed the bars on the back of a card); copy it to the repo root after a rebuild.
 if ORDER:
     out = {'fb': {}, 'bb': {}}
     for r in rows:
         v = ORDER.get((r['name'], r['school'], r['pos'], r['score'], r['tot']))
-        if v: out['fb' if r['sport'] == 'Football' else 'bb'][r['key']] = int(v[0])
+        pc = lambda x: max(1, min(99, int(round(x * 100))))
+        if v: out['fb' if r['sport'] == 'Football' else 'bb'][r['key']] = [int(v[0]), pc(r['pcg']), pc(r['pct_t']), pc(r['pct_k']), pc(r['pct_s'])]
     open(os.path.join(OUTD, 'ovr.js'), 'w').write('/* Varsity player overalls (OVR), written by tools/ovr/make_ovr.py. Do not edit by hand. */\nwindow.OVR_ALL=' + json.dumps(out, separators=(',', ':')) + ';\n')
     print('ovr.js', len(out['fb']), len(out['bb']))
