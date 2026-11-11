@@ -436,3 +436,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v431
 - CARD_FIX `zh-spot-1`: a Spotlight pack (special player cards only) gift for Zed Hornby.
+
+## v432
+- Locker > Cards: search box (`#lk-q`, name/school), team select (`#lk-sc`) and position select (`#lk-ps`) filter your cards (`UI.lkQ/lkSc/lkPs`, built from `ids0`; options list only teams/positions you own; Clear button `lkFClr`; duos match either teammate, team cards ignore position).
