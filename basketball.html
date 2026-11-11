@@ -2690,6 +2690,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .adv-p{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}.adv-p>b{font:900 1.25rem/1 var(--f-display,inherit);color:#4DE6A0}.adv-p small{font-size:.68rem}
 .adv-h{margin:6px 0 0;font:800 .8rem/1 var(--f-display,inherit);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.adv-n{display:block}
 
+.adv-dd{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:800 .85rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase}.adv-dd i{font-style:normal;font-size:1rem}
 /* v423: flip + back of single player cards (card view) */
 .cv-card>.pc-flip{display:block;position:relative;transform-style:preserve-3d;transition:transform .12s ease-out;will-change:transform;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pc-flipin{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.25,.45,1)}.pc-flip.fl .pc-flipin{transform:rotateY(180deg)}
@@ -3404,7 +3405,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v445 · Nov 10';
+const APP_BUILD='v446 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6389,11 +6390,11 @@ function topCardsList(){const u=ME.uid,m=cardsOf(u),out=[],ro={m:0,l:1,e:2,r:3,u
   return out.sort((a,b)=>b.v-a.v||(ro[a.r]??-1)-(ro[b.r]??-1)||cardInfo(a.id).name.localeCompare(cardInfo(b.id).name))}
 function advisorHTML(){
   if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return '';
-  const N=UI.tcN||8,L=topCardsList();
+  const L=topCardsList(),N=UI.tcOpen?L.length:3;
   const row=(x,i)=>{const c=cardInfo(x.id),R=RAR[x.r]||RAR.c;
     return `<li class="adv-r" style="--rc:${R.c}"><span class="adv-k">${i+1}</span><span class="adv-a">${x.id.startsWith('ac:')?achArt(x.id,58):cardArt(x.id,x.r,c.duo?72:58)}</span><div class="adv-i"><b>${esc(c.name)}</b><small style="color:${R.c}">${x.r==='x'?'Immortal':R.n}${c.spc?' · '+esc(SPEC[c.spc].n):c.duo?' Duo':c.team?' team card':''}</small><span class="adv-m">${esc(x.w)}</span></div><div class="adv-p"><b>${esc(x.t)}</b></div></li>`};
   return `<section class="card adv"><div class="qh"><h3>Top Cards</h3><span class="muted">Best advantage in your Locker</span></div>
-    ${L.length?`<ol class="adv-l">${L.slice(0,N).map(row).join('')}</ol>${L.length>N?`<button type="button" class="btn ghost sm" data-act="tcMore">Show more (${L.length-N})</button>`:''}`:'<p class="muted">You have no cards yet. Open packs in the Shop to get some.</p>'}
+    ${L.length?`<ol class="adv-l">${L.slice(0,N).map(row).join('')}</ol>${L.length>3?`<button type="button" class="adv-dd" data-act="tcMore" aria-expanded="${!!UI.tcOpen}"><span>${UI.tcOpen?'Hide the rest':'See all '+L.length+' cards'}</span><i aria-hidden="true">${UI.tcOpen?'▴':'▾'}</i></button>`:''}`:'<p class="muted">You have no cards yet. Open packs in the Shop to get some.</p>'}
     <small class="muted adv-n">Each card adds this much to your winnings when you win a bet it applies to. Best to worst.</small></section>`}
 function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
@@ -9960,7 +9961,7 @@ document.addEventListener('click',async e=>{
     else{if(!x)return;if(!L[id]&&Object.keys(L).length>=SL_MAX){say('A parlay can have up to '+SL_MAX+' picks.');return}
       Object.keys(L).forEach(o=>{if(o!==id&&pm[o]&&pm[o].k===x.k)delete L[o]});L[id]=t.dataset.s}
     render(true)}
-  else if(a==='tcMore'){UI.tcN=(UI.tcN||8)+10;render(true)}
+  else if(a==='tcMore'){UI.tcOpen=!UI.tcOpen;render(true)}
   else if(a==='slStake'){UI.sl.stake=+t.dataset.v;render(true)}
   else if(a==='slClear'){UI.sl.legs={};render(true)}
   else if(a==='slGo'){if(needJoin('make a parlay'))return;await slipGo()}
