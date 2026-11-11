@@ -83,7 +83,8 @@ MANUAL = {('Caden Bessler', 'La Jolla Country Day', 'LB'): (80, 'set to 80'), ("
           ('Dax Labrum', 'Santa Fe Christian', 'QB'): (96, 'set to 96'), ('Deandre Eleby', 'Morse', 'WR'): (97, 'set to 97'),
           ('Logan Nelson', 'Madison', 'DL'): (98, 'set to 98'), ('Gaige Weddle', 'Rancho Bernardo', 'QB'): (94, 'set to 94'),
           ('Gaige Weddle', 'Rancho Bernardo', 'DB'): (109, 'set to 99'), ('Paisios Polamalu', 'St. Augustine', 'RB'): (110, 'set to 99'),
-          ('Parker Rab', 'La Jolla Country Day', 'DB'): (83, 'set to 83')}
+          ('Parker Rab', 'La Jolla Country Day', 'DB'): (83, 'set to 83'),
+          ('Nicolas Bardaro', 'La Jolla', 'TE'): (98, 'set to 98'), ('Neke Letuli', 'Oceanside', 'RB'): (98, 'set to 98'), ('Hezekiah Manuel', 'Hoover', 'QB'): (98, 'set to 98')}
 rows = []   # dict(name, school, sport, pos, gr, gp, score, pct, status)
 fb = json.load(open(os.path.join(D, 'fb.json')))
 K = 2
