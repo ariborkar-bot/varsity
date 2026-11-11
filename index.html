@@ -2590,6 +2590,36 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pko-pack.nudge .pko-pk{animation:pkoNudge .4s}
 @keyframes pkoNudge{25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
 .cv-sell{margin-top:10px;align-self:center}
+/* v420 special cards: each style re-skins the shield (frame --fr, face .pc-in, pattern .pc-pt, rays .pc-ry) and adds a name ribbon .sp-tag and a moving layer .sp-fx */
+.pc2 .sp-tag{position:absolute;left:0;right:0;top:0;z-index:6;text-align:center;font:900 4.4em/1 var(--f-display,inherit);letter-spacing:.16em;text-transform:uppercase;padding:2.4em 0 1.6em;color:var(--sk,#fff);background:linear-gradient(180deg,rgba(0,0,0,.72),transparent);text-shadow:0 0 1em var(--sk,#fff);font-style:normal}
+.pc2.pc-s .sp-tag{display:none}.pc2 .sp-fx{position:absolute;inset:0;z-index:2;pointer-events:none}
+.pc2.spc{--rc:var(--sk)}
+.pc2.spc .pc-o{top:11em}.pc2.spc.pc-xl .pc-a{top:10em}.pc2.spc:not(.pc-xl):not(.pc-s) .pc-a{top:12em}
+.pc2.sp-prizm{--fr:conic-gradient(from 0deg,#ff6bd6,#7cf3ff,#7dffb0,#fff27a,#ff9a6b,#ff6bd6)}.pc2.sp-prizm .pc-f{animation:spSpin 6s linear infinite}.pc2.sp-prizm .pc-in{background:linear-gradient(135deg,#1a1038,#0a1a3a 55%,#06281f)}
+.pc2.sp-prizm .sp-fx{background:conic-gradient(from 0deg at 30% 20%,rgba(255,107,214,.32),rgba(124,243,255,.32),rgba(125,255,176,.32),rgba(255,242,122,.32),rgba(255,107,214,.32));mix-blend-mode:screen;animation:spHue 5s linear infinite}
+@keyframes spSpin{to{filter:hue-rotate(360deg)}}@keyframes spHue{to{filter:hue-rotate(360deg)}}
+.pc2.sp-ticket{--fr:linear-gradient(150deg,#fff1d6,#ff5a4f 40%,#8a1f18 75%,#fff1d6)}.pc2.sp-ticket .pc-in{background:repeating-linear-gradient(90deg,#2a0d0b 0 7em,#3a1411 7em 14em),#2a0d0b}
+.pc2.sp-ticket .sp-fx{background:radial-gradient(circle at 0 50%,#000 0 3.6em,transparent 3.8em),radial-gradient(circle at 100% 50%,#000 0 3.6em,transparent 3.8em),repeating-linear-gradient(90deg,transparent 0 3em,rgba(255,241,214,.5) 3em 4em) 0 0/100% 1.2em no-repeat;background-position:0 0,0 0,0 92%}
+.pc2.sp-streak{--fr:linear-gradient(180deg,#fff2a8,#ff8a1f 40%,#b8260a 80%)}.pc2.sp-streak .pc-in{background:radial-gradient(90% 55% at 50% 105%,rgba(255,138,31,.85),transparent 70%),linear-gradient(180deg,#2a0b05,#120402)}
+.pc2.sp-streak .sp-fx{background:radial-gradient(circle at 20% 90%,#ffd36b 0 .5em,transparent .7em),radial-gradient(circle at 70% 95%,#ff8a1f 0 .6em,transparent .8em),radial-gradient(circle at 45% 100%,#fff 0 .4em,transparent .6em),radial-gradient(circle at 85% 100%,#ffd36b 0 .5em,transparent .7em);background-size:100% 100%;animation:spEmber 1.6s ease-in infinite}
+@keyframes spEmber{0%{transform:translateY(8%);opacity:0}30%{opacity:1}100%{transform:translateY(-70%);opacity:0}}
+.pc2.sp-playbook{--fr:linear-gradient(150deg,#d7e6ff,#4c8dff 40%,#1c3d86 75%,#d7e6ff)}.pc2.sp-playbook .pc-in{background:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px) 0 0/6em 6em,linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px) 0 0/6em 6em,linear-gradient(180deg,#0d2a66,#071634)}
+.pc2.sp-playbook .sp-fx{background:radial-gradient(circle at 22% 24%,transparent 0 2.2em,rgba(255,255,255,.75) 2.3em 2.9em,transparent 3em),linear-gradient(135deg,transparent 46%,rgba(255,255,255,.7) 47% 49%,transparent 50%) 62% 20%/9em 9em no-repeat,linear-gradient(45deg,transparent 46%,rgba(255,255,255,.7) 47% 49%,transparent 50%) 62% 20%/9em 9em no-repeat,radial-gradient(circle at 80% 60%,transparent 0 2.2em,rgba(255,255,255,.75) 2.3em 2.9em,transparent 3em);opacity:.55}
+.pc2.sp-signature{--fr:linear-gradient(130deg,#fff6cf,#ffc23d 25%,#8a5a12 50%,#ffd86b 75%,#fff6cf)}.pc2.sp-signature .pc-in{background:radial-gradient(110% 60% at 60% 30%,#c79220,transparent 72%),linear-gradient(180deg,#5c410d,#150e03)}
+.pc2.sp-signature .sp-fx{background:linear-gradient(115deg,transparent 40%,rgba(255,246,207,.5) 50%,transparent 60%) 0 0/300% 100%;animation:spFoil 3s linear infinite}.pc2.sp-signature .sp-fx::after{content:"Signed";position:absolute;left:8%;right:8%;top:41%;font:italic 700 13em/1 "Brush Script MT","Segoe Script",cursive;color:rgba(255,246,207,.9);transform:rotate(-9deg);text-shadow:0 0 .3em rgba(0,0,0,.5);text-align:center}
+@keyframes spFoil{to{background-position:-300% 0}}
+.pc2.sp-fnl{--fr:linear-gradient(180deg,#fffbe0,#ffe27a 40%,#8a7416 85%)}.pc2.sp-fnl .pc-in{background:linear-gradient(180deg,#040a1c,#0a1738 70%,#0d2a1c)}
+.pc2.sp-fnl .sp-fx{background:conic-gradient(from 160deg at 18% -6%,transparent 0 6deg,rgba(255,244,190,.55) 8deg,transparent 16deg),conic-gradient(from 160deg at 82% -6%,transparent 0 6deg,rgba(255,244,190,.55) 8deg,transparent 16deg),conic-gradient(from 200deg at 50% -10%,transparent 0 6deg,rgba(255,244,190,.4) 8deg,transparent 16deg);animation:spLamp 3s ease-in-out infinite alternate}
+@keyframes spLamp{from{opacity:.55}to{opacity:1}}
+.pc2.sp-headline{--fr:linear-gradient(150deg,#ffffff,#c9c5b8 40%,#6b675a 75%,#ffffff)}.pc2.sp-headline .pc-in{background:repeating-linear-gradient(0deg,rgba(0,0,0,.07) 0 .6em,transparent .6em 1.8em),#ece8da}
+.pc2.sp-headline .pc-nm,.pc2.sp-headline .pc-n,.pc2.sp-headline .pc-r{color:#14110a!important;background:none!important;-webkit-text-fill-color:#14110a!important;text-shadow:none!important}.pc2.sp-headline .pc-b{background:linear-gradient(180deg,transparent,rgba(236,232,218,.95) 28%)}.pc2.sp-headline .pc-p{color:#14110a;border-color:#14110a}.pc2.sp-headline .pc-g,.pc2.sp-headline .pc-sc{color:#14110a}.pc2.sp-headline .sp-tag{background:#d3202e;color:#fff;text-shadow:none;padding:1.2em 0 1em}.pc2.sp-headline .pc-st b{color:#14110a}.pc2.sp-headline .pc-st i{color:#4a463a}.pc2.sp-headline .pc-st span{background:rgba(20,17,10,.08);border-color:rgba(20,17,10,.35)}
+.pc2.sp-rivalry{--fr:linear-gradient(110deg,#ff2e88 0 49%,#4c8dff 51%)}.pc2.sp-rivalry .pc-in{background:linear-gradient(110deg,#4a0a26 0 49.5%,#0a1d4a 50.5%)}
+.pc2.sp-rivalry .sp-fx{background:linear-gradient(110deg,transparent 47%,#fff 49% 51%,transparent 53%);filter:drop-shadow(0 0 1.4em #fff);animation:spBolt 1.8s steps(2,end) infinite}@keyframes spBolt{0%,70%{opacity:1}80%{opacity:.2}90%{opacity:1}}
+.pc2.sp-arcade{--fr:linear-gradient(120deg,#ff3df2,#38f5ff,#ff3df2)}.pc2.sp-arcade .pc-f{background-size:300% 100%;animation:pc2Fr 2.4s linear infinite}.pc2.sp-arcade .pc-in{background:linear-gradient(rgba(56,245,255,.18) 1px,transparent 1px) 0 100%/6em 6em,linear-gradient(90deg,rgba(255,61,242,.18) 1px,transparent 1px) 0 0/6em 6em,linear-gradient(180deg,#1a0640,#06021a)}
+.pc2.sp-arcade .sp-fx{background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 .35em,transparent .35em .8em)}.pc2.sp-arcade .sp-tag{font-family:"Courier New",monospace;text-shadow:0 0 .8em #38f5ff}
+.cv-back{display:flex;flex-direction:column;gap:6px;margin:6px 0;padding:12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--rc);text-align:left}.cv-back b{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--rc)}.cv-back small{font-size:13px;line-height:1.35}
+@media (prefers-reduced-motion:reduce){.pc2 .sp-fx,.pc2.spc .pc-f{animation:none!important}}
+
 .tp-list{display:grid;gap:10px;margin-top:10px}.tp-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border-left:4px solid var(--rc)}.tp-in{display:flex;flex-direction:column;gap:2px;min-width:0}.tp-pr b{font-size:20px}.tp-bt{display:flex;flex-direction:column;gap:6px}.tp-left{font-variant-numeric:tabular-nums;color:#FFC23D}.tp-st{font-weight:700}
 .tp-sell{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}.tp-s{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;border-bottom:3px solid var(--rc);cursor:pointer}
 .tp-f{display:flex;flex-direction:column;gap:10px;margin:8px 0;text-align:left}.tp-f label{display:flex;flex-direction:column;gap:4px;font-size:13px}.tp-f input,.tp-f select{font:inherit;padding:10px;border-radius:10px}.tp-go{margin-left:6px}
@@ -3177,7 +3207,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v419 · Nov 10';
+const APP_BUILD='v420 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3780,7 +3810,7 @@ const betsOf=u=>((S.picks[u]||{}).bets)||{};
 const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g});return m};
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
-  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+(+rcRec(u).wn||0);
+  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+arcBonus(u)+(+rcRec(u).wn||0);
   Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   Object.values(parlOf(u)).forEach(b=>{const st=+b.stake||0,res=parlResult(b,gm);t-=st;if(res==='won')t+=st+parlWin(b,gm);else if(res==='push')t+=st});
@@ -3810,7 +3840,7 @@ const rwOf=u=>((S.picks[u]||{}).rw)||{};
    challenge, minigame pay, duplicate refunds, gifts received, and winnings on picks and props). Spending tokens or
    losing a wager never lowers it. The current balance (bank) shows next to it and does not affect rank. */
 function earned(u){
-  const gm=gameMap(),v=invOf(u);let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+(+v.dup||0)+(+rcRec(u).wn||0);
+  const gm=gameMap(),v=invOf(u);let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+(+v.dup||0)+arcBonus(u)+(+rcRec(u).wn||0);
   for(const x of giftsIn(u))t+=+x.a||0;
   const win=b=>{const st=+b.stake||0;return (st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100)};
   Object.entries(betsOf(u)).forEach(([id,b])=>{if(betResult(b,gm[id])==='won')t+=win(b)});
@@ -4354,6 +4384,8 @@ const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','th
 const PACKS={
   /* v400 (owner): Accessories pack: 3 pieces of bobblehead gear (arm sleeves, back plates), nothing else */
   gear:{n:'Accessories pack',c:3,tok:300,usd:'$2.99',odds:{c:40,u:30,r:18,e:8,l:3,m:1},g:'',gear:1},
+  /* v420 (owner): Spotlight pack: special player cards only (Prizm, Game Ticket, Hot Streak, Playbook, Signature, Friday Night Lights, Headline, Rivalry, Arcade) */
+  spot:{n:'Spotlight pack',c:3,tok:1800,usd:'$11.99',odds:{e:70,l:24,m:6},g:'',cards:1,spc:1},
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
   player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:''},
   /* v380 (owner): Pick Your Team pack: Pro pack odds, but you pick the team; the card is one of that team's players or its team card. v381: 1 card */
@@ -4526,7 +4558,39 @@ function cardPools(){
 const cardsOf=u=>{const c=invOf(u).cards||{},o={};for(const [id,v] of Object.entries(c))o[id]=typeof v==='string'?{[v]:1}:(v||{});return o};
 const cardVers=(u,id)=>RAR_ORD.filter(r=>(cardsOf(u)[id]||{})[r]);
 const cardR=(u,id)=>{const v=cardVers(u,id);return v.length?v[v.length-1]:''};
-const cardPct=(u,id)=>{const r=cardR(u,id),sc=id.startsWith('tc:')?id.slice(3):((pByKey(id.slice(3))||{}).school||'');return Math.max(r?CARD_PCT[r]:0,id.startsWith('pc:')?achBest(u,id.slice(3)):0)+(sc?bndBoost(u,sc):0)};
+const cardPct=(u,id,ctx)=>{const r=cardR(u,id),sc=id.startsWith('tc:')?id.slice(3):((pByKey(id.slice(3))||{}).school||'');return Math.max(r?CARD_PCT[r]:0,id.startsWith('pc:')?achBest(u,id.slice(3)):0)+(sc?bndBoost(u,sc):0)+(id.startsWith('pc:')?specProp(u,id.slice(3),ctx):id.startsWith('tc:')?specTeam(u,id.slice(3)):0)};
+/* v420 (owner): nine special player cards (ids sc:<style>:<playerKey>, Epic / Legendary / Mythical only). Each style has its own look and its own boost rule.
+   Their boost is added on top of the player's normal card. Hot Streak counts his props you won in a row, Playbook only counts on parlay legs,
+   Friday Night Lights only on Friday games, Headline only on Overs, Rivalry only when his team is away, Ticket and Signature also touch his team's Pick ’em,
+   Arcade pays tokens per daily-challenge day you played. */
+const SPC_R=['e','l','m'];
+const SPEC={
+  prizm:{n:'Prizm',c:'#7CF3FF',pc:{e:20,l:30,m:40},u:'%',w:'Every over/under pick on him',d:'A rainbow refractor. Boosts every pick you make on him, always on.'},
+  ticket:{n:'Game Ticket',c:'#FF5A4F',pc:{e:40,l:60,m:90},u:'%',w:'Pick ’em picks on his team',d:'Admit one. Boosts your Pick ’em picks on his team’s games.'},
+  streak:{n:'Hot Streak',c:'#FF8A1F',pc:{e:8,l:12,m:16},u:'% per win in a row',w:'His props (up to 5 wins in a row)',d:'Heats up. Each prop of his you have won in a row adds the boost, up to five.'},
+  playbook:{n:'Playbook',c:'#4C8DFF',pc:{e:30,l:45,m:70},u:'%',w:'Parlay legs that have him',d:'Drawn up for parlays. Boosts every parlay that has him in it.'},
+  signature:{n:'Signature',c:'#FFC23D',pc:{e:25,l:40,m:60},u:'%',w:'His props, plus a smaller boost on his team’s Pick ’em',d:'Signed and numbered gold. Boosts his props, and a little on his team’s Pick ’em.'},
+  fnl:{n:'Friday Night Lights',c:'#FFE27A',pc:{e:50,l:75,m:110},u:'%',w:'His props in Friday games',d:'Under the lights. A big boost, but only when his game is on a Friday.'},
+  headline:{n:'Headline',c:'#F4F1E8',pc:{e:45,l:70,m:100},u:'%',w:'Over picks on him',d:'Front page. Boosts your Over picks on him.'},
+  rivalry:{n:'Rivalry',c:'#FF2E88',pc:{e:45,l:70,m:100},u:'%',w:'His props when his team is the road team',d:'Road game energy. Boosts his props when his team travels.'},
+  arcade:{n:'Arcade',c:'#C06BFF',pc:{e:2,l:4,m:8},u:' tokens a day',w:'Every day you play the daily challenge',d:'Insert coin. Pays tokens every day you play the daily challenge.'}};
+const SPEC_TEAM={ticket:null,signature:{e:10,l:15,m:25}};
+const SPC_CHANCE=14;   /* % of Epic+ cards in ordinary packs that come out as a special card */
+function specRaw(u,st,key){const c=(invOf(u).cards||{})['sc:'+st+':'+key];if(!c)return '';if(typeof c==='string')return SPC_R.includes(c)?c:'';let r='';for(const x of SPC_R)if(c[x])r=x;return r}
+function specStreak(u,key){const gm=gameMap();let n=0;for(const b of Object.values(propsOf(u)).filter(b=>b&&b.k===key).sort((x,y)=>(+y.at||0)-(+x.at||0))){const res=propResult(b,gm);if(res==='won')n++;else if(res==='lost')break}return Math.min(5,n)}
+function specProp(u,key,ctx){let t=0;const p=pByKey(key),g=ctx&&ctx.game;
+  for(const st of Object.keys(SPEC)){const r=specRaw(u,st,key);if(!r||st==='arcade'||st==='ticket')continue;const v=SPEC[st].pc[r];
+    if(st==='prizm'||st==='signature')t+=v;else if(!ctx)continue;
+    else if(st==='streak')t+=v*specStreak(u,key);
+    else if(st==='playbook'){if(ctx.parl)t+=v}
+    else if(st==='headline'){if(ctx.s==='o')t+=v}
+    else if(st==='fnl'){if(g&&g.d&&new Date(g.d+'T12:00:00').getDay()===5)t+=v}
+    else if(st==='rivalry'){if(g&&p&&g.a===p.school)t+=v}}
+  return t}
+function specTeam(u,school){let t=0;for(const id of Object.keys(invOf(u).cards||{})){if(!id.startsWith('sc:ticket:')&&!id.startsWith('sc:signature:'))continue;const [,st,key]=id.split(':'),p=pByKey(key);if(!p||p.school!==school)continue;const r=specRaw(u,st,key);if(r)t+=st==='ticket'?SPEC.ticket.pc[r]:SPEC_TEAM.signature[r]}return t}
+function arcBonus(u){let t=0;const d=+fgRec(u).days||0;if(!d)return 0;for(const id of Object.keys(invOf(u).cards||{})){if(!id.startsWith('sc:arcade:'))continue;const r=specRaw(u,'arcade',id.split(':')[2]);if(r)t+=SPEC.arcade.pc[r]*d}return t}
+const spcLine=(st,r)=>{const S=SPEC[st];return '+'+S.pc[r]+S.u};
+function rollSpec(){const P=cardPools().pl;if(!P.length)return '';const st=Object.keys(SPEC)[fcRnd(9)];return 'sc:'+st+':'+P[fcRnd(P.length)].slice(3)}
 /* Card Binder (v297): a school's set = its team card + its BND_N best players (by season fantasy points), any version of each.
    Complete one: +BND_TOK tokens once and a permanent +BND_BOOST% on winnings of Pick 'em picks on that team and props on its players
    (added on top of card boosts, saved on the pick as cb). Claimed sets are kept in picks/<uid>.bnd = {school: time}. */
@@ -4699,10 +4763,10 @@ function achInfo(id){const a=achParse(id);if(!a)return {name:'Player',school:'',
 function achArt(id,s=54){const a=achInfo(id),w=Math.round(s*.78);
   return `<span class="tcard tc-x ax-${a.t}" style="width:${w}px;height:${s}px"><b class="tcx-k">${a.k}</b>${av(a.name,a.school,Math.round(s*.34))}<i>${a.w?'WK '+a.w:'SEASON'}</i><u class="tcx-s"></u></span>`}
 const achOwned=u=>Object.keys(cardsOf(u)).filter(id=>id.startsWith('ac:')&&cardsOf(u)[id].x);
-function cardInfo(id){if(id.startsWith('dc:'))return duoInfo(id);if(id.startsWith('ac:')){const a=achInfo(id);return {team:0,ach:1,at:a.t,name:a.name,school:a.school,sub:a.sub,key:a.key,pct:a.pct,line:a.line}}
+function cardInfo(id){if(id.startsWith('dc:'))return duoInfo(id);if(id.startsWith('sc:')){const [,st,key]=id.split(':'),p=pByKey(key);return {team:0,spc:st,name:p?p.name:'Player',school:p?p.school:'',sub:(p?(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school:'')+' · '+(SPEC[st]||{n:''}).n,key:p?p.key:''}}if(id.startsWith('ac:')){const a=achInfo(id);return {team:0,ach:1,at:a.t,name:a.name,school:a.school,sub:a.sub,key:a.key,pct:a.pct,line:a.line}}
   if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
   const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
-function cardArt(id,r,s=54){if(id.startsWith('dc:'))return duoArt(id,r,s);if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
+function cardArt(id,r,s=54){if(id.startsWith('dc:'))return duoArt(id,r,s);if(id.startsWith('sc:')){const st=id.split(':')[1],S=SPEC[st]||SPEC.prizm,h=cardArt('pc:'+id.split(':')[2],r,s);return h.replace('class="tcard pc2 ',`class="tcard pc2 spc sp-${st} `).replace('style="--rc:',`style="--sk:${S.c};--rc:`).replace('<span class="pc-fx">',`<i class="sp-tag">${esc(S.n)}</i><span class="sp-fx"></span><span class="pc-fx">`)}if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
   if(c.team)return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${cutImg(c.school,Math.round(s*.56))||slogo(c.school,Math.round(s*.5))}<i>TEAM</i></span>`;
   /* v415 player card (shield): OVR (ovr.js, from the OVR sheets), position and class top-left, school crest, last name, and on full-size cards the school and
      this season's key stats. Under 80 px tall only the OVR and the crest fit. */
@@ -4744,8 +4808,9 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
   el.innerHTML=`<div class="cv-in" style="--rc:${R.c}"><button type="button" class="cv-x" data-act="cvClose" aria-label="Close">×</button>
     <div class="cv-card">${ach?achArt(id,H):cardArt(id,r,H)}</div>
     ${c.key?`<button type="button" class="cv-name" data-act="cvProfile" data-id="${esc(c.key)}"><b>${esc(c.name)}</b><small>${esc(c.sub||'')} · Tap the name for the profile</small></button>`:`<div class="cv-name"><b>${esc(c.name)}</b><small>${c.team?'Team card':esc(c.sub||'')}</small></div>`}
-    <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>+${ach?c.pct:c.duo?DUO_PCT[r]||0:CARD_PCT[r]||0}%</b><small>${c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
-    ${ach||c.duo?'':`<div class="cv-vs" role="group" aria-label="Versions you own">${RAR_ORD.filter(x=>CARD_PCT[x]).map(x=>`<button type="button" class="cv-v ${own.includes(x)?'on':''}" style="--rc:${RAR[x].c}" ${own.includes(x)?`data-act="cvVer" data-r="${x}"`:'disabled'} aria-pressed="${x===r}">${RAR[x].n}</button>`).join('')}</div>`}
+    <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>${c.spc?spcLine(c.spc,r):'+'+(ach?c.pct:c.duo?DUO_PCT[r]||0:CARD_PCT[r]||0)+'%'}</b><small>${c.spc?esc(SPEC[c.spc].n):c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
+    ${c.spc?`<div class="cv-back"><b>His boost</b><small>${esc(SPEC[c.spc].d)}</small><b>Where it works</b><small>${esc(SPEC[c.spc].w)}</small></div>`:''}
+    ${ach||c.duo?'':`<div class="cv-vs" role="group" aria-label="Versions you own">${RAR_ORD.filter(x=>c.spc?SPC_R.includes(x):CARD_PCT[x]).map(x=>`<button type="button" class="cv-v ${own.includes(x)?'on':''}" style="--rc:${RAR[x].c}" ${own.includes(x)?`data-act="cvVer" data-r="${x}"`:'disabled'} aria-pressed="${x===r}">${RAR[x].n}</button>`).join('')}</div>`}
     ${!ach&&own.includes(r)&&SELL[r]&&ME.mode!=='readonly'&&ME.mode!=='offline'?`<button type="button" class="btn ghost sm cv-sell" data-act="cvSell" data-r="${r}">Sell this ${RAR[r].n} for ${SELL[r]} tokens</button>`:''}</div>`;
   document.body.appendChild(el);const cd=el.querySelector('.cv-card'),art=cd.firstElementChild;
   if(art&&!c.duo){const mv=e=>{const b=cd.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.transform=`rotateY(${(x*22).toFixed(1)}deg) rotateX(${(-y*18).toFixed(1)}deg)`;art.style.setProperty('--mx',((x+.5)*100).toFixed(0)+'%');art.style.setProperty('--my',((y+.5)*100).toFixed(0)+'%')},rs=()=>{art.style.transform='';art.style.removeProperty('--mx');art.style.removeProperty('--my')};
@@ -4846,6 +4911,7 @@ async function packOpen(type,how,day,team){
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
+    if(P.spc||(!P.cos&&!P.gear&&!P.duo&&!P.team&&SPC_R.includes(r)&&fcRnd(100)<SPC_CHANCE)){const cid=rollSpec();if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(P.duo){const cid=team?rollDuoTeam(team):rollDuo();if(cid){const cur=Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(P.team){const cid=rollTeamCard(team);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(fcRnd(10000)<(ACH_CHANCE[type]||0)*100){const aid=rollAch();if(aid){const cur=Object.assign({},cards[aid]),isDup=!!cur.x;if(isDup)dup+=RAR.x.dup;else{cur.x=1;cards[aid]=cur;gotCard=true}got.push({card:aid,r:'x',dup:isDup});continue}}
@@ -5032,6 +5098,7 @@ function packShow(P,got){
     if(g.card.startsWith('pc:'))key=g.card.slice(3);else if(g.card.startsWith('ac:')){const a=achInfo(g.card);key=a&&a.key;pct=a&&a.pct}
     /* v408 (owner): Duo cards and team cards get the walkout too, so every Epic or better card is a walkout */
     if(g.card.startsWith('dc:')){const c=duoInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.full,school:c.school,pos:[c.a,c.b].map(q=>q.key?posOf(q):'').filter(Boolean).join(' + ')||'DUO',k1:'Duo',kind:'duo',on:'on parlays',art:duoArt(g.card,g.r,170),duo:[c.a,c.b]},pct:DUO_PCT[g.r]});continue}
+    if(g.card.startsWith('sc:')){const c=cardInfo(g.card),S=SPEC[c.spc];wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school,pos:S.n.toUpperCase(),k1:S.n,kind:'special',on:S.w.toLowerCase(),art:cardArt(g.card,g.r,170)},pct:S.pc[g.r]});continue}
     if(g.card.startsWith('tc:')){const c=cardInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school||c.name,pos:'TEAM',k1:'Card',kind:'team',on:'on Pick ’em picks',art:cardArt(g.card,g.r,124)}});continue}
     const p=key&&pByKey(key);if(p)wk.push({p,r:g.r,dup:g.dup,pct,k:P.n})}
   /* v416 (owner): only the best card in the pack gets the walkout */
@@ -5042,7 +5109,7 @@ function packShow0(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
   const ORD=['c','u','r','e','l','m','x'],calm=matchMedia('(prefers-reduced-motion: reduce)').matches,key=Object.keys(PACKS).find(k=>PACKS[k]===P)||'rookie';
   const face=g=>{const R=RAR[g.r];if(g.card){const c=cardInfo(g.card);
-      return `${cardArt(g.card,g.r,c.ach?66:c.duo?84:58)}${c.duo?'':`<b>${esc(c.name)}</b>`}<small style="color:${R.c}">${c.ach?esc(c.line):(c.duo?R.n+' duo':R.n+' '+(c.team?'team':'player')+' card')}</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:`+${c.ach?c.pct:c.duo?DUO_PCT[g.r]:CARD_PCT[g.r]}% on ${c.duo?'parlays':c.team?'Pick ’em picks':'his props'}`}</em>`}
+      return `${cardArt(g.card,g.r,c.ach?66:c.duo?84:58)}${c.duo?'':`<b>${esc(c.name)}</b>`}<small style="color:${R.c}">${c.ach?esc(c.line):(c.duo?R.n+' duo':c.spc?R.n+' '+SPEC[c.spc].n:R.n+' '+(c.team?'team':'player')+' card')}</small><em>${g.dup?`Duplicate · +${R.dup} tokens`:c.spc?`${spcLine(c.spc,g.r)} · ${SPEC[c.spc].w}`:`+${c.ach?c.pct:c.duo?DUO_PCT[g.r]:CARD_PCT[g.r]}% on ${c.duo?'parlays':c.team?'Pick ’em picks':'his props'}`}</em>`}
     const x=ITEM[g.id];
     return `${itemArt(g.id,54)}<b>${esc(x.n)}</b><small style="color:${R.c}">${R.n}</small>${g.dup?`<em>Duplicate · +${R.dup} tokens</em>`:''}${isCos(g.id)?`<button class="btn sm pko-eq" type="button" data-act="lkEq" data-k="${x.k}" data-v="${g.id}">Equip</button>`:''}`};
   o.innerHTML=`<div class="pko-bg" aria-hidden="true"><i class="pko-rays"></i></div>
@@ -5382,7 +5449,7 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'wp-3',who:ZH,wp:1},
   {id:'ml-wp-1',who:ML,wp:1},
   {id:'is-lx',who:/^\s*isaac\s+smedra\s*$/i,rar:['x','l']},   /* v409 (owner): every Immortal and Legendary card removed from Isaac Smedra */
-  {id:'ab-duo-1',who:AB,gp:'duo'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
+  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),gp=Object.assign({},(old.fr||{}).gp),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0,ng=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
@@ -5519,7 +5586,7 @@ function viewShop(){
       <section class="card sh-tro"><div><b>League trophy</b><small class="muted">${myLg.length?`Design the trophy for a league you run · ${TRO_TOK.toLocaleString()} tokens`:'Start a league to design its trophy.'}</small></div>${myLg.map(g=>`<button class="btn ghost sm" data-act="troOpen" data-gid="${esc(g.id)}">${esc(g.name)}${g.trophy?' · edit':''}</button>`).join('')}</section></div>`;
     body=dgShopCard()+spShopCard()+wpShopCard()+pkpBanner()+prizes+free+`<section class="card lk-adp"><div class="lk-adp-ic" aria-hidden="true">▶</div><div><b>Free pack</b><small class="muted">${adDone?'Back tomorrow for another.':'Watch a short video. Once a day.'}</small></div><button class="btn" data-act="pkAd" ${adDone?'disabled':''}>${adDone?'Back tomorrow':'Watch ad'}</button></section>
       ${shopHTML()}<h3 class="sh-h">Packs</h3><div class="lk-packs">${Object.entries(PACKS).filter(([k,P])=>!P.off&&!(P.gear&&FG_SPORT==='bb')).map(([k,P])=>P.pick?pkpShopCard(k,P,bal):`<article class="card lk-pack lk-${k}"><div class="lk-art"><span>${P.c}</span><small>${P.cards?(P.c===1?'card':'cards'):'items'}</small></div><h3>${esc(P.n)}</h3>
-      <p class="muted">${P.duo?'Duo cards only · two teammates on one double-sided card · Epic or better · unlocks parlays':P.team?'You pick the team · its player and team cards only':P.gear?'Bobblehead gear only · arm sleeves and back plates':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
+      <p class="muted">${P.spc?'Special player cards only · Prizm, Ticket, Hot Streak, Playbook and more · Epic or better':P.duo?'Duo cards only · two teammates on one double-sided card · Epic or better · unlocks parlays':P.team?'You pick the team · its player and team cards only':P.gear?'Bobblehead gear only · arm sleeves and back plates':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button></article>`).join('')}</div>
       <p class="muted lk-note">Items have no cash value. Cards can be traded for tokens on the Transfer Portal.</p>`+extras;
@@ -5546,9 +5613,9 @@ function viewLocker(){
           <div class="lk-grid"><button class="lk-it ${on?'':'on'}" data-act="lkEq" data-k="${k}" data-v="">${bhArt(dx,48)}<b>${dn}</b><small class="muted">Default</small></button>
           ${list.map(x=>`<button class="lk-it r-${x.r} ${cur===x.id?'on':''}" style="--rc:${RAR[x.r].c}" data-act="lkEq" data-k="${k}" data-v="${x.id}" title="${esc(x.d)}">${itemArt(x.id,48)}<b>${esc(x.n)}</b><small style="color:${RAR[x.r].c}">${RAR[x.r].n}</small></button>`).join('')}</div></section>`}).join('');
   }else if(tab==='cards'){
-    const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=UI.lkC==='t'?'t':UI.lkC==='d'?'d':'p',N=UI.lkN||30;
+    const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=UI.lkC==='t'?'t':UI.lkC==='d'?'d':UI.lkC==='s'?'s':'p',N=UI.lkN||30;
     const best=id=>cardR(ME.uid,id);
-    const ids=Object.keys(mine).filter(id=>cardVers(ME.uid,id).length&&id.startsWith(T==='t'?'tc:':T==='d'?'dc:':'pc:')).sort((a,b)=>ord[best(a)]-ord[best(b)]||cardInfo(a).name.localeCompare(cardInfo(b).name));
+    const ids=Object.keys(mine).filter(id=>cardVers(ME.uid,id).length&&id.startsWith(T==='t'?'tc:':T==='d'?'dc:':T==='s'?'sc:':'pc:')).sort((a,b)=>ord[best(a)]-ord[best(b)]||cardInfo(a).name.localeCompare(cardInfo(b).name));
     const vers=Object.keys(mine).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),nP=Object.keys(mine).filter(i=>i.startsWith('pc:')&&cardVers(ME.uid,i).length).length,nT=Object.keys(mine).filter(i=>i.startsWith('tc:')&&cardVers(ME.uid,i).length).length;
     const tiers=RAR_ORD.slice().reverse().map(r=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>+${CARD_PCT[r]}%</b></li>`).join('');
     const dots=id=>`<span class="lk-vers">${RAR_ORD.map(r=>`<i style="--rc:${RAR[r].c}" class="${(mine[id]||{})[r]?'on':''}" title="${RAR[r].n}"></i>`).join('')}</span>`;
@@ -5559,9 +5626,9 @@ function viewLocker(){
     body=achSec+`<section class="card"><div class="qh"><h3>Player & team cards</h3><span class="muted">${vers} of ${(P.nP+P.nT)*6} versions</span></div>
       <p class="muted">Player and team cards boost your winning picks. Better versions boost more.</p>
       <ul class="lk-tiers">${tiers}</ul><small class="muted">Boost on the winnings, added on top of a +25% token boost. It is saved on the pick when you lock it in.</small></section>
-      <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button><button class="chip" data-act="lkC" data-v="d" aria-pressed="${T==='d'}">Duos <small class="muted">${Object.keys(mine).filter(i=>i.startsWith('dc:')&&cardVers(ME.uid,i).length).length}/${duoSets().all.length}</small></button></div>
-      ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.duo?'div':'button type="button" data-act="cardView" data-id="'+esc(id)+'"'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,c.duo?104:64)}<span>${c.key?`<b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b>`:`<b>${esc(c.name)}</b>`}<small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">Best: ${R.n} · +${CARD_PCT[r]}%</small>${dots(id)}</span></${c.duo?'div':'button'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
-        :`<p class="empty">No ${T==='t'?'team':T==='d'?'Duo':'player'} cards yet. ${T==='d'?'Open a Duo pack to pull some.':'Open packs to pull some.'}</p>`}</section>`;
+      <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button><button class="chip" data-act="lkC" data-v="d" aria-pressed="${T==='d'}">Duos <small class="muted">${Object.keys(mine).filter(i=>i.startsWith('dc:')&&cardVers(ME.uid,i).length).length}/${duoSets().all.length}</small></button><button class="chip" data-act="lkC" data-v="s" aria-pressed="${T==='s'}">Special <small class="muted">${Object.keys(mine).filter(i=>i.startsWith('sc:')&&cardVers(ME.uid,i).length).length}</small></button></div>
+      ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.duo?'div':'button type="button" data-act="cardView" data-id="'+esc(id)+'"'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,c.duo?104:64)}<span>${c.key?`<b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b>`:`<b>${esc(c.name)}</b>`}<small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">Best: ${R.n} · ${c.spc?spcLine(c.spc,r)+' · '+SPEC[c.spc].n:'+'+CARD_PCT[r]+'%'}</small>${dots(id)}</span></${c.duo?'div':'button'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
+        :`<p class="empty">No ${T==='t'?'team':T==='d'?'Duo':T==='s'?'special':'player'} cards yet. ${T==='d'?'Open a Duo pack to pull some.':T==='s'?'Open a Spotlight pack, or pull Epic and better cards in any pack.':'Open packs to pull some.'}</p>`}</section>`;
   }else if(tab==='bnd'){body=bndHTML()
   }else if(tab==='cos'){
     const dflt={ball:`<span class="ia ia-ball" style="width:48px;height:48px"></span>`,frame:`<span class="ia ia-frame" style="width:48px;height:48px"><i></i></span>`,
@@ -5941,7 +6008,7 @@ const _dec=p=>Math.round(Math.min(8,Math.max(1.05,.93/p))*100)/100;
 let _ppC=null;
 function propCands(){
   const gs=((GAMES&&GAMES.games)||[]).filter(g=>!gDone(g)),
-    own=new Set(ME.uid?Object.keys(cardsOf(ME.uid)).map(id=>id.startsWith('pc:')?id.slice(3):id.startsWith('ac:')?id.split(':')[2]:'').filter(Boolean):[]),
+    own=new Set(ME.uid?Object.keys(cardsOf(ME.uid)).map(id=>id.startsWith('pc:')?id.slice(3):id.startsWith('ac:')||id.startsWith('sc:')?id.split(':')[2]:'').filter(Boolean):[]),
     key=gs.length+'|'+_rev+'|'+((window.MAXPREPS&&MAXPREPS.updated)||'')+'|'+[...own].sort().join(',');
   if(_ppC&&_ppC.k===key)return _ppC.list;
   const by={};players().forEach(p=>{if(p.mp&&p.school&&mgOk(p)){(by[p.school]=by[p.school]||[]).push(p)}});
@@ -6014,7 +6081,7 @@ function slipCalc(legs){
   /* v408 (owner): a Duo card you own boosts any parlay that has both of its players */
   const ks=new Set(legs.map(l=>l.x.k)),duos=ME.uid&&legs.length>1?Object.keys(cardsOf(ME.uid)).filter(id=>id.startsWith('dc:')&&duoKeys(id).every(k=>ks.has(k))&&cardR(ME.uid,id)):[];
   const dp=duos.reduce((t,id)=>t+duoPct(ME.uid,id),0);
-  const pct=Math.min(500,legs.reduce((t,l)=>t+(ME.uid?cardPct(ME.uid,'pc:'+l.x.k):0),0)+dp);
+  const pct=Math.min(500,legs.reduce((t,l)=>t+(ME.uid?cardPct(ME.uid,'pc:'+l.x.k,{s:l.s,game:l.x.game,parl:1}):0),0)+dp);
   return {odds,pct,pb,duos,dp,bonus:Math.round(SL_BONUS*(legs.length-1)*100),win:st=>st+(st*odds-st)*(1+pct/100)};
 }
 function slipHTML(bal){
@@ -6038,7 +6105,7 @@ async function slipGo(){
   if(!await stakeOk(stake,bal))return;
   if(legs.length===1){const x=legs[0].x,sd=legs[0].s,cur1=propsOf(ME.uid);
     if(cur1[x.id]){say('You already picked that line.');return}
-    const cb=ME.uid?cardPct(ME.uid,'pc:'+x.k):0,r1={k:x.k,m:x.m,w:x.w,g:x.g,s:sd,stake,line:x.line,odds:sd==='o'?x.over:x.under,at:NOW(),...(cb?{cb}:{})};
+    const cb=ME.uid?cardPct(ME.uid,'pc:'+x.k,{s:sd,game:x.game}):0,r1={k:x.k,m:x.m,w:x.w,g:x.g,s:sd,stake,line:x.line,odds:sd==='o'?x.over:x.under,at:NOW(),...(cb?{cb}:{})};
     if(await act(()=>setDoc('picks/'+ME.uid,{bets:betsOf(ME.uid),...fcKeep(),props:{...cur1,[x.id]:r1}}),'Pick locked in')){UI.sl={legs:{},stake:UI.sl.stake}}
     render();return}
   const c=slipCalc(legs),rec={d:'',pb:c.pb,legs:legs.map(l=>({k:l.x.k,m:l.x.m,w:l.x.w,g:l.x.g,line:l.x.line,s:l.s,odds:l.s==='o'?l.x.over:l.x.under})),stake,odds:c.odds,cb:c.pct,at:NOW()},key='p|'+NOW()+'|'+Math.random().toString(36).slice(2,6),cur=parlOf(ME.uid);
@@ -6063,7 +6130,7 @@ function propsHTML(){
     else if(side)foot='<p class="muted">In your slip below.</p>';
     else foot=b?`<p class="muted">Your pick: ${b.s==='o'?'Over':'Under'} ${fmtN(b.line)} for ${tk(b.stake)}.</p>`:'<p class="muted">Tap Over or Under to pick it.</p>';
     if(b&&!locked)foot+=bxChips('pp',id,b);else if(b&&b.bx)foot+=`<p class="bx-tag">${b.bx==='b'?'+25% boost':'Insured'}</p>`;
-    if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'pc:'+x.k))foot+=`<p class="bx-tag cbx">Your ${esc(x.name)} card adds +${cardPct(ME.uid,'pc:'+x.k)}% to the parlay winnings</p>`;
+    if(b&&b.cb)foot+=`<p class="bx-tag cbx">Card boost +${b.cb}% on winnings</p>`;else if(side&&!b&&!locked&&ME.uid&&cardPct(ME.uid,'pc:'+x.k,{s:side,game:x.game}))foot+=`<p class="bx-tag cbx">Your ${esc(x.name)} card adds +${cardPct(ME.uid,'pc:'+x.k,{s:side,game:x.game})}% to the parlay winnings</p>`;
     return `<article class="gm bt-g pp"><div class="gm-h"><span>${esc(fmtDate(x.game.d))} · vs ${esc(x.opp)}</span>${x.game.dv?`<span class="gm-k p">${esc(x.game.dv)}</span>`:''}</div>
       <button class="pp-who" type="button" data-act="player" data-id="${esc(x.k)}" aria-label="${esc(x.name)}, open player profile">${slogo(x.school,30)}<div><b>${esc(x.name)}</b>${ME.uid?cardTag(ME.uid,'pc:'+x.k):''}<small class="muted">${esc(x.school)} · ${esc(x.pos)}</small></div><span class="pp-go" aria-hidden="true">›</span></button>
       ${grp&&grp.length>1?`<div class="pp-mk" role="group" aria-label="${esc(x.name)} lines">${grp.map(y=>`<button class="pp-mc${y===x?' on':''}" data-act="ppSel" data-k="${esc(x.k)}" data-id="${esc(y.id)}" aria-pressed="${y===x}"><span>${esc(PP_MK[y.m].l)}</span><b>${fmtN(y.line)}</b>${mine[y.id]||UI.sl.legs[y.id]?'<i aria-label="picked"></i>':''}</button>`).join('')}</div>`:`<div class="pp-m">${esc(M.l)}</div>`}
@@ -9624,7 +9691,7 @@ document.addEventListener('click',async e=>{
   else if(a==='ppAll'){const today=TODAY(),pm=propMap(),cur=propsOf(ME.uid),nb={...cur};let n=0,need=0,sum=0,old0=0;
     Object.entries(UI.pp).forEach(([id,u])=>{const x=pm[id],old=cur[id];if(!x||!u||!u.s||started(x.game))return;
       const stake=Math.floor(u.stake||(old&&old.stake)||5);if(stake<1)return;need+=stake-(old?+old.stake:0);n++;sum+=stake;old0+=old?+old.stake:0;
-      const keep=old&&old.s===u.s;nb[id]={k:x.k,m:x.m,w:x.w,g:x.g,s:u.s,stake,line:keep?+old.line:x.line,odds:keep?+old.odds:(u.s==='o'?x.over:x.under),at:NOW(),...(old&&old.bx?{bx:old.bx}:{}),...(cardPct(ME.uid,'pc:'+x.k)?{cb:cardPct(ME.uid,'pc:'+x.k)}:{})}});
+      const keep=old&&old.s===u.s;nb[id]={k:x.k,m:x.m,w:x.w,g:x.g,s:u.s,stake,line:keep?+old.line:x.line,odds:keep?+old.odds:(u.s==='o'?x.over:x.under),at:NOW(),...(old&&old.bx?{bx:old.bx}:{}),...(cardPct(ME.uid,'pc:'+x.k,{s:u.s,game:x.game})?{cb:cardPct(ME.uid,'pc:'+x.k,{s:u.s,game:x.game})}:{})}});
     if(!n){say('Pick Over or Under first.');return}
     if(need>bank(ME.uid)){say('Not enough tokens for all of those. Lower some wagers.');return}
     if(!await stakeOk(sum,bank(ME.uid)+old0))return;

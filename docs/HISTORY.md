@@ -398,3 +398,10 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - Rules: listed card leaves the seller's locker (escrow); bids are held out of the bidder's balance (`inv.tp`, counted in `invBonus`); outbid refunds; min raise 5%; a bid in the last 2 min adds 2 min; 5% fee to the seller on a sale; buy-now optional; can't bid on a version you own; 20 open listings per seller; unsold cards return. Ended auctions settle when anyone opens the Portal.
 - Bid/buy send the client's balance (`p_bal`), like the rest of the app, balances are client-trusted.
 - Not built yet from the questionnaire: nine new card types, numbered/Trio cards, rarity wheel, 3 favourites on profile, weekly packs, season rarity, daily/streak/invite packs, parlay win celebration.
+
+## v420: nine special player cards + Spotlight pack
+- Ids `sc:<style>:<playerKey>`, versions Epic/Legendary/Mythical only. `SPEC` (name, colour, boost per rarity, text), `specProp(u,key,ctx)`, `specTeam`, `arcBonus`, `rollSpec`; `cardPct(u,id,ctx)` adds them (ctx = {s:'o'|'u', game, parl}). Call sites for props/parlay legs pass ctx.
+- Rules: Prizm = every prop; Game Ticket = Pick ’em on his team (Signature adds a smaller team part); Hot Streak = per prop won in a row (max 5); Playbook = parlay legs only; Signature = his props; Friday Night Lights = Friday games only; Headline = Overs only; Rivalry = his team is away; Arcade = tokens per daily-challenge day (in `bank()` and `earned()`).
+- Art: `cardArt` re-skins the shield (`.pc2.sp-<style>`, ribbon `.sp-tag`, moving layer `.sp-fx`). Card view shows "His boost / Where it works" (`.cv-back`). Locker Cards tab has a Special chip.
+- Spotlight pack (`PACKS.spot`, 1,800 tokens, specials only, walkout). Other packs turn 14% of Epic+ cards into specials (`SPC_CHANCE`). Ari Borkar gets 2 free Spotlight packs (CARD_FIX).
+- Still not built: numbered cards, Trio cards, rarity wheel, favourites on profile, weekly/season packs, daily/streak/invite packs, parlay win celebration.
