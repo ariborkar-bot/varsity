@@ -2674,11 +2674,14 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .tr-users{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}.tr-u{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:inherit;text-align:left}
 .tp-s.on{outline:2px solid var(--accent);outline-offset:1px}
 
-/* v438: Advisor */
-.adv{display:flex;flex-direction:column;gap:10px}.adv-r{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface2)}
-.adv-w{display:flex;align-items:center;gap:8px;grid-column:1/-1}.adv-w b{display:block;font:800 .95rem/1.15 var(--f-display,inherit)}.adv-w small{display:block}
-.adv-m b{display:block;font:800 .9rem/1.2 var(--f-body,inherit)}.adv-m small,.adv-p small{display:block;font-size:.72rem}.adv-p{text-align:right}.adv-p b{font:900 1.25rem/1 var(--f-display,inherit);color:#4DE6A0}
-.adv-c{grid-column:1/-1;color:#FFC23D;font-weight:700;font-size:.74rem}.adv-r .btn{grid-column:1/-1}
+/* v438: Advisor (ranked lists) */
+.adv{display:flex;flex-direction:column;gap:8px}.adv-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.adv-r{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface2)}
+.adv-k{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:900 .85rem/1 var(--f-display,inherit);background:var(--accent);color:var(--accent-ink,#0b1220)}.adv-r:first-child .adv-k{background:#FFC23D;color:#1a1205}
+.adv-a{flex:none;display:flex}.adv-a .tcard{flex:none}
+.adv-i{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.adv-i>b{font:800 .92rem/1.15 var(--f-display,inherit)}.adv-i small{font-size:.72rem}
+.adv-m{font-size:.8rem;font-weight:700}.adv-c{font-size:.72rem;color:#FFC23D}.adv-c b{font-weight:900}
+.adv-p{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}.adv-p>b{font:900 1.25rem/1 var(--f-display,inherit);color:#4DE6A0}.adv-p small{font-size:.68rem}
 .adv-h{margin:6px 0 0;font:800 .8rem/1 var(--f-display,inherit);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.adv-n{display:block}
 
 /* v423: flip + back of single player cards (card view) */
@@ -3395,7 +3398,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v441 · Nov 10';
+const APP_BUILD='v442 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6370,21 +6373,34 @@ function advRows(){const u=ME.uid,mine=propsOf(u),rows=[];
   return rows}
 function advCardTxt(k){const u=ME.uid,r=cardR(u,'pc:'+k),sp=Object.keys(SPEC).filter(st=>specRaw(u,st,k)).map(st=>SPEC[st].n);
   return r||sp.length?`Your ${r?RAR[r].n+' card':'special card'}${sp.length?(r?' + ':' ')+sp.join(' + '):''}`:'Your cards'}
+function advArt(k){const u=ME.uid,r=cardR(u,'pc:'+k);if(r)return cardArt('pc:'+k,r,58);const st=Object.keys(SPEC).find(x=>specRaw(u,x,k));return st?cardArt('sc:'+st+':'+k,specRaw(u,st,k),58):''}
+const advLeg=r=>({x:r.x,s:r.sd});
 function advisorHTML(){
   if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return '';
   const R=advRows();if(!R.length)return '';
-  const one=L=>{const k=new Set();return L.filter(r=>k.has(r.x.k)?0:(k.add(r.x.k),1))},withC=one(R.filter(r=>r.b>0).sort((a,b)=>b.ev-a.ev)).slice(0,5),seenK=new Set(withC.map(r=>r.x.k)),
-    free=one(R.filter(r=>!r.b&&!seenK.has(r.x.k)&&r.p>=.5).sort((a,b)=>b.ev-a.ev)).slice(0,3);
-  const row=r=>{const x=r.x,M=PP_MK[x.m],id=x.id,inS=UI.sl.legs[id]===r.sd;
-    return `<article class="adv-r"><div class="adv-w">${slogo(x.school,28)}<div><b>${esc(x.name)}</b><small class="muted">${esc(x.school)} · ${esc(x.pos)} · vs ${esc(x.opp)} · ${esc(fmtDate(x.game.d))}</small></div></div>
-      <div class="adv-m"><b>${r.sd==='o'?'Over':'Under'} ${fmtN(x.line)} ${esc(M.l.toLowerCase())}</b><small class="muted">${Math.round(r.p*100)}% chance · ${r.od.toFixed(2)}x odds</small></div>
-      <div class="adv-p"><b>+${n1(10*r.win)}</b><small class="muted">on a 10 token pick</small></div>
-      ${r.b?`<small class="adv-c">${esc(advCardTxt(x.k))} adds +${r.b}% to the winnings</small>`:''}
-      <button type="button" class="btn sm${inS?' ghost':''}" data-act="slLeg" data-id="${esc(id)}" data-s="${r.sd}">${inS?'In your slip ✓':'Add to slip'}</button></article>`};
-  return `<section class="card adv"><div class="qh"><h3>Advisor</h3><span class="muted">Best returns for your cards</span></div>
-    ${withC.length?withC.map(row).join(''):'<p class="muted">You have no cards that boost this week’s lines yet. Open packs in the Shop to get some.</p>'}
-    ${free.length?`<h4 class="adv-h">Also worth a look</h4>`+free.map(row).join(''):''}
-    <small class="muted adv-n">A guide from each player’s recent stats and your card boosts. Nothing is guaranteed.</small></section>`}
+  const u=ME.uid,one=L=>{const k=new Set();return L.filter(r=>k.has(r.x.k)?0:(k.add(r.x.k),1))},
+    singles=one(R.filter(r=>r.b>0).sort((a,b)=>b.b-a.b||b.win-a.win)).slice(0,6),
+    byK={};one(R.slice().sort((a,b)=>b.ev-a.ev)).forEach(r=>{byK[r.x.k]=r});
+  /* parlays: your Duo cards, and your best boosted singles stacked together */
+  const C=[];
+  Object.keys(cardsOf(u)).filter(id=>id.startsWith('dc:')&&cardR(u,id)).forEach(id=>{const [a,b]=duoKeys(id).map(k=>byK[k]);if(a&&b&&gid(a.x.game)===gid(b.x.game))C.push({rs:[a,b],t:'Duo card'})});
+  const top=one(R.filter(r=>r.b>0).sort((a,b)=>b.ev-a.ev)).slice(0,4);
+  for(let n=2;n<=Math.min(3,top.length);n++)C.push({rs:top.slice(0,n),t:n+' of your best cards'});
+  const seen=new Set(),PL=C.map(c=>{const legs=c.rs.map(advLeg),k=slipCalc(legs),pr=c.rs.reduce((t,r)=>t*r.p,1),win=k.win(10)-10;return {c,legs,k,pr,win,ev:pr*k.win(10)-10,key:c.rs.map(r=>r.x.id+r.sd).sort().join()}})
+    .filter(x=>!seen.has(x.key)&&seen.add(x.key)).sort((a,b)=>b.ev-a.ev).slice(0,4);
+  const sRow=(r,i)=>{const x=r.x,M=PP_MK[x.m],id=x.id,inS=UI.sl.legs[id]===r.sd;
+    return `<li class="adv-r"><span class="adv-k">${i+1}</span><span class="adv-a">${advArt(x.k)}</span><div class="adv-i"><b>${esc(x.name)}</b><small class="muted">${esc(x.school)} · vs ${esc(x.opp)} · ${esc(fmtDate(x.game.d))}</small>
+      <span class="adv-m">${r.sd==='o'?'Over':'Under'} ${fmtN(x.line)} ${esc(M.l.toLowerCase())} · ${Math.round(r.p*100)}% chance</span><span class="adv-c">${esc(advCardTxt(x.k))}: <b>+${r.b}%</b> on winnings</span></div>
+      <div class="adv-p"><b>+${n1(10*r.win)}</b><small class="muted">on 10 tokens</small><button type="button" class="btn sm${inS?' ghost':''}" data-act="slLeg" data-id="${esc(id)}" data-s="${r.sd}">${inS?'In slip ✓':'Add'}</button></div></li>`};
+  const pRow=(x,i)=>{const v=x.c.rs.map(r=>r.x.id+'~'+r.sd).join(',');
+    return `<li class="adv-r"><span class="adv-k">${i+1}</span><div class="adv-i"><b>${esc(x.c.t)} · ${x.c.rs.length}-pick parlay</b>${x.c.rs.map(r=>`<span class="adv-m">${esc(lastN(r.x.name))} ${r.sd==='o'?'Over':'Under'} ${fmtN(r.x.line)} ${esc(PP_MK[r.x.m].l.toLowerCase())}</span>`).join('')}
+      <span class="adv-c">Cards add <b>+${x.k.pct}%</b> · ${Math.round(x.pr*100)}% all hit · ${x.k.odds.toFixed(2)}x odds</span></div>
+      <div class="adv-p"><b>+${n1(x.win)}</b><small class="muted">on 10 tokens</small><button type="button" class="btn sm" data-act="advParl" data-v="${esc(v)}">Add all</button></div></li>`};
+  return `<section class="card adv"><div class="qh"><h3>Advisor</h3><span class="muted">Your cards, best to worst</span></div>
+    <h4 class="adv-h">Best bets for your cards</h4>
+    ${singles.length?`<ol class="adv-l">${singles.map(sRow).join('')}</ol>`:'<p class="muted">None of your cards boost this week’s lines yet. Open packs in the Shop to get some.</p>'}
+    ${PL.length?`<h4 class="adv-h">Best parlays for your cards</h4><ol class="adv-l">${PL.map(pRow).join('')}</ol>`:''}
+    <small class="muted adv-n">Ranked by what your card boosts are worth. A guide from each player’s recent stats. Nothing is guaranteed.</small></section>`}
 function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
@@ -9950,6 +9966,7 @@ document.addEventListener('click',async e=>{
     else{if(!x)return;if(!L[id]&&Object.keys(L).length>=SL_MAX){say('A parlay can have up to '+SL_MAX+' picks.');return}
       Object.keys(L).forEach(o=>{if(o!==id&&pm[o]&&pm[o].k===x.k)delete L[o]});L[id]=t.dataset.s}
     render(true)}
+  else if(a==='advParl'){const pm=propMap(),L=UI.sl.legs;Object.keys(L).forEach(k=>delete L[k]);let n=0;(t.dataset.v||'').split(',').forEach(z=>{const [pid,sd]=[z.slice(0,z.lastIndexOf('~')),z.slice(z.lastIndexOf('~')+1)];if(pm[pid]&&!started(pm[pid].game)&&n<SL_MAX){L[pid]=sd;n++}});say(n?'Parlay added to your slip':'Those lines are closed');render(true)}
   else if(a==='slStake'){UI.sl.stake=+t.dataset.v;render(true)}
   else if(a==='slClear'){UI.sl.legs={};render(true)}
   else if(a==='slGo'){if(needJoin('make a parlay'))return;await slipGo()}
