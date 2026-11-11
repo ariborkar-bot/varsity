@@ -364,3 +364,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - OVR: at most 10 players per sport can be 99 (Notes B11, via Raw OVR column P); schedule strength weight 6% (weights 37.6/28.2/28.2/6).
 - OVR: no DEF tab; 375 defenders with no position in the app are assigned DL/LB/DB by a stat-mix model and flagged 'Position estimated' in Status.
 - OVR manual overrides (Nov 10, owner): MANUAL dict in make_ovr.py pins Raw OVR for Paisios Polamalu RB (99), Daine Gonzalez RB (94), swaps Courtney Miller-Thompson / Deandre Eleby WR; shown in yellow with 'Manual OVR' in Status.
+- OVR manual: swapped Owen Dorros / DJ Ferguson WR (Nov 10, owner).

@@ -56,7 +56,8 @@ def school_pct(sos):
 SCH_FB = school_pct(sos_fb()); SCH_BB = school_pct(sos_bb())
 # Owner overrides (Nov 10): Raw OVR typed in by hand for these players (yellow cell); the 99 cap still applies, so Raw 110 = a top-10 99
 MANUAL = {('Paisios Polamalu', 'St. Augustine', 'RB'): (110, 'set to 99'), ('Daine Gonzalez', 'Classical Academy', 'RB'): (94, 'set to 94'),
-          ('Courtney Miller-Thompson', 'Granite Hills', 'WR'): (100.847707, 'swapped with Deandre Eleby (WR)'), ('Deandre Eleby', 'Morse', 'WR'): (97.710369, 'swapped with Courtney Miller-Thompson')}
+          ('Courtney Miller-Thompson', 'Granite Hills', 'WR'): (100.847707, 'swapped with Deandre Eleby (WR)'), ('Deandre Eleby', 'Morse', 'WR'): (97.710369, 'swapped with Courtney Miller-Thompson'),
+          ('Owen Dorros', 'La Jolla Country Day', 'WR'): (89.32224, 'swapped with DJ Ferguson (WR)'), ('Dj Ferguson', 'University City', 'WR'): (90.009279, 'swapped with Owen Dorros')}
 rows = []   # dict(name, school, sport, pos, gr, gp, score, pct, status)
 fb = json.load(open(os.path.join(D, 'fb.json')))
 K = 2
