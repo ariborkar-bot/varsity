@@ -2590,6 +2590,27 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pko-pack.nudge .pko-pk{animation:pkoNudge .4s}
 @keyframes pkoNudge{25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
 .cv-sell{margin-top:10px;align-self:center}
+/* v424: trading-card look (rounded rectangle, art window, name banner) instead of the shield */
+.pc2{--sh:inset(0 round 6em)}
+.pc2 .pc-in{inset:max(1.5px,2.2em);clip-path:inset(0 round 4.4em)}
+.pc2 .pc-ph{position:absolute;left:4em;top:4em;width:56em;height:56em;border-radius:3.6em;z-index:1;background:linear-gradient(165deg,rgba(255,255,255,.2),rgba(0,0,0,.12) 55%,rgba(0,0,0,.45)),repeating-linear-gradient(120deg,transparent 0 5em,rgba(255,255,255,.07) 5em 6.2em);box-shadow:inset 0 0 0 max(1px,.45em) color-mix(in srgb,var(--rc) 70%,#fff),inset 0 -6em 8em rgba(0,0,0,.45)}
+.pc2 .pc-ch{position:absolute;right:7em;top:7em;width:13em;height:13em;z-index:3;display:grid;place-items:center}
+.pc2 .pc-o{left:8em;top:7.5em}
+.pc2 .pc-n{font-size:20em}.pc2.pc-xl .pc-n{font-size:20em}
+.pc2 .pc-a,.pc2.pc-xl .pc-a{left:11em;top:11em;width:50em;height:50em;z-index:2;align-items:end}
+.pc2 .pc-b,.pc2:not(.pc-xl) .pc-b{top:60em;left:0;right:0;bottom:0;padding:2.4em 4em 0;gap:1.6em;background:linear-gradient(180deg,rgba(2,5,11,.0),rgba(2,5,11,.88) 22%)}
+.pc2 .pc-nm{font-size:9.6em}
+.pc2 .pc-sc{display:block;font-size:3.4em;letter-spacing:.18em;color:color-mix(in srgb,var(--rc) 55%,#fff)}
+.pc2:not(.pc-xl) .pc-sc{display:none}
+.pc2 .pc-r{margin:0;font-size:3.6em}.pc2.pc-xl .pc-r{display:none}.pc2:not(.pc-xl) .pc-r{font-size:4.2em}
+.pc2 .pc-st{margin-top:.2em;width:94%}.pc2 .pc-st span{padding:1.1em .4em 1em}.pc2 .pc-st b{font-size:5.4em}.pc2 .pc-st i{font-size:2.5em}
+.pc2.pc-s .pc-in{inset:max(1.5px,2.2em)}
+.pc2 .pb{padding:9em 7em 0}.pc2 .pb-n{font-size:22em}.pc2 .pb-d{font-size:4.2em}.pc2 .pb-w{font-size:4.4em}.pc2 .pb-k{font-size:6.4em}.pc2 .pb-h{font-size:4em}
+
+.pc2 .pc-mono{position:static;margin:0;font:900 26em/.8 var(--f-display,inherit);letter-spacing:-.04em;font-style:normal;color:transparent;background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--rc) 55%,#fff) 55%,color-mix(in srgb,var(--rc) 70%,#000));-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 .08em .12em rgba(0,0,0,.55));opacity:.95}
+.pc2 .pc-a,.pc2.pc-xl .pc-a{left:0;top:4em;width:60em;height:56em;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 5em 7em 0;box-sizing:border-box}
+.pc2 .pb-w{margin-bottom:8em}
+
 /* v423: flip + back of single player cards (card view) */
 .cv-card>.pc-flip{display:block;position:relative;transform-style:preserve-3d;transition:transform .12s ease-out;will-change:transform;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pc-flipin{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.25,.45,1)}.pc-flip.fl .pc-flipin{transform:rotateY(180deg)}
@@ -3225,7 +3246,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v424 · Nov 10';
+const APP_BUILD='v425 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4792,13 +4813,13 @@ function pcBack(id,r,s){const c=cardInfo(id),R=RAR[r]||RAR.c,sp=c.spc?SPEC[c.spc
   const body=sp
     ?`<b class="pb-k">${esc(sp.n)}</b><i class="pb-d">${esc(sp.d)}</i><span class="pb-w"><small>Works on</small>${esc(sp.w)}</span>`
     :`<b class="pb-k">On your winnings</b><i class="pb-d">Win an Over/Under prop on ${ln} and this card adds ${pct}% to your winnings.</i><span class="pb-w"><small>Works on</small>Every prop you bet on ${ln}</span>`;
-  return `<span class="tcard pc2 pc-bk pc-${r||'c'}${cls}" style="${sk}--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span><span class="pb"><i class="pb-h">What it does to your bets</i><b class="pb-n">${big}</b>${body}</span><span class="pc-fx"></span></span></span>`}
+  return `<span class="tcard pc2 pc-bk pc-${r||'c'}${cls}" style="${sk}--rc:${R.c};width:${Math.round(s*.72)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span><span class="pb"><i class="pb-h">What it does to your bets</i><b class="pb-n">${big}</b>${body}</span><span class="pc-fx"></span></span></span>`}
 function cardArt(id,r,s=54){if(id.startsWith('dc:'))return duoArt(id,r,s);if(id.startsWith('sc:')){const st=id.split(':')[1],S=SPEC[st]||SPEC.prizm,h=cardArt('pc:'+id.split(':')[2],r,s);return h.replace('class="tcard pc2 ',`class="tcard pc2 spc sp-${st} `).replace('style="--rc:',`style="--sk:${S.c};--rc:`).replace('<span class="pc-fx">',`<i class="sp-tag">${esc(S.n)}</i><span class="sp-fx"></span><span class="pc-fx">`)}if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
   if(c.team)return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${cutImg(c.school,Math.round(s*.56))||slogo(c.school,Math.round(s*.5))}<i>TEAM</i></span>`;
   /* v415 player card (shield): OVR (ovr.js, from the OVR sheets), position and class top-left, school crest, last name, and on full-size cards the school and
      this season's key stats. Under 80 px tall only the OVR and the crest fit. */
   const q=c.key?pByKey(c.key):null,o=ovrOf(c.key),sm=s<80,xl=s>=200,ps=q?(q.pos==='DEF'?(q.sub||'DEF'):q.pos):'',gr=q?(['','FR','SO','JR','SR'][q.gr]||''):'',lg=logoFor(c.school),st=xl?pcStats(q):[],full=xl&&st.length>0,hz=Math.round(s*(sm?.34:full?.41:.47));
-  return `<span class="tcard pc2 pc-${r||'c'} ${sm?'pc-s':''} ${full?'pc-xl':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span>${xl&&lg?`<span class="pc-wm">${cutImg(c.school,Math.round(s*.95))}</span>`:''}<span class="pc-o"><b class="pc-n">${o||'–'}</b>${sm?'':`<i class="pc-p">${esc(ps||'')}</i>${gr?`<i class="pc-g">${gr}</i>`:''}`}</span><span class="pc-a">${lg?cutImg(c.school,hz):av(c.name,c.school,Math.round(s*(sm?.26:.4)))}</span>${sm?'':`<span class="pc-b"><b class="pc-nm">${esc(lastN(c.name))}</b>${xl?`<i class="pc-sc">${esc(c.school||'')}</i>${st.length?`<span class="pc-st">${st.map(x=>`<span><b>${esc(String(x[0]))}</b><i>${x[1]}</i></span>`).join('')}</span>`:''}`:''}<i class="pc-r">${R.n}</i></span>`}<span class="pc-fx"></span></span></span>`}
+  return `<span class="tcard pc2 pc-${r||'c'} ${sm?'pc-s':''} ${full?'pc-xl':''}" style="--rc:${R.c};width:${Math.round(s*.72)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span>${sm?'':`<span class="pc-ph"></span>${lg?`<span class="pc-ch">${cutImg(c.school,Math.round(s*.15))}</span>`:''}`}<span class="pc-o"><b class="pc-n">${o||'–'}</b>${sm?'':`<i class="pc-p">${esc(ps||'')}</i>${gr?`<i class="pc-g">${gr}</i>`:''}`}</span><span class="pc-a">${sm?(lg?cutImg(c.school,hz):av(c.name,c.school,Math.round(s*.26))):`<b class="pc-mono">${esc(String(c.name).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase())}</b>`}</span>${sm?'':`<span class="pc-b"><b class="pc-nm">${esc(lastN(c.name))}</b><i class="pc-sc">${esc(c.school||'')}</i>${xl?`${st.length?`<span class="pc-st">${st.map(x=>`<span><b>${esc(String(x[0]))}</b><i>${x[1]}</i></span>`).join('')}</span>`:''}`:''}<i class="pc-r">${R.n}</i></span>`}<span class="pc-fx"></span></span></span>`}
 /* the season stats on a full-size card: the position's three key stats (football); fantasy points per game when there are no key stats or in basketball once it has stats */
 const PC_KEYS={QB:[['passYd','PASS YD'],['passTD','PASS TD'],['rushYd','RUSH YD']],RB:[['rushYd','RUSH YD'],['rushTD','RUSH TD'],['recYd','REC YD']],WR:[['recYd','REC YD'],['rec','CATCHES'],['recTD','REC TD']],TE:[['recYd','REC YD'],['rec','CATCHES'],['recTD','REC TD']],DL:[['tkl','TACKLES'],['sack','SACKS'],['tfl','TFL']],LB:[['tkl','TACKLES'],['tfl','TFL'],['sack','SACKS']],DB:[['tkl','TACKLES'],['dInt','INT'],['pbu','PBU']],K:[['fgm','FG MADE'],['xpm','PAT MADE']]};
 function pcStats(q){if(!q)return [];const g=(q.games||[]).filter(x=>x&&x.stat);if(!g.length)return [];const ks=FG_SPORT==='bb'?null:PC_KEYS[q.pos==='DEF'?q.sub:q.pos];
@@ -4833,7 +4854,7 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
   const R=RAR[r]||RAR.c,H=Math.max(260,Math.min(430,Math.round(innerHeight*.5))),o=c.team?0:ovrOf(c.key),q=c.key?pByKey(c.key):null;const flip=!ach&&!c.team&&!c.duo&&!!c.key;
   const el=document.createElement('div');el.id='cardview';el.className='cv';el.dataset.card=id;el.setAttribute('role','dialog');el.setAttribute('aria-label',c.name+' card');
   el.innerHTML=`<div class="cv-in" style="--rc:${R.c}"><button type="button" class="cv-x" data-act="cvClose" aria-label="Close">×</button>
-    <div class="cv-card">${ach?achArt(id,H):flip?`<span class="pc-flip" style="width:${Math.round(H*.78)}px;height:${H}px" title="Tap to flip"><span class="pc-flipin"><span class="pc-ff">${cardArt(id,r,H)}</span><span class="pc-fb">${pcBack(id,r,H)}</span></span></span>`:cardArt(id,r,H)}</div>
+    <div class="cv-card">${ach?achArt(id,H):flip?`<span class="pc-flip" style="width:${Math.round(H*.72)}px;height:${H}px" title="Tap to flip"><span class="pc-flipin"><span class="pc-ff">${cardArt(id,r,H)}</span><span class="pc-fb">${pcBack(id,r,H)}</span></span></span>`:cardArt(id,r,H)}</div>
     ${c.key?`<button type="button" class="cv-name" data-act="cvProfile" data-id="${esc(c.key)}"><b>${esc(c.name)}</b><small>${esc(c.sub||'')} · Tap the name for the profile</small></button>`:`<div class="cv-name"><b>${esc(c.name)}</b><small>${c.team?'Team card':esc(c.sub||'')}</small></div>`}
     <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>${c.spc?spcLine(c.spc,r):'+'+(ach?c.pct:c.duo?DUO_PCT[r]||0:CARD_PCT[r]||0)+'%'}</b><small>${c.spc?esc(SPEC[c.spc].n):c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
     ${c.spc?`<div class="cv-back"><b>His boost</b><small>${esc(SPEC[c.spc].d)}</small><b>Where it works</b><small>${esc(SPEC[c.spc].w)}</small></div>`:''}
