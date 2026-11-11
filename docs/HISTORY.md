@@ -411,3 +411,5 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v422: walkouts
 - Every Legendary+ card in a pack plays its walkout automatically, one after another (lowest rarity first, `packShow` -> `play(i)`); with no Legendary+, the best Epic card gets one skippable walkout. Mythical/Immortal stay locked. Ari Borkar got a second Special Edition pack (`se-all-2`).
+
+- v423 (Nov 10, owner): single player cards flip in the card view (`openCard`). Front = the v415 shield (OVR top-left, faded school crest watermark on full-size cards, school, name, stats); tap the card and it flips (`.pc-flip`, same `visibility` trick as the Duo card) to `pcBack(id,r,s)`: what it does to your bets (+0n winnings of his props; special cards show their own boost, rule and where it works). Only in the card view; small cards and packs are unchanged.

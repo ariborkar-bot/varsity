@@ -2590,6 +2590,24 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pko-pack.nudge .pko-pk{animation:pkoNudge .4s}
 @keyframes pkoNudge{25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
 .cv-sell{margin-top:10px;align-self:center}
+/* v423: flip + back of single player cards (card view) */
+.cv-card>.pc-flip{display:block;position:relative;transform-style:preserve-3d;transition:transform .12s ease-out;will-change:transform;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pc-flipin{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.25,.45,1)}.pc-flip.fl .pc-flipin{transform:rotateY(180deg)}
+.pc-ff,.pc-fb{position:absolute;inset:0;display:block}.pc-fb{transform:rotateY(180deg);visibility:hidden;transition:visibility 0s linear .35s}.pc-ff{visibility:visible;transition:visibility 0s linear .35s}
+.pc-flip.fl .pc-ff{visibility:hidden}.pc-flip.fl .pc-fb{visibility:visible}
+.pc-flip .pc2{position:absolute;left:0;top:0}
+.pc2 .pc-wm{position:absolute;left:50%;top:44%;width:95em;height:95em;margin:-47em 0 0 -47em;z-index:0;display:grid;place-items:center;opacity:.13;filter:grayscale(1) brightness(2);pointer-events:none}.pc2 .pc-wm img{filter:none!important}
+.pc2.pc-xl .pc-n{font-size:25em}
+.pc2 .pb{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2.4em;padding:10em 8em 0;text-align:center}
+.pc2 .pb>*{flex:none;font-style:normal}
+.pc2 .pb-h{font:800 3.6em/1.15 var(--f-display,inherit);letter-spacing:.16em;text-transform:uppercase;color:color-mix(in srgb,var(--rc) 65%,#fff)}
+.pc2 .pb-n{font:900 19em/.9 var(--f-display,inherit);color:#fff;text-shadow:0 .06em .14em rgba(0,0,0,.6),0 0 .4em color-mix(in srgb,var(--rc) 80%,transparent)}
+.pc2 .pb-k{font:900 5.6em/1.05 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;color:var(--rc)}
+.pc2 .pb-d{font:600 3.7em/1.3 var(--f-body,inherit);color:rgba(255,255,255,.86)}.pc2 .pb-s{color:rgba(255,255,255,.55);font-size:3.3em}
+.pc2 .pb-w{font:800 3.9em/1.25 var(--f-display,inherit);color:#fff;padding:1.6em 2.6em;border-radius:2em;background:color-mix(in srgb,var(--rc) 18%,rgba(255,255,255,.05));border:max(1px,.3em) solid color-mix(in srgb,var(--rc) 45%,transparent)}.pc2 .pb-w small{display:block;font:700 .62em/1 var(--f-display,inherit);letter-spacing:.16em;text-transform:uppercase;color:color-mix(in srgb,var(--rc) 60%,#fff);margin-bottom:.7em}
+.pc2 .pb-r{margin-top:auto;margin-bottom:20em;font:800 3.2em/1 var(--f-display,inherit);letter-spacing:.14em;text-transform:uppercase;color:var(--rc)}
+.pc2.pc-bk .pc-fx{display:none}
+
 /* v420 special cards: each style re-skins the shield (frame --fr, face .pc-in, pattern .pc-pt, rays .pc-ry) and adds a name ribbon .sp-tag and a moving layer .sp-fx */
 .pc2 .sp-tag{position:absolute;left:0;right:0;top:0;z-index:6;text-align:center;font:900 4.4em/1 var(--f-display,inherit);letter-spacing:.16em;text-transform:uppercase;padding:2.4em 0 1.6em;color:var(--sk,#fff);background:linear-gradient(180deg,rgba(0,0,0,.72),transparent);text-shadow:0 0 1em var(--sk,#fff);font-style:normal}
 .pc2.pc-s .sp-tag{display:none}.pc2 .sp-fx{position:absolute;inset:0;z-index:2;pointer-events:none}
@@ -3218,7 +3236,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v422 · Nov 10';
+const APP_BUILD='v423 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4745,12 +4763,19 @@ const achOwned=u=>Object.keys(cardsOf(u)).filter(id=>id.startsWith('ac:')&&cards
 function cardInfo(id){if(id.startsWith('dc:'))return duoInfo(id);if(id.startsWith('sc:')){const [,st,key]=id.split(':'),p=pByKey(key);return {team:0,spc:st,name:p?p.name:'Player',school:p?p.school:'',sub:(p?(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school:'')+' · '+(SPEC[st]||{n:''}).n,key:p?p.key:''}}if(id.startsWith('ac:')){const a=achInfo(id);return {team:0,ach:1,at:a.t,name:a.name,school:a.school,sub:a.sub,key:a.key,pct:a.pct,line:a.line}}
   if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
   const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
+/* v423 (owner): single player cards flip in the card view. Front = OVR in the corner, crest, name and school; back = what the card does to your bets. */
+function pcBack(id,r,s){const c=cardInfo(id),R=RAR[r]||RAR.c,sp=c.spc?SPEC[c.spc]:null,ln=esc(lastN(c.name)),pct=CARD_PCT[r]||0;
+  const big=sp?spcLine(c.spc,r):'+'+pct+'%',cls=sp?` spc sp-${c.spc}`:'',sk=sp?`--sk:${sp.c};`:'';
+  const body=sp
+    ?`<b class="pb-k">${esc(sp.n)}</b><i class="pb-d">${esc(sp.d)}</i><span class="pb-w"><small>Works on</small>${esc(sp.w)}</span>`
+    :`<b class="pb-k">On your winnings</b><i class="pb-d">Win an Over/Under prop on ${ln} and this card adds ${pct}% to your winnings.</i><span class="pb-w"><small>Works on</small>Every prop you bet on ${ln}</span>`;
+  return `<span class="tcard pc2 pc-bk pc-${r||'c'}${cls}" style="${sk}--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span><span class="pb"><i class="pb-h">What it does to your bets</i><b class="pb-n">${big}</b>${body}</span><span class="pc-fx"></span></span></span>`}
 function cardArt(id,r,s=54){if(id.startsWith('dc:'))return duoArt(id,r,s);if(id.startsWith('sc:')){const st=id.split(':')[1],S=SPEC[st]||SPEC.prizm,h=cardArt('pc:'+id.split(':')[2],r,s);return h.replace('class="tcard pc2 ',`class="tcard pc2 spc sp-${st} `).replace('style="--rc:',`style="--sk:${S.c};--rc:`).replace('<span class="pc-fx">',`<i class="sp-tag">${esc(S.n)}</i><span class="sp-fx"></span><span class="pc-fx">`)}if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
   if(c.team)return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${cutImg(c.school,Math.round(s*.56))||slogo(c.school,Math.round(s*.5))}<i>TEAM</i></span>`;
   /* v415 player card (shield): OVR (ovr.js, from the OVR sheets), position and class top-left, school crest, last name, and on full-size cards the school and
      this season's key stats. Under 80 px tall only the OVR and the crest fit. */
   const q=c.key?pByKey(c.key):null,o=ovrOf(c.key),sm=s<80,xl=s>=200,ps=q?(q.pos==='DEF'?(q.sub||'DEF'):q.pos):'',gr=q?(['','FR','SO','JR','SR'][q.gr]||''):'',lg=logoFor(c.school),st=xl?pcStats(q):[],full=xl&&st.length>0,hz=Math.round(s*(sm?.34:full?.41:.47));
-  return `<span class="tcard pc2 pc-${r||'c'} ${sm?'pc-s':''} ${full?'pc-xl':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span><span class="pc-o"><b class="pc-n">${o||'–'}</b>${sm?'':`<i class="pc-p">${esc(ps||'')}</i>${gr?`<i class="pc-g">${gr}</i>`:''}`}</span><span class="pc-a">${lg?cutImg(c.school,hz):av(c.name,c.school,Math.round(s*(sm?.26:.4)))}</span>${sm?'':`<span class="pc-b"><b class="pc-nm">${esc(lastN(c.name))}</b>${xl?`<i class="pc-sc">${esc(c.school||'')}</i>${st.length?`<span class="pc-st">${st.map(x=>`<span><b>${esc(String(x[0]))}</b><i>${x[1]}</i></span>`).join('')}</span>`:''}`:''}<i class="pc-r">${R.n}</i></span>`}<span class="pc-fx"></span></span></span>`}
+  return `<span class="tcard pc2 pc-${r||'c'} ${sm?'pc-s':''} ${full?'pc-xl':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-f"></span><span class="pc-in"><span class="pc-pt"></span><span class="pc-ry"></span>${xl&&lg?`<span class="pc-wm">${cutImg(c.school,Math.round(s*.95))}</span>`:''}<span class="pc-o"><b class="pc-n">${o||'–'}</b>${sm?'':`<i class="pc-p">${esc(ps||'')}</i>${gr?`<i class="pc-g">${gr}</i>`:''}`}</span><span class="pc-a">${lg?cutImg(c.school,hz):av(c.name,c.school,Math.round(s*(sm?.26:.4)))}</span>${sm?'':`<span class="pc-b"><b class="pc-nm">${esc(lastN(c.name))}</b>${xl?`<i class="pc-sc">${esc(c.school||'')}</i>${st.length?`<span class="pc-st">${st.map(x=>`<span><b>${esc(String(x[0]))}</b><i>${x[1]}</i></span>`).join('')}</span>`:''}`:''}<i class="pc-r">${R.n}</i></span>`}<span class="pc-fx"></span></span></span>`}
 /* the season stats on a full-size card: the position's three key stats (football); fantasy points per game when there are no key stats or in basketball once it has stats */
 const PC_KEYS={QB:[['passYd','PASS YD'],['passTD','PASS TD'],['rushYd','RUSH YD']],RB:[['rushYd','RUSH YD'],['rushTD','RUSH TD'],['recYd','REC YD']],WR:[['recYd','REC YD'],['rec','CATCHES'],['recTD','REC TD']],TE:[['recYd','REC YD'],['rec','CATCHES'],['recTD','REC TD']],DL:[['tkl','TACKLES'],['sack','SACKS'],['tfl','TFL']],LB:[['tkl','TACKLES'],['tfl','TFL'],['sack','SACKS']],DB:[['tkl','TACKLES'],['dInt','INT'],['pbu','PBU']],K:[['fgm','FG MADE'],['xpm','PAT MADE']]};
 function pcStats(q){if(!q)return [];const g=(q.games||[]).filter(x=>x&&x.stat);if(!g.length)return [];const ks=FG_SPORT==='bb'?null:PC_KEYS[q.pos==='DEF'?q.sub:q.pos];
@@ -4782,10 +4807,10 @@ const cutImg=(sc,z)=>{const u=cutLogo(sc);return u?`<img class="lg-cut" data-cut
 const ovrOf=k=>{const v=k&&((window.OVR_ALL||{})[FG_SPORT]||{})[k];return v?+v:0};
 /* card view (v414, owner): tapping a card shows it big (tilts under the finger); only the name opens the profile */
 function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsWith('ac:'),own=ach?['x']:cardVers(u,id);r=r||(ach?'x':cardR(u,id))||'c';
-  const R=RAR[r]||RAR.c,H=Math.max(260,Math.min(430,Math.round(innerHeight*.5))),o=c.team?0:ovrOf(c.key),q=c.key?pByKey(c.key):null;
+  const R=RAR[r]||RAR.c,H=Math.max(260,Math.min(430,Math.round(innerHeight*.5))),o=c.team?0:ovrOf(c.key),q=c.key?pByKey(c.key):null;const flip=!ach&&!c.team&&!c.duo&&!!c.key;
   const el=document.createElement('div');el.id='cardview';el.className='cv';el.dataset.card=id;el.setAttribute('role','dialog');el.setAttribute('aria-label',c.name+' card');
   el.innerHTML=`<div class="cv-in" style="--rc:${R.c}"><button type="button" class="cv-x" data-act="cvClose" aria-label="Close">×</button>
-    <div class="cv-card">${ach?achArt(id,H):cardArt(id,r,H)}</div>
+    <div class="cv-card">${ach?achArt(id,H):flip?`<span class="pc-flip" style="width:${Math.round(H*.78)}px;height:${H}px" title="Tap to flip"><span class="pc-flipin"><span class="pc-ff">${cardArt(id,r,H)}</span><span class="pc-fb">${pcBack(id,r,H)}</span></span></span>`:cardArt(id,r,H)}</div>
     ${c.key?`<button type="button" class="cv-name" data-act="cvProfile" data-id="${esc(c.key)}"><b>${esc(c.name)}</b><small>${esc(c.sub||'')} · Tap the name for the profile</small></button>`:`<div class="cv-name"><b>${esc(c.name)}</b><small>${c.team?'Team card':esc(c.sub||'')}</small></div>`}
     <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>${c.spc?spcLine(c.spc,r):'+'+(ach?c.pct:c.duo?DUO_PCT[r]||0:CARD_PCT[r]||0)+'%'}</b><small>${c.spc?esc(SPEC[c.spc].n):c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
     ${c.spc?`<div class="cv-back"><b>His boost</b><small>${esc(SPEC[c.spc].d)}</small><b>Where it works</b><small>${esc(SPEC[c.spc].w)}</small></div>`:''}
@@ -4794,6 +4819,7 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
   document.body.appendChild(el);const cd=el.querySelector('.cv-card'),art=cd.firstElementChild;
   if(art&&!c.duo){const mv=e=>{const b=cd.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.transform=`rotateY(${(x*22).toFixed(1)}deg) rotateX(${(-y*18).toFixed(1)}deg)`;art.style.setProperty('--mx',((x+.5)*100).toFixed(0)+'%');art.style.setProperty('--my',((y+.5)*100).toFixed(0)+'%')},rs=()=>{art.style.transform='';art.style.removeProperty('--mx');art.style.removeProperty('--my')};
     cd.addEventListener('pointermove',mv);cd.addEventListener('pointerleave',rs);cd.addEventListener('pointerup',rs);cd.addEventListener('pointercancel',rs)}
+  if(flip){const fl=cd.querySelector('.pc-flip');let dn=null;cd.addEventListener('pointerdown',e=>{dn=[e.clientX,e.clientY]});cd.addEventListener('click',e=>{if(dn&&Math.hypot(e.clientX-dn[0],e.clientY-dn[1])>8)return;fl.classList.toggle('fl');try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}})}
   const x=el.querySelector('.cv-x');if(x)x.focus();sheetPush()}
 function closeCard(){const e=document.getElementById('cardview');if(e)e.remove()}
 /* v416 (owner): sell a card version for tokens (cheap on purpose: about a third of what a duplicate pays). The version is set to 0, like a removed card. */
