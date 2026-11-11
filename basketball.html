@@ -2590,6 +2590,10 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .pko-pack.nudge .pko-pk{animation:pkoNudge .4s}
 @keyframes pkoNudge{25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
 .cv-sell{margin-top:10px;align-self:center}
+.tp-list{display:grid;gap:10px;margin-top:10px}.tp-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border-left:4px solid var(--rc)}.tp-in{display:flex;flex-direction:column;gap:2px;min-width:0}.tp-pr b{font-size:20px}.tp-bt{display:flex;flex-direction:column;gap:6px}.tp-left{font-variant-numeric:tabular-nums;color:#FFC23D}.tp-st{font-weight:700}
+.tp-sell{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}.tp-s{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;border-bottom:3px solid var(--rc);cursor:pointer}
+.tp-f{display:flex;flex-direction:column;gap:10px;margin:8px 0;text-align:left}.tp-f label{display:flex;flex-direction:column;gap:4px;font-size:13px}.tp-f input,.tp-f select{font:inherit;padding:10px;border-radius:10px}.tp-go{margin-left:6px}
+
 #cfm{z-index:460}
 @media (prefers-reduced-motion:reduce){.wko-door{display:none}.wko.wk-big[data-s="4"],.wko-bg{animation:none!important}}
 /* v256 pack opening: rip, lift-spin-land flips, sparks, rarity background glow */
@@ -3184,7 +3188,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v418 · Nov 10';
+const APP_BUILD='v419 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4475,7 +4479,7 @@ const isCos=id=>{const x=ITEM[id];return !!x&&COS_K.includes(x.k)};
 function invLeft(u,id){const v=invOf(u),own=invHas(u,id);
   if(id==='t_boost'||id==='t_insure'){const f=id==='t_boost'?'b':'i';let used=0;for(const b of [...Object.values(betsOf(u)),...Object.values(propsOf(u))])if(b&&b.bx===f)used++;return Math.max(0,own-used)}
   return Math.max(0,own-(+((v.use||{})[id])||0))}
-const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)+giftBonus(u)};
+const invBonus=u=>{const v=invOf(u);return (+v.dup||0)-(+v.sp||0)+(+v.tp||0)+giftBonus(u)};
 /* free packs: the starter pack, plus one Rookie pack for every 7 days you play the daily challenge */
 /* packs given to an account by the owner (v346): inv.fr.gp={id:{t:'god'}} lists them, inv.fr.gpo={id:1} marks the ones already opened */
 const giftPacks=u=>{const f=invOf(u).fr||{},o=f.gpo||{};return Object.keys(f.gp||{}).filter(id=>!o[id]&&PACKS[(f.gp[id]||{}).t]).map(id=>({id,type:f.gp[id].t,m:f.gp[id].m||''}))};
@@ -4732,6 +4736,71 @@ async function cardSell(id,r){const u=ME.uid,v=invOf(u),raw=v.cards&&v.cards[id]
   S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},v,patch)});
   if(await act(()=>upsert('picks/'+u,{inv:patch}),'Sold for '+SELL[r]+' tokens')){closeCard();SFX.coin()}else S.picks[u]=Object.assign({},S.picks[u],{inv:v});
   render()}
+/* v419 (owner): Varsity Transfer Portal. Cards are auctioned for tokens only (no real money). The server (tools/sql/transfer_portal.sql) holds the
+   card while it is listed and moves cards and tokens when it ends. Tokens from the Portal sit in inv.tp (counted in the balance by invBonus).
+   A 5% fee comes off every sale. A bid in the last 2 minutes adds 2 minutes. */
+const TP={rows:[],t:0,tab:'browse',err:'',ok:0,sel:null};
+const tpPre=()=>FG_SPORT==='bb'?'bb_':'';
+const TP_FEE=5,TP_HRS=[1,6,12,24,48];
+const tpMin=l=>l.bid==null?l.start_bid:l.bid+Math.max(1,Math.ceil(l.bid*.05));
+const tpEnd=l=>Date.parse(l.ends_at)||0;
+const tpLeft=ms=>{if(ms<=0)return 'Ended';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h>=24?Math.floor(h/24)+'d '+h%24+'h':h?h+'h '+m+'m':m+'m '+String(s%60).padStart(2,'0')+'s'};
+async function tpLoad(force){
+  if(!SB||!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return;
+  if(!force&&Date.now()-TP.t<8000)return;TP.t=Date.now();
+  try{await SB.rpc('tp_settle');const {data,error}=await SB.from('tp_listings').select('*').eq('pre',tpPre()).or('status.eq.open,seller.eq.'+ME.uid+',bidder.eq.'+ME.uid).order('ends_at');if(error)throw error;TP.rows=data||[];TP.err='';TP.ok=1}
+  catch(e){TP.err=String((e&&e.message)||e);TP.ok=0}
+  if(UI.view==='portal')render(true)}
+async function tpCall(fn,args,ok){
+  if(!SB)return false;
+  try{const {error}=await SB.rpc(fn,args);if(error)throw error;say(ok);SFX.coin();await tpLoad(true);return true}
+  catch(e){say((e&&e.message)||'That did not work. Try again.');await tpLoad(true);return false}}
+function tpCardRow(l,mode){
+  const c=cardInfo(l.card),R=RAR[l.ver]||RAR.c,left=tpEnd(l)-Date.now(),mine=l.seller===ME.uid,hi=l.bidder===ME.uid,open=l.status==='open'&&left>0,own=cardVers(ME.uid,l.card).includes(l.ver);
+  const st=l.status==='sold'?(mine?'Sold for '+l.bid+' tokens':hi?'You won it':'Sold'):l.status==='expired'?(mine?'Ended with no sale, card returned':'Ended'):l.status==='cancelled'?'Cancelled':'';
+  const price=l.bid==null?`<b>${l.start_bid}</b> <small class="muted">starting bid</small>`:`<b>${l.bid}</b> <small class="muted">${hi?'your bid is top':'top bid'}</small>`;
+  const btns=!open?'':mine?(l.bid==null?`<button class="btn ghost sm" data-act="tpCancel" data-id="${l.id}">Take it back</button>`:`<small class="muted">Has a bid</small>`):own?`<small class="muted">You own this</small>`:
+    `<button class="btn sm" data-act="tpBid" data-id="${l.id}">${hi?'Raise bid':'Bid'}</button>${l.buy_now&&(l.bid==null||l.bid<l.buy_now)?`<button class="btn ghost sm" data-act="tpBuy" data-id="${l.id}">Buy now ${l.buy_now}</button>`:''}`;
+  return `<article class="card tp-row" style="--rc:${R.c}"><div class="tp-art">${cardArt(l.card,l.ver,c.duo?96:64)}</div><div class="tp-in"><b>${esc(c.name)}</b><small style="color:${R.c}">${R.n} ${c.duo?'Duo':c.team?'team':c.ach?'Immortal':'player'} card</small><small class="muted">${mine?'Your listing':'Seller · '+esc(nm(l.seller))}</small>
+    ${open?`<div class="tp-pr">${price}</div><small class="tp-left" data-e="${tpEnd(l)}">${tpLeft(left)}</small>`:`<small class="tp-st">${esc(st)}</small>`}</div><div class="tp-bt">${btns}</div></article>`}
+function viewPortal(){
+  const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
+  const head=`<div class="head"><h2>Transfer Portal</h2><p>Auction your cards for tokens and bid on other players’ cards. Tokens only, no real money.</p></div>`;
+  if(!can)return head+'<p class="empty">Sign in to use the Transfer Portal.</p>';
+  tpLoad();
+  const bal=bank(ME.uid),tab=['browse','mine','sell'].includes(TP.tab)?TP.tab:'browse',now=Date.now();
+  const tabs=`<div class="lk-seg" role="tablist" aria-label="Transfer Portal">${[['browse','Auctions'],['mine','My bids & listings'],['sell','Sell a card']].map(([k,l])=>`<button role="tab" data-act="tpTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
+  let body='';
+  if(!SB)body='<p class="empty">The Transfer Portal needs the live app. It does not run in the demo.</p>';
+  else if(TP.err&&!TP.ok)body=`<p class="empty">The Portal is not open yet (${esc(TP.err)}). Try again soon.</p>`;
+  else if(tab==='browse'){
+    const rows=TP.rows.filter(l=>l.status==='open'&&tpEnd(l)>now).sort((a,b)=>tpEnd(a)-tpEnd(b));
+    body=rows.length?rows.map(l=>tpCardRow(l)).join(''):'<p class="empty">No cards for sale right now. List one from the Sell a card tab.</p>'}
+  else if(tab==='mine'){
+    const rows=TP.rows.filter(l=>l.seller===ME.uid||l.bidder===ME.uid).sort((a,b)=>(b.status==='open')-(a.status==='open')||tpEnd(a)-tpEnd(b));
+    body=rows.length?rows.map(l=>tpCardRow(l)).join(''):'<p class="empty">Nothing yet. Bid on a card or list one of yours.</p>'}
+  else{
+    const mine=cardsOf(ME.uid),items=[];
+    Object.keys(mine).forEach(id=>cardVers(ME.uid,id).forEach(r=>items.push({id,r})));
+    const ord={m:0,x:0,l:1,e:2,r:3,u:4,c:5};items.sort((a,b)=>ord[a.r]-ord[b.r]||cardInfo(a.id).name.localeCompare(cardInfo(b.id).name));
+    body=`<p class="muted">Pick a card to auction. It leaves your locker while it is listed and comes back if nobody bids. A ${TP_FEE}% fee comes off the winning bid.</p>`+(items.length?`<div class="tp-sell">${items.map(x=>{const c=cardInfo(x.id),R=RAR[x.r];return `<button type="button" class="card tp-s" style="--rc:${R.c}" data-act="tpList" data-id="${esc(x.id)}" data-r="${x.r}">${cardArt(x.id,x.r,c.duo?80:56)}<b>${esc(c.name)}</b><small style="color:${R.c}">${R.n}</small></button>`}).join('')}</div>`:'<p class="empty">You have no cards to sell yet. Open packs in the Shop.</p>')}
+  return head+top+tabs+`<div class="tp-list">${body}</div><p class="muted lk-note">Tokens have no cash value. A bid is held until you are outbid or the auction ends.</p>`}
+function tpListSheet(id,r){
+  const c=cardInfo(id),R=RAR[r],sug=Math.max(5,(SELL[r]||5)*3);
+  confirmBox('List '+c.name+' ('+R.n+')',`<span class="tp-f"><label>Starting bid (tokens)<input id="tp-s" type="number" min="1" inputmode="numeric" value="${sug}"></label>
+    <label>Buy-now price (optional)<input id="tp-b" type="number" min="1" inputmode="numeric" placeholder="none"></label>
+    <label>Lasts<select id="tp-h">${TP_HRS.map(h=>`<option value="${h}" ${h===24?'selected':''}>${h===1?'1 hour':h<24?h+' hours':h/24+(h===24?' day':' days')}</option>`).join('')}</select></label></span>
+    <small class="muted">The card leaves your locker until it sells or ends. ${TP_FEE}% fee on the sale.</small>`,'List it',async()=>{
+      const s=Math.round(+$('#tp-s').value),bn=$('#tp-b').value?Math.round(+$('#tp-b').value):null,h=+$('#tp-h').value;
+      if(!(s>=1)){say('Enter a starting bid.');return}if(bn!=null&&bn<=s){say('Buy now has to be above the starting bid.');return}
+      if(await tpCall('tp_list',{p_pre:tpPre(),p_card:id,p_ver:r,p_start:s,p_buy:bn,p_hours:h},'Listed on the Transfer Portal')){TP.tab='mine';render()}})}
+function tpBidSheet(l){
+  const c=cardInfo(l.card),min=tpMin(l),bal=bank(ME.uid);
+  confirmBox('Bid on '+c.name,`<span class="tp-f"><label>Your bid (min ${min})<input id="tp-a" type="number" min="${min}" inputmode="numeric" value="${min}"></label></span><small class="muted">You have ${Math.round(bal)} tokens. Your bid is held until you are outbid or it ends. If you win, the card lands in your locker.</small>`,'Place bid',async()=>{
+    const a=Math.round(+$('#tp-a').value);if(!(a>=min)){say('Bid at least '+min+' tokens.');return}
+    await tpCall('tp_bid',{p_id:l.id,p_amt:a,p_bal:Math.round(bank(ME.uid))},'Bid placed')})}
+setInterval(()=>{if(UI.view!=='portal'||document.hidden)return;const n=Date.now();let end=0;document.querySelectorAll('.tp-left').forEach(e=>{const ms=+e.dataset.e-n;e.textContent=tpLeft(ms);if(ms<=0)end=1});if(end)tpLoad(true);else if(n-TP.t>15000)tpLoad(true)},1000);
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollGear(r){let i=RAR_ORD.indexOf(r);for(;i>=0;i--){const pool=ITEMS.filter(x=>x.r===RAR_ORD[i]&&BH_K.includes(x.k));if(pool.length)return pool[fcRnd(pool.length)].id}return 'bhs_black'}
 function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)&&!BH_K.includes(x.k)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
@@ -5411,7 +5480,7 @@ function viewShop(){
   const head=`<div class="head"><h2>Shop</h2><p>Open packs with tokens.</p></div>`;
   if(!can)return head+'<p class="empty">Sign in to open packs.</p>';
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid);
-  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><a class="btn ghost sm" href="#locker">My Locker</a></section>`;
+  const top=`<section class="card lk-top"><div><span class="lbl">Your tokens</span><b class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</b></div><a class="btn ghost sm" href="#locker">My Locker</a><a class="btn sm tp-go" href="#portal">Transfer Portal</a></section>`;
   let body='';
     const free=fp?`<section class="card lk-free"><div><b>${fp} free ${fp===1?'pack':'packs'} waiting</b><small class="muted">${(v.fr||{}).st?'For every 7 days of daily challenge.':'Your starter pack.'}</small></div><button class="btn" data-act="pkOpen" data-v="rookie" data-h="free">Open free pack</button></section>`:
       `<p class="hint">Free Rookie pack for every 7 days you play the daily challenge (${(+fgRec(ME.uid).days||0)%7} of 7).</p>`;
@@ -5430,7 +5499,7 @@ function viewShop(){
       <p class="muted">${P.duo?'Duo cards only · two teammates on one double-sided card · Epic or better · unlocks parlays':P.team?'You pick the team · its player and team cards only':P.gear?'Bobblehead gear only · arm sleeves and back plates':P.cards?'Player and team cards only':P.cos?(ACH_CHANCE[k]?`Cosmetics, plus a ${ACH_CHANCE[k]}% Immortal card chance per item`:'Cosmetics only'):'Cosmetics and cards'} · ${P.c} ${P.cards?(P.c===1?'card':'cards'):(P.c===1?'item':'items')}${P.g?` · the last one is ${RAR[P.g].n} or better, the rest are random`:P.c===1?', random rarity':', all random'}</p>
       <details class="lk-odds"><summary>Odds</summary><ul>${Object.entries(P.odds).map(([r,p])=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>${p}%</b></li>`).join('')}${ACH_CHANCE[k]?`<li><span style="color:${RAR.x.c}">${RAR.x.n} card (per slot)</span><b>${ACH_CHANCE[k]}%</b></li>`:''}</ul><small class="muted">Each ${P.cards?'card':'item'} rolls these odds${P.g?`, except the last one, which is at least ${RAR[P.g].n}`:''}. Duplicate ${P.cards?'cards':P.cos&&!ACH_CHANCE[k]?'cosmetics':'cosmetics and cards'} turn into tokens.</small></details>
       <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${bal<P.tok?'disabled':''}>${P.tok.toLocaleString()} tokens</button></article>`).join('')}</div>
-      <p class="muted lk-note">Items have no cash value and can’t be traded.</p>`+extras;
+      <p class="muted lk-note">Items have no cash value. Cards can be traded for tokens on the Transfer Portal.</p>`+extras;
   return head+top+body;
 }
 function viewLocker(){
@@ -9198,7 +9267,7 @@ document.addEventListener('click',async e=>{
 });
 
 /* ---------- render ---------- */
-const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk','controls','privacy','locker','shop'];
+const VIEWS=['team','league','groups','games','minigames','simulate','me','account','scoring','admin','desk','controls','privacy','locker','shop','portal'];
 const viewOK=v=>VIEWS.includes(v)&&(v!=='team'||!!UI.team)&&(v!=='admin'||ME.admin)&&(v!=='desk'||canDesk())&&(v!=='controls'||ME.admin);
 function bannerHTML(){
   const b=[];
@@ -9260,7 +9329,7 @@ function render(bg){
   try{cosApplyRoot()}catch(_){}
   T10S=null;POTW_C=null;
   if(location.hash==='#simulate'){UI.mtab='sim';history.replaceState(null,'','#minigames')}
-  const V={shop:viewShop,locker:viewLocker,team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,controls:viewControls,scoring:viewScoring,privacy:viewPrivacy,admin:viewAdmin};
+  const V={portal:viewPortal,shop:viewShop,locker:viewLocker,team:viewTeam,league:viewLeague,groups:viewGroups,games:viewGames,minigames:viewMini,simulate:viewSim,me:viewMeAll,account:viewAccount,desk:viewDesk,controls:viewControls,scoring:viewScoring,privacy:viewPrivacy,admin:viewAdmin};
   let v=UI.view;
   const html=V[v]();
   if(bg===true&&html===LAST_HTML&&v===LAST_V){chrome(v);return}
@@ -9370,6 +9439,11 @@ document.addEventListener('click',async e=>{
   if(a==='cvClose'){sheetClose();return}
   if(a==='cvVer'){openCard($('#cardview').dataset.card,t.dataset.r);return}
   if(a==='cvSell'){const cid=$('#cardview').dataset.card,r=t.dataset.r,c=cardInfo(cid);confirmBox('Sell this card?',`You get <b>${SELL[r]} tokens</b> for your ${RAR[r].n} ${esc(c.name)} card. You can’t undo this.`,'Sell',()=>cardSell(cid,r));return}
+  if(a==='tpTab'){TP.tab=t.dataset.v;render();return}
+  if(a==='tpList'){tpListSheet(id,t.dataset.r);return}
+  if(a==='tpBid'){const l=TP.rows.find(x=>x.id===id);if(l)tpBidSheet(l);return}
+  if(a==='tpBuy'){const l=TP.rows.find(x=>x.id===id);if(l)confirmBox('Buy now?',`Pay <b>${l.buy_now} tokens</b> for the ${RAR[l.ver].n} ${esc(cardInfo(l.card).name)} card. You can’t undo this.`,'Buy',()=>tpCall('tp_buy',{p_id:l.id,p_bal:Math.round(bank(ME.uid))},'It’s yours. Check your locker.'));return}
+  if(a==='tpCancel'){tpCall('tp_cancel',{p_id:id},'Card back in your locker');return}
   if(a==='cvProfile'){closeCard();openPlayer(id);return}
   if(a==='player')openPlayer(id);
   else if(a==='close')sheetClose();
