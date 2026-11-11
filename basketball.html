@@ -3218,7 +3218,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v421 · Nov 10';
+const APP_BUILD='v422 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5080,10 +5080,14 @@ function packShow(P,got){
     if(g.card.startsWith('sc:')){const c=cardInfo(g.card),S=SPEC[c.spc];wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school,pos:S.n.toUpperCase(),k1:S.n,kind:'special',on:S.w.toLowerCase(),art:cardArt(g.card,g.r,170)},pct:S.pc[g.r]});continue}
     if(g.card.startsWith('tc:')){const c=cardInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school||c.name,pos:'TEAM',k1:'Card',kind:'team',on:'on Pick ’em picks',art:cardArt(g.card,g.r,124)}});continue}
     const p=key&&pByKey(key);if(p)wk.push({p,r:g.r,dup:g.dup,pct,k:P.n})}
-  /* v416 (owner): only the best card in the pack gets the walkout */
-  wk.sort((a,b)=>OR.indexOf(b.r)-OR.indexOf(a.r));
-  if(!wk.length){packShow0(P,got);return}
-  pkWalkout(null,()=>packShow0(P,got),Object.assign({btn:'See all cards'},wk[0]))}
+  /* v422 (owner): every Legendary or better card plays its walkout automatically, one after another, lowest first, even when there are several in the pack.
+     With none of those, the best Epic card gets one walkout that can be skipped. */
+  wk.sort((a,b)=>OR.indexOf(a.r)-OR.indexOf(b.r));
+  let list=wk.filter(x=>OR.indexOf(x.r)>=OR.indexOf('l'));
+  if(!list.length&&wk.length)list=[wk[wk.length-1]];
+  if(!list.length){packShow0(P,got);return}
+  const play=i=>{if(i>=list.length){packShow0(P,got);return}
+    pkWalkout(null,()=>play(i+1),Object.assign({btn:i===list.length-1?'See all cards':'Next'},list[i]))};play(0)}
 function packShow0(P,got){
   const o=document.createElement('div');o.className='pko';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',P.n+' opened');
   const ORD=['c','u','r','e','l','m','x'],calm=matchMedia('(prefers-reduced-motion: reduce)').matches,key=Object.keys(PACKS).find(k=>PACKS[k]===P)||'rookie';
@@ -5428,7 +5432,7 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'wp-3',who:ZH,wp:1},
   {id:'ml-wp-1',who:ML,wp:1},
   {id:'is-lx',who:/^\s*isaac\s+smedra\s*$/i,rar:['x','l']},   /* v409 (owner): every Immortal and Legendary card removed from Isaac Smedra */
-  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'},{id:'se-all-1',who:ABZH,gp:'alls',m:'Here’s all of the new special edition cards'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
+  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'},{id:'se-all-1',who:ABZH,gp:'alls',m:'Here’s all of the new special edition cards'},{id:'se-all-2',who:AB,gp:'alls',m:'Here’s another Special Edition pack'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),gp=Object.assign({},(old.fr||{}).gp),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0,ng=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};

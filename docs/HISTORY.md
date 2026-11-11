@@ -408,3 +408,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v421: Special Edition pack (gift)
 - `PACKS.alls` (off, gift only): 9 cards, one of every special style (`P.each`), Epic+ odds 70/24/6. CARD_FIX `se-all-1` gives it to Ari Borkar and Zed Hornby with the message "Here’s all of the new special edition cards" (CARD_FIX entries can now carry `m`).
+
+## v422: walkouts
+- Every Legendary+ card in a pack plays its walkout automatically, one after another (lowest rarity first, `packShow` -> `play(i)`); with no Legendary+, the best Epic card gets one skippable walkout. Mythical/Immortal stay locked. Ari Borkar got a second Special Edition pack (`se-all-2`).
