@@ -371,3 +371,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - OVR manual: QBs Dax Labrum 97, Gaige Weddle 94, Timothy Cox 90, Santonio Urena 91 (Nov 10, owner).
 - OVR sheets: OVR is column C (next to Name) and every tab lists highest OVR first (make_ovr.py builds twice: recalc, read OVR, rebuild in that order) (Nov 10, owner).
 - OVR (Nov 10, owner): DB OVRs x0.95 (Notes B13); manual: Madin Gardini QB 95, Tyler Holmes QB 92, Logan Nelson DL 98, Davon Dunn DB 96, Devin Davis DB 93, Gaige Weddle DB 99, T'Marrion Williams WR 87.
+- OVR: DB adjustment changed to x0.97 (3% lower) (Nov 10, owner).
