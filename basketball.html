@@ -2283,7 +2283,7 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .lk-bst span{min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 9px;border-radius:10px;border:1px solid color-mix(in srgb,var(--rc) 45%,transparent);background:color-mix(in srgb,var(--rc) 10%,transparent)}
 .lk-bst i{font:700 .62rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase;color:var(--rc);font-style:normal;white-space:nowrap}.lk-bst b{font:900 .92rem/1 var(--f-display,inherit)}
 .lk-ty{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:6px}.lk-ty::-webkit-scrollbar{display:none}.lk-ty .chip{flex:none}@media (max-width:520px){.lk-ty .chip{padding-left:11px;padding-right:11px;font-size:.74rem}}
-.lk-sr{display:flex;gap:8px;margin:10px 0 6px}.lk-sr input{flex:1;min-width:0}.lk-sr .btn{flex:none;min-height:42px}
+.lk-ord{display:block;margin:2px 0 0;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}.lk-sr{display:flex;gap:8px;margin:10px 0 6px}.lk-sr input{flex:1;min-width:0}.lk-sr .btn{flex:none;min-height:42px}
 .lk-cs .lk-big{gap:20px 12px}.lk-cs .lk-bc,.lk-cs .lk-bc.duo{max-width:none}.lk-cs .lk-bc>b{min-height:0;margin-top:2px}
 .lk-flt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 6px}.lk-flt #lk-q{grid-column:1/-1}.lk-flt input,.lk-flt select{width:100%;min-width:0}.lk-flt .btn{grid-column:1/-1;justify-self:start}.lk-flt select{min-height:42px}
 
@@ -3405,7 +3405,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v447 · Nov 10';
+const APP_BUILD='v448 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5879,6 +5879,10 @@ function viewLocker(){
     const ids=ids0.filter(id=>{const f=infos[id];return (!UI.lkSc||f.sch.includes(UI.lkSc))&&(!UI.lkPs||f.pos.includes(UI.lkPs))&&(!UI.lkR||cardVers(ME.uid,id).includes(UI.lkR))&&(!UI.lkSt||id.startsWith('sc:'+UI.lkSt+':'))&&(!cq||nmNorm(f.nm+' '+f.sch.join(' ')).includes(cq))});
     /* v436 (owner): more ways to filter and sort your cards: rarity you own, special style, and a sort (overall / rarity / name / team) */
     /* v444 (owner): no Sort menu any more: every list of cards is highest overall first (ids0 is already in that order) */
+    /* (owner, later the same night): the All list is ordered by what a card returns, best boost first (same value as Top Cards on the Props tab: special = its own boost,
+       Duo = DUO_PCT, player and team = CARD_PCT of the best version you own); ties go to the higher overall. The other type chips stay highest overall first. */
+    const bV=id=>{const r=best(id);return id.startsWith('sc:')?((SPEC[id.split(':')[1]]||{pc:{}}).pc[r]||0):id.startsWith('dc:')?(DUO_PCT[r]||0):(CARD_PCT[r]||0)};
+    if(T==='a')ids.sort((x,y)=>bV(y)-bV(x)||cOvr(y)-cOvr(x)||cardInfo(x).name.localeCompare(cardInfo(y).name));
     const vers=Object.keys(mine).reduce((n,id)=>n+cardVers(ME.uid,id).length,0),nP=Object.keys(mine).filter(i=>i.startsWith('pc:')&&cardVers(ME.uid,i).length).length,nT=Object.keys(mine).filter(i=>i.startsWith('tc:')&&cardVers(ME.uid,i).length).length;
     const tiers=RAR_ORD.slice().reverse().map(r=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>+${CARD_PCT[r]}%</b></li>`).join('');
     const dots=id=>`<span class="lk-vers">${RAR_ORD.map(r=>`<i style="--rc:${RAR[r].c}" class="${(mine[id]||{})[r]?'on':''}" title="${RAR[r].n}"></i>`).join('')}</span>`;
@@ -5899,7 +5903,8 @@ function viewLocker(){
         <select id="lk-r" aria-label="Rarity"><option value="">All rarities</option>${RAR_ORD.filter(r=>ids0.some(id=>cardVers(ME.uid,id).includes(r))).reverse().map(r=>`<option value="${r}" ${UI.lkR===r?'selected':''}>${RAR[r].n}</option>`).join('')}</select>
         ${lkSts.length?`<select id="lk-st" aria-label="Special style"><option value="">All special styles</option>${lkSts.map(x=>`<option value="${x}" ${UI.lkSt===x?'selected':''}>${esc(SPEC[x].n)}</option>`).join('')}</select>`:''}
         ${UI.lkQ||fN?'<button type="button" class="btn sm ghost" data-act="lkFClr">Clear filters</button>':''}</div>`:''}
-      ${UI.lkQ||fN?`<small class="muted">${ids.length} of ${ids0.length} cards · highest overall first</small>`:''}
+      ${UI.lkQ||fN?`<small class="muted">${ids.length} of ${ids0.length} cards</small>`:''}
+      <small class="muted lk-ord">${T==='a'?'Best boost first':'Highest overall first'}</small>
       ${ids.length?`<div class="lk-big" style="grid-template-columns:repeat(${LKC},minmax(0,1fr))">${ids.slice(0,N).map((id,i)=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.duo?'div':'button type="button" data-act="cardView" data-id="'+esc(id)+'"'} class="lk-bc${c.duo?' duo':''}" style="--rc:${R.c};--i:${i%6};--h:${LKH}px"><span class="lk-ba">${cardArt(id,r,LKH)}</span>${c.key?`<b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b>`:`<b>${esc(c.name)}</b>`}<small style="color:${R.c}">${R.n} · ${c.spc?spcLine(c.spc,r)+' · '+SPEC[c.spc].n:'+'+CARD_PCT[r]+'%'}</small>${dots(id)}</${c.duo?'div':'button'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" id="lk-more" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
         :`<p class="empty">No ${T==='t'?'team':T==='d'?'Duo':T==='s'?'special':T==='a'?'':'player'} cards yet. ${T==='d'?'Open a Duo pack to pull some.':T==='s'?'Open a Spotlight pack, or pull Epic and better cards in any pack.':'Open packs to pull some.'}</p>`}</section>`;
   }else if(tab==='bnd'){body=bndHTML()
