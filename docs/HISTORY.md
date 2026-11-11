@@ -430,3 +430,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v429
 - Pack opening (`packShow0`): Flip all flips every remaining card straight over (`flip(c,true)`, no per-card full-screen reveal); special cards flip on tap without a second reveal because they already had their walkout.
+
+## v430
+- Compare players (`compareHTML`, `cmpTop`) snaps to the top of the screen after a pick/Change/Clear (no centering, no smooth scroll); its search results (`.cmp-res`) and the admin card search results (`#ctl-res`) are fixed-height scroll boxes so nothing shifts; `overflow-anchor:none` inside them.

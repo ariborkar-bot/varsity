@@ -2262,6 +2262,11 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .lk-ring b{font:900 1.5rem/1 var(--f-display,inherit)}.lk-ring small{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .lk-hs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.lk-hs div{display:flex;flex-direction:column}.lk-hs b{font:900 1.35rem/1.1 var(--f-display,inherit)}.lk-hs small{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .lk-shopb{align-self:center}
+/* v430: no layout shifting in Compare players and the card search */
+.cmp-card,.cmp-card *,#ctl-res{overflow-anchor:none}.cmp-card{min-height:34em}.cmp-top .cmp-pl{min-height:20.6em}
+.cmp-res{height:13.5em;overflow-y:auto;overscroll-behavior:contain}
+#ctl-res{min-height:16em;max-height:16em;overflow-y:auto;overscroll-behavior:contain}
+
 .lk-cardsb{display:flex;align-items:center;gap:14px;width:100%;margin:0 0 12px;padding:16px 18px;border-radius:18px;border:2px solid var(--accent);background:linear-gradient(135deg,rgba(47,107,255,.5),rgba(180,140,255,.38));color:#fff;text-align:left;font:inherit;box-shadow:0 8px 24px -10px var(--accent)}
 .lk-cardsb b{display:block;font:900 1.25rem/1.1 var(--f-display,inherit);text-transform:uppercase;letter-spacing:.06em}.lk-cardsb small{display:block;margin-top:3px;opacity:.85;font-size:.78rem}.lk-cardsb>span:nth-child(2){flex:1;min-width:0}.lk-cardsb>i{font-style:normal;font-size:1.8rem;opacity:.8}
 .lk-cardsb[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px -8px var(--accent)}
@@ -3287,7 +3292,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v429 · Nov 10';
+const APP_BUILD='v430 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7816,6 +7821,8 @@ function cmpSearch(q){
     .sort((a,b)=>b.v-a.v).slice(0,8);
 }
 const cmpResHTML=(s,list)=>list.map(x=>`<li><button type="button" data-act="cmpPick" data-s="${s}" data-id="${esc(x.p.key)}">${av(x.p.name,x.p.school,30)}<span class="lt">${T10W(x.p,`<b>${esc(x.p.name)}</b>`)}<i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${esc(x.p.school)}</span></i></span><span class="pv"><b>${f1(x.v)}</b><small>pts</small></span></button></li>`).join('')||'<li class="hint">No players found</li>';
+/* v430 (owner): Compare players stays pinned at the top of the screen and never shifts: it snaps to the top once (no smooth scroll), its search results sit in a fixed-height box, and scroll anchoring is off inside it */
+function cmpTop(){const c=document.getElementById('compare');if(c){const y=c.getBoundingClientRect().top+scrollY-((document.querySelector('#mastMini.on')||{}).offsetHeight||56)-8;window.scrollTo(0,Math.max(0,y))}}
 function compareHTML(){
   const P=UI.cmp.map(k=>k?pByKey(k):null),both=P[0]&&P[1];
   let lead=-1,wins=[0,0];
@@ -9725,10 +9732,10 @@ document.addEventListener('click',async e=>{
   else if(a==='cmpPick'){const sd=+t.dataset.s,pl=players().filter(x=>x.mp&&x.key!==t.dataset.id);
     UI.cmp[sd]=t.dataset.id;UI.cmpNew=sd;UI.cmpPh='land';
     UI.cmpReel=Array.from({length:9},()=>pl[Math.floor(Math.random()*pl.length)]).filter(Boolean).map(x=>x.key);
-    render();const c=document.getElementById('compare');if(c)c.scrollIntoView({block:'center'});
+    render();cmpTop();
     setTimeout(()=>{if(UI.cmpNew===sd){UI.cmpNew=null;UI.cmpPh=null}},1500)}
-  else if(a==='cmpClear'){UI.cmp[+t.dataset.s]=null;render()}
-  else if(a==='cmpReset'){UI.cmp=[null,null];render()}
+  else if(a==='cmpClear'){UI.cmp[+t.dataset.s]=null;render();cmpTop()}
+  else if(a==='cmpReset'){UI.cmp=[null,null];render();cmpTop()}
   else if(a==='stTab'){UI.stab=t.dataset.v==='stats'?'stats':'players';render()}
   else if(a==='sxPos'){UI.sx.pos=t.dataset.v;UI.sx.k='';render()}
   else if(a==='sxK'){UI.sx.k=t.dataset.v;render()}
