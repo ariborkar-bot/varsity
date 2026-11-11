@@ -424,3 +424,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 ## v427
 - Special cards (Prizm, Game Ticket, Hot Streak, Playbook, Signature, Friday Night Lights, Headline, Rivalry, Arcade): only roll for the top 25 players of each position by overall (`specPool`, `SPC_TOP`); each style has its own walkout scene (`WKS`, `.wks-<style>`, `SFX.scene`); every special card plays its walkout automatically in `packShow` whatever the rarity. CARD_FIX `se-all-3` gives Ari Borkar (only) another Special Edition pack.
 - Locker opens on Cards. Cards left the tab strip and have their own big button (`.lk-cardsb`, `cardsBtn` in `viewLocker`) above the other tabs (Avatar, Cosmetics, Boosts, Binder).
+
+## v428
+- `giftPacks` sorts Special Edition packs (`alls`) to the front, so Ari's pack is the first one waiting.
