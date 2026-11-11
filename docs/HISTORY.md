@@ -405,3 +405,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - Art: `cardArt` re-skins the shield (`.pc2.sp-<style>`, ribbon `.sp-tag`, moving layer `.sp-fx`). Card view shows "His boost / Where it works" (`.cv-back`). Locker Cards tab has a Special chip.
 - Spotlight pack (`PACKS.spot`, 1,800 tokens, specials only, walkout). Other packs turn 14% of Epic+ cards into specials (`SPC_CHANCE`). Ari Borkar gets 2 free Spotlight packs (CARD_FIX).
 - Still not built: numbered cards, Trio cards, rarity wheel, favourites on profile, weekly/season packs, daily/streak/invite packs, parlay win celebration.
+
+## v421: Special Edition pack (gift)
+- `PACKS.alls` (off, gift only): 9 cards, one of every special style (`P.each`), Epic+ odds 70/24/6. CARD_FIX `se-all-1` gives it to Ari Borkar and Zed Hornby with the message "Here’s all of the new special edition cards" (CARD_FIX entries can now carry `m`).

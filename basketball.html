@@ -3218,7 +3218,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v420 · Nov 10';
+const APP_BUILD='v421 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4363,6 +4363,8 @@ const PACKS={
   gear:{n:'Accessories pack',c:3,tok:300,usd:'$2.99',odds:{c:40,u:30,r:18,e:8,l:3,m:1},g:'',gear:1},
   /* v420 (owner): Spotlight pack: special player cards only (Prizm, Game Ticket, Hot Streak, Playbook, Signature, Friday Night Lights, Headline, Rivalry, Arcade) */
   spot:{n:'Spotlight pack',c:3,tok:1800,usd:'$11.99',odds:{e:70,l:24,m:6},g:'',cards:1,spc:1},
+  /* v421 (owner): Special Edition pack: one card of every special style (9 cards). Gift only. */
+  alls:{n:'Special Edition pack',c:9,tok:0,odds:{e:70,l:24,m:6},g:'',cards:1,spc:1,each:1,off:1},
   rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
   player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:''},
   /* v380 (owner): Pick Your Team pack: Pro pack odds, but you pick the team; the card is one of that team's players or its team card. v381: 1 card */
@@ -4567,7 +4569,7 @@ function specProp(u,key,ctx){let t=0;const p=pByKey(key),g=ctx&&ctx.game;
 function specTeam(u,school){let t=0;for(const id of Object.keys(invOf(u).cards||{})){if(!id.startsWith('sc:ticket:')&&!id.startsWith('sc:signature:'))continue;const [,st,key]=id.split(':'),p=pByKey(key);if(!p||p.school!==school)continue;const r=specRaw(u,st,key);if(r)t+=st==='ticket'?SPEC.ticket.pc[r]:SPEC_TEAM.signature[r]}return t}
 function arcBonus(u){let t=0;const d=+fgRec(u).days||0;if(!d)return 0;for(const id of Object.keys(invOf(u).cards||{})){if(!id.startsWith('sc:arcade:'))continue;const r=specRaw(u,'arcade',id.split(':')[2]);if(r)t+=SPEC.arcade.pc[r]*d}return t}
 const spcLine=(st,r)=>{const S=SPEC[st];return '+'+S.pc[r]+S.u};
-function rollSpec(){const P=cardPools().pl;if(!P.length)return '';const st=Object.keys(SPEC)[fcRnd(9)];return 'sc:'+st+':'+P[fcRnd(P.length)].slice(3)}
+function rollSpec(st0){const P=cardPools().pl;if(!P.length)return '';const st=st0||Object.keys(SPEC)[fcRnd(9)];return 'sc:'+st+':'+P[fcRnd(P.length)].slice(3)}
 /* Card Binder (v297): a school's set = its team card + its BND_N best players (by season fantasy points), any version of each.
    Complete one: +BND_TOK tokens once and a permanent +BND_BOOST% on winnings of Pick 'em picks on that team and props on its players
    (added on top of card boosts, saved on the pick as cb). Claimed sets are kept in picks/<uid>.bnd = {school: time}. */
@@ -4888,7 +4890,7 @@ async function packOpen(type,how,day,team){
   const v=invOf(ME.uid),it=Object.assign({},v.it),got=[];let dup=0;
   const cards=Object.assign({},v.cards);let gotCard=false;
   for(let i=0;i<P.c;i++){const r=rollRarity(P.odds,i===P.c-1?P.g:'');
-    if(P.spc||(!P.cos&&!P.gear&&!P.duo&&!P.team&&SPC_R.includes(r)&&fcRnd(100)<SPC_CHANCE)){const cid=rollSpec();if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
+    if(P.spc||(!P.cos&&!P.gear&&!P.duo&&!P.team&&SPC_R.includes(r)&&fcRnd(100)<SPC_CHANCE)){const cid=rollSpec(P.each?Object.keys(SPEC)[i%9]:'');if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(P.duo){const cid=team?rollDuoTeam(team):rollDuo();if(cid){const cur=Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(P.team){const cid=rollTeamCard(team);if(cid){const cur=typeof cards[cid]==='string'?{[cards[cid]]:1}:Object.assign({},cards[cid]),isDup=!!cur[r];if(isDup)dup+=RAR[r].dup;else{cur[r]=1;cards[cid]=cur;gotCard=true}got.push({card:cid,r,dup:isDup});continue}}
     if(fcRnd(10000)<(ACH_CHANCE[type]||0)*100){const aid=rollAch();if(aid){const cur=Object.assign({},cards[aid]),isDup=!!cur.x;if(isDup)dup+=RAR.x.dup;else{cur.x=1;cards[aid]=cur;gotCard=true}got.push({card:aid,r:'x',dup:isDup});continue}}
@@ -5426,7 +5428,7 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'wp-3',who:ZH,wp:1},
   {id:'ml-wp-1',who:ML,wp:1},
   {id:'is-lx',who:/^\s*isaac\s+smedra\s*$/i,rar:['x','l']},   /* v409 (owner): every Immortal and Legendary card removed from Isaac Smedra */
-  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
+  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'},{id:'se-all-1',who:ABZH,gp:'alls',m:'Here’s all of the new special edition cards'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),gp=Object.assign({},(old.fr||{}).gp),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0,ng=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
@@ -5434,7 +5436,7 @@ function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'
   if(+old.wp>0&&(+old.wpv||1)<3&&!rv['wp-v3']){rv['wp-v3']=1;patch.wp=0;n++}
   for(const f of CARD_FIX){if(rv[f.id]||!f.who.test(nmU))continue;rv[f.id]=1;n++;
     if(f.wp){patch.wp=0;continue}
-    if(f.gp){gp[f.id]={t:f.gp,m:'A free '+PACKS[f.gp].n+' for you'};ng++;continue}
+    if(f.gp){gp[f.id]={t:f.gp,m:f.m||'A free '+PACKS[f.gp].n+' for you'};ng++;continue}
     if(f.rar){for(const [id,have] of Object.entries(own)){const rs=f.rar.filter(r=>have[r]);if(rs.length)put(id,c=>rs.forEach(r=>c[r]=0))}continue}
     if(f.restore){const raw=old.cards&&old.cards[f.card];if(raw&&typeof raw==='object'){const zs=Object.keys(raw).filter(r=>raw[r]===0);if(zs.length)put(f.card,c=>zs.forEach(r=>c[r]=1))}continue}
     for(const p of players().filter(p=>p.name===f.name&&p.school===f.school)){const id='pc:'+p.key,have=own[id]||{};
