@@ -59,7 +59,9 @@ MANUAL = {('Paisios Polamalu', 'St. Augustine', 'RB'): (110, 'set to 99'), ('Dai
           ('Courtney Miller-Thompson', 'Granite Hills', 'WR'): (100.847707, 'swapped with Deandre Eleby (WR)'), ('Deandre Eleby', 'Morse', 'WR'): (97.710369, 'swapped with Courtney Miller-Thompson'),
           ('Owen Dorros', 'La Jolla Country Day', 'WR'): (89.32224, 'swapped with DJ Ferguson (WR)'), ('Dj Ferguson', 'University City', 'WR'): (90.009279, 'swapped with Owen Dorros'),
           ('Caden Bessler', 'La Jolla Country Day', 'LB'): (80, 'set to 80'),
-          ('Zachary Benitez', 'Granite Hills', 'QB'): (96, 'set to 96'), ('Thomas Dietrich', 'University City', 'QB'): (94, 'set to 94')}
+          ('Zachary Benitez', 'Granite Hills', 'QB'): (96, 'set to 96'), ('Thomas Dietrich', 'University City', 'QB'): (94, 'set to 94'),
+          ('Dax Labrum', 'Santa Fe Christian', 'QB'): (97, 'set to 97'), ('Gaige Weddle', 'Rancho Bernardo', 'QB'): (94, 'set to 94'),
+          ('Timothy Cox', 'Clairemont', 'QB'): (90, 'set to 90'), ('Santonio Urena', 'Imperial', 'QB'): (91, 'set to 91')}
 rows = []   # dict(name, school, sport, pos, gr, gp, score, pct, status)
 fb = json.load(open(os.path.join(D, 'fb.json')))
 K = 2

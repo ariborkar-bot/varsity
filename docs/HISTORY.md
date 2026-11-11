@@ -368,3 +368,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - OVR manual: Marvin Jones III moved LB->DB (POS_FIX), Caden Bessler LB set to 90 (Nov 10, owner).
 - OVR manual: Caden Bessler 80, Zachary Benitez QB 96, Thomas Dietrich QB 94 (Nov 10, owner).
 - OVR: QB bonus +3 on Raw OVR (Notes B12) since QBs ranked lower than other positions (Nov 10, owner).
+- OVR manual: QBs Dax Labrum 97, Gaige Weddle 94, Timothy Cox 90, Santonio Urena 91 (Nov 10, owner).
