@@ -74,7 +74,16 @@ def school_pct(sos):
     return {names[i]: pc[i] for i in range(len(names))}
 SCH_FB = school_pct(sos_fb()); SCH_BB = school_pct(sos_bb())
 # Owner overrides (Nov 10): Raw OVR typed in by hand for these players (yellow cell); the 99 cap still applies, so Raw 110 = a top-10 99
-MANUAL = {}   # all owner overrides removed Nov 10 at the owner's request (the list is in docs/HISTORY.md); format: (name, school, pos): (raw OVR, note)
+# Owner overrides (Nov 10): Raw OVR typed in by hand (yellow cell); the 99 cap still applies, so Raw 109/110 = a top-10 99. Format: (name, school, pos): (raw OVR, note)
+MANUAL = {('Caden Bessler', 'La Jolla Country Day', 'LB'): (80, 'set to 80'), ("T'Marrion Williams", 'Valhalla', 'WR'): (87, 'set to 87'),
+          ('Owen Dorros', 'La Jolla Country Day', 'WR'): (89, 'set to 89'), ('Timothy Cox', 'Clairemont', 'QB'): (90, 'set to 90'),
+          ('Tyler Holmes', 'Grossmont', 'QB'): (93, 'set to 93'), ('Thomas Dietrich', 'University City', 'QB'): (94, 'set to 94'),
+          ('Daine Gonzalez', 'Classical Academy', 'RB'): (95, 'set to 95'), ('Madin Gardini', 'Patrick Henry', 'QB'): (95, 'set to 95'),
+          ('Zachary Benitez', 'Granite Hills', 'QB'): (96, 'set to 96'), ('Davon Dunn', 'Lincoln', 'DB'): (96, 'set to 96'),
+          ('Dax Labrum', 'Santa Fe Christian', 'QB'): (96, 'set to 96'), ('Deandre Eleby', 'Morse', 'WR'): (97, 'set to 97'),
+          ('Logan Nelson', 'Madison', 'DL'): (98, 'set to 98'), ('Gaige Weddle', 'Rancho Bernardo', 'QB'): (94, 'set to 94'),
+          ('Gaige Weddle', 'Rancho Bernardo', 'DB'): (109, 'set to 99'), ('Paisios Polamalu', 'St. Augustine', 'RB'): (110, 'set to 99'),
+          ('Parker Rab', 'La Jolla Country Day', 'DB'): (83, 'set to 83')}
 rows = []   # dict(name, school, sport, pos, gr, gp, score, pct, status)
 fb = json.load(open(os.path.join(D, 'fb.json')))
 K = 2
