@@ -126,12 +126,12 @@ let AC=null;
 function audio(){if(AC||muted)return;try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(_){AC=null}}
 function tone(f,d,type,v,slide){if(!AC||muted)return;try{const t=AC.currentTime,o=AC.createOscillator(),a=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);a.gain.setValueAtTime(v||.12,t);a.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(a).connect(AC.destination);o.start(t);o.stop(t+d)}catch(_){}}
 function noise(d,v){if(!AC||muted)return;try{const n=AC.sampleRate*d,b=AC.createBuffer(1,n,AC.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(rnd()*2-1)*(1-i/n);const s=AC.createBufferSource(),a=AC.createGain(),f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=1800;a.gain.value=v||.18;s.buffer=b;s.connect(f).connect(a).connect(AC.destination);s.start()}catch(_){}}
-const SFX={bounce:()=>tone(150,.07,'sine',.16,70),rim:()=>tone(520,.09,'triangle',.1,300),swish:()=>noise(.28,.22),jump:()=>tone(260,.08,'sine',.05,420),block:()=>{tone(110,.14,'square',.14,60);noise(.08,.12)},steal:()=>tone(700,.1,'square',.07,1100),buzz:()=>tone(160,.7,'sawtooth',.13,150),perfect:()=>tone(880,.12,'sine',.1,1320),whistle:()=>tone(1900,.18,'square',.05,1700)};
+const SFX={bounce:()=>tone(150,.07,'sine',.16,70),rim:()=>tone(520,.09,'triangle',.1,300),swish:()=>noise(.28,.22),jump:()=>tone(260,.08,'sine',.05,420),dj:()=>{tone(380,.16,'triangle',.12,900);noise(.1,.1)},block:()=>{tone(110,.14,'square',.14,60);noise(.08,.12)},steal:()=>tone(700,.1,'square',.07,1100),buzz:()=>tone(160,.7,'sawtooth',.13,150),perfect:()=>tone(880,.12,'sine',.1,1320),whistle:()=>tone(1900,.18,'square',.05,1700)};
 const sfx=n=>{if(SFX[n])SFX[n]()};
 
 /* ---------------- game state ---------------- */
 function hoops(W){return [{cx:112,bd:72,dir:1},{cx:W-112,bd:W-72,dir:-1}]}
-function mkP(i,x){return {i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,dj:false,en:1,pj:false,cd:0,stun:0,st:0,ph:0,gath:false,gt:0,pump:0,slow:false}}
+function mkP(i,x){return {i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,dj:false,en:1,pj:false,cd:0,stun:0,st:0,ph:0,djt:9,gath:false,gt:0,pump:0,slow:false}}
 function newGame(o,W){
   g={W,o,hp:hoops(W),t:0,P:[mkP(0,W/2-84),mkP(1,W/2+84)],ball:{x:W/2,y:210,vx:0,vy:-430,st:'loose',live:true,own:-1,sh:-1,pts:2,t:0,rot:0,cd:.25,hit:false,dunk:false,done:false},
     score:[0,0],clock:o.len,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false};
@@ -169,8 +169,8 @@ function stepP(p,c,dt){
   else if(!p.air){if(jp)jump()}
   else{
     /* double jump: a second push in the air, only without the ball (it is for blocks and rebounds) */
-    if(jp&&!p.has&&!p.dj&&p.en>=EN.dj*.6){p.dj=true;p.vy=-JV*.62;p.en=Math.max(0,p.en-EN.dj);g.fx.push({x:p.x,y:p.y,t:.32,d:.32});sfx('jump')}
-    p.jt+=dt;p.vy+=PG*dt;p.y+=p.vy*dt;
+    if(jp&&!p.has&&!p.dj&&p.en>=EN.dj*.6){p.dj=true;p.djt=0;p.vy=-JV*.72;p.en=Math.max(0,p.en-EN.dj);g.fx.push({x:p.x,y:p.y,t:.5,d:.5});sfx('dj')}
+    p.jt+=dt;p.djt+=dt;p.vy+=PG*dt;p.y+=p.vy*dt;
     if(p.shoot&&p.has&&!c.j&&p.jt>.03)release(p,false);
     if(p.y>=GY){p.y=GY;p.vy=0;p.air=false;if(p.shoot&&p.has)release(p,true);p.shoot=false}}
   p.x+=p.vx*dt;clampP(p);p.ph+=Math.abs(p.vx)*dt*.05;p.pj=c.j}
@@ -178,12 +178,12 @@ function stepP(p,c,dt){
    p.ap seconds after take-off, and falls to 0 when you are .3 s early or late. Perfect = within about .04 s of the top. */
 function release(p,late){
   const h=g.hp[1-p.i],o=g.P[1-p.i],b=g.ball,hx=p.x+p.face*8,hy=p.y-PH-16,dist=Math.abs(h.cx-p.x);
-  const q=late?0:1-Math.min(1,Math.abs(p.jt-p.ap)/.30),perfect=q>.86;
+  const q=late?0:1-Math.min(1,Math.abs(p.jt-p.ap)/.22),perfect=q>.88;
   p.has=false;p.shoot=false;p.cd=.4;Object.assign(b,{own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
   if(dist<78&&hy<RIMY+18&&!late){b.x=h.cx;b.y=RIMY-14;b.vx=0;b.vy=430;b.pts=2;b.dunk=true;g.shake=.5;return}
   b.x=hx;b.y=hy;b.pts=dist>TP?3:2;
   const near=Math.abs(o.x-p.x),contest=near<98&&o.air&&o.y<GY-36?1:near<68?.4:0,tired=p.en<.25?(1-p.en/.25)*20:0;
-  let err=Math.pow(1-q,1.3)*105+(dist>TP?(1-q)*26+5:0)+contest*26*(1-q*.5)+tired;if(perfect)err=contest?err*.35:tired*.6;
+  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*30*(1-q*.5)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*20+tired*.6;
   const T=Math.max(.86,Math.min(1.6,.8+dist/590)),off0=g._off!=null?g._off:(rnd()*2-1)*err,off=Math.abs(off0)>46?Math.sign(off0)*(27+rnd()*17):off0,tx=h.cx+off;   /* a badly timed shot clanks off the rim; it never lucks in off the backboard */
   b.vx=(tx-b.x)/T;b.vy=(RIMY-2-b.y-.5*GR*T*T)/T;
   pop(perfect?'PERFECT':q>.6?'GOOD':late||p.jt>p.ap?'LATE':'EARLY',p.x,p.y-PH-40,perfect?'#3DFF9A':q>.6?'#FFE08A':'#ff9aa8',.7);if(perfect)sfx('perfect')}
@@ -239,7 +239,7 @@ function ai(p,dt){const m=g.ai[p.i],D=DIFF[g.o.diff],o=g.P[1-p.i],b=g.ball,h=g.h
     /* out of breath with time on the shot clock: stand still and get some energy back */
     if(p.en<.22)m.rest=true;else if(p.en>.5)m.rest=false;if(m.rest&&g.sc>5&&g.clock>3&&o.st<.3&&Math.abs(o.x-p.x)>PW*2+16)return c;
     const spot=h.cx+h.dir*m.d,blocked=between&&Math.abs(o.x-p.x)<PW*2+18&&Math.abs(spot-h.cx)<Math.abs(o.x-h.cx);
-    if(m.wait<=0&&(Math.abs(p.x-spot)<11||g.sc<2.2||g.clock<1.2||blocked||o.st>.7||(m.fkd&&o.air))){c.j=true;m.off=(dist<74?-.02:0)+gauss()*D.sig*(dist<74?.4:1);
+    if(m.wait<=0&&(Math.abs(p.x-spot)<11||g.sc<2.2||g.clock<1.2||blocked||o.st>.7||(m.fkd&&o.air))){c.j=true;m.off=(dist<74?-.02:0)+gauss()*D.sig*1.35*(dist<74?.4:1);
       m.fk=!m.fkd&&between&&!o.air&&Math.abs(o.x-p.x)<125&&g.sc>4&&g.clock>3&&rnd()<D.fake}
     else go(spot);
     return c}
@@ -290,24 +290,26 @@ const INK='#0a1020';
 function limb(pts,w,col){X.lineCap='round';X.lineJoin='round';for(const pass of [[w+3.4,INK],[w,col]]){X.lineWidth=pass[0];X.strokeStyle=pass[1];X.beginPath();X.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)X.lineTo(pts[i],pts[i+1]);X.stroke()}}
 function bend(x1,y1,x2,y2,k){const dx=x2-x1,dy=y2-y1,l=Math.hypot(dx,dy)||1;return [(x1+x2)/2-dy/l*k,(y1+y2)/2+dx/l*k]}
 function shape(pts,fill,lw){X.beginPath();X.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)X.lineTo(pts[i],pts[i+1]);X.closePath();X.fillStyle=fill;X.fill();X.lineJoin='round';X.lineWidth=lw||2;X.strokeStyle=INK;X.stroke()}
-function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.vx)>30,sw=run?Math.sin(p.ph*6):0,b=g.ball,LH=88;
+function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.vx)>30,sw=run?Math.sin(p.ph*1.45):0,b=g.ball,LH=88,mv=Math.sign(p.vx)||1;
   X.fillStyle='rgba(0,0,0,.3)';X.beginPath();X.ellipse(x,GY+6,(24-Math.min(13,(GY-y)*.08))*PS,5.5,0,0,7);X.fill();
   if(p.stun>0)X.globalAlpha=.6+.4*Math.sin(g.t*40);
   X.save();X.translate(x,y);X.scale(PS,PS);X.translate(-x,-y);
-  const up=p.gath||p.pump>0||(p.shoot&&p.air),lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*4,bob=run?Math.abs(Math.cos(p.ph*6))*1.6:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*4:0;
+  if(p.air&&p.djt<.5){const k=p.djt/.5;X.translate(x,y-44);X.rotate(p.face*(1-Math.pow(1-k,2))*Math.PI*2);X.translate(-x,-(y-44))}   /* double jump: a quick flip */
+  const up=p.gath||p.pump>0||(p.shoot&&p.air),lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*4,bob=run?Math.abs(Math.cos(p.ph*1.45))*1.6:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*4:0;
   const hipY=y-39+crouch-bob*.3,shY=y-71+crouch-bob,hx=x+lean+f*1.5,hy=y-85+crouch-bob;
   /* hand targets (in the figure's own space) */
   let ax,ay,bx,by;
   if(p.has&&up){ax=x+(b.x-f*3-x)/PS;ay=y+(b.y+5-y)/PS;bx=x+(b.x+f*5-x)/PS;by=y+(b.y+3-y)/PS}
   else if(p.air&&!p.has){ax=x+f*8/PS;ay=y-LH-15;bx=x+f*1;by=y-LH-7}
-  else if(p.has){ax=x+(b.x-f*4-x)/PS;ay=y+(Math.min(b.y-7,y-30*PS)-y)/PS;bx=x-f*13;by=y-42+sw*3}
+  else if(p.has){ax=x+(b.x-f*4-x)/PS;ay=y+(Math.min(b.y-7,y-30*PS)-y)/PS;bx=x-f*8-sw*mv*7;by=y-44+Math.abs(sw)*2}
   else if(p.air){ax=x+f*14;ay=y-58;bx=x-f*12;by=y-52}
-  else{ax=x+f*23;ay=y-60-Math.abs(sw)*3;bx=x+f*15;by=y-80}
+  else if(run){ax=x+sw*mv*15;ay=y-52-Math.abs(sw)*4;bx=x-sw*mv*15;by=y-52-Math.abs(sw)*4}
+  else{ax=x+f*23;ay=y-60;bx=x+f*15;by=y-80}
   const sF=[x+lean+f*11,shY+2],sB=[x+lean-f*10,shY+2];
   const arm=(S,hx2,hy2,k,dark)=>{const e=bend(S[0],S[1],hx2,hy2,k);limb([S[0],S[1],e[0],e[1],hx2,hy2],6.5,dark?T.s2:T.s);X.beginPath();X.arc(hx2,hy2,4.3,0,7);X.fillStyle=dark?T.s2:T.s;X.fill();X.lineWidth=1.6;X.strokeStyle=INK;X.stroke()};
   /* back arm, then legs */
   arm(sB,bx,by,-f*5,true);
-  for(const s of [-1,1]){const fx=p.air?x+s*7-f*5*tuck:x+s*4+s*sw*15,fy=p.air?y-3-tuck*9:y-3-Math.max(0,s*sw*f)*7,hp=[x+s*5,hipY],k=bend(hp[0],hp[1],fx,fy,-f*(p.air?9:5+Math.abs(sw)*5)),col=s<0?T.s2:T.s;
+  for(const s of [-1,1]){const fx=p.air?x+s*7-f*5*tuck:x+s*3+s*sw*mv*17,fy=p.air?y-3-tuck*9:y-3-(run?Math.max(0,s*Math.cos(p.ph*1.45))*9:0),hp=[x+s*5,hipY],k=bend(hp[0],hp[1],fx,fy,-f*(p.air?9:5+Math.abs(sw)*5)),col=s<0?T.s2:T.s;
     limb([hp[0],hp[1],k[0],k[1],fx,fy],8,col);
     const sx0=fx+(k[0]-fx)*.3,sy0=fy+(k[1]-fy)*.3;limb([sx0,sy0,fx,fy],7,'#f4f7fb');          /* sock */
     X.beginPath();X.moveTo(fx-f*6,fy+3.5);X.lineTo(fx-f*6,fy-2);X.quadraticCurveTo(fx-f*2,fy-5,fx+f*4,fy-2.5);X.quadraticCurveTo(fx+f*11,fy-1,fx+f*11,fy+3.5);X.closePath();
@@ -334,9 +336,6 @@ function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.
   /* front arm on top */
   arm(sF,ax,ay,f*5,false);
   X.restore();X.lineCap='butt';X.globalAlpha=1;
-  /* shot meter: the white mark follows your jump up and back down; let go while it is in the green band at the very top */
-  if(p.shoot&&p.has){const mx=x-f*(PW+26),mh=78,my=y-PH-2,hm=p.ap*p.ap*PG/2,k=Math.max(0,Math.min(1,(GY-y)/hm));X.fillStyle='rgba(4,8,16,.78)';rr(mx-7,my-3,14,mh+6,6);X.fill();
-    X.fillStyle='#3DFF9A';rr(mx-5,my,10,mh*.13,3);X.fill();X.fillStyle=Math.abs(p.jt-p.ap)<.042?'#3DFF9A':'#fff';X.fillRect(mx-8,my+mh*(1-k)-2.5,16,5)}
   if(!p.has&&p.st>.15){X.fillStyle='rgba(4,8,16,.7)';rr(x-20,y-PH-24,40,6,3);X.fill();X.fillStyle=T.c;rr(x-20,y-PH-24,40*Math.min(1,p.st/STEAL),6,3);X.fill()}
   /* energy bar under the feet */
   X.fillStyle='rgba(4,8,16,.6)';rr(x-24,GY+13,48,6,3);X.fill();X.fillStyle=p.en<.25?'#ff6a7f':p.en<.5?'#FFC23D':'#3DFF9A';if(p.en>.02){rr(x-24,GY+13,48*p.en,6,3);X.fill()}}
@@ -353,7 +352,7 @@ function drawHUD(W){const cx=W/2;X.fillStyle='rgba(4,8,16,.82)';rr(cx-190,10,380
 function draw(){const W=g?g.W:VW,s=cv.width/W;X.setTransform(s,0,0,s,0,0);if(!g){X.fillStyle='#0a1226';X.fillRect(0,0,W,H);return}
   if(g.shake>0)X.translate((rnd()-.5)*g.shake*14,(rnd()-.5)*g.shake*10);
   drawCourt(W);g.hp.forEach(drawHoopBack);
-  for(const q of g.fx){const k=1-q.t/q.d;X.strokeStyle='rgba(255,255,255,'+(1-k)*.8+')';X.lineWidth=3;X.beginPath();X.ellipse(q.x,q.y+4,12+k*30,4+k*8,0,0,7);X.stroke()}
+  for(const q of g.fx){const k=1-q.t/q.d;X.strokeStyle='rgba(255,255,255,'+(1-k)*.8+')';X.lineWidth=4-k*2;X.beginPath();X.ellipse(q.x,q.y+4,14+k*46,5+k*13,0,0,7);X.stroke();if(k>.12){X.beginPath();X.ellipse(q.x,q.y+4,8+k*28,3+k*8,0,0,7);X.stroke()}}
   const o=[...g.P].sort((a,b)=>(a.has?1:0)-(b.has?1:0));o.forEach(drawP);drawBall();g.hp.forEach(drawHoopFront);
   X.setTransform(s,0,0,s,0,0);drawHUD(W);
   X.textAlign='center';for(const q of g.pop){if(!q.s)continue;const k=q.t/q.d;X.globalAlpha=Math.min(1,k*3);X.font='900 '+(q.s.length<4?34:24)+'px system-ui';X.lineWidth=5;X.strokeStyle='rgba(4,8,16,.85)';const yy=q.y-(1-k)*34;X.strokeText(q.s,q.x,yy);X.fillStyle=q.c;X.fillText(q.s,q.x,yy)}X.globalAlpha=1}
