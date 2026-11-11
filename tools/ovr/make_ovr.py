@@ -86,7 +86,8 @@ MANUAL = {('Caden Bessler', 'La Jolla Country Day', 'LB'): (80, 'set to 80'), ("
           ('Parker Rab', 'La Jolla Country Day', 'DB'): (83, 'set to 83'),
           ('Nicolas Bardaro', 'La Jolla', 'TE'): (98, 'set to 98'), ('Neke Letuli', 'Oceanside', 'RB'): (98, 'set to 98'), ('Hezekiah Manuel', 'Hoover', 'QB'): (97, 'set to 97'),
           ('Darian Webb', 'Carlsbad', 'RB'): (110, 'set to 99'), ('Seth Fanua', 'Lincoln', 'LB'): (110, 'set to 99'), ('Ryder Molchanoff', 'Cathedral Catholic', 'DL'): (110, 'set to 99'),
-          ('Honor Faalave', 'Cathedral Catholic', 'DB'): (110, 'set to 99'), ('Ezekiel McIntyre', 'San Marcos', 'WR'): (98, 'set to 98'), ('Courtney Miller-Thompson', 'Granite Hills', 'WR'): (98, 'set to 98')}   # Nov 11: exactly the 8 football 99s
+          ('Honor Faalave', 'Cathedral Catholic', 'DB'): (110, 'set to 99'), ('Ezekiel McIntyre', 'San Marcos', 'WR'): (98, 'set to 98'), ('Courtney Miller-Thompson', 'Granite Hills', 'WR'): (98, 'set to 98'),
+          ('Anthony Hellum Jr', 'Imperial', 'WR'): (97, 'set to 97'), ('Dareyen Bridges', 'Lincoln', 'WR'): (97, 'set to 97')}   # Nov 11: exactly the 8 football 99s
 rows = []   # dict(name, school, sport, pos, gr, gp, score, pct, status)
 fb = json.load(open(os.path.join(D, 'fb.json')))
 K = 2
