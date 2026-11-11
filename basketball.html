@@ -3398,7 +3398,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v443 · Nov 10';
+const APP_BUILD='v444 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6396,7 +6396,7 @@ function advisorHTML(){
     return `<li class="adv-r"><span class="adv-k">${i+1}</span><div class="adv-i"><b>${esc(x.c.t)} · ${x.c.rs.length}-pick parlay</b>${x.c.rs.map(r=>`<span class="adv-m">${esc(lastN(r.x.name))} ${r.sd==='o'?'Over':'Under'} ${fmtN(r.x.line)} ${esc(PP_MK[r.x.m].l.toLowerCase())}</span>`).join('')}
       <span class="adv-c">Cards add <b>+${x.k.pct}%</b> · ${Math.round(x.pr*100)}% all hit · ${x.k.odds.toFixed(2)}x odds</span></div>
       <div class="adv-p"><b>+${n1(x.win)}</b><small class="muted">on 10 tokens</small><button type="button" class="btn sm" data-act="advParl" data-v="${esc(v)}">Add all</button></div></li>`};
-  return `<section class="card adv"><div class="qh"><h3>Players with the best advantage</h3><span class="muted">Based on your Locker</span></div>
+  return `<section class="card adv"><div class="qh"><h3>Top Cards</h3><span class="muted">Best advantage in your Locker</span></div>
     <h4 class="adv-h">Best to worst</h4>
     ${singles.length?`<ol class="adv-l">${singles.map(sRow).join('')}</ol>`:'<p class="muted">No players in your Locker have an advantage on this week’s lines yet. Open packs in the Shop to get some.</p>'}
     ${PL.length?`<h4 class="adv-h">Best parlays from your Locker</h4><ol class="adv-l">${PL.map(pRow).join('')}</ol>`:''}
