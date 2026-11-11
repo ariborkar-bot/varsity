@@ -373,3 +373,4 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 - OVR (Nov 10, owner): DB OVRs x0.95 (Notes B13); manual: Madin Gardini QB 95, Tyler Holmes QB 92, Logan Nelson DL 98, Davon Dunn DB 96, Devin Davis DB 93, Gaige Weddle DB 99, T'Marrion Williams WR 87.
 - OVR: DB adjustment changed to x0.97 (3% lower) (Nov 10, owner).
 - OVR (Nov 10, owner): football schedule strength now rates each opponent half on win% and half on its 2026 playoff division (DIV_RATE, read from PO_DEFS; opponents not in a bracket = win% only). Also fixed 8 schools whose player-school name differs from the schedule name (SCH_ALIAS), which had been getting a neutral 50% schedule score.
+- OVR (Nov 10, owner): all manual OVR overrides removed (MANUAL = {}); Marvin Jones III LB->DB position fix, QB +3 and DB x0.97 kept.
