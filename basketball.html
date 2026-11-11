@@ -2262,6 +2262,16 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .lk-ring b{font:900 1.5rem/1 var(--f-display,inherit)}.lk-ring small{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .lk-hs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.lk-hs div{display:flex;flex-direction:column}.lk-hs b{font:900 1.35rem/1.1 var(--f-display,inherit)}.lk-hs small{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .lk-shopb{align-self:center}
+.lk-big{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px 10px;margin-top:12px;perspective:900px}
+.lk-bc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px 10px;border:0;background:none;color:inherit;font:inherit;text-align:center;cursor:pointer;min-width:0;-webkit-tap-highlight-color:transparent}.lk-bc.duo{grid-column:span 2}
+.lk-bc b{font:900 .9rem/1.15 var(--f-display,inherit);overflow-wrap:anywhere}.lk-bc small{font-size:.72rem;line-height:1.25}.lk-bc .lk-vers{justify-content:center}
+.lk-ba{display:block;margin-bottom:6px;transform-style:preserve-3d;animation:lkFloat 6s ease-in-out infinite;animation-delay:calc(var(--i)*-1s);filter:drop-shadow(0 10px 12px rgba(0,0,0,.55)) drop-shadow(0 0 12px color-mix(in srgb,var(--rc) 40%,transparent))}
+@keyframes lkFloat{0%,100%{transform:rotateY(-8deg) rotateX(3deg) translateY(0)}50%{transform:rotateY(8deg) rotateX(-3deg) translateY(-4px)}}
+.lk-big .pc2 .pc-fx{opacity:1;animation:lkHolo 4.5s ease-in-out infinite;background:radial-gradient(circle at 62% 24%,rgba(255,255,255,.42),transparent 42%),linear-gradient(115deg,rgba(255,60,120,0) 20%,rgba(255,220,90,.24) 36%,rgba(90,255,200,.22) 50%,rgba(110,150,255,.26) 64%,rgba(255,60,220,0) 80%);background-size:100% 100%,240% 100%;background-position:0 0,0 0;mix-blend-mode:screen}
+@keyframes lkHolo{0%,100%{background-position:0 0,0 0}50%{background-position:0 0,100% 0}}
+.lk-bc:active .lk-ba{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){.lk-ba,.lk-big .pc2 .pc-fx{animation:none!important}}
+
 .lk-flt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 6px}.lk-flt #lk-q{grid-column:1/-1}.lk-flt input,.lk-flt select{width:100%;min-width:0}.lk-flt .btn{grid-column:1/-1;justify-self:start}
 
 /* v430: no layout shifting in Compare players and the card search */
@@ -3305,7 +3315,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v432 · Nov 10';
+const APP_BUILD='v433 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5714,6 +5724,8 @@ function viewLocker(){
   }else if(tab==='cards'){
     const P=cardPools(),mine=cardsOf(ME.uid),ord={m:0,l:1,e:2,r:3,u:4,c:5},T=['p','t','d','s'].includes(UI.lkC)?UI.lkC:'a',N=UI.lkN||30;
     const best=id=>cardR(ME.uid,id);
+    /* v433 (owner): cards in the Locker are shown big, like the card view, with the holo shine and a slow tilt always on */
+    const LKH=Math.round(Math.max(190,Math.min(330,(innerWidth-64)/2/.72)));
     /* v423 (owner): the Cards tab opens on All, highest overall first. Teams rank by their top 3 players, Duos by the average of the two. */
     const tOvr={};for(const q of players()){const o=ovrOf(q.key);if(o)(tOvr[q.school]=tOvr[q.school]||[]).push(o)}
     const cOvr=id=>id.startsWith('tc:')?(()=>{const a=(tOvr[id.slice(3)]||[]).sort((x,y)=>y-x).slice(0,3);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0})():id.startsWith('dc:')?duoKeys(id).reduce((t,k)=>t+ovrOf(k),0)/2:ovrOf(id.split(':').pop());
@@ -5739,7 +5751,7 @@ function viewLocker(){
         <select id="lk-ps" aria-label="Position"><option value="">All positions</option>${lkPos.map(x=>`<option value="${esc(x)}" ${UI.lkPs===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
         ${UI.lkQ||UI.lkSc||UI.lkPs?'<button type="button" class="btn sm ghost" data-act="lkFClr">Clear</button>':''}</div>
       ${UI.lkQ||UI.lkSc||UI.lkPs?`<small class="muted">${ids.length} of ${ids0.length} cards</small>`:''}
-      ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.duo?'div':'button type="button" data-act="cardView" data-id="'+esc(id)+'"'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,c.duo?104:64)}<span>${c.key?`<b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b>`:`<b>${esc(c.name)}</b>`}<small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">Best: ${R.n} · ${c.spc?spcLine(c.spc,r)+' · '+SPEC[c.spc].n:'+'+CARD_PCT[r]+'%'}</small>${dots(id)}</span></${c.duo?'div':'button'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
+      ${ids.length?`<div class="lk-big">${ids.slice(0,N).map((id,i)=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.duo?'div':'button type="button" data-act="cardView" data-id="'+esc(id)+'"'} class="lk-bc${c.duo?' duo':''}" style="--rc:${R.c};--i:${i%6}"><span class="lk-ba">${cardArt(id,r,LKH)}</span>${c.key?`<b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b>`:`<b>${esc(c.name)}</b>`}<small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">${R.n} · ${c.spc?spcLine(c.spc,r)+' · '+SPEC[c.spc].n:'+'+CARD_PCT[r]+'%'}</small>${dots(id)}</${c.duo?'div':'button'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
         :`<p class="empty">No ${T==='t'?'team':T==='d'?'Duo':T==='s'?'special':T==='a'?'':'player'} cards yet. ${T==='d'?'Open a Duo pack to pull some.':T==='s'?'Open a Spotlight pack, or pull Epic and better cards in any pack.':'Open packs to pull some.'}</p>`}</section>`;
   }else if(tab==='bnd'){body=bndHTML()
   }else if(tab==='cos'){

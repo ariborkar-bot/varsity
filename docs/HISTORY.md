@@ -439,3 +439,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v432
 - Locker > Cards: search box (`#lk-q`, name/school), team select (`#lk-sc`) and position select (`#lk-ps`) filter your cards (`UI.lkQ/lkSc/lkPs`, built from `ids0`; options list only teams/positions you own; Clear button `lkFClr`; duos match either teammate, team cards ignore position).
+
+## v433
+- Locker > Cards shows each card big (`.lk-big` / `.lk-bc`, art height `LKH` from the screen width, two per row, Duos span two) with the holo shine (`lkHolo`) and a slow tilt (`lkFloat`) always on, like the tap-to-view card. Replaces the small `.lk-card` rows in that grid.
