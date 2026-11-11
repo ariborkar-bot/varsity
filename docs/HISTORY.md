@@ -427,3 +427,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 ## v428
 - `giftPacks` sorts Special Edition packs (`alls`) to the front, so Ari's pack is the first one waiting.
+
+## v429
+- Pack opening (`packShow0`): Flip all flips every remaining card straight over (`flip(c,true)`, no per-card full-screen reveal); special cards flip on tap without a second reveal because they already had their walkout.

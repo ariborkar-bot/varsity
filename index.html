@@ -3287,7 +3287,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v428 · Nov 10';
+const APP_BUILD='v429 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5272,14 +5272,15 @@ function packShow0(P,got){
       setTimeout(()=>{sp.remove();c.classList.remove('pre');c.classList.add('now','fl','land');glow(r);setTimeout(sync,50);done()},280)};
     sp.addEventListener('click',e=>{e.stopPropagation();end()});
     try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}});
-  const flip=c=>{if(c.classList.contains('fl')||c.classList.contains('pre'))return;const r=got[cards.indexOf(c)].r,n=ORD.indexOf(r);
-    if(n>=3&&!calm){c.classList.add('pre');SQ=SQ.then(()=>spot(c,r));return}
+  /* v429 (owner): Flip all flips every card straight over, and special cards (which already had their own walkout) flip on tap without a second full-screen reveal */
+  const flip=(c,direct)=>{if(c.classList.contains('fl')||c.classList.contains('pre'))return;const r=got[cards.indexOf(c)].r,n=ORD.indexOf(r),sp=String(got[cards.indexOf(c)].card||'').startsWith('sc:');
+    if(n>=3&&!calm&&!direct&&!sp){c.classList.add('pre');SQ=SQ.then(()=>spot(c,r));return}
     c.classList.add('fl');
     setTimeout(()=>{sparks(c,r);glow(r);c.classList.add('land')},calm?0:360);
     setTimeout(sync,calm?0:600);
     try{navigator.vibrate&&navigator.vibrate(n>=3?[30,30,70]:15)}catch(_){}};
   cards.forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('button'))return;flip(c)});c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip(c)}})});
-  allB.onclick=()=>{cards.filter(c=>!c.classList.contains('fl')&&!c.classList.contains('pre')).sort((a,b)=>ORD.indexOf(got[cards.indexOf(a)].r)-ORD.indexOf(got[cards.indexOf(b)].r)).forEach((c,i)=>setTimeout(()=>flip(c),i*300))};
+  allB.onclick=()=>{cards.filter(c=>!c.classList.contains('fl')&&!c.classList.contains('pre')).sort((a,b)=>ORD.indexOf(got[cards.indexOf(a)].r)-ORD.indexOf(got[cards.indexOf(b)].r)).forEach((c,i)=>setTimeout(()=>flip(c,true),i*300))};
   const close=()=>{clearTimeout(auto);document.querySelectorAll('.pks').forEach(x=>x.remove());o.remove();document.documentElement.style.overflow='';render()};
   okB.onclick=close;o.addEventListener('click',e=>{if((e.target===o||e.target.classList.contains('pko-bg'))&&ripped&&!left())close()});
 }
