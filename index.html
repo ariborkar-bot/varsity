@@ -2262,6 +2262,11 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .lk-ring b{font:900 1.5rem/1 var(--f-display,inherit)}.lk-ring small{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .lk-hs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.lk-hs div{display:flex;flex-direction:column}.lk-hs b{font:900 1.35rem/1.1 var(--f-display,inherit)}.lk-hs small{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .lk-shopb{align-self:center}
+.lk-cardsb{display:flex;align-items:center;gap:14px;width:100%;margin:0 0 12px;padding:16px 18px;border-radius:18px;border:2px solid var(--accent);background:linear-gradient(135deg,rgba(47,107,255,.5),rgba(180,140,255,.38));color:#fff;text-align:left;font:inherit;box-shadow:0 8px 24px -10px var(--accent)}
+.lk-cardsb b{display:block;font:900 1.25rem/1.1 var(--f-display,inherit);text-transform:uppercase;letter-spacing:.06em}.lk-cardsb small{display:block;margin-top:3px;opacity:.85;font-size:.78rem}.lk-cardsb>span:nth-child(2){flex:1;min-width:0}.lk-cardsb>i{font-style:normal;font-size:1.8rem;opacity:.8}
+.lk-cardsb[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px -8px var(--accent)}
+.lk-cbi{flex:none;width:34px;height:46px;border-radius:6px;background:linear-gradient(135deg,#FFC93A,#FF4F9A 55%,#7CF3FF);box-shadow:5px 3px 0 -1px rgba(255,255,255,.4),0 0 14px rgba(255,201,58,.5);transform:rotate(-8deg)}
+
 @media (max-width:560px){.lk-hero{grid-template-columns:auto minmax(0,1fr)}.lk-shopb{grid-column:1/-1;justify-self:stretch;text-align:center}}
 .lk-seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);margin-bottom:14px}
 .lk-seg button{border:0;background:transparent;padding:10px 6px;border-radius:10px;font:800 .82rem var(--f-display,inherit);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -2574,6 +2579,32 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .wko.wk-big .wko-pts i{background:var(--rc);box-shadow:0 0 10px var(--rc),0 0 2px #fff}
 .wko.wr-m .wko-bg,.wko.wr-x .wko-bg{animation:wkoPulse 1.2s ease-in-out infinite}
 @keyframes wkoPulse{50%{filter:brightness(1.6) saturate(1.4)}}
+/* v425 special card walkout scenes: .wks-<style> restyles the background (.wko-bg), a moving layer (.wko-sc / .wko-sc2) and the doors */
+.wks .wko-beams,.wks .wko-crowd{display:none}.wks .wko-sc,.wks .wko-sc2{position:absolute;inset:0;pointer-events:none;z-index:1}.wks .wko-k{color:var(--rc);text-shadow:0 0 14px var(--rc)}
+.wks .wko-door{background:linear-gradient(90deg,#05070d,#141a2c 48%,#05070d)}
+.wks-prizm .wko-bg{background:radial-gradient(circle at 50% 40%,#1b1040,#02030a 75%)}.wks-prizm .wko-sc{background:conic-gradient(from 0deg at 50% 45%,#ff6bd6,#7cf3ff,#7dffb0,#fff27a,#ff9a6b,#ff6bd6);opacity:.28;mix-blend-mode:screen;animation:wksSpin 5s linear infinite;transform-origin:50% 45%;inset:-40%}
+.wks-prizm .wko-sc2{background:repeating-linear-gradient(115deg,transparent 0 40px,rgba(255,255,255,.12) 40px 44px);animation:wksSlide 3s linear infinite}
+.wks-ticket .wko-bg{background:linear-gradient(120deg,#2a1d00,#5b3d00 50%,#2a1d00)}.wks-ticket .wko-sc{background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(0,0,0,.35) 22px 26px);-webkit-mask:linear-gradient(transparent 0 8%,#000 8% 92%,transparent 92%)}
+.wks-ticket .wko-sc2{background:radial-gradient(circle at 0 50%,#000 0 14px,transparent 15px) 0 0/100% 46px repeat-y,radial-gradient(circle at 100% 50%,#000 0 14px,transparent 15px) 0 0/100% 46px repeat-y;animation:wksSlideY 2s linear infinite}
+.wks-streak .wko-bg{background:radial-gradient(ellipse at 50% 110%,#ff5a00,#7a1500 45%,#0a0200 80%);animation:wkoPulse 1.1s ease-in-out infinite}.wks-streak .wko-sc{background:radial-gradient(ellipse 30% 55% at 20% 105%,#ffd24a,transparent 70%),radial-gradient(ellipse 28% 65% at 50% 108%,#ff8a1f,transparent 70%),radial-gradient(ellipse 30% 50% at 80% 105%,#ffd24a,transparent 70%);animation:wksFlame .7s ease-in-out infinite alternate;transform-origin:50% 100%}
+.wks-streak .wko-sc2{background:radial-gradient(circle,#ffd24a 0 2px,transparent 3px) 0 0/60px 90px;opacity:.7;animation:wksRise 2.2s linear infinite}
+.wks-playbook .wko-bg{background:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px) 0 0/48px 48px,#0a2260}
+.wks-playbook .wko-sc{background:radial-gradient(circle at 25% 30%,transparent 0 20px,#fff 21px 25px,transparent 26px),linear-gradient(35deg,transparent 48%,#fff 49% 51%,transparent 52%),linear-gradient(-30deg,transparent 60%,#fff 61% 62.5%,transparent 63%);opacity:.8;animation:wksDraw 1.8s ease-out both}
+.wks-playbook .wko-sc2{background:linear-gradient(45deg,transparent 46%,rgba(255,255,255,.7) 48% 52%,transparent 54%) 70% 65%/60px 60px no-repeat,linear-gradient(-45deg,transparent 46%,rgba(255,255,255,.7) 48% 52%,transparent 54%) 70% 65%/60px 60px no-repeat}
+.wks-signature .wko-bg{background:radial-gradient(circle at 50% 40%,#3a2a05,#070502 75%)}.wks-signature .wko-sc{background:linear-gradient(115deg,transparent 35%,rgba(255,246,207,.55) 50%,transparent 65%) 0 0/300% 100%;animation:wksFoil 2.6s linear infinite}
+.wks-signature .wko-sc2{background:radial-gradient(circle,#ffe9a0 0 1.5px,transparent 2.5px) 0 0/70px 70px;opacity:.6;animation:wksTw 1.6s ease-in-out infinite}
+.wks-fnl .wko-bg{background:linear-gradient(#030914,#0b2c16 70%,#103a1e)}.wks-fnl .wko-sc{background:conic-gradient(from 180deg at 18% -5%,transparent 0 40%,rgba(255,244,190,.45) 46% 54%,transparent 60%),conic-gradient(from 180deg at 82% -5%,transparent 0 40%,rgba(255,244,190,.45) 46% 54%,transparent 60%);animation:wksTw 1.2s ease-in-out infinite}
+.wks-fnl .wko-sc2{background:radial-gradient(circle,#fff 0 3px,transparent 4px) 0 0/34px 40px;-webkit-mask:linear-gradient(#000 0 14%,transparent 18%);opacity:.9}.wks-fnl .wko-lamps{opacity:1}
+.wks-headline .wko-bg{background:repeating-linear-gradient(0deg,rgba(0,0,0,.07) 0 6px,transparent 6px 18px),#d8d3c2}.wks-headline .wko-k,.wks-headline .wko-sch,.wks-headline .wko-lb,.wks-headline .wko-sub{color:#14110a;text-shadow:none}.wks-headline .wko-pos,.wks-headline .wko-num{color:#14110a;text-shadow:none;-webkit-text-fill-color:#14110a}
+.wks-headline .wko-sc{background:radial-gradient(circle at 20% 30%,#fff 0 6px,transparent 7px);animation:wksFlash 1.1s steps(1) infinite}.wks-headline .wko-sc2{background:radial-gradient(circle at 78% 62%,#fff 0 6px,transparent 7px);animation:wksFlash 1.1s .5s steps(1) infinite}
+.wks-rivalry .wko-bg{background:linear-gradient(110deg,#5a0a30 0 49.5%,#0a1d5a 50.5%)}.wks-rivalry .wko-sc{background:linear-gradient(110deg,transparent 47%,#fff 49% 51%,transparent 53%);filter:drop-shadow(0 0 22px #fff);animation:wksBolt 1.2s steps(2,end) infinite}
+.wks-rivalry .wko-sc2{background:linear-gradient(110deg,rgba(255,46,136,.35) 0 49%,transparent 50%),linear-gradient(110deg,transparent 50%,rgba(76,141,255,.35) 51%);animation:wksTw 1.4s ease-in-out infinite}
+.wks-arcade .wko-bg{background:linear-gradient(rgba(192,107,255,.18) 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,rgba(56,245,255,.18) 1px,transparent 1px) 0 0/40px 40px,#07061a}.wks-arcade .wko-sc{background:repeating-linear-gradient(0deg,rgba(0,0,0,.35) 0 3px,transparent 3px 7px);z-index:6}
+.wks-arcade .wko-sc2{background:radial-gradient(circle,#38f5ff 0 3px,transparent 4px) 0 0/72px 72px;opacity:.5;animation:wksSlideY 1.6s steps(8) infinite}.wks-arcade .wko-k,.wks-arcade .wko-sch,.wks-arcade .wko-lb{font-family:"Courier New",monospace}
+@keyframes wksSpin{to{transform:rotate(360deg)}}@keyframes wksSlide{to{background-position:200px 0}}@keyframes wksSlideY{to{background-position:0 90px}}@keyframes wksFlame{from{transform:scaleY(.85) scaleX(.97)}to{transform:scaleY(1.12) scaleX(1.03)}}
+@keyframes wksRise{to{background-position:0 -180px}}@keyframes wksDraw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}@keyframes wksFoil{to{background-position:-300% 0}}@keyframes wksTw{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes wksFlash{0%,80%{opacity:0}85%,100%{opacity:1}}@keyframes wksBolt{0%{opacity:1}50%{opacity:.15;transform:translateX(6px)}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.wks .wko-sc,.wks .wko-sc2{animation:none!important}}
 .wko-snd{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 26px);left:12px;z-index:5;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:8px 14px;font:700 .8rem/1 var(--f-body)}
 .wko-snd[aria-pressed=false]{opacity:.6}
 .wko-split{position:relative;display:flex;width:min(92vw,460px);height:min(56vh,360px);border-radius:18px;overflow:hidden;box-shadow:0 0 40px rgba(124,243,255,.4)}
@@ -3256,7 +3287,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v426 · Nov 10';
+const APP_BUILD='v427 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4641,7 +4672,13 @@ function specProp(u,key,ctx){let t=0;const p=pByKey(key),g=ctx&&ctx.game;
 function specTeam(u,school){let t=0;for(const id of Object.keys(invOf(u).cards||{})){if(!id.startsWith('sc:ticket:')&&!id.startsWith('sc:signature:'))continue;const [,st,key]=id.split(':'),p=pByKey(key);if(!p||p.school!==school)continue;const r=specRaw(u,st,key);if(r)t+=st==='ticket'?SPEC.ticket.pc[r]:SPEC_TEAM.signature[r]}return t}
 function arcBonus(u){let t=0;const d=+fgRec(u).days||0;if(!d)return 0;for(const id of Object.keys(invOf(u).cards||{})){if(!id.startsWith('sc:arcade:'))continue;const r=specRaw(u,'arcade',id.split(':')[2]);if(r)t+=SPEC.arcade.pc[r]*d}return t}
 const spcLine=(st,r)=>{const S=SPEC[st];return '+'+S.pc[r]+S.u};
-function rollSpec(st0){const P=cardPools().pl;if(!P.length)return '';const st=st0||Object.keys(SPEC)[fcRnd(9)];return 'sc:'+st+':'+P[fcRnd(P.length)].slice(3)}
+/* v423 (owner): special cards only exist for the top 25 players of each position, ranked by overall (ties by key). Cards people already own stay. */
+const SPC_TOP=25;let _sp25=null;
+function specPool(){const cp=cardPools();if(_sp25&&_sp25.rev===cp.rev)return _sp25.pl;const by={};
+  for(const id of cp.pl){const k=id.slice(3),p=pByKey(k);if(!p)continue;const o=ovrOf(k);if(!o)continue;const pos=p.pos==='DEF'?(p.sub||'DEF'):p.pos;(by[pos]=by[pos]||[]).push([o,id])}
+  let pl=[];for(const a of Object.values(by)){a.sort((x,y)=>y[0]-x[0]||(x[1]<y[1]?-1:1));pl=pl.concat(a.slice(0,SPC_TOP).map(x=>x[1]))}
+  if(!pl.length)pl=cp.pl;_sp25={rev:cp.rev,pl};return pl}
+function rollSpec(st0){const P=specPool();if(!P.length)return '';const st=st0||Object.keys(SPEC)[fcRnd(9)];return 'sc:'+st+':'+P[fcRnd(P.length)].slice(3)}
 /* Card Binder (v297): a school's set = its team card + its BND_N best players (by season fantasy points), any version of each.
    Complete one: +BND_TOK tokens once and a permanent +BND_BOOST% on winnings of Pick 'em picks on that team and props on its players
    (added on top of card boosts, saved on the pick as cb). Claimed sets are kept in picks/<uid>.bnd = {school: time}. */
@@ -5067,20 +5104,24 @@ function pkpShopCard(k,P,bal){const pend=!!pkpOf(ME.uid);
     <button class="btn" data-act="pkOpen" data-v="${k}" data-h="tok" ${!pend&&bal<P.tok?'disabled':''}>${pend?'Pick your player':P.tok.toLocaleString()+' tokens'}</button></article>`}
 function pkpBanner(){return pkpOf(ME.uid)?`<section class="card lk-free lk-prize"><div><b>Pick 1 of 5 · your pack is open</b><small class="muted">Choose the player you want to keep.</small></div><button class="btn" data-act="pkOpen" data-v="pick" data-h="tok">Pick now</button></section>`:''}
 /* the walkout: dark tunnel, then position, team, best stat and the player. Tap to move on, Skip to jump to the player. */
+/* v425 (owner): every special card style has its own walkout scene (colour, background, moving layer, intro words, title, sound). */
+const WKS={prizm:{c:'#7CF3FF',k0:'Refracting',t:'PRISM PULL!',snd:'shimmer'},ticket:{c:'#FFD24A',k0:'Admit one',t:'GAME TIME!',snd:'ticket'},streak:{c:'#FF8A1F',k0:'He is heating up',t:'ON FIRE!',snd:'fire'},
+  playbook:{c:'#4C8DFF',k0:'Drawing it up',t:'TOUCHDOWN CALL!',snd:'whistle'},signature:{c:'#FFC23D',k0:'Signed and sealed',t:'SIGNED!',snd:'chime'},fnl:{c:'#FFE27A',k0:'Under the lights',t:'FRIDAY NIGHT!',snd:'horn'},
+  headline:{c:'#F4F1E8',k0:'Breaking news',t:'EXTRA! EXTRA!',snd:'press'},rivalry:{c:'#FF2E88',k0:'Rivals collide',t:'RIVALRY WEEK!',snd:'clash'},arcade:{c:'#C06BFF',k0:'Insert coin',t:'NEW HIGH SCORE!',snd:'chip'}};
 function pkWalkout(R,done,X){
   /* X = {p,r,dup}: a Welcome pack walkout for a player card of rarity r (R is null); otherwise R is a Pick 1 of 5 offer */
   const C=X&&X.c,id=X?'':R.o[R.g].split('|')[0],ai=X?{key:C?'':X.p.key,rank:0,pct:X.pct||CARD_PCT[X.r]}:achInfo(id),p=C?{name:C.name,school:C.school}:X?X.p:pByKey(ai.key);if(!p){done();return}
   let st=C?{n:0,big:'+'+ai.pct+'%',l:C.on,sub:'Card boost'}:pkStat(ai.key,ai.rank);if(!C&&X&&st.big==='#0')st={n:0,big:'+'+ai.pct+'%',l:'on his props',sub:'Card boost'};
   const pos=C?C.pos:posOf(p),calm=matchMedia('(prefers-reduced-motion: reduce)').matches,ini=String(p.school).split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
   const o=document.createElement('div');const rr=X?X.r:'x',big=['l','m','x'].includes(rr),lock=['m','x'].includes(rr)&&!calm,mult={e:1,l:1.3,m:1.6,x:1.8}[rr]||1;
-  o.className='wko wr-'+rr+(big?' wk-big':'');o.style.setProperty('--rc',(RAR[rr]||RAR.e).c);o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Walkout');o.dataset.s='0';
-  o.innerHTML=`<div class="wko-bg" aria-hidden="true"></div><i class="wko-beams" aria-hidden="true"></i><i class="wko-crowd" aria-hidden="true"></i><i class="wko-lamps" aria-hidden="true"></i><i class="wko-bolt" aria-hidden="true"></i><i class="wko-fl" aria-hidden="true"></i>
+  const SC=C&&C.st?WKS[C.st]:null;o.className='wko wr-'+rr+(big?' wk-big':'')+(SC?' wks wks-'+C.st:'');o.style.setProperty('--rc',SC?SC.c:(RAR[rr]||RAR.e).c);o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Walkout');o.dataset.s='0';
+  o.innerHTML=`<div class="wko-bg" aria-hidden="true"></div><i class="wko-beams" aria-hidden="true"></i><i class="wko-crowd" aria-hidden="true"></i><i class="wko-lamps" aria-hidden="true"></i><i class="wko-bolt" aria-hidden="true"></i><i class="wko-fl" aria-hidden="true"></i>${SC?'<i class="wko-sc" aria-hidden="true"></i><i class="wko-sc2" aria-hidden="true"></i>':''}
     <i class="wko-door l" aria-hidden="true"></i><i class="wko-door r" aria-hidden="true"></i>
-    <div class="wko-st wko-s0"><i class="wko-ring"></i><b class="wko-k">${X?esc(X.k||'Walkout'):'Immortal pull'}</b></div>
+    <div class="wko-st wko-s0"><i class="wko-ring"></i><b class="wko-k">${SC?esc(SC.k0):X?esc(X.k||'Walkout'):'Immortal pull'}</b></div>
     <div class="wko-st wko-s1"><b class="wko-k">${C?esc(C.k1):'Position'}</b>${C&&C.duo?`<div class="wko-split">${C.duo.map((q,i)=>`<div class="wko-h ${i?'r':'l'}">${av(q.name,q.school,84)}<b>${esc(q.key?posOf(q):'')}</b><span>${esc(lastN(q.name))}</span></div>`).join('')}<i class="wko-slash"></i></div>`:`<div class="wko-pos${C?' sm':''}">${esc(pos)}</div>`}</div>
     <div class="wko-st wko-s2"><b class="wko-k">Team</b><div class="wko-logo">${logoFor(p.school)?slogo(p.school,150):`<span class="wko-ini">${esc(ini)}</span>`}</div><div class="wko-sch">${esc(p.school)}</div></div>
     <div class="wko-st wko-s3"><b class="wko-k">${C?'Boost':st.big?'Rank':'Season best stat'}</b><div class="wko-num">${st.big?esc(st.big):'0'}</div><div class="wko-lb">${esc(st.l)}</div><small class="wko-sub">${esc(st.sub)}</small></div>
-    <div class="wko-st wko-s4"><i class="wko-rays"></i><div class="wko-ttl">${X?esc(RAR[X.r].n.toUpperCase())+'!':'IMMORTAL!'}</div>
+    <div class="wko-st wko-s4"><i class="wko-rays"></i><div class="wko-ttl">${SC?esc(SC.t):X?esc(RAR[X.r].n.toUpperCase())+'!':'IMMORTAL!'}</div>
       <div class="wko-card"><div class="wko-ct"><span>${X?esc(RAR[X.r].n)+' '+(C?C.kind:'player')+' card':'TOP 10 · #'+ai.rank}</span><span>+${ai.pct}%</span></div>${C?C.art:av(p.name,p.school,124)}<h3>${esc(p.name)}</h3><p>${esc(pos)} · ${slogo(p.school,18)} ${esc(p.school)}</p><em>${esc(st.big?st.l:st.n.toLocaleString()+' '+st.l)}</em><i class="wko-shine"></i></div><i class="wko-pts"></i>
       <button class="btn wko-go" type="button">${X?esc(X.btn||'Next'):'Pick your player'}</button></div>
     ${lock?'':'<button class="wko-skip" type="button">Skip</button>'}<button class="wko-snd" type="button" aria-pressed="${SFX.on()}" aria-label="Sound">${SFX.on()?'Sound on':'Sound off'}</button>`;
@@ -5094,7 +5135,7 @@ function pkWalkout(R,done,X){
   const go=n=>{if(fin)return;clearTimeout(tm);cancelAnimationFrame(raf);s=n;o.dataset.s=n;
     if(n>0&&!calm){fl.classList.remove('on');void fl.offsetWidth;fl.classList.add('on')}
     vib(n===4?(big?[60,40,160,40,300,60,400]:[40,40,120,40,220]):n>0?[35,30,35]:[20]);
-    if(!calm){if(n===0){SFX.door();SFX.crowd(T[0]/1000+1.2,.05)}else if(n<4){SFX.thump(n);SFX.crowd(T[n]/1000,.04+n*.015)}if(n===3)SFX.riser(T[3]/1000);if(n===4)SFX.hit(big)}
+    if(!calm){if(SC&&(n===0||n===4))SFX.scene(SC.snd,n);if(n===0){SFX.door();SFX.crowd(T[0]/1000+1.2,.05)}else if(n<4){SFX.thump(n);SFX.crowd(T[n]/1000,.04+n*.015)}if(n===3)SFX.riser(T[3]/1000);if(n===4)SFX.hit(big)}
     if(n===3)count();
     if(n===4){fin=true;sparks();if(big&&!calm){setTimeout(sparks,700);setTimeout(sparks,1500);if(lock)setTimeout(sparks,2300)}return}
     tm=setTimeout(()=>go(n+1),T[n])};
@@ -5147,6 +5188,11 @@ const SFX={c:null,
   hit(big){this.tone(90,.9,{to:32,v:.7});this.noise(.5,{f:1800,v:.2,a:.005});
     [261.6,329.6,392,523.3].concat(big?[659.3,784,1046.5]:[]).forEach((f,i)=>this.tone(f,big?2.4:1.5,{type:'triangle',v:.09,at:i*.06,a:.02}));
     this.crowd(big?4:2.2,big?.16:.1);if(big)[0.5,0.9,1.3].forEach(t=>this.noise(.35,{f:3000,to:900,v:.09,at:t,a:.01}))},
+  scene(k,n){const t=(f,d,o)=>this.tone(f,d,o),z=(d,o)=>this.noise(d,o);
+    if(n===0){({shimmer:()=>[1318,1568,2093].forEach((f,i)=>t(f,.5,{v:.05,at:i*.12})),ticket:()=>{z(.12,{f:4000,v:.12,a:.005});z(.12,{f:4000,v:.12,at:.18,a:.005})},fire:()=>z(1.1,{f:500,to:2200,v:.12,a:.5}),whistle:()=>t(2600,.35,{type:'triangle',v:.1,to:2300}),
+      chime:()=>t(1568,1.2,{v:.07}),horn:()=>t(110,.9,{type:'sawtooth',v:.12,to:100}),press:()=>[0,.12,.24].forEach(a=>z(.1,{f:1800,v:.14,at:a,a:.005})),clash:()=>z(.5,{f:900,to:200,v:.18,a:.01}),chip:()=>[523,659,784,1047].forEach((f,i)=>t(f,.1,{type:'square',v:.05,at:i*.09}))}[k]||(()=>0))()}
+    else{({shimmer:()=>[2093,2637,3136].forEach((f,i)=>t(f,1.4,{v:.05,at:i*.08})),ticket:()=>[0,.15,.3].forEach(a=>z(.15,{f:3500,v:.14,at:a,a:.005})),fire:()=>{z(1.6,{f:300,to:3000,v:.16,a:.3});t(80,1.2,{type:'sawtooth',v:.1,to:50})},whistle:()=>{t(2600,.25,{type:'triangle',v:.1});t(2600,.5,{type:'triangle',v:.1,at:.3})},
+      chime:()=>[1568,2093,2637].forEach((f,i)=>t(f,1.8,{v:.06,at:i*.15})),horn:()=>{t(110,1.4,{type:'sawtooth',v:.14});t(165,1.4,{type:'sawtooth',v:.1})},press:()=>{z(.6,{f:2500,v:.16,a:.01});t(200,.4,{type:'square',v:.05})},clash:()=>{z(.7,{f:2800,to:500,v:.2,a:.005});t(60,.8,{to:30,v:.5})},chip:()=>[784,988,1319,1568,2093].forEach((f,i)=>t(f,.14,{type:'square',v:.06,at:i*.07}))}[k]||(()=>0))()}},
   tear(){this.noise(.4,{f:3500,to:1200,q:2,v:.18,a:.01})},
   coin(){this.tone(988,.08,{type:'square',v:.06});this.tone(1319,.25,{type:'square',v:.06,at:.08})}};
 /* v387 (owner): every Epic or better player card in a pack gets a walkout (position, team, his best stat, then the player) before the cards
@@ -5157,13 +5203,14 @@ function packShow(P,got){
     if(g.card.startsWith('pc:'))key=g.card.slice(3);else if(g.card.startsWith('ac:')){const a=achInfo(g.card);key=a&&a.key;pct=a&&a.pct}
     /* v408 (owner): Duo cards and team cards get the walkout too, so every Epic or better card is a walkout */
     if(g.card.startsWith('dc:')){const c=duoInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.full,school:c.school,pos:[c.a,c.b].map(q=>q.key?posOf(q):'').filter(Boolean).join(' + ')||'DUO',k1:'Duo',kind:'duo',on:'on parlays',art:duoArt(g.card,g.r,170),duo:[c.a,c.b]},pct:DUO_PCT[g.r]});continue}
-    if(g.card.startsWith('sc:')){const c=cardInfo(g.card),S=SPEC[c.spc];wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school,pos:S.n.toUpperCase(),k1:S.n,kind:'special',on:S.w.toLowerCase(),art:cardArt(g.card,g.r,170)},pct:S.pc[g.r]});continue}
+    if(g.card.startsWith('sc:')){const c=cardInfo(g.card),S=SPEC[c.spc];wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school,pos:S.n.toUpperCase(),k1:S.n,kind:'special',st:c.spc,on:S.w.toLowerCase(),art:cardArt(g.card,g.r,170)},pct:S.pc[g.r]});continue}
     if(g.card.startsWith('tc:')){const c=cardInfo(g.card);wk.push({r:g.r,dup:g.dup,k:P.n,c:{name:c.name,school:c.school||c.name,pos:'TEAM',k1:'Card',kind:'team',on:'on Pick ’em picks',art:cardArt(g.card,g.r,124)}});continue}
     const p=key&&pByKey(key);if(p)wk.push({p,r:g.r,dup:g.dup,pct,k:P.n})}
   /* v422 (owner): every Legendary or better card plays its walkout automatically, one after another, lowest first, even when there are several in the pack.
      With none of those, the best Epic card gets one walkout that can be skipped. */
   wk.sort((a,b)=>OR.indexOf(a.r)-OR.indexOf(b.r));
-  let list=wk.filter(x=>OR.indexOf(x.r)>=OR.indexOf('l'));
+  /* v426 (owner): special cards always get an automatic walkout, whatever the rarity */
+  let list=wk.filter(x=>OR.indexOf(x.r)>=OR.indexOf('l')||(x.c&&x.c.kind==='special'));
   if(!list.length&&wk.length)list=[wk[wk.length-1]];
   if(!list.length){packShow0(P,got);return}
   const play=i=>{if(i>=list.length){packShow0(P,got);return}
@@ -5512,7 +5559,7 @@ const CARD_FIX=[{id:'zh-ig',who:ZH,name:'Isaiah Garcia',school:'Bishop\'s',r:'l'
   {id:'wp-3',who:ZH,wp:1},
   {id:'ml-wp-1',who:ML,wp:1},
   {id:'is-lx',who:/^\s*isaac\s+smedra\s*$/i,rar:['x','l']},   /* v409 (owner): every Immortal and Legendary card removed from Isaac Smedra */
-  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'},{id:'se-all-1',who:ABZH,gp:'alls',m:'Here’s all of the new special edition cards'},{id:'se-all-2',who:AB,gp:'alls',m:'Here’s another Special Edition pack'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
+  {id:'ab-duo-1',who:AB,gp:'duo'},{id:'ab-spot-1',who:AB,gp:'spot'},{id:'ab-spot-2',who:AB,gp:'spot'},{id:'se-all-1',who:ABZH,gp:'alls',m:'Here’s all of the new special edition cards'},{id:'se-all-2',who:AB,gp:'alls',m:'Here’s another Special Edition pack'},{id:'se-all-3',who:AB,gp:'alls',m:'Here’s a new Special Edition pack'}];   /* v408 (owner): Ari Borkar gets a free Duo pack (a gift pack in the Shop) */   /* v366 (owner): Max London gets another welcome pack */   /* v353: Zed gets another welcome pack */   /* v350: Ari and Zed get a new welcome pack */
 function cardFix(){const u=ME.uid;if(!u||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!S.loaded.picks||!S.loaded.profiles)return;
   const nmU=String((myProfile()||{}).name||''),old=invOf(u),rv=Object.assign({},(old.fr||{}).rv),gp=Object.assign({},(old.fr||{}).gp),cards=Object.assign({},old.cards),own=cardsOf(u),patch={};let n=0,ng=0;
   const put=(id,f)=>{const cur=typeof cards[id]==='string'?{[cards[id]]:1}:Object.assign({},cards[id]);f(cur);cards[id]=cur;patch.cards=cards};
@@ -5661,8 +5708,10 @@ function viewLocker(){
   if(!can)return head+'<p class="empty">Sign in to keep your items.</p>';
   const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0)+achOwned(ME.uid).length,pct=Math.min(100,ownN/Math.max(1,totN)*100);
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
-  const BHON=FG_SPORT!=='bb',tab=['cards','cos','boost','bnd'].concat(BHON?['av']:[]).includes(UI.lk)?UI.lk:(BHON?'av':'cos');
-  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${(BHON?[['av','Avatar']]:[]).concat([['cos','Cosmetics'],['cards','Cards'],['boost','Boosts'],['bnd','Binder']]).map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const BHON=FG_SPORT!=='bb',tab=['cards','cos','boost','bnd'].concat(BHON?['av']:[]).includes(UI.lk)?UI.lk:'cards';   /* v427 (owner): the Locker opens on Cards */
+  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${(BHON?[['av','Avatar']]:[]).concat([['cos','Cosmetics'],['boost','Boosts'],['bnd','Binder']]).map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  /* v427 (owner): Cards come first in the Locker and have their own big button above the other tabs */
+  const cardsBtn=`<button type="button" class="lk-cardsb" data-act="lkTab" data-v="cards" aria-pressed="${tab==='cards'}"><span class="lk-cbi" aria-hidden="true"></span><span><b>My Cards</b><small>${cardN} card${cardN===1?'':'s'} · players, teams, Duos and special</small></span><i aria-hidden="true">›</i></button>`;
   const top=`<section class="lk-hero"><div class="lk-ring" style="--p:${pct.toFixed(1)}"><b>${pct>0&&pct<1?'<1':Math.floor(pct)}%</b><small>collected</small></div>
     <div class="lk-hs"><div><b>${ownN}</b><small>cosmetics</small></div><div><b>${cardN}</b><small>cards</small></div><div><b>${coinIc(ME.uid)}${Math.round(bal)}</b><small>tokens</small></div></div>
     <a class="btn lk-shopb" href="#shop">Shop${fp?` · ${fp} free`:''}</a></section>`;
@@ -5731,7 +5780,7 @@ function viewLocker(){
     body=`<section class="card"><div class="qh"><h3>Boosts & perks</h3></div><div class="lk-list">${ITEMS.filter(x=>x.k==='perk'||x.k==='tboost').map(x=>`<div class="lk-row">${itemArt(x.id,42)}<span><b>${esc(x.n)}</b><small class="muted">${esc(x.d)}</small></span><b class="lk-n">${invLeft(ME.uid,x.id)}</b></div>`).join('')}</div>
       <p class="muted">Token boosts go on a Pick ’em or player prop pick from the pick itself, before the game starts. Perks show up in the game they belong to.</p></section>`;
   }
-  return head+lkNote()+top+tabs+body;
+  return head+lkNote()+top+cardsBtn+tabs+body;
 }
 /* boost chips on a locked-in pick that hasn't started */
 async function invUse(id,extra){const v=invOf(ME.uid),use=Object.assign({},v.use,{[id]:(+((v.use||{})[id])||0)+1}),patch=Object.assign({use},extra||{});

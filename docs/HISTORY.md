@@ -420,3 +420,7 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 ## v425: Cards tab opens on All
 - Locker > Cards defaults to an All chip (players, teams, duos, special), every filter sorted by overall, highest first (`cOvr` in viewLocker: players/specials use ovr.js, teams = average of their top 3 players, duos = average of the two). Immortal cards still have their own section above.
 - v426 (Nov 10, owner): card layout fixes. The art window was 3.6em too narrow (off centre) and the special-card tag strip had a huge em padding that covered the OVR; window is now 59.6em wide (4em margin each side) and special cards (`.tcard.pc2.spc`) start the window at 11em under a slim tag strip. Check cards with a gallery of every position, rarity, special style and the 300/170/124/64 px sizes before shipping card CSS.
+
+## v427
+- Special cards (Prizm, Game Ticket, Hot Streak, Playbook, Signature, Friday Night Lights, Headline, Rivalry, Arcade): only roll for the top 25 players of each position by overall (`specPool`, `SPC_TOP`); each style has its own walkout scene (`WKS`, `.wks-<style>`, `SFX.scene`); every special card plays its walkout automatically in `packShow` whatever the rarity. CARD_FIX `se-all-3` gives Ari Borkar (only) another Special Edition pack.
+- Locker opens on Cards. Cards left the tab strip and have their own big button (`.lk-cardsb`, `cardsBtn` in `viewLocker`) above the other tabs (Avatar, Cosmetics, Boosts, Binder).
