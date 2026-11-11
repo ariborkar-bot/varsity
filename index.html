@@ -3225,7 +3225,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v423 · Nov 10';
+const APP_BUILD='v424 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -9111,7 +9111,7 @@ function admAlerts(X){const a=[];if(X.health.noScore.length)a.push(['r',`${X.hea
    Admins can write every picks doc (is_admin() policy). Cards are removed by setting that rarity to 0 (merges can't delete keys); tokens are
    given or taken through inv.dup (it counts into the balance and the earned total); gift packs go in inv.fr.gp (opened ones in inv.fr.gpo).
    Applies to the app you are in (football or basketball); the other app has its own data. */
-const CTL={q:'',uid:'',cq:'',card:'',cr:'e',pk:'player',it:'',tk:'',msg:'',sel:{}};
+const CTL={q:'',uid:'',cq:'',card:'',cr:'e',lsort:'name',lrar:'',ltype:'',lq:'',pk:'player',it:'',tk:'',msg:'',sel:{}};
 const ctlNote=t=>{const m=(CTL.msg||'').trim().slice(0,200);return m?{id:'n'+Date.now().toString(36),v:{m,t,at:NOW()}}:null};
 const ctlName=u=>{const r=(AD.rows||[]).find(x=>x.uid===u),p=S.profiles[u]||(r&&r.p)||{};return p.name||(r&&r.email)||'Account'};
 const ctlCardRes=q=>{q=nmNorm(q);if(q.length<2)return[];const out=[];
@@ -9135,7 +9135,16 @@ function ctlHTML(){
   const sel=CTL.uid&&rows.find(r=>r.uid===CTL.uid);
   let acct='';
   if(sel){const u=sel.uid,v=invOf(u),own=cardsOf(u),isB=!!((S.picks[u]||{}).ban),b=(S.picks[u]||{}).ban||{};
-    const cardRows=Object.keys(own).map(id=>({id,rs:RAR_ORD.concat(['x']).filter((r,i,a)=>a.indexOf(r)===i&&own[id][r])})).filter(x=>x.rs.length).sort((a,b)=>cardInfo(a.id).name.localeCompare(cardInfo(b.id).name));
+    const cardAll=Object.keys(own).map(id=>({id,rs:RAR_ORD.concat(['x']).filter((r,i,a)=>a.indexOf(r)===i&&own[id][r])})).filter(x=>x.rs.length);
+    const ctlKind=id=>id.startsWith('tc:')?'team':id.startsWith('dc:')?'duo':id.startsWith('sc:')?'special':id.startsWith('ac:')?'ach':'player';
+    const rk=x=>Math.max(...x.rs.map(r=>RAR_ORD.concat(['x']).indexOf(r)));
+    const lq=nmNorm(CTL.lq||'');
+    const cardRows=cardAll.filter(x=>(!CTL.lrar||x.rs.includes(CTL.lrar))&&(!CTL.ltype||ctlKind(x.id)===CTL.ltype)&&(!lq||nmNorm(cardInfo(x.id).name+' '+(cardInfo(x.id).sub||'')).includes(lq))).sort((a,b)=>{const na=cardInfo(a.id),nb=cardInfo(b.id);
+      if(CTL.lsort==='rhi'){const d=rk(b)-rk(a);if(d)return d}else if(CTL.lsort==='rlo'){const d=rk(a)-rk(b);if(d)return d}
+      else if(CTL.lsort==='school'){const d=String(na.school||'').localeCompare(String(nb.school||''));if(d)return d}
+      else if(CTL.lsort==='type'){const d=ctlKind(a.id).localeCompare(ctlKind(b.id));if(d)return d}
+      else if(CTL.lsort==='copies'){const d=b.rs.length-a.rs.length;if(d)return d}
+      return na.name.localeCompare(nb.name)});
     const gp=giftPacks(u),pkOpts=Object.keys(PACKS).map(k=>`<option value="${k}" ${CTL.pk===k?'selected':''}>${esc(PACKS[k].n)} (${PACKS[k].c})</option>`).join('');
     const itOpts=ITEMS.filter(x=>!x.ex).map(x=>`<option value="${esc(x.id)}" ${CTL.it===x.id?'selected':''}>${esc(x.n)} · ${RAR[x.r].n}</option>`).join('');
     const it=v.it||{},myIt=Object.keys(it).filter(k=>+it[k]>0&&ITEM[k]);
@@ -9147,7 +9156,8 @@ function ctlHTML(){
         :`<button class="btn sm" data-ctl="ban" data-id="${esc(u)}">Ban account</button><p class="muted" style="font-size:12px;margin:6px 0 0">They get a full-screen ban notice with your message above and can send one appeal.</p>`}
       <h4 style="margin:16px 0 6px">Tokens</h4>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="ctl-tk" type="number" min="1" class="ctl-i" placeholder="Amount" value="${esc(CTL.tk)}"><button class="btn sm" data-ctl="tok" data-d="1" data-id="${esc(u)}">Give tokens</button><button class="btn sm" data-ctl="tok" data-d="-1" data-id="${esc(u)}">Take tokens</button></div>
-      <h4 style="margin:16px 0 6px">Cards in their locker (${cardRows.length})</h4>
+      <h4 style="margin:16px 0 6px">Cards in their locker (${cardRows.length}${cardRows.length!==cardAll.length?' of '+cardAll.length:''})</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px"><select id="ctl-lsort" class="ctl-i" aria-label="Sort cards">${[['name','Sort: Name A-Z'],['rhi','Sort: Rarity high to low'],['rlo','Sort: Rarity low to high'],['school','Sort: School'],['type','Sort: Card type'],['copies','Sort: Most versions']].map(o=>`<option value="${o[0]}" ${CTL.lsort===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select><select id="ctl-lrar" class="ctl-i" aria-label="Filter by rarity"><option value="">All rarities</option>${RAR_ORD.concat(['x']).filter(r=>RAR[r]).map(r=>`<option value="${r}" ${CTL.lrar===r?'selected':''}>${RAR[r].n}</option>`).join('')}</select><select id="ctl-ltype" class="ctl-i" aria-label="Filter by card type">${[['','All card types'],['player','Player'],['team','Team'],['duo','Duo'],['special','Special Edition'],['ach','Achievement']].map(o=>`<option value="${o[0]}" ${CTL.ltype===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select><input id="ctl-lq" type="search" class="ctl-i" placeholder="Filter by name or school" value="${esc(CTL.lq||'')}"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px"><button class="btn sm ghost" data-ctl="ckall" data-id="${esc(u)}">Select all</button><button class="btn sm ghost" data-ctl="ckclr" data-id="${esc(u)}">Clear</button><button class="btn sm" id="ctl-rmbtn" data-ctl="ckrm" data-id="${esc(u)}">Remove selected (${Object.keys(CTL.sel).length})</button></div>
       <div style="max-height:260px;overflow:auto;border:1px solid #ECEEF4;border-radius:10px"><table class="ctl-t"><tbody>${cardRows.map(x=>`<tr><td><b>${esc(cardInfo(x.id).name)}</b> <span class="muted">${esc(cardInfo(x.id).sub||'')}</span></td><td class="n">${x.rs.map(r=>`<label style="display:inline-flex;align-items:center;gap:5px;margin-left:8px;white-space:nowrap;color:${RAR[r].c};font-weight:700"><input type="checkbox" data-ctl="ck" data-c="${esc(x.id)}" data-r="${r}" ${CTL.sel[x.id+'|'+r]?'checked':''}>${RAR[r].n}</label>`).join('')}</td></tr>`).join('')||'<tr><td class="muted">No cards.</td></tr>'}</tbody></table></div>
       <h4 style="margin:16px 0 6px">Give a card</h4>
@@ -9170,12 +9180,12 @@ async function ctlSave(u,patch,msg,top,note){const v=invOf(u);
   if(ok){const cur=S.picks[u]||{};S.picks[u]=top?Object.assign({},cur,top):Object.assign({},cur,{inv:Object.assign({},v,patch)});if(note)S.picks[u].an=Object.assign({},cur.an,{[note.id]:note.v});if(note)CTL.msg='';_gIn&&(_gIn.at=0);try{banCheck()}catch(_){}}render()}
 document.addEventListener('input',e=>{const t=e.target;if(!ME.admin)return;
   if(t.id==='ctl-q'){CTL.q=t.value;const h=document.getElementById('ctl-acc');if(h){const q=nmNorm(CTL.q);h.innerHTML=(AD.rows||[]).filter(r=>!q||nmNorm(((r.p&&r.p.name)||'')+' '+(r.email||'')+' '+((r.p&&r.p.school)||'')).includes(q)).slice(0,8).map(r=>`<button class="adm-btn" style="justify-content:flex-start;text-align:left" data-ctl="sel" data-id="${esc(r.uid)}"><b>${esc((r.p&&r.p.name)||r.email||'Account')}</b>&nbsp;<span class="adm-mut">${esc(r.email||'')}${r.p&&r.p.school?' · '+esc(r.p.school):''}</span></button>`).join('')||'<p class="adm-mut">No matches.</p>'}}
-  else if(t.id==='ctl-cq'){CTL.cq=t.value;const h=document.getElementById('ctl-res');if(h)h.innerHTML=ctlResHTML()}
+  else if(t.id==='ctl-lq'){CTL.lq=t.value;render();const e=document.getElementById('ctl-lq');if(e){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(_){}}}else if(t.id==='ctl-cq'){CTL.cq=t.value;const h=document.getElementById('ctl-res');if(h)h.innerHTML=ctlResHTML()}
   else if(t.id==='ctl-msg')CTL.msg=t.value;else if(t.id==='ctl-tk')CTL.tk=t.value});
-document.addEventListener('change',e=>{const t=e.target;if(!ME.admin)return;if(t.dataset&&t.dataset.ctl==='ck'){const k=t.dataset.c+'|'+t.dataset.r;if(t.checked)CTL.sel[k]=1;else delete CTL.sel[k];const b=document.getElementById('ctl-rmbtn');if(b)b.textContent='Remove selected ('+Object.keys(CTL.sel).length+')';return}if(t.id==='ctl-cr'){CTL.cr=t.value;render()}else if(t.id==='ctl-pk')CTL.pk=t.value;else if(t.id==='ctl-it')CTL.it=t.value});
+document.addEventListener('change',e=>{const t=e.target;if(!ME.admin)return;if(t.dataset&&t.dataset.ctl==='ck'){const k=t.dataset.c+'|'+t.dataset.r;if(t.checked)CTL.sel[k]=1;else delete CTL.sel[k];const b=document.getElementById('ctl-rmbtn');if(b)b.textContent='Remove selected ('+Object.keys(CTL.sel).length+')';return}if(t.id==='ctl-lsort'||t.id==='ctl-lrar'||t.id==='ctl-ltype'){CTL[t.id==='ctl-lsort'?'lsort':t.id==='ctl-lrar'?'lrar':'ltype']=t.value;render();return}if(t.id==='ctl-cr'){CTL.cr=t.value;render()}else if(t.id==='ctl-pk')CTL.pk=t.value;else if(t.id==='ctl-it')CTL.it=t.value});
 document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('[data-ctl]');if(!t||!ME.admin)return;
   const a=t.dataset.ctl,u=t.dataset.id,v=u?invOf(u):{};
-  if(a==='sel'){CTL.uid=u;CTL.card='';CTL.cq='';CTL.msg='';CTL.sel={};render();return}
+  if(a==='sel'){CTL.uid=u;CTL.card='';CTL.cq='';CTL.msg='';CTL.sel={};CTL.lsort='name';CTL.lrar='';CTL.ltype='';CTL.lq='';render();return}
   if(a==='ckall'){const o=cardsOf(u);CTL.sel={};for(const id of Object.keys(o))for(const r of RAR_ORD.concat(['x']))if(o[id][r])CTL.sel[id+'|'+r]=1;render();return}
   if(a==='ckclr'){CTL.sel={};render();return}
   if(a==='ckrm'){const ks=Object.keys(CTL.sel);if(!ks.length){say('Tick the cards to remove first.');return}
