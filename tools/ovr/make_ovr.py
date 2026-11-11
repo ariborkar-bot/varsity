@@ -106,13 +106,23 @@ for p in fb:
     if q: p['sub'] = q; p['fixed'] = True
 grp = {}
 for p in fb: grp.setdefault(p['sub'], []).append(p)
+def _msd(v):
+    m = sum(v) / len(v); return m, (sum((x - m) ** 2 for x in v) / max(1, len(v) - 1)) ** .5 or 1
 for g, L in grp.items():
     mu = sum(p['tot'] for p in L) / max(1, sum(p['gp'] for p in L))
     sc = [(i, (p['tot'] + K * mu) / (p['gp'] + K)) for i, p in enumerate(L)]
     pc = pctiles(sc); S = dict(sc); pt = pctiles([(i, p['tot']) for i, p in enumerate(L)])
+    m1, sd1 = _msd(list(S.values())); m2, sd2 = _msd([p['tot'] for p in L])
     ks = FBKEY.get(g, FBKEY['DEF']); kr = keyrank(L, [[p['st'].get(k, 0) for k in ks] for p in L])
     for i, p in enumerate(L):
-        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], pct_k=kr[i], pct_s=SCH_FB.get(SCH_ALIAS.get(p['school'], p['school']), .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '', 'Position set to DB (owner)' if p.get('fixed') else '') if x)))
+        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], zs=(S[i] - m1) / sd1, zt=(p['tot'] - m2) / sd2, pct_k=kr[i], pct_s=SCH_FB.get(SCH_ALIAS.get(p['school'], p['school']), .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '', 'Position set to DB (owner)' if p.get('fixed') else '') if x)))
+# Owner (Nov 10): offense and defense on one scale. Each football player's per-game and total points are turned into
+# 'how far above his position's average, in units of that position's spread' (z-score), and those are ranked against ALL
+# football players (not only his position), so no position gains just because it scores more fantasy points.
+_fbr = [r for r in rows if r['sport'] == 'Football']
+for key, z in (('pcg', 'zs'), ('pct_t', 'zt')):
+    pc = pctiles([(i, r[z]) for i, r in enumerate(_fbr)])
+    for i, r in enumerate(_fbr): r[key] = pc[i]
 bbapp = json.load(open(os.path.join(D, 'bb.json')))
 stats = {}
 for t in mb.load_real():
@@ -162,7 +172,7 @@ def build(sport):
   nt['A13'] = 'DB adjustment (every DB OVR is multiplied by this; 0.97 = 3% lower)'; nt['B13'] = 0.97 if sport == 'Football' else 1
   for r in (3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13): nt.cell(r, 2).font = Font(name=AR, color='0000FF'); nt.cell(r, 2).fill = PatternFill('solid', fgColor='FFFF00'); nt.cell(r, 1).font = Font(name=AR)
   allnotes = ['OVR = Mean + Spread x (how many standard deviations the player is above or below average, from his percentile), rounded and kept between Floor and Ceiling, so most players land in the 60s-80s, 90+ is rare and nobody is below 45. Blue/yellow cells are inputs: change them and every OVR recalculates.',
-   'Four percentiles (0 = worst, 1 = best among his peers): (1) fantasy points per game, (2) total fantasy points this season (rewards playing more and scoring more) and (3) his rank in the stats that matter at his position, the average percentile of the Position stats columns, and (4) schedule strength. Schedule-strength percentile (default weight 6%) = how tough his school’s schedule is compared with other schools: football = the average rating of the opponents it played this season, where an opponent in a 2026 playoff bracket is rated half on its win% and half on its playoff division (Open 1.00, D-I .85, D-II .70, D-III .55, D-IV .40, D-V .25, D-V-AA .10) and an opponent that is not in a bracket is rated on win% alone (completed games only, smoothed so 1-0 is not 100%); basketball = the average 2025-26 scoring margin of the opponents on its 2026-27 schedule. Basketball does not use division (the app has no basketball divisions yet). Weighted score = the four percentiles combined with the yellow weights (37.6%/28.2%/28.2%/6% by default, they do not have to add to 1). Because averaging squeezes everyone toward the middle, the weighted scores are re-ranked among his peers (Combined percentile) and OVR comes from that (Raw OVR = mean + spread x his standard deviations above average). Only the top N players in the sport by Raw OVR (the yellow cell, 10) can be a 99; everyone else is capped at 98, so the best player at a position is near the ceiling and the worst at the floor (45). Key stats: QB pass yd, pass TD, rush yd; RB rush yd, rush TD, rec yd; WR/TE rec yd, rec, rec TD; DL sack, TFL, tkl; LB tkl, TFL, sack; DB tkl, INT, PBU; DEF tkl, TFL, sack, INT; K FG, PAT; basketball PG ast, pts, stl; SG pts, 3pm, stl; SF pts, reb, stl; PF reb, pts, blk; C reb, blk, pts (season totals).',
+   'Four percentiles (0 = worst, 1 = best among his peers): (1) fantasy points per game, (2) total fantasy points this season (rewards playing more and scoring more) and (3) his rank in the stats that matter at his position, the average percentile of the Position stats columns, and (4) schedule strength. Football (1) and (2) are position-adjusted: each player is measured by how far above his own position’s average he is, in units of that position’s spread, and that is ranked against every football player, so offense and defense are on one scale even though offense scores more fantasy points. Schedule-strength percentile (default weight 6%) = how tough his school’s schedule is compared with other schools: football = the average rating of the opponents it played this season, where an opponent in a 2026 playoff bracket is rated half on its win% and half on its playoff division (Open 1.00, D-I .85, D-II .70, D-III .55, D-IV .40, D-V .25, D-V-AA .10) and an opponent that is not in a bracket is rated on win% alone (completed games only, smoothed so 1-0 is not 100%); basketball = the average 2025-26 scoring margin of the opponents on its 2026-27 schedule. Basketball does not use division (the app has no basketball divisions yet). Weighted score = the four percentiles combined with the yellow weights (37.6%/28.2%/28.2%/6% by default, they do not have to add to 1). Because averaging squeezes everyone toward the middle, the weighted scores are re-ranked among all players in the sport (Combined percentile) and OVR comes from that (Raw OVR = mean + spread x his standard deviations above average). Only the top N players in the sport by Raw OVR (the yellow cell, 10) can be a 99; everyone else is capped at 98, so the best players are near the ceiling and the worst at the floor (45). Key stats: QB pass yd, pass TD, rush yd; RB rush yd, rush TD, rec yd; WR/TE rec yd, rec, rec TD; DL sack, TFL, tkl; LB tkl, TFL, sack; DB tkl, INT, PBU; DEF tkl, TFL, sack, INT; K FG, PAT; basketball PG ast, pts, stl; SG pts, 3pm, stl; SF pts, reb, stl; PF reb, pts, blk; C reb, blk, pts (season totals).',
    'Football: Pts per game = fantasy points per game from MaxPreps box scores (the app scoring), shrunk toward the position average (2 games of average added) so one big game does not make a star. Peers = same position (QB, RB, WR, TE, DL, LB, DB, K).',
    'Basketball: Pts per game = points + 1.2 rebounds + 1.5 assists + 3 steals + 3 blocks - 2 turnovers per game from 2025-26 MaxPreps, shrunk (3 games of average added). Peers = every basketball player. Players with no 2025-26 stat line (%d of %d) get 0.6 x the average, so they sit below the middle (low confidence).' % (nostat, len(bbapp)),
    'Games = games with stats behind the rating (football 2026, basketball 2025-26). Few games = low confidence.',
@@ -176,10 +186,8 @@ def build(sport):
   W = [6, 24, 8, 26, 11, 7, 7, 8, 16, 16, 14, 13, 16, 17, 12, 14, 14, 9, 42]
   NN = len([r for r in rows if r['sport'] == sport]) + 1   # last data row of the All players tab
   def pctf(n):
-      # where the weighted score ranks among his peers (football: same position; basketball: all players), ties split; read from the All players tab
+      # where the weighted score ranks among his peers (all players in the sport), ties split; read from the All players tab
       A = "'All players'!"
-      if sport == 'Football':
-          return (f'=(COUNTIFS({A}$F$2:$F${NN},F{n},{A}$O$2:$O${NN},"<"&O{n})+0.5*COUNTIFS({A}$F$2:$F${NN},F{n},{A}$O$2:$O${NN},O{n}))/COUNTIFS({A}$F$2:$F${NN},F{n})')
       return f'=(COUNTIF({A}$O$2:$O${NN},"<"&O{n})+0.5*COUNTIF({A}$O$2:$O${NN},O{n}))/COUNT({A}$O$2:$O${NN})'
   def sheet(title, items):
       ws = wb.create_sheet(title); ws.append(H)
