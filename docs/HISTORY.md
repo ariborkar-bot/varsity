@@ -416,3 +416,6 @@ Owner had to sign in 2-4 times (Supabase logs: every one of those logins succeed
 
 - v424 (Nov 10, owner): Admin controls → "Cards in their locker" can be sorted and filtered (`CTL.lsort` name / rarity high-low / rarity low-high / school / card type / most versions, `CTL.lrar` rarity, `CTL.ltype` player / team / duo / special / achievement via `ctlKind`, `CTL.lq` name or school text). Heading shows "N of M" while filtered; Select all still selects every card the account owns, not just the visible rows. Filters reset when another account is picked.
 - v425 (Nov 10, owner): player cards are trading cards, not shields: rounded rectangle with foil border (`--sh:inset(0 round 6em)`), art window (`.pc-ph`) with OVR/position/class top-left, a small school crest chip top-right (`.pc-ch`) and the player initials (`.pc-mono`) instead of the big crest, name banner with school and stats below. Cards are 72% as wide as tall (were 78%). Back (`pcBack`) unchanged.
+
+## v425: Cards tab opens on All
+- Locker > Cards defaults to an All chip (players, teams, duos, special), every filter sorted by overall, highest first (`cOvr` in viewLocker: players/specials use ovr.js, teams = average of their top 3 players, duos = average of the two). Immortal cards still have their own section above.
