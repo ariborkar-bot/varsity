@@ -3384,7 +3384,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v438 · Nov 10';
+const APP_BUILD='v441 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5023,7 +5023,7 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
     <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>${c.spc?spcLine(c.spc,r):'+'+(ach?c.pct:c.duo?DUO_PCT[r]||0:CARD_PCT[r]||0)+'%'}</b><small>${c.spc?esc(SPEC[c.spc].n):c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
     ${c.spc?`<div class="cv-back"><b>His boost</b><small>${esc(SPEC[c.spc].d)}</small><b>Where it works</b><small>${esc(SPEC[c.spc].w)}</small></div>`:''}
     ${ach||c.duo?'':`<div class="cv-vs" role="group" aria-label="Versions you own">${RAR_ORD.filter(x=>c.spc?SPC_R.includes(x):CARD_PCT[x]).map(x=>`<button type="button" class="cv-v ${own.includes(x)?'on':''}" style="--rc:${RAR[x].c}" ${own.includes(x)?`data-act="cvVer" data-r="${x}"`:'disabled'} aria-pressed="${x===r}">${RAR[x].n}</button>`).join('')}</div>`}
-    ${!ach&&own.includes(r)&&SELL[r]&&ME.mode!=='readonly'&&ME.mode!=='offline'?`<button type="button" class="btn ghost sm cv-sell" data-act="cvSell" data-r="${r}">Sell this ${RAR[r].n} for ${SELL[r]} tokens</button>`:''}</div>`;
+    </div>`;   /* v441 (owner): no straight selling a card for tokens; the "Sell this card" button is gone. Cards can still be auctioned or traded in the Transfer Portal. */
   el.querySelector('.cv-in').insertAdjacentHTML('beforeend','<button type="button" class="btn cv-close" data-act="cvClose">Close</button>');   /* v435 (owner): big Close button at the bottom too, tapping the dark area closes it */
   el.addEventListener('click',ev=>{if(ev.target===el)closeCard()});
   document.body.appendChild(el);const cd=el.querySelector('.cv-card'),art=cd.firstElementChild;
@@ -5034,11 +5034,7 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
 function closeCard(){const e=document.getElementById('cardview');if(e)e.remove()}
 /* v416 (owner): sell a card version for tokens (cheap on purpose: about a third of what a duplicate pays). The version is set to 0, like a removed card. */
 const SELL={c:3,u:5,r:8,e:20,l:50,m:130};
-async function cardSell(id,r){const u=ME.uid,v=invOf(u),raw=v.cards&&v.cards[id],cur=typeof raw==='string'?{[raw]:1}:Object.assign({},raw);if(!u||!cur[r]||!SELL[r])return;
-  cur[r]=0;const patch={cards:Object.assign({},v.cards,{[id]:cur}),dup:(+v.dup||0)+SELL[r]};
-  S.picks[u]=Object.assign({},S.picks[u],{inv:Object.assign({},v,patch)});
-  if(await act(()=>upsert('picks/'+u,{inv:patch}),'Sold for '+SELL[r]+' tokens')){closeCard();SFX.coin()}else S.picks[u]=Object.assign({},S.picks[u],{inv:v});
-  render()}
+/* v441 (owner): cardSell() removed: cards cannot be sold straight for tokens. SELL is kept only as the Transfer Portal's suggested starting price. */
 /* v419 (owner): Varsity Transfer Portal. Cards are auctioned for tokens only (no real money). The server (tools/sql/transfer_portal.sql) holds the
    card while it is listed and moves cards and tokens when it ends. Tokens from the Portal sit in inv.tp (counted in the balance by invBonus).
    A 5% fee comes off every sale. A bid in the last 2 minutes adds 2 minutes. */
@@ -9858,7 +9854,6 @@ document.addEventListener('click',async e=>{
   if(a==='cardView'){openCard(id);return}
   if(a==='cvClose'){sheetClose();return}
   if(a==='cvVer'){openCard($('#cardview').dataset.card,t.dataset.r);return}
-  if(a==='cvSell'){const cid=$('#cardview').dataset.card,r=t.dataset.r,c=cardInfo(cid);confirmBox('Sell this card?',`You get <b>${SELL[r]} tokens</b> for your ${RAR[r].n} ${esc(c.name)} card. You can’t undo this.`,'Sell',()=>cardSell(cid,r));return}
   if(a==='tpTab'){TP.tab=t.dataset.v;render();return}
   if(a==='tpList'){tpListSheet(id,t.dataset.r);return}
   if(a==='tpBid'){const l=TP.rows.find(x=>x.id===id);if(l)tpBidSheet(l);return}
