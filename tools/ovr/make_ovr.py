@@ -116,7 +116,7 @@ for g, L in grp.items():
     m1, sd1 = _msd(list(S.values())); m2, sd2 = _msd([p['tot'] for p in L])
     ks = FBKEY.get(g, FBKEY['DEF']); kr = keyrank(L, [[p['st'].get(k, 0) for k in ks] for p in L])
     for i, p in enumerate(L):
-        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], zs=(S[i] - m1) / sd1, zt=(p['tot'] - m2) / sd2, pct_k=kr[i], pct_s=SCH_FB.get(SCH_ALIAS.get(p['school'], p['school']), .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '', 'Position set to DB (owner)' if p.get('fixed') else '') if x)))
+        rows.append(dict(key=p['key'], name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], zs=(S[i] - m1) / sd1, zt=(p['tot'] - m2) / sd2, pct_k=kr[i], pct_s=SCH_FB.get(SCH_ALIAS.get(p['school'], p['school']), .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '', 'Position set to DB (owner)' if p.get('fixed') else '') if x)))
 # Owner (Nov 10): offense and defense on one scale. Each football player's per-game and total points are turned into
 # 'how far above his position's average, in units of that position's spread' (z-score), and those are ranked against ALL
 # football players (not only his position), so no position gains just because it scores more fantasy points.
@@ -152,7 +152,7 @@ for pos in set(p['pos'] for p in bbapp):
 nostat = 0
 for i, p in enumerate(bbapp):
     s = stats.get((p['school'], p['name'])); nostat += 0 if s else 1
-    rows.append(dict(name=p['name'], school=p['school'], sport='Basketball', pos=p['pos'], gr=p['gr'], gp=s[0] if s else 0, score=round(S[i], 2), tot=round(TV[i], 1), pcg=pc[i], pct_t=pt[i], pct_k=bbk[i][0], pct_s=SCH_BB.get(p['school'], .5), keys=bbk[i][1], status=''))
+    rows.append(dict(key=p['key'], name=p['name'], school=p['school'], sport='Basketball', pos=p['pos'], gr=p['gr'], gp=s[0] if s else 0, score=round(S[i], 2), tot=round(TV[i], 1), pcg=pc[i], pct_t=pt[i], pct_k=bbk[i][0], pct_s=SCH_BB.get(p['school'], .5), keys=bbk[i][1], status=''))
 print('football', len(fb), 'basketball', len(bbapp), 'bb without stat line', nostat)
 
 def build(sport):
@@ -229,3 +229,11 @@ for sport in ('Football', 'Basketball'):
     for row in load_workbook(f, data_only=True)['All players'].iter_rows(min_row=2, values_only=True):
         ORDER[(row[1], row[3], row[5], row[8], row[9])] = (row[2] or 0, row[16] or 0)
     build(sport)
+# ovr.js for the app (v414): window.OVR_ALL = {fb:{player key: OVR}, bb:{...}}; copy it to the repo root after a rebuild.
+if ORDER:
+    out = {'fb': {}, 'bb': {}}
+    for r in rows:
+        v = ORDER.get((r['name'], r['school'], r['pos'], r['score'], r['tot']))
+        if v: out['fb' if r['sport'] == 'Football' else 'bb'][r['key']] = int(v[0])
+    open(os.path.join(OUTD, 'ovr.js'), 'w').write('/* Varsity player overalls (OVR), written by tools/ovr/make_ovr.py. Do not edit by hand. */\nwindow.OVR_ALL=' + json.dumps(out, separators=(',', ':')) + ';\n')
+    print('ovr.js', len(out['fb']), len(out['bb']))

@@ -1492,6 +1492,30 @@ select option{background:#0B1730;color:#EAF0F8}
 .pko-m .pko-front{box-shadow:0 0 0 2px #FF4F6D,0 0 24px #FF4F6D,0 0 48px rgba(255,177,61,.6);animation:pkoMy 1.4s ease-in-out infinite}@keyframes pkoMy{50%{box-shadow:0 0 0 2px #FFB13D,0 0 30px #FFB13D,0 0 60px rgba(255,79,109,.7)}}
 .tcard{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:8px;border:2px solid var(--rc);background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--rc) 35%,#13213a),#0a1324 80%);box-shadow:0 0 10px color-mix(in srgb,var(--rc) 45%,transparent);flex:none;position:relative;overflow:hidden}
 .tcard i{font:900 .48rem/1 var(--f-display,inherit);letter-spacing:.08em;color:var(--rc);font-style:normal}.tcard .av{flex:none}.tc-m{animation:pkoMy 1.4s ease-in-out infinite}
+/* v414 player cards: OVR top-left, position under it, photo/initials, last name plate, rarity label. Sizes are in em: font-size = 1% of the card's height */
+.pc2{display:inline-block;border-width:max(1.5px,1.4em);border-radius:max(6px,5.5em);background:linear-gradient(158deg,color-mix(in srgb,var(--rc) 62%,#16233d) 0%,color-mix(in srgb,var(--rc) 22%,#0c1528) 42%,#070d1a 70%,color-mix(in srgb,var(--rc) 34%,#0a1324) 100%);box-shadow:0 0 max(8px,7em) color-mix(in srgb,var(--rc) 50%,transparent),inset 0 0 0 max(1px,.7em) rgba(255,255,255,.14);line-height:1;isolation:isolate}
+.pc2::before{content:"";position:absolute;inset:0;z-index:-1;background:repeating-linear-gradient(118deg,transparent 0 9em,rgba(255,255,255,.045) 9em 10.5em),radial-gradient(circle at 64% 36%,color-mix(in srgb,var(--rc) 55%,transparent),transparent 58%)}
+.pc2::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.34) 50%,transparent 62%);background-size:260% 100%;background-position:130% 0;opacity:0}
+.pc2.pc-e::after,.pc2.pc-l::after,.pc2.pc-m::after,.pc2.pc-x::after{opacity:1;animation:pc2Sh 3.4s ease-in-out infinite}@keyframes pc2Sh{0%,55%{background-position:130% 0}100%{background-position:-60% 0}}
+@media (prefers-reduced-motion:reduce){.pc2::after{animation:none!important;opacity:0!important}}
+.pc2.pc-l{border-image:linear-gradient(150deg,#FFE9A6,#FFC23D 35%,#B8791A 65%,#FFE08A) 1;border-radius:0;clip-path:inset(0 round max(6px,5.5em))}
+.pc2 .pc-o{position:absolute;left:6em;top:6em;display:flex;flex-direction:column;align-items:center;gap:1.5em;z-index:2}
+.pc2 .pc-n{font:900 22em/.86 var(--f-display,inherit);color:#fff;letter-spacing:-.02em;text-shadow:0 .08em .2em rgba(0,0,0,.6),0 0 .5em color-mix(in srgb,var(--rc) 70%,transparent)}
+.pc2 .pc-p{font:900 7.6em/1 var(--f-display,inherit);letter-spacing:.06em;color:var(--rc);font-style:normal;padding-top:.4em;border-top:.14em solid color-mix(in srgb,var(--rc) 60%,transparent);min-width:2.1em;text-align:center}
+.pc2 .pc-a{position:absolute;left:31em;top:16em;z-index:1;border-radius:50%;box-shadow:0 0 0 max(1.5px,1.1em) color-mix(in srgb,var(--rc) 70%,#fff),0 1.6em 3em rgba(0,0,0,.55)}
+.pc2 .pc-b{position:absolute;left:0;right:0;bottom:0;padding:7em 3em 5.5em;background:linear-gradient(180deg,transparent,rgba(3,7,15,.86) 46%);display:flex;flex-direction:column;align-items:center;gap:2.6em;z-index:2}
+.pc2 .pc-nm{font:900 10.4em/1 var(--f-display,inherit);color:#fff;text-transform:uppercase;letter-spacing:.03em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc2 .pc-r{font:800 5.4em/1 var(--f-display,inherit);letter-spacing:.16em;text-transform:uppercase;color:var(--rc);font-style:normal}
+.pc2.pc-s .pc-o{left:5em;top:5em}.pc2.pc-s .pc-n{font-size:27em}.pc2.pc-s .pc-a{left:auto;right:6em;top:auto;bottom:7em}
+/* card view: tap a card to see it big; the name opens the profile */
+.cv{position:fixed;inset:0;z-index:400;background:rgba(3,7,15,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;overflow:auto;animation:cvIn .18s ease-out}@keyframes cvIn{from{opacity:0}}
+.cv-in{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(360px,100%);position:relative;margin-top:44px}
+.cv-x{position:absolute;top:-48px;right:0;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:700 1.3rem/1 system-ui;z-index:3}
+.cv-card{perspective:900px;touch-action:none;animation:cvPop .34s cubic-bezier(.2,1.3,.4,1)}@keyframes cvPop{from{transform:scale(.7) rotate(-4deg);opacity:0}}.cv-card>.tcard,.cv-card>.tc-duo{transition:transform .12s ease-out;will-change:transform}
+.cv-name{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:#fff;font:inherit;padding:4px 10px}.cv-name b{font:900 1.35rem/1.1 var(--f-display,inherit);text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:4px}.cv-name small{color:var(--muted);font-size:.78rem}
+.cv-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}.cv-st div{border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:8px 4px;text-align:center;background:rgba(255,255,255,.05)}.cv-st b{display:block;font:900 1.15rem/1.1 var(--f-display,inherit);color:#fff}.cv-st small{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em}
+.cv-vs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.cv-v{border:1.5px solid var(--rc);color:var(--rc);background:none;border-radius:99px;padding:5px 10px;font:800 .7rem/1 var(--f-display,inherit);opacity:.35}.cv-v.on{opacity:1}.cv-v[aria-pressed=true]{background:var(--rc);color:#0b1220}
+.lk-card .lk-nm{text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:3px;cursor:pointer}
 .cb-tag{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:99px;font:800 .6rem/1.2 var(--f-display,inherit);letter-spacing:.04em;color:#0b1220;background:linear-gradient(90deg,#3DDC84,#4FD8FF);vertical-align:middle}
 .bt-t .cb-tag{margin:4px 0 0}.bx-tag.cbx{color:#3DDC84}
 .lk-tiers{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.lk-tiers li{display:flex;justify-content:space-between;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:.8rem}
@@ -2667,6 +2691,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 <script src="logos.js"></script>
 <script src="games.js" onerror="void 0"></script>
 <script src="stats.js" onerror="void 0"></script>
+<script src="ovr.js" onerror="void 0"></script>
 <script>
 window.addEventListener("error",e=>{try{var t=document.getElementById("toast");if(t){t.textContent="Error: "+(e.message||"unknown")+" (line "+e.lineno+")";t.hidden=false}}catch(_){}});
 const $=s=>document.querySelector(s);
@@ -3080,7 +3105,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v413 · Nov 10';
+const APP_BUILD='v414 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4598,7 +4623,25 @@ function cardInfo(id){if(id.startsWith('dc:'))return duoInfo(id);if(id.startsWit
   if(id.startsWith('tc:')){const t=id.slice(3);return {team:1,name:t,school:t,sub:'Team card'}}
   const p=pByKey(id.slice(3));return p?{team:0,name:p.name,school:p.school,sub:(p.pos==='DEF'?(p.sub||'DEF'):p.pos)+' · '+p.school,key:p.key}:{team:0,name:'Player',school:'',sub:''}}
 function cardArt(id,r,s=54){if(id.startsWith('dc:'))return duoArt(id,r,s);if(id.startsWith('ac:'))return achArt(id,s);const c=cardInfo(id),R=RAR[r]||RAR.c;
-  return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${c.team?slogo(c.school,Math.round(s*.5)):av(c.name,c.school,Math.round(s*.46))}<i>${c.team?'TEAM':'PLAYER'}</i></span>`}
+  if(c.team)return `<span class="tcard ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px">${slogo(c.school,Math.round(s*.5))}<i>TEAM</i></span>`;
+  /* v414 player card: OVR (ovr.js, from the OVR sheets) top-left with the position, initials/photo, last name and rarity. Under 80 px tall only the OVR and the photo fit. */
+  const q=c.key?pByKey(c.key):null,o=ovrOf(c.key),big=s>=80,ps=q?(q.pos==='DEF'?(q.sub||'DEF'):q.pos):'';
+  return `<span class="tcard pc2 pc-${r||'c'} ${big?'':'pc-s'} ${r==='m'?'tc-m':''}" style="--rc:${R.c};width:${Math.round(s*.78)}px;height:${s}px;font-size:${(s/100).toFixed(2)}px"><span class="pc-o"><b class="pc-n">${o||'–'}</b>${big?`<i class="pc-p">${esc(ps||'')}</i>`:''}</span><span class="pc-a">${av(c.name,c.school,Math.round(s*(big?.42:.44)))}</span>${big?`<span class="pc-b"><b class="pc-nm">${esc(lastN(c.name))}</b><i class="pc-r">${R.n}</i></span>`:''}</span>`}
+const ovrOf=k=>{const v=k&&((window.OVR_ALL||{})[FG_SPORT]||{})[k];return v?+v:0};
+/* card view (v414, owner): tapping a card shows it big (tilts under the finger); only the name opens the profile */
+function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsWith('ac:'),own=ach?['x']:cardVers(u,id);r=r||(ach?'x':cardR(u,id))||'c';
+  const R=RAR[r]||RAR.c,H=Math.max(260,Math.min(430,Math.round(innerHeight*.5))),o=c.team?0:ovrOf(c.key),q=c.key?pByKey(c.key):null;
+  const el=document.createElement('div');el.id='cardview';el.className='cv';el.dataset.card=id;el.setAttribute('role','dialog');el.setAttribute('aria-label',c.name+' card');
+  el.innerHTML=`<div class="cv-in" style="--rc:${R.c}"><button type="button" class="cv-x" data-act="cvClose" aria-label="Close">×</button>
+    <div class="cv-card">${ach?achArt(id,H):cardArt(id,r,H)}</div>
+    ${c.key?`<button type="button" class="cv-name" data-act="cvProfile" data-id="${esc(c.key)}"><b>${esc(c.name)}</b><small>${esc(c.sub||'')} · Tap the name for the profile</small></button>`:`<div class="cv-name"><b>${esc(c.name)}</b><small>${c.team?'Team card':esc(c.sub||'')}</small></div>`}
+    <div class="cv-st">${c.team||c.duo?'':`<div><b>${o||'–'}</b><small>Overall</small></div>`}<div><b style="color:${R.c}">${R.n}</b><small>Version</small></div><div><b>+${ach?c.pct:CARD_PCT[r]||0}%</b><small>${c.duo?'On parlays':c.team?'On Pick ’em':'On his props'}</small></div></div>
+    ${ach||c.duo?'':`<div class="cv-vs" role="group" aria-label="Versions you own">${RAR_ORD.filter(x=>CARD_PCT[x]).map(x=>`<button type="button" class="cv-v ${own.includes(x)?'on':''}" style="--rc:${RAR[x].c}" ${own.includes(x)?`data-act="cvVer" data-r="${x}"`:'disabled'} aria-pressed="${x===r}">${RAR[x].n}</button>`).join('')}</div>`}</div>`;
+  document.body.appendChild(el);const cd=el.querySelector('.cv-card'),art=cd.firstElementChild;
+  if(art&&!c.duo){const mv=e=>{const b=cd.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.transform=`rotateY(${(x*22).toFixed(1)}deg) rotateX(${(-y*18).toFixed(1)}deg)`},rs=()=>{art.style.transform=''};
+    cd.addEventListener('pointermove',mv);cd.addEventListener('pointerleave',rs);cd.addEventListener('pointerup',rs);cd.addEventListener('pointercancel',rs)}
+  const x=el.querySelector('.cv-x');if(x)x.focus();sheetPush()}
+function closeCard(){const e=document.getElementById('cardview');if(e)e.remove()}
 const cardTag=(u,id)=>{const p=cardPct(u,id);return p?`<span class="cb-tag" title="You own this card">Card +${p}%</span>`:''};
 function rollGear(r){let i=RAR_ORD.indexOf(r);for(;i>=0;i--){const pool=ITEMS.filter(x=>x.r===RAR_ORD[i]&&BH_K.includes(x.k));if(pool.length)return pool[fcRnd(pool.length)].id}return 'bhs_black'}
 function rollItem(r,cosOnly){const pool=ITEMS.filter(x=>x.r===r&&!x.ex&&itemSp(x)&&!BH_K.includes(x.k)),use=pool.filter(x=>x.k==='perk'||x.k==='tboost'),cos=pool.filter(x=>!(x.k==='perk'||x.k==='tboost'));
@@ -5274,12 +5317,12 @@ function viewLocker(){
     const AC=achOwned(ME.uid).sort((a,b)=>ACH[achParse(b).t].pct-ACH[achParse(a).t].pct||achInfo(a).name.localeCompare(achInfo(b).name)),ACN=UI.lkA||12;
     const achSec=`<section class="card ax-sec"><div class="qh"><h3>Immortal cards</h3><span class="muted">${AC.length} owned</span></div>
       <p class="muted">The top tier. Only players who earned it: ${Object.values(ACH).map(a=>a.n+' +'+a.pct+'%').join(', ')}. They replace his normal card boost on his props. Found in Pro and Champion packs.</p>
-      ${AC.length?`<div class="lk-cards">${AC.slice(0,ACN).map(id=>{const c=cardInfo(id);return `<button type="button" data-act="player" data-id="${esc(c.key)}" class="lk-card lk-x" style="--rc:${RAR.x.c}">${achArt(id,64)}<span><b>${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${RAR.x.c}">Immortal · +${c.pct}% on his props</small></span></button>`}).join('')}</div>${AC.length>ACN?`<button class="btn ghost" data-act="lkMoreA">Show more (${AC.length-ACN})</button>`:''}`:'<p class="empty">None yet. Pro and Champion packs can hold one.</p>'}</section>`;
+      ${AC.length?`<div class="lk-cards">${AC.slice(0,ACN).map(id=>{const c=cardInfo(id);return `<button type="button" data-act="cardView" data-id="${esc(id)}" class="lk-card lk-x" style="--rc:${RAR.x.c}">${achArt(id,64)}<span><b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${RAR.x.c}">Immortal · +${c.pct}% on his props</small></span></button>`}).join('')}</div>${AC.length>ACN?`<button class="btn ghost" data-act="lkMoreA">Show more (${AC.length-ACN})</button>`:''}`:'<p class="empty">None yet. Pro and Champion packs can hold one.</p>'}</section>`;
     body=achSec+`<section class="card"><div class="qh"><h3>Player & team cards</h3><span class="muted">${vers} of ${(P.nP+P.nT)*6} versions</span></div>
       <p class="muted">Player and team cards boost your winning picks. Better versions boost more.</p>
       <ul class="lk-tiers">${tiers}</ul><small class="muted">Boost on the winnings, added on top of a +25% token boost. It is saved on the pick when you lock it in.</small></section>
       <section class="card"><div class="chips" role="group" aria-label="Card type"><button class="chip" data-act="lkC" data-v="p" aria-pressed="${T==='p'}">Players <small class="muted">${nP}/${P.nP}</small></button><button class="chip" data-act="lkC" data-v="t" aria-pressed="${T==='t'}">Teams <small class="muted">${nT}/${P.nT}</small></button><button class="chip" data-act="lkC" data-v="d" aria-pressed="${T==='d'}">Duos <small class="muted">${Object.keys(mine).filter(i=>i.startsWith('dc:')&&cardVers(ME.uid,i).length).length}/${duoSets().all.length}</small></button></div>
-      ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.key?'button type="button" data-act="player" data-id="'+esc(c.key)+'"':'div'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,c.duo?104:64)}<span><b>${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">Best: ${R.n} · +${CARD_PCT[r]}%</small>${dots(id)}</span></${c.key?'button':'div'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
+      ${ids.length?`<div class="lk-cards">${ids.slice(0,N).map(id=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.duo?'div':'button type="button" data-act="cardView" data-id="'+esc(id)+'"'} class="lk-card" style="--rc:${R.c}">${cardArt(id,r,c.duo?104:64)}<span>${c.key?`<b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b>`:`<b>${esc(c.name)}</b>`}<small class="muted">${esc(c.sub)}</small><small style="color:${R.c}">Best: ${R.n} · +${CARD_PCT[r]}%</small>${dots(id)}</span></${c.duo?'div':'button'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
         :`<p class="empty">No ${T==='t'?'team':T==='d'?'Duo':'player'} cards yet. ${T==='d'?'Open a Duo pack to pull some.':'Open packs to pull some.'}</p>`}</section>`;
   }else if(tab==='bnd'){body=bndHTML()
   }else if(tab==='cos'){
@@ -8154,7 +8197,7 @@ let SHEET=false;
 function sheetPush(){if(SHEET)return;try{history.pushState({sheet:1},'',location.href);SHEET=true}catch(_){}}
 function sheetClose(){if(SHEET){try{history.back();return}catch(_){SHEET=false}}closePlayer();closeNotes()}
 window.addEventListener('popstate',()=>{if(SHEET){SHEET=false;closePlayer();closeNotes()}});
-function closePlayer(){const d=$('#drawer');d.hidden=true;d.innerHTML='';delete d.dataset.id}
+function closePlayer(){closeCard();const d=$('#drawer');d.hidden=true;d.innerHTML='';delete d.dataset.id}
 /* live refresh of an open player card: unchanged -> leave it alone; changed -> redraw but keep the scroll position (no focus jump) */
 function refreshDrawer(){const d=$('#drawer');if(!d.hidden&&d.dataset.id){const p=pByKey(d.dataset.id);if(!p){closePlayer();return}
   const h=drawerHTML(p);if(h===d.__html)return;const sp=d.querySelector('.dp'),y=sp?sp.scrollTop:0;d.innerHTML=h;d.__html=h;const np=d.querySelector('.dp');if(np){np.style.animation='none';np.scrollTop=y}}}
@@ -9185,6 +9228,11 @@ document.addEventListener('click',async e=>{
   if(e.target.id==='notif'){sheetClose();return}
   const t=e.target.closest('[data-act]');if(!t)return;
   const a=t.dataset.act,id=t.dataset.id;
+  if(e.target.id==='cardview'){sheetClose();return}
+  if(a==='cardView'){openCard(id);return}
+  if(a==='cvClose'){sheetClose();return}
+  if(a==='cvVer'){openCard($('#cardview').dataset.card,t.dataset.r);return}
+  if(a==='cvProfile'){closeCard();openPlayer(id);return}
   if(a==='player')openPlayer(id);
   else if(a==='close')sheetClose();
   else if(a==='reload')location.reload();
