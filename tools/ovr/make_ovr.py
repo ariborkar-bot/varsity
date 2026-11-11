@@ -57,7 +57,8 @@ SCH_FB = school_pct(sos_fb()); SCH_BB = school_pct(sos_bb())
 # Owner overrides (Nov 10): Raw OVR typed in by hand for these players (yellow cell); the 99 cap still applies, so Raw 110 = a top-10 99
 MANUAL = {('Paisios Polamalu', 'St. Augustine', 'RB'): (110, 'set to 99'), ('Daine Gonzalez', 'Classical Academy', 'RB'): (94, 'set to 94'),
           ('Courtney Miller-Thompson', 'Granite Hills', 'WR'): (100.847707, 'swapped with Deandre Eleby (WR)'), ('Deandre Eleby', 'Morse', 'WR'): (97.710369, 'swapped with Courtney Miller-Thompson'),
-          ('Owen Dorros', 'La Jolla Country Day', 'WR'): (89.32224, 'swapped with DJ Ferguson (WR)'), ('Dj Ferguson', 'University City', 'WR'): (90.009279, 'swapped with Owen Dorros')}
+          ('Owen Dorros', 'La Jolla Country Day', 'WR'): (89.32224, 'swapped with DJ Ferguson (WR)'), ('Dj Ferguson', 'University City', 'WR'): (90.009279, 'swapped with Owen Dorros'),
+          ('Caden Bessler', 'La Jolla Country Day', 'LB'): (90, 'set to 90')}
 rows = []   # dict(name, school, sport, pos, gr, gp, score, pct, status)
 fb = json.load(open(os.path.join(D, 'fb.json')))
 K = 2
@@ -73,6 +74,11 @@ _known = [p for p in fb if p['pos'] == 'DEF' and p['sub'] in ('DL', 'LB', 'DB')]
 _unk = [p for p in fb if p['pos'] == 'DEF' and p['sub'] not in ('DL', 'LB', 'DB')]
 _m = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)).fit(np.array([_f(p) for p in _known]), [p['sub'] for p in _known])
 for p, q in zip(_unk, _m.predict(np.array([_f(p) for p in _unk]))): p['sub'] = str(q); p['est'] = True
+# Owner position fixes (Nov 10): (name, school, current defensive position) -> position
+POS_FIX = {('Marvin Jones III', 'La Jolla Country Day', 'LB'): 'DB'}
+for p in fb:
+    q = POS_FIX.get((p['name'], p['school'], p['sub']))
+    if q: p['sub'] = q; p['fixed'] = True
 grp = {}
 for p in fb: grp.setdefault(p['sub'], []).append(p)
 for g, L in grp.items():
@@ -81,7 +87,7 @@ for g, L in grp.items():
     pc = pctiles(sc); S = dict(sc); pt = pctiles([(i, p['tot']) for i, p in enumerate(L)])
     ks = FBKEY.get(g, FBKEY['DEF']); kr = keyrank(L, [[p['st'].get(k, 0) for k in ks] for p in L])
     for i, p in enumerate(L):
-        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], pct_k=kr[i], pct_s=SCH_FB.get(p['school'], .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '') if x)))
+        rows.append(dict(name=p['name'], school=p['school'], sport='Football', pos=p['sub'], gr=p['gr'], gp=p['gp'], score=round(S[i], 2), tot=round(p['tot'], 1), pcg=pc[i], pct_t=pt[i], pct_k=kr[i], pct_s=SCH_FB.get(p['school'], .5), keys=' · '.join('%s %s' % (round(p['st'].get(k, 0)), FBLAB[k]) for k in ks), status=' · '.join(x for x in ('Out' if p['inj'] else '', 'Position estimated' if p.get('est') else '', 'Position set to DB (owner)' if p.get('fixed') else '') if x)))
 bbapp = json.load(open(os.path.join(D, 'bb.json')))
 stats = {}
 for t in mb.load_real():
