@@ -3394,7 +3394,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v448 · Nov 10';
+const APP_BUILD='v449 · Nov 10';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6436,7 +6436,7 @@ function propsHTML(){
   const bal=ME.uid?bank(ME.uid):TOK0,pm=propMap();
   const staked=Object.values(mine).reduce((a,b)=>a+(propResult(b,gm)==='open'?+b.stake||0:0),0)+Object.values(parlOf(ME.uid||'')).reduce((a,b)=>a+(parlResult(b,gm)==='open'?+b.stake||0:0),0);
   const bankCard=`<section class="card bt-bank"><div><span class="lbl">Your tokens</span><div class="bt-n">${coinIc(ME.uid)}${Math.round(bal)}</div></div><div class="muted">Same tokens as Pick ’em. Each line is set from a player’s own game-by-game stats: a blend of his season average and his last three games. Pick Over or Under on one player, or on 2 or more to build a parlay: every pick has to hit, the odds multiply (plus a parlay bonus), and you wager once on the total. ${staked?`${tk(staked)} riding on open picks. `:''}If a player’s stats never post, that pick is dropped from the parlay.</div></section>`;
-  const mkChips=`<div class="chips bf-mk" role="group" aria-label="Stat type">${['ALL',...PP_GROUPS].map(v=>`<button class="chip" data-act="ppM" data-v="${v}" aria-pressed="${UI.pm===v}">${v==='ALL'?'All stats':v}</button>`).join('')}</div>`;
+  const mkChips=`<label class="fld bf-mk"><span>Stat type</span><select data-act="ppM" aria-label="Stat type">${['ALL',...PP_GROUPS].map(v=>`<option value="${v}" ${UI.pm===v?'selected':''}>${v==='ALL'?'All stats':v}</option>`).join('')}</select></label>`;
   const all=propCands().filter(x=>bfOK(x.game)&&(UI.pm==='ALL'||PP_MK[x.m].g===UI.pm));
   const shown=all.slice(0,UI.ppN);
   const card=(x,grp)=>{
@@ -9986,7 +9986,6 @@ document.addEventListener('click',async e=>{
   else if(a==='pkMoreW'){UI.pkWeeks=(UI.pkWeeks||1)+1;render()}
   else if(a==='atClear'){UI.at={};render()}
   else if(a==='bfClear'){UI.bf={dv:'',w:'',sc:''};UI.ppN=24;render()}
-  else if(a==='ppM'){UI.pm=t.dataset.v;UI.ppN=24;render()}
   else if(a==='ppSel'){UI.ppSel=Object.assign({},UI.ppSel,{[t.dataset.k]:t.dataset.id});render(true)}
   else if(a==='ppG'){UI.ppG=t.dataset.v;render();const h=document.querySelector('.pp-gh');if(h&&h.getBoundingClientRect().top>innerHeight*.6)h.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(a==='ppMore'){UI.ppN+=24;render()}
@@ -10195,6 +10194,7 @@ document.addEventListener('change',async e=>{
   if(a==='ptQ'){const q=quietOf();q[t.dataset.w]=+t.value;try{localStorage.setItem('vs-quiet',JSON.stringify(q))}catch(_){}pushSync(true);openNotes()}
   else if(a==='scope'){UI.scope=t.value==='season'?'season':+t.value;UI.more=false;render()}
   else if(a==='bf'){UI.bf[t.dataset.f]=t.value;UI.ppN=24;render()}
+  else if(a==='ppM'){UI.pm=t.value;UI.ppN=24;render()}
   else if(a==='school'){UI.school=t.value;UI.more=false;$('#lb-list').innerHTML=listHTML()}
   else if(a==='grade'){UI.grade=+t.value||0;UI.more=false;$('#lb-list').innerHTML=listHTML()}
   else if(a==='slot'){

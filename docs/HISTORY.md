@@ -476,3 +476,4 @@ All of it sits on top of the v424 trading card in `cardArt` / `pcBack` and leave
 - v447 (Nov 10, owner): Shop packs are listed cheapest first, most expensive last (sorted by `PACKS[k].tok` where the Shop builds `.lk-packs`; the order in `PACKS` no longer matters).
 
 - v448 (Nov 10, owner): Locker > Cards > All is ordered by what each card returns, best boost first (`bV` in viewLocker: special card = its own boost number, Duo = `DUO_PCT`, player/team = `CARD_PCT` of your best version; same value as `topCardsList`), ties by overall. Players / Teams / Duos / Special chips stay highest overall first. A small line under the filters says which order is on.
+- v449 (Nov 10, owner): the Props tab stat-type filter (All stats / Passing / Rushing ...) is a "Stat type" dropdown in the same filter card as Division / Week / School (`data-act="ppM"`, handled in the change listener next to `bf`), not chips.
