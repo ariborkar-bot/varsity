@@ -109,7 +109,7 @@ h1 span{color:#FFC23D}
 /* ---------------- constants (court units: the court is always 540 tall; its width follows the screen, 900 to 1280) ---------------- */
 /* v2 (owner, Nov 11): bigger players and ball (PH 88 -> 112, BR 11 -> 14, wider rim), a longer jump (players use their own, lower gravity PG, so the top of the
    jump comes at about half a second), a double jump without the ball, and energy (p.en, 0 to 1). */
-const H=540,GY=468,GR=1500,PG=1180,BR=14,PW=21,PH=112,PS=PH/88,JV=585,SPD=255,RIMY=236,RIMH=30,TP=305,SC=14,APEX=JV/PG,WALL=36,TICK=1/60;
+const H=540,GY=468,GR=1500,PG=1180,BR=19,PW=21,PH=112,PS=PH/88,JV=585,SPD=255,RIMY=236,RIMH=35,TP=305,SC=14,APEX=JV/PG,WALL=36,TICK=1/60;
 /* energy: running drains it, standing still refills it, every jump costs some. Tired players run slower, jump lower and shoot worse. */
 const EN={run:.085,rest:.26,jump:.09,dj:.12,score:.3};
 /* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
@@ -130,15 +130,15 @@ const SFX={bounce:()=>tone(150,.07,'sine',.16,70),rim:()=>tone(520,.09,'triangle
 const sfx=n=>{if(SFX[n])SFX[n]()};
 
 /* ---------------- game state ---------------- */
-function hoops(W){return [{cx:112,bd:72,dir:1},{cx:W-112,bd:W-72,dir:-1}]}
-function mkP(i,x){return {i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,dj:false,en:1,pj:false,cd:0,stun:0,st:0,ph:0,djt:9,dk:0,dkT:0,dkS:0,dkh:0,gath:false,gt:0,pump:0,slow:false}}
+function hoops(W){return [{cx:119,bd:72,dir:1},{cx:W-119,bd:W-72,dir:-1}]}
+function mkP(i,x){return {i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,dj:false,en:1,pj:false,cd:0,stun:0,st:0,ph:0,djt:9,dd:false,dk:0,dkT:0,dkS:0,dkh:0,gath:false,gt:0,pump:0,slow:false}}
 function newGame(o,W){
   g={W,o,hp:hoops(W),t:0,P:[mkP(0,W/2-84),mkP(1,W/2+84)],ball:{x:W/2,y:210,vx:0,vy:-430,st:'loose',live:true,own:-1,sh:-1,pts:2,t:0,rot:0,cd:.25,hit:false,dunk:false,done:false},
     score:[0,0],clock:o.len,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],rd:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false};
   pop('TIP OFF',W/2,212,'#fff',1.1);return g}
 function pop(t,x,y,c,d){g.pop.push({t:d||1,d:d||1,s:t,x,y,c:c||'#fff'})}
 /* player i attacks hoop 1-i and defends hoop i (player 0 defends the left hoop) */
-function setup(i){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.dj=false;p.gath=false;p.pump=0;p.dk=0;p.en=Math.min(1,p.en+EN.score)});
+function setup(i){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.dj=false;p.gath=false;p.pump=0;p.dk=0;p.dd=false;p.en=Math.min(1,p.en+EN.score)});
   g.P[i].x=a.cx+a.dir*150;g.P[1-i].x=g.W/2+a.dir*46;g.P[i].has=true;g.P[i].face=a.dir;g.P[1-i].face=-a.dir;
   Object.assign(b,{st:'held',own:i,sh:-1,vx:0,vy:0,live:false,hit:false,dunk:false,done:false,cd:0,t:0});g.sc=SC;g.phase='live';g.hold=.55;g.ai=[{},{}]}
 
@@ -155,16 +155,16 @@ function step(dt,inp){
   else{g.dead-=dt;if(g.dead<=0)afterDead()}}
 function clampP(p){p.x=Math.max(WALL+PW,Math.min(g.W-WALL-PW,p.x))}
 function stepP(p,c,dt){
-  p.cd=Math.max(0,p.cd-dt);if(p.pump>0)p.pump-=dt;if(p.stun>0){p.stun-=dt;c=NOIN}if(!p.has)p.gath=false;
-  const mv=(c.r?1:0)-(c.l?1:0),sp=SPD*(p.has?.9:1)*(.58+.42*Math.min(1,p.en/.3))*(p.slow?PRESS:1)*(p.gath?.5:1);
+  p.cd=Math.max(0,p.cd-dt);if(p.pump>0)p.pump-=dt;if(p.stun>0){p.stun-=dt;c=NOIN}if(!p.has){p.gath=false;p.dd=false}
+  const mv=(c.r?1:0)-(c.l?1:0),sp=SPD*(p.has?.9:1)*(.58+.42*Math.min(1,p.en/.3))*(p.slow?PRESS:1)*(p.gath?.5:1)*(p.dd&&p.has&&!p.air?0:1);   /* after a pump fake the dribble is dead: no walking, only fake again or shoot */
   if(!p.air){p.vx+=(mv*sp-p.vx)*Math.min(1,dt*14);if(mv)p.face=mv;else if(p.has)p.face=g.hp[1-p.i].cx>p.x?1:-1;else if(Math.abs(g.ball.x-p.x)>8)p.face=g.ball.x>p.x?1:-1;
-    p.en=mv?Math.max(0,p.en-dt*EN.run):Math.min(1,p.en+dt*EN.rest)}
+    p.en=mv&&sp>0?Math.max(0,p.en-dt*EN.run):Math.min(1,p.en+dt*EN.rest)}
   else p.vx+=(mv*sp*.8-p.vx)*Math.min(1,dt*3);
   if(p.shoot||p.gath)p.face=g.hp[1-p.i].cx>p.x?1:-1;
   const jp=c.j&&!p.pj,jump=()=>{const v=JV*(.8+.2*Math.min(1,p.en/.25));p.air=true;p.vy=-v;p.ap=v/PG;p.jt=0;p.dj=false;p.gath=false;p.en=Math.max(0,p.en-EN.jump);if(p.has)p.shoot=true;sfx('jump')};
   if(!p.air&&p.has){
     /* with the ball: a quick tap is a pump fake, holding JUMP for HOLD seconds goes up for the shot */
-    if(p.gath){if(!c.j){p.gath=false;p.pump=.3}else{p.gt+=dt;if(p.gt>=HOLD)jump()}}
+    if(p.gath){if(!c.j){p.gath=false;p.pump=.3;p.dd=true}else{p.gt+=dt;if(p.gt>=HOLD)jump()}}
     else if(jp&&p.pump<=.06){p.gath=true;p.gt=0}}
   else if(!p.air){if(jp)jump()}
   else{
@@ -179,7 +179,7 @@ function stepP(p,c,dt){
 function release(p,late){
   const h=g.hp[1-p.i],o=g.P[1-p.i],b=g.ball,hx=p.x+p.face*8,hy=p.y-PH-16,dist=Math.abs(h.cx-p.x);
   const q=late?0:1-Math.min(1,Math.abs(p.jt-p.ap)/.22),perfect=q>.88;
-  p.has=false;p.shoot=false;p.cd=.4;Object.assign(b,{own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
+  p.has=false;p.dd=false;p.shoot=false;p.cd=.4;Object.assign(b,{own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
   if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*3);p.dkh=hi;p.face=-h.dir;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=dist>TP?3:2;
   const near=Math.abs(o.x-p.x),contest=near<98&&o.air&&o.y<GY-36?1:near<68?.4:0,tired=p.en<.25?(1-p.en/.25)*20:0;
@@ -196,8 +196,8 @@ function stepBall(dt){
     if(b.dh<=0){b.dh=0;b.x=h.cx;b.y=RIMY-12;b.vy=520;g.shake=.75;g.net[b.hh]=1.7;g.rd[b.hh]=1;g.fx.push({x:h.cx,y:RIMY,t:.4,d:.4,burst:1});sfx('slam')}
     return}
   if(b.st==='held'){const p=g.P[b.own];if(p.air&&p.shoot){b.x=p.x+p.face*8;b.y=p.y-PH-16}else if(p.air){b.x=p.x+p.face*(PW+8);b.y=p.y-PH*.56}
-    else if(p.gath||p.pump>0){const k=p.gath?Math.min(1,p.gt/HOLD):Math.sin(Math.max(0,p.pump)/.3*Math.PI);b.x=p.x+p.face*(PW+BR-3-(PW+BR-11)*k);b.y=p.y-PH*.5-(PH*.5+12)*k}
-    else{const d=Math.abs(Math.sin(g.t*9+p.i*1.7));b.x=p.x+p.face*(PW+BR-3);b.y=GY-BR-d*56;if(d<.08&&!b._b){b._b=true;if(g.hold<=0)sfx('bounce')}else if(d>.3)b._b=false}
+    else if(p.gath||p.pump>0||p.dd){const k=p.gath?Math.min(1,p.gt/HOLD):p.pump>0?.35+.65*Math.sin(Math.max(0,p.pump)/.3*Math.PI):.35;b.x=p.x+p.face*(PW+BR-3-(PW+BR-11)*k);b.y=p.y-PH*.5-(PH*.5+12)*k}
+    else{const d=Math.abs(Math.sin(g.t*9+p.i*1.7));b.x=p.x+p.face*(PW+BR-3);b.y=GY-BR-d*60;if(d<.08&&!b._b){b._b=true;if(g.hold<=0)sfx('bounce')}else if(d>.3)b._b=false}
     b.vx=b.vy=0;return}
   b.t+=dt;const n=3,h=dt/n,W=g.W;
   for(let k=0;k<n;k++){const py=b.y;b.vy+=GR*h;b.x+=b.vx*h;b.y+=b.vy*h;b.rot+=b.vx*h*.05;
@@ -239,6 +239,7 @@ function ai(p,dt){const m=g.ai[p.i],D=DIFF[g.o.diff],o=g.P[1-p.i],b=g.ball,h=g.h
     if(p.air){if(p.shoot)c.j=p.jt<Math.max(.06,Math.min(p.ap*2-.06,p.ap+m.off));return c}
     if(p.gath){if(m.fk){m.fk=false;m.fkd=true;m.wait=.36}else c.j=true;return c}   /* keep holding through the gather, or let go at once for a pump fake */
     if(p.pump>0)return c;
+    if(p.dd){m.off=gauss()*D.sig*1.35*(Math.abs(h.cx-p.x)<74?.4:1);m.fk=!m.fkd&&g.sc>3&&g.clock>3&&rnd()<.22;m.fkd=false;c.j=true;return c}
     if(!m.plan){const r=rnd();m.plan=r<D.three?'three':r<D.three+D.mid?'mid':'drive';m.d=m.plan==='three'?TP+14+rnd()*34:m.plan==='mid'?150+rnd()*120:42;m.wait=.15+rnd()*.25+(D.slow||0)*(1+rnd())}
     m.wait-=dt;const dist=Math.abs(h.cx-p.x),between=(o.x-p.x)*(h.cx-p.x)>0&&Math.abs(o.x-p.x)<dist;
     if(!between&&m.plan!=='three'&&dist>84){m.plan='drive';m.d=42}
@@ -350,9 +351,9 @@ function drawHoopBack(hp,hi){const d=hp.dir,sx=Math.sin(g.t*62)*g.rd[hi]*2.5,dip
   X.strokeStyle='#e04646';X.lineWidth=2;X.strokeRect(hp.bd-3+sx,RIMY-48,6,40);X.fillStyle='rgba(255,255,255,.7)';X.fillRect(hp.bd-d*1-1+sx,RIMY-96,2,60);
   X.strokeStyle='#c4551f';X.lineWidth=4;X.beginPath();X.moveTo(hp.bd+sx,RIMY+dip);X.lineTo(hp.cx-RIMH,RIMY+dip);X.stroke()}
 function drawHoopFront(hp,hi){const sw=g.net[hi],k=Math.sin(sw*14)*sw*7,dip=g.rd[hi]*7*(.5+.5*Math.sin(g.t*38)),ry=RIMY+dip;X.strokeStyle='rgba(255,255,255,.92)';X.lineWidth=1.5;
-  for(let i=0;i<=6;i++){X.beginPath();X.moveTo(hp.cx-RIMH+i*(RIMH/3),ry+2);X.lineTo(hp.cx-18+i*6+k*(i/6-.5),ry+42+sw*8);X.stroke()}
-  for(let i=0;i<6;i++){X.beginPath();X.moveTo(hp.cx-RIMH+i*(RIMH/3),ry+2);X.lineTo(hp.cx-18+(i+1)*6+k*((i+1)/6-.5),ry+42+sw*8);X.moveTo(hp.cx-RIMH+(i+1)*(RIMH/3),ry+2);X.lineTo(hp.cx-18+i*6+k*(i/6-.5),ry+42+sw*8);X.stroke()}
-  for(let r=1;r<=2;r++){X.beginPath();const w=RIMH-r*4.5;X.moveTo(hp.cx-w,ry+r*14);X.lineTo(hp.cx+w,ry+r*14);X.stroke()}
+  for(let i=0;i<=6;i++){X.beginPath();X.moveTo(hp.cx-RIMH+i*(RIMH/3),ry+2);X.lineTo(hp.cx-21+i*7+k*(i/6-.5),ry+46+sw*8);X.stroke()}
+  for(let i=0;i<6;i++){X.beginPath();X.moveTo(hp.cx-RIMH+i*(RIMH/3),ry+2);X.lineTo(hp.cx-21+(i+1)*7+k*((i+1)/6-.5),ry+46+sw*8);X.moveTo(hp.cx-RIMH+(i+1)*(RIMH/3),ry+2);X.lineTo(hp.cx-21+i*7+k*(i/6-.5),ry+46+sw*8);X.stroke()}
+  for(let r=1;r<=2;r++){X.beginPath();const w=RIMH-r*5;X.moveTo(hp.cx-w,ry+r*14);X.lineTo(hp.cx+w,ry+r*14);X.stroke()}
   X.strokeStyle='#ff6a1f';X.lineWidth=5.5;X.lineCap='round';X.beginPath();X.moveTo(hp.cx-RIMH,ry);X.lineTo(hp.cx+RIMH,ry);X.stroke();X.strokeStyle='#ffb27a';X.lineWidth=1.6;X.beginPath();X.moveTo(hp.cx-RIMH+2,ry-1.6);X.lineTo(hp.cx+RIMH-2,ry-1.6);X.stroke();X.lineCap='butt'}
 /* v3 player art: outlined cartoon figure with jointed arms and legs, shoes and socks, striped shorts, a trimmed jersey, headband, hair and a face.
    Everything is drawn in an 88-tall space with the feet at (x,y) and scaled by PS. */
@@ -360,58 +361,66 @@ const INK='#0a1020';
 function limb(pts,w,col){X.lineCap='round';X.lineJoin='round';for(const pass of [[w+3.4,INK],[w,col]]){X.lineWidth=pass[0];X.strokeStyle=pass[1];X.beginPath();X.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)X.lineTo(pts[i],pts[i+1]);X.stroke()}}
 function bend(x1,y1,x2,y2,k){const dx=x2-x1,dy=y2-y1,l=Math.hypot(dx,dy)||1;return [(x1+x2)/2-dy/l*k,(y1+y2)/2+dx/l*k]}
 function shape(pts,fill,lw){X.beginPath();X.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)X.lineTo(pts[i],pts[i+1]);X.closePath();X.fillStyle=fill;X.fill();X.lineJoin='round';X.lineWidth=lw||2;X.strokeStyle=INK;X.stroke()}
-function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.vx)>30,sw=run?Math.sin(p.ph*1.45):0,b=g.ball,LH=88,mv=Math.sign(p.vx)||1;
-  X.fillStyle='rgba(0,0,0,.3)';X.beginPath();X.ellipse(x,GY+6,(24-Math.min(13,(GY-y)*.08))*PS,5.5,0,0,7);X.fill();
+function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.vx)>30,ph=p.ph*1.45,sw=run?Math.sin(ph):0,cs=run?Math.cos(ph):0,b=g.ball,LH=96,mv=Math.sign(p.vx)||1;
+  X.fillStyle='rgba(0,0,0,.3)';X.beginPath();X.ellipse(x,GY+6,(22-Math.min(12,(GY-y)*.08))*PS,5.5,0,0,7);X.fill();
   if(p.stun>0)X.globalAlpha=.6+.4*Math.sin(g.t*40);
   X.save();X.translate(x,y);X.scale(PS,PS);X.translate(-x,-y);
-  const up=p.gath||p.pump>0||(p.shoot&&p.air)||p.dk>0,lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*4,bob=run?Math.abs(Math.cos(p.ph*1.45))*1.6:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*4:0;
-  const hipY=y-39+crouch-bob*.3,shY=y-71+crouch-bob,hx=x+lean+f*1.5,hy=y-85+crouch-bob;
-  /* hand targets (in the figure's own space) */
+  const up=p.gath||p.pump>0||p.dd||(p.shoot&&p.air)||p.dk>0,lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*5,bob=run?Math.abs(cs)*2.2:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*5:(p.dd&&!p.air?2.5:0);
+  const hipY=y-47+crouch-bob*.5,shY=y-77+crouch*1.1-bob,shX=x+lean,hx=shX+f*3,hy=shY-12.5,hipX=x+lean*.4;
+  /* two-bone limbs: the middle joint is solved from the two segment lengths, and a limb stretches up to 30% to reach a ball or the rim */
+  const ik=(ax,ay,bx,by,l1,l2,side)=>{const dx=bx-ax,dy=by-ay,d=Math.hypot(dx,dy)||1,s=Math.min(1.3,Math.max(1,d/((l1+l2)*.985))),a1=l1*s,a2=l2*s,dd=Math.min(d,(a1+a2)*.985),a=(a1*a1-a2*a2+dd*dd)/(2*dd),h=Math.sqrt(Math.max(0,a1*a1-a*a)),ux=dx/d,uy=dy/d;return [ax+ux*a-uy*h*side,ay+uy*a+ux*h*side,ax+ux*dd,ay+uy*dd]};
+  const seg=(P,w1,w2,col)=>{for(const pass of [0,1]){X.lineCap='round';X.strokeStyle=pass?col:INK;X.lineWidth=(pass?0:2.4)+w1;X.beginPath();X.moveTo(P[0],P[1]);X.lineTo(P[2],P[3]);X.stroke();X.lineWidth=(pass?0:2.4)+w2;X.beginPath();X.moveTo(P[2],P[3]);X.lineTo(P[4],P[5]);X.stroke()}};
+  const limbDraw=(S,E,l1,l2,side,w1,w2,col)=>{const r=ik(S[0],S[1],E[0],E[1],l1,l2,side),P=[S[0],S[1],r[0],r[1],r[2],r[3]];for(const pass of [0,1]){X.lineCap='round';X.lineJoin='round';X.strokeStyle=pass?col:INK;X.lineWidth=(pass?0:2.4)+w1;X.beginPath();X.moveTo(P[0],P[1]);X.lineTo(P[2],P[3]);X.stroke();X.lineWidth=(pass?0:2.4)+w2;X.beginPath();X.moveTo(P[2],P[3]);X.lineTo(P[4],P[5]);X.stroke()}return P};
+  /* hand targets (figure space) */
   let ax,ay,bx,by;
   if(p.dk>0){const hh=g.hp[p.dkh];if(b.dh>0){ax=x+(b.x-f*3-x)/PS;ay=y+(b.y+4-y)/PS;if(p.dkS===1){bx=x+(b.x+f*5-x)/PS;by=ay}else{bx=x-f*10;by=y-LH-4}}
     else{ax=x+(hh.cx-hh.dir*2-x)/PS;ay=y+(RIMY-3-y)/PS;bx=x+(hh.cx+hh.dir*9-x)/PS;by=ay+1}}
   else if(p.has&&up){ax=x+(b.x-f*3-x)/PS;ay=y+(b.y+5-y)/PS;bx=x+(b.x+f*5-x)/PS;by=y+(b.y+3-y)/PS}
-  else if(p.air&&!p.has){ax=x+f*8/PS;ay=y-LH-15;bx=x+f*1;by=y-LH-7}
-  else if(p.has){ax=x+(b.x-f*4-x)/PS;ay=y+(Math.min(b.y-7,y-30*PS)-y)/PS;bx=x-f*8-sw*mv*7;by=y-44+Math.abs(sw)*2}
-  else if(p.air){ax=x+f*14;ay=y-58;bx=x-f*12;by=y-52}
-  else if(run){ax=x+sw*mv*15;ay=y-52-Math.abs(sw)*4;bx=x-sw*mv*15;by=y-52-Math.abs(sw)*4}
-  else{ax=x+f*23;ay=y-60;bx=x+f*15;by=y-80}
-  const sF=[x+lean+f*11,shY+2],sB=[x+lean-f*10,shY+2];
-  const arm=(S,hx2,hy2,k,dark)=>{const e=bend(S[0],S[1],hx2,hy2,k);limb([S[0],S[1],e[0],e[1],hx2,hy2],6.5,dark?T.s2:T.s);X.beginPath();X.arc(hx2,hy2,4.3,0,7);X.fillStyle=dark?T.s2:T.s;X.fill();X.lineWidth=1.6;X.strokeStyle=INK;X.stroke()};
-  /* back arm, then legs */
-  arm(sB,bx,by,-f*5,true);
-  for(const s of [-1,1]){const fx=p.air?x+s*7-f*5*tuck:x+s*3+s*sw*mv*17,fy=p.air?y-3-tuck*9:y-3-(run?Math.max(0,s*Math.cos(p.ph*1.45))*9:0),hp=[x+s*5,hipY],k=bend(hp[0],hp[1],fx,fy,-f*(p.air?9:5+Math.abs(sw)*5)),col=s<0?T.s2:T.s;
-    limb([hp[0],hp[1],k[0],k[1],fx,fy],8,col);
-    const sx0=fx+(k[0]-fx)*.3,sy0=fy+(k[1]-fy)*.3;limb([sx0,sy0,fx,fy],7,'#f4f7fb');          /* sock */
-    X.beginPath();X.moveTo(fx-f*6,fy+3.5);X.lineTo(fx-f*6,fy-2);X.quadraticCurveTo(fx-f*2,fy-5,fx+f*4,fy-2.5);X.quadraticCurveTo(fx+f*11,fy-1,fx+f*11,fy+3.5);X.closePath();
-    X.fillStyle='#ffffff';X.fill();X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();X.fillStyle=T.c;X.fillRect(Math.min(fx-f*2,fx+f*3),fy-1.5,5,3);X.fillStyle=INK;X.fillRect(Math.min(fx-f*6,fx+f*11),fy+2.2,17,1.6)}
+  else if(p.air&&!p.has){ax=x+f*7;ay=y-LH-14;bx=x+f*1;by=y-LH-6}
+  else if(p.has){ax=x+(b.x-f*4-x)/PS;ay=y+(Math.min(b.y-7,y-30*PS)-y)/PS;bx=x-f*7-sw*mv*7;by=y-50+Math.abs(sw)*2}
+  else if(p.air){ax=x+f*15;ay=y-62;bx=x-f*11;by=y-58}
+  else if(run){ax=x+sw*mv*16;ay=y-54-Math.abs(sw)*4;bx=x-sw*mv*16;by=y-54-Math.abs(sw)*4}
+  else{ax=x+f*22;ay=y-66;bx=x+f*14;by=y-84}
+  const sF=[shX+f*8,shY+3],sB=[shX-f*8,shY+3];
+  /* back arm, then both legs */
+  limbDraw(sB,[bx,by],17,16,f,7.6,6.2,T.s2);X.beginPath();X.arc(bx,by,3.6,0,7);X.fillStyle=T.s2;X.fill();X.lineWidth=1.5;X.strokeStyle=INK;X.stroke();
+  for(const s of [-1,1]){let fx,fy;
+    if(p.air){fx=x+s*6-f*7*tuck*(s>0?1:.5);fy=y-4-tuck*(p.dk>0?9:15)*(s>0?1:.7)}
+    else if(run){fx=x+s*sw*mv*21;fy=y-3-Math.max(0,s*cs)*11}
+    else{fx=x+s*(7+crouch*.6);fy=y-3}
+    const hp=[hipX+s*4.5,hipY+2],r=ik(hp[0],hp[1],fx,fy,25,24,-f),col=s<0?T.s2:T.s;fx=r[2];fy=r[3];
+    seg([hp[0],hp[1],r[0],r[1],fx,fy],11,8,col);
+    const sx0=fx+(r[0]-fx)*.34,sy0=fy+(r[1]-fy)*.34;X.strokeStyle='#f4f7fb';X.lineWidth=8;X.lineCap='round';X.beginPath();X.moveTo(sx0,sy0);X.lineTo(fx,fy);X.stroke();X.strokeStyle=T.c;X.lineWidth=8.2;X.beginPath();X.moveTo(sx0,sy0);X.lineTo(sx0+(fx-sx0)*.18,sy0+(fy-sy0)*.18);X.stroke();
+    X.beginPath();X.moveTo(fx-f*5.5,fy+3.6);X.lineTo(fx-f*5.5,fy-3);X.quadraticCurveTo(fx-f*2,fy-5.5,fx+f*3,fy-3.2);X.quadraticCurveTo(fx+f*9,fy-2,fx+f*12,fy+.8);X.lineTo(fx+f*12,fy+3.6);X.closePath();
+    X.fillStyle='#ffffff';X.fill();X.lineWidth=1.7;X.strokeStyle=INK;X.stroke();X.fillStyle=T.c;X.beginPath();X.moveTo(fx-f*1,fy-4);X.lineTo(fx+f*4,fy-2.6);X.lineTo(fx+f*2,fy+2);X.lineTo(fx-f*3,fy+2);X.fill();X.fillStyle=INK;X.fillRect(Math.min(fx-f*5.5,fx+f*12),fy+2.4,17.5,1.8)}
   /* shorts */
-  shape([x-13+lean*.4,hipY-9,x+13+lean*.4,hipY-9,x+16,hipY+11,x+2.5,hipY+11,x,hipY+4,x-2.5,hipY+11,x-16,hipY+11],T.d);
-  X.fillStyle=T.c;X.fillRect(x+f*11.5-1.5,hipY-7,3,16);X.fillStyle=T.c2;X.fillRect(x-13+lean*.4,hipY-9.5,26,2.6);
-  /* jersey: wider at the shoulders, trim at the neck and arm holes */
-  X.beginPath();X.moveTo(x-12+lean*.4,hipY-8);X.lineTo(x+12+lean*.4,hipY-8);X.lineTo(x+16+lean,shY+7);X.quadraticCurveTo(x+16+lean,shY-2,x+8+lean,shY-3);X.lineTo(x-8+lean,shY-3);X.quadraticCurveTo(x-16+lean,shY-2,x-16+lean,shY+7);X.closePath();
-  const jg=X.createLinearGradient(x-16,0,x+16,0);jg.addColorStop(f>0?0:1,T.c);jg.addColorStop(f>0?1:0,T.c2);X.fillStyle=jg;X.fill();X.lineWidth=2;X.strokeStyle=INK;X.lineJoin='round';X.stroke();
-  X.strokeStyle=T.d;X.lineWidth=2.4;X.beginPath();X.moveTo(x-6+lean,shY-2.5);X.quadraticCurveTo(x+lean,shY+5,x+6+lean,shY-2.5);X.stroke();
-  X.beginPath();X.moveTo(x-15.5+lean,shY+8);X.lineTo(x-13+lean*.5,hipY-9);X.moveTo(x+15.5+lean,shY+8);X.lineTo(x+13+lean*.5,hipY-9);X.lineWidth=1.6;X.stroke();
-  X.font='900 15px system-ui';X.textAlign='center';X.lineWidth=3;X.strokeStyle=T.c2;X.strokeText(T.num,x+lean*.7,shY+24);X.fillStyle=T.d;X.fillText(T.num,x+lean*.7,shY+24);
+  shape([hipX-11,hipY-6,hipX+11,hipY-6,hipX+14.5,hipY+17,hipX+2.5,hipY+17,hipX,hipY+8,hipX-2.5,hipY+17,hipX-14.5,hipY+17],T.d,1.8);
+  X.fillStyle=T.c;X.fillRect(hipX+f*11-1.4,hipY-4,2.8,19);X.fillStyle=T.c2;X.fillRect(hipX-11,hipY-6.5,22,3);
+  /* jersey (tank top) */
+  X.beginPath();X.moveTo(hipX-10,hipY-4);X.lineTo(hipX+10,hipY-4);X.lineTo(shX+12.5,shY+9);X.quadraticCurveTo(shX+13.5,shY+1,shX+7.5,shY-2.5);X.lineTo(shX-7.5,shY-2.5);X.quadraticCurveTo(shX-13.5,shY+1,shX-12.5,shY+9);X.closePath();
+  const jg=X.createLinearGradient(shX-13,0,shX+13,0);jg.addColorStop(f>0?0:1,T.c);jg.addColorStop(f>0?1:0,T.c2);X.fillStyle=jg;X.fill();X.lineWidth=1.9;X.strokeStyle=INK;X.lineJoin='round';X.stroke();
+  X.strokeStyle=T.d;X.lineWidth=2.2;X.beginPath();X.moveTo(shX-6,shY-2);X.quadraticCurveTo(shX,shY+6,shX+6,shY-2);X.stroke();
+  X.lineWidth=1.5;X.beginPath();X.moveTo(shX-12,shY+8);X.quadraticCurveTo(shX-10,shY+1,shX-7.5,shY-2.5);X.moveTo(shX+12,shY+8);X.quadraticCurveTo(shX+10,shY+1,shX+7.5,shY-2.5);X.stroke();
+  X.font='900 13px system-ui';X.textAlign='center';X.lineWidth=2.6;X.strokeStyle=T.c2;X.strokeText(T.num,shX+lean*.2+f*1,shY+20);X.fillStyle=T.d;X.fillText(T.num,shX+lean*.2+f*1,shY+20);
   /* neck and head */
-  X.fillStyle=T.s2;X.fillRect(hx-4,shY-8,8,7);
-  X.beginPath();X.arc(hx-f*11,hy+2,3.2,0,7);X.fillStyle=T.s2;X.fill();X.lineWidth=1.5;X.strokeStyle=INK;X.stroke();                      /* ear */
-  X.beginPath();X.arc(hx,hy,12.5,0,7);X.fillStyle=T.s;X.fill();X.lineWidth=2;X.strokeStyle=INK;X.stroke();
-  X.save();X.beginPath();X.arc(hx,hy,12.5,0,7);X.clip();X.fillStyle=T.hair;X.fillRect(hx-14,hy-14,28,9.5);X.fillRect(hx-f*14,hy-14,f*7,17);X.fillStyle=T.c;X.fillRect(hx-14,hy-5.5,28,3.6);X.restore();
-  X.fillStyle=T.hair;X.fillRect(hx-9,hy-15.5,18,4);X.beginPath();X.arc(hx,hy,12.5,0,7);X.lineWidth=2;X.strokeStyle=INK;X.stroke();
-  X.fillStyle='#fff';X.beginPath();X.ellipse(hx+f*6,hy+1.5,2.9,3.2,0,0,7);X.fill();X.fillStyle=INK;X.beginPath();X.arc(hx+f*7,hy+1.8,1.7,0,7);X.fill();
-  X.strokeStyle=INK;X.lineWidth=1.6;X.lineCap='round';X.beginPath();X.moveTo(hx+f*3,hy-2.8);X.lineTo(hx+f*9,hy-(p.has&&up||(p.air&&!p.has)?4.4:2.2));X.stroke();
-  X.beginPath();if(p.en<.25){X.arc(hx+f*7,hy+8,2,0,7)}else{X.moveTo(hx+f*4.5,hy+7.2);X.quadraticCurveTo(hx+f*7.5,hy+8.6,hx+f*10,hy+6.6)}X.stroke();
-  if(p.en<.25&&!p.air){X.fillStyle='rgba(140,210,255,.95)';for(const k of [0,1]){const a=(g.t*1.6+k*.5)%1;X.beginPath();X.arc(hx-f*(9+k*5),hy-6+a*14,1.9,0,7);X.fill()}}   /* sweat when out of breath */
+  X.fillStyle=T.s2;X.fillRect(hx-3.3,shY-9,6.6,8);
+  X.beginPath();X.arc(hx-f*7,hy+1,2.5,0,7);X.fillStyle=T.s2;X.fill();X.lineWidth=1.3;X.strokeStyle=INK;X.stroke();
+  X.beginPath();X.arc(hx,hy,8,0,7);X.fillStyle=T.s;X.fill();X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();
+  X.save();X.beginPath();X.arc(hx,hy,8,0,7);X.clip();X.fillStyle=T.hair;X.fillRect(hx-9,hy-9,18,6.5);X.fillRect(hx-f*9,hy-9,f*5,11);X.fillStyle=T.c;X.fillRect(hx-9,hy-3.4,18,2.8);X.restore();
+  X.beginPath();X.arc(hx,hy,8,0,7);X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();
+  X.fillStyle='#fff';X.beginPath();X.ellipse(hx+f*3.8,hy+.9,2,2.2,0,0,7);X.fill();X.fillStyle=INK;X.beginPath();X.arc(hx+f*4.5,hy+1.1,1.1,0,7);X.fill();
+  X.strokeStyle=INK;X.lineWidth=1.3;X.lineCap='round';X.beginPath();X.moveTo(hx+f*1.8,hy-1.6);X.lineTo(hx+f*6,hy-(up||(p.air&&!p.has)?2.9:1.4));X.stroke();
+  X.beginPath();X.moveTo(hx+f*7.6,hy+1.6);X.lineTo(hx+f*8.7,hy+3.4);X.lineTo(hx+f*7.4,hy+3.7);X.stroke();
+  X.beginPath();if(p.en<.25){X.arc(hx+f*4.8,hy+5.6,1.5,0,7)}else{X.moveTo(hx+f*2.6,hy+5.2);X.quadraticCurveTo(hx+f*4.8,hy+6.1,hx+f*6.6,hy+4.8)}X.stroke();
+  if(p.en<.25&&!p.air){X.fillStyle='rgba(140,210,255,.95)';for(const k of [0,1]){const a=(g.t*1.6+k*.5)%1;X.beginPath();X.arc(hx-f*(6+k*4),hy-4+a*11,1.5,0,7);X.fill()}}
   /* front arm on top */
-  arm(sF,ax,ay,f*5,false);
+  limbDraw(sF,[ax,ay],17,16,f,7.6,6.2,T.s);X.beginPath();X.arc(ax,ay,3.6,0,7);X.fillStyle=T.s;X.fill();X.lineWidth=1.5;X.strokeStyle=INK;X.stroke();
   X.restore();X.lineCap='butt';X.globalAlpha=1;
   if(!p.has&&p.st>.15){X.fillStyle='rgba(4,8,16,.7)';rr(x-20,y-PH-24,40,6,3);X.fill();X.fillStyle=T.c;rr(x-20,y-PH-24,40*Math.min(1,p.st/STEAL),6,3);X.fill()}
   /* energy bar under the feet */
   X.fillStyle='rgba(4,8,16,.6)';rr(x-24,GY+13,48,6,3);X.fill();X.fillStyle=p.en<.25?'#ff6a7f':p.en<.5?'#FFC23D':'#3DFF9A';if(p.en>.02){rr(x-24,GY+13,48*p.en,6,3);X.fill()}}
 function drawBall(){const b=g.ball;X.fillStyle='rgba(0,0,0,.25)';X.beginPath();X.ellipse(b.x,GY+6,13-Math.min(7,(GY-b.y)*.02),4,0,0,7);X.fill();
-  X.save();X.translate(b.x,b.y);X.rotate(b.rot);const gr=X.createRadialGradient(-4,-4,2,0,0,BR);gr.addColorStop(0,'#ffb168');gr.addColorStop(1,'#d9601a');X.fillStyle=gr;X.beginPath();X.arc(0,0,BR,0,7);X.fill();
+  X.save();X.translate(b.x,b.y);X.rotate(b.rot);const gr=X.createRadialGradient(-BR*.3,-BR*.3,2,0,0,BR);gr.addColorStop(0,'#ffb168');gr.addColorStop(1,'#d9601a');X.fillStyle=gr;X.beginPath();X.arc(0,0,BR,0,7);X.fill();
   X.strokeStyle='#5a2408';X.lineWidth=1.4;X.beginPath();X.moveTo(-BR,0);X.lineTo(BR,0);X.moveTo(0,-BR);X.lineTo(0,BR);X.stroke();X.beginPath();X.arc(-BR*1.1,0,BR,-.9,.9);X.stroke();X.beginPath();X.arc(BR*1.1,0,BR,Math.PI-.9,Math.PI+.9);X.stroke();X.restore()}
 function drawHUD(W){const cx=W/2;X.fillStyle='rgba(4,8,16,.82)';rr(cx-190,10,380,74,14);X.fill();X.strokeStyle='rgba(255,255,255,.16)';X.lineWidth=1.5;X.stroke();
   X.textAlign='center';X.font='800 13px system-ui';X.fillStyle=TEAM[0].c;X.fillText(TEAM[0].n,cx-140,32);X.fillStyle=TEAM[1].c;X.fillText(TEAM[1].n,cx+140,32);
@@ -462,7 +471,7 @@ function onEnd(){const a=g.score[0],b=g.score[1],two=OPT.mode==='2p',s=g.stat;
 function seg(id,key,cast){const el=document.getElementById(id);const paint=()=>{el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(cast(b.dataset.v)===OPT[key])));document.getElementById('w-diff').style.display=OPT.mode==='ai'?'':'none';how()};
   el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;OPT[key]=cast(b.dataset.v);paint()});paint()}
 function how(){const touch=matchMedia('(pointer:coarse)').matches,two=OPT.mode==='2p';
-  document.getElementById('how').innerHTML=`<b>With the ball:</b> hold JUMP to go up and let go to shoot. Let go at the very top of your jump for a perfect shot. A quick tap of JUMP is a pump fake. Jump next to the rim to dunk. Behind the line is worth 3.<br><b>Without the ball:</b> JUMP to block, and tap JUMP again in the air for a second jump. Stay right in front of the dribbler long enough and you steal it.<br><b>Energy:</b> running and jumping use it up; stand still to get it back. When it is low you are slower, jump lower and shoot worse.<br><b>Controls:</b> ${touch?(two?'Player 1 uses the buttons on the left, Player 2 the buttons on the right.':'◀ ▶ on the left, JUMP on the right.'):(two?'Player 1: A, D and W. Player 2: ←, → and ↑.':'A / D or ← / → to move, W, ↑ or Space to jump. P pauses.')}`}
+  document.getElementById('how').innerHTML=`<b>With the ball:</b> hold JUMP to go up and let go to shoot. Let go at the very top of your jump for a perfect shot. A quick tap of JUMP is a pump fake, but after a fake you cannot dribble again: fake again or shoot. Jump next to the rim to dunk. Behind the line is worth 3.<br><b>Without the ball:</b> JUMP to block, and tap JUMP again in the air for a second jump. Stay right in front of the dribbler long enough and you steal it.<br><b>Energy:</b> running and jumping use it up; stand still to get it back. When it is low you are slower, jump lower and shoot worse.<br><b>Controls:</b> ${touch?(two?'Player 1 uses the buttons on the left, Player 2 the buttons on the right.':'◀ ▶ on the left, JUMP on the right.'):(two?'Player 1: A, D and W. Player 2: ←, → and ↑.':'A / D or ← / → to move, W, ↑ or Space to jump. P pauses.')}`}
 seg('s-mode','mode',v=>v);seg('s-diff','diff',v=>v);seg('s-len','len',v=>+v);
 document.getElementById('play').addEventListener('click',start);document.getElementById('again').addEventListener('click',start);
 document.getElementById('tomenu').addEventListener('click',toMenu);document.getElementById('quit').addEventListener('click',toMenu);document.getElementById('resume').addEventListener('click',togglePause);document.getElementById('pz').addEventListener('click',togglePause);
