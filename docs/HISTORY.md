@@ -521,3 +521,6 @@ Props tab Top Cards: the button now shows 5 more cards per tap (`UI.tcN`, starts
 
 ## v457
 Active picks (Predict tab) made compact: smaller logos/text/row padding, shows 3 rows then one "Show all N picks" button (`UI.apOpen`, `data-act="apMore"`).
+
+## Hoops Battle v11
+Blocks: a defender already coming down (vy>110, or any descent while the shooter is still rising) cannot block; air hit radius BR+30 (was 36); hard AI block odds .28. AI under pressure (`m.pr`, `D.pw` weights shoot/fake/back/push) picks one of: shoot over him, pump fake, back away for room, or push through, instead of always shooting.
