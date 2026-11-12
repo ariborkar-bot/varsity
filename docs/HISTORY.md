@@ -551,3 +551,6 @@ Softer rim ricochet (rim restitution .55 to .42 plus light damping; backboard .8
 
 ## Hoops Battle v20
 Dunks: slow motion during the flight (`g.slo`, .42x), then on the slam a hit-stop (`g.freeze` .16 s), camera punch toward the hoop (`g.zm`), white flash (`g.fl`), shockwave ring, stronger shake, rim/net shake, big pop text ("SLAM!", "WINDMILL!", "360 SLAM!"). Three-point line: TP 360 to 380 and a three is decided by where the shooter left the floor (`p.tk`), not where he released.
+
+## Hoops Battle v21
+TP 380 to 430 (the three-point line is farther back). It is the same distance from each hoop for both players (the CPU gets a three when he leaves the floor more than TP from the left hoop); only the right end has markings.

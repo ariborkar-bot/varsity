@@ -109,7 +109,7 @@ h1 span{color:#FFC23D}
 /* ---------------- constants (court units: the court is always 540 tall; its width follows the screen, 900 to 1280) ---------------- */
 /* v2 (owner, Nov 11): bigger players and ball (PH 88 -> 112, BR 11 -> 14, wider rim), a longer jump (players use their own, lower gravity PG, so the top of the
    jump comes at about half a second), a double jump without the ball, and energy (p.en, 0 to 1). */
-const H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=620,SPD=360,RIMY=236,RIMH=35,TP=380,SC=14,APEX=JV/PG,WALL=24,TICK=1/60;
+const H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=620,SPD=360,RIMY=236,RIMH=35,TP=430,SC=14,APEX=JV/PG,WALL=24,TICK=1/60;
 /* energy: running drains it, standing still refills it, every jump costs some. Tired players run slower, jump lower and shoot worse. */
 const EN={run:.03,rest:.3,jump:.055,shot:.11,fake:.03,push:.16,score:.3};   /* shooting costs the most, running little, driving into a defender is tiring but not impossible */
 /* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
