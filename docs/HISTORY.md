@@ -577,3 +577,6 @@ WebRTC now also has a public TURN relay (openrelay.metered.ca) and shows the ICE
 
 ## Hoops Battle v28
 Online play no longer uses WebRTC (it failed between real phones). After matchmaking (lobby channel `hb-lobby-v2`) the host opens a private channel `hb-m-<host>-<guest>` on the same Supabase Realtime and all game traffic goes through it: host snapshots 20 Hz, guest inputs on change plus every 150 ms, 9 s silence = connection lost. About 100-250 ms of delay is normal. Tested against a fake in-browser relay only.
+
+## Hoops Battle v29
+Online is now an invite link: Friend online + Invite a friend makes a random room, shows a link (?room=xxxxxx) with Share/Copy; opening that link goes straight into the game (presence channel `hb-room-<room>`, pairing and play as in v28). No random matchmaking with strangers any more.

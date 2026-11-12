@@ -68,7 +68,7 @@ h1 span{color:#FFC23D}
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
     <button type="button" data-v="2p" aria-pressed="false">Friend<small>same device</small></button>
-    <button type="button" data-v="on" aria-pressed="false">Friend online<small>find opponent</small></button>
+    <button type="button" data-v="on" aria-pressed="false">Friend online<small>invite link</small></button>
   </div>
   <div id="w-diff"><span class="lbl">Computer skill</span>
   <div class="seg" id="s-diff">
@@ -89,9 +89,10 @@ h1 span{color:#FFC23D}
 </div></div>
 
 <div id="net" class="ov" hidden><div class="box">
-  <h1>Finding an opponent</h1>
+  <h1 id="n-h">Invite a friend</h1>
+  <div id="n-inv"><p class="sub">Send your friend this link. When they open it they join your game automatically.</p>
+    <textarea id="n-link" readonly></textarea><button class="go" id="n-share" type="button">Share link</button><button class="ghost" id="n-copy" type="button">Copy link</button></div>
   <p class="sub" id="n-msg">Connecting...</p>
-  <p class="sub">Ask your friend to open this page and tap Friend online, then Tip off. You will be matched automatically.</p>
   <button class="ghost" id="n-back" type="button">Cancel</button>
 </div></div>
 
@@ -523,7 +524,7 @@ function onEnd(){const a=g.score[0],b=g.score[1],two=OPT.mode==='2p',s=g.stat;
   setTimeout(()=>{if(g&&g.phase==='over')document.getElementById('end').hidden=false},900)}
 
 /* ---------------- menu wiring ---------------- */
-function seg(id,key,cast){const el=document.getElementById(id);const paint=()=>{el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(cast(b.dataset.v)===OPT[key])));document.getElementById('w-diff').style.display=OPT.mode==='ai'?'':'none';document.getElementById('play').textContent=OPT.mode==='on'?'Find opponent':'Tip off';how()};
+function seg(id,key,cast){const el=document.getElementById(id);const paint=()=>{el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(cast(b.dataset.v)===OPT[key])));document.getElementById('w-diff').style.display=OPT.mode==='ai'?'':'none';document.getElementById('play').textContent=OPT.mode==='on'?'Invite a friend':'Tip off';how()};
   el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;OPT[key]=cast(b.dataset.v);paint()});paint()}
 function how(){const touch=matchMedia('(pointer:coarse)').matches,two=OPT.mode==='2p';
   document.getElementById('how').innerHTML=`<b>With the ball:</b> hold JUMP to go up and let go to shoot. Let go at the very top of your jump for a perfect shot. A quick tap of JUMP is a pump fake, but after a fake you cannot dribble again: fake again or shoot. Jump next to the rim to dunk. Behind the line is worth 3.<br><b>Without the ball:</b> JUMP to block. Stay right in front of the dribbler long enough and you steal it.<br><b>Energy:</b> running and jumping use it up; stand still to get it back. When it is low you are slower, jump lower and shoot worse.<br><b>Controls:</b> ${touch?(two?'Player 1 uses the buttons on the left, Player 2 the buttons on the right.':'◀ ▶ on the left, JUMP on the right.'):(two?'Player 1: A, D and W. Player 2: ←, → and ↑.':'A / D or ← / → to move, W, ↑ or Space to jump. P pauses.')}`}
@@ -547,14 +548,17 @@ function netReset(){if(NET.mc)netTx({k:'bye'});try{if(NET.sb){NET.lb&&NET.sb.rem
   Object.assign(NET,{on:false,role:'',sb:null,lb:null,mc:null,partner:'',up:false,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null,last:0,lastIn:'',lastInT:0})}
 function netLost(msg){const was=NET.on;netReset();if(was){g=null;for(const id of ['end','pause','net'])el(id).hidden=true;el('menu').hidden=true;for(const id of ['ctl','pz','snd'])el(id).classList.remove('on');fit();netOpen(false)}
   el('n-msg').textContent=msg||'The connection ended.'}
-function netOpen(find=true){el('menu').hidden=true;el('net').hidden=false;if(find){netReset();netFind()}}
+function netOpen(find=true,room){el('menu').hidden=true;el('net').hidden=false;if(find){netReset();const mine=!room;room=room||Math.random().toString(36).slice(2,8);NET.room=room;
+    el('n-inv').hidden=!mine;el('n-h').textContent=mine?'Invite a friend':'Joining the game';
+    if(mine){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('room',room);el('n-link').value=u.toString()}
+    netFind(room)}}
 async function sbLib(){if(window.supabase&&window.supabase.createClient)return true;
   for(const u of ['../../vendor/supabase.min.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js','https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js']){
     const ok=await new Promise(r=>{const x=document.createElement('script');x.src=u;x.onload=()=>r(true);x.onerror=()=>r(false);document.head.appendChild(x)});if(ok&&window.supabase&&window.supabase.createClient)return true}return false}
-async function netFind(){const msg=t=>{el('n-msg').textContent=t};msg('Connecting...');
+async function netFind(room){const msg=t=>{el('n-msg').textContent=t};msg('Connecting...');
   if(!await sbLib()){msg('Could not load the matchmaking library. Check your connection.');return}
   const me=Math.random().toString(36).slice(2,10),sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false},realtime:{params:{eventsPerSecond:60}}});
-  const lob=sb.channel('hb-lobby-v2',{config:{presence:{key:me},broadcast:{self:false}}});NET.sb=sb;NET.lb=lob;NET.partner='';
+  const lob=sb.channel('hb-room-'+room,{config:{presence:{key:me},broadcast:{self:false}}});NET.sb=sb;NET.lb=lob;NET.partner='';
   const joinMatch=(name,role,partner)=>{NET.partner=partner;NET.role=role;msg('Opponent found. Joining the match...');
     const mc=sb.channel(name,{config:{broadcast:{self:false,ack:false}}});NET.mc=mc;
     mc.on('broadcast',{event:'g'},({payload:m})=>{if(m)netMsg(m)}).subscribe(st=>{
@@ -583,6 +587,10 @@ function netGuest(dt){const now=performance.now(),inp=el('rot').hidden?human(0):
     g.ball.x=NET.from.b.x+(NET.tg.b.x-NET.from.b.x)*k;g.ball.y=NET.from.b.y+(NET.tg.b.y-NET.from.b.y)*k}
   if(g.phase==='over'&&!NET.ended){NET.ended=true;onEnd()}}
 el('n-back').addEventListener('click',()=>{netReset();el('net').hidden=true;el('menu').hidden=false});
+el('n-copy').addEventListener('click',()=>{const t=el('n-link');t.select();t.setSelectionRange(0,9999);try{navigator.clipboard.writeText(t.value)}catch(_){try{document.execCommand('copy')}catch(__){}}el('n-copy').textContent='Copied';setTimeout(()=>el('n-copy').textContent='Copy link',1500)});
+el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(navigator.share)navigator.share({title:'Hoops Battle',text:'Play me in Hoops Battle',url:u}).catch(()=>{});else el('n-copy').click()});
+/* opened from an invite link: go straight into that game */
+{const r=new URLSearchParams(location.search).get('room');if(r&&/^[a-z0-9]{3,12}$/i.test(r)){OPT.mode='on';setTimeout(()=>{audio();netOpen(true,r)},300)}}
 /* test hook: run the game fast with the computer playing both sides (used to balance the difficulty levels) */
 window.__hb={get g(){return g},sim(sec,d0,d1){OPT.mode='ai';newGame({mode:'ai',diff:d1||'med',len:sec},1100);const saved=g.o.diff;let guard=0;
   while(g.phase!=='over'&&guard++<sec*60*3){g.o.diff=d0||'med';const a=ai(g.P[0],TICK);g.o.diff=saved;const b=ai(g.P[1],TICK);step(TICK,[a,b])}
