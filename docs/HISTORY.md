@@ -530,3 +530,6 @@ Run speed scales with energy over the whole range: x(.68+.4*energy), so full ene
 
 ## Hoops Battle v13
 Contested shots are harder (contest 1.3 with a defender in the air, .6 close on the ground, .2 within 100 px; larger error even on perfect). Defender is beatable: he tracks where the ball handler was `D.lag` s ago (easy .34, med .24, hard .15) and runs at `D.dsp` of full speed (.8/.88/.95) via `p.dm`, so a quick reversal gets you past.
+
+## Hoops Battle v14
+New look (original art, not copied from any game): outdoor street court (sky, skyline, trees, chain-link and picket fence, low wall, tan floor with orange key and centre ring) replaces the arena; steel-frame hoops with a big slanted white board and orange target box; flat cartoon characters (big head, thick outline, flat colours, shorter body; local `cap3`/`ball3` in `drawP`). Physics and proportions unchanged (rim is ~2.07 player heights up).
