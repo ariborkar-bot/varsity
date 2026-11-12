@@ -206,8 +206,8 @@ function stepBall(dt){
     if(b.y>GY-BR){b.y=GY-BR;if(b.vy>110){b.vy=-b.vy*.62;sfx('bounce')}else b.vy=0;b.vx*=.93;b.live=true;if(b.st==='shot')b.st='loose'}
     if(b.x<WALL+BR){b.x=WALL+BR;b.vx=Math.abs(b.vx)*.7;b.live=true}else if(b.x>W-WALL-BR){b.x=W-WALL-BR;b.vx=-Math.abs(b.vx)*.7;b.live=true}
     for(let hi=0;hi<2;hi++){const hp=g.hp[hi];
-      if(b.y>RIMY-100&&b.y<RIMY+8){if(hp.dir>0&&b.x-BR<hp.bd&&b.vx<0){b.x=hp.bd+BR;b.vx=-b.vx*.86;hitRim(b)}else if(hp.dir<0&&b.x+BR>hp.bd&&b.vx>0){b.x=hp.bd-BR;b.vx=-b.vx*.86;hitRim(b)}}
-      for(const px of [hp.cx-RIMH,hp.cx+RIMH]){const dx=b.x-px,dy=b.y-RIMY,d=Math.hypot(dx,dy),R=BR+3;if(d<R&&d>0){const nx=dx/d,ny=dy/d,vn=b.vx*nx+b.vy*ny;b.x=px+nx*R;b.y=RIMY+ny*R;if(vn<0){b.vx-=1.55*vn*nx;b.vy-=1.55*vn*ny}hitRim(b)}}
+      if(b.y>RIMY-100&&b.y<RIMY+8){if(hp.dir>0&&b.x-BR<hp.bd&&b.vx<0){b.x=hp.bd+BR;b.vx=-b.vx*.5;b.vy*=.8;hitRim(b)}else if(hp.dir<0&&b.x+BR>hp.bd&&b.vx>0){b.x=hp.bd-BR;b.vx=-b.vx*.5;b.vy*=.8;hitRim(b)}}
+      for(const px of [hp.cx-RIMH,hp.cx+RIMH]){const dx=b.x-px,dy=b.y-RIMY,d=Math.hypot(dx,dy),R=BR+3;if(d<R&&d>0){const nx=dx/d,ny=dy/d,vn=b.vx*nx+b.vy*ny;b.x=px+nx*R;b.y=RIMY+ny*R;if(vn<0){b.vx-=1.28*vn*nx;b.vy-=1.28*vn*ny;b.vx*=.82;b.vy*=.9}hitRim(b)   /* v19: a rim bounce is a short, soft ricochet */}}
       if(py<RIMY&&b.y>=RIMY&&Math.abs(b.x-hp.cx)<RIMH-3&&b.vy>0&&!b.done&&g.phase==='live')scored(hi)}}}
 function hitRim(b){if(!b.hit){b.hit=true;sfx('rim')}b.live=true;if(b.st==='shot'&&g.phase==='live')g.sc=SC}
 function scored(hi){const b=g.ball,team=hi===1?0:1,pts=b.sh===team?b.pts:2,hp=g.hp[hi];
@@ -314,11 +314,12 @@ function bgFloor(k,W){
   k.fillStyle='#e3bd86';for(let i=0;i<7;i++){const y0=FT+(H-FT)*Math.pow(i/7,1.4),y1=FT+(H-FT)*Math.pow((i+1)/7,1.4);if(i%2)k.fillRect(0,y0,W,y1-y0)}
   /* out of bounds */
   k.fillStyle='rgba(120,70,30,.28)';k.beginPath();k.moveTo(0,FT);k.lineTo(WALL,FT);k.lineTo(P(WALL,H),H);k.lineTo(0,H);k.fill();k.beginPath();k.moveTo(W,FT);k.lineTo(W-WALL,FT);k.lineTo(P(W-WALL,H),H);k.lineTo(W,H);k.fill();
-  for(const hp of hoops(W)){const b0=hp.dir>0?WALL:W-WALL,b1=b0+hp.dir*196;
+  for(const hp of hoops(W)){if(hp.dir>0)continue;const b0=hp.dir>0?WALL:W-WALL,b1=b0+hp.dir*196;   /* v19: lane, free-throw line and three-point arc only at the right hoop, the one you attack */
     k.fillStyle='#e8744a';k.beginPath();k.moveTo(b0,FT);k.lineTo(b1,FT);k.lineTo(P(b1,H),H);k.lineTo(P(b0,H),H);k.closePath();k.fill();
     k.strokeStyle='#fff6e6';k.lineWidth=5;k.beginPath();k.moveTo(b1,FT);k.lineTo(P(b1,H),H);k.stroke();
     k.lineWidth=4;k.beginPath();k.ellipse(P(b1,486),486,40,15,0,0,7);k.stroke();
-    const tx=hp.cx+hp.dir*TP;k.strokeStyle='#fff6e6';k.lineWidth=5;k.beginPath();k.moveTo(tx,FT);k.lineTo(P(tx,H),H);k.stroke();k.font='900 15px system-ui';k.fillStyle='#fff6e6';k.textAlign='center';k.fillText('3',P(tx,520)+hp.dir*16,522)}
+    const tx=hp.cx+hp.dir*TP;k.save();k.beginPath();k.rect(0,FT,W,H-FT);k.clip();k.strokeStyle='#fff6e6';k.lineWidth=5;k.beginPath();k.ellipse(hp.cx,468,TP,70,0,hp.dir>0?-Math.PI/2:Math.PI/2,hp.dir>0?Math.PI/2:Math.PI*1.5);k.stroke();k.restore();
+    k.beginPath();k.moveTo(b1,FT);k.lineTo(P(b1,H),H);k.stroke();k.font='900 15px system-ui';k.fillStyle='#fff6e6';k.textAlign='center';k.fillText('3',tx+hp.dir*16,522)}
   k.strokeStyle='#fff6e6';k.lineWidth=5;k.beginPath();k.moveTo(W/2,FT);k.lineTo(W/2,H);k.stroke();
   k.strokeStyle='#e8744a';k.lineWidth=11;k.beginPath();k.ellipse(W/2,488,94,30,0,0,7);k.stroke();k.strokeStyle='#fff6e6';k.lineWidth=3;k.beginPath();k.ellipse(W/2,488,106,35,0,0,7);k.stroke();
   k.strokeStyle='#fff6e6';k.lineWidth=5;for(const bx of [WALL,W-WALL]){k.beginPath();k.moveTo(bx,FT);k.lineTo(P(bx,H),H);k.stroke()}
