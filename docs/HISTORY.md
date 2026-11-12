@@ -583,3 +583,6 @@ Online is now an invite link: Friend online + Invite a friend makes a random roo
 
 ## v458
 sw.js: requests under /tools/ (Hoops Battle) skip the service worker. Before, opening hoops-battle.html as a navigation was cached under the app root "./" key as the offline fallback. Hoops Battle menu shows its version (v29).
+
+## Hoops Battle v30
+Invite links: also read #room=, join after 100 ms, and the menu shows a "Join your friend's game" button for the invite as a fallback. Menu shows v30.

@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v29</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v30</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -590,7 +590,10 @@ el('n-back').addEventListener('click',()=>{netReset();el('net').hidden=true;el('
 el('n-copy').addEventListener('click',()=>{const t=el('n-link');t.select();t.setSelectionRange(0,9999);try{navigator.clipboard.writeText(t.value)}catch(_){try{document.execCommand('copy')}catch(__){}}el('n-copy').textContent='Copied';setTimeout(()=>el('n-copy').textContent='Copy link',1500)});
 el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(navigator.share)navigator.share({title:'Hoops Battle',text:'Play me in Hoops Battle',url:u}).catch(()=>{});else el('n-copy').click()});
 /* opened from an invite link: go straight into that game */
-{const r=new URLSearchParams(location.search).get('room');if(r&&/^[a-z0-9]{3,12}$/i.test(r)){OPT.mode='on';setTimeout(()=>{audio();netOpen(true,r)},300)}}
+{const r=new URLSearchParams(location.search).get('room')||(location.hash.match(/room=([a-z0-9]{3,12})/i)||[])[1];if(r&&/^[a-z0-9]{3,12}$/i.test(r)){OPT.mode='on';
+  /* v30: join at once; if anything stops that, the menu still shows a big Join button for this invite */
+  const b=document.createElement('button');b.className='go';b.textContent="Join your friend's game";b.addEventListener('click',()=>{audio();netOpen(true,r)});el('play').parentNode.insertBefore(b,el('play'));
+  setTimeout(()=>{try{audio();netOpen(true,r)}catch(e){el('menu').hidden=false}},100)}}
 /* test hook: run the game fast with the computer playing both sides (used to balance the difficulty levels) */
 window.__hb={get g(){return g},sim(sec,d0,d1){OPT.mode='ai';newGame({mode:'ai',diff:d1||'med',len:sec},1100);const saved=g.o.diff;let guard=0;
   while(g.phase!=='over'&&guard++<sec*60*3){g.o.diff=d0||'med';const a=ai(g.P[0],TICK);g.o.diff=saved;const b=ai(g.P[1],TICK);step(TICK,[a,b])}
