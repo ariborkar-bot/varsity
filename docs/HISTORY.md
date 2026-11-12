@@ -548,3 +548,6 @@ PRESS .82 to .76. After a basket (`g.tip`) both players restart at centre court 
 
 ## Hoops Battle v19
 Softer rim ricochet (rim restitution .55 to .42 plus light damping; backboard .86 to .5). Court markings (orange lane, free-throw line and circle, curved three-point arc through the TP distance) are drawn only at the right hoop; the left end is plain.
+
+## Hoops Battle v20
+Dunks: slow motion during the flight (`g.slo`, .42x), then on the slam a hit-stop (`g.freeze` .16 s), camera punch toward the hoop (`g.zm`), white flash (`g.fl`), shockwave ring, stronger shake, rim/net shake, big pop text ("SLAM!", "WINDMILL!", "360 SLAM!"). Three-point line: TP 360 to 380 and a three is decided by where the shooter left the floor (`p.tk`), not where he released.
