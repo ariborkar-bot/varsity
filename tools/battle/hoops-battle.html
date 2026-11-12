@@ -223,7 +223,8 @@ function steals(dt){const b=g.ball;if(b.st!=='held')return;const h=g.P[b.own],d=
 function blocks(){const b=g.ball;let d=null,s=null;
   if(b.st==='held'){s=g.P[b.own];d=g.P[1-b.own];if(!(s.air&&s.shoot&&d.air))return}
   else if(b.st==='shot'&&!b.live&&b.t<.9&&!b.dunk){s=g.P[b.sh];d=g.P[1-b.sh]}else return;
-  const hx=d.x+d.face*8,hy=d.y-PH-18;if(Math.hypot(b.x-hx,b.y-hy)>BR+(d.air?30:20))return;
+  const behind=Math.sign(s.x-d.x)===Math.sign(g.hp[1-s.i].cx-s.x),hx=d.x+(behind?Math.sign(b.x-d.x)||d.face:d.face)*(behind?12:8),hy=d.y-PH-18;
+  if(Math.hypot(b.x-hx,b.y-hy)>(BR+(d.air?30:20))*(behind?.8:1))return;   /* v22: a block from behind still works (he reaches over the shoulder) but his reach is 20% shorter */
   if(d.air&&d.vy>0&&(s.vy<0||d.vy>110))return;   /* v11: a defender who is already coming down is too late; a shooter still rising is safe */
   s.has=false;s.shoot=false;s.cd=.5;d.cd=.3;Object.assign(b,{st:'loose',live:true,own:-1,cd:.28,vx:(b.x>=d.x?1:-1)*(140+rnd()*120)+d.vx*.4,vy:-330});
   g.stat[d.i].blk++;g.shake=.45;pop('BLOCKED!',d.x,d.y-PH-44,TEAM[d.i].c,1.1);sfx('block')}
