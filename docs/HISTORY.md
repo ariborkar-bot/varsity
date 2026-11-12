@@ -568,3 +568,6 @@ HOLD .14 to .22 s: a normal tap on the jump button (up to about a fifth of a sec
 
 ## Hoops Battle v25 (online, standalone prototype)
 "Friend online" works between two phones with no server: WebRTC data channels, the two players swap two ~560 character codes by text (host makes a code, guest pastes it and sends a reply code back). Host runs `step()` and sends snapshots 30 Hz (`SNAPK`), guest sends {l,r,j} at 60 Hz and draws interpolated snapshots; sounds are forwarded; both use a 1100 wide court; no pause online. Tested with two browser tabs. Not part of the Varsity app. A relay with short room codes (Supabase Realtime) would remove the code swap.
+
+## Hoops Battle v26 (online matchmaking)
+Replaced the code swap with "Find opponent": both players join one public Supabase Realtime channel (`hb-lobby-v1`, broadcast + presence, no tables, the app's project and publishable key), are paired two by two by sorted id (lower id hosts), exchange the WebRTC offer/answer over the channel, then leave it. 15 s retry if the pair does not connect. The library loads from ../../vendor/supabase.min.js (CDN fallbacks). Tested only against a fake in-browser relay; the real Realtime channel was not reachable from the build sandbox.
