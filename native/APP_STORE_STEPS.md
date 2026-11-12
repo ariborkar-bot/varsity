@@ -2,25 +2,17 @@
 
 You need a Mac with Xcode, Node 20+, and the Apple Developer account that owns the "Varsity Fantasy" record in App Store Connect.
 
-## 1. Build the iPhone project (about 10 minutes)
-```
-git clone https://github.com/ariborkar-bot/varsity
-cd varsity/native
-npm install
-npx cap add ios
-npm run sync
-npx cap open ios
-```
-(`npm run sync` copies the web app into the iPhone project. Run it again after every app change.)
+## 1. Open the iPhone project (no Node needed)
+The Xcode project is already generated and committed in `native/ios`. Get the repo (Code > Download ZIP on GitHub, or `git pull`), then double-click `native/ios/App/App.xcodeproj`. Xcode opens and downloads the Swift packages by itself the first time (needs internet, takes a minute).
+
+(Only if the web app changed and you want those changes in the iPhone app: with Node installed, run `cd native && npm install && npm run sync`, then commit `native/ios`.)
 
 ## 2. In Xcode
-1. Click **App** (blue icon, top of the left list), then **Signing & Capabilities**. Choose your Team.
-2. **Bundle Identifier** must be exactly the one in App Store Connect. The project uses `com.varsityfantasy.app` (set in `capacitor.config.json`). If App Store Connect shows a different one, change it here and in that file.
-3. Open `App/App/Info.plist` and add key `GADApplicationIdentifier` (string) = `ca-app-pub-3940256099942544~1458002511` (Google's test ad id; swap for the real one before earning money).
-4. Under **General**, set Version `1.0` and Build `1`. Every new upload needs a higher Build number.
-5. Replace the app icon in `App/App/Assets.xcassets/AppIcon` with a 1024x1024 PNG (no transparency, no rounded corners).
-6. Top bar: pick **Any iOS Device (arm64)**. Then **Product > Archive**. When Organizer opens: **Distribute App > App Store Connect > Upload**.
-7. After 5-30 min the build shows under App Store Connect > TestFlight > Builds. Install it on a phone with TestFlight and test sign-in, a pack, and "Watch a sponsor".
+1. Click **App** (blue icon, top of the left list), then **Signing & Capabilities**. Choose your Team. (Xcode menu > Settings > Accounts > + to add the Apple ID first.)
+2. **Bundle Identifier** must be exactly the one in App Store Connect. The project uses `com.varsityfantasy.app`. If App Store Connect shows a different one, change it here.
+3. Already done for you: AdMob test app id in Info.plist, iPhone-only, portrait-only, 1024 icon (a sharpened 512 version, replace with a true 1024x1024 when you have one), Version 1.0, Build 1. Every new upload needs a higher Build number (General tab).
+4. Top bar: pick **Any iOS Device (arm64)**. Then **Product > Archive**. When Organizer opens: **Distribute App > App Store Connect > Upload**.
+5. After 5-30 min the build shows under App Store Connect > TestFlight > Builds. Install it on a phone with TestFlight and test sign-in, a pack, and "Watch a sponsor".
 
 ## 3. App Store Connect listing (Distribution tab)
 - Screenshots (6.9" and 6.5" iPhone), description, keywords, support URL, **privacy policy URL** (the app has a privacy page; its `[contact email]` placeholder must be filled in first).
