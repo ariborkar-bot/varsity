@@ -562,3 +562,6 @@ Blocks from behind (defender on the side of the shooter away from the hoop) are 
 
 ## Hoops Battle v23
 Contest is now continuous: strength = (1 - distance/125) x1.4 (x1.8 more if the defender is airborne and high) plus .4 when he is within 98 px in the air; shot error +34 per point, +30 per point on a perfect release (was a 3-step 1.3/.6/.2).
+
+## Hoops Battle v24
+HOLD .14 to .22 s: a normal tap on the jump button (up to about a fifth of a second) is always a pump fake; you have to hold to go up for the shot, and letting go early after that is an early release.

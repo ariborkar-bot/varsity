@@ -114,7 +114,7 @@ const H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=620,SPD=360,RI
 const EN={run:.03,rest:.3,jump:.055,shot:.11,fake:.03,push:.16,score:.3};   /* shooting costs the most, running little, driving into a defender is tiring but not impossible */
 /* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
    STEAL = seconds of standing chest-to-chest in front of the dribbler before the ball is taken (was .5). Dribbling through a defender is allowed but slow (PRESS). */
-const HOLD=.14,STEAL=1.5,PRESS=.76;
+const HOLD=.22,STEAL=1.5,PRESS=.76;
 const DIFF={easy:{lag:.34,dsp:.8,pw:[.55,0,.25,.2],sig:.2,three:.2,mid:.5,gap:92,react:.32,block:.15,reb:.5,slow:.5,dj:.15,bite:.6,fake:0},med:{lag:.24,dsp:.88,pw:[.3,.25,.2,.25],sig:.11,three:.3,mid:.42,gap:70,react:.2,block:.24,reb:.8,dj:.4,bite:.4,fake:.15},hard:{lag:.15,dsp:.95,pw:[.2,.3,.2,.3],sig:.055,three:.38,mid:.34,gap:60,react:.13,block:.28,reb:1,dj:.6,bite:.2,fake:.3}};
 const TEAM=[{n:'YOU',c:'#FFC23D',c2:'#FFE08A',d:'#10224a',s:'#f0c49a',s2:'#d9a377',hair:'#3a2414',num:'1'},{n:'CPU',c:'#FF4F6D',c2:'#ff8fa3',d:'#4a0f1f',s:'#b97a4e',s2:'#9a6038',hair:'#141017',num:'2'}];
 const NOIN={l:false,r:false,j:false},rnd=Math.random,gauss=()=>(rnd()+rnd()+rnd()-1.5)*2;
