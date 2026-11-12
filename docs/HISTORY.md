@@ -571,3 +571,6 @@ HOLD .14 to .22 s: a normal tap on the jump button (up to about a fifth of a sec
 
 ## Hoops Battle v26 (online matchmaking)
 Replaced the code swap with "Find opponent": both players join one public Supabase Realtime channel (`hb-lobby-v1`, broadcast + presence, no tables, the app's project and publishable key), are paired two by two by sorted id (lower id hosts), exchange the WebRTC offer/answer over the channel, then leave it. 15 s retry if the pair does not connect. The library loads from ../../vendor/supabase.min.js (CDN fallbacks). Tested only against a fake in-browser relay; the real Realtime channel was not reachable from the build sandbox.
+
+## Hoops Battle v27
+WebRTC now also has a public TURN relay (openrelay.metered.ca) and shows the ICE state while connecting, because two phones on different networks could be matched but not connect with STUN alone. Gather wait 4.5 s, retry after 30 s.

@@ -544,9 +544,12 @@ function netReset(){try{if(NET.sb&&NET.lb)NET.sb.removeChannel(NET.lb)}catch(_){
 function netLost(){if(!NET.pc&&!NET.on)return;const was=NET.on;netReset();if(was){g=null;for(const id of ['end','pause','net'])el(id).hidden=true;el('menu').hidden=true;for(const id of ['ctl','pz','snd'])el(id).classList.remove('on');fit();netOpen()}
   el('n-msg').textContent='The connection ended.'}
 function netOpen(){el('menu').hidden=true;el('net').hidden=false;netReset();netFind()}
-function mkPC(){const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});NET.pc=pc;
+function mkPC(){const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},
+    /* v27: phones on different networks (mobile data especially) usually cannot reach each other directly, so a public relay (TURN) is added as the fallback */
+    {urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp','turns:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]});NET.pc=pc;
+  pc.oniceconnectionstatechange=()=>{const m=el('n-msg');if(m&&!NET.on)m.textContent='Opponent found. Connecting... ('+pc.iceConnectionState+')'};
   pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState)||(pc.connectionState==='disconnected'&&NET.on))netLost()};return pc}
-const gathered=pc=>new Promise(r=>{if(pc.iceGatheringState==='complete')return r();const f=()=>{if(pc.iceGatheringState==='complete'){pc.removeEventListener('icegatheringstatechange',f);r()}};pc.addEventListener('icegatheringstatechange',f);setTimeout(r,3500)});
+const gathered=pc=>new Promise(r=>{if(pc.iceGatheringState==='complete')return r();const f=()=>{if(pc.iceGatheringState==='complete'){pc.removeEventListener('icegatheringstatechange',f);r()}};pc.addEventListener('icegatheringstatechange',f);setTimeout(r,4500)});
 function wire(){for(const k of ['ch','un']){const c=NET[k];if(!c||c._w)continue;c._w=1;c.onmessage=netMsg;c.onclose=()=>{if(NET.up||NET.on)netLost()};
   c.onopen=()=>{if(NET.ch&&NET.ch.readyState==='open'&&NET.un&&NET.un.readyState==='open'&&!NET.up){NET.up=true;try{if(NET.sb&&NET.lb)NET.sb.removeChannel(NET.lb)}catch(_){}clearTimeout(NET.to);if(NET.role==='host')netStart();else el('n-msg').textContent='Connected. Starting...'}};
   if(c.readyState==='open')c.onopen()}}
@@ -563,13 +566,13 @@ async function netFind(){const msg=t=>{el('n-msg').textContent=t};msg('Connectin
   const say=p=>ch.send({type:'broadcast',event:'sig',payload:{...p,from:me}});
   const retry=()=>{NET.partner='';try{NET.pc&&NET.pc.close()}catch(_){}NET.pc=NET.ch=NET.un=null;NET.up=false;msg('Searching for an opponent...');pair()};
   async function offerTo(p){NET.partner=p;NET.role='host';msg('Opponent found. Connecting...');const pc=mkPC();NET.ch=pc.createDataChannel('c');NET.un=pc.createDataChannel('u',{ordered:false,maxRetransmits:0});wire();
-    await pc.setLocalDescription(await pc.createOffer());await gathered(pc);say({k:'offer',to:p,d:pc.localDescription.sdp});NET.to=setTimeout(()=>{if(!NET.up)retry()},15000)}
+    await pc.setLocalDescription(await pc.createOffer());await gathered(pc);say({k:'offer',to:p,d:pc.localDescription.sdp});NET.to=setTimeout(()=>{if(!NET.up)retry()},30000)}
   function pair(){if(NET.partner)return;const ids=Object.keys(ch.presenceState()).sort(),i=ids.indexOf(me);if(i<0||ids.length<2)return;
     if(i%2===0&&ids[i+1])offerTo(ids[i+1])}
   ch.on('presence',{event:'sync'},pair).on('broadcast',{event:'sig'},async({payload:m})=>{if(!m||m.to!==me)return;
     if(m.k==='offer'&&!NET.partner){NET.partner=m.from;NET.role='guest';msg('Opponent found. Connecting...');const pc=mkPC();pc.ondatachannel=e=>{if(e.channel.label==='c')NET.ch=e.channel;else NET.un=e.channel;wire()};
       await pc.setRemoteDescription({type:'offer',sdp:m.d});await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);say({k:'answer',to:m.from,d:pc.localDescription.sdp});
-      NET.to=setTimeout(()=>{if(!NET.up)retry()},15000)}
+      NET.to=setTimeout(()=>{if(!NET.up)retry()},30000)}
     else if(m.k==='answer'&&NET.role==='host'&&m.from===NET.partner&&NET.pc&&!NET.pc.currentRemoteDescription)await NET.pc.setRemoteDescription({type:'answer',sdp:m.d})})
    .subscribe(async st=>{if(st==='SUBSCRIBED'){msg('Searching for an opponent...');await ch.track({at:Date.now()})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the matchmaking server. Try again in a moment.')})}
 function netBegin(len){NET.on=true;OPT.mode='on';NET.ended=false;NET.acc=0;NET.in={l:false,r:false,j:false};NET.from=NET.tg=null;const host=NET.role==='host';
