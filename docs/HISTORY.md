@@ -542,3 +542,6 @@ Run speed SPD 255 to 305. Run animation: legs swing wider (25 px, 14 px lift, ca
 
 ## Hoops Battle v17
 SPD 305 to 360; PRESS .5 to .82 (driving into a defender is only slightly slower); STEAL 1.3 to 1.5 s; ball handler forward .9 to .97, backward .76 to .8. Jump pose: legs hang down a little apart (no tuck).
+
+## Hoops Battle v18
+PRESS .82 to .76. After a basket (`g.tip`) both players restart at centre court (36 px either side) and the ball is tossed up (`setup(i,tip)`), drifting 120-170 px/s toward the side of the player who was just scored on, who also stands on that side. Shot-clock turnovers and overtime still use the normal restart.
