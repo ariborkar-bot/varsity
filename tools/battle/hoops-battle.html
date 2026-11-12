@@ -207,7 +207,7 @@ function stepBall(dt){
     if(b.x<WALL+BR){b.x=WALL+BR;b.vx=Math.abs(b.vx)*.7;b.live=true}else if(b.x>W-WALL-BR){b.x=W-WALL-BR;b.vx=-Math.abs(b.vx)*.7;b.live=true}
     for(let hi=0;hi<2;hi++){const hp=g.hp[hi];
       if(b.y>RIMY-100&&b.y<RIMY+8){if(hp.dir>0&&b.x-BR<hp.bd&&b.vx<0){b.x=hp.bd+BR;b.vx=-b.vx*.5;b.vy*=.8;hitRim(b)}else if(hp.dir<0&&b.x+BR>hp.bd&&b.vx>0){b.x=hp.bd-BR;b.vx=-b.vx*.5;b.vy*=.8;hitRim(b)}}
-      for(const px of [hp.cx-RIMH,hp.cx+RIMH]){const dx=b.x-px,dy=b.y-RIMY,d=Math.hypot(dx,dy),R=BR+3;if(d<R&&d>0){const nx=dx/d,ny=dy/d,vn=b.vx*nx+b.vy*ny;b.x=px+nx*R;b.y=RIMY+ny*R;if(vn<0){b.vx-=1.28*vn*nx;b.vy-=1.28*vn*ny;b.vx*=.82;b.vy*=.9}hitRim(b)   /* v19: a rim bounce is a short, soft ricochet */}}
+      for(const px of [hp.cx-RIMH,hp.cx+RIMH]){const dx=b.x-px,dy=b.y-RIMY,d=Math.hypot(dx,dy),R=BR+3;if(d<R&&d>0){const nx=dx/d,ny=dy/d,vn=b.vx*nx+b.vy*ny;b.x=px+nx*R;b.y=RIMY+ny*R;if(vn<0){b.vx-=1.42*vn*nx;b.vy-=1.42*vn*ny;b.vx*=.9;b.vy*=.95}hitRim(b)   /* v19: a rim bounce is a short, soft ricochet */}}
       if(py<RIMY&&b.y>=RIMY&&Math.abs(b.x-hp.cx)<RIMH-3&&b.vy>0&&!b.done&&g.phase==='live')scored(hi)}}}
 function hitRim(b){if(!b.hit){b.hit=true;sfx('rim')}b.live=true;if(b.st==='shot'&&g.phase==='live')g.sc=SC}
 function scored(hi){const b=g.ball,team=hi===1?0:1,pts=b.sh===team?b.pts:2,hp=g.hp[hi];

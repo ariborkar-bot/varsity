@@ -547,4 +547,4 @@ SPD 305 to 360; PRESS .5 to .82 (driving into a defender is only slightly slower
 PRESS .82 to .76. After a basket (`g.tip`) both players restart at centre court (36 px either side) and the ball is tossed up (`setup(i,tip)`), drifting 120-170 px/s toward the side of the player who was just scored on, who also stands on that side. Shot-clock turnovers and overtime still use the normal restart.
 
 ## Hoops Battle v19
-Softer rim ricochet (rim restitution .55 to .28 plus extra damping; backboard .86 to .5). Court markings (orange lane, free-throw line and circle, curved three-point arc through the TP distance) are drawn only at the right hoop; the left end is plain.
+Softer rim ricochet (rim restitution .55 to .42 plus light damping; backboard .86 to .5). Court markings (orange lane, free-throw line and circle, curved three-point arc through the TP distance) are drawn only at the right hoop; the left end is plain.
