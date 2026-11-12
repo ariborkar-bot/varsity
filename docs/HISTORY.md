@@ -518,3 +518,6 @@ More 3D look: players are built from shaded solids (`cap3()` capsules and `ball3
 
 ## v456
 Props tab Top Cards: the button now shows 5 more cards per tap (`UI.tcN`, starts at 3); when all are shown it becomes "Hide the rest" and resets to 3.
+
+## v457
+Active picks (Predict tab) made compact: smaller logos/text/row padding, shows 3 rows then one "Show all N picks" button (`UI.apOpen`, `data-act="apMore"`).

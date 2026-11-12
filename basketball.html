@@ -1262,7 +1262,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .bt-pay{display:flex;flex-direction:column;align-items:flex-end;text-align:right;white-space:nowrap}.bt-pay b{color:#4ADE80}.bt-pay small{font-size:.74rem}
 .bt-mine .bt-h:first-of-type{border-top:0}
 .tk-v{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;white-space:nowrap}.tk-v small{font-size:.72rem;opacity:.7;font-weight:600}
-.tk-sub{font-size:.76rem;margin:-4px 0 6px}.act-l{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:10px 0 2px;opacity:.85}.act-picks .act-l+.bt-h{border-top:0}
+.tk-sub{font-size:.76rem;margin:-4px 0 6px}.act-l{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:10px 0 2px;opacity:.85}.act-picks .act-l+.bt-h{border-top:0}.act-picks .bt-h{padding-top:6px;padding-bottom:6px}.act-picks .bt-pk{gap:8px}.act-picks .bt-pk b,.act-picks .bt-pay b{font-size:.86rem}.act-picks .bt-pk small,.act-picks .bt-pay small{font-size:.7rem}.act-picks .act-l{margin:6px 0 0}.act-picks .bt-more{margin-top:6px}
 .bd-c{grid-template-columns:44px minmax(0,1fr) auto!important;grid-template-areas:"slot who r" "slot m m" "slot acts acts";gap:8px 10px!important;align-items:center}
 .bd-c .lg-slot{grid-area:slot;align-self:start}.bd-c .lg-who{grid-area:who}.bd-c .bd-r{grid-area:r}.bd-c .bd-m{grid-area:m}.bd-c .lg-acts{grid-area:acts!important;grid-column:auto!important;justify-content:flex-end}
 .bd-c .lg-who .lt b{white-space:normal;line-height:1.15;font-size:.98rem}.bd-c .lg-who .lt i{flex-wrap:wrap;row-gap:3px}
@@ -3404,7 +3404,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v456 · Nov 11';
+const APP_BUILD='v457 · Nov 11';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -5972,15 +5972,17 @@ function activeCard(){
   const pay=b=>{const st=+b.stake||0;return st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100)};
   const right=b=>`<span class="bt-pay"><b>${tk(pay(b))}</b><small class="muted">${tk(b.stake)} at ${(+b.odds).toFixed(2)}x</small></span>`;
   const pkRow=x=>{const t=x.b.s==='h'?x.g.h:x.g.a,o=x.b.s==='h'?x.g.a:x.g.h;
-    return `<div class="bt-h"><span class="bt-pk">${slogo(t,30)}<span><b>${esc(t)} to win</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${started(x.g)?' · locked':''}</small></span></span>${right(x.b)}</div>`};
+    return `<div class="bt-h"><span class="bt-pk">${slogo(t,22)}<span><b>${esc(t)} to win</b><small class="muted">${x.b.s==='h'?'vs':'at'} ${esc(o)} · ${esc(fmtDate(x.g.d))}${started(x.g)?' · locked':''}</small></span></span>${right(x.b)}</div>`};
   const ppRow=x=>{const p=pByKey(x.b.k),M=PP_MK[x.b.m]||{l:x.b.m||''},g=x.g;
-    return `<div class="bt-h"><span class="bt-pk">${slogo(p?p.school:'',30)}<span><b>${esc(p?p.name:'Player')} ${x.b.s==='o'?'Over':'Under'} ${fmtN(+x.b.line)}</b><small class="muted">${esc(M.l)}${g?' · '+esc(abbr(g.a))+' at '+esc(abbr(g.h))+' · '+esc(fmtDate(g.d)):''}${g&&started(g)?' · locked':''}</small></span></span>${right(x.b)}</div>`};
+    return `<div class="bt-h"><span class="bt-pk">${slogo(p?p.school:'',22)}<span><b>${esc(p?p.name:'Player')} ${x.b.s==='o'?'Over':'Under'} ${fmtN(+x.b.line)}</b><small class="muted">${esc(M.l)}${g?' · '+esc(abbr(g.a))+' at '+esc(abbr(g.h))+' · '+esc(fmtDate(g.d)):''}${g&&started(g)?' · locked':''}</small></span></span>${right(x.b)}</div>`};
   const par=Object.values(parlOf(ME.uid)).filter(b=>parlResult(b,gm)==='open');
   const parRow=b=>{const st=+b.stake||0,pot=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100);
     return `<div class="bt-h"><span class="bt-pk"><span><b>${b.legs.length}-pick parlay</b><small class="muted">${b.legs.map(l=>esc(lastN((pByKey(l.k)||{}).name))+' '+(l.s==='o'?'O':'U')+' '+fmtN(+l.line)).join(' · ')}</small></span></span><span class="bt-pay"><b>${tk(pot)}</b><small class="muted">${tk(st)} at ${(+b.odds).toFixed(2)}x</small></span></div>`};
   const n=pk.length+pp.length+par.length,wag=[...pk,...pp,...par].reduce((t,x)=>t+(+(x.b||x).stake||0),0);
-  const sec=(l,arr,f)=>arr.length?`<div class="act-l">${l} <span class="muted">${arr.length}</span></div>${arr.map(f).join('')}`:'';
-  return `<section class="card bt-mine act-picks"><div class="qh"><h3>Active picks</h3>${n?`<span class="muted">${n} open · ${tk(wag)} wagered</span>`:''}</div>${n?sec('Pick ’em',pk,pkRow)+sec('Player props',pp,ppRow)+sec('Parlays',par,parRow):'<p class="muted">Nothing open right now. Your Pick ’em picks and player props show here until they are settled.</p>'}</section>`;
+  /* v457: compact; first 3 rows, the rest behind one button */
+  const all=[...pk.map(x=>[pkRow(x),'Pick ’em']),...pp.map(x=>[ppRow(x),'Player props']),...par.map(b=>[parRow(b),'Parlays'])],cap=UI.apOpen?all.length:3;
+  let last='',body='';all.slice(0,cap).forEach(([h,l])=>{if(l!==last){body+=`<div class="act-l">${l} <span class="muted">${all.filter(y=>y[1]===l).length}</span></div>`;last=l}body+=h});
+  return `<section class="card bt-mine act-picks"><div class="qh"><h3>Active picks</h3>${n?`<span class="muted">${n} open · ${tk(wag)} wagered</span>`:''}</div>${n?body+(all.length>3?`<button type="button" class="btn sm ghost bt-more" data-act="apMore">${UI.apOpen?'Show less':'Show all '+all.length+' picks'}</button>`:''):'<p class="muted">Nothing open right now. Your Pick ’em picks and player props show here until they are settled.</p>'}</section>`;
 }
 function mgBoard(title,rows,empty,sub){
   if(!rows.length)return `<section class="card bt-board"><div class="qh"><h3>${title}</h3></div><p class="muted">${empty||'No one is on the board yet. Lock in a pick to be first.'}</p></section>`;
@@ -9973,6 +9975,7 @@ document.addEventListener('click',async e=>{
     else{if(!x)return;if(!L[id]&&Object.keys(L).length>=SL_MAX){say('A parlay can have up to '+SL_MAX+' picks.');return}
       Object.keys(L).forEach(o=>{if(o!==id&&pm[o]&&pm[o].k===x.k)delete L[o]});L[id]=t.dataset.s}
     render(true)}
+  else if(a==='apMore'){UI.apOpen=!UI.apOpen;render(true)}
   else if(a==='tcMore'){const n=UI.tcN||3,t=topCardsList().length;UI.tcN=n>=t?3:Math.min(t,n+5);render(true)}
   else if(a==='slStake'){UI.sl.stake=+t.dataset.v;render(true)}
   else if(a==='slClear'){UI.sl.legs={};render(true)}
