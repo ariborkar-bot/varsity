@@ -1,7 +1,7 @@
 /* Varsity service worker: lets the app open from the home screen, and offline.
    The page is always fetched fresh when there is a connection, so updates show up right away;
    the saved copy is only used offline. League data from Supabase is never cached. */
-const CACHE = 'varsity-v457';
+const CACHE = 'varsity-v458';
 const SHELL = ['./', 'vendor/supabase.min.js', 'manifest.webmanifest', 'logo.png', 'logos.js', 'games.js', 'stats.js', 'ovr.js', 'fonts.css', 'icons/icon-192-v2.png', 'icons/icon-512-v2.png', 'icons/apple-touch-icon-v2.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -13,6 +13,7 @@ self.addEventListener('fetch', e => {
   const same = url.origin === self.location.origin;
   if (!same) return;                                            // v314: other sites (CDN backups, Supabase) go straight to the network; an opaque cached copy of the login library could stay broken for good
   if (same && /\.mp4$/.test(url.pathname)) return;                // sponsor video: straight to the network (range requests can't be cached)                                     // Supabase and everything else: straight to the network
+  if (/\/tools\//.test(url.pathname)) return;                    // v458: prototypes under tools/ (Hoops Battle) go straight to the network and never touch the app's cached pages
   if (req.mode === 'navigate' || (same && /\/(index|basketball)\.html$/.test(url.pathname))) {
     const key = /basketball\.html$/.test(url.pathname) ? req : './';       // football lives at ./ ; basketball keeps its own copy
     e.respondWith(fetch(req, { cache: 'no-cache' }).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(key, copy)); return r; })

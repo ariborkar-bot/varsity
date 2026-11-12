@@ -580,3 +580,6 @@ Online play no longer uses WebRTC (it failed between real phones). After matchma
 
 ## Hoops Battle v29
 Online is now an invite link: Friend online + Invite a friend makes a random room, shows a link (?room=xxxxxx) with Share/Copy; opening that link goes straight into the game (presence channel `hb-room-<room>`, pairing and play as in v28). No random matchmaking with strangers any more.
+
+## v458
+sw.js: requests under /tools/ (Hoops Battle) skip the service worker. Before, opening hoops-battle.html as a navigation was cached under the app root "./" key as the offline fallback. Hoops Battle menu shows its version (v29).
