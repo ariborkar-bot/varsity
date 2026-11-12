@@ -2551,15 +2551,15 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 @media (min-width:760px) and (max-width:899px){.mast .wk{display:none}}
 .tc-duo{display:inline-block;position:relative;flex:none;perspective:700px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;vertical-align:middle;line-height:1;font-style:normal}
 .tc-duo .duo-tilt{position:absolute;inset:0;transform-style:preserve-3d;animation:duoTilt 5s ease-in-out infinite}
-.tc-duo .duo-in{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.3,1.35,.45,1)}
+.tc-duo .duo-in{position:absolute;inset:0;transform-style:preserve-3d}
 .tc-duo.pop{animation:duoPop .85s cubic-bezier(.2,.8,.3,1)}
 .tc-duo::after{content:"";position:absolute;inset:-3%;border-radius:1.1em;border:.18em solid var(--rc);box-shadow:0 0 1.4em var(--rc);opacity:0;pointer-events:none}
 .tc-duo.pop::after{animation:duoRing .8s ease-out}
 .tc-duo .duo-f{position:absolute;inset:0;border-radius:.9em;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:.22em solid transparent;
   background:linear-gradient(165deg,color-mix(in srgb,var(--rc) 55%,#0b1428) 0%,#0a1224 52%,#05080f 100%) padding-box,linear-gradient(135deg,#fff,var(--rc) 30%,color-mix(in srgb,var(--rc) 40%,#000) 55%,var(--rc) 75%,#fff) border-box;
   box-shadow:0 0 1.2em color-mix(in srgb,var(--rc) 60%,transparent),0 .5em 1em rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
-.tc-duo .duo-f.bk{transform:rotateY(180deg);background:linear-gradient(195deg,#05080f 0%,#0a1224 45%,color-mix(in srgb,var(--rc) 60%,#0b1428) 100%) padding-box,linear-gradient(225deg,#fff,var(--rc) 30%,color-mix(in srgb,var(--rc) 40%,#000) 55%,var(--rc) 75%,#fff) border-box}
-.tc-duo .duo-f.fr{visibility:visible;transition:visibility 0s linear .1s}.tc-duo .duo-f.bk{visibility:hidden;transition:visibility 0s linear .1s}.tc-duo.fl .duo-f.fr{visibility:hidden}.tc-duo.fl .duo-f.bk{visibility:visible}   /* v406: hide the face that is turned away at the half-way point of the flip instead of trusting backface-visibility (phones drew the front through the back, mirrored) */
+.tc-duo .duo-f.bk{background:linear-gradient(195deg,#05080f 0%,#0a1224 45%,color-mix(in srgb,var(--rc) 60%,#0b1428) 100%) padding-box,linear-gradient(225deg,#fff,var(--rc) 30%,color-mix(in srgb,var(--rc) 40%,#000) 55%,var(--rc) 75%,#fff) border-box}
+.tc-duo .duo-f.fr{visibility:visible}.tc-duo .duo-f.bk{visibility:hidden}.tc-duo.fl .duo-f.fr{visibility:hidden}.tc-duo.fl .duo-f.bk{visibility:visible}   /* v406: hide the face that is turned away at the half-way point of the flip instead of trusting backface-visibility (phones drew the front through the back, mirrored) */
 .tc-duo .duo-sl{position:absolute;inset:0;background:repeating-linear-gradient(118deg,transparent 0 .9em,rgba(255,255,255,.045) .9em 1em),linear-gradient(118deg,transparent 46%,color-mix(in srgb,var(--rc) 55%,transparent) 46.5% 49%,transparent 49.5% 52%,rgba(255,255,255,.35) 52.2% 53%,transparent 53.5%)}
 .tc-duo .bk .duo-sl{transform:scaleX(-1)}
 .tc-duo .duo-wm{position:absolute;right:-18%;top:-6%;width:85%;opacity:.16;filter:grayscale(1) brightness(2)}.tc-duo .duo-wm img{width:100%;height:auto}
@@ -2585,7 +2585,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 @keyframes duoFoil{0%{background-position:130% 0}100%{background-position:-130% 0}}
 @keyframes duoTw{0%,100%{opacity:.15;transform:scale(.96)}50%{opacity:1;transform:scale(1.03)}}
 @keyframes duoGlow{0%,100%{box-shadow:0 0 1.2em color-mix(in srgb,var(--rc) 60%,transparent),0 .5em 1em rgba(0,0,0,.5)}50%{box-shadow:0 0 2.6em var(--rc),0 0 .8em #fff,0 .5em 1em rgba(0,0,0,.5)}}
-@media (prefers-reduced-motion:reduce){.tc-duo .duo-tilt,.tc-duo .duo-av::before,.tc-duo .duo-foil,.tc-duo .duo-sp,.tc-duo.r-m .duo-f,.tc-duo.pop,.tc-duo.pop::after{animation:none}.tc-duo .duo-in{transition:none}}
+@media (prefers-reduced-motion:reduce){.tc-duo .duo-tilt,.tc-duo .duo-av::before,.tc-duo .duo-foil,.tc-duo .duo-sp,.tc-duo.r-m .duo-f,.tc-duo.pop,.tc-duo.pop::after{animation:none}.tc-duo .duo-in{animation:none}}
 .lk-duo .lk-art,.pko-pack.lk-duo .pko-pk{background:linear-gradient(135deg,#B48CFF 0%,#5B2BD9 48%,#FFC23D 52%,#C2281E 100%);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5)}
 .parl-c{border:1px solid color-mix(in srgb,var(--rc) 55%,transparent)}.parl-h{display:flex;gap:10px;align-items:center;margin-bottom:8px}.parl-h small{display:block}
 .parl-leg{display:flex;flex-direction:column;gap:6px}.parl-who{display:flex;gap:8px;align-items:center}.parl-plus{text-align:center;font:900 1.1rem/1 var(--f-display,inherit);color:var(--rc);margin:4px 0}
@@ -2693,9 +2693,8 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 .adv-dd{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:800 .85rem/1 var(--f-display,inherit);letter-spacing:.06em;text-transform:uppercase}.adv-dd i{font-style:normal;font-size:1rem}
 /* v423: flip + back of single player cards (card view) */
 .cv-card>.pc-flip{display:block;position:relative;transform-style:preserve-3d;transition:transform .12s ease-out;will-change:transform;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.pc-flipin{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.25,.45,1)}.pc-flip.fl .pc-flipin{transform:rotateY(180deg)}
-.pc-ff,.pc-fb{position:absolute;inset:0;display:block}.pc-fb{transform:rotateY(180deg);visibility:hidden;transition:visibility 0s linear .095s}.pc-ff{visibility:visible;transition:visibility 0s linear .095s}   /* v454: .095 s is where the flip's easing curve passes 90 degrees (it was .35 s, so the mirrored front showed for a quarter of a second) */
-.pc-flip.fl .pc-ff{visibility:hidden}.pc-flip.fl .pc-fb{visibility:visible}
+.pc-flipin{position:absolute;inset:0;transform-style:preserve-3d}
+.pc-ff,.pc-fb{position:absolute;inset:0;display:block}.pc-fb{display:none}.pc-flip.fl .pc-ff{display:none}.pc-flip.fl .pc-fb{display:block}   /* v455: the flip is two quarter turns (turnCard): the front turns edge-on, the faces swap while it is edge-on, the back turns out of it, so a mirrored face is never on screen */
 .pc-flip .pc2{position:absolute;left:0;top:0}
 .pc2 .pc-wm{position:absolute;left:50%;top:44%;width:95em;height:95em;margin:-47em 0 0 -47em;z-index:0;display:grid;place-items:center;opacity:.13;filter:grayscale(1) brightness(2);pointer-events:none}.pc2 .pc-wm img{filter:none!important}
 .pc2.pc-xl .pc-n{font-size:25em}
@@ -3405,7 +3404,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v454 · Nov 11';
+const APP_BUILD='v455 · Nov 11';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4825,7 +4824,11 @@ function duoArt(id,r,s=54){const c=duoInfo(id),R=RAR[r]||RAR.e,w=Math.round(s*.7
   const face=(p,cl,n)=>`<span class="duo-f ${cl}"><span class="duo-sl"></span><span class="duo-wm">${slogo(p.school,Math.round(s*.6))}</span><span class="duo-tag">DUO<em>${n}/2</em></span><span class="duo-av">${av(p.name,p.school,z)}</span><span class="duo-nm"><b>${esc(lastN(p.name))}</b><small>${esc(p.pos==='DEF'?(p.sub||'DEF'):(p.pos||''))}</small></span><span class="duo-sp"></span><span class="duo-foil"></span></span>`;
   return `<span class="tc-duo r-${r}" style="--rc:${R.c};width:${w}px;height:${s}px;font-size:${(s/11).toFixed(2)}px" title="${esc(c.full)} · tap to flip" role="img" aria-label="${esc(c.full)} duo card"><span class="duo-tilt"><span class="duo-in">${face(c.a,'fr',1)}${face(c.b,'bk',2)}</span></span></span>`}
 /* v403 (owner): duo cards flip on their own every 5 seconds and when tapped. Each flip keeps turning the same way, lifts the card and fires a ring in its rarity colour. */
-function duoFlip(el){const inn=el.querySelector('.duo-in');if(!inn)return;el._r=(el._r||0)+180;inn.style.transform='rotateY('+el._r+'deg)';el.classList.toggle('fl');el._t=Date.now();el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}
+/* v455: two quarter turns instead of one 180 degree turn: turn edge-on, swap the faces while edge-on, turn out. No mirrored face is ever visible, whatever the browser does with backface-visibility. */
+function turnCard(host,inn,swap){if(!inn||!inn.animate){swap();return}if(host._turning)return;host._turning=1;
+  const a1=inn.animate([{transform:'rotateY(0deg)'},{transform:'rotateY(90deg)'}],{duration:150,easing:'ease-in',fill:'forwards'});
+  a1.onfinish=()=>{swap();a1.cancel();const a2=inn.animate([{transform:'rotateY(-90deg)'},{transform:'rotateY(0deg)'}],{duration:320,easing:'cubic-bezier(.25,1.25,.4,1)'});a2.onfinish=()=>{host._turning=0}}}
+function duoFlip(el){const inn=el.querySelector('.duo-in');if(!inn)return;turnCard(el,inn,()=>el.classList.toggle('fl'));el._t=Date.now();el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}
 const duoBuzz=()=>{try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}};
 setInterval(()=>{const n=Date.now();document.querySelectorAll('.tc-duo').forEach(el=>{if(!el._t){el._t=n;return}if(n-el._t>=5000)duoFlip(el)})},250);
 document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.tc-duo');if(!el)return;duoFlip(el);duoBuzz();if(!el.closest('.pks,.pko-c')){e.stopPropagation();e.preventDefault()}},true);
@@ -5016,7 +5019,7 @@ function openCard(id,r){closeCard();const c=cardInfo(id),u=ME.uid,ach=id.startsW
   document.body.appendChild(el);const cd=el.querySelector('.cv-card'),art=cd.firstElementChild;
   if(art&&!c.duo){const mv=e=>{const b=cd.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.transform=`rotateY(${(x*22).toFixed(1)}deg) rotateX(${(-y*18).toFixed(1)}deg)`;art.style.setProperty('--mx',((x+.5)*100).toFixed(0)+'%');art.style.setProperty('--my',((y+.5)*100).toFixed(0)+'%')},rs=()=>{art.style.transform='';art.style.removeProperty('--mx');art.style.removeProperty('--my')};
     cd.addEventListener('pointermove',mv);cd.addEventListener('pointerleave',rs);cd.addEventListener('pointerup',rs);cd.addEventListener('pointercancel',rs)}
-  if(flip){const fl=cd.querySelector('.pc-flip');let dn=null;cd.addEventListener('pointerdown',e=>{dn=[e.clientX,e.clientY]});cd.addEventListener('click',e=>{if(dn&&Math.hypot(e.clientX-dn[0],e.clientY-dn[1])>8)return;fl.classList.toggle('fl');try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}})}
+  if(flip){const fl=cd.querySelector('.pc-flip');let dn=null;cd.addEventListener('pointerdown',e=>{dn=[e.clientX,e.clientY]});cd.addEventListener('click',e=>{if(dn&&Math.hypot(e.clientX-dn[0],e.clientY-dn[1])>8)return;turnCard(fl,fl.querySelector('.pc-flipin'),()=>fl.classList.toggle('fl'));try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}})}
   const x=el.querySelector('.cv-x');if(x)x.focus();sheetPush()}
 function closeCard(){const e=document.getElementById('cardview');if(e)e.remove()}
 /* v416 (owner): sell a card version for tokens (cheap on purpose: about a third of what a duplicate pays). The version is set to 0, like a removed card. */
