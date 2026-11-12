@@ -2559,7 +2559,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
   background:linear-gradient(165deg,color-mix(in srgb,var(--rc) 55%,#0b1428) 0%,#0a1224 52%,#05080f 100%) padding-box,linear-gradient(135deg,#fff,var(--rc) 30%,color-mix(in srgb,var(--rc) 40%,#000) 55%,var(--rc) 75%,#fff) border-box;
   box-shadow:0 0 1.2em color-mix(in srgb,var(--rc) 60%,transparent),0 .5em 1em rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
 .tc-duo .duo-f.bk{transform:rotateY(180deg);background:linear-gradient(195deg,#05080f 0%,#0a1224 45%,color-mix(in srgb,var(--rc) 60%,#0b1428) 100%) padding-box,linear-gradient(225deg,#fff,var(--rc) 30%,color-mix(in srgb,var(--rc) 40%,#000) 55%,var(--rc) 75%,#fff) border-box}
-.tc-duo .duo-f.fr{visibility:visible;transition:visibility 0s linear .4s}.tc-duo .duo-f.bk{visibility:hidden;transition:visibility 0s linear .4s}.tc-duo.fl .duo-f.fr{visibility:hidden}.tc-duo.fl .duo-f.bk{visibility:visible}   /* v406: hide the face that is turned away at the half-way point of the flip instead of trusting backface-visibility (phones drew the front through the back, mirrored) */
+.tc-duo .duo-f.fr{visibility:visible;transition:visibility 0s linear .1s}.tc-duo .duo-f.bk{visibility:hidden;transition:visibility 0s linear .1s}.tc-duo.fl .duo-f.fr{visibility:hidden}.tc-duo.fl .duo-f.bk{visibility:visible}   /* v406: hide the face that is turned away at the half-way point of the flip instead of trusting backface-visibility (phones drew the front through the back, mirrored) */
 .tc-duo .duo-sl{position:absolute;inset:0;background:repeating-linear-gradient(118deg,transparent 0 .9em,rgba(255,255,255,.045) .9em 1em),linear-gradient(118deg,transparent 46%,color-mix(in srgb,var(--rc) 55%,transparent) 46.5% 49%,transparent 49.5% 52%,rgba(255,255,255,.35) 52.2% 53%,transparent 53.5%)}
 .tc-duo .bk .duo-sl{transform:scaleX(-1)}
 .tc-duo .duo-wm{position:absolute;right:-18%;top:-6%;width:85%;opacity:.16;filter:grayscale(1) brightness(2)}.tc-duo .duo-wm img{width:100%;height:auto}
@@ -2694,7 +2694,7 @@ details.lk-col>summary{display:flex;justify-content:space-between;align-items:ce
 /* v423: flip + back of single player cards (card view) */
 .cv-card>.pc-flip{display:block;position:relative;transform-style:preserve-3d;transition:transform .12s ease-out;will-change:transform;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pc-flipin{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.25,.45,1)}.pc-flip.fl .pc-flipin{transform:rotateY(180deg)}
-.pc-ff,.pc-fb{position:absolute;inset:0;display:block}.pc-fb{transform:rotateY(180deg);visibility:hidden;transition:visibility 0s linear .35s}.pc-ff{visibility:visible;transition:visibility 0s linear .35s}
+.pc-ff,.pc-fb{position:absolute;inset:0;display:block}.pc-fb{transform:rotateY(180deg);visibility:hidden;transition:visibility 0s linear .095s}.pc-ff{visibility:visible;transition:visibility 0s linear .095s}   /* v454: .095 s is where the flip's easing curve passes 90 degrees (it was .35 s, so the mirrored front showed for a quarter of a second) */
 .pc-flip.fl .pc-ff{visibility:hidden}.pc-flip.fl .pc-fb{visibility:visible}
 .pc-flip .pc2{position:absolute;left:0;top:0}
 .pc2 .pc-wm{position:absolute;left:50%;top:44%;width:95em;height:95em;margin:-47em 0 0 -47em;z-index:0;display:grid;place-items:center;opacity:.13;filter:grayscale(1) brightness(2);pointer-events:none}.pc2 .pc-wm img{filter:none!important}
@@ -3394,7 +3394,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v453 · Nov 11';
+const APP_BUILD='v454 · Nov 11';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
