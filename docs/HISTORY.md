@@ -565,3 +565,6 @@ Contest is now continuous: strength = (1 - distance/125) x1.4 (x1.8 more if the 
 
 ## Hoops Battle v24
 HOLD .14 to .22 s: a normal tap on the jump button (up to about a fifth of a second) is always a pump fake; you have to hold to go up for the shot, and letting go early after that is an early release.
+
+## Hoops Battle v25 (online, standalone prototype)
+"Friend online" works between two phones with no server: WebRTC data channels, the two players swap two ~560 character codes by text (host makes a code, guest pastes it and sends a reply code back). Host runs `step()` and sends snapshots 30 Hz (`SNAPK`), guest sends {l,r,j} at 60 Hz and draws interpolated snapshots; sounds are forwarded; both use a 1100 wide court; no pause online. Tested with two browser tabs. Not part of the Varsity app. A relay with short room codes (Supabase Realtime) would remove the code swap.

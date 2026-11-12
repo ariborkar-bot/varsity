@@ -19,7 +19,7 @@ html,body{margin:0;height:100%;background:#060a13;color:#fff;font-family:system-
 #stage{position:fixed;inset:0;display:grid;place-items:center;background:#060a13}
 canvas{display:block;touch-action:none}
 .ov{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(4,8,16,.86);padding:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));overflow:auto}
-.ov[hidden]{display:none}.ov{touch-action:pan-y}
+.ov[hidden]{display:none}#net textarea{width:100%;height:84px;box-sizing:border-box;border-radius:10px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#dfe8ff;font:11px/1.3 ui-monospace,Menlo,monospace;padding:8px;resize:none;word-break:break-all}#net .sub{min-height:1.2em}.ov{touch-action:pan-y}
 .box{width:min(560px,100%);background:linear-gradient(180deg,#14213d,#0b1220);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:18px 18px 16px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 h1{margin:0 0 2px;font:900 1.7rem/1 system-ui;letter-spacing:.02em;text-transform:uppercase}
 h1 span{color:#FFC23D}
@@ -68,7 +68,7 @@ h1 span{color:#FFC23D}
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
     <button type="button" data-v="2p" aria-pressed="false">Friend<small>same device</small></button>
-    <button type="button" data-v="on" disabled>Friend online<small>not built yet</small></button>
+    <button type="button" data-v="on" aria-pressed="false">Friend online<small>two phones</small></button>
   </div>
   <div id="w-diff"><span class="lbl">Computer skill</span>
   <div class="seg" id="s-diff">
@@ -86,6 +86,17 @@ h1 span{color:#FFC23D}
   <div class="how" id="how"></div>
   <button class="go" id="play" type="button">Tip off</button>
   </div>
+</div></div>
+
+<div id="net" class="ov" hidden><div class="box">
+  <h1>Play a friend online</h1>
+  <p class="sub">No account or server. You swap two short codes by text message, then your phones connect directly.</p>
+  <div id="n-pick"><button class="go" id="n-host" type="button">Host a game</button><button class="ghost" id="n-join" type="button">Join a game</button></div>
+  <div id="n-hostp" hidden><span class="lbl">1. Send this code to your friend</span><textarea id="n-c1" readonly placeholder="Making your code..."></textarea><button class="ghost" id="n-copy1" type="button">Copy code</button>
+    <span class="lbl">2. Paste the code they send back</span><textarea id="n-in1" placeholder="Paste here"></textarea><button class="go" id="n-go1" type="button">Connect</button></div>
+  <div id="n-joinp" hidden><span class="lbl">1. Paste the host's code</span><textarea id="n-in2" placeholder="Paste here"></textarea><button class="go" id="n-go2" type="button">Make my reply code</button>
+    <span class="lbl">2. Send this reply to the host</span><textarea id="n-c2" readonly placeholder="Your reply code shows here"></textarea><button class="ghost" id="n-copy2" type="button">Copy code</button></div>
+  <p class="sub" id="n-msg"></p><button class="ghost" id="n-back" type="button">Back</button>
 </div></div>
 
 <div id="pause" class="ov" hidden><div class="box">
@@ -119,7 +130,7 @@ const DIFF={easy:{lag:.34,dsp:.8,pw:[.55,0,.25,.2],sig:.2,three:.2,mid:.5,gap:92
 const TEAM=[{n:'YOU',c:'#FFC23D',c2:'#FFE08A',d:'#10224a',s:'#f0c49a',s2:'#d9a377',hair:'#3a2414',num:'1'},{n:'CPU',c:'#FF4F6D',c2:'#ff8fa3',d:'#4a0f1f',s:'#b97a4e',s2:'#9a6038',hair:'#141017',num:'2'}];
 const NOIN={l:false,r:false,j:false},rnd=Math.random,gauss=()=>(rnd()+rnd()+rnd()-1.5)*2;
 let g=null,OPT={mode:'ai',diff:'med',len:120},paused=false,muted=false;
-try{const s=JSON.parse(localStorage.getItem('hb-opt')||'null');if(s&&DIFF[s.diff]&&[60,120,180].includes(s.len)&&['ai','2p'].includes(s.mode))OPT=s;muted=localStorage.getItem('hb-mute')==='1'}catch(_){}
+try{const s=JSON.parse(localStorage.getItem('hb-opt')||'null');if(s&&DIFF[s.diff]&&[60,120,180].includes(s.len)&&['ai','2p'].includes(s.mode))OPT=s   /* online is picked fresh each visit */;muted=localStorage.getItem('hb-mute')==='1'}catch(_){}
 
 /* ---------------- sound (tiny WebAudio beeps; starts on the first tap) ---------------- */
 let AC=null;
@@ -127,7 +138,8 @@ function audio(){if(AC||muted)return;try{AC=new (window.AudioContext||window.web
 function tone(f,d,type,v,slide){if(!AC||muted)return;try{const t=AC.currentTime,o=AC.createOscillator(),a=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);a.gain.setValueAtTime(v||.12,t);a.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(a).connect(AC.destination);o.start(t);o.stop(t+d)}catch(_){}}
 function noise(d,v){if(!AC||muted)return;try{const n=AC.sampleRate*d,b=AC.createBuffer(1,n,AC.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(rnd()*2-1)*(1-i/n);const s=AC.createBufferSource(),a=AC.createGain(),f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=1800;a.gain.value=v||.18;s.buffer=b;s.connect(f).connect(a).connect(AC.destination);s.start()}catch(_){}}
 const SFX={bounce:()=>tone(150,.07,'sine',.16,70),rim:()=>tone(520,.09,'triangle',.1,300),swish:()=>noise(.28,.22),jump:()=>tone(260,.08,'sine',.05,420),slam:()=>{tone(95,.26,'square',.2,40);noise(.2,.24)},block:()=>{tone(110,.14,'square',.14,60);noise(.08,.12)},steal:()=>tone(700,.1,'square',.07,1100),buzz:()=>tone(160,.7,'sawtooth',.13,150),perfect:()=>tone(880,.12,'sine',.1,1320),whistle:()=>tone(1900,.18,'square',.05,1700)};
-const sfx=n=>{if(SFX[n])SFX[n]()};
+const NET={on:false,role:'',pc:null,ch:null,un:null,up:false,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null,t0:0};
+const sfx=n=>{if(NET.on&&NET.role==='host')NET.snd.push(n);if(SFX[n])SFX[n]()};
 
 /* ---------------- game state ---------------- */
 function hoops(W){return [{cx:77,bd:30,dir:1},{cx:W-77,bd:W-30,dir:-1}]}
@@ -497,17 +509,19 @@ function buildCtl(){const c=document.getElementById('ctl'),two=OPT.mode==='2p',b
 /* ---------------- loop ---------------- */
 let last=0,acc=0;
 function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1000||0);last=ts;
+  if(NET.on&&NET.role==='guest'){if(g)netGuest(dt);draw();return}
   if(g&&g.slo>0)g.slo-=dt;if(g&&g.freeze>0){g.freeze-=dt;acc=0}
-  else if(g&&!paused&&g.phase!=='over'&&document.getElementById('rot').hidden){acc+=dt*(g.slo>0?.42:1);let n=0;while(acc>=TICK&&n<5){acc-=TICK;n++;step(TICK,[human(0),OPT.mode==='ai'?ai(g.P[1],TICK):human(1)])}if(n===5)acc=0}
+  else if(g&&!paused&&g.phase!=='over'&&document.getElementById('rot').hidden){acc+=dt*(g.slo>0?.42:1);let n=0;while(acc>=TICK&&n<5){acc-=TICK;n++;step(TICK,[human(0),OPT.mode==='ai'?ai(g.P[1],TICK):OPT.mode==='on'?NET.in:human(1)])}if(n===5)acc=0}
+  if(NET.on&&NET.role==='host'&&g){NET.acc+=dt;if(NET.acc>=1/30){NET.acc=0;netSend()}}
   draw()}
-function start(){audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT},VW);fit();paused=false;acc=0;
+function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NET.up&&NET.role==='host'){netStart();return}netOpen();return}audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT},VW);fit();paused=false;acc=0;
   for(const id of ['menu','end','pause'])document.getElementById(id).hidden=true;buildCtl();
   document.getElementById('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);document.getElementById('pz').classList.add('on');document.getElementById('snd').classList.add('on');
   try{localStorage.setItem('hb-opt',JSON.stringify(OPT))}catch(_){}}
-function togglePause(){if(!g||g.phase==='over'||!document.getElementById('menu').hidden)return;paused=!paused;document.getElementById('pause').hidden=!paused}
-function toMenu(){g=null;paused=false;for(const id of ['end','pause'])document.getElementById(id).hidden=true;document.getElementById('menu').hidden=false;for(const id of ['ctl','pz','snd'])document.getElementById(id).classList.remove('on');fit()}
+function togglePause(){if(NET.on)return;if(!g||g.phase==='over'||!document.getElementById('menu').hidden)return;paused=!paused;document.getElementById('pause').hidden=!paused}
+function toMenu(){netReset();g=null;paused=false;for(const id of ['end','pause'])document.getElementById(id).hidden=true;document.getElementById('menu').hidden=false;for(const id of ['ctl','pz','snd'])document.getElementById(id).classList.remove('on');fit()}
 function onEnd(){const a=g.score[0],b=g.score[1],two=OPT.mode==='2p',s=g.stat;
-  document.getElementById('e-res').textContent=two?(a>b?'Player 1 wins':'Player 2 wins'):(a>b?'You win':'You lose');document.getElementById('e-sc').textContent=a+' - '+b;
+  const me=NET.role==='guest'?1:0;document.getElementById('e-res').textContent=OPT.mode==='on'?(g.score[me]>g.score[1-me]?'You win':'You lose'):two?(a>b?'Player 1 wins':'Player 2 wins'):(a>b?'You win':'You lose');document.getElementById('e-sc').textContent=a+' - '+b;
   document.getElementById('e-st').textContent=`${TEAM[0].n}: ${s[0].fg} of ${s[0].fga} shots, ${s[0].three} threes, ${s[0].blk} blocks, ${s[0].stl} steals · ${TEAM[1].n}: ${s[1].fg} of ${s[1].fga} shots, ${s[1].three} threes, ${s[1].blk} blocks, ${s[1].stl} steals`;
   setTimeout(()=>{if(g&&g.phase==='over')document.getElementById('end').hidden=false},900)}
 
@@ -523,9 +537,55 @@ const sndB=document.getElementById('snd'),sndPaint=()=>{sndB.textContent=muted?'
 sndB.addEventListener('click',()=>{muted=!muted;if(!muted)audio();sndPaint();try{localStorage.setItem('hb-mute',muted?'1':'0')}catch(_){}});
 addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));fit();requestAnimationFrame(frame);
 
-/* ONLINE NOTE: "Friend online" is not built. The plan that fits this code: one phone is the host and runs step(); the guest sends its {l,r,j} every tick and draws the
-   host's snapshots (players, ball, score, clocks) about 20 times a second. That needs a relay both phones can reach (the app's Supabase Realtime channel would do)
-   and a fixed court width for both players (use 1100). Nothing here talks to a network. */
+/* ---------------- v25 online: two phones, peer to peer (WebRTC), no server. The players swap two codes by text message. ----------------
+   The host phone runs the whole game (step) and sends a snapshot about 30 times a second; the guest sends its {l,r,j} 60 times a second and draws the snapshots.
+   The host is player 1 (left, attacks right), the guest is player 2. Both use a 1100 wide court. */
+const NETW=1100,SNAPK=['P','ball','score','clock','sc','phase','dead','next','hold','pop','fx','shake','net','rd','ot','stat','started','slo','freeze','zm','zx','fl','t','tip'];
+const el=id=>document.getElementById(id);
+async function enc(o){let b=new TextEncoder().encode(JSON.stringify(o)),z=!!window.CompressionStream;if(z)b=new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+  let t='';for(const x of b)t+=String.fromCharCode(x);return 'HB1'+(z?'z':'p')+btoa(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+async function dec(c){c=String(c).replace(/\s+/g,'');if(!/^HB1[zp]/.test(c))throw new Error('bad code');let b=Uint8Array.from(atob(c.slice(4).replace(/-/g,'+').replace(/_/g,'/')),x=>x.charCodeAt(0));
+  if(c[3]==='z')b=new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());return JSON.parse(new TextDecoder().decode(b))}
+function netReset(){try{if(NET.ch&&NET.ch.readyState==='open')NET.ch.send(JSON.stringify({k:'bye'}))}catch(_){}
+  for(const k of ['ch','un'])try{NET[k]&&NET[k].close()}catch(_){}try{NET.pc&&NET.pc.close()}catch(_){}
+  Object.assign(NET,{on:false,role:'',pc:null,ch:null,un:null,up:false,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null})}
+function netLost(){if(!NET.pc&&!NET.on)return;const was=NET.on;netReset();if(was){g=null;for(const id of ['end','pause','net'])el(id).hidden=true;el('menu').hidden=true;for(const id of ['ctl','pz','snd'])el(id).classList.remove('on');fit();netOpen()}
+  el('n-msg').textContent='The connection ended.'}
+function netOpen(){el('menu').hidden=true;el('net').hidden=false;el('n-pick').hidden=false;el('n-hostp').hidden=el('n-joinp').hidden=true;el('n-msg').textContent='';netReset()}
+function mkPC(){const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});NET.pc=pc;
+  pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState)||(pc.connectionState==='disconnected'&&NET.on))netLost()};return pc}
+const gathered=pc=>new Promise(r=>{if(pc.iceGatheringState==='complete')return r();const f=()=>{if(pc.iceGatheringState==='complete'){pc.removeEventListener('icegatheringstatechange',f);r()}};pc.addEventListener('icegatheringstatechange',f);setTimeout(r,3500)});
+function wire(){for(const k of ['ch','un']){const c=NET[k];if(!c||c._w)continue;c._w=1;c.onmessage=netMsg;c.onclose=()=>{if(NET.up||NET.on)netLost()};
+  c.onopen=()=>{if(NET.ch&&NET.ch.readyState==='open'&&NET.un&&NET.un.readyState==='open'&&!NET.up){NET.up=true;if(NET.role==='host')netStart();else el('n-msg').textContent='Connected. Waiting for the host to tip off...'}};
+  if(c.readyState==='open')c.onopen()}}
+async function netHost(){netReset();NET.role='host';const pc=mkPC();NET.ch=pc.createDataChannel('c');NET.un=pc.createDataChannel('u',{ordered:false,maxRetransmits:0});wire();
+  await pc.setLocalDescription(await pc.createOffer());await gathered(pc);return enc({d:pc.localDescription.sdp})}
+async function netHostFinish(code){const a=await dec(code);await NET.pc.setRemoteDescription({type:'answer',sdp:a.d})}
+async function netJoin(code){netReset();NET.role='guest';const o=await dec(code);const pc=mkPC();pc.ondatachannel=e=>{if(e.channel.label==='c')NET.ch=e.channel;else NET.un=e.channel;wire()};
+  await pc.setRemoteDescription({type:'offer',sdp:o.d});await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);return enc({d:pc.localDescription.sdp})}
+function netBegin(len){NET.on=true;OPT.mode='on';NET.ended=false;NET.acc=0;NET.in={l:false,r:false,j:false};NET.from=NET.tg=null;const host=NET.role==='host';
+  TEAM[0].n=host?'YOU':'FRIEND';TEAM[1].n=host?'FRIEND':'YOU';newGame({mode:'on',diff:'med',len},NETW);fit();paused=false;acc=0;
+  for(const id of ['menu','end','pause','net'])el(id).hidden=true;buildCtl();el('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);el('pz').classList.remove('on');el('snd').classList.add('on')}
+function netStart(){audio();try{NET.ch.send(JSON.stringify({k:'go',len:OPT.len}))}catch(_){}netBegin(OPT.len)}
+function netSend(){if(!NET.un||NET.un.readyState!=='open')return;const o={};for(const k of SNAPK)o[k]=g[k];try{NET.un.send(JSON.stringify({k:'s',g:o,snd:NET.snd.splice(0)}))}catch(_){}}
+function netMsg(e){let m;try{m=JSON.parse(e.data)}catch(_){return}
+  if(m.k==='go'&&NET.role==='guest'){audio();netBegin(m.len)}
+  else if(m.k==='bye')netLost();
+  else if(m.k==='i'&&NET.role==='host'){NET.in=m.i}
+  else if(m.k==='s'&&NET.role==='guest'&&g){const from={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};Object.assign(g,m.g);
+    NET.from=from;NET.tg={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};NET.t0=performance.now();for(const n of m.snd||[])sfx(n)}}
+function netGuest(dt){NET.si+=dt;if(NET.si>=1/60){NET.si=0;if(NET.un&&NET.un.readyState==='open'&&el('rot').hidden)try{NET.un.send(JSON.stringify({k:'i',i:human(0)}))}catch(_){}}
+  if(NET.from&&NET.tg){const k=Math.min(1,(performance.now()-NET.t0)/50);g.P.forEach((p,i)=>{p.x=NET.from.P[i].x+(NET.tg.P[i].x-NET.from.P[i].x)*k;p.y=NET.from.P[i].y+(NET.tg.P[i].y-NET.from.P[i].y)*k});
+    g.ball.x=NET.from.b.x+(NET.tg.b.x-NET.from.b.x)*k;g.ball.y=NET.from.b.y+(NET.tg.b.y-NET.from.b.y)*k}
+  if(g.phase==='over'&&!NET.ended){NET.ended=true;onEnd()}}
+const busy=async(btn,fn)=>{btn.disabled=true;try{await fn()}catch(err){el('n-msg').textContent='That code did not work. Check you copied all of it.'}btn.disabled=false};
+const copyTo=(id)=>{const t=el(id);t.select();t.setSelectionRange(0,99999);try{navigator.clipboard.writeText(t.value)}catch(_){try{document.execCommand('copy')}catch(__){}}el('n-msg').textContent=t.value?'Code copied.':''};
+el('n-host').addEventListener('click',e=>busy(e.target,async()=>{el('n-pick').hidden=true;el('n-hostp').hidden=false;el('n-msg').textContent='Making your code...';el('n-c1').value='';el('n-c1').value=await netHost();el('n-msg').textContent='Send it to your friend, then paste what they send back.'}));
+el('n-join').addEventListener('click',()=>{el('n-pick').hidden=true;el('n-joinp').hidden=false;el('n-msg').textContent=''});
+el('n-go1').addEventListener('click',e=>busy(e.target,async()=>{el('n-msg').textContent='Connecting...';await netHostFinish(el('n-in1').value)}));
+el('n-go2').addEventListener('click',e=>busy(e.target,async()=>{el('n-msg').textContent='Making your reply...';el('n-c2').value=await netJoin(el('n-in2').value);el('n-msg').textContent='Send this reply to the host. The game starts when they connect.'}));
+el('n-copy1').addEventListener('click',()=>copyTo('n-c1'));el('n-copy2').addEventListener('click',()=>copyTo('n-c2'));
+el('n-back').addEventListener('click',()=>{netReset();el('net').hidden=true;el('menu').hidden=false});
 /* test hook: run the game fast with the computer playing both sides (used to balance the difficulty levels) */
 window.__hb={get g(){return g},sim(sec,d0,d1){OPT.mode='ai';newGame({mode:'ai',diff:d1||'med',len:sec},1100);const saved=g.o.diff;let guard=0;
   while(g.phase!=='over'&&guard++<sec*60*3){g.o.diff=d0||'med';const a=ai(g.P[0],TICK);g.o.diff=saved;const b=ai(g.P[1],TICK);step(TICK,[a,b])}
