@@ -527,3 +527,6 @@ Blocks: a defender already coming down (vy>110, or any descent while the shooter
 
 ## Hoops Battle v12
 Run speed scales with energy over the whole range: x(.68+.4*energy), so full energy is 10% faster than base and empty is 32% slower (was only slower below 30% energy).
+
+## Hoops Battle v13
+Contested shots are harder (contest 1.3 with a defender in the air, .6 close on the ground, .2 within 100 px; larger error even on perfect). Defender is beatable: he tracks where the ball handler was `D.lag` s ago (easy .34, med .24, hard .15) and runs at `D.dsp` of full speed (.8/.88/.95) via `p.dm`, so a quick reversal gets you past.

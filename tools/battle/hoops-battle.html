@@ -115,7 +115,7 @@ const EN={run:.045,rest:.26,jump:.08,shot:.17,fake:.04,push:.3,score:.3};   /* s
 /* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
    STEAL = seconds of standing chest-to-chest in front of the dribbler before the ball is taken (was .5). Dribbling through a defender is allowed but slow (PRESS). */
 const HOLD=.14,STEAL=1.3,PRESS=.5;
-const DIFF={easy:{pw:[.55,0,.25,.2],sig:.2,three:.2,mid:.5,gap:92,react:.32,block:.15,reb:.5,slow:.5,dj:.15,bite:.6,fake:0},med:{pw:[.3,.25,.2,.25],sig:.11,three:.3,mid:.42,gap:70,react:.2,block:.24,reb:.8,dj:.4,bite:.4,fake:.15},hard:{pw:[.2,.3,.2,.3],sig:.055,three:.38,mid:.34,gap:60,react:.13,block:.28,reb:1,dj:.6,bite:.2,fake:.3}};
+const DIFF={easy:{lag:.34,dsp:.8,pw:[.55,0,.25,.2],sig:.2,three:.2,mid:.5,gap:92,react:.32,block:.15,reb:.5,slow:.5,dj:.15,bite:.6,fake:0},med:{lag:.24,dsp:.88,pw:[.3,.25,.2,.25],sig:.11,three:.3,mid:.42,gap:70,react:.2,block:.24,reb:.8,dj:.4,bite:.4,fake:.15},hard:{lag:.15,dsp:.95,pw:[.2,.3,.2,.3],sig:.055,three:.38,mid:.34,gap:60,react:.13,block:.28,reb:1,dj:.6,bite:.2,fake:.3}};
 const TEAM=[{n:'YOU',c:'#FFC23D',c2:'#FFE08A',d:'#10224a',s:'#f0c49a',s2:'#d9a377',hair:'#3a2414',num:'1'},{n:'CPU',c:'#FF4F6D',c2:'#ff8fa3',d:'#4a0f1f',s:'#b97a4e',s2:'#9a6038',hair:'#141017',num:'2'}];
 const NOIN={l:false,r:false,j:false},rnd=Math.random,gauss=()=>(rnd()+rnd()+rnd()-1.5)*2;
 let g=null,OPT={mode:'ai',diff:'med',len:120},paused=false,muted=false;
@@ -156,7 +156,7 @@ function step(dt,inp){
 function clampP(p){p.x=Math.max(WALL+PW,Math.min(g.W-WALL-PW,p.x))}
 function stepP(p,c,dt){
   p.cd=Math.max(0,p.cd-dt);if(p.pump>0)p.pump-=dt;if(p.stun>0){p.stun-=dt;c=NOIN}if(!p.has){p.gath=false;p.dd=false}
-  const mv=(c.r?1:0)-(c.l?1:0),hd=g.hp[1-p.i].cx>p.x?1:-1,sp=SPD*(p.has?(mv&&mv!==hd?.76:.9):1)*(.68+.4*Math.max(0,Math.min(1,p.en)))*(p.slow?PRESS:1)*(p.gath?.5:1)*(p.dd&&p.has&&!p.air?0:1);   /* after a pump fake the dribble is dead: no walking, only fake again or shoot */
+  const mv=(c.r?1:0)-(c.l?1:0),hd=g.hp[1-p.i].cx>p.x?1:-1,sp=SPD*(p.has?(mv&&mv!==hd?.76:.9):1)*(.68+.4*Math.max(0,Math.min(1,p.en)))*(p.slow?PRESS:1)*(p.dm||1)*(p.gath?.5:1)*(p.dd&&p.has&&!p.air?0:1);   /* after a pump fake the dribble is dead: no walking, only fake again or shoot */
   if(!p.air){p.vx+=(mv*sp-p.vx)*Math.min(1,dt*14);if(p.has)p.face=hd;else if(mv)p.face=mv;else if(Math.abs(g.ball.x-p.x)>8)p.face=g.ball.x>p.x?1:-1;
     const push=p.slow&&p.has&&mv&&(g.P[1-p.i].x-p.x)*mv>0;   /* driving into a defender wears you out fast */
     p.en=mv&&sp>0?Math.max(0,p.en-dt*(EN.run+(push?EN.push:0))):Math.min(1,p.en+dt*EN.rest)}
@@ -181,8 +181,8 @@ function release(p,late){
   p.has=false;p.dd=false;p.shoot=false;p.cd=.4;Object.assign(b,{own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
   if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=dist>TP?3:2;
-  const near=Math.abs(o.x-p.x),contest=near<98&&o.air&&o.y<GY-36?1:near<68?.4:0,tired=p.en<.25?(1-p.en/.25)*20:0;
-  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*30*(1-q*.5)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*20+tired*.6;
+  const near=Math.abs(o.x-p.x),contest=near<98&&o.air&&o.y<GY-36?1.3:near<68?.6:near<100?.2:0,tired=p.en<.25?(1-p.en/.25)*20:0;
+  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*34*(1-q*.4)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*24+tired*.6;
   const T=Math.max(.86,Math.min(1.6,.8+dist/590)),off0=g._off!=null?g._off:(rnd()*2-1)*err,off=Math.abs(off0)>46?Math.sign(off0)*(27+rnd()*17):off0,tx=h.cx+off;   /* a badly timed shot clanks off the rim; it never lucks in off the backboard */
   b.vx=(tx-b.x)/T;b.vy=(RIMY-2-b.y-.5*GR*T*T)/T;
   pop(perfect?'PERFECT':q>.6?'GOOD':late||p.jt>p.ap?'LATE':'EARLY',p.x,p.y-PH-40,perfect?'#3DFF9A':q>.6?'#FFE08A':'#ff9aa8',.7);if(perfect)sfx('perfect')}
@@ -235,7 +235,7 @@ function clocks(dt){const b=g.ball;if(!g.started)return;g.clock-=dt;
 /* ---------------- computer player: returns {l,r,j} for player p ---------------- */
 function ai(p,dt){const m=g.ai[p.i],D=DIFF[g.o.diff],o=g.P[1-p.i],b=g.ball,h=g.hp[1-p.i],my=g.hp[p.i],c={l:false,r:false,j:false};
   const go=x=>{if(x>p.x+7)c.r=true;else if(x<p.x-7)c.l=true};
-  if(p.has){
+  if(p.has){p.dm=1;
     if(p.air){if(p.shoot)c.j=p.jt<Math.max(.06,Math.min(p.ap*2-.06,p.ap+m.off));return c}
     if(p.gath){if(m.fk){m.fk=false;m.fkd=true;m.wait=.36}else c.j=true;return c}   /* keep holding through the gather, or let go at once for a pump fake */
     if(p.pump>0)return c;
@@ -258,8 +258,9 @@ function ai(p,dt){const m=g.ai[p.i],D=DIFF[g.o.diff],o=g.P[1-p.i],b=g.ball,h=g.h
       m.fk=!m.fkd&&between&&!o.air&&Math.abs(o.x-p.x)<125&&g.sc>4&&g.clock>3&&(m.pr==='fake'||rnd()<D.fake);m.pr=null}
     else go(spot);
     return c}
-  m.plan=null;m.fkd=false;m.fk=false;m.pr=null;
-  if(b.st==='held'){const s=Math.sign(my.cx-o.x)||1;go(o.x+s*(o.air&&o.shoot?PW+24:D.gap));   /* close in on a shooter who has left the floor */
+  m.plan=null;m.fkd=false;m.fk=false;m.pr=null;p.dm=D.dsp;
+  (m.hs=m.hs||[]).push({t:g.t,x:o.x});while(m.hs.length>2&&m.hs[1].t<g.t-D.lag)m.hs.shift();const ox=m.hs[0].x;   /* v13: he reads where you were a moment ago, so a quick change of direction beats him */
+  if(b.st==='held'){const s=Math.sign(my.cx-o.x)||1;go((o.air&&o.shoot?o.x:ox)+s*(o.air&&o.shoot?PW+24:D.gap));   /* close in on a shooter who has left the floor */
     if(o.air&&o.shoot){if(m.rt==null){m.rt=D.react*(.6+rnd()*.8);m.will=rnd()<D.block}m.rt-=dt;if(m.will&&m.rt<=0&&Math.abs(o.x-p.x)<130&&!p.air)c.j=true;
 }else m.rt=null;
     /* a pump fake can get the defender off his feet */
