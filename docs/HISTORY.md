@@ -533,3 +533,6 @@ Contested shots are harder (contest 1.3 with a defender in the air, .6 close on 
 
 ## Hoops Battle v14
 New look (original art, not copied from any game): outdoor street court (sky, skyline, trees, chain-link and picket fence, low wall, tan floor with orange key and centre ring) replaces the arena; steel-frame hoops with a big slanted white board and orange target box; flat cartoon characters (big head, thick outline, flat colours, shorter body; local `cap3`/`ball3` in `drawP`). Physics and proportions unchanged (rim is ~2.07 player heights up).
+
+## Hoops Battle v15
+Energy drains slower: run .03/s, jump .055, shot .11, fake .03, push-through .16/s (was .045/.08/.17/.04/.3), rest .3/s. Speed factor .78+.3*energy (full 8% faster than base, empty 22% slower).
