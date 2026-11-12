@@ -3404,7 +3404,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v455 · Nov 11';
+const APP_BUILD='v456 · Nov 11';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6403,11 +6403,11 @@ function topCardsList(){const u=ME.uid,m=cardsOf(u),out=[],ro={m:0,l:1,e:2,r:3,u
   return out.sort((a,b)=>b.v-a.v||(ro[a.r]??-1)-(ro[b.r]??-1)||cardInfo(a.id).name.localeCompare(cardInfo(b.id).name))}
 function advisorHTML(){
   if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return '';
-  const L=topCardsList(),N=UI.tcOpen?L.length:3;
+  const L=topCardsList(),N=Math.min(L.length,UI.tcN||3),more=L.length-N;
   const row=(x,i)=>{const c=cardInfo(x.id),R=RAR[x.r]||RAR.c;
     return `<li class="adv-r" style="--rc:${R.c}"><span class="adv-k">${i+1}</span><span class="adv-a">${x.id.startsWith('ac:')?achArt(x.id,58):cardArt(x.id,x.r,c.duo?72:58)}</span><div class="adv-i"><b>${esc(c.name)}</b><small style="color:${R.c}">${x.r==='x'?'Immortal':R.n}${c.spc?' · '+esc(SPEC[c.spc].n):c.duo?' Duo':c.team?' team card':''}</small><span class="adv-m">${esc(x.w)}</span></div><div class="adv-p"><b>${esc(x.t)}</b></div></li>`};
   return `<section class="card adv"><div class="qh"><h3>Top Cards</h3><span class="muted">Best advantage in your Locker</span></div>
-    ${L.length?`<ol class="adv-l">${L.slice(0,N).map(row).join('')}</ol>${L.length>3?`<button type="button" class="adv-dd" data-act="tcMore" aria-expanded="${!!UI.tcOpen}"><span>${UI.tcOpen?'Hide the rest':'See all '+L.length+' cards'}</span><i aria-hidden="true">${UI.tcOpen?'▴':'▾'}</i></button>`:''}`:'<p class="muted">You have no cards yet. Open packs in the Shop to get some.</p>'}
+    ${L.length?`<ol class="adv-l">${L.slice(0,N).map(row).join('')}</ol>${L.length>3?`<button type="button" class="adv-dd" data-act="tcMore" aria-expanded="${more<=0}"><span>${more>0?'Show '+Math.min(5,more)+' more':'Hide the rest'}</span><i aria-hidden="true">${more>0?'▾':'▴'}</i></button>`:''}`:'<p class="muted">You have no cards yet. Open packs in the Shop to get some.</p>'}
     <small class="muted adv-n">Each card adds this much to your winnings when you win a bet it applies to. Best to worst.</small></section>`}
 function propsHTML(){
   const gm=gameMap(),today=TODAY(),mine=propsOf(ME.uid||''),can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
@@ -9973,7 +9973,7 @@ document.addEventListener('click',async e=>{
     else{if(!x)return;if(!L[id]&&Object.keys(L).length>=SL_MAX){say('A parlay can have up to '+SL_MAX+' picks.');return}
       Object.keys(L).forEach(o=>{if(o!==id&&pm[o]&&pm[o].k===x.k)delete L[o]});L[id]=t.dataset.s}
     render(true)}
-  else if(a==='tcMore'){UI.tcOpen=!UI.tcOpen;render(true)}
+  else if(a==='tcMore'){const n=UI.tcN||3,t=topCardsList().length;UI.tcN=n>=t?3:Math.min(t,n+5);render(true)}
   else if(a==='slStake'){UI.sl.stake=+t.dataset.v;render(true)}
   else if(a==='slClear'){UI.sl.legs={};render(true)}
   else if(a==='slGo'){if(needJoin('make a parlay'))return;await slipGo()}
