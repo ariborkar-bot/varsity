@@ -559,3 +559,6 @@ TP 380 to 430 (the three-point line is farther back). It is the same distance fr
 
 ## Hoops Battle v22
 Blocks from behind (defender on the side of the shooter away from the hoop) are possible but less likely: the defender reaches toward the ball with a 20% shorter hit radius. Front blocks unchanged.
+
+## Hoops Battle v23
+Contest is now continuous: strength = (1 - distance/125) x1.4 (x1.8 more if the defender is airborne and high) plus .4 when he is within 98 px in the air; shot error +34 per point, +30 per point on a perfect release (was a 3-step 1.3/.6/.2).

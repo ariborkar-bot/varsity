@@ -184,8 +184,8 @@ function release(p,late){
   p.has=false;p.dd=false;p.shoot=false;p.cd=.4;Object.assign(b,{own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
   if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=(p.tk!=null?p.tk:dist)>TP?3:2;   /* v20: a three is decided by where he left the floor, like the line on the court */
-  const near=Math.abs(o.x-p.x),contest=near<98&&o.air&&o.y<GY-36?1.3:near<68?.6:near<100?.2:0,tired=p.en<.25?(1-p.en/.25)*20:0;
-  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*34*(1-q*.4)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*24+tired*.6;
+  const near=Math.abs(o.x-p.x),hi=o.air&&o.y<GY-36,contest=Math.max(0,1-near/125)*(hi?1.8:1)*1.4+(hi&&near<98?.4:0)   /* v23: the closer and higher the defender's hand, the worse the shot; felt from 125 px out */,tired=p.en<.25?(1-p.en/.25)*20:0;
+  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*34*(1-q*.4)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*30+tired*.6;
   const T=Math.max(.86,Math.min(1.6,.8+dist/590)),off0=g._off!=null?g._off:(rnd()*2-1)*err,off=Math.abs(off0)>46?Math.sign(off0)*(27+rnd()*17):off0,tx=h.cx+off;   /* a badly timed shot clanks off the rim; it never lucks in off the backboard */
   b.vx=(tx-b.x)/T;b.vy=(RIMY-2-b.y-.5*GR*T*T)/T;
   pop(perfect?'PERFECT':q>.6?'GOOD':late||p.jt>p.ap?'LATE':'EARLY',p.x,p.y-PH-40,perfect?'#3DFF9A':q>.6?'#FFE08A':'#ff9aa8',.7);if(perfect)sfx('perfect')}
