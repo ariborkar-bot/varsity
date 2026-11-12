@@ -539,3 +539,6 @@ Energy drains slower: run .03/s, jump .055, shot .11, fake .03, push-through .16
 
 ## Hoops Battle v16
 Run speed SPD 255 to 305. Run animation: legs swing wider (25 px, 14 px lift, cadence .043 per px), arms pump like a runner (hand from low behind the hip to up by the chest, elbow bent) instead of sliding the hand sideways at constant height.
+
+## Hoops Battle v17
+SPD 305 to 360; PRESS .5 to .82 (driving into a defender is only slightly slower); STEAL 1.3 to 1.5 s; ball handler forward .9 to .97, backward .76 to .8. Jump pose: legs hang down a little apart (no tuck).
