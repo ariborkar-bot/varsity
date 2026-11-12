@@ -536,3 +536,6 @@ New look (original art, not copied from any game): outdoor street court (sky, sk
 
 ## Hoops Battle v15
 Energy drains slower: run .03/s, jump .055, shot .11, fake .03, push-through .16/s (was .045/.08/.17/.04/.3), rest .3/s. Speed factor .78+.3*energy (full 8% faster than base, empty 22% slower).
+
+## Hoops Battle v16
+Run speed SPD 255 to 305. Run animation: legs swing wider (25 px, 14 px lift, cadence .043 per px), arms pump like a runner (hand from low behind the hip to up by the chest, elbow bent) instead of sliding the hand sideways at constant height.
