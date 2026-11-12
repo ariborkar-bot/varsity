@@ -109,13 +109,13 @@ h1 span{color:#FFC23D}
 /* ---------------- constants (court units: the court is always 540 tall; its width follows the screen, 900 to 1280) ---------------- */
 /* v2 (owner, Nov 11): bigger players and ball (PH 88 -> 112, BR 11 -> 14, wider rim), a longer jump (players use their own, lower gravity PG, so the top of the
    jump comes at about half a second), a double jump without the ball, and energy (p.en, 0 to 1). */
-const H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=680,SPD=255,RIMY=236,RIMH=35,TP=305,SC=14,APEX=JV/PG,WALL=36,TICK=1/60;
+const H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=680,SPD=255,RIMY=236,RIMH=35,TP=305,SC=14,APEX=JV/PG,WALL=24,TICK=1/60;
 /* energy: running drains it, standing still refills it, every jump costs some. Tired players run slower, jump lower and shoot worse. */
-const EN={run:.085,rest:.26,jump:.09,score:.3};
+const EN={run:.045,rest:.26,jump:.08,shot:.17,fake:.04,score:.3};   /* shooting costs the most, running little */
 /* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
    STEAL = seconds of standing chest-to-chest in front of the dribbler before the ball is taken (was .5). Dribbling through a defender is allowed but slow (PRESS). */
 const HOLD=.14,STEAL=1.3,PRESS=.5;
-const DIFF={easy:{sig:.2,three:.2,mid:.5,gap:92,react:.32,block:.2,reb:.5,slow:.5,dj:.15,bite:.6,fake:0},med:{sig:.11,three:.3,mid:.42,gap:70,react:.2,block:.3,reb:.8,dj:.4,bite:.4,fake:.15},hard:{sig:.055,three:.38,mid:.34,gap:60,react:.13,block:.42,reb:1,dj:.6,bite:.2,fake:.3}};
+const DIFF={easy:{sig:.2,three:.2,mid:.5,gap:92,react:.32,block:.15,reb:.5,slow:.5,dj:.15,bite:.6,fake:0},med:{sig:.11,three:.3,mid:.42,gap:70,react:.2,block:.24,reb:.8,dj:.4,bite:.4,fake:.15},hard:{sig:.055,three:.38,mid:.34,gap:60,react:.13,block:.35,reb:1,dj:.6,bite:.2,fake:.3}};
 const TEAM=[{n:'YOU',c:'#FFC23D',c2:'#FFE08A',d:'#10224a',s:'#f0c49a',s2:'#d9a377',hair:'#3a2414',num:'1'},{n:'CPU',c:'#FF4F6D',c2:'#ff8fa3',d:'#4a0f1f',s:'#b97a4e',s2:'#9a6038',hair:'#141017',num:'2'}];
 const NOIN={l:false,r:false,j:false},rnd=Math.random,gauss=()=>(rnd()+rnd()+rnd()-1.5)*2;
 let g=null,OPT={mode:'ai',diff:'med',len:120},paused=false,muted=false;
@@ -130,7 +130,7 @@ const SFX={bounce:()=>tone(150,.07,'sine',.16,70),rim:()=>tone(520,.09,'triangle
 const sfx=n=>{if(SFX[n])SFX[n]()};
 
 /* ---------------- game state ---------------- */
-function hoops(W){return [{cx:119,bd:72,dir:1},{cx:W-119,bd:W-72,dir:-1}]}
+function hoops(W){return [{cx:77,bd:30,dir:1},{cx:W-77,bd:W-30,dir:-1}]}
 function mkP(i,x){return {i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,en:1,pj:false,cd:0,stun:0,st:0,ph:0,dd:false,dk:0,dkT:0,dkS:0,dkh:0,gath:false,gt:0,pump:0,slow:false}}
 function newGame(o,W){
   g={W,o,hp:hoops(W),t:0,P:[mkP(0,W/2-84),mkP(1,W/2+84)],ball:{x:W/2,y:210,vx:0,vy:-430,st:'loose',live:true,own:-1,sh:-1,pts:2,t:0,rot:0,cd:.25,hit:false,dunk:false,done:false},
@@ -161,10 +161,10 @@ function stepP(p,c,dt){
     p.en=mv&&sp>0?Math.max(0,p.en-dt*EN.run):Math.min(1,p.en+dt*EN.rest)}
   else p.vx+=(mv*sp*.8-p.vx)*Math.min(1,dt*3);
   if(p.shoot||p.gath)p.face=g.hp[1-p.i].cx>p.x?1:-1;
-  const jp=c.j&&!p.pj,jump=()=>{const v=JV*(.8+.2*Math.min(1,p.en/.25));p.air=true;p.vy=-v;p.ap=v/PG;p.jt=0;p.gath=false;p.en=Math.max(0,p.en-EN.jump);if(p.has)p.shoot=true;sfx('jump')};
+  const jp=c.j&&!p.pj,jump=()=>{const v=JV*(p.has?1:1.18)*(.8+.2*Math.min(1,p.en/.25));p.air=true;p.vy=-v;p.ap=v/PG;p.jt=0;p.gath=false;p.en=Math.max(0,p.en-(p.has?EN.shot:EN.jump));if(p.has)p.shoot=true;sfx('jump')};
   if(!p.air&&p.has){
     /* with the ball: a quick tap is a pump fake, holding JUMP for HOLD seconds goes up for the shot */
-    if(p.gath){if(!c.j){p.gath=false;p.pump=.3;p.dd=true}else{p.gt+=dt;if(p.gt>=HOLD)jump()}}
+    if(p.gath){if(!c.j){p.gath=false;p.pump=.3;p.dd=true;p.en=Math.max(0,p.en-EN.fake)}else{p.gt+=dt;if(p.gt>=HOLD)jump()}}
     else if(jp&&p.pump<=.06){p.gath=true;p.gt=0}}
   else if(!p.air){if(jp)jump()}
   else{
@@ -218,8 +218,8 @@ function steals(dt){const b=g.ball;if(b.st!=='held')return;const h=g.P[b.own],d=
   else d.st=Math.max(0,d.st-dt*2.5);h.st=0}
 function blocks(){const b=g.ball;let d=null,s=null;
   if(b.st==='held'){s=g.P[b.own];d=g.P[1-b.own];if(!(s.air&&s.shoot&&d.air))return}
-  else if(b.st==='shot'&&!b.live&&b.t<.7&&!b.dunk){s=g.P[b.sh];d=g.P[1-b.sh]}else return;
-  const hx=d.x+d.face*8,hy=d.y-PH-18;if(Math.hypot(b.x-hx,b.y-hy)>BR+(d.air?24:15))return;
+  else if(b.st==='shot'&&!b.live&&b.t<.9&&!b.dunk){s=g.P[b.sh];d=g.P[1-b.sh]}else return;
+  const hx=d.x+d.face*8,hy=d.y-PH-18;if(Math.hypot(b.x-hx,b.y-hy)>BR+(d.air?36:22))return;
   s.has=false;s.shoot=false;s.cd=.5;d.cd=.3;Object.assign(b,{st:'loose',live:true,own:-1,cd:.28,vx:(b.x>=d.x?1:-1)*(140+rnd()*120)+d.vx*.4,vy:-330});
   g.stat[d.i].blk++;g.shake=.45;pop('BLOCKED!',d.x,d.y-PH-44,TEAM[d.i].c,1.1);sfx('block')}
 function pickups(){const b=g.ball;if(b.cd>0||b.done||!(b.st==='loose'||(b.st==='shot'&&b.live)))return;let best=null;
@@ -339,7 +339,10 @@ function ticker(W){X.save();X.beginPath();X.rect(0,442,W,GY-442-4);X.clip();X.fo
 function drawCourt(W){const key=cv.width+'|'+W;if(BGK!==key){BGK=key;BGS=layer(W,k=>bgStatic(k,W));BGO=layer(W,k=>bgOver(k,W));BGF=layer(W,k=>bgFloor(k,W))}
   X.drawImage(BGS,0,0,W,H);crowd(W);X.drawImage(BGO,0,0,W,H);ticker(W);X.drawImage(BGF,0,0,W,H)}
 function drawHoopBack(hp,hi){const d=hp.dir,sx=Math.sin(g.t*62)*g.rd[hi]*2.5,dip=g.rd[hi]*7*(.5+.5*Math.sin(g.t*38));
-  let gr;
+  /* the board is bolted to a pole right behind it, standing on the floor with a padded base, so it does not float */
+  let gr=X.createLinearGradient(hp.bd-d*14,0,hp.bd-d*4,0);gr.addColorStop(0,'#3a4870');gr.addColorStop(.5,'#8fa0c6');gr.addColorStop(1,'#34426a');X.fillStyle=gr;X.fillRect(Math.min(hp.bd-d*14,hp.bd-d*4),RIMY-64,10,GY-RIMY+64);
+  X.fillStyle='#1b3d8f';RR(X,hp.bd-d*9-9,GY-84,18,84,5);X.fill();X.strokeStyle=INK;X.lineWidth=2;X.stroke();X.fillStyle='#f4f7fb';X.fillRect(hp.bd-d*9-9,GY-52,18,4);
+  X.fillStyle='#5b6c96';X.fillRect(Math.min(hp.bd-d*9,hp.bd),RIMY-60,10,10);X.fillRect(Math.min(hp.bd-d*9,hp.bd),RIMY+6,10,8);
   /* glass backboard with the target square */
   gr=X.createLinearGradient(0,RIMY-100,0,RIMY+10);gr.addColorStop(0,'rgba(235,246,255,.96)');gr.addColorStop(1,'rgba(176,205,235,.9)');X.fillStyle=gr;RR(X,hp.bd-4+sx,RIMY-100,8,110,3);X.fill();X.lineWidth=1.8;X.strokeStyle='#7e95bb';X.stroke();
   X.strokeStyle='#e04646';X.lineWidth=2;X.strokeRect(hp.bd-3+sx,RIMY-48,6,40);X.fillStyle='rgba(255,255,255,.7)';X.fillRect(hp.bd-d*1-1+sx,RIMY-96,2,60);
@@ -360,16 +363,15 @@ function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.
   if(p.stun>0)X.globalAlpha=.6+.4*Math.sin(g.t*40);
   X.save();X.translate(x,y);X.scale(PS,PS);X.translate(-x,-y);
   const up=p.gath||p.pump>0||p.dd||(p.shoot&&p.air)||p.dk>0,lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*5,bob=run?Math.abs(cs)*2.2:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*5:(p.dd&&!p.air?2.5:0);
-  const hipY=y-47+crouch-bob*.5,shY=y-77+crouch*1.1-bob,shX=x+lean,hx=shX+f*3,hy=shY-12.5,hipX=x+lean*.4;
-  /* two-bone limbs: the middle joint is solved from the two segment lengths, and a limb stretches up to 30% to reach a ball or the rim */
+  const hipY=y-48+crouch-bob*.5,shY=y-76+crouch*1.1-bob,shX=x+lean,hipX=x+lean*.4,hx=shX+f*3,hy=shY-15;
+  /* limbs are tapered outlines through several points; the middle joint of each is solved from the two bone lengths (a limb stretches up to 30% to reach the ball or rim) */
   const ik=(ax,ay,bx,by,l1,l2,side)=>{const dx=bx-ax,dy=by-ay,d=Math.hypot(dx,dy)||1,s=Math.min(1.3,Math.max(1,d/((l1+l2)*.985))),a1=l1*s,a2=l2*s,dd=Math.min(d,(a1+a2)*.985),a=(a1*a1-a2*a2+dd*dd)/(2*dd),h=Math.sqrt(Math.max(0,a1*a1-a*a)),ux=dx/d,uy=dy/d;return [ax+ux*a-uy*h*side,ay+uy*a+ux*h*side,ax+ux*dd,ay+uy*dd]};
-  /* a limb is a tapered outline through several points (thigh/calf, upper arm/forearm), not a stick */
-  const taper=(pts,hw,col)=>{const N=pts.length,nr=[];for(let i=0;i<N;i++){const a=pts[Math.max(0,i-1)],b2=pts[Math.min(N-1,i+1)],dx=b2[0]-a[0],dy=b2[1]-a[1],l=Math.hypot(dx,dy)||1;nr.push([-dy/l,dx/l])}
-    X.beginPath();for(let i=0;i<N;i++)X[i?'lineTo':'moveTo'](pts[i][0]+nr[i][0]*hw[i],pts[i][1]+nr[i][1]*hw[i]);for(let i=N-1;i>=0;i--)X.lineTo(pts[i][0]-nr[i][0]*hw[i],pts[i][1]-nr[i][1]*hw[i]);X.closePath();X.fillStyle=col;X.fill();X.lineJoin='round';X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();
-    X.beginPath();X.arc(pts[N-1][0],pts[N-1][1],hw[N-1],0,7);X.fillStyle=col;X.fill()};
+  const taper=(pts,hw,col,cap)=>{const N=pts.length,nr=[];for(let i=0;i<N;i++){const a=pts[Math.max(0,i-1)],b2=pts[Math.min(N-1,i+1)],dx=b2[0]-a[0],dy=b2[1]-a[1],l=Math.hypot(dx,dy)||1;nr.push([-dy/l,dx/l])}
+    X.beginPath();for(let i=0;i<N;i++)X[i?'lineTo':'moveTo'](pts[i][0]+nr[i][0]*hw[i],pts[i][1]+nr[i][1]*hw[i]);for(let i=N-1;i>=0;i--)X.lineTo(pts[i][0]-nr[i][0]*hw[i],pts[i][1]-nr[i][1]*hw[i]);X.closePath();X.fillStyle=col;X.fill();X.lineJoin='round';X.lineWidth=1.7;X.strokeStyle=INK;X.stroke();
+    if(cap){X.beginPath();X.arc(pts[N-1][0],pts[N-1][1],hw[N-1],0,7);X.fillStyle=col;X.fill()}};
   const lerp2=(a,b2,t)=>[a[0]+(b2[0]-a[0])*t,a[1]+(b2[1]-a[1])*t];
-  const armDraw=(S,E,col)=>{const r=ik(S[0],S[1],E[0],E[1],17,16,f),K=[r[0],r[1]],W=[r[2],r[3]];taper([S,lerp2(S,K,.5),K,lerp2(K,W,.4),W],[5,4.8,3.7,4,2.7],col);return W};
-  const handDraw=(W,col)=>{X.beginPath();X.arc(W[0],W[1],3.5,0,7);X.fillStyle=col;X.fill();X.lineWidth=1.5;X.strokeStyle=INK;X.stroke()};
+  const armDraw=(S,E,col)=>{const r=ik(S[0],S[1],E[0],E[1],17,16,f),K=[r[0],r[1]],W=[r[2],r[3]];taper([S,lerp2(S,K,.5),K,lerp2(K,W,.4),W],[5.4,5.2,3.9,4.3,2.8],col,true);return W};
+  const handDraw=(W,col)=>{X.beginPath();X.arc(W[0],W[1],3.6,0,7);X.fillStyle=col;X.fill();X.lineWidth=1.5;X.strokeStyle=INK;X.stroke()};
   /* hand targets (figure space) */
   let ax,ay,bx,by;
   if(p.dk>0){const hh=g.hp[p.dkh];if(b.dh>0){ax=x+(b.x-f*3-x)/PS;ay=y+(b.y+4-y)/PS;if(p.dkS===1){bx=x+(b.x+f*5-x)/PS;by=ay}else{bx=x-f*10;by=y-LH-4}}
@@ -380,39 +382,41 @@ function drawP(p){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.abs(p.
   else if(p.air){ax=x+f*15;ay=y-62;bx=x-f*11;by=y-58}
   else if(run){ax=x+sw*mv*16;ay=y-54-Math.abs(sw)*4;bx=x-sw*mv*16;by=y-54-Math.abs(sw)*4}
   else{ax=x+f*22;ay=y-66;bx=x+f*14;by=y-84}
-  const sF=[shX+f*8,shY+3],sB=[shX-f*8,shY+3];
-  /* back arm, then both legs */
-  handDraw(armDraw(sB,[bx,by],T.s2),T.s2);
-  for(const s of [-1,1]){let fx,fy;
+  const sF=[shX+f*9,shY+4],sB=[shX-f*9,shY+4];
+  /* legs: skin, sock, shoe, and the shorts leg wrapped round the thigh so the shorts move with the leg */
+  const leg=s=>{let fx,fy;
     if(p.air){fx=x+s*6-f*7*tuck*(s>0?1:.5);fy=y-4-tuck*(p.dk>0?9:15)*(s>0?1:.7)}
     else if(run){fx=x+s*sw*mv*21;fy=y-3-Math.max(0,s*cs)*11}
     else{fx=x+s*(7+crouch*.6);fy=y-3}
-    const hp=[hipX+s*4.5,hipY+2],r=ik(hp[0],hp[1],fx,fy,25,24,-f),col=s<0?T.s2:T.s;fx=r[2];fy=r[3];
-    {const Hp=[hp[0],hp[1]],Kn=[r[0],r[1]],An=[fx,fy];taper([Hp,lerp2(Hp,Kn,.5),Kn,lerp2(Kn,An,.32),An],[6.8,6.2,4.6,5.3,3.2],col)}
-    const sx0=fx+(r[0]-fx)*.34,sy0=fy+(r[1]-fy)*.34;X.strokeStyle='#f4f7fb';X.lineWidth=8;X.lineCap='round';X.beginPath();X.moveTo(sx0,sy0);X.lineTo(fx,fy);X.stroke();X.strokeStyle=T.c;X.lineWidth=8.2;X.beginPath();X.moveTo(sx0,sy0);X.lineTo(sx0+(fx-sx0)*.18,sy0+(fy-sy0)*.18);X.stroke();
-    X.beginPath();X.moveTo(fx-f*5.5,fy+3.6);X.lineTo(fx-f*5.5,fy-3);X.quadraticCurveTo(fx-f*2,fy-5.5,fx+f*3,fy-3.2);X.quadraticCurveTo(fx+f*9,fy-2,fx+f*12,fy+.8);X.lineTo(fx+f*12,fy+3.6);X.closePath();
-    X.fillStyle='#ffffff';X.fill();X.lineWidth=1.7;X.strokeStyle=INK;X.stroke();X.fillStyle=T.c;X.beginPath();X.moveTo(fx-f*1,fy-4);X.lineTo(fx+f*4,fy-2.6);X.lineTo(fx+f*2,fy+2);X.lineTo(fx-f*3,fy+2);X.fill();X.fillStyle=INK;X.fillRect(Math.min(fx-f*5.5,fx+f*12),fy+2.4,17.5,1.8)}
-  /* shorts */
-  shape([hipX-11,hipY-6,hipX+11,hipY-6,hipX+14.5,hipY+17,hipX+2.5,hipY+17,hipX,hipY+8,hipX-2.5,hipY+17,hipX-14.5,hipY+17],T.d,1.8);
-  X.fillStyle=T.c;X.fillRect(hipX+f*11-1.4,hipY-4,2.8,19);X.fillStyle=T.c2;X.fillRect(hipX-11,hipY-6.5,22,3);
+    const Hp=[hipX+s*4.5,hipY+1],r=ik(Hp[0],Hp[1],fx,fy,26,24,-f),Kn=[r[0],r[1]],An=[r[2],r[3]],col=s<0?T.s2:T.s;
+    taper([Hp,lerp2(Hp,Kn,.5),Kn,lerp2(Kn,An,.32),An],[7,6.5,4.8,5.5,3.4],col,true);
+    const sk=lerp2(An,Kn,.38);X.lineCap='round';X.strokeStyle=INK;X.lineWidth=9.6;X.beginPath();X.moveTo(sk[0],sk[1]);X.lineTo(An[0],An[1]);X.stroke();X.strokeStyle='#f4f7fb';X.lineWidth=7.6;X.beginPath();X.moveTo(sk[0],sk[1]);X.lineTo(An[0],An[1]);X.stroke();X.strokeStyle=T.c;X.lineWidth=7.8;X.beginPath();X.moveTo(sk[0],sk[1]);X.lineTo(sk[0]+(An[0]-sk[0])*.14,sk[1]+(An[1]-sk[1])*.14);X.stroke();
+    const sx=An[0],sy=An[1];X.beginPath();X.moveTo(sx-f*5.5,sy+3.8);X.lineTo(sx-f*5.5,sy-3);X.quadraticCurveTo(sx-f*2,sy-5.5,sx+f*3,sy-3.2);X.quadraticCurveTo(sx+f*9,sy-2,sx+f*12,sy+.8);X.lineTo(sx+f*12,sy+3.8);X.closePath();
+    X.fillStyle='#ffffff';X.fill();X.lineWidth=1.7;X.strokeStyle=INK;X.stroke();X.fillStyle=T.c;X.beginPath();X.moveTo(sx-f*1,sy-4);X.lineTo(sx+f*4,sy-2.6);X.lineTo(sx+f*2,sy+2);X.lineTo(sx-f*3,sy+2);X.fill();X.fillStyle=INK;X.fillRect(Math.min(sx-f*5.5,sx+f*12),sy+2.5,17.5,1.8);
+    const e1=lerp2(Hp,Kn,.46),e2=lerp2(Hp,Kn,.9);taper([Hp,e1,e2],[8.6,9.8,10.4],T.d,true);taper([lerp2(Hp,Kn,.8),e2],[10.1,10.4],T.c,false)};
+  handDraw(armDraw(sB,[bx,by],T.s2),T.s2);
+  leg(-1);
+  X.beginPath();X.moveTo(hipX-10.5,hipY-9);X.lineTo(hipX+10.5,hipY-9);X.lineTo(hipX+12,hipY+5);X.lineTo(hipX-12,hipY+5);X.closePath();X.fillStyle=T.d;X.fill();X.lineWidth=1.7;X.strokeStyle=INK;X.lineJoin='round';X.stroke();
+  leg(1);
   /* jersey (tank top) */
-  X.beginPath();X.moveTo(hipX-9.5,hipY-4);X.lineTo(hipX+9.5,hipY-4);X.lineTo(shX+13.5,shY+10);X.quadraticCurveTo(shX+15,shY+1,shX+8,shY-2.5);X.lineTo(shX-8,shY-2.5);X.quadraticCurveTo(shX-15,shY+1,shX-13.5,shY+10);X.closePath();
-  const jg=X.createLinearGradient(shX-13,0,shX+13,0);jg.addColorStop(f>0?0:1,T.c);jg.addColorStop(f>0?1:0,T.c2);X.fillStyle=jg;X.fill();X.lineWidth=1.9;X.strokeStyle=INK;X.lineJoin='round';X.stroke();
-  X.strokeStyle=T.d;X.lineWidth=2.2;X.beginPath();X.moveTo(shX-6,shY-2);X.quadraticCurveTo(shX,shY+6,shX+6,shY-2);X.stroke();
-  X.lineWidth=1.5;X.beginPath();X.moveTo(shX-13,shY+9);X.quadraticCurveTo(shX-11,shY+1,shX-8,shY-2.5);X.moveTo(shX+13,shY+9);X.quadraticCurveTo(shX+11,shY+1,shX+8,shY-2.5);X.stroke();
-  X.font='900 13px system-ui';X.textAlign='center';X.lineWidth=2.6;X.strokeStyle=T.c2;X.strokeText(T.num,shX+lean*.2+f*1,shY+20);X.fillStyle=T.d;X.fillText(T.num,shX+lean*.2+f*1,shY+20);
+  X.beginPath();X.moveTo(hipX-10.5,hipY-3);X.lineTo(hipX+10.5,hipY-3);X.lineTo(shX+14.5,shY+11);X.quadraticCurveTo(shX+16,shY+1,shX+8.5,shY-2.5);X.lineTo(shX-8.5,shY-2.5);X.quadraticCurveTo(shX-16,shY+1,shX-14.5,shY+11);X.closePath();
+  const jg=X.createLinearGradient(shX-15,0,shX+15,0);jg.addColorStop(f>0?0:1,T.c);jg.addColorStop(f>0?1:0,T.c2);X.fillStyle=jg;X.fill();X.lineWidth=1.9;X.strokeStyle=INK;X.lineJoin='round';X.stroke();
+  X.fillStyle=T.c2;X.fillRect(hipX-10.4,hipY-5.6,20.8,2.6);
+  X.strokeStyle=T.d;X.lineWidth=2.2;X.beginPath();X.moveTo(shX-6.5,shY-2);X.quadraticCurveTo(shX,shY+7,shX+6.5,shY-2);X.stroke();
+  X.lineWidth=1.5;X.beginPath();X.moveTo(shX-14,shY+10);X.quadraticCurveTo(shX-12,shY+1,shX-8.5,shY-2.5);X.moveTo(shX+14,shY+10);X.quadraticCurveTo(shX+12,shY+1,shX+8.5,shY-2.5);X.stroke();
+  X.font='900 13px system-ui';X.textAlign='center';X.lineWidth=2.6;X.strokeStyle=T.c2;X.strokeText(T.num,shX+lean*.2+f*1,shY+21);X.fillStyle=T.d;X.fillText(T.num,shX+lean*.2+f*1,shY+21);
   /* neck and head: a normal face with two eyes, looking the way the player faces */
-  X.fillStyle=T.s2;X.fillRect(hx-3.8,shY-9,7.6,8);
-  X.beginPath();X.arc(hx-f*7.2,hy+1.6,2.4,0,7);X.fillStyle=T.s2;X.fill();X.lineWidth=1.3;X.strokeStyle=INK;X.stroke();
-  X.beginPath();X.ellipse(hx,hy,8,8.6,0,0,7);X.fillStyle=T.s;X.fill();X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();
-  X.save();X.beginPath();X.ellipse(hx,hy,8,8.6,0,0,7);X.clip();X.fillStyle=T.hair;X.fillRect(hx-9,hy-9.5,18,6.8);X.fillRect(hx-f*9,hy-9.5,f*5.5,12);X.fillStyle=T.c;X.fillRect(hx-9,hy-4.3,18,2.6);X.restore();
-  X.beginPath();X.ellipse(hx,hy,8,8.6,0,0,7);X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();
-  const ex=hx+f*2.4,ey=hy+2,look=f*.7;
-  for(const s2 of [-1,1]){const px=ex+s2*3.2;X.fillStyle='#fff';X.beginPath();X.ellipse(px,ey,1.9,2.1,0,0,7);X.fill();X.fillStyle=INK;X.beginPath();X.arc(px+look,ey+.2,1.2,0,7);X.fill();
-    X.lineWidth=1.2;X.lineCap='round';X.beginPath();X.moveTo(px-1.9,ey-3.1-(up||(p.air&&!p.has)?.7:0));X.lineTo(px+1.9,ey-3.4-(up||(p.air&&!p.has)?.7:0));X.stroke()}
+  X.fillStyle=T.s2;X.fillRect(hx-4,shY-11,8,10);
+  X.beginPath();X.arc(hx-f*7.4,hy+1.8,2.5,0,7);X.fillStyle=T.s2;X.fill();X.lineWidth=1.3;X.strokeStyle=INK;X.stroke();
+  X.beginPath();X.ellipse(hx,hy,8.4,9.2,0,0,7);X.fillStyle=T.s;X.fill();X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();
+  X.save();X.beginPath();X.ellipse(hx,hy,8.4,9.2,0,0,7);X.clip();X.fillStyle=T.hair;X.fillRect(hx-9,hy-10,18,7.4);X.fillRect(hx-f*9,hy-10,f*5.8,13);X.fillStyle=T.c;X.fillRect(hx-9,hy-4.6,18,2.7);X.restore();
+  X.beginPath();X.ellipse(hx,hy,8.4,9.2,0,0,7);X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();
+  const ex=hx+f*2.5,ey=hy+2.2,look=f*.7;
+  for(const s2 of [-1,1]){const px=ex+s2*3.3;X.fillStyle='#fff';X.beginPath();X.ellipse(px,ey,1.9,2.1,0,0,7);X.fill();X.fillStyle=INK;X.beginPath();X.arc(px+look,ey+.2,1.2,0,7);X.fill();
+    X.strokeStyle=INK;X.lineWidth=1.2;X.lineCap='round';const lift=(up||(p.air&&!p.has))?.7:0;X.beginPath();X.moveTo(px-1.9,ey-3.1-lift);X.lineTo(px+1.9,ey-3.4-lift);X.stroke()}
   X.strokeStyle='rgba(60,30,10,.7)';X.lineWidth=1.1;X.beginPath();X.moveTo(ex+f*.8,ey+1.2);X.lineTo(ex+f*1.8,ey+3.6);X.lineTo(ex-f*.4,ey+3.9);X.stroke();
-  X.strokeStyle=INK;X.lineWidth=1.3;X.beginPath();if(p.en<.25){X.ellipse(ex+f*.4,hy+6.6,1.7,1.4,0,0,7)}else{X.moveTo(ex-2.4,hy+6.1);X.quadraticCurveTo(ex+f*.4,hy+7.6,ex+2.4,hy+6.1)}X.stroke();
-  if(p.en<.25&&!p.air){X.fillStyle='rgba(140,210,255,.95)';for(const k of [0,1]){const a=(g.t*1.6+k*.5)%1;X.beginPath();X.arc(hx-f*(6+k*4),hy-4+a*11,1.5,0,7);X.fill()}}
+  X.strokeStyle=INK;X.lineWidth=1.3;X.beginPath();if(p.en<.25){X.ellipse(ex+f*.4,hy+6.9,1.7,1.4,0,0,7)}else{X.moveTo(ex-2.4,hy+6.4);X.quadraticCurveTo(ex+f*.4,hy+7.9,ex+2.4,hy+6.4)}X.stroke();
+  if(p.en<.25&&!p.air){X.fillStyle='rgba(140,210,255,.95)';for(const k of [0,1]){const a=(g.t*1.6+k*.5)%1;X.beginPath();X.arc(hx-f*(7+k*4),hy-4+a*12,1.5,0,7);X.fill()}}
   /* front arm on top */
   handDraw(armDraw(sF,[ax,ay],T.s),T.s);
   X.restore();X.lineCap='butt';X.globalAlpha=1;
