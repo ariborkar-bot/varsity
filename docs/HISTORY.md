@@ -524,3 +524,6 @@ Active picks (Predict tab) made compact: smaller logos/text/row padding, shows 3
 
 ## Hoops Battle v11
 Blocks: a defender already coming down (vy>110, or any descent while the shooter is still rising) cannot block; air hit radius BR+30 (was 36); hard AI block odds .28. AI under pressure (`m.pr`, `D.pw` weights shoot/fake/back/push) picks one of: shoot over him, pump fake, back away for room, or push through, instead of always shooting.
+
+## Hoops Battle v12
+Run speed scales with energy over the whole range: x(.68+.4*energy), so full energy is 10% faster than base and empty is 32% slower (was only slower below 30% energy).
