@@ -134,7 +134,7 @@ function audio(){if(AC||muted)return;try{AC=new (window.AudioContext||window.web
 function tone(f,d,type,v,slide){if(!AC||muted)return;try{const t=AC.currentTime,o=AC.createOscillator(),a=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);a.gain.setValueAtTime(v||.12,t);a.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(a).connect(AC.destination);o.start(t);o.stop(t+d)}catch(_){}}
 function noise(d,v){if(!AC||muted)return;try{const n=AC.sampleRate*d,b=AC.createBuffer(1,n,AC.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(rnd()*2-1)*(1-i/n);const s=AC.createBufferSource(),a=AC.createGain(),f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=1800;a.gain.value=v||.18;s.buffer=b;s.connect(f).connect(a).connect(AC.destination);s.start()}catch(_){}}
 const SFX={bounce:()=>tone(150,.07,'sine',.16,70),rim:()=>tone(520,.09,'triangle',.1,300),swish:()=>noise(.28,.22),jump:()=>tone(260,.08,'sine',.05,420),slam:()=>{tone(95,.26,'square',.2,40);noise(.2,.24)},block:()=>{tone(110,.14,'square',.14,60);noise(.08,.12)},steal:()=>tone(700,.1,'square',.07,1100),buzz:()=>tone(160,.7,'sawtooth',.13,150),perfect:()=>tone(880,.12,'sine',.1,1320),whistle:()=>tone(1900,.18,'square',.05,1700)};
-const NET={on:false,role:'',pc:null,ch:null,un:null,up:false,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null,t0:0};
+const NET={on:false,role:'',sb:null,lb:null,mc:null,partner:'',up:false,last:0,lastIn:'',lastInT:0,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null,t0:0};
 const sfx=n=>{if(NET.on&&NET.role==='host')NET.snd.push(n);if(SFX[n])SFX[n]()};
 
 /* ---------------- game state ---------------- */
@@ -505,10 +505,11 @@ function buildCtl(){const c=document.getElementById('ctl'),two=OPT.mode==='2p',b
 /* ---------------- loop ---------------- */
 let last=0,acc=0;
 function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1000||0);last=ts;
-  if(NET.on&&NET.role==='guest'){if(g)netGuest(dt);draw();return}
+  if(NET.on&&NET.role==='guest'){if(g)netGuest(dt);if(NET.on&&performance.now()-NET.last>9000)netLost('Lost contact with your opponent.');draw();return}
   if(g&&g.slo>0)g.slo-=dt;if(g&&g.freeze>0){g.freeze-=dt;acc=0}
   else if(g&&!paused&&g.phase!=='over'&&document.getElementById('rot').hidden){acc+=dt*(g.slo>0?.42:1);let n=0;while(acc>=TICK&&n<5){acc-=TICK;n++;step(TICK,[human(0),OPT.mode==='ai'?ai(g.P[1],TICK):OPT.mode==='on'?NET.in:human(1)])}if(n===5)acc=0}
-  if(NET.on&&NET.role==='host'&&g){NET.acc+=dt;if(NET.acc>=1/30){NET.acc=0;netSend()}}
+  if(NET.on&&NET.role==='host'&&g){NET.acc+=dt;if(NET.acc>=1/20){NET.acc=0;netSend()}}
+  if(NET.on&&performance.now()-NET.last>9000)netLost('Lost contact with your opponent.');
   draw()}
 function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NET.up&&NET.role==='host'){netStart();return}netOpen();return}audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT},VW);fit();paused=false;acc=0;
   for(const id of ['menu','end','pause'])document.getElementById(id).hidden=true;buildCtl();
@@ -533,61 +534,52 @@ const sndB=document.getElementById('snd'),sndPaint=()=>{sndB.textContent=muted?'
 sndB.addEventListener('click',()=>{muted=!muted;if(!muted)audio();sndPaint();try{localStorage.setItem('hb-mute',muted?'1':'0')}catch(_){}});
 addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));fit();requestAnimationFrame(frame);
 
-/* ---------------- v25 online: two phones, peer to peer (WebRTC), no server. The players swap two codes by text message. ----------------
-   The host phone runs the whole game (step) and sends a snapshot about 30 times a second; the guest sends its {l,r,j} 60 times a second and draws the snapshots.
-   The host is player 1 (left, attacks right), the guest is player 2. Both use a 1100 wide court. */
+/* ---------------- v28 online: two phones through a public Supabase Realtime channel (no direct phone-to-phone link, so it works on any network) ----------------
+   Matchmaking: everybody who taps Find opponent joins one lobby channel (presence). Waiting players are sorted by id and paired two by two; the lower id hosts.
+   The host opens a private match channel and tells its partner; from then on every message goes through that channel.
+   The host phone runs the whole game (step) and sends a snapshot about 20 times a second; the guest sends its {l,r,j} when it changes (and every 150 ms) and draws the
+   snapshots. The host is player 1 (left, attacks right), the guest is player 2. Both use a 1100 wide court. */
 const NETW=1100,SNAPK=['P','ball','score','clock','sc','phase','dead','next','hold','pop','fx','shake','net','rd','ot','stat','started','slo','freeze','zm','zx','fl','t','tip'];
-const el=id=>document.getElementById(id);
-function netReset(){try{if(NET.sb&&NET.lb)NET.sb.removeChannel(NET.lb)}catch(_){}NET.sb=NET.lb=null;NET.partner='';clearTimeout(NET.to);try{if(NET.ch&&NET.ch.readyState==='open')NET.ch.send(JSON.stringify({k:'bye'}))}catch(_){}
-  for(const k of ['ch','un'])try{NET[k]&&NET[k].close()}catch(_){}try{NET.pc&&NET.pc.close()}catch(_){}
-  Object.assign(NET,{on:false,role:'',pc:null,ch:null,un:null,up:false,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null})}
-function netLost(){if(!NET.pc&&!NET.on)return;const was=NET.on;netReset();if(was){g=null;for(const id of ['end','pause','net'])el(id).hidden=true;el('menu').hidden=true;for(const id of ['ctl','pz','snd'])el(id).classList.remove('on');fit();netOpen()}
-  el('n-msg').textContent='The connection ended.'}
-function netOpen(){el('menu').hidden=true;el('net').hidden=false;netReset();netFind()}
-function mkPC(){const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},
-    /* v27: phones on different networks (mobile data especially) usually cannot reach each other directly, so a public relay (TURN) is added as the fallback */
-    {urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp','turns:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]});NET.pc=pc;
-  pc.oniceconnectionstatechange=()=>{const m=el('n-msg');if(m&&!NET.on)m.textContent='Opponent found. Connecting... ('+pc.iceConnectionState+')'};
-  pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState)||(pc.connectionState==='disconnected'&&NET.on))netLost()};return pc}
-const gathered=pc=>new Promise(r=>{if(pc.iceGatheringState==='complete')return r();const f=()=>{if(pc.iceGatheringState==='complete'){pc.removeEventListener('icegatheringstatechange',f);r()}};pc.addEventListener('icegatheringstatechange',f);setTimeout(r,4500)});
-function wire(){for(const k of ['ch','un']){const c=NET[k];if(!c||c._w)continue;c._w=1;c.onmessage=netMsg;c.onclose=()=>{if(NET.up||NET.on)netLost()};
-  c.onopen=()=>{if(NET.ch&&NET.ch.readyState==='open'&&NET.un&&NET.un.readyState==='open'&&!NET.up){NET.up=true;try{if(NET.sb&&NET.lb)NET.sb.removeChannel(NET.lb)}catch(_){}clearTimeout(NET.to);if(NET.role==='host')netStart();else el('n-msg').textContent='Connected. Starting...'}};
-  if(c.readyState==='open')c.onopen()}}
-/* matchmaking: everybody who taps Find Opponent joins one public Supabase Realtime channel (broadcast + presence, no tables). Waiting players are sorted by id and
-   paired two by two; the lower id of a pair hosts. The offer and answer travel over the channel, then the phones talk directly and the channel is closed. */
 const SB_URL='https://urdkamhsdjhzhrjwzyoq.supabase.co',SB_KEY='sb_publishable_Kwc2VdtM1AbcKB7xgsOhlw_KOw02EOb';
+const el=id=>document.getElementById(id);
+function netTx(o){try{NET.mc&&NET.mc.send({type:'broadcast',event:'g',payload:o})}catch(_){}}
+function netReset(){if(NET.mc)netTx({k:'bye'});try{if(NET.sb){NET.lb&&NET.sb.removeChannel(NET.lb);NET.mc&&NET.sb.removeChannel(NET.mc)}}catch(_){}
+  Object.assign(NET,{on:false,role:'',sb:null,lb:null,mc:null,partner:'',up:false,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null,last:0,lastIn:'',lastInT:0})}
+function netLost(msg){const was=NET.on;netReset();if(was){g=null;for(const id of ['end','pause','net'])el(id).hidden=true;el('menu').hidden=true;for(const id of ['ctl','pz','snd'])el(id).classList.remove('on');fit();netOpen(false)}
+  el('n-msg').textContent=msg||'The connection ended.'}
+function netOpen(find=true){el('menu').hidden=true;el('net').hidden=false;if(find){netReset();netFind()}}
 async function sbLib(){if(window.supabase&&window.supabase.createClient)return true;
   for(const u of ['../../vendor/supabase.min.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js','https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js']){
     const ok=await new Promise(r=>{const x=document.createElement('script');x.src=u;x.onload=()=>r(true);x.onerror=()=>r(false);document.head.appendChild(x)});if(ok&&window.supabase&&window.supabase.createClient)return true}return false}
 async function netFind(){const msg=t=>{el('n-msg').textContent=t};msg('Connecting...');
   if(!await sbLib()){msg('Could not load the matchmaking library. Check your connection.');return}
-  const me=Math.random().toString(36).slice(2,10),sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
-  const ch=sb.channel('hb-lobby-v1',{config:{presence:{key:me},broadcast:{self:false}}});NET.sb=sb;NET.lb=ch;NET.me=me;NET.partner='';
-  const say=p=>ch.send({type:'broadcast',event:'sig',payload:{...p,from:me}});
-  const retry=()=>{NET.partner='';try{NET.pc&&NET.pc.close()}catch(_){}NET.pc=NET.ch=NET.un=null;NET.up=false;msg('Searching for an opponent...');pair()};
-  async function offerTo(p){NET.partner=p;NET.role='host';msg('Opponent found. Connecting...');const pc=mkPC();NET.ch=pc.createDataChannel('c');NET.un=pc.createDataChannel('u',{ordered:false,maxRetransmits:0});wire();
-    await pc.setLocalDescription(await pc.createOffer());await gathered(pc);say({k:'offer',to:p,d:pc.localDescription.sdp});NET.to=setTimeout(()=>{if(!NET.up)retry()},30000)}
-  function pair(){if(NET.partner)return;const ids=Object.keys(ch.presenceState()).sort(),i=ids.indexOf(me);if(i<0||ids.length<2)return;
-    if(i%2===0&&ids[i+1])offerTo(ids[i+1])}
-  ch.on('presence',{event:'sync'},pair).on('broadcast',{event:'sig'},async({payload:m})=>{if(!m||m.to!==me)return;
-    if(m.k==='offer'&&!NET.partner){NET.partner=m.from;NET.role='guest';msg('Opponent found. Connecting...');const pc=mkPC();pc.ondatachannel=e=>{if(e.channel.label==='c')NET.ch=e.channel;else NET.un=e.channel;wire()};
-      await pc.setRemoteDescription({type:'offer',sdp:m.d});await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);say({k:'answer',to:m.from,d:pc.localDescription.sdp});
-      NET.to=setTimeout(()=>{if(!NET.up)retry()},30000)}
-    else if(m.k==='answer'&&NET.role==='host'&&m.from===NET.partner&&NET.pc&&!NET.pc.currentRemoteDescription)await NET.pc.setRemoteDescription({type:'answer',sdp:m.d})})
-   .subscribe(async st=>{if(st==='SUBSCRIBED'){msg('Searching for an opponent...');await ch.track({at:Date.now()})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the matchmaking server. Try again in a moment.')})}
-function netBegin(len){NET.on=true;OPT.mode='on';NET.ended=false;NET.acc=0;NET.in={l:false,r:false,j:false};NET.from=NET.tg=null;const host=NET.role==='host';
+  const me=Math.random().toString(36).slice(2,10),sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false},realtime:{params:{eventsPerSecond:60}}});
+  const lob=sb.channel('hb-lobby-v2',{config:{presence:{key:me},broadcast:{self:false}}});NET.sb=sb;NET.lb=lob;NET.partner='';
+  const joinMatch=(name,role,partner)=>{NET.partner=partner;NET.role=role;msg('Opponent found. Joining the match...');
+    const mc=sb.channel(name,{config:{broadcast:{self:false,ack:false}}});NET.mc=mc;
+    mc.on('broadcast',{event:'g'},({payload:m})=>{if(m)netMsg(m)}).subscribe(st=>{
+      if(st==='SUBSCRIBED'){if(role==='guest')netTx({k:'ready'})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the matchmaking server. Try again in a moment.')});
+    setTimeout(()=>{if(!NET.on&&NET.mc===mc){try{sb.removeChannel(mc)}catch(_){}NET.mc=null;NET.partner='';NET.role='';msg('Searching for an opponent...');pair()}},12000)};
+  function pair(){if(NET.partner)return;const ids=Object.keys(lob.presenceState()).sort(),i=ids.indexOf(me);if(i<0||ids.length<2)return;
+    if(i%2===0&&ids[i+1]){const p=ids[i+1],name='hb-m-'+me+'-'+p;joinMatch(name,'host',p);setTimeout(()=>lob.send({type:'broadcast',event:'sig',payload:{to:p,from:me,ch:name}}),600)}}
+  lob.on('presence',{event:'sync'},pair).on('broadcast',{event:'sig'},({payload:m})=>{if(m&&m.to===me&&!NET.partner)joinMatch(m.ch,'guest',m.from)})
+    .subscribe(async st=>{if(st==='SUBSCRIBED'){msg('Searching for an opponent...');await lob.track({at:Date.now()})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the matchmaking server. Try again in a moment.')})}
+function netBegin(len){NET.on=true;NET.up=true;OPT.mode='on';NET.ended=false;NET.acc=0;NET.in={l:false,r:false,j:false};NET.from=NET.tg=null;NET.last=performance.now();const host=NET.role==='host';
+  try{NET.lb&&NET.sb.removeChannel(NET.lb)}catch(_){}NET.lb=null;
   TEAM[0].n=host?'YOU':'FRIEND';TEAM[1].n=host?'FRIEND':'YOU';newGame({mode:'on',diff:'med',len},NETW);fit();paused=false;acc=0;
   for(const id of ['menu','end','pause','net'])el(id).hidden=true;buildCtl();el('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);el('pz').classList.remove('on');el('snd').classList.add('on')}
-function netStart(){audio();try{NET.ch.send(JSON.stringify({k:'go',len:OPT.len}))}catch(_){}netBegin(OPT.len)}
-function netSend(){if(!NET.un||NET.un.readyState!=='open')return;const o={};for(const k of SNAPK)o[k]=g[k];try{NET.un.send(JSON.stringify({k:'s',g:o,snd:NET.snd.splice(0)}))}catch(_){}}
-function netMsg(e){let m;try{m=JSON.parse(e.data)}catch(_){return}
-  if(m.k==='go'&&NET.role==='guest'){audio();netBegin(m.len)}
-  else if(m.k==='bye')netLost();
+function netStart(){audio();netTx({k:'go',len:OPT.len});netBegin(OPT.len)}
+function netSend(){const o={};for(const k of SNAPK)o[k]=g[k];netTx({k:'s',g:o,snd:NET.snd.splice(0)})}
+function netMsg(m){NET.last=performance.now();
+  if(m.k==='ready'&&NET.role==='host'&&!NET.on){netStart()}
+  else if(m.k==='go'&&NET.role==='guest'){audio();netBegin(m.len)}
+  else if(m.k==='bye'){if(NET.on)netLost();else{NET.partner='';NET.mc=null}}
   else if(m.k==='i'&&NET.role==='host'){NET.in=m.i}
   else if(m.k==='s'&&NET.role==='guest'&&g){const from={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};Object.assign(g,m.g);
     NET.from=from;NET.tg={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};NET.t0=performance.now();for(const n of m.snd||[])sfx(n)}}
-function netGuest(dt){NET.si+=dt;if(NET.si>=1/60){NET.si=0;if(NET.un&&NET.un.readyState==='open'&&el('rot').hidden)try{NET.un.send(JSON.stringify({k:'i',i:human(0)}))}catch(_){}}
-  if(NET.from&&NET.tg){const k=Math.min(1,(performance.now()-NET.t0)/50);g.P.forEach((p,i)=>{p.x=NET.from.P[i].x+(NET.tg.P[i].x-NET.from.P[i].x)*k;p.y=NET.from.P[i].y+(NET.tg.P[i].y-NET.from.P[i].y)*k});
+function netGuest(dt){const now=performance.now(),inp=el('rot').hidden?human(0):{l:false,r:false,j:false},key=(inp.l?1:0)+''+(inp.r?1:0)+(inp.j?1:0);
+  if(key!==NET.lastIn||now-NET.lastInT>150){NET.lastIn=key;NET.lastInT=now;netTx({k:'i',i:{l:!!inp.l,r:!!inp.r,j:!!inp.j}})}
+  if(NET.from&&NET.tg){const k=Math.min(1,(now-NET.t0)/70);g.P.forEach((p,i)=>{p.x=NET.from.P[i].x+(NET.tg.P[i].x-NET.from.P[i].x)*k;p.y=NET.from.P[i].y+(NET.tg.P[i].y-NET.from.P[i].y)*k});
     g.ball.x=NET.from.b.x+(NET.tg.b.x-NET.from.b.x)*k;g.ball.y=NET.from.b.y+(NET.tg.b.y-NET.from.b.y)*k}
   if(g.phase==='over'&&!NET.ended){NET.ended=true;onEnd()}}
 el('n-back').addEventListener('click',()=>{netReset();el('net').hidden=true;el('menu').hidden=false});

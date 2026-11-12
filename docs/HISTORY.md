@@ -574,3 +574,6 @@ Replaced the code swap with "Find opponent": both players join one public Supaba
 
 ## Hoops Battle v27
 WebRTC now also has a public TURN relay (openrelay.metered.ca) and shows the ICE state while connecting, because two phones on different networks could be matched but not connect with STUN alone. Gather wait 4.5 s, retry after 30 s.
+
+## Hoops Battle v28
+Online play no longer uses WebRTC (it failed between real phones). After matchmaking (lobby channel `hb-lobby-v2`) the host opens a private channel `hb-m-<host>-<guest>` on the same Supabase Realtime and all game traffic goes through it: host snapshots 20 Hz, guest inputs on change plus every 150 ms, 9 s silence = connection lost. About 100-250 ms of delay is normal. Tested against a fake in-browser relay only.
