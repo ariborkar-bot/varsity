@@ -138,7 +138,7 @@ class MaxPrepsAdapter(Adapter):
             print('  crawled %d teams, %d games, %d rows rejected%s' % (rep['teams_crawled'], len(g), rep['rejects'], ', STOPPED: ' + rep['blocked'] if rep['blocked'] else ''))
             blocked = blocked or rep['blocked']
             for sid, t in teams.items():
-                if names is None or M.norm(t['name']) in names:
+                if t.get('state') == 'CA' and (names is None or M.norm(t['name']) in names):
                     schools[sid] = {'id': sid, 'name': t['name'], 'city': t['city'], 'section': t.get('section'), 'league': t.get('league'), 'division': t.get('division')}
             games.update(g)
         return {'section': section, 'source': 'maxpreps', 'schools': list(schools.values()), 'players': [], 'games': list(games.values()), 'lines': [],
