@@ -224,6 +224,6 @@ def crawl(seeds, sport, names=None, state='CA', max_teams=300, fetcher=None, log
                 report['skipped_not_in_names'] += 1
                 continue
             queue.append(t['url'])
-        log('  %s: %d games (%d rows rejected), queue %d' % (url.split('/maxpreps.com')[-1], len(gs), len(rej), len(queue)))
+        log('  %s: %d games (%d rows rejected), queue %d%s' % (url.split('/maxpreps.com')[-1], len(gs), len(rej), len(queue), (' REJECTED: ' + '; '.join('%s %s' % r for r in rej[:3])) if rej else ''))
     report['teams_crawled'] = len(seen)
     return teams, games, report
