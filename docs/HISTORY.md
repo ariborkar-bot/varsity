@@ -595,3 +595,6 @@ Owner: Compare players is back to how it was before v430 (no fixed-height search
 
 ## v461
 Owner: football 5 Card Draw pays on the Friday after the week's last game (Pacific date, `fcFriday`, `fcPastFriday`) even if stats or scores are missing; a missing line counts as 0. `fcWeekDone` returns true from that Friday, which also releases the packs, tokens and School Cup rewards for that week. Week 12 (games Nov 6) pays Fri Nov 13. Basketball daily hands are unchanged.
+
+## v462
+Owner: basketball 5 Card Draw day hands pay when every stat is in, or 7 days after the game day at the latest (`fcDayLate`, in `fcDayDone`); missing lines count as 0. Football rule (v461) unchanged.

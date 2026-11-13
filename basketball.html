@@ -6747,11 +6747,13 @@ function fcWaiting(w,only){let n=0;const seen=new Set();for(const u of Object.ke
 const fcFriday=w=>{const ds=(fcIdx().w[w]||[]).map(g=>g.d).filter(Boolean).sort();if(!ds.length)return '';const d=new Date(ds[ds.length-1]+'T12:00:00Z'),add=((5-d.getUTCDay()+7)%7)||7;return new Date(d.getTime()+add*864e5).toISOString().slice(0,10)};
 const fcPastFriday=w=>{if(FC_DAILY)return false;const f=fcFriday(w);return !!f&&TODAY()>=f};
 function fcWeekDone(w){const gs=fcIdx().w[w]||[];if(!gs.length)return w<CURW();if(fcPastFriday(w))return true;if(!gs.every(gDone))return false;return fcWaiting(w)===0}
-const fcWaitNote=w=>{const gs=fcGamesOf(w);if(!gs.length||!gs.every(gDone))return '';const n=FC_DAILY?fcWaiting(null,w):fcWaiting(w);return n?`<p class="hint">Prizes pay out once every player in every hand has a stat line (a player who didn’t play counts as 0), or on the Friday after the week’s last game, whichever comes first. Waiting on ${n} ${n===1?'player':'players'}.</p>`:''};
+const fcWaitNote=w=>{const gs=fcGamesOf(w);if(!gs.length||!gs.every(gDone))return '';const n=FC_DAILY?fcWaiting(null,w):fcWaiting(w);return n?`<p class="hint">Prizes pay out once every player in every hand has a stat line (a player who didn’t play counts as 0), or ${FC_DAILY?'a week after the game day':'on the Friday after the week’s last game'}, whichever comes first. Waiting on ${n} ${n===1?'player':'players'}.</p>`:''};
 /* v319 (owner): basketball 5 Card Draw prizes are DAILY: each game day has its own board (that day's hands), paid once every game that day is final and every hand player has a line.
    The prize unit is the slot (the day number in basketball, the week in football); fcLbWeeks lists the last finished units. The School Cup stays weekly (fcWeekDone / fcRank). */
 const FC_LB_DAYS=7;
-function fcDayDone(s){const gs=fcGamesOf(s);if(!gs.length||!gs.every(gDone))return false;return fcWaiting(null,s)===0}
+/* v462 (owner): basketball 5 Card Draw pays once every stat is in, or a week after the game day at the latest (a missing line counts as 0) */
+const fcDayLate=s=>{const d=dayOf(s);return !!d&&TODAY()>=new Date(new Date(d+'T12:00:00Z').getTime()+7*864e5).toISOString().slice(0,10)};
+function fcDayDone(s){const gs=fcGamesOf(s);if(!gs.length)return false;if(fcDayLate(s))return true;if(!gs.every(gDone))return false;return fcWaiting(null,s)===0}
 const fcPrizeRank=s=>FC_DAILY?Object.keys(S.picks).filter(u=>fcHand(u,s)).map(u=>({u,t:fcScore(u,s)})).sort((a,b)=>b.t-a.t||(a.u<b.u?-1:1)):fcRank(s);
 const fcLbWeeks=()=>{const out=[];
   if(FC_DAILY){for(const d of Object.keys(fcIdx().d).sort().reverse()){const s=dayNo(d);if(s<FC_LB_START)break;if(fcDayDone(s)){out.push(s);if(out.length>=FC_LB_DAYS)break}}return out}
