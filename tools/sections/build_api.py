@@ -11,12 +11,16 @@ Layout (sport is fb or bb):
   sections/<id>/<sport>/games.json            every game
   sections/<id>/<sport>/weeks/<monday>.json   one week of games (Monday's date)
   sections/<id>/<sport>/teams/<team id>.json  one team: record and its games ("mp:123" is written as mp-123)
+  sections/<id>/<sport>/players.json          top 500 players by fantasy points (from data/players, see players.py); `columns` names each array slot
 Everything is rebuilt from scratch on each run, so a removed team or game disappears. Output is deterministic (sorted keys, no timestamps
 except the source's own), so an unchanged data set produces no git diff. See docs/API.md."""
 import argparse, datetime, json, os, shutil, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, HERE)
+import players as PL  # noqa: E402
+TOP = 500   # players per section and sport in players.json
 SPORTS = ('fb', 'bb')
 VERSION = 1
 
@@ -87,10 +91,32 @@ def build_sport(sec, sport, out):
     return {'teams': len(T), 'games': len(games), 'played': sum(1 for g in games if final(g)), 'weeks': len(weeks)}
 
 
+def build_players(sec_id, sport, src, out):
+    """players.json: the TOP players by fantasy points, as arrays [name, school, pos, games, fp, v1, v2 ...] in `keys` order (smaller than objects)."""
+    p = os.path.join(src, '%s.%s.json' % (sec_id, sport))
+    if not os.path.exists(p):
+        return None
+    pl = json.load(open(p, encoding='utf-8'))['players']
+    keys = PL.KEYS[sport]
+    rows = []
+    for cid, e in pl.items():
+        t = e['t']
+        rows.append((PL.fantasy(t, sport), e, t, cid))
+    rows.sort(key=lambda r: (-r[0], r[1]['n']))
+    body = [[e['n'], e['s'], (PL.guess_pos(t) if sport == 'fb' else None), e['g'], fp] + [t.get(k, 0) for k in keys] for fp, e, t, cid in rows[:TOP]]
+    base = os.path.join(out, 'sections', sec_id, sport)
+    os.makedirs(base, exist_ok=True)
+    with open(os.path.join(base, 'players.json'), 'w', encoding='utf-8') as f:
+        json.dump({'section': sec_id, 'sport': sport, 'total': len(rows), 'keys': keys, 'columns': ['name', 'school', 'pos', 'games', 'fp'] + keys, 'players': body},
+                  f, sort_keys=True, ensure_ascii=False, separators=(',', ':'))
+    return len(rows)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument('--data', default=os.path.join(ROOT, 'data', 'sections'))
     ap.add_argument('--out', default=os.path.join(ROOT, 'api', 'v1'))
+    ap.add_argument('--players', default=os.path.join(ROOT, 'data', 'players'))
     a = ap.parse_args(argv)
     if not os.path.isdir(a.data):
         print('no data folder at %s; nothing to build' % a.data)
@@ -105,6 +131,10 @@ def main(argv=None):
         sec.setdefault('section', fn[:-5])
         updated = max(updated, sec.get('synced') or '')
         info = {s: build_sport(sec, s, a.out) for s in SPORTS}
+        for s in SPORTS:
+            np = build_players(sec['section'], s, a.players, a.out)
+            if np:
+                (info.get(s) or info.setdefault(s, {'teams': 0, 'games': 0, 'played': 0, 'weeks': 0}))['players'] = np
         info = {s: v for s, v in info.items() if v}
         if info:
             idx[sec['section']] = {'id': sec['section'], 'partial': bool(sec.get('partial')), 'sports': info,
