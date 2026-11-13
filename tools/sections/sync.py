@@ -2,7 +2,8 @@
 """Sync one section's data from an adapter into data/sections/<section>.json.
 
     python3 tools/sections/sync.py southern --adapter mock --out /tmp/sections     test run with fake data
-    python3 tools/sections/sync.py southern --adapter feed                         the real run (needs FeedAdapter written)
+    python3 tools/sections/sync.py san-diego --adapter maxpreps --dry-run          read MaxPreps (run on the owner's computer)
+    python3 tools/sections/sync.py southern --adapter feed                         a licensed feed (FeedAdapter is not written yet)
     python3 tools/sections/sync.py southern --coverage                             coverage report only
 
 Rules:
@@ -21,6 +22,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('section')
     ap.add_argument('--adapter', default='feed', choices=sorted(L.ADAPTERS))
+    ap.add_argument('--delay', type=float, default=2.0, help='maxpreps: seconds between requests')
+    ap.add_argument('--cache', default=os.path.expanduser('~/.varsity-cache/maxpreps'), help='maxpreps: raw schedule cache folder')
+    ap.add_argument('--max-teams', type=int, default=300, help='maxpreps: most team pages per sport')
+    ap.add_argument('--max-age-h', type=float, default=12, help='maxpreps: reuse cached pages younger than this')
+    ap.add_argument('--seeds', default=None, help='maxpreps: seeds file (default tools/sections/seeds/<section>.txt)')
     ap.add_argument('--sport', default='both', choices=['fb', 'bb', 'both'])
     ap.add_argument('--out', default=L.DATA_DIR)
     ap.add_argument('--dry-run', action='store_true')
@@ -46,7 +52,12 @@ def main():
         if a.adapter == 'mock' and os.path.abspath(a.out).startswith(os.path.abspath(L.DATA_DIR)):
             print('refusing: the mock adapter may not write into data/sections (use --out elsewhere)'); return 2
         sports = ['fb', 'bb'] if a.sport == 'both' else [a.sport]
-        ad = L.ADAPTERS[a.adapter]() if a.adapter != 'mock' else L.MockAdapter(a.mock_schools, a.mock_correct)
+        if a.adapter == 'mock':
+            ad = L.MockAdapter(a.mock_schools, a.mock_correct)
+        elif a.adapter == 'maxpreps':
+            ad = L.MaxPrepsAdapter(a.delay, a.cache, a.max_teams, a.max_age_h, a.seeds)
+        else:
+            ad = L.ADAPTERS[a.adapter]()
         new = ad.fetch(a.section, sports)
         data, ch = L.upsert(old, new)
         data['synced'] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')

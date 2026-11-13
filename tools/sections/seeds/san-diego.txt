@@ -1,0 +1,3 @@
+# one team page per sport; the crawl follows opponents that are in the section (names come from the app's school list + team_aliases.txt)
+fb|https://www.maxpreps.com/ca/la-jolla/bishops-knights/football/
+bb|https://www.maxpreps.com/ca/la-jolla/bishops-knights/basketball/

@@ -89,7 +89,63 @@ class FeedAdapter(Adapter):
         raise SystemExit('FeedAdapter is not written yet: it needs the licensed provider, its format and credentials.')
 
 
-ADAPTERS = {'mock': MockAdapter, 'feed': FeedAdapter}
+SEED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'seeds')
+
+
+def _read_lines(path):
+    return [l.strip() for l in open(path, encoding='utf-8') if l.strip() and not l.startswith('#')] if os.path.exists(path) else []
+
+
+class MaxPrepsAdapter(Adapter):
+    """Schedules and final scores from MaxPreps team pages (see maxpreps.py; run it on the owner's computer, not in the cloud).
+    Seeds: tools/sections/seeds/<section>.txt, lines 'fb|<team url>' or 'bb|<team url>'. Teams to stay inside:
+    tools/sections/seeds/<section>.names.txt (one school name per line); for san-diego the app's own school list is used.
+    Gives schools and games only: rosters and box-score stat lines are not collected yet, so coverage will say so."""
+    name = 'maxpreps'
+
+    def __init__(self, delay=2.0, cache=None, max_teams=300, max_age_h=12, seeds_file=None):
+        self.delay, self.cache, self.max_teams, self.max_age_h, self.seeds_file = delay, cache, max_teams, max_age_h, seeds_file
+
+    def _names(self, section):
+        import maxpreps as M
+        names = _read_lines(os.path.join(SEED_DIR, section + '.names.txt'))
+        if not names and section == 'san-diego':
+            m = re.search(r"const SD_SCHOOLS=(\[.*?\]);", open(INDEX, encoding='utf-8').read())
+            names = json.loads(m.group(1)) if m else []
+            al = os.path.join(ROOT, 'tools', 'data', 'team_aliases.txt')
+            for line in _read_lines(al):
+                if '=' in line and line.split('=', 1)[1].strip() in names:
+                    names.append(line.split('=', 1)[0].strip())
+        return {M.norm(n) for n in names} if names else None
+
+    def fetch(self, section, sports):
+        import maxpreps as M
+        seeds = {'fb': [], 'bb': []}
+        for line in _read_lines(self.seeds_file or os.path.join(SEED_DIR, section + '.txt')):
+            sp, _, url = line.partition('|')
+            if sp in seeds and url:
+                seeds[sp].append(url.strip())
+        names = self._names(section)
+        if names is None:
+            print('  note: no names list for %s, so the crawl may wander the whole state (capped at %d teams)' % (section, self.max_teams))
+        fetcher = M.Fetcher(delay=self.delay, cache=self.cache, max_age_h=self.max_age_h)
+        schools, games, blocked = {}, {}, None
+        for sp in sports:
+            if not seeds[sp]:
+                print('  no %s seeds for %s' % (sp, section)); continue
+            print('%s %s:' % (section, sp))
+            teams, g, rep = M.crawl(seeds[sp], sp, names=names, max_teams=self.max_teams, fetcher=fetcher)
+            print('  crawled %d teams, %d games, %d rows rejected%s' % (rep['teams_crawled'], len(g), rep['rejects'], ', STOPPED: ' + rep['blocked'] if rep['blocked'] else ''))
+            blocked = blocked or rep['blocked']
+            for sid, t in teams.items():
+                if names is None or M.norm(t['name']) in names:
+                    schools[sid] = {'id': sid, 'name': t['name'], 'city': t['city']}
+            games.update(g)
+        return {'section': section, 'source': 'maxpreps', 'schools': list(schools.values()), 'players': [], 'games': list(games.values()), 'lines': [],
+                'partial': bool(blocked)}
+
+
+ADAPTERS = {'mock': MockAdapter, 'feed': FeedAdapter, 'maxpreps': MaxPrepsAdapter}
 
 
 # ---------------------------------------------------------------- upsert

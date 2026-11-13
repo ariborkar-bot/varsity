@@ -13,3 +13,16 @@ One JSON file per section at `data/sections/<section>.json` (format in the docst
 
 ## Opening a section
 1. Feed written and licensed for that section. 2. `sync.py <section> --adapter feed` until coverage says READY. 3. Set its `status` to `beta` (admins only) in `SECTIONS`, watch one full Friday night of syncing. 4. Set `live`.
+
+## MaxPreps collector (`maxpreps.py`, adapter `maxpreps`)
+Reads the JSON that each MaxPreps team page embeds, for schedules and final scores (football and boys basketball, same format). Must run on a computer with normal internet: the cloud workspace's network refuses maxpreps.com.
+
+    python3 tools/sections/test_maxpreps.py                                  offline tests (no network)
+    python3 tools/sections/sync.py san-diego --adapter maxpreps --dry-run    look first, writes nothing
+    python3 tools/sections/sync.py san-diego --adapter maxpreps              writes data/sections/san-diego.json
+
+- `seeds/<section>.txt` has one team page per sport; the crawl follows opponents inside the section (`seeds/<section>.names.txt`, or for san-diego the app's school list plus `team_aliases.txt`).
+- Polite by design: one request at a time, 2 s delay, honest User-Agent (set `VARSITY_CONTACT` to an email or URL), robots.txt respected, 12 h cache, stops at the first 403/429.
+- Every game row is checked (ids, date, score vs W/L code, score found in MaxPreps' own summary text). If more than 20% of a page fails, it raises `FormatChanged` instead of writing wrong data. Home/away comes from field 11 (0 home, 1 away); neutral or unset games are listed with `ha: false`.
+- Collected so far: schools and games with final scores. NOT yet: rosters and box-score stat lines (each game row has its box-score page url in `url`). Coverage will say "not ready" until they are.
+- For a new section: add `seeds/<section>.txt` and `seeds/<section>.names.txt`. MaxPreps' school directory (`/ca/football/schools/`) shows only 200 teams and no section, so section membership still has to come from a names list.
