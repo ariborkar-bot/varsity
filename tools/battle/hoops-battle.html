@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v37</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v38</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -622,8 +622,9 @@ function netMsg(m){NET.last=performance.now();
     const t1=performance.now();NET.iv=Math.max(30,Math.min(90,NET.t0?(t1-NET.t0)*1.15:50));NET.from=from;NET.tg={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};NET.t0=t1;for(const n of m.snd||[])sfx(n)}}
 function netGuest(dt){const now=performance.now(),inp=el('rot').hidden?human(0):{l:false,r:false,j:false},key=(inp.l?1:0)+''+(inp.r?1:0)+(inp.j?1:0);
   if(key!==NET.lastIn||now-NET.lastInT>150){NET.lastIn=key;NET.lastInT=now;netTx({k:'i',i:{l:!!inp.l,r:!!inp.r,j:!!inp.j}})}
-  if(NET.from&&NET.tg){const k=Math.min(1,(now-NET.t0)/(NET.iv||50));g.P.forEach((p,i)=>{p.x=NET.from.P[i].x+(NET.tg.P[i].x-NET.from.P[i].x)*k;p.y=NET.from.P[i].y+(NET.tg.P[i].y-NET.from.P[i].y)*k});
-    g.ball.x=NET.from.b.x+(NET.tg.b.x-NET.from.b.x)*k;g.ball.y=NET.from.b.y+(NET.tg.b.y-NET.from.b.y)*k}
+  if(NET.from&&NET.tg){const k=Math.min(1.6,(now-NET.t0)/(NET.iv||50));   /* v38: when the next snapshot is late, keep moving along the same line for up to .6 of an interval (about 30 ms) instead of freezing, so a slow packet reads as a small catch-up and not a stutter */
+    g.P.forEach((p,i)=>{p.x=NET.from.P[i].x+(NET.tg.P[i].x-NET.from.P[i].x)*k;p.y=Math.min(GY,NET.from.P[i].y+(NET.tg.P[i].y-NET.from.P[i].y)*k)});
+    g.ball.x=NET.from.b.x+(NET.tg.b.x-NET.from.b.x)*k;g.ball.y=Math.min(GY-BR,NET.from.b.y+(NET.tg.b.y-NET.from.b.y)*k)}
   /* v34: client-side prediction of the guest's own walking, so steering answers at once instead of a round trip later */
   const me=g.P[1],ground=!me.air&&!me.stun&&!me.gath&&!me.dk&&!(me.dd&&me.has)&&g.phase==='live'&&g.hold<=0;
   if(ground&&el('rot').hidden){const mv=(inp.r?1:0)-(inp.l?1:0),ax=me.x;if(NET.px==null||Math.abs(NET.px-ax)>90)NET.px=ax;

@@ -3391,7 +3391,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v467 · Nov 12';
+const APP_BUILD='v468 · Nov 12';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7823,7 +7823,7 @@ async function hbOpen(m){
   el.innerHTML=`<iframe title="Hoops Battle" allow="autoplay" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#0b1626" src="tools/battle/hoops-battle.html?embed=1${m==='find'?'&find=1&w='+w+'&bal='+bal:''}&b=${encodeURIComponent(APP_BUILD)}"></iframe><button class="fgx-x" aria-label="Close game" style="left:12px;right:auto;top:calc(8px + env(safe-area-inset-top,0px));width:36px;height:36px;font-size:16px">✕</button>`;
   document.body.appendChild(el);document.body.classList.add('fg-on');HB.live=null;
   const fr=el.querySelector('iframe');
-  const done=()=>{removeEventListener('message',on);removeEventListener('keydown',fwd);removeEventListener('keyup',fwd);el.remove();document.body.classList.remove('fg-on')},
+  const done=()=>{removeEventListener('message',on);removeEventListener('keydown',fwd);removeEventListener('keyup',fwd);el.remove();document.body.classList.remove('fg-on');if(dirty&&!typing()){dirty=false;try{render(true)}catch(_){}}},
   close=()=>{const lv=HB.live;HB.live=null;if(lv&&lv.w){try{fr.contentWindow.postMessage({hb:'bye'},'*')}catch(_){}hbRecord(lv.mid,lv.w,false);setTimeout(done,250)}else done()},
   on=e=>{const d=e.data;if(!d||!d.hb||e.source!==fr.contentWindow)return;
     if(d.hb==='close')close();
@@ -9834,7 +9834,8 @@ function touch(){
   if(rq)return;rq=true;
   /* a refresh that lands mid-swipe waits until the finger is up and the page has stopped scrolling */
   const go=()=>{if(FINGER||Date.now()-LASTSCROLL<350){setTimeout(go,250);return}
-    rq=false;let v=UI.view;chrome(v);if(typing()){if(document.activeElement.id==='chat-in')refreshChat();dirty=true;return}render(true);if(!$('#drawer').hidden)refreshDrawer()};
+    rq=false;let v=UI.view;chrome(v);if(document.querySelector('.hbx')){dirty=true;return}   /* v468: no page rebuild behind a running Hoops Battle: the game iframe shares this thread, so a rebuild froze the match for a moment (flushed in hbOpen's done) */
+    if(typing()){if(document.activeElement.id==='chat-in')refreshChat();dirty=true;return}render(true);if(!$('#drawer').hidden)refreshDrawer()};
   requestAnimationFrame(go);
 }
 let FINGER=false,LASTSCROLL=0;
