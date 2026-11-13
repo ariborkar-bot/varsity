@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Varsity Gridiron Duel</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;background:#07101e;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden;touch-action:none}
+canvas{position:fixed;left:0;top:0;width:100%;height:100%;display:block}
+.ov{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(5,10,22,.84);padding:10px}
+.ov[hidden]{display:none}
+.box{width:min(760px,100%);max-height:100%;overflow:auto;background:linear-gradient(180deg,#14233f,#0c172b);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box.one{grid-template-columns:1fr;max-width:420px}
+h1{margin:0;font:900 1.5rem/1.1 system-ui}h1 span{color:#FFC23D}
+.sub{margin:4px 0 8px;color:#9fb0cc;font-size:.82rem}
+.lbl{display:block;margin:8px 0 4px;font:800 .68rem/1 system-ui;letter-spacing:.12em;text-transform:uppercase;color:#9fb0cc}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font:800 .85rem/1.1 system-ui;cursor:pointer}
+.seg button small{display:block;font:600 .62rem/1.2 system-ui;color:#9fb0cc;margin-top:2px}
+.seg button[aria-pressed=true]{background:#FFC23D;color:#241800;border-color:#FFC23D}.seg button[aria-pressed=true] small{color:#5a4200}
+.how{font-size:.78rem;line-height:1.5;color:#cfd9ec;background:rgba(255,255,255,.05);border-radius:12px;padding:10px}.how b{color:#FFC23D}
+.go{width:100%;margin-top:10px;padding:14px;border-radius:14px;border:0;background:linear-gradient(180deg,#FFD35A,#F29A1D);color:#2a1800;font:900 1.05rem/1 system-ui;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.ghost{width:100%;margin-top:8px;padding:11px;border-radius:12px;border:1.5px solid rgba(255,255,255,.22);background:transparent;color:#fff;font:800 .85rem/1 system-ui;cursor:pointer}
+#ctl{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}#ctl.on{display:block}
+#stick{position:absolute;left:calc(22px + env(safe-area-inset-left,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));width:150px;height:150px;border-radius:50%;border:3px solid rgba(255,255,255,.4);background:rgba(10,18,36,.45);pointer-events:auto;touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(255,255,255,.55);border:2px solid #fff}
+.btn{position:absolute;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:rgba(10,18,36,.55);color:#fff;font:900 .8rem/1.1 system-ui;letter-spacing:.05em;text-align:center;display:grid;place-items:center;pointer-events:auto;touch-action:none}
+.btn.dn{background:rgba(255,194,61,.9);color:#241800;border-color:#FFC23D}
+#bA{right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));width:112px;height:112px;font-size:1rem}
+#bS{right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));width:84px;height:84px}
+#rot{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#07101e;text-align:center;font:800 1.1rem system-ui;padding:30px}#rot[hidden]{display:none}
+#lnk{position:fixed;left:8px;bottom:4px;z-index:5;font:700 10px system-ui;opacity:.4;pointer-events:none}
+textarea{width:100%;height:58px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font:600 .72rem system-ui;padding:8px;resize:none}
+</style></head><body>
+<canvas id="cv"></canvas>
+<div id="rot" hidden>Turn your phone sideways to play</div>
+<div id="ctl"><div id="stick"><div id="knob"></div></div><button class="btn" id="bS" type="button">SPRINT</button><button class="btn" id="bA" type="button">JUKE</button></div>
+<div id="lnk"></div>
+
+<div id="menu" class="ov"><div class="box"><div>
+  <h1>Varsity <span>Gridiron Duel</span></h1>
+  <p class="sub">1 on 1 open field football. Real time. <small style="opacity:.55">v3</small></p>
+  <span class="lbl">Play against</span>
+  <div class="seg" id="s-mode"><button type="button" data-v="ai" aria-pressed="true">Computer</button><button type="button" data-v="on" aria-pressed="false">Friend online<small>invite link</small></button></div>
+  <div id="w-diff"><span class="lbl">Computer skill</span>
+  <div class="seg" id="s-diff"><button type="button" data-v="easy" aria-pressed="false">Easy</button><button type="button" data-v="med" aria-pressed="true">Medium</button><button type="button" data-v="hard" aria-pressed="false">Hard</button></div></div>
+</div><div>
+  <div class="how"><b>Every snap is a one on one chase.</b> One of you carries the ball, the other is the only defender. Get 10 yards in 4 downs to keep it, or score.<br><b>Ball carrier:</b> steer, hold SPRINT to run faster (it uses stamina), and tap JUKE to dash sideways. A juke can't be tackled. Bait the defender in, then dash past him.<br><b>Defender:</b> cut off the carrier, and tap DIVE to lunge. A dive reaches farther, but if you miss you are on the ground.<br><b>Touchdown 7, first to 21 wins.</b><br><b>Controls:</b> stick or arrows / WASD, Shift sprint, Space juke / dive.</div>
+  <button class="go" id="play" type="button">Kick off</button>
+</div></div></div>
+
+<div id="net" class="ov" hidden><div class="box one">
+  <h1 id="n-h">Invite a friend</h1>
+  <div id="n-inv"><p class="sub">Send this link. When your friend opens it they join your game.</p><textarea id="n-link" readonly></textarea><button class="go" id="n-share" type="button">Share link</button><button class="ghost" id="n-copy" type="button">Copy link</button></div>
+  <p class="sub" id="n-msg">Connecting...</p>
+  <button class="ghost" id="n-back" type="button">Cancel</button>
+</div></div>
+<div id="end" class="ov" hidden><div class="box one">
+  <h1 id="e-res" style="text-align:center"></h1><div style="font:900 2.2rem system-ui;text-align:center" id="e-sc"></div><p class="sub" id="e-st" style="text-align:center"></p>
+  <button class="go" id="again" type="button">Play again</button><button class="ghost" id="tomenu" type="button">Menu</button>
+</div></div>
+
+<script>
+'use strict';
+/* ================= Varsity Gridiron Duel v3 (real time) =================
+   One ball carrier against one defender in an open field. World units are yards: x runs 0 to 100 (the carrier always runs toward +x, the screen is drawn from the offense's side),
+   y is across the field (+-HW). The HOST (or a local game) runs the whole simulation at 60 steps a second; the guest sends its stick and buttons and draws the host's snapshots. */
+const W=960,H=540,PXY=14,HW=17,WIN=21,TICK=1/60;
+const cv=document.getElementById('cv'),X=cv.getContext('2d'),el=id=>document.getElementById(id);
+const TEAM=[{n:'YOU',c:'#FFC23D',d:'#3a2a00'},{n:'CPU',c:'#FF4F6D',d:'#3a0a16'}];
+const VO=9.0,VD=9.35,SPR=1.2,ACO=27,ACD=24,JD=13,JT=.22,JINV=.36,JCD=1.25,DV=12.6,DT=.4,DDOWN=.95,REACH=1.5,DREACH=2.6;
+let OPT={mode:'ai',diff:'med'},G=null,paused=false;
+const NET={on:false,role:'',in:{x:0,y:0,a:false,s:false}};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rnd=Math.random;
+const mkPl=()=>({x:0,y:0,vx:0,vy:0,f:0,st:1,act:'',at:0,cd:0,inv:0,dx:0,dy:0,ph:0,pa:false});
+const newState=()=>({sc:[0,0],poss:0,los:30,fd:40,down:1,n:0,over:false});
+const ordinal=d=>['','1st','2nd','3rd','4th'][d]||'';
+
+/* ---------- play setup and rules ---------- */
+function setupPlay(){const s=G.s,off=s.poss,def=1-off;G.pl=[mkPl(),mkPl()];
+  Object.assign(G.pl[off],{x:s.los,y:0,f:0});Object.assign(G.pl[def],{x:s.los+9,y:(rnd()*2-1)*7,f:Math.PI});G.ph='snap';G.t=0;G.msg='';G.fx=[];G.trail=[[],[]];G.shake=0;G.res=null;G.hist=[];
+  G.ai=[{rt:0},{rt:0}];G.prevA=[false,false]}
+function endPlay(kind,spot){if(G.ph!=='live')return;G.ph='dead';G.t=0;const s=G.s,off=s.poss,yards=Math.round(spot-s.los);G.res={kind,spot,yards};
+  G.shake=kind==='td'?1.4:.9;G.fx.push({k:'ring',x:spot,y:G.pl[off].y,t:.5,d:.5});
+  if(kind==='td'){s.sc[off]+=7;G.msg='TOUCHDOWN!';G.sub=TEAM[off].n+' +7'}
+  else if(kind==='oob'){G.msg='OUT OF BOUNDS';G.sub=''}
+  else{G.msg=kind==='time'?'WHISTLE':'TACKLED!';G.sub=''}
+  G.res.txt=G.msg;sfx(kind)}
+function nextPlay(){const s=G.s,off=s.poss,spot=G.res.spot;s.n++;
+  if(G.res.kind==='td'){s.poss=1-off;s.los=30;s.down=1;s.fd=40}
+  else{s.los=clamp(Math.round(spot),1,99);
+    if(s.los>=s.fd){s.down=1;s.fd=Math.min(100,s.los+10)}
+    else{s.down++;if(s.down>4){s.poss=1-off;s.los=clamp(100-s.los,1,99);s.down=1;s.fd=s.los+10;G.turnover=true}}}
+  if(s.sc[0]>=WIN||s.sc[1]>=WIN){s.over=true;G.ph='over';showEnd();return}
+  setupPlay()}
+function showEnd(){const me=G.me,a=G.s.sc[me],b=G.s.sc[1-me];el('e-res').textContent=a>b?'You win':'You lose';el('e-sc').textContent=G.s.sc[0]+' - '+G.s.sc[1];el('e-st').textContent=TEAM[0].n+' '+G.s.sc[0]+' · '+TEAM[1].n+' '+G.s.sc[1]+' · '+G.s.n+' plays';el('end').hidden=false;el('ctl').classList.remove('on')}
+
+/* ---------- the simulation ---------- */
+function movePl(p,i,off,inp,dt){
+  const car=i===off,vm0=car?VO:VD,ac=car?ACO:ACD;let sx=clamp(inp.x||0,-1,1),sy=clamp(inp.y||0,-1,1);const m=Math.hypot(sx,sy);if(m>1){sx/=m;sy/=m}
+  p.cd=Math.max(0,p.cd-dt);p.inv=Math.max(0,p.inv-dt);
+  const moving=m>.2,spr=!!inp.s&&moving&&p.st>.04&&(p.act===''||p.act==='get');
+  if(spr)p.st=Math.max(0,p.st-.42*dt);else p.st=Math.min(1,p.st+.2*dt);
+  let vm=vm0*(spr?SPR:1)*(.8+.2*Math.min(1,p.st/.3));
+  if(p.act==='juke'){p.vx=p.dx*JD;p.vy=p.dy*JD;p.at-=dt;if(p.at<=0){p.act='';p.vx*=.55;p.vy*=.55}}
+  else if(p.act==='dive'){p.vx=p.dx*DV;p.vy=p.dy*DV;p.at-=dt;if(p.at<=0){p.act='down';p.at=DDOWN}}
+  else if(p.act==='down'){p.vx*=Math.max(0,1-dt*7);p.vy*=Math.max(0,1-dt*7);p.at-=dt;if(p.at<=0){p.act='get';p.at=.4}}
+  else{if(p.act==='get'){vm*=.45;p.at-=dt;if(p.at<=0)p.act=''}
+    const tx=sx*vm,ty=sy*vm;let dx=tx-p.vx,dy=ty-p.vy;const d=Math.hypot(dx,dy),lim=ac*dt;if(d>lim){dx*=lim/d;dy*=lim/d}p.vx+=dx;p.vy+=dy}
+  const sp=Math.hypot(p.vx,p.vy);if(sp>1.2){const tf=Math.atan2(p.vy,p.vx);let df=tf-p.f;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;p.f+=df*Math.min(1,dt*(p.act?30:14))}
+  p.x+=p.vx*dt;p.y+=p.vy*dt;p.ph+=sp*dt*1.15}
+function action(p,i,off,inp,other){
+  if(p.act!==''||p.cd>0&&i===off)return;const sx=inp.x||0,sy=inp.y||0,m=Math.hypot(sx,sy);
+  if(i===off){ /* juke: dash the way the stick points, or away from the defender when it is centered */
+    let dx,dy;if(m>.3){dx=sx/m;dy=sy/m}else{dx=.35;dy=other.y>p.y?-1:1;const n=Math.hypot(dx,dy);dx/=n;dy/=n}
+    if(p.st<.12)return;p.act='juke';p.at=JT;p.inv=JINV;p.cd=JCD;p.dx=dx;p.dy=dy;p.st=Math.max(0,p.st-.12);G.fx.push({k:'puff',x:p.x,y:p.y,t:.4,d:.4});sfx('juke')}
+  else{ /* dive along the facing direction (toward the carrier if standing still) */
+    let dx=Math.cos(p.f),dy=Math.sin(p.f);if(Math.hypot(p.vx,p.vy)<1.5){dx=other.x-p.x;dy=other.y-p.y;const n=Math.hypot(dx,dy)||1;dx/=n;dy/=n}
+    p.act='dive';p.at=DT;p.dx=dx;p.dy=dy;G.fx.push({k:'puff',x:p.x,y:p.y,t:.4,d:.4});sfx('dive')}}
+function step(dt,inps){
+  G.t+=dt;G.shake=Math.max(0,G.shake-dt*2.4);for(const q of G.fx)q.t-=dt;G.fx=G.fx.filter(q=>q.t>0);
+  if(G.ph==='snap'){if(G.t>=1.6){G.ph='live';G.t=0;sfx('snap')}return}
+  if(G.ph==='dead'){const k=G.pl;for(const p of k){p.vx*=.9;p.vy*=.9}if(G.t>=2.1)nextPlay();return}
+  if(G.ph!=='live')return;
+  const s=G.s,off=s.poss,def=1-off,O=G.pl[off],D=G.pl[def];
+  for(let i=0;i<2;i++){const inp=inps[i]||{};if(inp.a&&!G.prevA[i])action(G.pl[i],i,off,inp,G.pl[1-i]);G.prevA[i]=!!inp.a;movePl(G.pl[i],i,off,inp,dt)}
+  /* record a short trail for the juke afterimages */
+  for(let i=0;i<2;i++){const tr=G.trail[i];tr.push({x:G.pl[i].x,y:G.pl[i].y,a:G.pl[i].act});if(tr.length>12)tr.shift()}
+  G.hist.push({x:O.x,y:O.y});if(G.hist.length>40)G.hist.shift();
+  /* the defender can't leave the field */
+  D.y=clamp(D.y,-HW-2,HW+2);D.x=clamp(D.x,-5,110);
+  if(O.x>=100)return endPlay('td',100);
+  if(Math.abs(O.y)>HW)return endPlay('oob',O.x);
+  const dist=Math.hypot(O.x-D.x,O.y-D.y),reach=D.act==='dive'?DREACH:D.act==='get'?1.0:D.act===''?REACH:0;
+  if(reach&&dist<reach&&O.inv<=0){D.act=D.act==='dive'?'tk':D.act;endPlay('tackle',O.x);G.fx.push({k:'puff',x:(O.x+D.x)/2,y:(O.y+D.y)/2,t:.6,d:.6})}
+  if(G.t>16)endPlay('time',O.x)}
+
+/* ---------- the computer opponent ---------- */
+const DIFF={easy:{rt:.2,dive:.6,juke:.5,err:.4,spr:.5},med:{rt:.13,dive:.8,juke:.8,err:.22,spr:.75},hard:{rt:.1,dive:.93,juke:.95,err:.12,spr:.95}};
+function aiInput(i){const s=G.s,off=s.poss,car=i===off,me=G.pl[i],o=G.pl[1-i],D=DIFF[OPT.diff],inp={x:0,y:0,a:false,s:false};
+  const hp=G.hist.length>2?G.hist[Math.max(0,G.hist.length-1-Math.round(D.rt*60))]:o;   /* it sees the carrier a moment late */
+  if(car){ /* run downfield, bending away from the defender, juke when he gets close */
+    const dx=o.x-me.x,dy=o.y-me.y,dist=Math.hypot(dx,dy),side=dy>0?-1:1;
+    let ty=0;if(dx>-2&&dx<20)ty=side*clamp((20-Math.abs(dx))/20,.15,1)*(Math.abs(dy)<8?1:.3);ty+=(me.y>HW-5?-.8:me.y<-HW+5?.8:0);
+    inp.x=1;inp.y=clamp(ty+(rnd()-.5)*D.err,-1,1);
+    inp.s=me.st>.35&&rnd()<D.spr||dist>8;
+    if(me.cd<=0&&me.act===''&&dx>0&&dist<4.1&&dist>2.1&&G.ai[i].rt<=0&&rnd()<.35*D.juke+(dist<3?.25:0)){inp.a=true;inp.y=side*.9;inp.x=.45;G.ai[i].rt=.5}
+    G.ai[i].rt=Math.max(0,G.ai[i].rt-TICK)}
+  else{ /* chase to where the carrier will be */
+    const tx0=hp.x,ty0=hp.y,dist=Math.hypot(tx0-me.x,ty0-me.y),sp=Math.hypot(o.vx,o.vy),lead=clamp(dist/(VD*1.05),0,1.1);
+    const tx=tx0+o.vx*lead*(1-D.err*.5)+(rnd()-.5)*D.err*2,ty=ty0+o.vy*lead*(1-D.err*.5);let dx=tx-me.x,dy=ty-me.y;const n=Math.hypot(dx,dy)||1;inp.x=dx/n;inp.y=dy/n;inp.s=dist>5&&me.st>.3;
+    const cl=Math.hypot(o.x-me.x,o.y-me.y);
+    if(me.act===''&&cl<3.1&&cl>1.7&&o.inv<=0&&G.ai[i].rt<=0&&rnd()<D.dive*.07){inp.a=true;G.ai[i].rt=1.2}
+    G.ai[i].rt=Math.max(0,G.ai[i].rt-TICK)}
+  return inp}
+
+/* ---------- sound ---------- */
+let AC=null;const aud=()=>{try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(_){}};
+function tone(f,d,ty,v,f2){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type=ty||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v||.1,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.02)}
+function noise(d,v){if(!AC)return;const n=AC.sampleRate*d,b=AC.createBuffer(1,n,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;g.gain.value=v;s.connect(g);g.connect(AC.destination);s.start()}
+function sfx(k){if(k==='td')[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.2,'triangle',.12),i*90));else if(k==='tackle'||k==='time'){noise(.25,.3);tone(90,.25,'square',.14,40)}else if(k==='oob')tone(300,.2,'sine',.08,160);else if(k==='juke')tone(500,.12,'sine',.07,900);else if(k==='dive')noise(.18,.14);else if(k==='snap'){tone(660,.08,'square',.07);setTimeout(()=>tone(880,.14,'square',.07),90)}}
+
+/* ---------- drawing ---------- */
+let cam=30;const FY=H/2;
+const sx=x=>(x-cam)*PXY+W/2,sy=y=>FY+y*PXY;
+function field(s){const g=X.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2a7a3c');g.addColorStop(1,'#1f6a31');X.fillStyle='#0e2b18';X.fillRect(0,0,W,H);
+  const top=sy(-HW),bot=sy(HW);X.fillStyle=g;X.fillRect(0,top,W,bot-top);
+  const a0=Math.floor(cam-W/2/PXY)-1,a1=Math.ceil(cam+W/2/PXY)+1;
+  for(let y=a0;y<=a1;y++)if(y>=0&&y<=100&&Math.floor(y/5)%2===0){X.fillStyle='rgba(255,255,255,.05)';X.fillRect(sx(y),top,PXY,bot-top)}
+  const oc=TEAM[s.poss].c,dc=TEAM[1-s.poss].c;X.globalAlpha=.55;X.fillStyle=oc;X.fillRect(sx(-10),top,10*PXY,bot-top);X.fillStyle=dc;X.fillRect(sx(100),top,10*PXY,bot-top);X.globalAlpha=1;
+  X.textAlign='center';X.fillStyle='rgba(255,255,255,.9)';X.font='900 30px system-ui';
+  X.save();X.translate(sx(-5),FY);X.rotate(-Math.PI/2);X.fillText(TEAM[s.poss].n,0,10);X.restore();X.save();X.translate(sx(105),FY);X.rotate(Math.PI/2);X.fillText(TEAM[1-s.poss].n,0,10);X.restore();
+  X.strokeStyle='rgba(255,255,255,.78)';
+  for(let y=Math.max(0,a0);y<=Math.min(100,a1);y++){if(y%5===0){X.lineWidth=y%10===0?3:1.6;X.beginPath();X.moveTo(sx(y),top);X.lineTo(sx(y),bot);X.stroke()}else{X.lineWidth=1;X.beginPath();X.moveTo(sx(y),top+2);X.lineTo(sx(y),top+9);X.moveTo(sx(y),bot-9);X.lineTo(sx(y),bot-2);X.moveTo(sx(y),FY-HW*PXY*.18-4);X.lineTo(sx(y),FY-HW*PXY*.18+4);X.moveTo(sx(y),FY+HW*PXY*.18-4);X.lineTo(sx(y),FY+HW*PXY*.18+4);X.stroke()}
+    if(y%10===0&&y>0&&y<100){X.fillStyle='rgba(255,255,255,.55)';X.font='900 24px system-ui';const n=y<=50?y:100-y;X.fillText(n,sx(y),top+34);X.save();X.translate(sx(y),bot-30);X.rotate(Math.PI);X.fillText(n,0,0);X.restore()}}
+  X.strokeStyle='#fff';X.lineWidth=5;X.strokeRect(sx(-10),top,120*PXY,bot-top);
+  if(G.ph!=='live'&&G.ph!=='dead'){X.strokeStyle='#58a8ff';X.lineWidth=4;X.beginPath();X.moveTo(sx(s.los),top);X.lineTo(sx(s.los),bot);X.stroke();if(s.fd<=100){X.strokeStyle='#ffe14a';X.beginPath();X.moveTo(sx(s.fd),top);X.lineTo(sx(s.fd),bot);X.stroke()}}
+  else{if(s.fd<=100){X.strokeStyle='rgba(255,225,74,.85)';X.lineWidth=4;X.beginPath();X.moveTo(sx(s.fd),top);X.lineTo(sx(s.fd),bot);X.stroke()}}}
+function player(p,i,car){const T=TEAM[i],x=sx(p.x),y=sy(p.y),run=Math.hypot(p.vx,p.vy),ph=p.ph*2.1;X.save();X.translate(x,y);
+  const down=p.act==='down'||p.act==='tk',dive=p.act==='dive';
+  X.fillStyle='rgba(0,0,0,.28)';X.beginPath();X.ellipse(0,5,18,11,0,0,7);X.fill();
+  X.rotate(p.f);if(down){X.scale(1.25,.8)}else if(dive){X.scale(1.45,.8)}
+  /* legs */
+  if(!down){const sw=Math.sin(ph)*(run>1?7:0);X.fillStyle='#e9edf4';X.strokeStyle='#0b1220';X.lineWidth=1.8;for(const s of [-1,1]){X.beginPath();X.ellipse(sw*s*.8-2,s*6,6,3.4,0,0,7);X.fill();X.stroke()}}
+  /* body, shoulders, helmet */
+  X.fillStyle=T.c;X.strokeStyle='#0b1220';X.lineWidth=2.2;X.beginPath();X.ellipse(0,0,10,17,0,0,7);X.fill();X.stroke();
+  X.fillStyle=T.d;X.fillRect(-4,-9,5,18);
+  X.fillStyle=T.c;X.beginPath();X.arc(5,0,8.5,0,7);X.fill();X.stroke();X.fillStyle='rgba(255,255,255,.6)';X.beginPath();X.arc(7.5,-2.5,2.6,0,7);X.fill();
+  X.fillStyle=T.d;X.fillRect(2,-1,9,2.2);
+  if(car&&!down){const bob=Math.sin(ph)*1.4;X.fillStyle='#8a4a1f';X.strokeStyle='#2a1204';X.lineWidth=1.8;X.beginPath();X.ellipse(12,9+bob,8,4.6,.3,0,7);X.fill();X.stroke();X.strokeStyle='#fff';X.lineWidth=1.2;X.beginPath();X.moveTo(9,9+bob);X.lineTo(15,10+bob);X.stroke()}
+  X.restore()}
+function scene(){const s=G.s,off=s.poss,def=1-off,O=G.pl[off],D=G.pl[def];
+  let tx=O.x;if(G.ph==='snap')tx=s.los+3;cam+=(clamp(tx+10,24,80)-cam)*Math.min(1,.12);
+  X.save();if(G.shake>0)X.translate((rnd()-.5)*G.shake*14,(rnd()-.5)*G.shake*10);
+  field(s);
+  /* juke / dive afterimages */
+  for(let i=0;i<2;i++){const tr=G.trail[i]||[];tr.forEach((q,k)=>{if(q.a==='juke'||q.a==='dive'){X.globalAlpha=.08+k/tr.length*.2;X.fillStyle=TEAM[i].c;X.beginPath();X.arc(sx(q.x),sy(q.y),14,0,7);X.fill()}});X.globalAlpha=1}
+  for(const q of G.fx){const k=1-q.t/q.d;if(q.k==='ring'){X.strokeStyle='rgba(255,255,255,'+(.8*(1-k))+')';X.lineWidth=6*(1-k)+1;X.beginPath();X.ellipse(sx(q.x),sy(q.y),12+k*80,8+k*54,0,0,7);X.stroke()}else{X.fillStyle='rgba(235,235,225,'+(.5*(1-k))+')';for(let j=0;j<6;j++){const a=j*1.05+q.x;X.beginPath();X.arc(sx(q.x)+Math.cos(a)*k*34,sy(q.y)+Math.sin(a)*k*22,5+k*7,0,7);X.fill()}}}
+  /* draw the lower one first so overlaps look right */
+  const order=O.y<D.y?[[O,off,true],[D,def,false]]:[[D,def,false],[O,off,true]];order.forEach(([p,i,c])=>player(p,i,c));
+  /* indicators */
+  const me=G.me;X.fillStyle=TEAM[me].c;X.beginPath();const mp=G.pl[me];X.moveTo(sx(mp.x),sy(mp.y)-30);X.lineTo(sx(mp.x)-7,sy(mp.y)-42);X.lineTo(sx(mp.x)+7,sy(mp.y)-42);X.closePath();X.fill();
+  X.restore()}
+function rr(x,y,w,h,r){X.beginPath();X.moveTo(x+r,y);X.arcTo(x+w,y,x+w,y+h,r);X.arcTo(x+w,y+h,x,y+h,r);X.arcTo(x,y+h,x,y,r);X.arcTo(x,y,x+w,y,r);X.closePath()}
+function hud(){const s=G.s;X.fillStyle='rgba(4,8,16,.86)';rr(W/2-250,8,500,74,14);X.fill();X.strokeStyle='rgba(255,255,255,.16)';X.lineWidth=1.5;X.stroke();X.textAlign='center';
+  X.font='800 13px system-ui';X.fillStyle=TEAM[0].c;X.fillText(TEAM[0].n+(s.poss===0?' ●':''),W/2-170,28);X.fillStyle=TEAM[1].c;X.fillText(TEAM[1].n+(s.poss===1?' ●':''),W/2+170,28);
+  X.font='900 36px system-ui';X.fillStyle='#fff';X.fillText(s.sc[0],W/2-170,62);X.fillText(s.sc[1],W/2+170,62);
+  X.font='900 15px system-ui';X.fillStyle='#FFC23D';X.fillText('FIRST TO '+WIN,W/2,38);
+  const ytg=s.fd>=100?'Goal':Math.max(1,s.fd-s.los);X.font='800 13px system-ui';X.fillStyle='#9fb0cc';X.fillText(ordinal(s.down)+' & '+ytg+' · ball on '+(s.los<=50?'own '+s.los:'opp '+(100-s.los)),W/2,64);
+  const off=s.poss===G.me;X.textAlign='left';X.font='900 15px system-ui';X.fillStyle=off?'#3DFF9A':'#ffb347';X.fillText(off?'YOU HAVE THE BALL':'YOU ARE ON DEFENSE',16,30);
+  X.font='700 12px system-ui';X.fillStyle='#cfd9ec';X.fillText(off?'Get past the defender. Juke when he closes in.':'Cut him off. Dive only when you are close.',16,50);
+  /* stamina */
+  const mp=G.pl[G.me];X.fillStyle='rgba(4,8,16,.7)';rr(16,60,130,12,6);X.fill();X.fillStyle=mp.st<.25?'#ff6a7f':'#3DFF9A';rr(17,61,128*clamp(mp.st,0,1),10,5);X.fill();X.fillStyle='#fff';X.font='800 9px system-ui';X.fillText('STAMINA',22,70);
+  /* ability ready */
+  if(s.poss===G.me){const r=1-clamp(mp.cd/JCD,0,1);X.fillStyle='rgba(4,8,16,.7)';rr(16,78,130,12,6);X.fill();X.fillStyle=r>=1?'#FFC23D':'#6a7aa0';rr(17,79,128*r,10,5);X.fill();X.fillStyle='#fff';X.fillText(r>=1?'JUKE READY':'JUKE',22,87)}
+  X.textAlign='center';
+  if(G.ph==='snap'){const k=Math.ceil(1.6-G.t);X.font='900 70px system-ui';X.lineWidth=8;X.strokeStyle='rgba(4,8,16,.85)';const t=k>0?String(k):'GO';X.strokeText(t,W/2,H/2-40);X.fillStyle='#fff';X.fillText(t,W/2,H/2-40)}
+  if(G.ph==='dead'&&G.msg){const k=Math.min(1,G.t*5);X.save();X.globalAlpha=k;X.font='900 46px system-ui';X.lineWidth=9;X.strokeStyle='rgba(4,8,16,.9)';const col=G.res.kind==='td'?'#3dff9a':'#fff';X.strokeText(G.msg,W/2,H/2-58);X.fillStyle=col;X.fillText(G.msg,W/2,H/2-58);
+    X.font='800 22px system-ui';const yd=G.res.yards,line=G.res.kind==='td'?(G.sub||''):(yd>=0?'Gain of '+yd:'Loss of '+(-yd))+' · '+(G.res.spot<=50?'own '+Math.round(G.res.spot):'opp '+Math.round(100-G.res.spot));X.strokeText(line,W/2,H/2-26);X.fillStyle='#fff';X.fillText(line,W/2,H/2-26);X.restore()}}
+function fit(){const dpr=Math.min(2,devicePixelRatio||1),w=innerWidth,h=innerHeight;cv.width=w*dpr;cv.height=h*dpr;el('rot').hidden=!(h>w*1.05&&matchMedia('(pointer:coarse)').matches)}
+
+/* ---------- input: stick, buttons, keyboard ---------- */
+const K={},TS={x:0,y:0,a:false,s:false};
+const stick=el('stick'),knob=el('knob');let sid=null;
+function stickAt(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=(e.clientX-cx)/(r.width/2),dy=(e.clientY-cy)/(r.height/2);const m=Math.hypot(dx,dy);if(m>1){dx/=m;dy/=m}
+  TS.x=Math.abs(dx)<.12?0:dx;TS.y=Math.abs(dy)<.12?0:dy;knob.style.transform=`translate(${dx*44}px,${dy*44}px)`}
+stick.addEventListener('pointerdown',e=>{e.preventDefault();sid=e.pointerId;try{stick.setPointerCapture(e.pointerId)}catch(_){}stickAt(e)});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===sid)stickAt(e)});
+for(const ev of ['pointerup','pointercancel','lostpointercapture'])stick.addEventListener(ev,e=>{if(e.pointerId===sid||ev==='lostpointercapture'){sid=null;TS.x=TS.y=0;knob.style.transform=''}});
+for(const [id,k] of [['bA','a'],['bS','s']]){const b=el(id),set=v=>{TS[k]=v;b.classList.toggle('dn',v)};b.addEventListener('pointerdown',e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}set(true)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>set(false));b.addEventListener('contextmenu',e=>e.preventDefault())}
+addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();K[e.key.length===1?e.key.toLowerCase():e.key]=true});
+addEventListener('keyup',e=>{K[e.key.length===1?e.key.toLowerCase():e.key]=false});
+addEventListener('blur',()=>{for(const k in K)K[k]=false});
+function humanInput(){const kx=(K.ArrowRight||K.d?1:0)-(K.ArrowLeft||K.a?1:0),ky=(K.ArrowDown||K.s?1:0)-(K.ArrowUp||K.w?1:0);
+  const x=kx||TS.x,y=ky||TS.y;return{x,y,a:!!(K[' ']||K.z||TS.a),s:!!(K.Shift||K.x||TS.s)}}
+function fixLabel(){if(!G||!G.s)return;const off=G.s.poss===G.me;const b=el('bA');const t=off?'JUKE':'DIVE';if(b.textContent!==t)b.textContent=t}
+
+/* ---------- main loop ---------- */
+let last=0,acc=0;
+function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1000||0);last=ts;
+  const w=cv.width,h=cv.height,sc=Math.min(w/W,h/H);X.setTransform(sc,0,0,sc,(w-W*sc)/2,(h-H*sc)/2);X.fillStyle='#07101e';X.fillRect(-W,-H,W*3,H*3);
+  X.save();X.beginPath();X.rect(0,0,W,H);X.clip();
+  if(!G){G={s:newState(),ph:'menu',t:0,me:0,pl:[mkPl(),mkPl()],fx:[],trail:[[],[]],shake:0};G.pl[0].x=30;G.pl[1].x=39;G.pl[1].f=Math.PI;scene();X.restore();return}
+  fixLabel();
+  if(NET.on&&NET.role==='guest'){guestFrame(dt);scene();hud();X.restore();return}
+  if(G.ph!=='menu'&&G.ph!=='over'&&!paused){acc+=dt;let n=0;while(acc>=TICK&&n<5){acc-=TICK;n++;
+    const mine=humanInput(),i0=G.me;const inps=[null,null];inps[i0]=mine;
+    if(OPT.mode==='ai')inps[1-i0]=G.ph==='live'?aiInput(1-i0):{};else inps[1-i0]=NET.in;
+    step(TICK,inps)}if(n===5)acc=0}
+  if(NET.on&&NET.role==='host'&&G&&G.ph!=='menu'){NET.acc=(NET.acc||0)+dt;if(NET.acc>=1/30){NET.acc=0;netSend()}}
+  scene();hud();X.restore()}
+function startGame(){G={s:newState(),ph:'snap',t:0,me:0,fx:[],trail:[[],[]],shake:0,pl:[mkPl(),mkPl()],hist:[],prevA:[false,false],ai:[{rt:0},{rt:0}]};
+  if(OPT.mode==='on')G.me=NET.role==='guest'?1:0;
+  TEAM[0].n=OPT.mode==='on'?(G.me===0?'YOU':'FRIEND'):'YOU';TEAM[1].n=OPT.mode==='on'?(G.me===1?'YOU':'FRIEND'):'CPU';
+  G.s.poss=OPT.mode==='on'?0:0;
+  for(const id of ['menu','end','net'])el(id).hidden=true;el('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);acc=0;cam=30;setupPlay()}
+addEventListener('resize',fit);fit();requestAnimationFrame(frame);
+
+/* ---------- menu ---------- */
+function seg(id,key,cast){const e=el(id),paint=()=>{e.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(cast(b.dataset.v)===OPT[key])));el('w-diff').style.display=OPT.mode==='ai'?'':'none';el('play').textContent=OPT.mode==='on'?'Invite a friend':'Kick off'};
+  e.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;OPT[key]=cast(b.dataset.v);paint()});paint()}
+seg('s-mode','mode',v=>v);seg('s-diff','diff',v=>v);
+el('play').addEventListener('click',()=>{aud();if(OPT.mode==='on'){netOpen(true);return}startGame()});
+el('again').addEventListener('click',()=>{aud();if(OPT.mode==='on'){if(NET.role==='host'){netTx({k:'go'});startGame()}return}startGame()});
+el('tomenu').addEventListener('click',()=>{netReset();G=null;el('end').hidden=true;el('ctl').classList.remove('on');el('menu').hidden=false});
+
+/* ---------- online ---------- */
+const SB_URL='https://urdkamhsdjhzhrjwzyoq.supabase.co',SB_KEY='sb_publishable_Kwc2VdtM1AbcKB7xgsOhlw_KOw02EOb';
+const RTCCFG={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
+function netTx(o){try{const ch=o.k==='s'?NET.dSnap:o.k==='i'?NET.dInp:null;if(ch&&ch.readyState==='open'){ch.send(JSON.stringify(o));return}NET.mc&&NET.mc.send({type:'broadcast',event:'g',payload:o})}catch(_){}}
+function lnkPaint(){const e=el('lnk');if(e)e.textContent=NET.on?(NET.p2p?'direct':'relay'):''}
+function rtcClose(){try{(NET.dcs||[]).forEach(d=>d.close())}catch(_){}try{NET.pc&&NET.pc.close()}catch(_){}NET.pc=null;NET.dcs=null;NET.dSnap=NET.dInp=null;NET.p2p=false;NET.rd=false;NET.pend=[];lnkPaint()}
+function rtcAttach(ch){ch.onmessage=ev=>{try{netMsg(JSON.parse(ev.data))}catch(_){}};const chk=()=>{NET.p2p=!!(NET.dSnap&&NET.dSnap.readyState==='open'&&NET.dInp&&NET.dInp.readyState==='open');lnkPaint()};
+  ch.onopen=()=>{if(ch.label==='snap')NET.dSnap=ch;else NET.dInp=ch;chk()};ch.onclose=()=>{if(ch.label==='snap')NET.dSnap=null;else NET.dInp=null;chk()}}
+function rtcStart(host){if(!window.RTCPeerConnection||NET.pc)return;let pc;try{pc=new RTCPeerConnection(RTCCFG)}catch(_){return}NET.pc=pc;NET.dcs=[];NET.rd=false;NET.pend=NET.pend||[];
+  pc.onicecandidate=e=>{if(e.candidate)netTx({k:'rtc',r:'ice',d:e.candidate.toJSON()})};
+  if(host){for(const [l,o] of [['snap',{ordered:false,maxRetransmits:0}],['inp',{ordered:true}]]){const ch=pc.createDataChannel(l,o);NET.dcs.push(ch);rtcAttach(ch)}
+    pc.createOffer().then(o=>pc.setLocalDescription(o)).then(()=>netTx({k:'rtc',r:'offer',d:{type:pc.localDescription.type,sdp:pc.localDescription.sdp}})).catch(()=>{})}
+  else pc.ondatachannel=e=>{NET.dcs.push(e.channel);rtcAttach(e.channel)}}
+async function rtcSig(m){try{if(!window.RTCPeerConnection)return;const flush=()=>{NET.rd=true;(NET.pend||[]).splice(0).forEach(c=>NET.pc&&NET.pc.addIceCandidate(c).catch(()=>{}))};
+  if(m.r==='offer'&&NET.role==='guest'){rtcStart(false);const pc=NET.pc;if(!pc)return;await pc.setRemoteDescription(m.d);await pc.setLocalDescription(await pc.createAnswer());netTx({k:'rtc',r:'answer',d:{type:pc.localDescription.type,sdp:pc.localDescription.sdp}});flush()}
+  else if(m.r==='answer'&&NET.role==='host'&&NET.pc){await NET.pc.setRemoteDescription(m.d);flush()}
+  else if(m.r==='ice'){if(NET.pc&&NET.rd)NET.pc.addIceCandidate(m.d).catch(()=>{});else(NET.pend=NET.pend||[]).push(m.d)}}catch(_){}}
+function netReset(){rtcClose();if(NET.mc)netTx({k:'bye'});try{if(NET.sb){NET.lb&&NET.sb.removeChannel(NET.lb);NET.mc&&NET.sb.removeChannel(NET.mc)}}catch(_){}Object.assign(NET,{on:false,role:'',sb:null,lb:null,mc:null,partner:'',in:{x:0,y:0,a:false,s:false},tg:null,lastIn:'',lastInT:0})}
+async function sbLib(){if(window.supabase&&window.supabase.createClient)return true;
+  for(const u of ['../../vendor/supabase.min.js','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js','https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js']){
+    const ok=await new Promise(r=>{const x=document.createElement('script');x.src=u;x.onload=()=>r(true);x.onerror=()=>r(false);document.head.appendChild(x)});if(ok&&window.supabase&&window.supabase.createClient)return true}return false}
+function netOpen(find,room){el('menu').hidden=true;el('net').hidden=false;if(find){netReset();const mine=!room;room=room||Math.random().toString(36).slice(2,8);el('n-inv').hidden=!mine;el('n-h').textContent=mine?'Invite a friend':'Joining the game';
+  if(mine){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('room',room);el('n-link').value=u.toString()}netFind(room)}}
+async function netFind(room){const msg=t=>{el('n-msg').textContent=t};msg('Connecting...');
+  if(!await sbLib()){msg('Could not load the matchmaking library. Check your connection.');return}
+  const me=Math.random().toString(36).slice(2,10),sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false},realtime:{params:{eventsPerSecond:60}}});
+  const lob=sb.channel('gd-room-'+room,{config:{presence:{key:me},broadcast:{self:false}}});NET.sb=sb;NET.lb=lob;NET.partner='';
+  const join=(name,role,partner)=>{NET.partner=partner;NET.role=role;msg('Opponent found. Joining...');const mc=sb.channel(name,{config:{broadcast:{self:false,ack:false}}});NET.mc=mc;
+    mc.on('broadcast',{event:'g'},({payload:m})=>{if(m)netMsg(m)}).subscribe(st=>{if(st==='SUBSCRIBED'){if(role==='guest')netTx({k:'ready'})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the server. Try again in a moment.')})};
+  function pair(){if(NET.partner)return;const ids=Object.keys(lob.presenceState()).sort(),i=ids.indexOf(me);if(i<0||ids.length<2)return;
+    if(i%2===0&&ids[i+1]){const p=ids[i+1],name='gd-m-'+me+'-'+p;join(name,'host',p);setTimeout(()=>lob.send({type:'broadcast',event:'sig',payload:{to:p,from:me,ch:name}}),600)}}
+  lob.on('presence',{event:'sync'},pair).on('broadcast',{event:'sig'},({payload:m})=>{if(m&&m.to===me&&!NET.partner)join(m.ch,'guest',m.from)})
+    .subscribe(async st=>{if(st==='SUBSCRIBED'){msg('Searching for an opponent...');await lob.track({at:Date.now()})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the server. Try again in a moment.')})}
+function netSend(){const o={s:G.s,ph:G.ph,t:G.t,msg:G.msg,sub:G.sub,res:G.res,shake:G.shake,pl:G.pl.map(p=>[p.x,p.y,p.vx,p.vy,p.f,p.st,p.act,p.at,p.cd,p.inv,p.ph])};
+  const R=v=>typeof v==='number'?Math.round(v*100)/100:Array.isArray(v)?v.map(R):v&&typeof v==='object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,R(x)])):v;netTx({k:'s',g:R(o),fx:[]})}
+function netMsg(m){
+  if(m.k==='rtc')rtcSig(m);
+  else if(m.k==='ready'&&NET.role==='host'){NET.on=true;OPT.mode='on';netTx({k:'go'});startGame();rtcStart(true)}
+  else if(m.k==='go'&&NET.role==='guest'){NET.on=true;OPT.mode='on';startGame()}
+  else if(m.k==='i'&&NET.role==='host'){NET.in=m.i}
+  else if(m.k==='s'&&NET.role==='guest'&&G){NET.last=performance.now();const g=m.g,wasPh=G.ph;G.s=g.s;G.ph=g.ph;G.t=g.t;G.msg=g.msg;G.sub=g.sub;G.res=g.res;G.shake=Math.max(G.shake,g.shake);
+    NET.tg=g.pl;if(!G.pl||wasPh==='menu'||G.ph==='snap'&&wasPh!=='snap'){G.pl=g.pl.map(a=>unpack(a))}
+    if(wasPh!==G.ph&&G.ph==='dead')sfx(G.res?G.res.kind:'tackle');if(wasPh!=='snap'&&G.ph==='snap'){cam=G.s.los;G.trail=[[],[]];G.fx=[]}if(wasPh==='snap'&&G.ph==='live')sfx('snap');
+    if(G.ph==='over'&&!el('end').classList.contains('x')&&el('end').hidden){showEnd()}}
+  else if(m.k==='bye'){if(G&&G.ph!=='over'){G.ph='over';el('e-res').textContent='Your friend left';el('e-sc').textContent=G.s.sc[0]+' - '+G.s.sc[1];el('e-st').textContent='';el('end').hidden=false;el('ctl').classList.remove('on')}netReset()}}
+function unpack(a){return{x:a[0],y:a[1],vx:a[2],vy:a[3],f:a[4],st:a[5],act:a[6],at:a[7],cd:a[8],inv:a[9],ph:a[10]}}
+function guestFrame(dt){
+  const inp=humanInput(),key=[Math.round(inp.x*10),Math.round(inp.y*10),inp.a?1:0,inp.s?1:0].join(),now=performance.now();
+  if(key!==NET.lastIn||now-NET.lastInT>120){NET.lastIn=key;NET.lastInT=now;netTx({k:'i',i:inp})}
+  if(NET.tg&&G.pl){G.pl.forEach((p,i)=>{const t=unpack(NET.tg[i]),k=Math.min(1,dt*22);if(Math.hypot(t.x-p.x,t.y-p.y)>8){Object.assign(p,t)}else{p.x+=(t.x-p.x)*k;p.y+=(t.y-p.y)*k}
+    Object.assign(p,{vx:t.vx,vy:t.vy,f:t.f,st:t.st,act:t.act,at:t.at,cd:t.cd,inv:t.inv,ph:p.ph+Math.hypot(t.vx,t.vy)*dt*1.15})});
+    const off=G.s.poss,O=G.pl[off];for(let i=0;i<2;i++){const tr=G.trail[i];tr.push({x:G.pl[i].x,y:G.pl[i].y,a:G.pl[i].act});if(tr.length>12)tr.shift()}
+    G.t+=dt;for(const q of G.fx)q.t-=dt;G.fx=G.fx.filter(q=>q.t>0);G.shake=Math.max(0,G.shake-dt*2.4);}
+  if(NET.on&&performance.now()-(NET.last||performance.now())>9000){G.ph='over';el('e-res').textContent='Lost contact';el('e-sc').textContent=G.s.sc[0]+' - '+G.s.sc[1];el('e-st').textContent='';el('end').hidden=false;netReset()}}
+el('n-back').addEventListener('click',()=>{netReset();el('net').hidden=true;el('menu').hidden=false});
+el('n-copy').addEventListener('click',()=>{const t=el('n-link');t.select();try{navigator.clipboard.writeText(t.value)}catch(_){try{document.execCommand('copy')}catch(__){}}el('n-copy').textContent='Copied';setTimeout(()=>el('n-copy').textContent='Copy link',1500)});
+el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(navigator.share)navigator.share({title:'Gridiron Duel',text:'Play me in Gridiron Duel',url:u}).catch(()=>{});else el('n-copy').click()});
+{const r=new URLSearchParams(location.search).get('room');if(r&&/^[a-z0-9]{3,12}$/i.test(r)){OPT.mode='on';setTimeout(()=>{aud();netOpen(true,r)},100)}}
+/* test hooks */
+window.__gd={get g(){return G},step,setupPlay,newState,aiInput,setOpt(o){Object.assign(OPT,o)},sim(d0,d1,maxPlays){OPT.diff=d0;const o=OPT.diff;G={s:newState(),ph:'snap',t:0,me:0,fx:[],trail:[[],[]],shake:0,pl:[mkPl(),mkPl()],hist:[],prevA:[false,false],ai:[{rt:0},{rt:0}],fxq:[]};setupPlay();const res=[];let guard=0;
+  while(!G.s.over&&guard++<4e5&&res.length<(maxPlays||200)){const off=G.s.poss;OPT.diff=off===0?d0:d1;const i0=aiInput(0);OPT.diff=off===1?d0:d1;const i1=aiInput(1);const ph=G.ph;step(TICK,[i0,i1]);if(ph==='live'&&G.ph==='dead')res.push({k:G.res.kind,y:G.res.yards,off})}
+  OPT.diff=o;return{res,s:G.s}}};
+</script></body></html>
