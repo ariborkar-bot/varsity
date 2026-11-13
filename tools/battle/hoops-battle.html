@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v35</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v36</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -496,7 +496,10 @@ function draw(){const W=g?g.W:VW,s=cv.width/W;X.setTransform(s,0,0,s,0,0);if(!g)
 const K={},TCH=[{l:false,r:false,j:false},{l:false,r:false,j:false}];
 addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();K[e.key.length===1?e.key.toLowerCase():e.key]=true;if(e.key==='Escape'||e.key==='p')togglePause()});
 addEventListener('keyup',e=>{K[e.key.length===1?e.key.toLowerCase():e.key]=false});
-addEventListener('blur',()=>{for(const k in K)K[k]=false;if(g&&g.phase!=='over'&&!paused&&g.started)togglePause()});
+/* v36: inside Varsity the game sits in an iframe, so the keyboard may still be on the page around it: take focus, and accept keys the page forwards */
+try{window.focus()}catch(_){}addEventListener('pointerdown',()=>{try{window.focus()}catch(_){}});
+addEventListener('message',e=>{const d=e.data;if(d&&d.hb==='key'&&typeof d.k==='string'){const k=d.k.length===1?d.k.toLowerCase():d.k;K[k]=!!d.down;if(d.down&&(k==='Escape'||k==='p'))togglePause()}});
+addEventListener('blur',()=>{for(const k in K)K[k]=false;if(g&&g.phase!=='over'&&!paused&&g.started&&!(parent!==window&&!document.hidden))togglePause()});
 function human(i){const t=TCH[i];if(OPT.mode==='2p')return i===0?{l:K.a||t.l,r:K.d||t.r,j:K.w||t.j}:{l:K.ArrowLeft||t.l,r:K.ArrowRight||t.r,j:K.ArrowUp||t.j};
   return {l:K.a||K.ArrowLeft||t.l,r:K.d||K.ArrowRight||t.r,j:K.w||K.ArrowUp||K[' ']||t.j}}
 function buildCtl(){const c=document.getElementById('ctl'),two=OPT.mode==='2p',b=(p,k,t,cl)=>`<button type="button" class="tb ${cl||''}" data-p="${p}" data-k="${k}" aria-label="${k==='l'?'Left':k==='r'?'Right':'Jump'}">${t}</button>`;

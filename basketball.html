@@ -3402,7 +3402,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v465 · Nov 12';
+const APP_BUILD='v466 · Nov 12';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7800,13 +7800,15 @@ async function hbOpen(m){
   el.innerHTML=`<iframe title="Hoops Battle" allow="autoplay" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#0b1626" src="tools/battle/hoops-battle.html?embed=1${m==='find'?'&find=1&w='+w+'&bal='+bal:''}&b=${encodeURIComponent(APP_BUILD)}"></iframe><button class="fgx-x" aria-label="Close game" style="left:12px;right:auto;top:calc(8px + env(safe-area-inset-top,0px));width:36px;height:36px;font-size:16px">✕</button>`;
   document.body.appendChild(el);document.body.classList.add('fg-on');HB.live=null;
   const fr=el.querySelector('iframe');
-  const done=()=>{removeEventListener('message',on);el.remove();document.body.classList.remove('fg-on')},
+  const done=()=>{removeEventListener('message',on);removeEventListener('keydown',fwd);removeEventListener('keyup',fwd);el.remove();document.body.classList.remove('fg-on')},
   close=()=>{const lv=HB.live;HB.live=null;if(lv&&lv.w){try{fr.contentWindow.postMessage({hb:'bye'},'*')}catch(_){}hbRecord(lv.mid,lv.w,false);setTimeout(done,250)}else done()},
   on=e=>{const d=e.data;if(!d||!d.hb||e.source!==fr.contentWindow)return;
     if(d.hb==='close')close();
     else if(d.hb==='live')HB.live={mid:d.mid,w:+d.w||0};
     else if(d.hb==='result'){HB.live=null;hbRecord(d.mid,+d.w||0,!!d.win)}
     else if(d.hb==='nobal'){UI.hbW=0;say('Not enough tokens for that wager. Playing for fun.')}};
+  const fwd=e=>{if(!document.querySelector('.hbx')||e.target.closest&&e.target.closest('input,textarea'))return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','w','a','d','p','Escape'].includes(e.key)){if(e.key!=='Escape')e.preventDefault();try{fr.contentWindow.postMessage({hb:'key',k:e.key,down:e.type==='keydown'},'*')}catch(_){}}};
+  addEventListener('keydown',fwd);addEventListener('keyup',fwd);fr.addEventListener('load',()=>{try{fr.contentWindow.focus()}catch(_){}});setTimeout(()=>{try{fr.contentWindow.focus()}catch(_){}},400);
   addEventListener('message',on);el.querySelector('.fgx-x').addEventListener('click',close)}
 function viewMini(){
   if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='leagues';UI.lgk='pk';setTimeout(()=>{location.hash='#groups'},0)}
