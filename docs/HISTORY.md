@@ -666,3 +666,6 @@ Owner: first to 21 win by 2 (no clock, no overtime: `WINPTS`, checked in `afterD
 
 ## Hoops Battle v48
 Energy: every restart after a score gives 2 bars (`EN.score .25`), standing still 1.5 s gives one bar (`EN.still`, `p.stl`), no per-second regen when standing; moving regen stays tiny.
+
+## Hoops Battle v49
+Timeouts: tap the scoreboard (canvas hit test in `sbTap`, game coords from `innerWidth`) to call one of 2 timeouts (`g.tol`, `g.to`, `callTO`): 20 s freeze, +2 energy bars for the caller, tap again to end early; 2P: left half of the scoreboard is player 1, right half player 2; online the guest sends `{k:'to'}` and the host runs it (`to`,`tol` are in `SNAPK`). Pips under the names show timeouts left. Buttons: no iOS loupe/selection/double-tap zoom (`*{user-select:none;-webkit-touch-callout:none}`, `touchstart` preventDefault on `.tb`, `#ctl`, canvas; `selectstart`, `dblclick`, `gesture*` blocked).
