@@ -586,3 +586,6 @@ sw.js: requests under /tools/ (Hoops Battle) skip the service worker. Before, op
 
 ## Hoops Battle v30
 Invite links: also read #room=, join after 100 ms, and the menu shows a "Join your friend's game" button for the invite as a fallback. Menu shows v30.
+
+## v459
+Owner: no real-money options. Removed the `usd` price field from every pack in `PACKS` and the disabled '1 more try · $0.99 · Coming soon' buttons in Field Goal/Hoops (`fgMoreBtns`, `fgOut`; `FG_TRY_USD` gone). Ads and token rewards are unchanged. Once the daily ad try is used, the out-of-tries screen shows only Play Unlimited.

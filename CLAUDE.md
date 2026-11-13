@@ -47,7 +47,7 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - A Claude scheduled task ("Varsity daily scores", 5:41 am Pacific every day) is ON (re-created Nov 5 2026 at the owner's request). it finds final scores in news scoreboards (High School On SI, local papers) and adds them with `tools/add_scores.py`. It does not scrape MaxPreps: from the cloud MaxPreps pages come back about a year stale, and automated scraping breaks their terms.
 - `tools/add_scores.py` (read its docstring): input lines `fb|YYYY-MM-DD|home|hs|away|as|source`; fills scores for scheduled games, adds unscheduled games that involve a San Diego Section school, reports CONFLICT/SKIPPED and never guesses. `--pending` lists played games with no score, `--names fb|bb` lists team names, `--dry-run` previews. Other spellings go in `tools/data/team_aliases.txt`.
 - Football scores live in `games.js`; basketball scores are a trailing `64-58` (home first) on a line of `tools/data/bb_2627_games.txt`, read by `load_games()` and passed through to `basketball.html`.
-- Player stats are not updated automatically (news sources rarely publish full box scores). The owner is asking MaxPreps/PlayOn for a data license and ScoreStream for an API quote; the owner wants to expand the app to the whole U.S. The app is free, with no purchases and no gambling (tokens have no cash value; real-money packs show 'Coming soon').
+- Player stats are not updated automatically (news sources rarely publish full box scores). The owner is asking MaxPreps/PlayOn for a data license and ScoreStream for an API quote; the owner wants to expand the app to the whole U.S. The app is free, with no purchases and no gambling (tokens have no cash value; no real-money prices anywhere, removed v459).
 
 ## Getting MaxPreps data (if needed again)
 Use Claude in Chrome. `javascript_tool` output is cut off at about 1 KB and blocks query-string URLs, so write results into the page DOM and read them with `get_page_text`. Verify hand-transcribed data with a checksum computed in the browser and in Python.
@@ -64,7 +64,7 @@ Use Claude in Chrome. `javascript_tool` output is cut off at about 1 KB and bloc
 
 ## Rules to keep (owner decisions that are easy to break)
 - Declined for now (do not do without asking): hiding "Admin sign in", intro shown once ever, bigger tap targets, 12 px minimum text, shorter Minigames tab labels, Simulate leaderboard wording, "VARSITY 05" yard numbers, Stats list loading more at once.
-- Wagers are final once saved (no Remove); All in asks once to confirm. Tokens have no cash value; real-money prices show 'Coming soon' (no purchases, no gambling). Pay-for-tokens was NOT built.
+- Wagers are final once saved (no Remove); All in asks once to confirm. Tokens have no cash value; no real-money prices or 'Coming soon' purchase buttons (v459; no purchases, no gambling). Pay-for-tokens was NOT built.
 - Signed-out visitors only see the sign-in screen on the real site (previews run in demo mode). 13+ box at sign-up.
 - Two-way football players: each card scores only its own side. Football defense scoring: tackle 1.25, TFL 2, sack 3, INT 5, PBU 2, FF 4, FR 3, def TD 6.
 - Stats tab On the rise / Cooling off show exactly 5 people each.

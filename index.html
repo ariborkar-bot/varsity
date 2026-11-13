@@ -1467,7 +1467,7 @@ select option{background:#0B1730;color:#EAF0F8}
 .lk-rookie .lk-art{background:linear-gradient(135deg,#2F6BFF,#1C3E91)}.lk-player .lk-art{background:linear-gradient(135deg,#7A4DFF,#2A0E6B)}.lk-cards .lk-art,.pko-pack.lk-cards .pko-pk{background:linear-gradient(135deg,#19C2A0,#0B4F6C);color:#fff}
 .lk-champs .lk-art{background:radial-gradient(circle at 30% 25%,#FFF6C8,#F2BE2C 45%,#9C6F00);color:#2A1C00;text-shadow:none}
 .lk-odds{text-align:left;font-size:.85rem}.lk-odds summary{cursor:pointer;color:var(--muted)}.lk-odds ul{list-style:none;margin:6px 0;padding:0}.lk-odds li{display:flex;justify-content:space-between;padding:3px 0}
-.lk-usd{opacity:.7}.lk-note{margin-top:12px}
+.lk-note{margin-top:12px}
 .lk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px;margin-top:10px}
 .lk-it{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);color:inherit;font:inherit;cursor:pointer;text-align:center}
 .lk-it b{font-size:.8rem}.lk-it small{font-size:.7rem}.lk-it.on{border-color:#FFC23D;box-shadow:0 0 0 2px rgba(255,194,61,.35)}.lk-it.lock{opacity:.45;cursor:default}
@@ -3393,7 +3393,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v458 · Nov 11';
+const APP_BUILD='v459 · Nov 12';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4569,29 +4569,29 @@ const ITEM=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
 const COS_K=['ball','frame','banner','name','cback','bubble','title','badge','theme','coin','icon','share','walkup','crest','lineup','field','jersey','bhSleeve','bhPlate'];
 const PACKS={
   /* v400 (owner): Accessories pack: 3 pieces of bobblehead gear (arm sleeves, back plates), nothing else */
-  gear:{n:'Accessories pack',c:3,tok:300,usd:'$2.99',odds:{c:40,u:30,r:18,e:8,l:3,m:1},g:'',gear:1},
+  gear:{n:'Accessories pack',c:3,tok:300,odds:{c:40,u:30,r:18,e:8,l:3,m:1},g:'',gear:1},
   /* v420 (owner): Spotlight pack: special player cards only (Prizm, Game Ticket, Hot Streak, Playbook, Signature, Friday Night Lights, Headline, Rivalry, Arcade) */
-  spot:{n:'Spotlight pack',c:3,tok:1800,usd:'$11.99',odds:{e:70,l:24,m:6},g:'',cards:1,spc:1},
+  spot:{n:'Spotlight pack',c:3,tok:1800,odds:{e:70,l:24,m:6},g:'',cards:1,spc:1},
   /* v421 (owner): Special Edition pack: one card of every special style (9 cards). Gift only. */
   alls:{n:'Special Edition pack',c:9,tok:0,odds:{e:70,l:24,m:6},g:'',cards:1,spc:1,each:1,off:1},
-  rookie:{n:'Rookie pack',c:3,tok:150,usd:'$0.99',odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
-  player:{n:'Pro pack',c:5,tok:450,usd:'$4.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:''},
+  rookie:{n:'Rookie pack',c:3,tok:150,odds:{c:50,u:30,r:15,e:3,l:1.5,m:.5},g:''},
+  player:{n:'Pro pack',c:5,tok:450,odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:''},
   /* v380 (owner): Pick Your Team pack: Pro pack odds, but you pick the team; the card is one of that team's players or its team card. v381: 1 card */
-  team:{n:'Pick Your Team pack',c:1,tok:1100,usd:'$8.99',odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'',cards:1,team:1},
+  team:{n:'Pick Your Team pack',c:1,tok:1100,odds:{c:30,u:35,r:22,e:8,l:3,m:2},g:'',cards:1,team:1},
   /* v342 (owner): Player + Team pack: 5 player/team cards only (no cosmetics, perks or boosts), a bit better odds than the Pro pack (v380: no guaranteed last card, just the odds) */
-  cards:{n:'Player + Team pack',c:5,tok:950,usd:'$7.99',odds:{c:20,u:32,r:26,e:12,l:6,m:4},g:'',cards:1},
-  champs:{n:'Champion pack',c:10,tok:1250,usd:'$9.99',odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:''},
+  cards:{n:'Player + Team pack',c:5,tok:950,odds:{c:20,u:32,r:26,e:12,l:6,m:4},g:'',cards:1},
+  champs:{n:'Champion pack',c:10,tok:1250,odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:''},
   /* v285 Hall of Fame pack (was God pack; key stays 'god'): cosmetics only (no cards or perks), Rare and up (v380: no guaranteed last item) */
-  god:{n:'Hall of Fame pack',c:5,tok:3500,usd:'$19.99',odds:{r:33,e:35,l:17,m:8},g:'',cos:1},
+  god:{n:'Hall of Fame pack',c:5,tok:3500,odds:{r:33,e:35,l:17,m:8},g:'',cos:1},
   /* v366 (owner): Pick 1 of 5: 5 players, one is a Top 10 Immortal card, you keep 1 (odds are for the other 4, Rare or better) */
-  pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,usd:'$24.99',odds:{r:40,e:32,l:19,m:9},g:'',pick:1,off:1},   /* v380 (owner): removed from the Shop (off); gifts/half-done picks still open */
+  pick:{n:'Pick 1 of 5 pack',c:5,tok:4000,odds:{r:40,e:32,l:19,m:9},g:'',pick:1,off:1},   /* v380 (owner): removed from the Shop (off); gifts/half-done picks still open */
   /* v382 (owner): the Welcome pack: you pick a team and get a walkout player (Epic or better) + 10 more cards (Champion pack odds), once per account (off: not in the Shop) */
   welcome:{n:'Welcome pack',c:10,tok:0,odds:{c:20,u:30,r:25,e:13,l:7,m:5},g:'',cards:1,off:1},
   /* v401 (owner): Duo pack: 3 Duo cards (two teammates on one double-sided card), Epic or better; they unlock parlays */
-  duo:{n:'Duo pack',c:3,tok:2000,usd:'$14.99',odds:{e:80,l:16,m:4},g:'',cards:1,duo:1},
+  duo:{n:'Duo pack',c:3,tok:2000,odds:{e:80,l:16,m:4},g:'',cards:1,duo:1},
   /* v402 (owner): a free gift for everyone: 1 Duo card from a school you choose, once per account (off: not sold) */
   duogift:{n:'Duo gift',c:1,tok:0,odds:{e:80,l:16,m:4},g:'',cards:1,duo:1,team:1,off:1},
-  godpick:{n:'God Picks pack',c:5,tok:25000,usd:'$99.99',odds:{},g:'',pick:1,all:1}};   /* v386 (owner): back in the Shop, still the most expensive pack */
+  godpick:{n:'God Picks pack',c:5,tok:25000,odds:{},g:'',pick:1,all:1}};   /* v386 (owner): back in the Shop, still the most expensive pack */
 const invOf=u=>((S.picks[u]||{}).inv)||{};
 const invHas=(u,id)=>{const x=ITEM[id];if(x&&x.ex)return cosEarned(u,id)?1:0;return Math.max(0,(+((invOf(u).it||{})[id])||0)+(+gDelta(u)[id]||0))};
 const cosOwnCount=u=>{const it=invOf(u).it||{},d=gDelta(u);let n=0;for(const id of new Set([...Object.keys(it),...Object.keys(d)])){const x=ITEM[id];if(x&&!x.ex&&COS_K.includes(x.k)&&(+it[id]||0)+(+d[id]||0)>0)n++}return n};
@@ -6926,12 +6926,11 @@ function cupHTML(){
   const pk=`<section class="card" id="cup-pk"><div class="qh"><h3>Cup Pick ’em · Week ${w}</h3><span class="muted">${gs.length} ${gs.length===1?'game':'games'}</span></div><p class="muted">Free picks that only count for the School Cup. Pick as many games as you like.</p>${bar}</section>`+(gs.length?`<div class="bt-grid">${gs.map(card).join('')}</div>`:'<p class="empty">No games this week.</p>');
   return mu+how+nos+mine+stand+oth+pk;
 }
-/* v269: out of daily tries -> watch an ad for one more (once a day, dd.adt), then a 4th+ try for $0.99 (shown as Coming soon: no real-money purchases yet) */
-const FG_TRY_USD='$0.99';
+/* v269: out of daily tries -> watch an ad for one more (once a day, dd.adt). v459 (owner): the $0.99 try was removed, no real-money options. */
 const fgAdUsed=()=>!!((fgDay(ME.uid)||{}).adt);
 function fgAdTry(after){if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline')return;const d=fgDay(ME.uid)||{d:TODAY(),tries:0,best:0,t:0};if(d.adt)return;
   const dd=Object.assign({},d,{d:TODAY(),x:(+d.x||0)+1,adt:1}),my=fgRec(ME.uid);S.picks[ME.uid]={...(S.picks[ME.uid]||{}),fg:{...my,dd}};upsert('picks/'+ME.uid,{fg:{dd}}).catch(()=>{});say('+1 try for today’s challenge');if(after)after()}
-const fgMoreBtns=()=>fgAdUsed()?`<button type="button" class="btn ghost fgm-usd" disabled title="Coming soon">1 more try · ${FG_TRY_USD} · Coming soon</button>`:`<button type="button" class="btn fgm-ad" data-act="fgAdTry">▶ Watch an ad for 1 more try</button>`;
+const fgMoreBtns=()=>fgAdUsed()?'':`<button type="button" class="btn fgm-ad" data-act="fgAdTry">▶ Watch an ad for 1 more try</button>`;
 const fgTriesLeft=()=>{const d=fgDay(ME.uid)||{};return Math.max(0,FG_TRIES+(+d.x||0)-(+d.tries||0))};
 function fgHTML(){
   const my=ME.uid?fgRec(ME.uid):{},can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly',bb=FG_SPORT==='bb',M=UI.fgm==='free'?'free':'daily';
@@ -7169,7 +7168,7 @@ function fgOut(){const g=FG;if(!g)return;let o=g.el.querySelector('.fgx-more');
   const want=g.st==='over'&&!g.offer&&g.mode==='daily'&&ME.uid&&ME.mode!=='guest'&&!fgTriesLeft()&&performance.now()-g.tEnd>300;
   if(!want){if(o)o.remove();return}if(o)return;
   o=document.createElement('div');o.className='fgx-rv fgx-more';
-  o.innerHTML=(fgAdUsed()?`<button type="button" class="rvx" disabled>1 more try · ${FG_TRY_USD} · Coming soon</button>`:'<button type="button" class="rvw">▶ Watch an ad for 1 more try</button>')+'<button type="button" class="rve">Play Unlimited</button>';
+  o.innerHTML=(fgAdUsed()?'':'<button type="button" class="rvw">▶ Watch an ad for 1 more try</button>')+'<button type="button" class="rve">Play Unlimited</button>';
   g.el.appendChild(o);o.style.top=(g.H*.3+160*g.s)+'px';
   const w=o.querySelector('.rvw');if(w)w.onclick=()=>adPlay(()=>fgAdTry(()=>{o.remove();fgReset()}));
   o.querySelector('.rve').onclick=()=>{o.remove();g.mode='free';UI.fgm='free';fgReset()}}
