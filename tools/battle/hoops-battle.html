@@ -65,7 +65,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v51</small></p>
+  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v52</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -221,7 +221,7 @@ function release(p,late){
   p.has=false;p.dd=false;p.shoot=false;p.cd=.4;Object.assign(b,{blk:false,own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
   if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.fb=Math.abs(p.vx)>SPD*.55;   /* v47: any running dunk shatters the glass */p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=(p.tk!=null?p.tk:dist)>TP?3:2;   /* v20: a three is decided by where he left the floor, like the line on the court */
-  const near=Math.abs(o.x-p.x),hi=o.air&&o.y<GY-36,contest=Math.max(0,1-near/140)*(hi?1.8:1)*1.4*1.15+(hi&&near<105?.45:0)   /* v23: the closer and higher the defender's hand, the worse the shot; felt from 125 px out */,tired=p.en<.25?(1-p.en/.25)*20:0;
+  const near=Math.abs(o.x-p.x),hi=o.air&&o.y<GY-36,contest=!o.air?0:Math.max(0,1-near/140)*(hi?1.8:1)*1.4*1.15+(hi&&near<105?.45:0)   /* v52: a shot is only contested while the defender is in the air */   /* v23: the closer and higher the defender's hand, the worse the shot; felt from 125 px out */,tired=p.en<.25?(1-p.en/.25)*20:0;
   const cpct=Math.round(Math.min(1,contest/3.2)*100);   /* v47: how contested the shot is, shown at the release */
   let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8+(dist-TP)*.055:0)+contest*(dist>TP?p.co||1:1)*47*(1-q*.35)+tired;if(perfect)err=6+(dist>TP?9+(dist-TP)*.03:0)+contest*(dist>TP?p.co||1:1)*42+tired*.6;   /* v38: contested shots about 35% harder */
   err*=p.ce||1;

@@ -687,3 +687,5 @@ Owner says they have MaxPreps' permission, so `tools/sections/maxpreps.py` + ada
 
 ## v480 (Nov 13, owner): all-California crawl, split by section (tools + workflow, no app change)
 Owner wants all of California, applied by section. MaxPreps team pages list their section/league/division (`pageProps.teamContext.data.sectionName/leagueName/sectionDivisionName`), so `maxpreps.crawl` tags every crawled school, and `sync.py california` writes `data/sections/<section>.json` per section plus `index.json` (`split_by_section` in sections_lib.py matches MaxPreps' "San Diego Section" to the registry id). Stale-copy guard (newest game must be within 150 days). `.github/workflows/collect.yml` (manual only, dry run by default, probes MaxPreps first). Not built yet: the app reading these files (the football app is wired to San Diego in about 14 places, and player stats are not collected), rosters and box scores.
+## Hoops Battle v52
+A shot can only be contested while the defender is jumping (`contest` in `release` is 0 when `!o.air`); a defender standing next to the shooter no longer hurts the shot or shows a percentage.
