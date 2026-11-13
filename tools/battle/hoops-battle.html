@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v42</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v43</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -216,7 +216,7 @@ function release(p,late){
   if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.fb=Math.abs(p.vx)>SPD*.7&&Math.abs(o.x-p.x)>230;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=(p.tk!=null?p.tk:dist)>TP?3:2;   /* v20: a three is decided by where he left the floor, like the line on the court */
   const near=Math.abs(o.x-p.x),hi=o.air&&o.y<GY-36,contest=Math.max(0,1-near/140)*(hi?1.8:1)*1.4+(hi&&near<105?.45:0)   /* v23: the closer and higher the defender's hand, the worse the shot; felt from 125 px out */,tired=p.en<.25?(1-p.en/.25)*20:0;
-  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*(dist>TP?p.co||1:1)*47*(1-q*.35)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*(dist>TP?p.co||1:1)*42+tired*.6;   /* v38: contested shots about 35% harder */
+  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8+(dist-TP)*.055:0)+contest*(dist>TP?p.co||1:1)*47*(1-q*.35)+tired;if(perfect)err=6+(dist>TP?9+(dist-TP)*.03:0)+contest*(dist>TP?p.co||1:1)*42+tired*.6;   /* v38: contested shots about 35% harder */
   err*=p.ce||1;
   const T=Math.max(.86,Math.min(1.6,.8+dist/590)),off0=g._off!=null?g._off:(rnd()*2-1)*err,off=Math.abs(off0)>46?Math.sign(off0)*(27+rnd()*17):off0,tx=h.cx+off;   /* a badly timed shot clanks off the rim; it never lucks in off the backboard */
   b.vx=(tx-b.x)/T;b.vy=(RIMY-2-b.y-.5*GR*T*T)/T;
@@ -546,23 +546,24 @@ const el=id=>document.getElementById(id);
    It works from what is drawn, so the online guest records the same way from the host's snapshots. */
 const RP={buf:[],n:0,lt:0,dk:-1,done:false,on:false,pos:0,a:0,b:0};
 const RPK=['ball','fx','net','rd','shake','zm','zx','fl','t','pop','score','clock'];
+function rpBegin(){const f=RP.buf[RP.buf.length-1];if(!f)return;const base=RP.buf[0].n,dk=RP.dk>=0?RP.dk:f.n-60,a=Math.max(base,dk-50),b=Math.min(f.n,dk+70);if(b-a<30)return;RP.a=a-base;RP.b=b-base;RP.pos=RP.a;RP.el=0;RP.on=true;el('tskip').hidden=false}
 function rpRec(){const now=performance.now();if(!g||g.phase==='over'||now-RP.lt<15)return;RP.lt=now;
   const f={n:RP.n++,P:g.P.map(p=>Object.assign({},p)),ball:Object.assign({},g.ball),fx:g.fx.map(q=>Object.assign({},q)),pop:g.pop.map(q=>Object.assign({},q)),net:g.net.slice(),rd:g.rd.slice(),bb:g.bb.slice(),score:g.score.slice()};
   for(const k of ['shake','zm','zx','fl','t','clock'])f[k]=g[k];RP.buf.push(f);if(RP.buf.length>260)RP.buf.shift();
   if(g.phase==='live'){RP.dk=-1;RP.done=false}
   else if(RP.dk<0&&g.P.some(p=>p.dk>0))RP.dk=f.n;
   if(RP.dk>=0&&g.phase==='live'&&g.P.some(p=>p.dk>0)&&RP.dk>f.n)RP.dk=f.n;
-  if(g.phase==='dead'&&g.ball.dunk&&RP.dk>=0&&!RP.done&&g.dead<.55&&!paused){
-    const base=RP.buf[0].n,a=Math.max(base,RP.dk-50),b=Math.min(f.n,RP.dk+70);RP.done=true;if(b-a<30)return;
-    RP.a=a-base;RP.b=b-base;RP.pos=RP.a;RP.on=true;el('tskip').hidden=false}}
-function rpPlay(dt){RP.pos+=dt*60*.62;const i=Math.floor(RP.pos);
-  if(i>=RP.b||!RP.buf[i]){RP.on=false;el('tskip').hidden=true;acc=0;return}
+  /* v43: the replay can't be skipped and lasts the same time for both players: the host (or a local game) starts it and tells the guest, and both play the clip over RPT seconds (the host holds the last frame a moment longer so the guest never finishes after play resumes) */
+  if(g.phase==='dead'&&g.ball.dunk&&RP.dk>=0&&!RP.done&&g.dead<.55&&!paused&&!(NET.on&&NET.role==='guest')){RP.done=true;rpBegin();if(RP.on&&NET.on&&NET.role==='host')netTx({k:'rp'})}}
+const RPT=2.9;
+function rpPlay(dt){RP.el+=dt;const dur=RPT+(NET.on&&NET.role==='host'?.35:0);
+  if(RP.el>=dur){RP.on=false;el('tskip').hidden=true;acc=0;return}
+  RP.pos=RP.a+Math.min(1,RP.el/RPT)*(RP.b-RP.a-1);const i=Math.floor(RP.pos);if(!RP.buf[i]){RP.on=false;el('tskip').hidden=true;acc=0;return}
   const f=RP.buf[i],keep={P:g.P,ball:g.ball,fx:g.fx,pop:g.pop,net:g.net,rd:g.rd,bb:g.bb,score:g.score,shake:g.shake,zm:g.zm,zx:g.zx,fl:g.fl,t:g.t,clock:g.clock,phase:g.phase,dead:g.dead};
   try{g.P=f.P;g.ball=f.ball;g.fx=f.fx;g.pop=f.pop;g.net=f.net;g.rd=f.rd;g.bb=f.bb;g.score=f.score;g.shake=f.shake*.6;g.zm=f.zm;g.zx=f.zx;g.fl=f.fl*.5;g.t=f.t;g.clock=f.clock;g.phase='live';g.dead=0;
     draw();const W=g.W,s=cv.width/W;X.setTransform(s,0,0,s,0,0);X.fillStyle='rgba(0,0,0,.78)';X.fillRect(0,0,W,34);X.fillRect(0,H-34,W,34);
     X.fillStyle='#ff3b3b';X.beginPath();X.arc(W/2-52,H-17,6,0,7);X.fill();X.fillStyle='#fff';X.font='900 18px system-ui';X.textAlign='left';X.fillText('REPLAY',W/2-38,H-10);X.textAlign='center'}
   finally{Object.assign(g,keep)}}
-el('tskip').addEventListener('pointerdown',()=>{RP.on=false;el('tskip').hidden=true;acc=0});
 
 function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1000||0);last=ts;
   if(g){rpRec();if(RP.on){if(NET.on&&NET.role==='host'){NET.acc+=dt;if(NET.acc>=1/30){NET.acc=0;netSend()}}rpPlay(dt);return}}
@@ -657,6 +658,7 @@ const R2=v=>typeof v==='number'?Math.round(v*100)/100:Array.isArray(v)?v.map(R2)
 function netSend(){const o={};for(const k of SNAPK)o[k]=R2(g[k]);netTx({k:'s',g:o,snd:NET.snd.splice(0)})}
 function netMsg(m){NET.last=performance.now();
   if(m.k==='rtc'){rtcSig(m)}
+  else if(m.k==='rp'&&NET.role==='guest'&&g&&!RP.on){RP.done=true;rpBegin()}
   else if(m.k==='ready'&&NET.role==='host'&&!NET.on){NET.gc=m.c;netStart();rtcStart(true)}
   else if(m.k==='go'&&NET.role==='guest'){audio();netBegin(m.len,m.c)}
   else if(m.k==='bye'){if(NET.on){if(NET.w&&NET.mid&&NET.posted!==NET.mid&&g&&g.phase!=='over'){NET.posted=NET.mid;hbPost({hb:'result',mid:NET.mid,w:NET.w,win:true,forfeit:true});NET.bal+=NET.w}netLost('Your opponent left.')}else{NET.partner='';NET.mc=null}}

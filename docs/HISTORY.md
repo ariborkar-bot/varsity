@@ -630,3 +630,6 @@ Owner: driving into a defender costs more energy (`EN.push` .16 to .21). Crossov
 
 ## Hoops Battle v42 (Finisher)
 Owner: fourth character `fin` FINISHER (`CH`): speed x.97, shot error x1.1, block reach x.9, but `paint` .55 (a shooter within 160 px of the hoop he attacks is blocked with 55 percent of the usual reach, `blocks()`) and `out` .5 (contest penalty halved when the shot is behind the line, `release()`). Shows in both character pickers.
+
+## Hoops Battle v43
+Owner: (1) the dunk replay can no longer be skipped (the `tskip` layer only blocks taps). (2) Equal replay time online: the host (or a local game) starts it (`rpBegin`) and sends `{k:'rp'}`; the guest starts on that message from its own buffer; both play the clip over `RPT` 2.9 s (time based), the host holds the last frame .35 s longer. (3) Shots from farther behind the line are harder: error + .055 px per px beyond `TP` (.03 on a perfect release).
