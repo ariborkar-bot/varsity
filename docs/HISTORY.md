@@ -704,3 +704,8 @@ Owner: v5 was just 1v1 tackling. v6: offense picks Inside run / Sweep / Quick / 
 
 ### Gridiron Rush v7 (Retro Bowl style) — tools/football/gridiron-duel.html
 Owner: make it like Retro Bowl. Passing concepts are named (Slants, Smash, Four Verts). The QB throw is aimed: tap/click the field spot you want the ball (`throwAt`, tap -> field point via inverse of `sx/sy`); `resolveCatch` finds the nearest receiver to where the ball lands (miss >2.5 yd = NO ONE THERE, <=0.9 full odds, <=1.6 x.75, else x.4), so you must lead the receiver. After the catch, swipe on the canvas to juke in that direction (`SW`, works during the catch animation; online guest sends `{k:'sw'}`). 1/2/3 throw buttons and keys removed. AI still uses `throwTo`.
+
+## v482 (Nov 13, owner): players by section, leagues belong to one section
+- Players tab: new Section chip row (`psec`, `UI.psec`, default All sections = everyone in the country). `secOfPlayer(p)` = profile `sec`, else the section of the school, else San Diego (all box-score data is San Diego so far). Choosing a section also narrows the School filter. A section with no players shows "coming soon".
+- Leagues: the create forms (snake draft/budget/pick 'em, and the Pick 'em tab form) have a Section select (`secSel`, ids `new-sec`, `pkl-sec`); only live sections can be chosen. The doc stores `sec`; `lgSec(g)` reads it (old leagues = San Diego); league tabs show the section name. Cannot be changed later.
+- Not done yet: restricting a league's draft/pick pool and games to its section in code (only San Diego is live, so every pool is already San Diego). Do that when a second section gets player data. The pre-profile "pending create" path (`vs-pending`) does not carry the section and uses the player's own.

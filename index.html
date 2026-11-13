@@ -3055,6 +3055,11 @@ const secOfSchool=n=>{for(const k in SECTIONS)if(SECTIONS[k].schools.includes(n)
 const secOfProfile=p=>p&&p.sec&&SECTIONS[p.sec]?p.sec:HOME_SEC;
 const secLive=id=>!!SECTIONS[id]&&SECTIONS[id].status==='live';
 const LIVE_SECS=()=>Object.keys(SECTIONS).filter(secLive);
+/* v482: a player's section comes from their school (box-score names the team list lacks are San Diego too, since that is the only data so far); a league belongs to one section, chosen when it is started, and older leagues are San Diego */
+const secOfPlayer=p=>(p&&p.sec&&SECTIONS[p.sec]?p.sec:secOfSchool(p&&p.school))||HOME_SEC;
+const lgSec=g=>g&&g.sec&&SECTIONS[g.sec]?g.sec:HOME_SEC;
+const secSel=(id,cur)=>`<label class="fld lg-sec"><span>Section</span><select id="${id}" aria-label="League section">${Object.values(SECTIONS).map(x=>`<option value="${x.id}" ${secLive(x.id)?'':'disabled'} ${x.id===cur?'selected':''}>${esc(x.name)}${secLive(x.id)?'':' (coming soon)'}</option>`).join('')}</select><small class="muted">A league plays in one section only: its players, games and standings. You cannot change it later.</small></label>`;
+const newSec=id=>{const e=document.getElementById(id),v=e&&e.value;return v&&secLive(v)?v:secOfProfile(myProfile())};
 /* sign-up school list = the team list plus every school name the box-score data uses (v412: 11 schools such as Mt. Carmel, Central and San Diego were missing, so their players and fans could not pick them) */
 let _nmSch=null;function nmSchools(){if(!_nmSch||_nmSch.n!==SD_SCHOOLS.length+':'+_rev){try{const s=new Set(SD_SCHOOLS);players().forEach(p=>{if(p.school&&p.key!=='me')s.add(p.school)});_nmSch={n:SD_SCHOOLS.length+':'+_rev,l:[...s].sort((a,b)=>a.localeCompare(b))}}catch(_){return SD_SCHOOLS}}return _nmSch.l}
 
@@ -3413,7 +3418,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v481 · Nov 13';
+const APP_BUILD='v482 · Nov 13';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4352,6 +4357,7 @@ let _poSeed=null;const poSeed=n=>{if(!_poSeed){_poSeed={};PO_DEFS.forEach(d=>d.r
 function pklHTML(inL){
   const can=ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly';
   const forms=`<div class="two"><form class="card lg-form" id="pkl-create"><h3>Start a Pick ’em league</h3><p class="muted">Name it, then send the code to your friends.</p>
+      ${secSel('pkl-sec',secOfProfile(myProfile()))}
       <div class="lg-row"><input id="pkl-name" maxlength="32" placeholder="League name, like Lunch Table Picks" autocomplete="off" aria-label="League name"><button class="btn" type="submit">Create</button></div></form>
     <form class="card lg-form" id="pkl-join"><h3>Join a Pick ’em league</h3><p class="muted">Enter the code a friend sent you.</p>
       <div class="lg-row"><input id="pkl-code" maxlength="12" placeholder="Invite code" autocomplete="off" aria-label="Invite code"><button class="btn" type="submit">Join</button></div></form></div>`;
@@ -7879,7 +7885,7 @@ const MGI=(()=>{const w=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</sv
    Data is the JSON the collector commits to data/sections/ (index.json + one file per section). It is loaded only when you open a section, never at start-up, and it never touches GAMES, picks, wagers or leagues. San Diego keeps its full app. */
 const SEC_URL='data/sections/';
 const SBR={idx:null,data:{},busy:{},err:{}};
-UI.sb=HOME_SEC;UI.sbt='sched';UI.sbw=null;UI.sbl='ALL';UI.sbtm=null;
+UI.sb=HOME_SEC;UI.psec='ALL';UI.sbt='sched';UI.sbw=null;UI.sbl='ALL';UI.sbtm=null;
 function sbFetch(key,url,done,id){if(SBR.busy[key]||SBR.err[key])return;SBR.busy[key]=1;
   fetch(url,{cache:'no-cache'}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(done).catch(()=>{SBR.err[key]=1}).finally(()=>{delete SBR.busy[key];if(!id||UI.sb===id)render()})}
 function sbIdx(){if(!SBR.idx)sbFetch('idx',SEC_URL+'index.json',j=>{SBR.idx=j&&j.sections?j:{sections:{}}});return SBR.idx}
@@ -8017,7 +8023,7 @@ function viewHub(){
 function leagueRows(){
   const q=UI.q.trim().toLowerCase();
   /* rank everyone under the position and school filters first, so a name search keeps each player's real rank */
-  const all=players().filter(p=>posMatch(p,UI.pos)&&(UI.school==='ALL'||p.school===UI.school)&&(!UI.grade||p.gr===UI.grade))
+  const all=players().filter(p=>posMatch(p,UI.pos)&&(UI.school==='ALL'||p.school===UI.school)&&(UI.psec==='ALL'||secOfPlayer(p)===UI.psec)&&(!UI.grade||p.gr===UI.grade))
     .map(p=>({p,a:aggR(p)})).filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a));
   all.forEach((x,i)=>x.rank=i+1);
   return q?all.filter(x=>x.p.name.toLowerCase().includes(q)):all;
@@ -8039,6 +8045,7 @@ function leadersHTML(rows){
 }
 function listHTML(){
   const rows=leagueRows();
+  if(!rows.length&&UI.psec!=='ALL'&&!players().some(p=>secOfPlayer(p)===UI.psec))return `<p class="empty">Players for the ${esc(SECTIONS[UI.psec].full)} are coming soon. Pick All sections to see everyone.</p>`;
   if(!rows.length)return `<p class="empty">No players match these filters yet. Players appear here after they join and their games are reported.</p>`;
   const shown=UI.more?Math.max(5,+UI.more||5):5,vis=rows.slice(0,shown);
   const top=!UI.q.trim()&&vis.length>=3,rest=top?vis.slice(3):vis;
@@ -8143,14 +8150,17 @@ function statsHTML(){
 function viewLeague(){
   const seg=`<div class="pr-seg st-seg" role="tablist" aria-label="Stats sections">${[['players','Players','Full leaderboard'],['stats','Stats','Leaders and trends']].map(([v,l,d])=>`<button role="tab" data-act="stTab" data-v="${v}" aria-pressed="${UI.stab===v}" aria-selected="${UI.stab===v}">${v==='players'?'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .6 3.3 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>':'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}<span><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`;
   if(UI.stab==='stats')return `<div class="head"><h2>Stats</h2><p>Leaders, hot streaks and top teams.</p></div>${seg}${statsHTML()}`;
-  const schools=[...new Set(players().map(p=>p.school))].filter(Boolean).sort();
+  const pl0=players(),nSec={};pl0.forEach(p=>{const k=secOfPlayer(p);nSec[k]=(nSec[k]||0)+1});
+  const schools=[...new Set(pl0.filter(p=>UI.psec==='ALL'||secOfPlayer(p)===UI.psec).map(p=>p.school))].filter(Boolean).sort();
   const fN=(UI.scope!=='season'?1:0)+(UI.school!=='ALL'?1:0)+(UI.grade?1:0);
-  return `<div class="head"><h2>Players</h2><p>Every player, ranked by fantasy points.</p></div>
+  const secRow=`<div class="chips gm-wks sbr-secs" role="group" aria-label="Section">${[['ALL','All sections']].concat(Object.values(SECTIONS).map(x=>[x.id,x.name])).map(([v,l])=>`<button class="chip${v!=='ALL'&&!nSec[v]?' sbr-off':''}" data-act="psec" data-v="${v}" aria-pressed="${UI.psec===v}">${esc(l)}</button>`).join('')}</div>`;
+  return `<div class="head"><h2>Players</h2><p>${UI.psec==="ALL"?"Every player in the country, ranked by fantasy points.":esc(SECTIONS[UI.psec].full)+", ranked by fantasy points."}</p></div>
   ${cupBanner()}${seg}
   <div class="tools lite">
     <div class="sb"><span class="sw"><input id="q" type="search" placeholder="Search players" aria-label="Search players" value="${esc(UI.q)}"></span>
       <button type="button" class="fbtn" data-act="ftoggle" aria-expanded="${!!UI.fOpen}">Filters${fN?`<b>${fN}</b>`:''}</button></div>
     <div class="rk-out">${rankSw()}</div>
+    ${secRow}
     <div class="chips" role="group" aria-label="Position">${FILTERS.map(x=>`<button class="chip" data-act="pos" data-v="${x}" aria-pressed="${UI.pos===x}">${FLABEL[x]||x}</button>`).join('')}</div>
     <div class="fpanel" ${UI.fOpen?'':'hidden'}>
       ${scopeSel('scope1',UI.rank==='prev')}
@@ -8582,12 +8592,13 @@ function viewGroups0(){
         <label class="lg-mode"><input type="radio" name="lg-mode" value="budget"><span><b>Budget</b><small>Like Premier League fantasy. Build the best team for ${money(CAP_FULL)}, and friends can pick the same players. Uses the same roster spots as a snake draft.</small></span></label>
       </div>
       <div class="ro-wrap card-sub"><b>Roster spots</b><small class="muted">How many of each position every team gets, in snake draft and budget leagues. Default: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 DL, 1 LB, 1 DB, 1 K and 3 bench spots. Bench players do not score; swap them into a starting spot any time after the draft.</small>${rosterPickerHTML('ro-new',ROSTER_DEFAULT)}</div>
+      ${secSel('new-sec',secOfProfile(myProfile()))}
       <div class="lg-row"><input id="new-name" maxlength="32" placeholder="League name, like Friday Night Crew" autocomplete="off" aria-label="League name"><button class="btn" type="submit">Create</button></div></form>`;
   const joinForm=`<form class="card lg-form" id="join-form"><h3>Join a league</h3><p class="muted">Paste the invite code a friend sent you.</p>
       <div class="lg-row"><input id="join-code" maxlength="12" placeholder="Invite code, like FNL-7Q2K" autocomplete="off" aria-label="Invite code" value="${esc(UI.joinCode||'')}"><button class="btn" type="submit">Join</button></div></form>`;
   const pks=myPKL(),pkMode=!!pks.length&&(UI.lgk==='pk'||!g),pkg=pkMode?(pks.find(x=>x.id===UI.pkli)||pks[0]):null;if(pkg)UI.pkli=pkg.id;
   const fmt=x=>x.mode==='budget'?'Budget':'Snake draft',curId=pkMode?(pkg&&pkg.id):(g&&g.id),curL=pkMode?pkg:g,tot=gs.length+pks.length;
-  const tabsOld=`<div class="lg-tabs" role="tablist" aria-label="Your leagues">${gs.map(x=>`<button class="gtab" role="tab" aria-selected="${!pkMode&&g&&x.id===g.id}" data-act="group" data-id="${esc(x.id)}">${esc(x.name)}<small>${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'team':'teams'}</small></button>`).join('')}${pks.map(x=>`<button class="gtab" role="tab" aria-selected="${!!pkg&&x.id===pkg.id}" data-act="pklSel" data-v="${esc(x.id)}">${esc(x.name)}<small>Pick ’em · ${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'player':'players'}</small></button>`).join('')}</div>`;
+  const tabsOld=`<div class="lg-tabs" role="tablist" aria-label="Your leagues">${gs.map(x=>`<button class="gtab" role="tab" aria-selected="${!pkMode&&g&&x.id===g.id}" data-act="group" data-id="${esc(x.id)}">${esc(x.name)}<small>${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'team':'teams'} · ${esc(SECTIONS[lgSec(x)].name)}</small></button>`).join('')}${pks.map(x=>`<button class="gtab" role="tab" aria-selected="${!!pkg&&x.id===pkg.id}" data-act="pklSel" data-v="${esc(x.id)}">${esc(x.name)}<small>Pick ’em · ${Object.keys(x.members).length} ${Object.keys(x.members).length===1?'player':'players'} · ${esc(SECTIONS[lgSec(x)].name)}</small></button>`).join('')}</div>`;
   const rankOf=x=>{try{const st=standingsOf(x),i=st.findIndex(y=>y.uid===ME.uid);return i>=0?`You’re #${i+1} of ${st.length}`:''}catch(_){return ''}};
   const row=(x,kind)=>{const n=Object.keys(x.members).length,on=x.id===curId&&(kind==='pk')===!!pkMode;return `<button class="lg-row2 ${on?'on':''}" data-act="${kind==='pk'?'pklSel':'group'}" ${kind==='pk'?`data-v="${esc(x.id)}"`:`data-id="${esc(x.id)}"`}><span><b>${esc(x.name)}</b><small>${n} ${kind==='pk'?(n===1?'player':'players'):(n===1?'team':'teams')}${kind==='pk'?'':(rankOf(x)?' · '+rankOf(x):'')}</small></span>${on?'<em>Open</em>':'<i>›</i>'}</button>`};
   const sect=(t,list,kind)=>list.length?`<div class="lg-sec"><span class="lbl">${t} · ${list.length}</span>${list.map(x=>row(x,kind)).join('')}</div>`:'';
@@ -10086,6 +10097,7 @@ document.addEventListener('click',async e=>{
     if(await act(()=>upsert('picks/'+ME.uid,{bk:patch}),Object.keys(patch).length+(Object.keys(patch).length===1?' pick':' picks')+' saved')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{bk:Object.assign({},sv,patch)});UI.bkS={};render()}}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='sb'){UI.sb=t.dataset.v;UI.sbtm=null;UI.sbw=null;UI.sbl='ALL';UI.sbt='sched';delete SBR.err[UI.sb];delete SBR.err.idx;render()}
+  else if(a==='psec'){UI.psec=t.dataset.v;UI.school='ALL';UI.more=false;render()}
   else if(a==='sbt'){UI.sbt=t.dataset.v;UI.sbl='ALL';render()}
   else if(a==='sbw'){UI.sbw=t.dataset.v;render()}
   else if(a==='sbteam'){UI.sbtm=t.dataset.id||null;render();scrollTo(0,0)}
@@ -10395,7 +10407,7 @@ async function createGroup(coll,name,stateKey){
   if(needJoin('start a league'))return;
   const code=makeCode(name,'GRP'),now=NOW();
   let ref=null;
-  const ok=await act(async()=>{ref=await DB.collection(coll).add(Object.assign({name,code,ownerId:ME.uid,createdAt:now,members:{[ME.uid]:now}},coll==='groups'?(()=>{const md=(window.__pendMode||(document.querySelector('input[name=lg-mode]:checked')||{}).value)==='budget'?'budget':'draft';return {mode:md,roster:cleanRoster(window.__pendRoster||readRoster('ro-new'))}})():{}))},'League created. Share code '+code);
+  const ok=await act(async()=>{ref=await DB.collection(coll).add(Object.assign({name,code,ownerId:ME.uid,createdAt:now,sec:newSec('new-sec'),members:{[ME.uid]:now}},coll==='groups'?(()=>{const md=(window.__pendMode||(document.querySelector('input[name=lg-mode]:checked')||{}).value)==='budget'?'budget':'draft';return {mode:md,roster:cleanRoster(window.__pendRoster||readRoster('ro-new'))}})():{}))},'League created. Share code '+code);
   if(ok&&ref){UI[stateKey]=ref.id;UI.member=null}
 }
 async function joinGroup(coll,code,stateKey,quiet){
@@ -10421,14 +10433,14 @@ document.addEventListener('submit',async e=>{
   if(id==='create-form'){const n=$('#new-name').value.trim();if(!n){say('Give your league a name first');return}
     if(!myProfile()){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'create',n,m:(document.querySelector('input[name=lg-mode]:checked')||{}).value||'draft',r:readRoster('ro-new')}))}catch(_){}}
     UI.lgp=null;if((document.querySelector('input[name=lg-mode]:checked')||{}).value==='pk'){if(needJoin('start a league'))return;const now=NOW();let ref=null;
-      const ok=await act(async()=>{ref=await DB.collection('fgroups').add({name:n,code:makeCode(n,'PKL'),ownerId:ME.uid,createdAt:now,kind:'pk',members:{[ME.uid]:now}})},'League created. Send your friends the code.');
+      const ok=await act(async()=>{ref=await DB.collection('fgroups').add({name:n,code:makeCode(n,'PKL'),ownerId:ME.uid,createdAt:now,kind:'pk',sec:newSec('new-sec'),members:{[ME.uid]:now}})},'League created. Send your friends the code.');
       if(ok&&ref){UI.pkli=ref.id;UI.lgk='pk';render()}return}
     await createGroup('groups',n,'gi');UI.lgk='';render()}
   else if(id==='join-form'){const c=$('#join-code').value.trim().toUpperCase();if(!myProfile()&&c){try{sessionStorage.setItem('vs-pending',JSON.stringify({k:'join',c}))}catch(_){}}
     UI.lgp=null;if(await joinGroup('groups',c,'gi',true)==='nf'){if(await joinGroup('fgroups',c,'pkli',true)==='nf')say('No league found for that code');else{UI.lgk='pk';render()}}else{UI.lgk='';render()}}
   else if(id==='pkl-create'){const n=$('#pkl-name').value.trim();if(!n){say('Give your league a name first');return}
     if(needJoin('start a league'))return;const now=NOW();let ref=null;
-    const ok=await act(async()=>{ref=await DB.collection('fgroups').add({name:n,code:makeCode(n,'PKL'),ownerId:ME.uid,createdAt:now,kind:'pk',members:{[ME.uid]:now}})},'League created. Send your friends the code.');
+    const ok=await act(async()=>{ref=await DB.collection('fgroups').add({name:n,code:makeCode(n,'PKL'),ownerId:ME.uid,createdAt:now,kind:'pk',sec:newSec('pkl-sec'),members:{[ME.uid]:now}})},'League created. Send your friends the code.');
     if(ok&&ref){UI.pkli=ref.id;UI.pklNew=false;render()}}
   else if(id==='pkl-join'){const c=$('#pkl-code').value.trim().toUpperCase();UI.pklNew=false;await joinGroup('fgroups',c,'pkli');render()}
   else if(id==='fcreate-form'){const n=$('#fnew-name').value.trim();if(!n){say('Give your league a name first');return}await createGroup('fgroups',n,'fi')}
