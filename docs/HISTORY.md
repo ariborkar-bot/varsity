@@ -660,3 +660,6 @@ Owner: add a sprint button limited to 1 to 2 s that drains energy much faster, a
 
 ## Gridiron Duel v4.3
 Owner: auto-run route made CUT useless (easy to get jammed) and turning to the ball made the receiver run at the QB. Human receiver is now fully manual: field-relative stick (up = downfield, `vy=0`), camera follows heading within 75 degrees of downfield and NEVER turns to the ball; dotted route line is only a guide; CUT/JUKE go in the stick's field direction. A yellow ring and a CATCH SPOT edge arrow show where the QB is throwing (to the receiver's lead). Auto route-run is now computer-only. Defender unchanged (view-relative, looks at the ball).
+
+## Hoops Battle v47
+Owner: first to 21 win by 2 (no clock, no overtime: `WINPTS`, checked in `afterDead`; game length picker hidden, `clock` is 1e9; HUD shows FIRST TO 21 / WIN BY 2 from 20 up); CONTESTED nn% / OPEN popup at every release (`cpct`, contest/3.2); any running dunk (`|vx|>.55 SPD`) shatters the backboard; energy is 8 bars for the whole match: a shot costs one bar (`EN.shot`), a sprint burst costs one bar on press (`EN.bar`), nothing refills on a score (`EN.score=0`), standing still refills slowly (`EN.rest .03/s`, `EN.move .012/s`), drawn as 8 segments under the feet. AI rests below 1 bar.

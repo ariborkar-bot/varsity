@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v46</small></p>
+  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v47</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -83,8 +83,8 @@ h1 span{color:#FFC23D}
     <button type="button" data-v="lock" aria-pressed="false">Lockdown<small>blocker</small></button>
     <button type="button" data-v="fin" aria-pressed="false">Finisher<small>paint</small></button>
   </div>
-  <span class="lbl">Game length</span>
-  <div class="seg" id="s-len">
+  <span class="lbl" hidden>Game length</span>
+  <div class="seg" id="s-len" hidden>
     <button type="button" data-v="60" aria-pressed="false">1 min</button>
     <button type="button" data-v="120" aria-pressed="true">2 min</button>
     <button type="button" data-v="180" aria-pressed="false">3 min</button>
@@ -132,9 +132,9 @@ h1 span{color:#FFC23D}
 /* ---------------- constants (court units: the court is always 540 tall; its width follows the screen, 900 to 1280) ---------------- */
 /* v2 (owner, Nov 11): bigger players and ball (PH 88 -> 112, BR 11 -> 14, wider rim), a longer jump (players use their own, lower gravity PG, so the top of the
    jump comes at about half a second), a double jump without the ball, and energy (p.en, 0 to 1). */
-const H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=620,SPD=360,RIMY=236,RIMH=35,TP=430,SC=14,APEX=JV/PG,WALL=24,TICK=1/60;
+const WINPTS=21,H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=620,SPD=360,RIMY=236,RIMH=35,TP=430,SC=14,APEX=JV/PG,WALL=24,TICK=1/60;
 /* energy: running drains it, standing still refills it, every jump costs some. Tired players run slower, jump lower and shoot worse. */
-const EN={run:.03,rest:.3,jump:.055,shot:.11,fake:.03,push:.21,score:.3};   /* shooting costs the most, running little, driving into a defender is tiring but not impossible */
+const EN={run:0,rest:.03,move:.012,jump:.02,shot:.125,fake:0,push:.05,score:0,bar:.125};   /* v47: energy is 8 bars (.125 each) for the WHOLE match: a shot costs a bar, a sprint burst costs a bar, standing still refills one bar in about 4 s, nothing refills on a score */   /* shooting costs the most, running little, driving into a defender is tiring but not impossible */
 /* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
    STEAL = seconds of standing chest-to-chest in front of the dribbler before the ball is taken (was .5). Dribbling through a defender is allowed but slow (PRESS). */
 const HOLD=.22,STEAL=1.5,PRESS=.76;
@@ -160,7 +160,7 @@ const CH={flash:{n:'FLASH',spd:1.1,err:1.18,blk:.85},sniper:{n:'SNIPER',spd:.95,
 function mkP(i,x,ck){const c=CH[ck]||{spd:1,err:1,blk:1};return {ch:ck||'',cs:c.spd,ce:c.err,cb:c.blk,cp:c.paint||1,co:c.out||1,i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,en:1,pj:false,cd:0,stun:0,st:0,ph:0,dd:false,dk:0,dkT:0,dkS:0,dkh:0,gath:false,gt:0,pump:0,slow:false}}
 function newGame(o,W){
   g={W,o,hp:hoops(W),t:0,P:[mkP(0,W/2-84,(o.c||[])[0]),mkP(1,W/2+84,(o.c||[])[1])],ball:{x:W/2,y:210,vx:0,vy:-430,st:'loose',live:true,own:-1,sh:-1,pts:2,t:0,rot:0,cd:.25,hit:false,dunk:false,done:false},
-    score:[0,0],clock:o.len,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],rd:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false,bb:[0,0]};
+    score:[0,0],clock:1e9,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],rd:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false,bb:[0,0]};
   pop('TIP OFF',W/2,212,'#fff',1.1);return g}
 function pop(t,x,y,c,d,big){g.pop.push({t:d||1,d:d||1,s:t,x,y,c:c||'#fff',big})}
 /* player i attacks hoop 1-i and defends hoop i (player 0 defends the left hoop) */
@@ -190,12 +190,12 @@ function stepP(p,c,dt){
     if(ms)p.lm=ms}
   if(!p.has);else if(c.l!==c.r&&!p.air&&!p.stun)p.dr=true;   /* v33: no dribble until you move left or right */
   if(p.stun>0){p.stun-=dt;c=NOIN}if(p.kd>0){p.kd-=dt;c=NOIN}if(!p.has){p.gath=false;p.dd=false}
-  const sbOn=!!c.s&&((c.r?1:0)-(c.l?1:0))!==0&&!p.air&&p.en>.1&&(p.sbc||0)<=0&&(p.sb||0)<1.5&&!p.gath;   /* v46: SPRINT burst, 1.5 s at most, then a 2 s wait; it drains energy about 20x faster than running */
-  if(sbOn)p.sb=(p.sb||0)+dt;else if((p.sb||0)>0){p.sbc=2;p.sb=0}p.sbc=Math.max(0,(p.sbc||0)-dt);
+  const sbOn=!!c.s&&((c.r?1:0)-(c.l?1:0))!==0&&!p.air&&p.en>=EN.bar-.001&&(p.sbc||0)<=0&&(p.sb||0)<1.5&&!p.gath;   /* v46: SPRINT burst, 1.5 s at most, then a 2 s wait; it drains energy about 20x faster than running */
+  if(sbOn){if(!(p.sb>0))p.en=Math.max(0,p.en-EN.bar);p.sb=(p.sb||0)+dt}else if((p.sb||0)>0){p.sbc=2;p.sb=0}p.sbc=Math.max(0,(p.sbc||0)-dt);
   const mv=(c.r?1:0)-(c.l?1:0),hd=g.hp[1-p.i].cx>p.x?1:-1,sp=SPD*(p.has?(mv&&mv!==hd?.8:.97):1)*(.78+.3*Math.max(0,Math.min(1,p.en)))*(p.slow?PRESS:1)*(p.dm||1)*(p.cs||1)*(p.gath?.5:1)*(p.dd&&p.has&&!p.air?0:1)*(sbOn?1.5:1);   /* after a pump fake the dribble is dead: no walking, only fake again or shoot */
   if(!p.air){p.vx+=(mv*sp-p.vx)*Math.min(1,dt*14);if(p.has)p.face=hd;else if(mv)p.face=mv;else if(Math.abs(g.ball.x-p.x)>8)p.face=g.ball.x>p.x?1:-1;
     const push=p.slow&&p.has&&mv&&(g.P[1-p.i].x-p.x)*mv>0;   /* driving into a defender wears you out fast */
-    p.en=mv&&sp>0?Math.max(0,p.en-dt*(EN.run+(push?EN.push:0)+(sbOn?.6:0))):Math.min(1,p.en+dt*EN.rest)}
+    p.en=Math.max(0,Math.min(1,p.en-(mv&&push?EN.push*dt:0)+dt*(mv?EN.move:EN.rest)))}
   else p.vx+=(mv*sp*.8-p.vx)*Math.min(1,dt*3);
   if(p.shoot||p.gath)p.face=g.hp[1-p.i].cx>p.x?1:-1;
   const jp=c.j&&!p.pj,jump=()=>{p.tk=Math.abs(g.hp[1-p.i].cx-p.x);const v=JV*(p.has?1:1.14)*(.8+.2*Math.min(1,p.en/.25));p.air=true;p.vy=-v;p.ap=v/PG;p.jt=0;p.gath=false;p.en=Math.max(0,p.en-(p.has?EN.shot:EN.jump));if(p.has)p.shoot=true;sfx('jump')};
@@ -215,14 +215,15 @@ function release(p,late){
   const h=g.hp[1-p.i],o=g.P[1-p.i],b=g.ball,hx=p.x+p.face*8,hy=p.y-PH-16,dist=Math.abs(h.cx-p.x);
   const q=late?0:1-Math.min(1,Math.abs(p.jt-p.ap)/.22),perfect=q>.88;
   p.has=false;p.dd=false;p.shoot=false;p.cd=.4;Object.assign(b,{blk:false,own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
-  if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.fb=Math.abs(p.vx)>SPD*.7&&Math.abs(o.x-p.x)>230;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
+  if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.fb=Math.abs(p.vx)>SPD*.55;   /* v47: any running dunk shatters the glass */p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=(p.tk!=null?p.tk:dist)>TP?3:2;   /* v20: a three is decided by where he left the floor, like the line on the court */
   const near=Math.abs(o.x-p.x),hi=o.air&&o.y<GY-36,contest=Math.max(0,1-near/140)*(hi?1.8:1)*1.4*1.15+(hi&&near<105?.45:0)   /* v23: the closer and higher the defender's hand, the worse the shot; felt from 125 px out */,tired=p.en<.25?(1-p.en/.25)*20:0;
+  const cpct=Math.round(Math.min(1,contest/3.2)*100);   /* v47: how contested the shot is, shown at the release */
   let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8+(dist-TP)*.055:0)+contest*(dist>TP?p.co||1:1)*47*(1-q*.35)+tired;if(perfect)err=6+(dist>TP?9+(dist-TP)*.03:0)+contest*(dist>TP?p.co||1:1)*42+tired*.6;   /* v38: contested shots about 35% harder */
   err*=p.ce||1;
   const T=Math.max(.86,Math.min(1.6,.8+dist/590)),off0=g._off!=null?g._off:(rnd()*2-1)*err,off=Math.abs(off0)>46?Math.sign(off0)*(27+rnd()*17):off0,tx=h.cx+off;   /* a badly timed shot clanks off the rim; it never lucks in off the backboard */
   b.vx=(tx-b.x)/T;b.vy=(RIMY-2-b.y-.5*GR*T*T)/T;
-  pop(perfect?'PERFECT':q>.6?'GOOD':late||p.jt>p.ap?'LATE':'EARLY',p.x,p.y-PH-40,perfect?'#3DFF9A':q>.6?'#FFE08A':'#ff9aa8',.7);if(perfect)sfx('perfect')}
+  pop(perfect?'PERFECT':q>.6?'GOOD':late||p.jt>p.ap?'LATE':'EARLY',p.x,p.y-PH-40,perfect?'#3DFF9A':q>.6?'#FFE08A':'#ff9aa8',.7);if(perfect)sfx('perfect');pop(cpct<6?'OPEN':'CONTESTED '+cpct+'%',p.x,p.y-PH-68,cpct<6?'#3DFF9A':cpct<35?'#FFE08A':'#ff7a5a',.62)}
 function stepBall(dt){
   const b=g.ball;b.cd=Math.max(0,b.cd-dt);
   if(b.dh>0){const p=g.P[b.sh],h=g.hp[b.hh],f=p.face;b.dh-=dt;const k=Math.min(1,1-b.dh/.26);let x,y;
@@ -249,7 +250,7 @@ function scored(hi){const b=g.ball,team=hi===1?0:1,pts=b.sh===team?b.pts:2,hp=g.
   g.score[team]+=pts;b.done=true;g.net[hi]=1;g.stat[team].fg++;if(pts===3)g.stat[team].three++;
   pop('+'+pts,hp.cx,RIMY-34,TEAM[team].c,1.3);pop(b.dunk?(g.P[b.sh].dkS===3?'360 SLAM!':g.P[b.sh].dkS===2?'WINDMILL!':'SLAM!'):pts===3?'FROM DEEP!':b.hit?'':'SWISH',hp.cx+hp.dir*(b.dunk?130:70),b.dunk?RIMY-110:RIMY-70,b.dunk?'#FFE08A':'#fff',b.dunk?1.6:1.1,!!b.dunk);
   sfx('swish');if(b.dunk)g.shake=.7;g.phase='dead';g.dead=1.35;g.next=1-team;g.tip=true}
-function afterDead(){if(g.clock<=0){if(g.score[0]===g.score[1]){g.ot++;g.clock=20;setup(g.next>=0?g.next:(rnd()<.5?0:1));pop('OVERTIME',g.W/2,212,'#FFC23D',1.4)}else{g.phase='over';sfx('buzz');onEnd()}}else{const t=g.tip;g.tip=false;setup(g.next,t)}}
+function afterDead(){const sa=g.score[0],sb=g.score[1];if(Math.max(sa,sb)>=WINPTS&&Math.abs(sa-sb)>=2){g.phase='over';sfx('buzz');onEnd()}else{const t=g.tip;g.tip=false;setup(g.next,t)}}
 /* a steal needs STEAL seconds of standing right in front of the dribbler (he is facing you). Getting past, turning away, jumping or a pump fake all reset it. */
 function doSteal(h,d){const b=g.ball;h.has=false;h.stun=.45;h.cd=.7;d.has=true;d.st=0;b.own=d.i;g.sc=SC;g.stat[d.i].stl++;pop('STEAL!',d.x,d.y-PH-30,TEAM[d.i].c,1);sfx('steal')}
 function steals(dt){const b=g.ball;if(b.st!=='held')return;const h=g.P[b.own],d=g.P[1-b.own];
@@ -284,7 +285,7 @@ function ai(p,dt){const m=g.ai[p.i],D=DIFF[g.o.diff],o=g.P[1-p.i],b=g.ball,h=g.h
     m.wait-=dt;const dist=Math.abs(h.cx-p.x),between=(o.x-p.x)*(h.cx-p.x)>0&&Math.abs(o.x-p.x)<dist;
     if(!between&&m.plan!=='three'&&dist>84){m.plan='drive';m.d=42}
     /* out of breath with time on the shot clock: stand still and get some energy back */
-    if(p.en<.22)m.rest=true;else if(p.en>.5)m.rest=false;if(m.rest&&g.sc>5&&g.clock>3&&o.st<.3&&Math.abs(o.x-p.x)>PW*2+16)return c;
+    if(p.en<.13)m.rest=true;else if(p.en>.26)m.rest=false;if(m.rest&&g.sc>5&&g.clock>3&&o.st<.3&&Math.abs(o.x-p.x)>PW*2+16)return c;
     const spot=h.cx+h.dir*m.d,blocked=between&&Math.abs(o.x-p.x)<PW*2+18&&Math.abs(spot-h.cx)<Math.abs(o.x-h.cx),late=g.sc<2.2||g.clock<1.2;
     /* v11: when a defender gets in his face he chooses: shoot over him, pump fake, back away for room, or push through */
     if(m.pr==='back'){m.pt-=dt;const aw=Math.sign(p.x-o.x)||1,edge=p.x<WALL+60||p.x>g.W-WALL-60;
@@ -498,7 +499,7 @@ function drawP(p,refl){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.a
   if(refl)return;
   if(!p.has&&p.st>.15){X.fillStyle='rgba(4,8,16,.7)';rr(x-20,y-PH-24,40,6,3);X.fill();X.fillStyle=T.c;rr(x-20,y-PH-24,40*Math.min(1,p.st/STEAL),6,3);X.fill()}
   /* energy bar under the feet */
-  X.fillStyle='rgba(4,8,16,.6)';rr(x-24,GY+13,48,6,3);X.fill();X.fillStyle=p.en<.25?'#ff6a7f':p.en<.5?'#FFC23D':'#3DFF9A';if(p.en>.02){rr(x-24,GY+13,48*p.en,6,3);X.fill()}}
+  for(let k=0;k<8;k++){const bx=x-26+k*6.6,f=Math.max(0,Math.min(1,p.en*8-k));X.fillStyle='rgba(4,8,16,.65)';rr(bx,GY+13,5.4,7,1.5);X.fill();if(f>.02){X.fillStyle=p.en<.25?'#ff6a7f':p.en<.5?'#FFC23D':'#3DFF9A';rr(bx,GY+13,5.4*f,7,1.5);X.fill()}}}
 function drawBall(refl){const b=g.ball;
   if(!refl){X.fillStyle='rgba(0,0,0,.3)';X.beginPath();X.ellipse(b.x,GY+6,BR*.95-Math.min(9,(GY-b.y)*.025),5,0,0,7);X.fill()}
   X.save();if(refl)X.globalAlpha=.17;
@@ -509,8 +510,8 @@ function drawBall(refl){const b=g.ball;
 function drawHUD(W){const cx=W/2;X.fillStyle='rgba(4,8,16,.82)';rr(cx-190,10,380,74,14);X.fill();X.strokeStyle='rgba(255,255,255,.16)';X.lineWidth=1.5;X.stroke();
   X.textAlign='center';X.font='800 13px system-ui';X.fillStyle=TEAM[0].c;X.fillText(TEAM[0].n,cx-140,32);X.fillStyle=TEAM[1].c;X.fillText(TEAM[1].n,cx+140,32);
   X.font='900 34px system-ui';X.fillStyle='#fff';X.fillText(g.score[0],cx-140,64);X.fillText(g.score[1],cx+140,64);
-  const c=Math.max(0,g.clock),t=c<10?c.toFixed(1):Math.floor(c/60)+':'+String(Math.floor(c%60)).padStart(2,'0');X.font='900 30px system-ui';X.fillStyle=c<10?'#ff6a7f':'#fff';X.fillText(t,cx,44);
-  X.font='800 12px system-ui';X.fillStyle=g.sc<4?'#ff6a7f':'#9fb0cc';X.fillText((g.ot?'OT · ':'')+'SHOT '+Math.max(0,Math.ceil(g.sc)),cx,63);
+  {const sa=g.score[0],sb=g.score[1],pt=Math.max(sa,sb)>=WINPTS-1&&Math.abs(sa-sb)<2?'WIN BY 2':'FIRST TO '+WINPTS;X.font='900 22px system-ui';X.fillStyle=pt==='WIN BY 2'?'#FFC23D':'#fff';X.fillText(pt,cx,44)}
+  X.font='800 12px system-ui';X.fillStyle=g.sc<4?'#ff6a7f':'#9fb0cc';X.fillText('SHOT '+Math.max(0,Math.ceil(g.sc)),cx,63);
   for(const i of [0,1]){const e=g.P[i].en,bx=cx+(i?1:-1)*140-45;X.fillStyle='rgba(255,255,255,.14)';rr(bx,71,90,6,3);X.fill();if(e>.02){X.fillStyle=e<.25?'#ff6a7f':e<.5?'#FFC23D':'#3DFF9A';rr(bx,71,90*e,6,3);X.fill()}}
   if(g.ball.st==='held'){X.fillStyle=TEAM[g.ball.own].c;X.beginPath();X.arc(cx+(g.ball.own?1:-1)*92,52,5,0,7);X.fill()}}
 function draw(){MIR=!!(g&&NET.on&&NET.role==='guest');const W=g?g.W:VW,s=cv.width/W;X.setTransform(s,0,0,s,0,0);if(!g){X.fillStyle='#0a1226';X.fillRect(0,0,W,H);return}
