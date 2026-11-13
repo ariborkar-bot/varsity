@@ -3402,7 +3402,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v464 · Nov 12';
+const APP_BUILD='v465 · Nov 12';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3997,7 +3997,7 @@ const betsOf=u=>((S.picks[u]||{}).bets)||{};
 const gameMap=()=>{const m={};((GAMES&&GAMES.games)||[]).forEach(g=>{m[gid(g)]=g});return m};
 function betResult(b,g){if(!g||!gDone(g))return'open';if(g.hs===g.as)return'push';return((b.s==='h')===(g.hs>g.as))?'won':'lost'}
 function bank(u){
-  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+arcBonus(u)+(+rcRec(u).wn||0);
+  const gm=gameMap();let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+invBonus(u)+arcBonus(u)+(+rcRec(u).wn||0)+(+hbRec(u).wn||0);
   Object.entries(betsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=betResult(b,gm[id]);t-=st;if(res==='won')t+=st+(st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100);else if(res==='push'||(res==='lost'&&b.bx==='i'))t+=st});
   Object.entries(atsOf(u)).forEach(([id,b])=>{const st=+b.stake||0,res=atsResult(b,gm[id]);t-=st;if(res==='won')t+=st*b.odds;else if(res==='push')t+=st});
   Object.values(parlOf(u)).forEach(b=>{const st=+b.stake||0,res=parlResult(b,gm);t-=st;if(res==='won')t+=st+parlWin(b,gm);else if(res==='push')t+=st});
@@ -4027,7 +4027,7 @@ const rwOf=u=>((S.picks[u]||{}).rw)||{};
    challenge, minigame pay, duplicate refunds, gifts received, and winnings on picks and props). Spending tokens or
    losing a wager never lowers it. The current balance (bank) shows next to it and does not affect rank. */
 function earned(u){
-  const gm=gameMap(),v=invOf(u);let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+(+v.dup||0)+arcBonus(u)+(+rcRec(u).wn||0);
+  const gm=gameMap(),v=invOf(u);let t=TOK0+adBonus(u)+rwBonus(u)+lbtBonus(u)+dlyBonus(u)+bndBonus(u)+FG_DAY_PAY*(+fgRec(u).days||0)+(+v.dup||0)+arcBonus(u)+(+rcRec(u).wn||0)+(+hbRec(u).wn||0);
   for(const x of giftsIn(u))t+=+x.a||0;
   const win=b=>{const st=+b.stake||0;return (st*b.odds-st)*(1+(b.bx==='b'?.25:0)+Math.min(500,+b.cb||0)/100)};
   Object.entries(betsOf(u)).forEach(([id,b])=>{if(betResult(b,gm[id])==='won')t+=win(b)});
@@ -7393,6 +7393,7 @@ const RC_SLOTS=[
   {k:'PG',label:'PG',elig:['PG']},{k:'SG',label:'SG',elig:['SG']},{k:'SF',label:'SF',elig:['SF']},{k:'PF',label:'PF',elig:['PF']},{k:'C',label:'C',elig:['C']},
   {k:'G',label:'G',elig:['PG','SG']},{k:'F',label:'F',elig:['SF','PF','C']},{k:'UTIL',label:'UTIL',elig:['PG','SG','SF','PF','C']}];
 const rcRec=u=>((S.picks[u]||{}).rc)||{};
+const hbRec=u=>((S.picks[u]||{}).hb)||{};   /* v465: Hoops Battle wagers, net tokens in .wn (counted in bank) */
 /* everything in Ring Chaser is per game: average fantasy points and average stats */
 const rcAvg=p=>{const a=agg(p,'season');return a.n?Math.round(a.v/a.n*10)/10:0};
 let _rcP=null,_rcR=-1;
@@ -7781,13 +7782,31 @@ function rcoHTML(){
 }
 
 /* v463 (owner): Hoops Battle (tools/battle/hoops-battle.html) in basketball's Minigames. Find an opponent opens it full screen in an iframe (?find=1 joins the public lobby and pairs two searchers); Play the AI opens its menu */
-function hbHTML(){return `<section class="card rc-card"><div class="qh"><h3>Hoops Battle</h3></div><p class="muted" style="text-align:center">One-on-one. Hold JUMP to shoot, time it at the top for a perfect release.</p><div class="rco-modes" style="margin-top:10px"><button class="btn" data-act="hbOpen" data-m="find">Find an opponent</button><button class="btn ghost" data-act="hbOpen" data-m="ai">Play the AI</button></div></section>`}
-function hbOpen(m){
+function hbHTML(){const can=!!ME.uid&&ME.mode!=='guest'&&ME.mode!=='readonly'&&ME.mode!=='offline',bal=can?bank(ME.uid):0,w=can&&bal>=(+UI.hbW||0)?(+UI.hbW||0):0,my=hbRec(ME.uid||'');
+  return `<section class="card rc-card"><div class="qh"><h3>Hoops Battle</h3>${can&&(my.w||my.l)?`<span class="muted">${my.w||0}-${my.l||0}${my.wn?` · ${my.wn>0?'+':''}${my.wn} tokens`:''}</span>`:''}</div><p class="muted" style="text-align:center">One-on-one. Hold JUMP to shoot, time it at the top for a perfect release. Dunk on a jumper to knock him down.</p>
+  ${can?`<div class="rco-wg pick"><p>Wager tokens (winner takes them):</p><div class="chips"><button class="chip" data-act="hbWg" data-v="0" aria-pressed="${w===0}">Free</button>${RCO_WG.map(v=>`<button class="chip" data-act="hbWg" data-v="${v}" aria-pressed="${w===v}" ${bal<v?'disabled':''}>${v}</button>`).join('')}</div><small class="muted">You have ${Math.round(bal)} tokens. Both players must pick the same wager to be matched.</small></div>`:'<p class="hint" style="text-align:center">Sign in to wager tokens.</p>'}
+  <div class="rco-modes" style="margin-top:10px"><button class="btn" data-act="hbOpen" data-m="find">Find an opponent${w?` · ${w} tokens`:''}</button><button class="btn ghost" data-act="hbOpen" data-m="ai">Play the AI</button></div></section>`}
+const HB={live:null};
+async function hbRecord(mid,w,win){
+  if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly'||ME.mode==='offline'||!(w>0))return;
+  const my=hbRec(ME.uid);if(my.oid===mid)return;
+  const o={w:(+my.w||0)+(win?1:0),l:(+my.l||0)+(win?0:1),wn:(+my.wn||0)+(win?w:-w),oid:mid,at:NOW()};
+  await act(()=>upsert('picks/'+ME.uid,{hb:o}),win?`Hoops Battle win · +${w} tokens`:`Hoops Battle loss · -${w} tokens`);render(true)}
+async function hbOpen(m){
   if(document.querySelector('.hbx'))return;
+  let w=0;if(m==='find'&&ME.uid&&ME.mode!=='guest'){w=+UI.hbW||0;if(w&&bank(ME.uid)<w){say(`You need ${w} tokens for that wager.`);return}if(w&&!await stakeOk(w))return}
+  const bal=ME.uid?Math.round(bank(ME.uid)):0;
   const el=document.createElement('div');el.className='fgx hbx';el.setAttribute('role','dialog');el.setAttribute('aria-label','Hoops Battle');
-  el.innerHTML=`<iframe title="Hoops Battle" allow="autoplay" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#0b1626" src="tools/battle/hoops-battle.html?embed=1${m==='find'?'&find=1':''}&b=${encodeURIComponent(APP_BUILD)}"></iframe><button class="fgx-x" aria-label="Close game" style="left:12px;right:auto;top:calc(8px + env(safe-area-inset-top,0px));width:36px;height:36px;font-size:16px">✕</button>`;
-  document.body.appendChild(el);document.body.classList.add('fg-on');
-  const close=()=>{removeEventListener('message',on);el.remove();document.body.classList.remove('fg-on')},on=e=>{if(e.data&&e.data.hb==='close')close()};
+  el.innerHTML=`<iframe title="Hoops Battle" allow="autoplay" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#0b1626" src="tools/battle/hoops-battle.html?embed=1${m==='find'?'&find=1&w='+w+'&bal='+bal:''}&b=${encodeURIComponent(APP_BUILD)}"></iframe><button class="fgx-x" aria-label="Close game" style="left:12px;right:auto;top:calc(8px + env(safe-area-inset-top,0px));width:36px;height:36px;font-size:16px">✕</button>`;
+  document.body.appendChild(el);document.body.classList.add('fg-on');HB.live=null;
+  const fr=el.querySelector('iframe');
+  const done=()=>{removeEventListener('message',on);el.remove();document.body.classList.remove('fg-on')},
+  close=()=>{const lv=HB.live;HB.live=null;if(lv&&lv.w){try{fr.contentWindow.postMessage({hb:'bye'},'*')}catch(_){}hbRecord(lv.mid,lv.w,false);setTimeout(done,250)}else done()},
+  on=e=>{const d=e.data;if(!d||!d.hb||e.source!==fr.contentWindow)return;
+    if(d.hb==='close')close();
+    else if(d.hb==='live')HB.live={mid:d.mid,w:+d.w||0};
+    else if(d.hb==='result'){HB.live=null;hbRecord(d.mid,+d.w||0,!!d.win)}
+    else if(d.hb==='nobal'){UI.hbW=0;say('Not enough tokens for that wager. Playing for fun.')}};
   addEventListener('message',on);el.querySelector('.fgx-x').addEventListener('click',close)}
 function viewMini(){
   if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='leagues';UI.lgk='pk';setTimeout(()=>{location.hash='#groups'},0)}
@@ -9941,6 +9960,7 @@ document.addEventListener('click',async e=>{
   else if(a==='fgb'){UI.fgb=t.dataset.v;UI.mgMore=false;render()}
   else if(a==='rcStart'){rcoStop();rcStart()}
   else if(a==='hbOpen')hbOpen(t.dataset.m);
+  else if(a==='hbWg'){UI.hbW=+t.dataset.v||0;render(true)}
   else if(a==='rcoFind'){if(UI.rco){rcoStop();rcoForget()}rcoNew(true)}
   else if(a==='rcoParty'){if(UI.rco){rcoStop();rcoForget()}rcoNew(false)}
   else if(a==='rcoJoin')rcoJoin();

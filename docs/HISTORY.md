@@ -604,3 +604,6 @@ Owner: basketball Minigames has a new "1-on-1" tab (`hbHTML`, `hbOpen`; only whe
 
 ## v464 (Hoops Battle v32-v33)
 Owner: dunk replay (`rpRec`, `rpPlay`, `RP`): the drawn state is buffered every frame; after a dunk's celebration (`g.dead`<.55) the dunk replays in slow motion (about 3 s, 0.62x, REPLAY tag and bars, tap to skip). The host keeps sending snapshots during it, the guest records from snapshots. v33: the ball is held still after a tipoff or pickup until you move left or right (`p.dr`).
+
+## v465 (Hoops Battle v34-v35)
+Owner: (1) Token wagers in the 1-on-1 tab: Free/5/10/25/50/100 chips (`UI.hbW`, `hbWg`); the iframe gets `&w=&bal=`; both players must pick the same wager (lobby channel `hb-room-public-w<amt>`). Result goes to the app by postMessage (`live`, `result`, `nobal`); `hbRecord` saves picks/<uid>.hb={w,l,wn,oid} and bank() adds `hbRec(u).wn` (same trust model as Ring Chaser wn). Leaving a live wagered match records a loss for the leaver (parent `close`) and a forfeit win for the other (`bye`). (2) Online lag: snapshots 30 Hz and rounded to 2 decimals, interpolation window follows the measured gap (`NET.iv`), the guest predicts its own walking (`NET.px`, blends to the host position). Not measured on real phones. (3) Blocking: reach +25

@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v33</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v35</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -148,7 +148,7 @@ function newGame(o,W){
   pop('TIP OFF',W/2,212,'#fff',1.1);return g}
 function pop(t,x,y,c,d,big){g.pop.push({t:d||1,d:d||1,s:t,x,y,c:c||'#fff',big})}
 /* player i attacks hoop 1-i and defends hoop i (player 0 defends the left hoop) */
-function setup(i,tip){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.gath=false;p.pump=0;p.dk=0;p.dd=false;p.dr=false;p.en=Math.min(1,p.en+EN.score)});
+function setup(i,tip){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.gath=false;p.pump=0;p.dk=0;p.kd=0;p.dd=false;p.dr=false;p.en=Math.min(1,p.en+EN.score)});
   g.P[i].x=a.cx+a.dir*150;g.P[1-i].x=g.W/2+a.dir*46;g.P[i].has=true;g.P[i].face=a.dir;g.P[1-i].face=-a.dir;
   Object.assign(b,{st:'held',own:i,sh:-1,vx:0,vy:0,live:false,hit:false,dunk:false,done:false,cd:0,t:0});g.sc=SC;g.phase='live';g.hold=.55;g.ai=[{},{}];
   /* v18: after a basket both players start at centre court and the ball goes up like a tip-off, drifting toward the side of the player who was just scored on */
@@ -169,7 +169,7 @@ function step(dt,inp){
 function clampP(p){p.x=Math.max(WALL+PW,Math.min(g.W-WALL-PW,p.x))}
 function stepP(p,c,dt){
   p.cd=Math.max(0,p.cd-dt);if(p.pump>0)p.pump-=dt;if(!p.has)p.dr=false;else if(c.l!==c.r&&!p.air&&!p.stun)p.dr=true;   /* v33: no dribble until you move left or right */
-  if(p.stun>0){p.stun-=dt;c=NOIN}if(!p.has){p.gath=false;p.dd=false}
+  if(p.stun>0){p.stun-=dt;c=NOIN}if(p.kd>0){p.kd-=dt;c=NOIN}if(!p.has){p.gath=false;p.dd=false}
   const mv=(c.r?1:0)-(c.l?1:0),hd=g.hp[1-p.i].cx>p.x?1:-1,sp=SPD*(p.has?(mv&&mv!==hd?.8:.97):1)*(.78+.3*Math.max(0,Math.min(1,p.en)))*(p.slow?PRESS:1)*(p.dm||1)*(p.gath?.5:1)*(p.dd&&p.has&&!p.air?0:1);   /* after a pump fake the dribble is dead: no walking, only fake again or shoot */
   if(!p.air){p.vx+=(mv*sp-p.vx)*Math.min(1,dt*14);if(p.has)p.face=hd;else if(mv)p.face=mv;else if(Math.abs(g.ball.x-p.x)>8)p.face=g.ball.x>p.x?1:-1;
     const push=p.slow&&p.has&&mv&&(g.P[1-p.i].x-p.x)*mv>0;   /* driving into a defender wears you out fast */
@@ -206,7 +206,7 @@ function stepBall(dt){
     if(p.dkS===2){const a=-Math.PI/2+f*k*Math.PI*2,R=36*PS,w=Math.max(0,(k-.6)/.4),sh=p.y-71*PS;x=(p.x+f*6+Math.cos(a)*R)*(1-w)+h.cx*w;y=(sh+Math.sin(a)*R)*(1-w)+(RIMY-16)*w}
     else{const x0=p.x+f*12,y0=p.y-PH-20;x=x0+(h.cx-x0)*k*k;y=y0+(RIMY-16-y0)*k*k}
     b.x=x;b.y=y;b.vx=b.vy=0;b.rot+=dt*8;
-    if(b.dh<=0){b.dh=0;b.x=h.cx;b.y=RIMY-12;b.vy=520;g.shake=1.3;g.net[b.hh]=2.4;g.rd[b.hh]=1.9;g.fx.push({x:h.cx,y:RIMY,t:.55,d:.55,burst:1});g.fx.push({x:h.cx,y:RIMY,t:.5,d:.5,ring:1});g.freeze=.16;g.zm=1;g.zx=h.cx;g.fl=1;sfx('slam')}   /* v20: hit-stop, camera punch, flash and shockwave on the slam */
+    if(b.dh<=0){b.dh=0;{const dn=g.P[1-b.sh];if(dn&&dn.air&&Math.abs(dn.x-g.P[b.sh].x)<150){dn.kd=1.25;dn.kdD=Math.sign(dn.x-g.P[b.sh].x)||-g.P[b.sh].face;dn.vx=dn.kdD*230;dn.vy=Math.min(dn.vy,-60);dn.shoot=false;dn.has=false;pop('POSTERIZED!',h.cx+h.dir*250,RIMY+30,'#ffd35a',1.4,1);g.shake=Math.max(g.shake,1.1)}}b.x=h.cx;b.y=RIMY-12;b.vy=520;g.shake=1.3;g.net[b.hh]=2.4;g.rd[b.hh]=1.9;g.fx.push({x:h.cx,y:RIMY,t:.55,d:.55,burst:1});g.fx.push({x:h.cx,y:RIMY,t:.5,d:.5,ring:1});g.freeze=.16;g.zm=1;g.zx=h.cx;g.fl=1;sfx('slam')}   /* v20: hit-stop, camera punch, flash and shockwave on the slam */
     return}
   if(b.st==='held'){const p=g.P[b.own];if(p.air&&p.shoot){b.x=p.x+p.face*8;b.y=p.y-PH-16}else if(p.air){b.x=p.x+p.face*(PW+8);b.y=p.y-PH*.56}
     else if(p.gath||p.pump>0||p.dd||!p.dr){const k=p.gath?Math.min(1,p.gt/HOLD):p.pump>0?.35+.65*Math.sin(Math.max(0,p.pump)/.3*Math.PI):.35;b.x=p.x+p.face*(PW+BR-3-(PW+BR-11)*k);b.y=p.y-PH*.5-(PH*.5+12)*k}
@@ -235,8 +235,8 @@ function blocks(){const b=g.ball;let d=null,s=null;
   if(b.st==='held'){s=g.P[b.own];d=g.P[1-b.own];if(!(s.air&&s.shoot&&d.air))return}
   else if(b.st==='shot'&&!b.live&&b.t<.9&&!b.dunk){s=g.P[b.sh];d=g.P[1-b.sh]}else return;
   const behind=Math.sign(s.x-d.x)===Math.sign(g.hp[1-s.i].cx-s.x),hx=d.x+(behind?Math.sign(b.x-d.x)||d.face:d.face)*(behind?12:8),hy=d.y-PH-18;
-  if(Math.hypot(b.x-hx,b.y-hy)>(BR+(d.air?30:20))*(behind?.8:1))return;   /* v22: a block from behind still works (he reaches over the shoulder) but his reach is 20% shorter */
-  if(d.air&&d.vy>0&&(s.vy<0||d.vy>110))return;   /* v11: a defender who is already coming down is too late; a shooter still rising is safe */
+  if(Math.hypot(b.x-hx,b.y-hy)>(BR+(d.air?38:26))*(behind?.8:1))return;   /* v35: reach +25% */   /* v22: a block from behind still works (he reaches over the shoulder) but his reach is 20% shorter */
+  if(d.air&&d.vy>0&&(s.vy<-150||d.vy>330))return;   /* v35: a defender can block on the way down, unless the shooter is still rising fast or the defender is already falling fast */
   s.has=false;s.shoot=false;s.cd=.5;d.cd=.3;Object.assign(b,{st:'loose',live:true,own:-1,cd:.28,vx:(b.x>=d.x?1:-1)*(140+rnd()*120)+d.vx*.4,vy:-330});
   g.stat[d.i].blk++;g.shake=.45;pop('BLOCKED!',d.x,d.y-PH-44,TEAM[d.i].c,1.1);sfx('block')}
 function pickups(){const b=g.ball;if(b.cd>0||b.done||!(b.st==='loose'||(b.st==='shot'&&b.live)))return;let best=null;
@@ -397,7 +397,8 @@ function drawP(p,refl){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.a
   const ball3=(x,y,r,col)=>{X.beginPath();X.arc(x,y,r*1.25,0,7);X.fillStyle=col;X.fill();X.lineWidth=2.2;X.strokeStyle=INK;X.stroke()};
   const HW=13.4,HH=14;
   X.globalAlpha=A0*(p.stun>0?.6+.4*Math.sin(g.t*40):1);
-  X.save();X.translate(x,y);X.scale(PS,PS);X.translate(-x,-y);
+  X.save();if(p.kd>0){const t=1.25-p.kd,k=t<.3?1-Math.pow(1-t/.3,2):p.kd<.4?p.kd/.4:1,a=(p.kdD||1)*1.5*k;X.translate(x,y-10);X.rotate(a);X.translate(-x,-(y-10))}
+  X.translate(x,y);X.scale(PS,PS);X.translate(-x,-y);
   let bk=false;if(p.dk>0&&p.dkS===3){const th=Math.PI*2*Math.min(1,p.dkT/.26),c3=Math.cos(th);bk=c3<0;X.translate(x,0);X.scale(Math.abs(c3)<.14?(c3<0?-.14:.14):c3,1);X.translate(-x,0)}   /* 360 dunk: a full turn about the vertical axis; his back is to us in the middle of it */
   const up=p.gath||p.pump>0||p.dd||(p.has&&!p.dr&&!p.air)||(p.shoot&&p.air)||p.dk>0,lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*5,bob=run?Math.abs(cs)*2.2:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*5:(p.dd&&!p.air?2.5:0);
   const hipY=y-43+crouch-bob*.5,shY=y-68+crouch*1.1-bob,shX=x+lean,hipX=x+lean*.4,hx=shX+f*3,hy=shY-17;
@@ -532,21 +533,21 @@ function rpPlay(dt){RP.pos+=dt*60*.62;const i=Math.floor(RP.pos);
 el('tskip').addEventListener('pointerdown',()=>{RP.on=false;el('tskip').hidden=true;acc=0});
 
 function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1000||0);last=ts;
-  if(g){rpRec();if(RP.on){if(NET.on&&NET.role==='host'){NET.acc+=dt;if(NET.acc>=1/20){NET.acc=0;netSend()}}rpPlay(dt);return}}
+  if(g){rpRec();if(RP.on){if(NET.on&&NET.role==='host'){NET.acc+=dt;if(NET.acc>=1/30){NET.acc=0;netSend()}}rpPlay(dt);return}}
   if(NET.on&&NET.role==='guest'){if(g)netGuest(dt);if(NET.on&&performance.now()-NET.last>9000)netLost('Lost contact with your opponent.');draw();return}
   if(g&&g.slo>0)g.slo-=dt;if(g&&g.freeze>0){g.freeze-=dt;acc=0}
   else if(g&&!paused&&g.phase!=='over'&&document.getElementById('rot').hidden){acc+=dt*(g.slo>0?.42:1);let n=0;while(acc>=TICK&&n<5){acc-=TICK;n++;step(TICK,[human(0),OPT.mode==='ai'?ai(g.P[1],TICK):OPT.mode==='on'?NET.in:human(1)])}if(n===5)acc=0}
-  if(NET.on&&NET.role==='host'&&g){NET.acc+=dt;if(NET.acc>=1/20){NET.acc=0;netSend()}}
+  if(NET.on&&NET.role==='host'&&g){NET.acc+=dt;if(NET.acc>=1/30){NET.acc=0;netSend()}}
   if(NET.on&&performance.now()-NET.last>9000)netLost('Lost contact with your opponent.');
   draw()}
-function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NET.up&&NET.role==='host'){netStart();return}netOpen(true,NET.pub?'public':undefined);return}audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT},VW);fit();paused=false;acc=0;
+function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NET.up&&NET.role==='host'){netStart();return}if(NET.pub&&NET.w&&NET.w>NET.bal){NET.w=0;try{parent.postMessage({hb:'nobal'},'*')}catch(_){}}netOpen(true,NET.pub?'public'+(NET.w?'-w'+NET.w:''):undefined);if(NET.pub)el('n-h').textContent='Find an opponent'+(NET.w?' · '+NET.w+' tokens':'');return}audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT},VW);fit();paused=false;acc=0;
   for(const id of ['menu','end','pause'])document.getElementById(id).hidden=true;buildCtl();
   document.getElementById('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);document.getElementById('pz').classList.add('on');document.getElementById('snd').classList.add('on');
   try{localStorage.setItem('hb-opt',JSON.stringify(OPT))}catch(_){}}
 function togglePause(){if(NET.on)return;if(!g||g.phase==='over'||!document.getElementById('menu').hidden)return;paused=!paused;document.getElementById('pause').hidden=!paused}
 function toMenu(){netReset();g=null;paused=false;for(const id of ['end','pause'])document.getElementById(id).hidden=true;document.getElementById('menu').hidden=false;for(const id of ['ctl','pz','snd'])document.getElementById(id).classList.remove('on');fit()}
 function onEnd(){const a=g.score[0],b=g.score[1],two=OPT.mode==='2p',s=g.stat;
-  const me=NET.role==='guest'?1:0;document.getElementById('e-res').textContent=OPT.mode==='on'?(g.score[me]>g.score[1-me]?'You win':'You lose'):two?(a>b?'Player 1 wins':'Player 2 wins'):(a>b?'You win':'You lose');document.getElementById('e-sc').textContent=a+' - '+b;
+  const me=NET.role==='guest'?1:0;if(OPT.mode==='on'&&NET.w&&NET.mid&&NET.posted!==NET.mid){NET.posted=NET.mid;const win=g.score[me]>g.score[1-me];hbPost({hb:'result',mid:NET.mid,w:NET.w,win});NET.bal+=win?NET.w:-NET.w}document.getElementById('e-res').textContent=OPT.mode==='on'?(g.score[me]>g.score[1-me]?'You win':'You lose'):two?(a>b?'Player 1 wins':'Player 2 wins'):(a>b?'You win':'You lose');document.getElementById('e-sc').textContent=a+' - '+b;
   document.getElementById('e-st').textContent=`${TEAM[0].n}: ${s[0].fg} of ${s[0].fga} shots, ${s[0].three} threes, ${s[0].blk} blocks, ${s[0].stl} steals · ${TEAM[1].n}: ${s[1].fg} of ${s[1].fga} shots, ${s[1].three} threes, ${s[1].blk} blocks, ${s[1].stl} steals`;
   setTimeout(()=>{if(g&&g.phase==='over')document.getElementById('end').hidden=false},900)}
 
@@ -567,7 +568,7 @@ addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeo
    The host opens a private match channel and tells its partner; from then on every message goes through that channel.
    The host phone runs the whole game (step) and sends a snapshot about 20 times a second; the guest sends its {l,r,j} when it changes (and every 150 ms) and draws the
    snapshots. The host is player 1 (left, attacks right), the guest is player 2. Both use a 1100 wide court. */
-const NETW=1100,SNAPK=['P','ball','score','clock','sc','phase','dead','next','hold','pop','fx','shake','net','rd','ot','stat','started','slo','freeze','zm','zx','fl','t','tip'];
+const QP=new URLSearchParams(location.search),HBW=Math.max(0,Math.min(500,+QP.get('w')||0)),HBB=+QP.get('bal')||0,NETW=1100,SNAPK=['P','ball','score','clock','sc','phase','dead','next','hold','pop','fx','shake','net','rd','ot','stat','started','slo','freeze','zm','zx','fl','t','tip'];
 const SB_URL='https://urdkamhsdjhzhrjwzyoq.supabase.co',SB_KEY='sb_publishable_Kwc2VdtM1AbcKB7xgsOhlw_KOw02EOb';
 function netTx(o){try{NET.mc&&NET.mc.send({type:'broadcast',event:'g',payload:o})}catch(_){}}
 function netReset(){if(NET.mc)netTx({k:'bye'});try{if(NET.sb){NET.lb&&NET.sb.removeChannel(NET.lb);NET.mc&&NET.sb.removeChannel(NET.mc)}}catch(_){}
@@ -585,7 +586,7 @@ async function netFind(room){const msg=t=>{el('n-msg').textContent=t};msg('Conne
   if(!await sbLib()){msg('Could not load the matchmaking library. Check your connection.');return}
   const me=Math.random().toString(36).slice(2,10),sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false},realtime:{params:{eventsPerSecond:60}}});
   const lob=sb.channel('hb-room-'+room,{config:{presence:{key:me},broadcast:{self:false}}});NET.sb=sb;NET.lb=lob;NET.partner='';
-  const joinMatch=(name,role,partner)=>{NET.partner=partner;NET.role=role;msg('Opponent found. Joining the match...');
+  const joinMatch=(name,role,partner)=>{NET.partner=partner;NET.mid=name;NET.role=role;msg('Opponent found. Joining the match...');
     const mc=sb.channel(name,{config:{broadcast:{self:false,ack:false}}});NET.mc=mc;
     mc.on('broadcast',{event:'g'},({payload:m})=>{if(m)netMsg(m)}).subscribe(st=>{
       if(st==='SUBSCRIBED'){if(role==='guest')netTx({k:'ready'})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the matchmaking server. Try again in a moment.')});
@@ -596,22 +597,31 @@ async function netFind(room){const msg=t=>{el('n-msg').textContent=t};msg('Conne
     .subscribe(async st=>{if(st==='SUBSCRIBED'){msg('Searching for an opponent...');await lob.track({at:Date.now()})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the matchmaking server. Try again in a moment.')})}
 function netBegin(len){NET.on=true;NET.up=true;OPT.mode='on';NET.ended=false;NET.acc=0;NET.in={l:false,r:false,j:false};NET.from=NET.tg=null;NET.last=performance.now();const host=NET.role==='host';
   try{NET.lb&&NET.sb.removeChannel(NET.lb)}catch(_){}NET.lb=null;
-  TEAM[0].n=host?'YOU':'FRIEND';TEAM[1].n=host?'FRIEND':'YOU';newGame({mode:'on',diff:'med',len},NETW);fit();paused=false;acc=0;
+  hbPost({hb:'live',mid:NET.mid,w:NET.w});NET.px=null;TEAM[0].n=host?'YOU':'FRIEND';TEAM[1].n=host?'FRIEND':'YOU';newGame({mode:'on',diff:'med',len},NETW);fit();paused=false;acc=0;
   for(const id of ['menu','end','pause','net'])el(id).hidden=true;buildCtl();el('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);el('pz').classList.remove('on');el('snd').classList.add('on')}
+function hbPost(o){if(NET.pub&&NET.w&&parent!==window){try{parent.postMessage(o,'*')}catch(_){}}}
 function netStart(){audio();netTx({k:'go',len:OPT.len});netBegin(OPT.len)}
-function netSend(){const o={};for(const k of SNAPK)o[k]=g[k];netTx({k:'s',g:o,snd:NET.snd.splice(0)})}
+const R2=v=>typeof v==='number'?Math.round(v*100)/100:Array.isArray(v)?v.map(R2):v&&typeof v==='object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,R2(x)])):v;   /* v34: smaller snapshots */
+function netSend(){const o={};for(const k of SNAPK)o[k]=R2(g[k]);netTx({k:'s',g:o,snd:NET.snd.splice(0)})}
 function netMsg(m){NET.last=performance.now();
   if(m.k==='ready'&&NET.role==='host'&&!NET.on){netStart()}
   else if(m.k==='go'&&NET.role==='guest'){audio();netBegin(m.len)}
-  else if(m.k==='bye'){if(NET.on)netLost();else{NET.partner='';NET.mc=null}}
+  else if(m.k==='bye'){if(NET.on){if(NET.w&&NET.mid&&NET.posted!==NET.mid&&g&&g.phase!=='over'){NET.posted=NET.mid;hbPost({hb:'result',mid:NET.mid,w:NET.w,win:true,forfeit:true});NET.bal+=NET.w}netLost('Your opponent left.')}else{NET.partner='';NET.mc=null}}
   else if(m.k==='i'&&NET.role==='host'){NET.in=m.i}
   else if(m.k==='s'&&NET.role==='guest'&&g){const from={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};Object.assign(g,m.g);
-    NET.from=from;NET.tg={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};NET.t0=performance.now();for(const n of m.snd||[])sfx(n)}}
+    const t1=performance.now();NET.iv=Math.max(30,Math.min(90,NET.t0?(t1-NET.t0)*1.15:50));NET.from=from;NET.tg={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};NET.t0=t1;for(const n of m.snd||[])sfx(n)}}
 function netGuest(dt){const now=performance.now(),inp=el('rot').hidden?human(0):{l:false,r:false,j:false},key=(inp.l?1:0)+''+(inp.r?1:0)+(inp.j?1:0);
   if(key!==NET.lastIn||now-NET.lastInT>150){NET.lastIn=key;NET.lastInT=now;netTx({k:'i',i:{l:!!inp.l,r:!!inp.r,j:!!inp.j}})}
-  if(NET.from&&NET.tg){const k=Math.min(1,(now-NET.t0)/70);g.P.forEach((p,i)=>{p.x=NET.from.P[i].x+(NET.tg.P[i].x-NET.from.P[i].x)*k;p.y=NET.from.P[i].y+(NET.tg.P[i].y-NET.from.P[i].y)*k});
+  if(NET.from&&NET.tg){const k=Math.min(1,(now-NET.t0)/(NET.iv||50));g.P.forEach((p,i)=>{p.x=NET.from.P[i].x+(NET.tg.P[i].x-NET.from.P[i].x)*k;p.y=NET.from.P[i].y+(NET.tg.P[i].y-NET.from.P[i].y)*k});
     g.ball.x=NET.from.b.x+(NET.tg.b.x-NET.from.b.x)*k;g.ball.y=NET.from.b.y+(NET.tg.b.y-NET.from.b.y)*k}
+  /* v34: client-side prediction of the guest's own walking, so steering answers at once instead of a round trip later */
+  const me=g.P[1],ground=!me.air&&!me.stun&&!me.gath&&!me.dk&&!(me.dd&&me.has)&&g.phase==='live'&&g.hold<=0;
+  if(ground&&el('rot').hidden){const mv=(inp.r?1:0)-(inp.l?1:0),ax=me.x;if(NET.px==null||Math.abs(NET.px-ax)>90)NET.px=ax;
+    const sp=SPD*(.78+.3*Math.max(0,Math.min(1,me.en)))*(me.has?.97:1)*(me.slow?PRESS:1);NET.px+=mv*sp*Math.min(dt,.05);NET.px+=(ax-NET.px)*Math.min(1,dt*(mv?5:14));
+    const old=me.x;me.x=NET.px;clampP(me);NET.px=me.x;if(mv)me.vx=mv*sp;if(g.ball.st==='held'&&g.ball.own===1)g.ball.x+=me.x-old}
+  else NET.px=null;
   if(g.phase==='over'&&!NET.ended){NET.ended=true;onEnd()}}
+addEventListener('message',e=>{if(e.data&&e.data.hb==='bye'&&NET.mc)netTx({k:'bye'})});
 el('n-back').addEventListener('click',()=>{if(NET.pub&&parent!==window){try{parent.postMessage({hb:'close'},'*')}catch(_){}}netReset();el('net').hidden=true;el('menu').hidden=false});
 el('n-copy').addEventListener('click',()=>{const t=el('n-link');t.select();t.setSelectionRange(0,9999);try{navigator.clipboard.writeText(t.value)}catch(_){try{document.execCommand('copy')}catch(__){}}el('n-copy').textContent='Copied';setTimeout(()=>el('n-copy').textContent='Copy link',1500)});
 el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(navigator.share)navigator.share({title:'Hoops Battle',text:'Play me in Hoops Battle',url:u}).catch(()=>{});else el('n-copy').click()});
@@ -622,7 +632,7 @@ el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(naviga
   setTimeout(()=>{try{audio();netOpen(true,r)}catch(e){el('menu').hidden=false}},100)}}
 /* v31: opened inside Varsity's Minigames with ?find=1: search the shared public lobby at once (the first two people searching are paired) */
 {const q=new URLSearchParams(location.search);if(q.get('find')&&!q.get('room')){OPT.mode='on';NET.pub=1;
-  setTimeout(()=>{try{audio()}catch(_){}netOpen(true,'public');el('n-h').textContent='Find an opponent'},100)}}
+  NET.w=HBW;NET.bal=HBB;setTimeout(()=>{try{audio()}catch(_){}netOpen(true,'public'+(NET.w?'-w'+NET.w:''));el('n-h').textContent='Find an opponent'+(NET.w?' · '+NET.w+' tokens':'')},100)}}
 /* test hook: run the game fast with the computer playing both sides (used to balance the difficulty levels) */
 window.__hb={get g(){return g},sim(sec,d0,d1){OPT.mode='ai';newGame({mode:'ai',diff:d1||'med',len:sec},1100);const saved=g.o.diff;let guard=0;
   while(g.phase!=='over'&&guard++<sec*60*3){g.o.diff=d0||'med';const a=ai(g.P[0],TICK);g.o.diff=saved;const b=ai(g.P[1],TICK);step(TICK,[a,b])}
