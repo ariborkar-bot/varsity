@@ -101,7 +101,7 @@ class Fake:
         self.n += 1
         if self.block_after is not None and self.n > self.block_after:
             raise M.Blocked('HTTP 429')
-        return self.pages.get(url, [])
+        return {'contests': self.pages.get(url, []), 'meta': {'team_id': B, 'section': 'San Diego Section', 'league': 'Coastal', 'division': 'SDS Division 1-5'} if url == BURL else {}}
 
 
 names = {M.norm(x) for x in ("Bishop's", 'Coronado', 'Christian', 'Don Lugo')}
@@ -128,4 +128,11 @@ class Fake404(Fake):
 f3 = Fake404({BURL: FIX})
 _, g3, rep3 = M.crawl([BURL], 'fb', names=names, fetcher=f3, log=lambda *_: None)
 check(rep3['blocked'] is None and len(g3) == 10, 'a 404 on one team page is skipped and the crawl carries on')
+check(teams['mp:' + B].get('section') == 'San Diego Section' and teams['mp:' + B].get('league') == 'Coastal', 'the crawl tags a crawled team with its section and league')
+
+# stale pages (an old copy served by a cache or another network) stop the crawl
+stale = [json.loads(json.dumps(r)) for r in FIX]
+f4 = Fake({BURL: stale})
+_, _, rep4 = M.crawl([BURL], 'fb', names=names, fetcher=f4, log=lambda *_: None, fresh_after='2027-01-01')
+check(rep4['blocked'] and 'stale' in rep4['blocked'], 'old pages are refused as stale')
 print('ok: %d checks passed' % ok)

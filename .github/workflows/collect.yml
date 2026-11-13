@@ -1,0 +1,70 @@
+# Varsity section data: crawl MaxPreps team pages for every California section and commit data/sections/*.json.
+# Run by hand first (Actions tab > Collect section data > Run workflow). A quick probe runs first and stops with a clear message if
+# MaxPreps refuses this network or serves an old copy, so a failed run never writes anything. Add a schedule only after a good run.
+name: Collect section data
+on:
+  workflow_dispatch:
+    inputs:
+      sport:
+        description: 'Sport'
+        type: choice
+        options: [both, fb, bb]
+        default: both
+      max_teams:
+        description: 'Most team pages per sport (small number = quick test)'
+        default: '4000'
+      dry:
+        description: 'Dry run (print results, commit nothing)'
+        type: boolean
+        default: true
+concurrency:
+  group: varsity-collect
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline tests
+        run: python3 -I tools/sections/test_maxpreps.py
+      - name: Probe MaxPreps (reachable and current?)
+        env:
+          VARSITY_CONTACT: https://github.com/ariborkar-bot/varsity
+        run: |
+          python3 - <<'PY'
+          import sys, os
+          sys.path.insert(0, 'tools/sections')
+          import maxpreps as M
+          f = M.Fetcher(delay=1.0)
+          url = 'https://www.maxpreps.com/ca/la-jolla/bishops-knights/football/'
+          try:
+              if not f.allowed(url + 'schedule/'): sys.exit('robots.txt disallows the schedule page')
+              pg = f.schedule(url)
+          except (M.Blocked, M.NotFound, M.FormatChanged) as e:
+              sys.exit('PROBE FAILED: %s' % e)
+          gs, rej, n = M.decode_contests(pg['contests'], 'fb')
+          newest = max(g['date'] for g in gs) if gs else None
+          print('probe ok: %d games, %d rejected, newest %s, section %r' % (len(gs), len(rej), newest, pg['meta'].get('section')))
+          if not gs or newest < '2026-06-01': sys.exit('PROBE FAILED: page looks stale (newest game %s)' % newest)
+          PY
+      - name: Crawl California
+        env:
+          VARSITY_CONTACT: https://github.com/ariborkar-bot/varsity
+        run: |
+          python3 -I tools/sections/sync.py california --adapter maxpreps --sport "${{ inputs.sport }}" --max-teams "${{ inputs.max_teams }}" --cache .mpcache ${{ inputs.dry && '--dry-run' || '' }}
+      - name: Commit data
+        if: ${{ !inputs.dry }}
+        run: |
+          git config user.name "varsity-collector"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/sections
+          git diff --cached --quiet && echo "no data changes" && exit 0
+          git commit -m "Section data update"
+          git pull --rebase -q
+          git push

@@ -6,6 +6,8 @@
     python3 tools/sections/sync.py southern --adapter feed                         a licensed feed (FeedAdapter is not written yet)
     python3 tools/sections/sync.py southern --coverage                             coverage report only
 
+    python3 tools/sections/sync.py california --adapter maxpreps                   crawl ALL of California, one file per section (seeds/california.txt)
+
 Rules:
   - A section whose status in index.html is 'off' is refused unless --force (so a stray run cannot fill a hidden section).
   - The mock adapter may only write outside data/sections/, so fake data can never be committed as real data.
@@ -18,13 +20,43 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sections_lib as L
 
 
+def run_california(a):
+    """Crawl all of California once, tag every school with the section MaxPreps lists, write one file per section plus index.json."""
+    if a.adapter != 'maxpreps':
+        print('california needs --adapter maxpreps'); return 2
+    sports = ['fb', 'bb'] if a.sport == 'both' else [a.sport]
+    ad = L.MaxPrepsAdapter(a.delay, a.cache, a.max_teams, a.max_age_h, a.seeds)
+    data = ad.fetch('california', sports)
+    parts, unmatched = L.split_by_section(data)
+    reg = L.registry()
+    out = os.path.abspath(a.out)
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')
+    index = {}
+    for slug, part in parts.items():
+        path = os.path.join(out, slug + '.json')
+        merged, ch = L.upsert(L.load(path), part)
+        merged['synced'] = now
+        merged['partial'] = bool(data.get('partial'))
+        index[slug] = {'name': reg[slug]['name'], 'status': reg[slug]['status'], 'schools': len(merged['schools']), 'games': len(merged['games']),
+                       'played': sum(1 for g in merged['games'] if g['hs'] is not None)}
+        print('%-14s %4d schools %5d games (%d played) new %d, score changes %d' % (slug, index[slug]['schools'], index[slug]['games'], index[slug]['played'], ch['added_games'], len(ch['score_changed'])))
+        if not a.dry_run:
+            L.save(path, merged)
+    for name, schools in unmatched.items():
+        print('NOT MATCHED to a section: %r (%d schools, e.g. %s)' % (name, len(schools), ', '.join(schools[:3])))
+    if not a.dry_run and parts:
+        L.save(os.path.join(out, 'index.json'), {'updated': now, 'partial': bool(data.get('partial')), 'sections': index})
+        print('wrote', out)
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('section')
     ap.add_argument('--adapter', default='feed', choices=sorted(L.ADAPTERS))
     ap.add_argument('--delay', type=float, default=2.0, help='maxpreps: seconds between requests')
     ap.add_argument('--cache', default=os.path.expanduser('~/.varsity-cache/maxpreps'), help='maxpreps: raw schedule cache folder')
-    ap.add_argument('--max-teams', type=int, default=300, help='maxpreps: most team pages per sport')
+    ap.add_argument('--max-teams', type=int, default=None, help='maxpreps: most team pages per sport')
     ap.add_argument('--max-age-h', type=float, default=12, help='maxpreps: reuse cached pages younger than this')
     ap.add_argument('--seeds', default=None, help='maxpreps: seeds file (default tools/sections/seeds/<section>.txt)')
     ap.add_argument('--sport', default='both', choices=['fb', 'bb', 'both'])
@@ -35,7 +67,11 @@ def main():
     ap.add_argument('--mock-schools', type=int, default=12)
     ap.add_argument('--mock-correct', type=int, default=0, help='mock only: change N stat lines to test corrections')
     a = ap.parse_args()
+    if a.max_teams is None:
+        a.max_teams = 4000 if a.section == 'california' else 300
 
+    if a.section == 'california':
+        return run_california(a)
     reg = L.registry()
     if a.section not in reg:
         print('unknown section %r; known: %s' % (a.section, ', '.join(reg))); return 2

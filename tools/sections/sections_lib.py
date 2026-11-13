@@ -126,7 +126,7 @@ class MaxPrepsAdapter(Adapter):
             if sp in seeds and url:
                 seeds[sp].append(url.strip())
         names = self._names(section)
-        if names is None:
+        if names is None and section != 'california':
             print('  note: no names list for %s, so the crawl may wander the whole state (capped at %d teams)' % (section, self.max_teams))
         fetcher = M.Fetcher(delay=self.delay, cache=self.cache, max_age_h=self.max_age_h)
         schools, games, blocked = {}, {}, None
@@ -139,10 +139,31 @@ class MaxPrepsAdapter(Adapter):
             blocked = blocked or rep['blocked']
             for sid, t in teams.items():
                 if names is None or M.norm(t['name']) in names:
-                    schools[sid] = {'id': sid, 'name': t['name'], 'city': t['city']}
+                    schools[sid] = {'id': sid, 'name': t['name'], 'city': t['city'], 'section': t.get('section'), 'league': t.get('league'), 'division': t.get('division')}
             games.update(g)
         return {'section': section, 'source': 'maxpreps', 'schools': list(schools.values()), 'players': [], 'games': list(games.values()), 'lines': [],
                 'partial': bool(blocked)}
+
+
+def split_by_section(data):
+    """One crawl of all California -> {section id: normalized data}. A school's section is the one MaxPreps lists on its team page
+    ('San Diego Section' -> 'san-diego', matched against the registry). A game goes into every section that has one of its teams.
+    Also returns {unmatched section name: [schools]} so a name the registry does not know is visible, never silently dropped."""
+    ids = {v['full'].replace('CIF ', '').strip(): k for k, v in registry().items()}
+    sec_of, unmatched = {}, {}
+    for sc in data['schools']:
+        slug = ids.get(sc.get('section') or '')
+        if slug:
+            sec_of[sc['id']] = slug
+        else:
+            unmatched.setdefault(sc.get('section') or '(no section on page)', []).append(sc['name'])
+    out = {}
+    for slug in sorted(set(sec_of.values())):
+        mine = {i for i, v in sec_of.items() if v == slug}
+        out[slug] = {'section': slug, 'source': data.get('source'), 'players': [], 'lines': [],
+                     'schools': [sc for sc in data['schools'] if sc['id'] in mine],
+                     'games': [g for g in data['games'] if g.get('home_id') in mine or g.get('away_id') in mine]}
+    return out, unmatched
 
 
 ADAPTERS = {'mock': MockAdapter, 'feed': FeedAdapter, 'maxpreps': MaxPrepsAdapter}

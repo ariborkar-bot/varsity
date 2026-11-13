@@ -15,7 +15,7 @@ Positions (contest row r, team row t) were verified on 2026-11-13 against known 
   r[1] contest id, r[11] start time, r[18] game page url, r[28] state text, r[29] summary sentence, r[37] and r[38] team rows
   t[1] school id, t[5] W/L/T, t[6] score, t[11] 1=away 0=home (2 when not set, e.g. neutral playoff), t[13] team url, t[14] name, t[15] city, t[16] state
 """
-import collections, hashlib, json, os, random, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser
+import collections, datetime, hashlib, json, os, random, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser
 
 BASE = 'https://www.maxpreps.com'
 UA = 'VARSITY-collector/1.0 (+%s)' % os.environ.get('VARSITY_CONTACT', 'https://github.com/ariborkar-bot/varsity')
@@ -101,6 +101,12 @@ def decode_contests(contests, sport):
     return games, rejects, checked
 
 
+def team_meta(pp):
+    """The page's own team: id and its section / league / division (pp.teamContext.data)."""
+    d = ((pp.get('teamContext') or {}).get('data')) or {}
+    return {'team_id': d.get('teamId'), 'section': d.get('sectionName'), 'league': d.get('leagueName'), 'division': d.get('sectionDivisionName')}
+
+
 def teams_in(contests):
     """Every team seen on a schedule: {school_id: {name, city, state, url}}."""
     out = {}
@@ -155,28 +161,32 @@ class Fetcher:
         return self.rp.can_fetch(UA, url)
 
     def schedule(self, team_url):
-        """-> list of contest rows for a team's /schedule/ page (cached)."""
+        """-> {'contests': [...rows], 'meta': {team_id, section, league, division}} for a team's /schedule/ page (cached)."""
         if not TEAM_URL_RE.match(team_url):
             raise ValueError('not a MaxPreps team url: ' + team_url)
         url = team_url + 'schedule/'
         path = os.path.join(self.cache, hashlib.sha1(url.encode()).hexdigest() + '.json') if self.cache else None
         if path and os.path.exists(path) and time.time() - os.path.getmtime(path) < self.max_age:
-            return json.load(open(path))['contests']
+            c = json.load(open(path))
+            return {'contests': c['contests'], 'meta': c.get('meta') or {}}
         if not self.allowed(url):
             raise Blocked('robots.txt disallows ' + url)
         pp = next_data(self._open(url))['props']['pageProps']
         contests = pp.get('contests')
         if not isinstance(contests, list):
             raise FormatChanged('no contests list on ' + url)
+        meta = team_meta(pp)
         if path:
-            json.dump({'url': url, 'contests': contests}, open(path, 'w'))
-        return contests
+            json.dump({'url': url, 'contests': contests, 'meta': meta}, open(path, 'w'))
+        return {'contests': contests, 'meta': meta}
 
 
-def crawl(seeds, sport, names=None, state='CA', max_teams=300, fetcher=None, log=print):
+def crawl(seeds, sport, names=None, state='CA', max_teams=300, fetcher=None, log=print, fresh_after=None):
     """Snowball from seed team urls. names = set of norm()ed team names to stay inside (None = whole state, capped by max_teams).
     -> (teams, games, report)."""
     fetcher = fetcher or Fetcher(log=log)
+    if fresh_after is None:
+        fresh_after = (datetime.date.today() - datetime.timedelta(days=150)).isoformat()
     queue, seen, games, teams = collections.deque(seeds), set(), {}, {}
     report = {'pages': 0, 'rejects': 0, 'blocked': None, 'skipped_not_in_names': 0}
     while queue and len(seen) < max_teams:
@@ -185,7 +195,8 @@ def crawl(seeds, sport, names=None, state='CA', max_teams=300, fetcher=None, log
             continue
         seen.add(url)
         try:
-            contests = fetcher.schedule(url)
+            page = fetcher.schedule(url)
+            contests, meta = page['contests'], page.get('meta') or {}
         except NotFound as e:
             log('  skipped (not found): %s' % e)
             continue
@@ -196,10 +207,17 @@ def crawl(seeds, sport, names=None, state='CA', max_teams=300, fetcher=None, log
         report['pages'] += 1
         gs, rej, n = decode_contests(contests, sport)
         report['rejects'] += len(rej)
+        if len(gs) >= 3 and max(g['date'] for g in gs) < fresh_after:
+            report['blocked'] = 'stale pages: newest game on %s is %s (before %s); this network may be served an old copy' % (url, max(g['date'] for g in gs), fresh_after)
+            log('STOPPED: ' + report['blocked'])
+            break
         for g in gs:
             games.setdefault(g['id'], g)
         for sid, t in teams_in(contests).items():
             teams.setdefault(sid, t)
+        if meta.get('team_id') and 'mp:' + meta['team_id'] in teams:
+            teams['mp:' + meta['team_id']].update({k: meta.get(k) for k in ('section', 'league', 'division')})
+        for sid, t in teams_in(contests).items():
             if t['state'] != state or not t['url'] or not TEAM_URL_RE.match(t['url']) or t['url'] in seen:
                 continue
             if names is not None and norm(t['name']) not in names:

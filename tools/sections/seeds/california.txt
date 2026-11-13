@@ -1,0 +1,3 @@
+# one team page per sport to start from; with no names list the crawl follows every California opponent (capped by --max-teams) and tags each school with the section MaxPreps lists
+fb|https://www.maxpreps.com/ca/la-jolla/bishops-knights/football/
+bb|https://www.maxpreps.com/ca/la-jolla/bishops-knights/basketball/
