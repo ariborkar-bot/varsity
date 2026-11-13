@@ -701,3 +701,6 @@ Owner asked for a total remake and picked the Retro Bowl style arcade. v5 is the
 
 ### Gridiron Rush v6 (run and pass mix) — tools/football/gridiron-duel.html
 Owner: v5 was just 1v1 tackling. v6: offense picks Inside run / Sweep / Quick / Medium / Deep pass, defense picks Balanced / Blitz / Deep shell / Run stuff and controls one defender (SHED, SWAT, TACKLE). Offense throws with 1/2/3 and sidesteps rushers. Plays in `OP`, calls in `DC`, `formation()`, `launch`, `resolveCatch`. Balance: run holds x1.9 (`launch`), LB/DB react late on runs, held defenders can't tackle, completion odds raised. AI-vs-AI via `__gd.sim`. Sacks are rare.
+
+### Gridiron Rush v7 (Retro Bowl style) — tools/football/gridiron-duel.html
+Owner: make it like Retro Bowl. Passing concepts are named (Slants, Smash, Four Verts). The QB throw is aimed: tap/click the field spot you want the ball (`throwAt`, tap -> field point via inverse of `sx/sy`); `resolveCatch` finds the nearest receiver to where the ball lands (miss >2.5 yd = NO ONE THERE, <=0.9 full odds, <=1.6 x.75, else x.4), so you must lead the receiver. After the catch, swipe on the canvas to juke in that direction (`SW`, works during the catch animation; online guest sends `{k:'sw'}`). 1/2/3 throw buttons and keys removed. AI still uses `throwTo`.
