@@ -65,7 +65,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v50</small></p>
+  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v51</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -251,7 +251,8 @@ function stepBall(dt){
       if(py<RIMY&&b.y>=RIMY&&Math.abs(b.x-hp.cx)<RIMH-3&&b.vy>0&&!b.done&&!b.blk&&g.phase==='live')scored(hi)}}}
 function hitRim(b){if(!b.hit){b.hit=true;sfx('rim')}b.live=true;if(b.st==='shot'&&g.phase==='live')g.sc=SC}
 function scored(hi){const b=g.ball,team=hi===1?0:1,pts=b.sh===team?b.pts:2,hp=g.hp[hi];
-  g.score[team]+=pts;b.done=true;g.net[hi]=1;g.stat[team].fg++;if(pts===3)g.stat[team].three++;
+  g.score[team]+=pts;if(b.sh===team){const sp=g.P[team];sp.en=Math.min(1,sp.en+EN.shot)}   /* v51: a made shot refunds its energy bar */
+  b.done=true;g.net[hi]=1;g.stat[team].fg++;if(pts===3)g.stat[team].three++;
   pop('+'+pts,hp.cx,RIMY-34,TEAM[team].c,1.3);pop(b.dunk?(g.P[b.sh].dkS===3?'360 SLAM!':g.P[b.sh].dkS===2?'WINDMILL!':'SLAM!'):pts===3?'FROM DEEP!':b.hit?'':'SWISH',hp.cx+hp.dir*(b.dunk?130:70),b.dunk?RIMY-110:RIMY-70,b.dunk?'#FFE08A':'#fff',b.dunk?1.6:1.1,!!b.dunk);
   sfx('swish');if(b.dunk)g.shake=.7;g.phase='dead';g.dead=1.35;g.next=1-team;g.tip=true}
 function afterDead(){const sa=g.score[0],sb=g.score[1];if(Math.max(sa,sb)>=WINPTS&&Math.abs(sa-sb)>=2){g.phase='over';sfx('buzz');onEnd()}else{const t=g.tip;g.tip=false;setup(g.next,t)}}

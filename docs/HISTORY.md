@@ -672,3 +672,6 @@ Timeouts: tap the scoreboard (canvas hit test in `sbTap`, game coords from `inne
 
 ## Hoops Battle v50
 Timeouts: ONE per team per match (`g.tol=[1,1]`), 10 s, only while your player holds the ball (`P[i].has`, else a 'YOU NEED THE BALL' pop); no energy bonus any more. During your own timeout a panel (`#toch`) lets you switch character (`setChar`, updates `ch/cs/ce/cb/cp/co`; guest sends `{k:'ch'}`). Energy: each score now gives one bar (`EN.score .125`) instead of two.
+
+## Hoops Battle v51
+A made shot refunds the energy bar it cost (in `scored`, only when the scoring team's player took the shot). Misses still cost the bar.
