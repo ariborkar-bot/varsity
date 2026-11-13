@@ -696,3 +696,5 @@ A shot can only be contested while the defender is jumping (`contest` in `releas
 - `sw.js`: network-first rule for `/data/sections/` (keeps the last good copy offline).
 - Name collisions to avoid: `SB` is the Supabase client, `SX`/`UI.sx`/`sxData` and `.sx-*` are the Stats view, `.sb-*` is the Simulate cards. Section browser names are `SBR`, `UI.sb*`, `sb*()` and `.sbr-*`.
 - Not built: players, rosters and box scores for other sections (the collector only gets schools and games so far); picks or wagers on other sections.
+## Gridiron Rush (Gridiron Duel v5, tools/football/gridiron-duel.html)
+Owner asked for a total remake and picked the Retro Bowl style arcade. v5 is the v3 simulation (carrier vs lone defender, 4 downs for 10, TD 7, first to 21, host-authoritative online) with a new broadcast side view (`field`, `fig`, `scene`: stands, ad wall, sheared field, depth-sorted side-on figures), a carrier who runs on his own (the stick only picks the lane, `auto` input in `step`), BOOST button, slow-mo + flash on tackles (`G.slo`, `G.flash`), BIG HIT on dives. Old versions: `gridiron-duel-topdown-v3.html`, `-playcall-v2.html`. Online path untested on real phones.
