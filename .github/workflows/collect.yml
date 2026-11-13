@@ -90,6 +90,19 @@ jobs:
           git commit -m "Section data update (basketball)"
           git pull --rebase -q
           git push
+      - name: Build API files
+        if: ${{ !inputs.dry }}
+        run: python3 -I tools/sections/build_api.py
+      - name: Commit API files
+        if: ${{ !inputs.dry }}
+        run: |
+          git config user.name "varsity-collector"
+          git config user.email "actions@users.noreply.github.com"
+          git add api
+          git diff --cached --quiet && echo "no api changes" && exit 0
+          git commit -m "API files update"
+          git pull --rebase -q
+          git push
       - name: Save page cache (also after a failure, so a rerun does not refetch)
         if: always()
         uses: actions/cache/save@v4

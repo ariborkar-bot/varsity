@@ -712,3 +712,6 @@ Owner: make it like Retro Bowl. Passing concepts are named (Slants, Smash, Four 
 
 ## v482b (Nov 13): collector no longer dies on one odd page (tools + workflow only)
 - The first full California run (id 43505518561) crashed after about 1,300 team pages: one team's rows failed the W/L-vs-score check (3 of 11) and `FormatChanged` aborted everything before any file was written. `crawl()` now logs `SKIPPED (format)` and moves on; it only stops when more than max(5, 3%) of pages fail. The workflow saves the page cache even after a failure (`actions/cache/save`, `if: always()`). Look for the SKIPPED lines in the next run: they show which team page has odd data.
+
+## v482c (Nov 13): read-only API (tools + workflow + docs, no app change)
+- `tools/sections/build_api.py` makes static JSON under `api/v1/` from `data/sections/` (see docs/API.md). Served by GitHub Pages, no server or keys. The collect workflow builds and commits `api/` after the crawls. Tested on mock data only (58 files for one 12-team section, deterministic); no real data yet because the California run has not succeeded.
