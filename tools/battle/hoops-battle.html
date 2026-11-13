@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v31</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v33</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -88,6 +88,7 @@ h1 span{color:#FFC23D}
   </div>
 </div></div>
 
+<button id="tskip" type="button" hidden aria-label="Skip replay" style="position:fixed;inset:0;z-index:30;background:none;border:0;padding:0"></button>
 <div id="net" class="ov" hidden><div class="box">
   <h1 id="n-h">Invite a friend</h1>
   <div id="n-inv"><p class="sub">Send your friend this link. When they open it they join your game automatically.</p>
@@ -147,7 +148,7 @@ function newGame(o,W){
   pop('TIP OFF',W/2,212,'#fff',1.1);return g}
 function pop(t,x,y,c,d,big){g.pop.push({t:d||1,d:d||1,s:t,x,y,c:c||'#fff',big})}
 /* player i attacks hoop 1-i and defends hoop i (player 0 defends the left hoop) */
-function setup(i,tip){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.gath=false;p.pump=0;p.dk=0;p.dd=false;p.en=Math.min(1,p.en+EN.score)});
+function setup(i,tip){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.gath=false;p.pump=0;p.dk=0;p.dd=false;p.dr=false;p.en=Math.min(1,p.en+EN.score)});
   g.P[i].x=a.cx+a.dir*150;g.P[1-i].x=g.W/2+a.dir*46;g.P[i].has=true;g.P[i].face=a.dir;g.P[1-i].face=-a.dir;
   Object.assign(b,{st:'held',own:i,sh:-1,vx:0,vy:0,live:false,hit:false,dunk:false,done:false,cd:0,t:0});g.sc=SC;g.phase='live';g.hold=.55;g.ai=[{},{}];
   /* v18: after a basket both players start at centre court and the ball goes up like a tip-off, drifting toward the side of the player who was just scored on */
@@ -167,7 +168,8 @@ function step(dt,inp){
   else{g.dead-=dt;if(g.dead<=0)afterDead()}}
 function clampP(p){p.x=Math.max(WALL+PW,Math.min(g.W-WALL-PW,p.x))}
 function stepP(p,c,dt){
-  p.cd=Math.max(0,p.cd-dt);if(p.pump>0)p.pump-=dt;if(p.stun>0){p.stun-=dt;c=NOIN}if(!p.has){p.gath=false;p.dd=false}
+  p.cd=Math.max(0,p.cd-dt);if(p.pump>0)p.pump-=dt;if(!p.has)p.dr=false;else if(c.l!==c.r&&!p.air&&!p.stun)p.dr=true;   /* v33: no dribble until you move left or right */
+  if(p.stun>0){p.stun-=dt;c=NOIN}if(!p.has){p.gath=false;p.dd=false}
   const mv=(c.r?1:0)-(c.l?1:0),hd=g.hp[1-p.i].cx>p.x?1:-1,sp=SPD*(p.has?(mv&&mv!==hd?.8:.97):1)*(.78+.3*Math.max(0,Math.min(1,p.en)))*(p.slow?PRESS:1)*(p.dm||1)*(p.gath?.5:1)*(p.dd&&p.has&&!p.air?0:1);   /* after a pump fake the dribble is dead: no walking, only fake again or shoot */
   if(!p.air){p.vx+=(mv*sp-p.vx)*Math.min(1,dt*14);if(p.has)p.face=hd;else if(mv)p.face=mv;else if(Math.abs(g.ball.x-p.x)>8)p.face=g.ball.x>p.x?1:-1;
     const push=p.slow&&p.has&&mv&&(g.P[1-p.i].x-p.x)*mv>0;   /* driving into a defender wears you out fast */
@@ -207,7 +209,7 @@ function stepBall(dt){
     if(b.dh<=0){b.dh=0;b.x=h.cx;b.y=RIMY-12;b.vy=520;g.shake=1.3;g.net[b.hh]=2.4;g.rd[b.hh]=1.9;g.fx.push({x:h.cx,y:RIMY,t:.55,d:.55,burst:1});g.fx.push({x:h.cx,y:RIMY,t:.5,d:.5,ring:1});g.freeze=.16;g.zm=1;g.zx=h.cx;g.fl=1;sfx('slam')}   /* v20: hit-stop, camera punch, flash and shockwave on the slam */
     return}
   if(b.st==='held'){const p=g.P[b.own];if(p.air&&p.shoot){b.x=p.x+p.face*8;b.y=p.y-PH-16}else if(p.air){b.x=p.x+p.face*(PW+8);b.y=p.y-PH*.56}
-    else if(p.gath||p.pump>0||p.dd){const k=p.gath?Math.min(1,p.gt/HOLD):p.pump>0?.35+.65*Math.sin(Math.max(0,p.pump)/.3*Math.PI):.35;b.x=p.x+p.face*(PW+BR-3-(PW+BR-11)*k);b.y=p.y-PH*.5-(PH*.5+12)*k}
+    else if(p.gath||p.pump>0||p.dd||!p.dr){const k=p.gath?Math.min(1,p.gt/HOLD):p.pump>0?.35+.65*Math.sin(Math.max(0,p.pump)/.3*Math.PI):.35;b.x=p.x+p.face*(PW+BR-3-(PW+BR-11)*k);b.y=p.y-PH*.5-(PH*.5+12)*k}
     else{const d=Math.abs(Math.sin(g.t*9+p.i*1.7));b.x=p.x+p.face*(PW+BR-3);b.y=GY-BR-d*60;if(d<.08&&!b._b){b._b=true;if(g.hold<=0)sfx('bounce')}else if(d>.3)b._b=false}
     b.vx=b.vy=0;return}
   b.t+=dt;const n=3,h=dt/n,W=g.W;
@@ -397,7 +399,7 @@ function drawP(p,refl){const T=TEAM[p.i],f=p.face,x=p.x,y=p.y,run=!p.air&&Math.a
   X.globalAlpha=A0*(p.stun>0?.6+.4*Math.sin(g.t*40):1);
   X.save();X.translate(x,y);X.scale(PS,PS);X.translate(-x,-y);
   let bk=false;if(p.dk>0&&p.dkS===3){const th=Math.PI*2*Math.min(1,p.dkT/.26),c3=Math.cos(th);bk=c3<0;X.translate(x,0);X.scale(Math.abs(c3)<.14?(c3<0?-.14:.14):c3,1);X.translate(-x,0)}   /* 360 dunk: a full turn about the vertical axis; his back is to us in the middle of it */
-  const up=p.gath||p.pump>0||p.dd||(p.shoot&&p.air)||p.dk>0,lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*5,bob=run?Math.abs(cs)*2.2:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*5:(p.dd&&!p.air?2.5:0);
+  const up=p.gath||p.pump>0||p.dd||(p.has&&!p.dr&&!p.air)||(p.shoot&&p.air)||p.dk>0,lean=p.air?0:Math.max(-1,Math.min(1,p.vx/SPD))*5,bob=run?Math.abs(cs)*2.2:0,tuck=p.air?Math.min(1,p.jt*5):0,crouch=p.gath?Math.min(1,p.gt/HOLD)*5:(p.dd&&!p.air?2.5:0);
   const hipY=y-43+crouch-bob*.5,shY=y-68+crouch*1.1-bob,shX=x+lean,hipX=x+lean*.4,hx=shX+f*3,hy=shY-17;
   const ik=(ax,ay,bx,by,l1,l2,side)=>{const dx=bx-ax,dy=by-ay,d=Math.hypot(dx,dy)||1,s=Math.min(1.3,Math.max(1,d/((l1+l2)*.985))),a1=l1*s,a2=l2*s,dd=Math.min(d,(a1+a2)*.985),a=(a1*a1-a2*a2+dd*dd)/(2*dd),h=Math.sqrt(Math.max(0,a1*a1-a*a)),ux=dx/d,uy=dy/d;return [ax+ux*a-uy*h*side,ay+uy*a+ux*h*side,ax+ux*dd,ay+uy*dd]};
   const lerp2=(a,b2,t)=>[a[0]+(b2[0]-a[0])*t,a[1]+(b2[1]-a[1])*t];
@@ -505,7 +507,32 @@ function buildCtl(){const c=document.getElementById('ctl'),two=OPT.mode==='2p',b
 
 /* ---------------- loop ---------------- */
 let last=0,acc=0;
+const el=id=>document.getElementById(id);
+/* v32: dunk replay. Every frame the drawn state is copied into a short buffer (about 4 s). A dunk's celebration plays live; then, before play restarts, the dunk is
+   shown again in slow motion (about 3 s: from just before the jump to the slam) with a REPLAY tag. The game waits (host) while it plays; tap to skip.
+   It works from what is drawn, so the online guest records the same way from the host's snapshots. */
+const RP={buf:[],n:0,lt:0,dk:-1,done:false,on:false,pos:0,a:0,b:0};
+const RPK=['ball','fx','net','rd','shake','zm','zx','fl','t','pop','score','clock'];
+function rpRec(){const now=performance.now();if(!g||g.phase==='over'||now-RP.lt<15)return;RP.lt=now;
+  const f={n:RP.n++,P:g.P.map(p=>Object.assign({},p)),ball:Object.assign({},g.ball),fx:g.fx.map(q=>Object.assign({},q)),pop:g.pop.map(q=>Object.assign({},q)),net:g.net.slice(),rd:g.rd.slice(),score:g.score.slice()};
+  for(const k of ['shake','zm','zx','fl','t','clock'])f[k]=g[k];RP.buf.push(f);if(RP.buf.length>260)RP.buf.shift();
+  if(g.phase==='live'){RP.dk=-1;RP.done=false}
+  else if(RP.dk<0&&g.P.some(p=>p.dk>0))RP.dk=f.n;
+  if(RP.dk>=0&&g.phase==='live'&&g.P.some(p=>p.dk>0)&&RP.dk>f.n)RP.dk=f.n;
+  if(g.phase==='dead'&&g.ball.dunk&&RP.dk>=0&&!RP.done&&g.dead<.55&&!paused){
+    const base=RP.buf[0].n,a=Math.max(base,RP.dk-50),b=Math.min(f.n,RP.dk+70);RP.done=true;if(b-a<30)return;
+    RP.a=a-base;RP.b=b-base;RP.pos=RP.a;RP.on=true;el('tskip').hidden=false}}
+function rpPlay(dt){RP.pos+=dt*60*.62;const i=Math.floor(RP.pos);
+  if(i>=RP.b||!RP.buf[i]){RP.on=false;el('tskip').hidden=true;acc=0;return}
+  const f=RP.buf[i],keep={P:g.P,ball:g.ball,fx:g.fx,pop:g.pop,net:g.net,rd:g.rd,score:g.score,shake:g.shake,zm:g.zm,zx:g.zx,fl:g.fl,t:g.t,clock:g.clock,phase:g.phase,dead:g.dead};
+  try{g.P=f.P;g.ball=f.ball;g.fx=f.fx;g.pop=f.pop;g.net=f.net;g.rd=f.rd;g.score=f.score;g.shake=f.shake*.6;g.zm=f.zm;g.zx=f.zx;g.fl=f.fl*.5;g.t=f.t;g.clock=f.clock;g.phase='live';g.dead=0;
+    draw();const W=g.W,s=cv.width/W;X.setTransform(s,0,0,s,0,0);X.fillStyle='rgba(0,0,0,.78)';X.fillRect(0,0,W,34);X.fillRect(0,H-34,W,34);
+    X.fillStyle='#ff3b3b';X.beginPath();X.arc(W/2-52,H-17,6,0,7);X.fill();X.fillStyle='#fff';X.font='900 18px system-ui';X.textAlign='left';X.fillText('REPLAY',W/2-38,H-10);X.textAlign='center'}
+  finally{Object.assign(g,keep)}}
+el('tskip').addEventListener('pointerdown',()=>{RP.on=false;el('tskip').hidden=true;acc=0});
+
 function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1000||0);last=ts;
+  if(g){rpRec();if(RP.on){if(NET.on&&NET.role==='host'){NET.acc+=dt;if(NET.acc>=1/20){NET.acc=0;netSend()}}rpPlay(dt);return}}
   if(NET.on&&NET.role==='guest'){if(g)netGuest(dt);if(NET.on&&performance.now()-NET.last>9000)netLost('Lost contact with your opponent.');draw();return}
   if(g&&g.slo>0)g.slo-=dt;if(g&&g.freeze>0){g.freeze-=dt;acc=0}
   else if(g&&!paused&&g.phase!=='over'&&document.getElementById('rot').hidden){acc+=dt*(g.slo>0?.42:1);let n=0;while(acc>=TICK&&n<5){acc-=TICK;n++;step(TICK,[human(0),OPT.mode==='ai'?ai(g.P[1],TICK):OPT.mode==='on'?NET.in:human(1)])}if(n===5)acc=0}
@@ -542,7 +569,6 @@ addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeo
    snapshots. The host is player 1 (left, attacks right), the guest is player 2. Both use a 1100 wide court. */
 const NETW=1100,SNAPK=['P','ball','score','clock','sc','phase','dead','next','hold','pop','fx','shake','net','rd','ot','stat','started','slo','freeze','zm','zx','fl','t','tip'];
 const SB_URL='https://urdkamhsdjhzhrjwzyoq.supabase.co',SB_KEY='sb_publishable_Kwc2VdtM1AbcKB7xgsOhlw_KOw02EOb';
-const el=id=>document.getElementById(id);
 function netTx(o){try{NET.mc&&NET.mc.send({type:'broadcast',event:'g',payload:o})}catch(_){}}
 function netReset(){if(NET.mc)netTx({k:'bye'});try{if(NET.sb){NET.lb&&NET.sb.removeChannel(NET.lb);NET.mc&&NET.sb.removeChannel(NET.mc)}}catch(_){}
   Object.assign(NET,{on:false,role:'',sb:null,lb:null,mc:null,partner:'',up:false,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null,last:0,lastIn:'',lastInT:0})}

@@ -601,3 +601,6 @@ Owner: basketball 5 Card Draw day hands pay when every stat is in, or 7 days aft
 
 ## v463
 Owner: basketball Minigames has a new "1-on-1" tab (`hbHTML`, `hbOpen`; only when `FG_SPORT==="bb"`): Find an opponent opens tools/battle/hoops-battle.html?embed=1&find=1 full screen in an iframe (`.hbx`), Play the AI opens its menu. Hoops Battle v31: `?find=1` joins the shared lobby channel `hb-room-public` (`NET.pub`), the first two people searching are paired, rematch searches again, Cancel posts `{hb:"close"}` to the app. Not tested with two real devices.
+
+## v464 (Hoops Battle v32-v33)
+Owner: dunk replay (`rpRec`, `rpPlay`, `RP`): the drawn state is buffered every frame; after a dunk's celebration (`g.dead`<.55) the dunk replays in slow motion (about 3 s, 0.62x, REPLAY tag and bars, tap to skip). The host keeps sending snapshots during it, the guest records from snapshots. v33: the ball is held still after a tipoff or pickup until you move left or right (`p.dr`).
