@@ -27,6 +27,7 @@ h1{margin:0;font:900 1.5rem/1.1 system-ui}h1 span{color:#FFC23D}
 #bA{right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));width:112px;height:112px;font-size:1rem}
 #bS{right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));width:84px;height:84px}
 #rot{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#07101e;text-align:center;font:800 1.1rem system-ui;padding:30px}#rot[hidden]{display:none}
+#rp{position:fixed;left:50%;top:92px;transform:translateX(-50%);z-index:15;width:min(560px,94vw);background:rgba(8,14,28,.92);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:10px;text-align:center}#rp[hidden]{display:none}#rp b{font:900 .95rem system-ui;color:#FFC23D}.rps{display:flex;gap:6px;justify-content:center;margin:6px 0}.rps button,.rpg button{border-radius:10px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font:800 .85rem system-ui;padding:8px 14px;cursor:pointer}.rps button[aria-pressed=true]{background:#FFC23D;color:#241800}.rpg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rpg button small{display:block;font:600 .62rem system-ui;color:#9fb0cc;margin-top:2px}.rpg button:active{background:#FFC23D;color:#241800}.rpg button:active small{color:#5a4200}
 #lnk{position:fixed;left:8px;bottom:4px;z-index:5;font:700 10px system-ui;opacity:.4;pointer-events:none}
 textarea{width:100%;height:58px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font:600 .72rem system-ui;padding:8px;resize:none}
 </style></head><body>
@@ -34,6 +35,7 @@ textarea{width:100%;height:58px;border-radius:10px;border:1px solid rgba(255,255
 <div id="rot" hidden>Turn your phone sideways to play</div>
 <div id="ctl"><div id="stick"><div id="knob"></div></div><button class="btn" id="bS" type="button">SPRINT</button><button class="btn" id="bA" type="button">JUKE</button></div>
 <div id="lnk"></div>
+<div id="rp" hidden><b>Pick your route</b><div class="rps"><button type="button" data-s="-1" aria-pressed="false">Left</button><button type="button" data-s="1" aria-pressed="true">Right</button></div><div class="rpg" id="rpg"></div></div>
 
 <div id="menu" class="ov"><div class="box"><div>
   <h1>Varsity <span>Gridiron Duel</span></h1>
@@ -43,7 +45,7 @@ textarea{width:100%;height:58px;border-radius:10px;border:1px solid rgba(255,255
   <div id="w-diff"><span class="lbl">Computer skill</span>
   <div class="seg" id="s-diff"><button type="button" data-v="easy" aria-pressed="false">Easy</button><button type="button" data-v="med" aria-pressed="true">Medium</button><button type="button" data-v="hard" aria-pressed="false">Hard</button></div></div>
 </div><div>
-  <div class="how"><b>Receiver vs defender, first person.</b> One of you is the receiver, the other covers him. A computer QB throws about 2 to 3 seconds after the snap, to where the receiver is heading. Catch it to gain yards, break it up or pick it off to win the snap. Get 10 yards in 4 downs to keep the ball. Touchdown 7, first to 21.<br><b>Receiver:</b> run, then CUT to shake him. When BALL! shows your head snaps to it: tap CATCH when it is within reach. After the catch, JUKE past the tackler.<br><b>Defender:</b> JAM the receiver at the line, stay on him, tap SWAT when the ball arrives (close = interception). After a catch, DIVE to tackle.<br><b>Controls:</b> stick left/right turns, up runs, down backpedals. Keys: arrows or WASD, Shift sprint, Space action.</div>
+  <div class="how"><b>Receiver vs defender, first person.</b> One of you is the receiver, the other covers him. A computer QB throws about 2 to 3 seconds after the snap, to where the receiver is heading. Catch it to gain yards, break it up or pick it off to win the snap. Get 10 yards in 4 downs to keep the ball. Touchdown 7, first to 21.<br><b>Receiver:</b> pick a route before each snap, then you run it automatically. Hold SPRINT, tap CUT to shake him. When BALL! shows your head snaps to it: tap CATCH when it is within reach. After the catch, JUKE past the tackler.<br><b>Defender:</b> you can't see the route. JAM the receiver at the line, stay on him, tap SWAT when the ball arrives (close = interception). After a catch, DIVE to tackle.<br><b>Controls:</b> on defense and when the ball is in the air, stick up moves toward what you see. Keys: arrows or WASD, Shift sprint, Space action.</div>
   <button class="go" id="play" type="button">Kick off</button>
 </div></div></div>
 
@@ -66,7 +68,15 @@ textarea{width:100%;height:58px;border-radius:10px;border:1px solid rgba(255,255
 const W=960,H=540,HW=26,WIN=21,TICK=1/60,FOC=500,EYE=1.8,NEAR=.3;
 const VR=8.6,VD=8.9,SPR=1.18,ACC=26,BACK=.55,STRAFE=.3,TR=2.7;
 const CUTD=12,CUTT=.2,CUTCD=1.1,JD=13,JT=.22,JINV=.36,JCD=1.25,DV=12.6,DT=.4,DDOWN=.95,REACH=1.5,DREACH=2.6;
-const HWIN=.34,HCD=.85,RCATCH=2.2,DSWAT=2.0,PICK=.8,VB=19;
+const HWIN=.5,HCD=1.0,RCATCH=2.7,DSWAT=2.4,PICK=1.0,VB=16;
+/* routes: waypoints [sideways*side, downfield] from the receiver's start; t = seconds until the QB throws */
+const ROUTES={go:{n:'Go',d:'Straight deep',w:[[0,40]],t:3.0},slant:{n:'Slant',d:'Quick, angles in',w:[[0,3],[9,10],[16,30]],t:1.7},out:{n:'Out',d:'Break to the sideline',w:[[0,10],[15,10.5]],t:2.2},post:{n:'Post',d:'Deep, angle in',w:[[0,12],[9,30],[12,45]],t:2.7},curl:{n:'Curl',d:'Stop and come back',w:[[0,12],[1.5,8.5]],t:2.4},corner:{n:'Corner',d:'Deep, angle out',w:[[0,11],[15,26],[18,40]],t:2.8}};
+function setRoute(id,sd){if(G.ph!=='pick'||G.route||!ROUTES[id])return;const R=G.pl[G.s.poss],r=ROUTES[id];sd=sd<0?-1:1;
+  const wp=r.w.map(q=>[clamp(R.x+q[0]*sd,-HW+2.5,HW-2.5),G.s.los+q[1]]);G.route={id,sd,wp};G.rp=0;G.thT=r.t+rnd()*.25;}
+function aiPicks(off){return G.simAll||(OPT.mode==='ai'&&off!==G.me)}
+function viewYaw(i){const me=G.pl[i],o=G.pl[1-i],isR=i===G.s.poss;
+  if(G.th===1&&G.ft>.2&&G.ball)return Math.atan2(G.ball.x-me.x,G.ball.z-me.z);
+  if(!isR)return Math.atan2(o.x-me.x,o.z-me.z);return me.mh}
 const cv=document.getElementById('cv'),X=cv.getContext('2d'),el=id=>document.getElementById(id);
 const TEAM=[{n:'YOU',c:'#FFC23D',d:'#3a2a00'},{n:'CPU',c:'#FF4F6D',d:'#3a0a16'}];
 let OPT={mode:'ai',diff:'med'},G=null,paused=false;
@@ -81,7 +91,7 @@ function evFx(k,x,z){if(k==='tackle'||k==='swat'||k==='int'||k==='jam')G.fx.push
 /* ---------- play setup and rules ---------- */
 function setupPlay(){const s=G.s,off=s.poss,def=1-off;G.pl=[mkPl(),mkPl()];
   Object.assign(G.pl[off],{x:(rnd()-.5)*6,z:s.los,mh:0});Object.assign(G.pl[def],{x:(rnd()-.5)*8,z:s.los+7,mh:Math.PI});
-  G.ph='snap';G.t=0;G.msg='';G.sub='';G.fx=[];G.shake=0;G.res=null;G.th=0;G.ft=-1;G.thT=2.2+rnd()*.8;G.qb={x:G.pl[off].x,z:s.los-1};G.ball={x:G.qb.x,z:G.qb.z,h:1.6};G.fl=null;G.tgt=null;
+  G.ph='pick';G.t=0;G.msg='';G.sub='';G.fx=[];G.shake=0;G.res=null;G.th=0;G.ft=-1;G.thT=2.5;G.picked=false;G.route=null;G.rp=0;G.qb={x:G.pl[off].x,z:s.los-1};G.ball={x:G.qb.x,z:G.qb.z,h:1.6};G.fl=null;G.tgt=null;
   G.ai=[{h:0,rt:null},{h:0,rt:null}];G.prevA=[false,false]}
 function endPlay(kind,spot){if(G.ph!=='live')return;G.ph='dead';G.t=0;const s=G.s,off=s.poss;G.res={kind,spot,yards:kind==='inc'||kind==='int'?0:Math.round(spot-s.los)};G.shake=kind==='td'?1.4:.8;
   if(kind==='td'){s.sc[off]+=7;G.msg='TOUCHDOWN!';G.sub=TEAM[off].n+' +7';emit('td',G.pl[off].x,100)}
@@ -101,11 +111,11 @@ function nextPlay(){const s=G.s,off=s.poss,spot=G.res.spot;s.n++;
 function showEnd(){const me=G.me,a=G.s.sc[me],b=G.s.sc[1-me];el('e-res').textContent=a>b?'You win':'You lose';el('e-sc').textContent=G.s.sc[0]+' - '+G.s.sc[1];el('e-st').textContent=TEAM[0].n+' '+G.s.sc[0]+' · '+TEAM[1].n+' '+G.s.sc[1]+' · '+G.s.n+' plays';el('end').hidden=false;el('ctl').classList.remove('on')}
 
 /* ---------- the simulation ---------- */
-function movePl(p,i,off,inp,dt){
+function movePl(p,i,off,inp,dt,vy){
   const car=i===off,vm0=car?VR:VD;let sx=clamp(inp.x||0,-1,1),sy=clamp(inp.y||0,-1,1);
   p.cd=Math.max(0,p.cd-dt);p.inv=Math.max(0,p.inv-dt);p.hw=Math.max(0,p.hw-dt);p.hc=Math.max(0,p.hc-dt);
   const free=p.act===''||p.act==='get'||p.act==='jam';
-  const spr=!!inp.s&&(sy>.3||(inp.cam&&G.th===1&&G.ft>.2&&Math.hypot(sx,sy)>.3))&&p.st>.04&&free;
+  const spr=!!inp.s&&(sy>.3||(vy!=null&&inp.cam&&Math.hypot(sx,sy)>.3)||(car&&G.th===0))&&p.st>.04&&free;
   if(spr)p.st=Math.max(0,p.st-.4*dt);else p.st=Math.min(1,p.st+.2*dt);
   let vm=vm0*(spr?SPR:1)*(.8+.2*Math.min(1,p.st/.3));
   if(p.act==='cut'){p.vx=p.dx*CUTD;p.vz=p.dz*CUTD;p.at-=dt;if(p.at<=0){p.act='';p.vx*=.6;p.vz*=.6}}
@@ -114,10 +124,10 @@ function movePl(p,i,off,inp,dt){
   else if(p.act==='down'){p.vx*=Math.max(0,1-dt*7);p.vz*=Math.max(0,1-dt*7);p.at-=dt;if(p.at<=0){p.act='get';p.at=.4}}
   else{
     if(p.act==='get'){vm*=.45;p.at-=dt;if(p.at<=0)p.act=''}else if(p.act==='jam'){vm*=.5;p.at-=dt;if(p.at<=0)p.act=''}
-    if(inp.cam&&G.th===1&&G.ft>.2){ /* head is turned to the ball: stick is relative to what you SEE */
-      const cy=Math.atan2(G.ball.x-p.x,G.ball.z-p.z),m=Math.min(1,Math.hypot(sx,sy)),wx=Math.sin(cy)*sy+Math.cos(cy)*sx,wz=Math.cos(cy)*sy-Math.sin(cy)*sx,wl=Math.hypot(wx,wz)||1;
-      if(m>.15)p.mh+=wrap(Math.atan2(wx,wz)-p.mh)*Math.min(1,dt*5);
-      let dx=wx/wl*m*vm-p.vx,dz=wz/wl*m*vm-p.vz;const d=Math.hypot(dx,dz),lim=ACC*dt;if(d>lim){dx*=lim/d;dz*=lim/d}p.vx+=dx;p.vz+=dz}
+    if(vy!=null&&inp.cam){ /* stick is relative to where the camera looks */
+      const m=Math.min(1,Math.hypot(sx,sy)),wx=Math.sin(vy)*sy+Math.cos(vy)*sx,wz=Math.cos(vy)*sy-Math.sin(vy)*sx,wl=Math.hypot(wx,wz)||1,bk=sy<-.3?.8:1;
+      if(m>.15)p.mh+=wrap(Math.atan2(wx,wz)-p.mh)*Math.min(1,dt*8);
+      let dx=wx/wl*m*vm*bk-p.vx,dz=wz/wl*m*vm*bk-p.vz;const d=Math.hypot(dx,dz),lim=ACC*dt;if(d>lim){dx*=lim/d;dz*=lim/d}p.vx+=dx;p.vz+=dz}
     else{
     p.mh+=sx*TR*(spr?.8:1)*dt;const fx=Math.sin(p.mh),fz=Math.cos(p.mh),rx=Math.cos(p.mh),rz=-Math.sin(p.mh);
     const fv=sy>0?sy*vm:sy*vm*BACK,tx=fx*fv+rx*sx*vm*STRAFE,tz=fz*fv+rz*sx*vm*STRAFE;
@@ -129,11 +139,11 @@ function stickDir(p,inp,other,fwdIfIdle){const sx=inp.x||0,sy=inp.y||0,m=Math.hy
 function action(i,inp){const s=G.s,off=s.poss,p=G.pl[i],o=G.pl[1-i];
   if(G.th===1){if(p.hc<=0&&p.act===''){p.hw=HWIN;p.hc=HCD}return}
   if(i===off){
-    if(G.th===0){if(p.cd>0||p.act!==''||p.st<.1)return;const[dx,dz]=stickDir(p,inp,o,false);p.act='cut';p.at=CUTT;p.cd=CUTCD;p.dx=dx;p.dz=dz;p.st-=.1;p.mh+=wrapD(Math.atan2(dx,dz)-p.mh)*.6;G.fx.push({k:'puff',x:p.x,z:p.z,t:.35,d:.35})}
+    if(G.th===0){if(p.cd>0||p.act!==''||p.st<.1)return;const[dx,dz]=stickDir(p,inp.cx!=null?{x:inp.cx,y:inp.cy}:inp,o,false);p.act='cut';p.at=CUTT;p.cd=CUTCD;p.dx=dx;p.dz=dz;p.st-=.1;p.mh+=wrapD(Math.atan2(dx,dz)-p.mh)*.6;G.fx.push({k:'puff',x:p.x,z:p.z,t:.35,d:.35})}
     else{if(p.cd>0||p.act!==''||p.st<.12)return;const[dx,dz]=stickDir(p,inp,o,false);p.act='juke';p.at=JT;p.inv=JINV;p.cd=JCD;p.dx=dx;p.dz=dz;p.st=Math.max(0,p.st-.12);G.fx.push({k:'puff',x:p.x,z:p.z,t:.4,d:.4});emit('juke',p.x,p.z)}}
   else{
     if(G.th===0){if(p.jam||p.act!=='')return;p.jam=1;const dist=Math.hypot(o.x-p.x,o.z-p.z),fx=Math.sin(p.mh),fz=Math.cos(p.mh),front=((o.x-p.x)*fx+(o.z-p.z)*fz)>0;
-      if(dist<2.4&&front){o.act='jam';o.at=.9;o.vx*=.25;o.vz*=.25;p.st=Math.max(0,p.st-.1);emit('jam',(o.x+p.x)/2,(o.z+p.z)/2)}else{p.act='get';p.at=.5}}
+      if(dist<2.7){o.act='jam';o.at=.9;o.vx*=.25;o.vz*=.25;p.st=Math.max(0,p.st-.1);emit('jam',(o.x+p.x)/2,(o.z+p.z)/2)}else{p.act='get';p.at=.5}}
     else{if(p.act!=='')return;let dx=Math.sin(p.mh),dz=Math.cos(p.mh);if(Math.hypot(p.vx,p.vz)<1.5){dx=o.x-p.x;dz=o.z-p.z;const n=Math.hypot(dx,dz)||1;dx/=n;dz/=n}
       p.act='dive';p.at=DT;p.dx=dx;p.dz=dz;p.mh=Math.atan2(dx,dz);G.fx.push({k:'puff',x:p.x,z:p.z,t:.4,d:.4});emit('dive',p.x,p.z)}}}
 function wrapD(d){return wrap(d)}
@@ -147,11 +157,18 @@ function ballAt(){const f=G.fl,u=f.t/f.T,h=1.6+(1.6-1.6)*u+4*f.pk*u*(1-u)+(u>1?-
   G.ball.x=f.x0+(f.tx-f.x0)*u;G.ball.z=f.z0+(f.tz-f.z0)*u;G.ball.h=Math.max(0,h);return u}
 function step(dt,inps){
   G.t+=dt;G.shake=Math.max(0,G.shake-dt*2.4);for(const q of G.fx)q.t-=dt;G.fx=G.fx.filter(q=>q.t>0);
-  if(G.ph==='snap'){if(G.t>=1.6){G.ph='live';G.t=0;emit('snap')}return}
+  if(G.ph==='pick'){const off=G.s.poss;if(!G.route&&(G.t>8||aiPicks(off)&&G.t>.9)){const ids=Object.keys(ROUTES);setRoute(ids[rnd()*ids.length|0],rnd()<.5?-1:1)}
+    if(G.route){G.ph='snap';G.t=0}return}
+  if(G.ph==='snap'){if(G.t>=1.4){G.ph='live';G.t=0;emit('snap')}return}
   if(G.ph==='dead'){for(const p of G.pl){p.vx*=.9;p.vz*=.9;p.hw=0}if(G.t>=2.1)nextPlay();return}
   if(G.ph!=='live')return;
   const s=G.s,off=s.poss,def=1-off,R=G.pl[off],D=G.pl[def];
-  for(let i=0;i<2;i++){const inp=inps[i]||{};if(inp.a&&!G.prevA[i])action(i,inp);G.prevA[i]=!!inp.a;movePl(G.pl[i],i,off,inp,dt)}
+  for(let i=0;i<2;i++){let inp=inps[i]||{};
+    if(i===off&&G.th===0&&G.route){const p=G.pl[i],wp=G.route.wp;let t=wp[Math.min(G.rp,wp.length-1)];if(G.rp<wp.length&&Math.hypot(t[0]-p.x,t[1]-p.z)<1.4)G.rp++;
+      let tx,tz;if(G.rp<wp.length){tx=wp[G.rp][0];tz=wp[G.rp][1]}else{const l=wp[wp.length-1],pr=wp.length>1?wp[wp.length-2]:[p.x,G.s.los],dx=l[0]-pr[0],dz=l[1]-pr[1],n=Math.hypot(dx,dz)||1;tx=l[0]+dx/n*12;tz=l[1]+dz/n*12}
+      const ri={x:0,y:0};steer(p,tx,tz,ri);const nx=inp.x,ny=inp.y;inp=Object.assign({},inp,{x:ri.x,y:ri.y,cx:nx,cy:ny,cam:false})}
+    const vy=(i!==off||(G.th===1&&G.ft>.2))&&inp.cam?viewYaw(i):null;
+    if(inp.a&&!G.prevA[i])action(i,inp);G.prevA[i]=!!inp.a;movePl(G.pl[i],i,off,inp,dt,vy)}
   for(const p of G.pl){p.x=clamp(p.x,-HW-8,HW+8);p.z=clamp(p.z,-12,112)}
   if(G.th<2){const dx=R.x-D.x,dz=R.z-D.z,d=Math.hypot(dx,dz);if(d<1.7){const n=d||.01,px=(d?dx/n:1)*(1.7-d)/2,pz=(d?dz/n:0)*(1.7-d)/2;R.x+=px;R.z+=pz;D.x-=px;D.z-=pz;const sv=Math.min(R.vx*dx+R.vz*dz,0);}}
   if(G.th===0){G.qb.z+=((s.los-6)-G.qb.z)*Math.min(1,dt*2.5);G.ball.x=G.qb.x;G.ball.z=G.qb.z;G.ball.h=1.6;if(G.t>=G.thT)throwBall()}
@@ -249,16 +266,14 @@ function ballDraw(x,h,z,spin,held){const q=cam3(x,z);if(q.f<.4)return;const k=CA
   X.save();X.translate(px,py);X.rotate(spin);X.fillStyle='#8a4a1f';X.strokeStyle='#2a1204';X.lineWidth=Math.max(1,.04*k);X.beginPath();X.ellipse(0,0,.5*k,.28*k,0,0,7);X.fill();X.stroke();X.strokeStyle='#fff';X.lineWidth=Math.max(1,.03*k);X.beginPath();X.moveTo(-.18*k,0);X.lineTo(.18*k,0);for(let j=-2;j<=2;j++){X.moveTo(j*.07*k,-.07*k);X.lineTo(j*.07*k,.07*k)}X.stroke();X.restore()}
 function ring3(x,z,r,col,w){const q=cam3(x,z);if(q.f<.6)return;const k=CAM.foc/q.f,sq=clamp(EYE/q.f,.05,1);X.strokeStyle=col;X.lineWidth=w;X.beginPath();X.ellipse(W/2+q.r*k,CAM.hz+EYE*k,r*k,r*k*sq,0,0,7);X.stroke()}
 function edgeArrow(x,z,col,label){const q=cam3(x,z),k=q.f>.4?CAM.foc/q.f:0,px=W/2+q.r*k;if(q.f>.4&&px>30&&px<W-30)return;const right=q.r>=0;X.fillStyle=col;X.beginPath();const ex=right?W-30:30,ey=H*.4,d=right?1:-1;X.moveTo(ex+d*16,ey);X.lineTo(ex-d*6,ey-18);X.lineTo(ex-d*6,ey+18);X.closePath();X.fill();X.fillStyle='#fff';X.font='900 12px system-ui';X.textAlign='center';X.fillText(label,ex-d*8,ey+34)}
-function camTarget(){const me=G.pl[G.me],o=G.pl[1-G.me],isR=G.me===G.s.poss;let ty=me.mh;
-  if(G.th===1&&G.ft>.2&&G.ball)ty=Math.atan2(G.ball.x-me.x,G.ball.z-me.z);
-  else if(!isR&&(G.th===0||G.th===2||G.ph==='snap'))ty=Math.atan2(o.x-me.x,o.z-me.z);
-  return ty}
+function camTarget(){return viewYaw(G.me)}
 function scene(dt){const s=G.s,me=G.pl[G.me],isR=G.me===s.poss;
   camY+=wrap(camTarget()-camY)*Math.min(1,dt*9);const sp=Math.hypot(me.vx,me.vz),bob=Math.sin(me.ph*1.8)*Math.min(1,sp/8)*6;
   CAM.x=me.x;CAM.z=me.z;CAM.y=camY;CAM.s=Math.sin(camY);CAM.c=Math.cos(camY);CAM.foc=FOC*(1+.05*clamp((sp-8)/3,0,1));CAM.hz=H*.46+bob+(me.act==='down'?90:0);
   X.save();if(G.shake>0)X.translate((rnd()-.5)*G.shake*16,(rnd()-.5)*G.shake*12);
   fieldDraw(s);
   if(G.tgt&&G.th===1){ring3(G.tgt.x,G.tgt.z,1.6,'rgba(255,230,90,.85)',3)}
+  if(isR&&G.route&&G.route.wp&&G.th===0){let px=G.pl[G.s.poss].x,pz=G.s.los;const pts=[[px,pz],...G.route.wp];for(let j=0;j<pts.length-1;j++){const a=pts[j],b=pts[j+1],n=Math.max(1,Math.hypot(b[0]-a[0],b[1]-a[1])/1.6|0);for(let q=1;q<=n;q++){const t=q/n;ring3(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,.3,'rgba(255,230,90,.9)',3)}}const e=pts[pts.length-1];ring3(e[0],e[1],.9,'rgba(255,230,90,.95)',4)}
   const spr=[];const off=s.poss,def=1-off;
   spr.push([cam3(G.pl[off].x,G.pl[off].z).f,()=>figure(G.pl[off],off,true)]);spr.push([cam3(G.pl[def].x,G.pl[def].z).f,()=>figure(G.pl[def],def,false)]);
   if(G.qb&&(G.th<=1||G.ph==='dead'))spr.push([cam3(G.qb.x,G.qb.z).f,()=>figure({x:G.qb.x,z:G.qb.z,mh:0,vx:0,vz:0,ph:0,hw:0,act:''},off,false,true)]);
@@ -281,12 +296,12 @@ function hud(){const s=G.s,isR=G.me===s.poss,mp=G.pl[G.me];X.fillStyle='rgba(4,8
   X.font='900 15px system-ui';X.fillStyle='#FFC23D';X.fillText('FIRST TO '+WIN,W/2,38);
   const ytg=s.fd>=100?'Goal':Math.max(1,s.fd-s.los);X.font='800 13px system-ui';X.fillStyle='#9fb0cc';X.fillText(ordinal(s.down)+' & '+ytg+' · ball on '+(s.los<=50?'own '+s.los:'opp '+(100-s.los)),W/2,64);
   X.textAlign='left';X.font='900 15px system-ui';X.fillStyle=isR?'#3DFF9A':'#ffb347';X.fillText(isR?'YOU ARE THE RECEIVER':'YOU ARE THE DEFENDER',16,30);
-  const tip=G.th===0?(isR?'Get open. Tap CUT to shake him.':'Stay on him. JAM him at the line.'):G.th===1?(isR?'Tap CATCH when the ball is close.':'Tap SWAT when the ball is close.'):G.th===2?(isR?'Run! JUKE the tackler.':'Close in. DIVE to tackle.'):'';
+  const tip=G.ph==='pick'?(isR?'Pick your route.':'The offense is picking a route...'):G.th===0?(isR?'Following your route. Tap CUT to shake him.':'Stay with him. Stick up = toward him.'):G.th===1?(isR?'Tap CATCH when the ball is close.':'Tap SWAT when the ball is close.'):G.th===2?(isR?'Run! JUKE the tackler.':'Close in. DIVE to tackle.'):'';
   X.font='700 12px system-ui';X.fillStyle='#cfd9ec';X.fillText(tip,16,50);
   X.fillStyle='rgba(4,8,16,.7)';rr(16,60,130,12,6);X.fill();X.fillStyle=mp.st<.25?'#ff6a7f':'#3DFF9A';rr(17,61,128*clamp(mp.st,0,1),10,5);X.fill();X.fillStyle='#fff';X.font='800 9px system-ui';X.fillText('STAMINA',22,70);
   const cd=G.th===1?mp.hc/HCD:isR?mp.cd/(G.th===0?CUTCD:JCD):0,r=1-clamp(cd,0,1);X.fillStyle='rgba(4,8,16,.7)';rr(16,78,130,12,6);X.fill();X.fillStyle=r>=1?'#FFC23D':'#6a7aa0';rr(17,79,128*r,10,5);X.fill();X.fillStyle='#fff';X.fillText(r>=1?'READY':'WAIT',22,87);
   X.textAlign='center';
-  if(G.ph==='snap'){const k=Math.ceil(1.6-G.t);X.font='900 70px system-ui';X.lineWidth=8;X.strokeStyle='rgba(4,8,16,.85)';const t=k>0?String(k):'GO';X.strokeText(t,W/2,H/2-60);X.fillStyle='#fff';X.fillText(t,W/2,H/2-60)}
+  if(G.ph==='snap'){const k=Math.ceil(1.4-G.t);X.font='900 70px system-ui';X.lineWidth=8;X.strokeStyle='rgba(4,8,16,.85)';const t=k>0?String(k):'GO';X.strokeText(t,W/2,H/2-60);X.fillStyle='#fff';X.fillText(t,W/2,H/2-60)}
   if(G.th===1&&G.ft>=0&&G.ft<.9){const fl=Math.floor(G.ft*8)%2===0;X.font='900 54px system-ui';X.lineWidth=9;X.strokeStyle='rgba(4,8,16,.9)';X.strokeText('BALL!',W/2,H*.3);X.fillStyle=fl?'#FFC23D':'#fff';X.fillText('BALL!',W/2,H*.3)}
   if(G.ph==='dead'&&G.msg){const k=Math.min(1,G.t*5);X.save();X.globalAlpha=k;X.font='900 46px system-ui';X.lineWidth=9;X.strokeStyle='rgba(4,8,16,.9)';const col=G.res.kind==='td'?'#3dff9a':G.res.kind==='int'?'#ff6a7f':'#fff';X.strokeText(G.msg,W/2,H/2-58);X.fillStyle=col;X.fillText(G.msg,W/2,H/2-58);
     X.font='800 22px system-ui';const yd=G.res.yards,kind=G.res.kind,line=kind==='td'||kind==='int'?(G.sub||''):kind==='inc'?'No gain':(yd>=0?'Gain of '+yd:'Loss of '+(-yd))+' · '+(G.res.spot<=50?'own '+Math.round(G.res.spot):'opp '+Math.round(100-G.res.spot));X.strokeText(line,W/2,H/2-26);X.fillStyle='#fff';X.fillText(line,W/2,H/2-26);X.restore()}}
@@ -306,7 +321,7 @@ addEventListener('keyup',e=>{K[e.key.length===1?e.key.toLowerCase():e.key]=false
 addEventListener('blur',()=>{for(const k in K)K[k]=false});
 function humanInput(){const kx=(K.ArrowRight||K.d?1:0)-(K.ArrowLeft||K.a?1:0),ky=(K.ArrowUp||K.w?1:0)-(K.ArrowDown||K.s?1:0);
   const x=kx||TS.x,y=ky||-TS.y;return{x,y,a:!!(K[' ']||K.z||TS.a),s:!!(K.Shift||K.x||TS.s),cam:true}}
-function fixLabel(){if(!G||!G.s||G.th==null)return;const isR=G.me===G.s.poss,t=G.th===1?(isR?'CATCH':'SWAT'):G.th===2?(isR?'JUKE':'DIVE'):(isR?'CUT':'JAM'),b=el('bA');if(b.textContent!==t)b.textContent=t}
+function fixLabel(){if(!G||!G.s||G.th==null)return;const rp=el('rp'),show=G.ph==='pick'&&G.me===G.s.poss&&!G.route&&!G.picked;if(rp.hidden===show)rp.hidden=!show;const isR=G.me===G.s.poss,t=G.th===1?(isR?'CATCH':'SWAT'):G.th===2?(isR?'JUKE':'DIVE'):(isR?'CUT':'JAM'),b=el('bA');if(b.textContent!==t)b.textContent=t}
 let last=0,acc=0;
 function mkG(){return{s:newState(),ph:'snap',t:0,me:0,fx:[],evq:[],shake:0,pl:[mkPl(),mkPl()],prevA:[false,false],ai:[{h:0,rt:null},{h:0,rt:null}],th:0,ft:-1,qb:{x:0,z:29},ball:{x:0,z:29,h:1.6}}}
 function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1000||0);last=ts;
@@ -327,6 +342,9 @@ function startGame(){G=mkG();
   if(OPT.mode==='on')G.me=NET.role==='guest'?1:0;
   TEAM[0].n=OPT.mode==='on'?(G.me===0?'YOU':'FRIEND'):'YOU';TEAM[1].n=OPT.mode==='on'?(G.me===1?'YOU':'FRIEND'):'CPU';
   for(const id of ['menu','end','net'])el(id).hidden=true;el('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);acc=0;setupPlay();camY=G.pl[G.me].mh}
+{let sd=1;const rp=el('rp');rp.querySelector('.rps').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sd=+b.dataset.s;rp.querySelectorAll('.rps button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.s===sd)))});
+  el('rpg').innerHTML=Object.keys(ROUTES).map(k=>'<button type="button" data-r="'+k+'">'+ROUTES[k].n+'<small>'+ROUTES[k].d+'</small></button>').join('');
+  el('rpg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!G)return;aud();G.picked=true;if(NET.on&&NET.role==='guest')netTx({k:'pick',id:b.dataset.r,sd});else setRoute(b.dataset.r,sd)})}
 addEventListener('resize',fit);fit();requestAnimationFrame(frame);
 
 /* ---------- menu ---------- */
@@ -370,7 +388,7 @@ async function netFind(room){const msg=t=>{el('n-msg').textContent=t};msg('Conne
     if(i%2===0&&ids[i+1]){const p=ids[i+1],name='gd-m-'+me+'-'+p;join(name,'host',p);setTimeout(()=>lob.send({type:'broadcast',event:'sig',payload:{to:p,from:me,ch:name}}),600)}}
   lob.on('presence',{event:'sync'},pair).on('broadcast',{event:'sig'},({payload:m})=>{if(m&&m.to===me&&!NET.partner)join(m.ch,'guest',m.from)})
     .subscribe(async st=>{if(st==='SUBSCRIBED'){msg('Searching for an opponent...');await lob.track({at:Date.now()})}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')msg('Could not reach the server. Try again in a moment.')})}
-function netSend(){const o={s:G.s,ph:G.ph,t:G.t,msg:G.msg,sub:G.sub,res:G.res,shake:G.shake,th:G.th,ft:G.ft,tgt:G.tgt,qb:G.qb,b:[G.ball.x,G.ball.z,G.ball.h],pl:G.pl.map(p=>[p.x,p.z,p.vx,p.vz,p.mh,p.st,p.act,p.at,p.cd,p.inv,p.ph,p.hw,p.hc])};
+function netSend(){const o={s:G.s,ph:G.ph,t:G.t,msg:G.msg,sub:G.sub,res:G.res,shake:G.shake,th:G.th,ft:G.ft,tgt:G.tgt,rt:G.route?G.route.wp:null,qb:G.qb,b:[G.ball.x,G.ball.z,G.ball.h],pl:G.pl.map(p=>[p.x,p.z,p.vx,p.vz,p.mh,p.st,p.act,p.at,p.cd,p.inv,p.ph,p.hw,p.hc])};
   const R=v=>typeof v==='number'?Math.round(v*100)/100:Array.isArray(v)?v.map(R):v&&typeof v==='object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,R(x)])):v;netTx({k:'s',g:R(o),ev:G.evq.splice(0)})}
 function unpack(a){return{x:a[0],z:a[1],vx:a[2],vz:a[3],mh:a[4],st:a[5],act:a[6],at:a[7],cd:a[8],inv:a[9],ph:a[10],hw:a[11],hc:a[12]}}
 function netMsg(m){
@@ -378,8 +396,9 @@ function netMsg(m){
   else if(m.k==='ready'&&NET.role==='host'){NET.on=true;OPT.mode='on';netTx({k:'go'});startGame();rtcStart(true)}
   else if(m.k==='go'&&NET.role==='guest'){NET.on=true;OPT.mode='on';startGame()}
   else if(m.k==='i'&&NET.role==='host'){NET.in=m.i}
-  else if(m.k==='s'&&NET.role==='guest'&&G){NET.last=performance.now();const g=m.g,wasPh=G.ph,wasPoss=G.s&&G.s.poss;G.s=g.s;G.ph=g.ph;G.t=g.t;G.msg=g.msg;G.sub=g.sub;G.res=g.res;G.shake=Math.max(G.shake,g.shake);G.th=g.th;G.ft=g.ft;G.tgt=g.tgt;G.qb=g.qb;G.ball={x:g.b[0],z:g.b[1],h:g.b[2]};
-    NET.tg=g.pl;if(wasPh==='menu'||G.ph==='snap'&&wasPh!=='snap'||!NET.first){NET.first=1;G.pl=g.pl.map(a=>unpack(a))}
+  else if(m.k==='pick'&&NET.role==='host'&&G&&G.s.poss===1){setRoute(m.id,m.sd)}
+  else if(m.k==='s'&&NET.role==='guest'&&G){NET.last=performance.now();const g=m.g,wasPh=G.ph,wasPoss=G.s&&G.s.poss;G.s=g.s;G.ph=g.ph;G.t=g.t;G.msg=g.msg;G.sub=g.sub;G.res=g.res;G.shake=Math.max(G.shake,g.shake);G.th=g.th;G.ft=g.ft;G.tgt=g.tgt;G.route=g.rt?{wp:g.rt}:null;if(G.ph!=='pick')G.picked=false;G.qb=g.qb;G.ball={x:g.b[0],z:g.b[1],h:g.b[2]};
+    NET.tg=g.pl;if(wasPh==='menu'||G.ph==='pick'&&wasPh!=='pick'||!NET.first){NET.first=1;G.pl=g.pl.map(a=>unpack(a))}
     for(const e of m.ev||[]){evFx(e[0],e[1],e[2]);sfx(e[0])}
     if(G.ph==='over'&&el('end').hidden)showEnd()}
   else if(m.k==='bye'){if(G&&G.ph!=='over'){G.ph='over';el('e-res').textContent='Your friend left';el('e-sc').textContent=G.s.sc[0]+' - '+G.s.sc[1];el('e-st').textContent='';el('end').hidden=false;el('ctl').classList.remove('on')}netReset()}}
@@ -395,7 +414,7 @@ el('n-copy').addEventListener('click',()=>{const t=el('n-link');t.select();try{n
 el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(navigator.share)navigator.share({title:'Gridiron Duel',text:'Play me in Gridiron Duel',url:u}).catch(()=>{});else el('n-copy').click()});
 {const r=new URLSearchParams(location.search).get('room');if(r&&/^[a-z0-9]{3,12}$/i.test(r)){OPT.mode='on';setTimeout(()=>{aud();netOpen(true,r)},100)}}
 /* test hooks */
-window.__gd={get g(){return G},step,setupPlay,aiInput,setOpt(o){Object.assign(OPT,o)},sim(d0,d1,maxPlays){const o=OPT.diff;G=mkG();setupPlay();const res=[];let guard=0;
+window.__gd={get g(){return G},step,setupPlay,aiInput,setOpt(o){Object.assign(OPT,o)},sim(d0,d1,maxPlays){const o=OPT.diff;G=mkG();G.simAll=true;setupPlay();const res=[];let guard=0;
   while(!G.s.over&&guard++<6e5&&res.length<(maxPlays||200)){const off=G.s.poss;OPT.diff=off===0?d1:d0;const iR=aiInput(off);OPT.diff=off===0?d0:d1;const iD=aiInput(1-off);const ph=G.ph,inps=[null,null];inps[off]=iR;inps[1-off]=iD;step(TICK,inps);G.evq.length=0;if(ph==='live'&&G.ph==='dead')res.push({k:G.res.kind,y:G.res.yards,off,th:G.th})}
   OPT.diff=o;return{res,s:G.s}}};
 

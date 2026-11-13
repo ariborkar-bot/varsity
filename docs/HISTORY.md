@@ -651,3 +651,6 @@ Owner wanted a first person receiver vs QB feel, not the top-down view; chose re
 
 ## Gridiron Duel v4.1
 Owner: when the head turns to the ball, up/down felt flipped. While the ball is in the air (and the head is turned, `ft>.2`) a human's stick is now relative to the view (`inp.cam`): up runs toward what you see, the body turns to follow. AI is unchanged.
+
+## Gridiron Duel v4.2 (easier, route picking)
+Owner: defense controls flipped too, mechanics too hard, receiver should pick a route. Now: before each snap the receiver picks Go/Slant/Out/Post/Curl/Corner and Left/Right (`ROUTES`, `setRoute`, phase `pick`, 8 s auto-pick; panel `#rp`); the route is auto-run (dotted line on the grass for the receiver only), QB throws at the route's time. Receiver steers nothing before the throw: SPRINT and CUT only. Defender (and anyone while the ball is in the air) uses view-relative stick (`viewYaw`, `inp.cam`): up = toward what the camera sees. Bigger catch/swat reach (`RCATCH 2.7, DSWAT 2.4`), longer hands window, slower ball (`VB 16`). Guest picks via `{k:'pick'}`.
