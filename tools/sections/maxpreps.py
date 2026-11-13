@@ -200,6 +200,14 @@ def crawl(seeds, sport, names=None, state='CA', max_teams=300, fetcher=None, log
         try:
             page = fetcher.schedule(url)
             contests, meta = page['contests'], page.get('meta') or {}
+        except FormatChanged as e:
+            report['format_skips'] = report.get('format_skips', 0) + 1
+            log('  SKIPPED (format): %s: %s' % (url.split('/maxpreps.com')[-1], e))
+            if report['format_skips'] > max(5, report['pages'] * 0.03):
+                report['blocked'] = 'format changed: %d of %d pages failed the checks' % (report['format_skips'], report['pages'])
+                log('STOPPED: ' + report['blocked'])
+                break
+            continue
         except NotFound as e:
             log('  skipped (not found): %s' % e)
             continue
@@ -208,7 +216,17 @@ def crawl(seeds, sport, names=None, state='CA', max_teams=300, fetcher=None, log
             log('STOPPED: %s' % e)
             break
         report['pages'] += 1
-        gs, rej, n = decode_contests(contests, sport)
+        try:
+            gs, rej, n = decode_contests(contests, sport)
+        except FormatChanged as e:
+            # one odd page (a team whose rows fail the checks) is skipped and logged; many means MaxPreps changed, so stop
+            report['format_skips'] = report.get('format_skips', 0) + 1
+            log('  SKIPPED (format): %s: %s' % (url.split('/maxpreps.com')[-1], e))
+            if report['format_skips'] > max(5, report['pages'] * 0.03):
+                report['blocked'] = 'format changed: %d of %d pages failed the checks' % (report['format_skips'], report['pages'])
+                log('STOPPED: ' + report['blocked'])
+                break
+            continue
         report['rejects'] += len(rej)
         if len(gs) >= 3 and max(g['date'] for g in gs) < fresh_after:
             report['blocked'] = 'stale pages: newest game on %s is %s (before %s); this network may be served an old copy' % (url, max(g['date'] for g in gs), fresh_after)
