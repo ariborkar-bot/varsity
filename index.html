@@ -3391,7 +3391,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v461 · Nov 12';
+const APP_BUILD='v463 · Nov 12';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7803,12 +7803,21 @@ function rcoHTML(){
   return `<section class="card rc-card"><div class="qh"><h3>Ring Chaser <span class="rco-live">Online</span></h3><span class="muted">${RC_SLOTS.length-open.length} of ${RC_SLOTS.length} filled</span></div>${score}${rcoWgBar(d,on)}${oppNote}${body}</section>`+teams;
 }
 
+/* v463 (owner): Hoops Battle (tools/battle/hoops-battle.html) in basketball's Minigames. Find an opponent opens it full screen in an iframe (?find=1 joins the public lobby and pairs two searchers); Play the AI opens its menu */
+function hbHTML(){return `<section class="card rc-card"><div class="qh"><h3>Hoops Battle</h3></div><p class="muted" style="text-align:center">One-on-one. Hold JUMP to shoot, time it at the top for a perfect release.</p><div class="rco-modes" style="margin-top:10px"><button class="btn" data-act="hbOpen" data-m="find">Find an opponent</button><button class="btn ghost" data-act="hbOpen" data-m="ai">Play the AI</button></div></section>`}
+function hbOpen(m){
+  if(document.querySelector('.hbx'))return;
+  const el=document.createElement('div');el.className='fgx hbx';el.setAttribute('role','dialog');el.setAttribute('aria-label','Hoops Battle');
+  el.innerHTML=`<iframe title="Hoops Battle" allow="autoplay" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#0b1626" src="tools/battle/hoops-battle.html?embed=1${m==='find'?'&find=1':''}&b=${encodeURIComponent(APP_BUILD)}"></iframe><button class="fgx-x" aria-label="Close game" style="left:12px;right:auto;top:calc(8px + env(safe-area-inset-top,0px));width:36px;height:36px;font-size:16px">✕</button>`;
+  document.body.appendChild(el);document.body.classList.add('fg-on');
+  const close=()=>{removeEventListener('message',on);el.remove();document.body.classList.remove('fg-on')},on=e=>{if(e.data&&e.data.hb==='close')close()};
+  addEventListener('message',on);el.querySelector('.fgx-x').addEventListener('click',close)}
 function viewMini(){
   if(UI.mtab==='pkl'){UI.mtab='picks';UI.ltab='leagues';UI.lgk='pk';setTimeout(()=>{location.hash='#groups'},0)}
   if(!UI.mtab||UI.mtab==='predict')UI.mtab=propCands().length?'props':'picks';   /* v287: Predict opens on Player props (Pick 'em when there are no lines yet) */
-  const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg'].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
+  const T0=UI.mtab==='spread'?'props':['picks','draw','props','sim','rc','fg',...(FG_SPORT==='bb'?['hb']:[])].includes(UI.mtab)?UI.mtab:'picks',T=T0==='props'||T0==='picks'||T0==='pkl'?'predict':T0,PT=T0==='props'?'props':T0==='pkl'?'pkl':'picks';
   const tkn=ME.uid&&ME.mode!=='guest'?`<div class="tok-wrap"><a class="tok-box shop-box" href="#shop" aria-label="Shop: open packs"><small>Shop</small><b><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h16l-1 11H5zM8 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b></a><button type="button" class="tok-box" data-act="tokOpen" aria-label="Your tokens. Get more"><small>Your tokens</small><b>${coinIc(ME.uid)}${Math.round(bank(ME.uid))}<span class="tok-plus" aria-hidden="true">+</span></b></button></div>`:'';
-  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='rc'?'Spin a school, pick a player. Best lineup wins.':T==='fg'?'Tap to keep the ball up and fly through the goals.':T==='sim'?'Draw a full 12-player team and swap players with respins.':T==='mock'?'Practice drafting. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on a player’s stats.':T==='draw'?'Get dealt 5 random players each week and redraw up to '+FC_REDRAWS+'.':PT==='pkl'?'Pick every winner. Best accuracy wins.':'Pick the winners of upcoming games.'}</p></div>${tkn}</div>`;
+  const head=`<div class="head mg-head"><div><h2>Minigames</h2><p>${T==='hb'?'One-on-one hoops against another player.':T==='rc'?'Spin a school, pick a player. Best lineup wins.':T==='fg'?'Tap to keep the ball up and fly through the goals.':T==='sim'?'Draw a full 12-player team and swap players with respins.':T==='mock'?'Practice drafting. It never touches your leagues or tokens.':PT==='props'&&T==='predict'?'Over or under on a player’s stats.':T==='draw'?'Get dealt 5 random players each week and redraw up to '+FC_REDRAWS+'.':PT==='pkl'?'Pick every winner. Best accuracy wins.':'Pick the winners of upcoming games.'}</p></div>${tkn}</div>`;
   /* v289: game tiles with an icon and a colour each (gold glow on the one you're in) */
 const MGI=(()=>{const w=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;return {
   predict:w('<rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 12.3l2.5 2.5 4.8-5.3"/>'),
@@ -7817,11 +7826,11 @@ const MGI=(()=>{const w=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</sv
   rc:w('<circle cx="12" cy="15" r="5.8"/><path d="M9 6.3L10.4 4h3.2L15 6.3 12 9.2z"/>'),
   fg:w('<path d="M12 20.5v-8M6 3.5V9a6 6 0 0 0 12 0V3.5"/>'),
   hoop:w('<circle cx="12" cy="4.6" r="2.6"/><ellipse cx="12" cy="11" rx="7" ry="2"/><path d="M5.4 12l2.6 7M18.6 12l-2.6 7M10 13l.8 6.4M14 13l-.8 6.4"/>')}})();
-  const tabs=`<div class="mg-tiles" role="group" aria-label="Minigames">${[['predict','Predict',MGI.predict,'#2F6BFF'],['draw','5 Card Draw',MGI.draw,'#7A4DFF'],['sim','10-0',MGI.sim,'#FF4F6D'],['rc','Ring Chaser',MGI.rc,'#3DDC84'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal',FG_SPORT==='bb'?MGI.hoop:MGI.fg,'#FF9A1F']].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="mtab" data-v="${v}" aria-pressed="${v===T}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
+  const tabs=`<div class="mg-tiles" role="group" aria-label="Minigames" style="${FG_SPORT==='bb'?'grid-template-columns:repeat(6,1fr)':''}">${[['predict','Predict',MGI.predict,'#2F6BFF'],['draw','5 Card Draw',MGI.draw,'#7A4DFF'],['sim','10-0',MGI.sim,'#FF4F6D'],['rc','Ring Chaser',MGI.rc,'#3DDC84'],['fg',FG_SPORT==='bb'?'Hoops':'Field Goal',FG_SPORT==='bb'?MGI.hoop:MGI.fg,'#FF9A1F'],...(FG_SPORT==='bb'?[['hb','1-on-1',MGI.rc,'#E65B28']]:[])].map(([v,l,ic,c])=>`<button class="mg-tile" style="--tc:${c}" data-act="mtab" data-v="${v}" aria-pressed="${v===T}"><span class="mg-ti" aria-hidden="true">${ic}</span><b>${l}</b></button>`).join('')}</div>`;
   const sub=T==='predict'?`<div class="pr-big" role="group" aria-label="Predict">${[['props','Player props','Over or under on player stats','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5-5 5 5M7 14l5 5 5-5"/></svg>'],['picks','Pick ’em','Pick the winners of the games','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h12l-3 4.5 3 4.5H6"/></svg>']].map(([v,l,d,ic])=>`<button class="pr-bt" data-act="mtab" data-v="${v}" aria-pressed="${PT===v}"><span class="pr-ic" aria-hidden="true">${ic}</span><span class="pr-tx"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`:'';
   const help=({predict:`<div class="mg-help"><span>Over / Under ${ii('ou')}</span><span>Pick ’em ${ii('pickem')}</span></div>`,draw:`<div class="mg-help"><span>Redraw ${ii('redraw')}</span></div>`,sim:`<div class="mg-help"><span>${FG_SPORT==='bb'?'82-0':'10-0'} ${ii('sim')}</span></div>`})[T]||'';
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
-  return head+tabs+sub+help+(T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
+  return head+tabs+sub+help+(T==='hb'?hbHTML():T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
 }
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
@@ -9965,6 +9974,7 @@ document.addEventListener('click',async e=>{
   else if(a==='fgm'){UI.fgm=t.dataset.v;UI.mgMore=false;render()}
   else if(a==='fgb'){UI.fgb=t.dataset.v;UI.mgMore=false;render()}
   else if(a==='rcStart'){rcoStop();rcStart()}
+  else if(a==='hbOpen')hbOpen(t.dataset.m);
   else if(a==='rcoFind'){if(UI.rco){rcoStop();rcoForget()}rcoNew(true)}
   else if(a==='rcoParty'){if(UI.rco){rcoStop();rcoForget()}rcoNew(false)}
   else if(a==='rcoJoin')rcoJoin();

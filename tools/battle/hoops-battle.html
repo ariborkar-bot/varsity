@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v30</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v31</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -512,7 +512,7 @@ function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1
   if(NET.on&&NET.role==='host'&&g){NET.acc+=dt;if(NET.acc>=1/20){NET.acc=0;netSend()}}
   if(NET.on&&performance.now()-NET.last>9000)netLost('Lost contact with your opponent.');
   draw()}
-function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NET.up&&NET.role==='host'){netStart();return}netOpen();return}audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT},VW);fit();paused=false;acc=0;
+function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NET.up&&NET.role==='host'){netStart();return}netOpen(true,NET.pub?'public':undefined);return}audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT},VW);fit();paused=false;acc=0;
   for(const id of ['menu','end','pause'])document.getElementById(id).hidden=true;buildCtl();
   document.getElementById('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);document.getElementById('pz').classList.add('on');document.getElementById('snd').classList.add('on');
   try{localStorage.setItem('hb-opt',JSON.stringify(OPT))}catch(_){}}
@@ -586,7 +586,7 @@ function netGuest(dt){const now=performance.now(),inp=el('rot').hidden?human(0):
   if(NET.from&&NET.tg){const k=Math.min(1,(now-NET.t0)/70);g.P.forEach((p,i)=>{p.x=NET.from.P[i].x+(NET.tg.P[i].x-NET.from.P[i].x)*k;p.y=NET.from.P[i].y+(NET.tg.P[i].y-NET.from.P[i].y)*k});
     g.ball.x=NET.from.b.x+(NET.tg.b.x-NET.from.b.x)*k;g.ball.y=NET.from.b.y+(NET.tg.b.y-NET.from.b.y)*k}
   if(g.phase==='over'&&!NET.ended){NET.ended=true;onEnd()}}
-el('n-back').addEventListener('click',()=>{netReset();el('net').hidden=true;el('menu').hidden=false});
+el('n-back').addEventListener('click',()=>{if(NET.pub&&parent!==window){try{parent.postMessage({hb:'close'},'*')}catch(_){}}netReset();el('net').hidden=true;el('menu').hidden=false});
 el('n-copy').addEventListener('click',()=>{const t=el('n-link');t.select();t.setSelectionRange(0,9999);try{navigator.clipboard.writeText(t.value)}catch(_){try{document.execCommand('copy')}catch(__){}}el('n-copy').textContent='Copied';setTimeout(()=>el('n-copy').textContent='Copy link',1500)});
 el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(navigator.share)navigator.share({title:'Hoops Battle',text:'Play me in Hoops Battle',url:u}).catch(()=>{});else el('n-copy').click()});
 /* opened from an invite link: go straight into that game */
@@ -594,6 +594,9 @@ el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(naviga
   /* v30: join at once; if anything stops that, the menu still shows a big Join button for this invite */
   const b=document.createElement('button');b.className='go';b.textContent="Join your friend's game";b.addEventListener('click',()=>{audio();netOpen(true,r)});el('play').parentNode.insertBefore(b,el('play'));
   setTimeout(()=>{try{audio();netOpen(true,r)}catch(e){el('menu').hidden=false}},100)}}
+/* v31: opened inside Varsity's Minigames with ?find=1: search the shared public lobby at once (the first two people searching are paired) */
+{const q=new URLSearchParams(location.search);if(q.get('find')&&!q.get('room')){OPT.mode='on';NET.pub=1;
+  setTimeout(()=>{try{audio()}catch(_){}netOpen(true,'public');el('n-h').textContent='Find an opponent'},100)}}
 /* test hook: run the game fast with the computer playing both sides (used to balance the difficulty levels) */
 window.__hb={get g(){return g},sim(sec,d0,d1){OPT.mode='ai';newGame({mode:'ai',diff:d1||'med',len:sec},1100);const saved=g.o.diff;let guard=0;
   while(g.phase!=='over'&&guard++<sec*60*3){g.o.diff=d0||'med';const a=ai(g.P[0],TICK);g.o.diff=saved;const b=ai(g.P[1],TICK);step(TICK,[a,b])}

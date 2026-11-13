@@ -598,3 +598,6 @@ Owner: football 5 Card Draw pays on the Friday after the week's last game (Pacif
 
 ## v462
 Owner: basketball 5 Card Draw day hands pay when every stat is in, or 7 days after the game day at the latest (`fcDayLate`, in `fcDayDone`); missing lines count as 0. Football rule (v461) unchanged.
+
+## v463
+Owner: basketball Minigames has a new "1-on-1" tab (`hbHTML`, `hbOpen`; only when `FG_SPORT==="bb"`): Find an opponent opens tools/battle/hoops-battle.html?embed=1&find=1 full screen in an iframe (`.hbx`), Play the AI opens its menu. Hoops Battle v31: `?find=1` joins the shared lobby channel `hb-room-public` (`NET.pub`), the first two people searching are paired, rematch searches again, Cancel posts `{hb:"close"}` to the app. Not tested with two real devices.
