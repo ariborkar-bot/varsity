@@ -252,6 +252,9 @@ def run(a, log=print, fetcher=None):
         if not o:
             stat['nostats'] += 1
             done.add(g['id'])
+            if stat['fetched'] >= 40 and stat['nostats'] == stat['fetched']:
+                stop = 'STOPPED: the first %d box scores had no stats object (wrong page address or MaxPreps changed); last page: %s' % (stat['fetched'], url)
+                break
             continue
         for label, P in (football_lines(o) if sport == 'fb' else basketball_lines(o, unknown)):
             side = team_school(label, g)
@@ -270,6 +273,9 @@ def run(a, log=print, fetcher=None):
         if stat['fetched'] % 200 == 0:
             save()
             log('  %d/%d box scores, %d players so far' % (i + 1, len(todo), sum(len(v) for v in store.values())))
+    if (stop or '').startswith('STOPPED') and stat['nostats'] == stat['fetched']:
+        for g in todo[:stat['fetched']]:
+            done.discard(g['id'])
     save()
     log('done: %s. fetched %d, no stats on page %d, team not matched %d, not found %d' % (stop or 'all requested games read', stat['fetched'], stat['nostats'], stat['unmatched_team'], stat['notfound']))
     for sid, pl in sorted(store.items()):
@@ -277,7 +283,7 @@ def run(a, log=print, fetcher=None):
             log('  %-14s %6d players' % (sid, len(pl)))
     if unknown:
         log('basketball columns that matched nothing (add to BB_COLS if they are stats): ' + '; '.join('%s/%s x%d' % (k[0], k[1], n) for k, n in sorted(unknown.items(), key=lambda x: -x[1])[:25]))
-    return 1 if (stop or '').startswith('STOPPED') and not stat['fetched'] else 0
+    return 1 if (stop or '').startswith('STOPPED') and stat['nostats'] == stat['fetched'] else 0
 
 
 def main():
