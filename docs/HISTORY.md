@@ -657,3 +657,6 @@ Owner: defense controls flipped too, mechanics too hard, receiver should pick a 
 
 ## Hoops Battle v46
 Owner: add a sprint button limited to 1 to 2 s that drains energy much faster, and a bit more contest effect. RUN button (key Shift/S, 2P: S and Down arrow): 1.5x speed for at most 1.5 s per press (`p.sb`), then a 2 s wait (`p.sbc`), drains .6 energy/s extra (`sbOn` in `step`); input field `s` goes through `human()`, the guest's net input and `TCH`. Contested shots 15 percent harder (`contest` in `release`). AI does not sprint.
+
+## Gridiron Duel v4.3
+Owner: auto-run route made CUT useless (easy to get jammed) and turning to the ball made the receiver run at the QB. Human receiver is now fully manual: field-relative stick (up = downfield, `vy=0`), camera follows heading within 75 degrees of downfield and NEVER turns to the ball; dotted route line is only a guide; CUT/JUKE go in the stick's field direction. A yellow ring and a CATCH SPOT edge arrow show where the QB is throwing (to the receiver's lead). Auto route-run is now computer-only. Defender unchanged (view-relative, looks at the ball).

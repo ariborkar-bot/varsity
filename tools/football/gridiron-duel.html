@@ -45,7 +45,7 @@ textarea{width:100%;height:58px;border-radius:10px;border:1px solid rgba(255,255
   <div id="w-diff"><span class="lbl">Computer skill</span>
   <div class="seg" id="s-diff"><button type="button" data-v="easy" aria-pressed="false">Easy</button><button type="button" data-v="med" aria-pressed="true">Medium</button><button type="button" data-v="hard" aria-pressed="false">Hard</button></div></div>
 </div><div>
-  <div class="how"><b>Receiver vs defender, first person.</b> One of you is the receiver, the other covers him. A computer QB throws about 2 to 3 seconds after the snap, to where the receiver is heading. Catch it to gain yards, break it up or pick it off to win the snap. Get 10 yards in 4 downs to keep the ball. Touchdown 7, first to 21.<br><b>Receiver:</b> pick a route before each snap, then you run it automatically. Hold SPRINT, tap CUT to shake him. When BALL! shows your head snaps to it: tap CATCH when it is within reach. After the catch, JUKE past the tackler.<br><b>Defender:</b> you can't see the route. JAM the receiver at the line, stay on him, tap SWAT when the ball arrives (close = interception). After a catch, DIVE to tackle.<br><b>Controls:</b> on defense and when the ball is in the air, stick up moves toward what you see. Keys: arrows or WASD, Shift sprint, Space action.</div>
+  <div class="how"><b>Receiver vs defender, first person.</b> One of you is the receiver, the other covers him. A computer QB throws about 2 to 3 seconds after the snap, to where the receiver is heading. Catch it to gain yards, break it up or pick it off to win the snap. Get 10 yards in 4 downs to keep the ball. Touchdown 7, first to 21.<br><b>Receiver:</b> pick a route before each snap, follow the dotted line yourself (stick up is downfield), SPRINT, and tap CUT to shake the defender. The QB throws to where you are heading, so look for the yellow ring on the grass. When BALL! shows your head snaps to it: tap CATCH when it is within reach. After the catch, JUKE past the tackler.<br><b>Defender:</b> you can't see the route. JAM the receiver at the line, stay on him, tap SWAT when the ball arrives (close = interception). After a catch, DIVE to tackle.<br><b>Controls:</b> on defense and when the ball is in the air, stick up moves toward what you see. Keys: arrows or WASD, Shift sprint, Space action.</div>
   <button class="go" id="play" type="button">Kick off</button>
 </div></div></div>
 
@@ -75,8 +75,9 @@ function setRoute(id,sd){if(G.ph!=='pick'||G.route||!ROUTES[id])return;const R=G
   const wp=r.w.map(q=>[clamp(R.x+q[0]*sd,-HW+2.5,HW-2.5),G.s.los+q[1]]);G.route={id,sd,wp};G.rp=0;G.thT=r.t+rnd()*.25;}
 function aiPicks(off){return G.simAll||(OPT.mode==='ai'&&off!==G.me)}
 function viewYaw(i){const me=G.pl[i],o=G.pl[1-i],isR=i===G.s.poss;
+  if(isR)return clamp(wrap(me.mh),-1.3,1.3);   /* the receiver's view stays downfield; the ring on the grass shows where the ball is going */
   if(G.th===1&&G.ft>.2&&G.ball)return Math.atan2(G.ball.x-me.x,G.ball.z-me.z);
-  if(!isR)return Math.atan2(o.x-me.x,o.z-me.z);return me.mh}
+  return Math.atan2(o.x-me.x,o.z-me.z)}
 const cv=document.getElementById('cv'),X=cv.getContext('2d'),el=id=>document.getElementById(id);
 const TEAM=[{n:'YOU',c:'#FFC23D',d:'#3a2a00'},{n:'CPU',c:'#FF4F6D',d:'#3a0a16'}];
 let OPT={mode:'ai',diff:'med'},G=null,paused=false;
@@ -133,14 +134,14 @@ function movePl(p,i,off,inp,dt,vy){
     const fv=sy>0?sy*vm:sy*vm*BACK,tx=fx*fv+rx*sx*vm*STRAFE,tz=fz*fv+rz*sx*vm*STRAFE;
     let dx=tx-p.vx,dz=tz-p.vz;const d=Math.hypot(dx,dz),lim=ACC*dt;if(d>lim){dx*=lim/d;dz*=lim/d}p.vx+=dx;p.vz+=dz}}
   p.x+=p.vx*dt;p.z+=p.vz*dt;p.ph+=Math.hypot(p.vx,p.vz)*dt*1.15}
-function stickDir(p,inp,other,fwdIfIdle){const sx=inp.x||0,sy=inp.y||0,m=Math.hypot(sx,sy),fx=Math.sin(p.mh),fz=Math.cos(p.mh),rx=Math.cos(p.mh),rz=-Math.sin(p.mh);
-  let dx,dz;if(m>.3){dx=fx*sy+rx*sx;dz=fz*sy+rz*sx}else if(fwdIfIdle){dx=fx;dz=fz}else{const side=(other.x-p.x)*rx+(other.z-p.z)*rz>0?-1:1;dx=rx*side+fx*.35;dz=rz*side+fz*.35}
+function stickDir(p,inp,other,fwdIfIdle,wor){const sx=inp.x||0,sy=inp.y||0,m=Math.hypot(sx,sy),fx=Math.sin(p.mh),fz=Math.cos(p.mh),rx=Math.cos(p.mh),rz=-Math.sin(p.mh);
+  let dx,dz;if(m>.3){if(wor){dx=sx;dz=sy}else{dx=fx*sy+rx*sx;dz=fz*sy+rz*sx}}else if(fwdIfIdle){dx=fx;dz=fz}else{const side=(other.x-p.x)*rx+(other.z-p.z)*rz>0?-1:1;dx=rx*side+fx*.35;dz=rz*side+fz*.35}
   const n=Math.hypot(dx,dz)||1;return[dx/n,dz/n]}
 function action(i,inp){const s=G.s,off=s.poss,p=G.pl[i],o=G.pl[1-i];
   if(G.th===1){if(p.hc<=0&&p.act===''){p.hw=HWIN;p.hc=HCD}return}
   if(i===off){
-    if(G.th===0){if(p.cd>0||p.act!==''||p.st<.1)return;const[dx,dz]=stickDir(p,inp.cx!=null?{x:inp.cx,y:inp.cy}:inp,o,false);p.act='cut';p.at=CUTT;p.cd=CUTCD;p.dx=dx;p.dz=dz;p.st-=.1;p.mh+=wrapD(Math.atan2(dx,dz)-p.mh)*.6;G.fx.push({k:'puff',x:p.x,z:p.z,t:.35,d:.35})}
-    else{if(p.cd>0||p.act!==''||p.st<.12)return;const[dx,dz]=stickDir(p,inp,o,false);p.act='juke';p.at=JT;p.inv=JINV;p.cd=JCD;p.dx=dx;p.dz=dz;p.st=Math.max(0,p.st-.12);G.fx.push({k:'puff',x:p.x,z:p.z,t:.4,d:.4});emit('juke',p.x,p.z)}}
+    if(G.th===0){if(p.cd>0||p.act!==''||p.st<.1)return;const[dx,dz]=stickDir(p,inp.cx!=null?{x:inp.cx,y:inp.cy}:inp,o,false,!!inp.cam);p.act='cut';p.at=CUTT;p.cd=CUTCD;p.dx=dx;p.dz=dz;p.st-=.1;p.mh+=wrapD(Math.atan2(dx,dz)-p.mh)*.6;G.fx.push({k:'puff',x:p.x,z:p.z,t:.35,d:.35})}
+    else{if(p.cd>0||p.act!==''||p.st<.12)return;const[dx,dz]=stickDir(p,inp,o,false,!!inp.cam);p.act='juke';p.at=JT;p.inv=JINV;p.cd=JCD;p.dx=dx;p.dz=dz;p.st=Math.max(0,p.st-.12);G.fx.push({k:'puff',x:p.x,z:p.z,t:.4,d:.4});emit('juke',p.x,p.z)}}
   else{
     if(G.th===0){if(p.jam||p.act!=='')return;p.jam=1;const dist=Math.hypot(o.x-p.x,o.z-p.z),fx=Math.sin(p.mh),fz=Math.cos(p.mh),front=((o.x-p.x)*fx+(o.z-p.z)*fz)>0;
       if(dist<2.7){o.act='jam';o.at=.9;o.vx*=.25;o.vz*=.25;p.st=Math.max(0,p.st-.1);emit('jam',(o.x+p.x)/2,(o.z+p.z)/2)}else{p.act='get';p.at=.5}}
@@ -164,10 +165,10 @@ function step(dt,inps){
   if(G.ph!=='live')return;
   const s=G.s,off=s.poss,def=1-off,R=G.pl[off],D=G.pl[def];
   for(let i=0;i<2;i++){let inp=inps[i]||{};
-    if(i===off&&G.th===0&&G.route){const p=G.pl[i],wp=G.route.wp;let t=wp[Math.min(G.rp,wp.length-1)];if(G.rp<wp.length&&Math.hypot(t[0]-p.x,t[1]-p.z)<1.4)G.rp++;
+    if(i===off&&G.th===0&&G.route&&!inp.cam){const p=G.pl[i],wp=G.route.wp;let t=wp[Math.min(G.rp,wp.length-1)];if(G.rp<wp.length&&Math.hypot(t[0]-p.x,t[1]-p.z)<1.4)G.rp++;
       let tx,tz;if(G.rp<wp.length){tx=wp[G.rp][0];tz=wp[G.rp][1]}else{const l=wp[wp.length-1],pr=wp.length>1?wp[wp.length-2]:[p.x,G.s.los],dx=l[0]-pr[0],dz=l[1]-pr[1],n=Math.hypot(dx,dz)||1;tx=l[0]+dx/n*12;tz=l[1]+dz/n*12}
       const ri={x:0,y:0};steer(p,tx,tz,ri);const nx=inp.x,ny=inp.y;inp=Object.assign({},inp,{x:ri.x,y:ri.y,cx:nx,cy:ny,cam:false})}
-    const vy=(i!==off||(G.th===1&&G.ft>.2))&&inp.cam?viewYaw(i):null;
+    const vy=inp.cam?(i===off?0:viewYaw(i)):null;   /* receiver: stick = field (up is downfield); defender: stick = what he sees */
     if(inp.a&&!G.prevA[i])action(i,inp);G.prevA[i]=!!inp.a;movePl(G.pl[i],i,off,inp,dt,vy)}
   for(const p of G.pl){p.x=clamp(p.x,-HW-8,HW+8);p.z=clamp(p.z,-12,112)}
   if(G.th<2){const dx=R.x-D.x,dz=R.z-D.z,d=Math.hypot(dx,dz);if(d<1.7){const n=d||.01,px=(d?dx/n:1)*(1.7-d)/2,pz=(d?dz/n:0)*(1.7-d)/2;R.x+=px;R.z+=pz;D.x-=px;D.z-=pz;const sv=Math.min(R.vx*dx+R.vz*dz,0);}}
@@ -281,7 +282,7 @@ function scene(dt){const s=G.s,me=G.pl[G.me],isR=G.me===s.poss;
   if(G.th===1)spr.push([cam3(G.ball.x,G.ball.z).f,()=>ballDraw(G.ball.x,G.ball.h,G.ball.z,G.ft*17,false)]);
   for(const q of G.fx)spr.push([cam3(q.x,q.z).f,()=>{const k=1-q.t/q.d,c=cam3(q.x,q.z);if(c.f<.5)return;const u=CAM.foc/c.f,px=W/2+c.r*u,py=CAM.hz+(EYE-.6)*u;if(q.k==='ring'){X.strokeStyle='rgba(255,255,255,'+(.85*(1-k))+')';X.lineWidth=5*(1-k)+1;X.beginPath();X.ellipse(px,py+.5*u,(.8+k*3.5)*u,(.5+k*1.4)*u*.5,0,0,7);X.stroke()}else{X.fillStyle='rgba(235,235,225,'+(.55*(1-k))+')';for(let j=0;j<7;j++){const a=j*.9+q.x;X.beginPath();X.arc(px+Math.cos(a)*k*1.6*u,py+Math.sin(a)*k*.7*u-k*.6*u,(.25+k*.4)*u,0,7);X.fill()}}}]);
   spr.sort((a,b)=>b[0]-a[0]);spr.forEach(a=>a[1]());
-  if(G.th===1&&G.ball)edgeArrow(G.ball.x,G.ball.z,'#FFC23D','BALL');
+  if(G.th===1&&G.ball){if(isR&&G.tgt)edgeArrow(G.tgt.x,G.tgt.z,'#FFE25A','CATCH SPOT');else edgeArrow(G.ball.x,G.ball.z,'#FFC23D','BALL')}
   /* own hands */
   const hp=me.hw>0?Math.sin(Math.min(1,(1-me.hw/HWIN)*1.4)*1.57):0;
   if(hp>0){for(const sx of [-1,1]){const bx=W/2+sx*(150-hp*70),by=H+60-hp*(H*.5);X.fillStyle=TEAM[G.me].c;X.strokeStyle='#0b1220';X.lineWidth=3;X.save();X.translate(bx,by);X.rotate(-sx*.12);X.fillRect(-26,0,52,200);X.strokeRect(-26,0,52,200);X.fillStyle='#fff';X.fillRect(-30,-34,60,44);X.strokeRect(-30,-34,60,44);X.restore()}}
@@ -296,7 +297,7 @@ function hud(){const s=G.s,isR=G.me===s.poss,mp=G.pl[G.me];X.fillStyle='rgba(4,8
   X.font='900 15px system-ui';X.fillStyle='#FFC23D';X.fillText('FIRST TO '+WIN,W/2,38);
   const ytg=s.fd>=100?'Goal':Math.max(1,s.fd-s.los);X.font='800 13px system-ui';X.fillStyle='#9fb0cc';X.fillText(ordinal(s.down)+' & '+ytg+' · ball on '+(s.los<=50?'own '+s.los:'opp '+(100-s.los)),W/2,64);
   X.textAlign='left';X.font='900 15px system-ui';X.fillStyle=isR?'#3DFF9A':'#ffb347';X.fillText(isR?'YOU ARE THE RECEIVER':'YOU ARE THE DEFENDER',16,30);
-  const tip=G.ph==='pick'?(isR?'Pick your route.':'The offense is picking a route...'):G.th===0?(isR?'Following your route. Tap CUT to shake him.':'Stay with him. Stick up = toward him.'):G.th===1?(isR?'Tap CATCH when the ball is close.':'Tap SWAT when the ball is close.'):G.th===2?(isR?'Run! JUKE the tackler.':'Close in. DIVE to tackle.'):'';
+  const tip=G.ph==='pick'?(isR?'Pick your route.':'The offense is picking a route...'):G.th===0?(isR?'Run your route (dotted line). CUT to shake him.':'Stay with him. Stick up = toward him.'):G.th===1?(isR?'Tap CATCH when the ball is close.':'Tap SWAT when the ball is close.'):G.th===2?(isR?'Run! JUKE the tackler.':'Close in. DIVE to tackle.'):'';
   X.font='700 12px system-ui';X.fillStyle='#cfd9ec';X.fillText(tip,16,50);
   X.fillStyle='rgba(4,8,16,.7)';rr(16,60,130,12,6);X.fill();X.fillStyle=mp.st<.25?'#ff6a7f':'#3DFF9A';rr(17,61,128*clamp(mp.st,0,1),10,5);X.fill();X.fillStyle='#fff';X.font='800 9px system-ui';X.fillText('STAMINA',22,70);
   const cd=G.th===1?mp.hc/HCD:isR?mp.cd/(G.th===0?CUTCD:JCD):0,r=1-clamp(cd,0,1);X.fillStyle='rgba(4,8,16,.7)';rr(16,78,130,12,6);X.fill();X.fillStyle=r>=1?'#FFC23D':'#6a7aa0';rr(17,79,128*r,10,5);X.fill();X.fillStyle='#fff';X.fillText(r>=1?'READY':'WAIT',22,87);
