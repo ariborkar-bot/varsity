@@ -624,3 +624,6 @@ Owner: (1) contested shots about 35 percent harder (`contest` reach 140 px, erro
 
 ## v470 (Hoops Battle v40)
 Owner: online, each player attacks the hoop on the RIGHT of his own screen. The match is unchanged (host = player 0 attacks right, guest = player 1 attacks left); the guest's screen is mirrored in `draw()` (`MIR`): hoops, effects, players and ball are flipped, the court stays as drawn (markings on the right), HUD, pop text, name tags and jersey numbers are not flipped, zoom centre is mirrored, and the guest's left/right input is swapped before it is sent and used for prediction.
+
+## Hoops Battle v41 (crossovers)
+Owner: driving into a defender costs more energy (`EN.push` .16 to .21). Crossovers: reversing direction with the defender within 150 px counts (`p.xo`, window 2.6 s), each costs .025 energy; from the third one, if the defender is within 125 px and on the ground, each crossover has a 20 percent x (count-2) chance to be stolen at once (`doSteal`). Simulated: 3 reversals about 17 percent, 5 reversals about 85 percent.
