@@ -654,3 +654,6 @@ Owner: when the head turns to the ball, up/down felt flipped. While the ball is 
 
 ## Gridiron Duel v4.2 (easier, route picking)
 Owner: defense controls flipped too, mechanics too hard, receiver should pick a route. Now: before each snap the receiver picks Go/Slant/Out/Post/Curl/Corner and Left/Right (`ROUTES`, `setRoute`, phase `pick`, 8 s auto-pick; panel `#rp`); the route is auto-run (dotted line on the grass for the receiver only), QB throws at the route's time. Receiver steers nothing before the throw: SPRINT and CUT only. Defender (and anyone while the ball is in the air) uses view-relative stick (`viewYaw`, `inp.cam`): up = toward what the camera sees. Bigger catch/swat reach (`RCATCH 2.7, DSWAT 2.4`), longer hands window, slower ball (`VB 16`). Guest picks via `{k:'pick'}`.
+
+## Hoops Battle v46
+Owner: add a sprint button limited to 1 to 2 s that drains energy much faster, and a bit more contest effect. RUN button (key Shift/S, 2P: S and Down arrow): 1.5x speed for at most 1.5 s per press (`p.sb`), then a 2 s wait (`p.sbc`), drains .6 energy/s extra (`sbOn` in `step`); input field `s` goes through `human()`, the guest's net input and `TCH`. Contested shots 15 percent harder (`contest` in `release`). AI does not sprint.
