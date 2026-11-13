@@ -74,9 +74,14 @@ def decode_contests(contests, sport):
             if not UUID_RE.match(str(cid)) or not re.fullmatch(r'\d{4}-\d\d-\d\d', date):
                 raise ValueError('bad id or date')
             a, b = r[37], r[38]
-            for t in (a, b):
-                if not isinstance(t, list) or len(t) < 17 or not isinstance(t[14], str) or not t[14] or not UUID_RE.match(str(t[1])):
-                    raise ValueError('bad team row')
+            bad = [t for t in (a, b) if not isinstance(t, list) or len(t) < 17 or not isinstance(t[14], str) or not t[14] or not UUID_RE.match(str(t[1]))]
+            if bad:
+                # an opponent MaxPreps has no school page for (TBD, open date, tournament slot, out-of-state): not a game we can place.
+                # Without a score it is just skipped; with a score it still counts as a failed row.
+                if all(isinstance(t, list) and len(t) > 6 and _score(t[6]) is None for t in (a, b)):
+                    checked -= 1
+                    continue
+                raise ValueError('bad team row')
             if sorted([a[11], b[11]]) == [0, 1]:
                 home, away, ha = (a, b, True) if a[11] == 0 else (b, a, True)
             else:
@@ -99,7 +104,9 @@ def decode_contests(contests, sport):
                           'state': (r[28] or '').replace('ContestState is ', '').rstrip('.'), 'url': r[18] if isinstance(r[18], str) else None})
         except (ValueError, TypeError, IndexError, KeyError) as e:
             rejects.append((str(r[1])[:8] if isinstance(r, list) and len(r) > 1 else '?', str(e)))
-    if checked >= 3 and len(rejects) / checked > 0.2:
+    # a few odd rows on a page are dropped one by one (the crawl stops if too many fail over the whole run, see crawl());
+    # a page where every row fails the checks means the format changed
+    if checked >= 3 and len(rejects) == checked:
         raise FormatChanged('%d of %d rows failed checks: %s' % (len(rejects), checked, rejects[:3]))
     return games, rejects, checked
 
@@ -228,6 +235,11 @@ def crawl(seeds, sport, names=None, state='CA', max_teams=300, fetcher=None, log
                 break
             continue
         report['rejects'] += len(rej)
+        report['checked'] = report.get('checked', 0) + n
+        if report['checked'] >= 300 and report['rejects'] / report['checked'] > 0.10:
+            report['blocked'] = 'format changed: %d of %d game rows failed the checks' % (report['rejects'], report['checked'])
+            log('STOPPED: ' + report['blocked'])
+            break
         if len(gs) >= 3 and max(g['date'] for g in gs) < fresh_after:
             report['blocked'] = 'stale pages: newest game on %s is %s (before %s); this network may be served an old copy' % (url, max(g['date'] for g in gs), fresh_after)
             log('STOPPED: ' + report['blocked'])

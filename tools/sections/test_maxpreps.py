@@ -142,4 +142,15 @@ stale = [json.loads(json.dumps(r)) for r in FIX]
 f4 = Fake({BURL: stale})
 _, _, rep4 = M.crawl([BURL], 'fb', names=names, fetcher=f4, log=lambda *_: None, fresh_after='2027-01-01')
 check(rep4['blocked'] and 'stale' in rep4['blocked'], 'old pages are refused as stale')
+
+# 5. odd rows are dropped one by one: an unscored game against an opponent with no school page (TBD) is skipped, a bad scored row is a reject, and the rest stay
+tbd = row('1111c17-0000-4000-8000-000000000001'.replace('1111c17', '11111111'), '2026-12-05T19:00:00', 'ContestState is Pregame.', '', team(B, '', None, None, "Bishop's", 'La Jolla', 0, BURL), ['x'] * 20)
+tbd[38] = [None] * 17
+g5, r5, n5 = M.decode_contests([tbd] + FIX[1:4], 'fb')
+check(len(g5) == 3 and not r5 and n5 == 3, 'unscored game with a TBD opponent is skipped without a reject: %s %s %s' % (len(g5), r5, n5))
+badscored = played('22222222-2222-4222-8222-222222222222', '2026-10-02T19:00:00', True, 37, 'f8c33d57-a1ba-4322-aac1-acb5b2698e4d', 'Coastal Academy', 'Oceanside', 36, 'On 10/2, x 37-36')
+badscored[38][5] = 'W'
+g6, r6, n6 = M.decode_contests([badscored] + FIX[1:5], 'fb')
+check(len(g6) == 4 and len(r6) == 1, 'one bad scored row is rejected and the other four rows are kept: %s %s' % (len(g6), r6))
+
 print('ok: %d checks passed' % ok)
