@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v43</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v44</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -166,7 +166,7 @@ function pop(t,x,y,c,d,big){g.pop.push({t:d||1,d:d||1,s:t,x,y,c:c||'#fff',big})}
 /* player i attacks hoop 1-i and defends hoop i (player 0 defends the left hoop) */
 function setup(i,tip){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.gath=false;p.pump=0;p.dk=0;p.kd=0;p.fb=false;p.dd=false;p.dr=false;p.en=Math.min(1,p.en+EN.score)});
   g.P[i].x=a.cx+a.dir*150;g.P[1-i].x=g.W/2+a.dir*46;g.P[i].has=true;g.P[i].face=a.dir;g.P[1-i].face=-a.dir;
-  Object.assign(b,{st:'held',own:i,sh:-1,vx:0,vy:0,live:false,hit:false,dunk:false,done:false,cd:0,t:0});g.sc=SC;g.phase='live';g.hold=.55;g.ai=[{},{}];
+  Object.assign(b,{blk:false,st:'held',own:i,sh:-1,vx:0,vy:0,live:false,hit:false,dunk:false,done:false,cd:0,t:0});g.sc=SC;g.phase='live';g.hold=.55;g.ai=[{},{}];
   /* v18: after a basket both players start at centre court and the ball goes up like a tip-off, drifting toward the side of the player who was just scored on */
   if(tip){const W=g.W,s=-a.dir;g.P[i].has=false;g.P[i].x=W/2+s*36;g.P[1-i].x=W/2-s*36;g.P[i].face=g.P[1-i].face=0;g.P[i].face=-s;g.P[1-i].face=s;
     Object.assign(b,{st:'loose',own:-1,x:W/2,y:GY-PH-34,vx:s*(120+rnd()*50),vy:-560,live:true,cd:.25,hit:false,done:false});g.started=true}}
@@ -212,7 +212,7 @@ function stepP(p,c,dt){
 function release(p,late){
   const h=g.hp[1-p.i],o=g.P[1-p.i],b=g.ball,hx=p.x+p.face*8,hy=p.y-PH-16,dist=Math.abs(h.cx-p.x);
   const q=late?0:1-Math.min(1,Math.abs(p.jt-p.ap)/.22),perfect=q>.88;
-  p.has=false;p.dd=false;p.shoot=false;p.cd=.4;Object.assign(b,{own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
+  p.has=false;p.dd=false;p.shoot=false;p.cd=.4;Object.assign(b,{blk:false,own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
   if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.fb=Math.abs(p.vx)>SPD*.7&&Math.abs(o.x-p.x)>230;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=(p.tk!=null?p.tk:dist)>TP?3:2;   /* v20: a three is decided by where he left the floor, like the line on the court */
   const near=Math.abs(o.x-p.x),hi=o.air&&o.y<GY-36,contest=Math.max(0,1-near/140)*(hi?1.8:1)*1.4+(hi&&near<105?.45:0)   /* v23: the closer and higher the defender's hand, the worse the shot; felt from 125 px out */,tired=p.en<.25?(1-p.en/.25)*20:0;
@@ -241,7 +241,7 @@ function stepBall(dt){
     for(let hi=0;hi<2;hi++){const hp=g.hp[hi];
       if(b.y>RIMY-100&&b.y<RIMY+8){if(hp.dir>0&&b.x-BR<hp.bd&&b.vx<0){b.x=hp.bd+BR;b.vx=-b.vx*.5;b.vy*=.8;hitRim(b)}else if(hp.dir<0&&b.x+BR>hp.bd&&b.vx>0){b.x=hp.bd-BR;b.vx=-b.vx*.5;b.vy*=.8;hitRim(b)}}
       for(const px of [hp.cx-RIMH,hp.cx+RIMH]){const dx=b.x-px,dy=b.y-RIMY,d=Math.hypot(dx,dy),R=BR+3;if(d<R&&d>0){const nx=dx/d,ny=dy/d,vn=b.vx*nx+b.vy*ny;b.x=px+nx*R;b.y=RIMY+ny*R;if(vn<0){b.vx-=1.42*vn*nx;b.vy-=1.42*vn*ny;b.vx*=.9;b.vy*=.95}hitRim(b)   /* v19: a rim bounce is a short, soft ricochet */}}
-      if(py<RIMY&&b.y>=RIMY&&Math.abs(b.x-hp.cx)<RIMH-3&&b.vy>0&&!b.done&&g.phase==='live')scored(hi)}}}
+      if(py<RIMY&&b.y>=RIMY&&Math.abs(b.x-hp.cx)<RIMH-3&&b.vy>0&&!b.done&&!b.blk&&g.phase==='live')scored(hi)}}}
 function hitRim(b){if(!b.hit){b.hit=true;sfx('rim')}b.live=true;if(b.st==='shot'&&g.phase==='live')g.sc=SC}
 function scored(hi){const b=g.ball,team=hi===1?0:1,pts=b.sh===team?b.pts:2,hp=g.hp[hi];
   g.score[team]+=pts;b.done=true;g.net[hi]=1;g.stat[team].fg++;if(pts===3)g.stat[team].three++;
@@ -260,7 +260,7 @@ function blocks(){const b=g.ball;let d=null,s=null;
   const behind=Math.sign(s.x-d.x)===Math.sign(g.hp[1-s.i].cx-s.x),hx=d.x+(behind?Math.sign(b.x-d.x)||d.face:d.face)*(behind?12:8),hy=d.y-PH-18;
   if(Math.hypot(b.x-hx,b.y-hy)>(BR+(d.air?38:26)*(d.cb||1))*(behind?.8:1)*(Math.abs(g.hp[1-s.i].cx-s.x)<160?(s.cp||1):1))return;   /* v35: reach +25% */   /* v22: a block from behind still works (he reaches over the shoulder) but his reach is 20% shorter */
   if(d.air&&d.vy>0&&(s.vy<-150||d.vy>330))return;   /* v35: a defender can block on the way down, unless the shooter is still rising fast or the defender is already falling fast */
-  s.has=false;s.shoot=false;s.cd=.5;d.cd=.3;Object.assign(b,{st:'loose',live:true,own:-1,cd:.28,vx:(b.x>=d.x?1:-1)*(140+rnd()*120)+d.vx*.4,vy:-330});
+  s.has=false;s.shoot=false;s.cd=.5;d.cd=.3;Object.assign(b,{blk:true,st:'loose',live:true,own:-1,cd:.28,vx:(b.x>=d.x?1:-1)*(140+rnd()*120)+d.vx*.4,vy:-330});
   g.stat[d.i].blk++;g.shake=.45;pop('BLOCKED!',d.x,d.y-PH-44,TEAM[d.i].c,1.1);sfx('block')}
 function pickups(){const b=g.ball;if(b.cd>0||b.done||!(b.st==='loose'||(b.st==='shot'&&b.live)))return;let best=null;
   for(const p of g.P){if(p.has||p.cd>0||p.stun>0)continue;if(Math.abs(b.x-p.x)<PW+BR+5&&b.y>p.y-PH-BR-8&&b.y<p.y+2){if(!best||Math.abs(b.x-p.x)<Math.abs(b.x-best.x))best=p}}
