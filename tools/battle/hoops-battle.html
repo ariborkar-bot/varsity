@@ -18,7 +18,8 @@
 html,body{margin:0;height:100%;background:#060a13;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:none}
 #stage{position:fixed;inset:0;display:grid;place-items:center;background:#060a13}
 canvas{display:block;touch-action:none}
-*{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}textarea,input{-webkit-user-select:text;user-select:text}button,.tb{touch-action:manipulation}
+*{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}textarea,input{-webkit-user-select:text;user-select:text}
+#toch{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;background:rgba(8,14,28,.94);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:8px 10px;text-align:center;width:min(640px,96vw)}#toch[hidden]{display:none}#toch b{font:900 .8rem system-ui;color:#FFC23D}#tochg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}#tochg button{border-radius:10px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font:800 .78rem system-ui;padding:7px 4px;cursor:pointer}#tochg button small{display:block;font:600 .6rem system-ui;color:#9fb0cc;margin-top:2px}#tochg button[aria-pressed=true]{background:#FFC23D;color:#241800}#tochg button[aria-pressed=true] small{color:#5a4200}button,.tb{touch-action:manipulation}
 .ov{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(4,8,16,.86);padding:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));overflow:auto}
 .ov[hidden]{display:none}#net textarea{width:100%;height:84px;box-sizing:border-box;border-radius:10px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#dfe8ff;font:11px/1.3 ui-monospace,Menlo,monospace;padding:8px;resize:none;word-break:break-all}#net .sub{min-height:1.2em}.ov{touch-action:pan-y}
 .box{width:min(560px,100%);background:linear-gradient(180deg,#14213d,#0b1220);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:18px 18px 16px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
@@ -64,7 +65,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v49</small></p>
+  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v50</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -112,6 +113,7 @@ h1 span{color:#FFC23D}
   <button class="ghost" id="n-back" type="button">Cancel</button>
 </div></div>
 
+<div id="toch" hidden><b>Timeout: switch character</b><div id="tochg"></div></div>
 <div id="pause" class="ov" hidden><div class="box">
   <h1>Paused</h1>
   <button class="go" id="resume" type="button">Resume</button>
@@ -135,7 +137,7 @@ h1 span{color:#FFC23D}
    jump comes at about half a second), a double jump without the ball, and energy (p.en, 0 to 1). */
 const WINPTS=21,H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=620,SPD=360,RIMY=236,RIMH=35,TP=430,SC=14,APEX=JV/PG,WALL=24,TICK=1/60;
 /* energy: running drains it, standing still refills it, every jump costs some. Tired players run slower, jump lower and shoot worse. */
-const EN={run:0,rest:0,move:.012,still:1.5,jump:.02,shot:.125,fake:0,push:.05,score:.25,bar:.125};   /* v47: energy is 8 bars (.125 each) for the WHOLE match: a shot costs a bar, a sprint burst costs a bar, standing still 1.5 s earns a bar, every tip off (restart after a score) gives 2 bars */   /* shooting costs the most, running little, driving into a defender is tiring but not impossible */
+const EN={run:0,rest:0,move:.012,still:1.5,jump:.02,shot:.125,fake:0,push:.05,score:.125,bar:.125};   /* v47: energy is 8 bars (.125 each) for the WHOLE match: a shot costs a bar, a sprint burst costs a bar, standing still 1.5 s earns a bar, every tip off (restart after a score) gives 2 bars */   /* shooting costs the most, running little, driving into a defender is tiring but not impossible */
 /* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
    STEAL = seconds of standing chest-to-chest in front of the dribbler before the ball is taken (was .5). Dribbling through a defender is allowed but slow (PRESS). */
 const HOLD=.22,STEAL=1.5,PRESS=.76;
@@ -161,7 +163,7 @@ const CH={flash:{n:'FLASH',spd:1.1,err:1.18,blk:.85},sniper:{n:'SNIPER',spd:.95,
 function mkP(i,x,ck){const c=CH[ck]||{spd:1,err:1,blk:1};return {ch:ck||'',cs:c.spd,ce:c.err,cb:c.blk,cp:c.paint||1,co:c.out||1,i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,en:1,pj:false,cd:0,stun:0,st:0,ph:0,dd:false,dk:0,dkT:0,dkS:0,dkh:0,gath:false,gt:0,pump:0,slow:false}}
 function newGame(o,W){
   g={W,o,hp:hoops(W),t:0,P:[mkP(0,W/2-84,(o.c||[])[0]),mkP(1,W/2+84,(o.c||[])[1])],ball:{x:W/2,y:210,vx:0,vy:-430,st:'loose',live:true,own:-1,sh:-1,pts:2,t:0,rot:0,cd:.25,hit:false,dunk:false,done:false},
-    score:[0,0],clock:1e9,tol:[2,2],to:null,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],rd:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false,bb:[0,0]};
+    score:[0,0],clock:1e9,tol:[1,1],to:null,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],rd:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false,bb:[0,0]};
   pop('TIP OFF',W/2,212,'#fff',1.1);return g}
 function pop(t,x,y,c,d,big){g.pop.push({t:d||1,d:d||1,s:t,x,y,c:c||'#fff',big})}
 /* player i attacks hoop 1-i and defends hoop i (player 0 defends the left hoop) */
@@ -523,8 +525,8 @@ function draw(){MIR=!!(g&&NET.on&&NET.role==='guest');const W=g?g.W:VW,s=cv.widt
   for(const q of g.fx){const k=1-q.t/q.d;if(q.ring){X.strokeStyle='rgba(255,255,255,'+(.8*(1-k))+')';X.lineWidth=7*(1-k)+1;X.beginPath();X.ellipse(q.x,q.y,20+k*190,10+k*95,0,0,7);X.stroke();continue}if(q.burst){X.strokeStyle='rgba(255,226,140,'+(1-k)+')';X.lineWidth=3.5*(1-k)+1;for(let i=0;i<14;i++){const a=i*Math.PI/7+.2,r1=14+k*26,r2=30+k*86;X.beginPath();X.moveTo(q.x+Math.cos(a)*r1,q.y+Math.sin(a)*r1);X.lineTo(q.x+Math.cos(a)*r2,q.y+Math.sin(a)*r2);X.stroke()}continue}X.strokeStyle='rgba(255,255,255,'+(1-k)*.8+')';X.lineWidth=4-k*2;X.beginPath();X.ellipse(q.x,q.y+4,14+k*46,5+k*13,0,0,7);X.stroke();if(k>.12){X.beginPath();X.ellipse(q.x,q.y+4,8+k*28,3+k*8,0,0,7);X.stroke()}}
   X.save();X.beginPath();X.rect(0,GY+2,W,H-GY);X.clip();X.translate(0,2*GY+10);X.scale(1,-1);g.P.forEach(p=>drawP(p,true));drawBall(true);X.restore();
   const o=[...g.P].sort((a,b)=>(a.has?1:0)-(b.has?1:0));o.forEach(p=>drawP(p));drawBall();g.hp.forEach(drawHoopFront);g.hp.forEach(drawShards);if(MIR)X.restore();if(g.t<3.4)for(const p of g.P)if(p.ch&&CH[p.ch]){X.globalAlpha=Math.min(1,(3.4-g.t)*2);X.font='900 15px system-ui';X.textAlign='center';X.lineWidth=4;X.strokeStyle='rgba(4,8,16,.85)';X.strokeText(CH[p.ch].n,(MIR?W-p.x:p.x),p.y-PH-34);X.fillStyle=TEAM[p.i].c;X.fillText(CH[p.ch].n,(MIR?W-p.x:p.x),p.y-PH-34);X.globalAlpha=1}
-  X.setTransform(s,0,0,s,0,0);if(g.fl>0){X.fillStyle='rgba(255,250,235,'+(.5*g.fl*g.fl)+')';X.fillRect(0,0,W,H)}drawHUD(W);if(g.to||g.tol){for(let i=0;i<2;i++)for(let k=0;k<2;k++){X.fillStyle=g.tol[i]>k?TEAM[i].c:'rgba(255,255,255,.18)';X.beginPath();X.arc(W/2+(i?140:-140)+(k?7:-7),79,3.2,0,7);X.fill()}}
-  if(g.to){X.fillStyle='rgba(4,8,16,.5)';X.fillRect(0,92,W,H);X.textAlign='center';X.font='900 56px system-ui';X.lineWidth=8;X.strokeStyle='rgba(4,8,16,.9)';X.strokeText('TIMEOUT',W/2,H/2-20);X.fillStyle='#FFC23D';X.fillText('TIMEOUT',W/2,H/2-20);X.font='800 22px system-ui';const tx=TEAM[g.to.by].n+' · '+Math.ceil(g.to.t)+'s · +2 energy bars';X.strokeText(tx,W/2,H/2+16);X.fillStyle='#fff';X.fillText(tx,W/2,H/2+16);X.font='700 15px system-ui';X.fillStyle='#cfd9ec';X.fillText('Tap the scoreboard to end the timeout',W/2,H/2+44)}
+  X.setTransform(s,0,0,s,0,0);if(g.fl>0){X.fillStyle='rgba(255,250,235,'+(.5*g.fl*g.fl)+')';X.fillRect(0,0,W,H)}drawHUD(W);if(g.to||g.tol){for(let i=0;i<2;i++){X.fillStyle=g.tol[i]>0?TEAM[i].c:'rgba(255,255,255,.18)';X.beginPath();X.arc(W/2+(i?140:-140),79,3.6,0,7);X.fill()}}
+  if(g.to){X.fillStyle='rgba(4,8,16,.5)';X.fillRect(0,92,W,H);X.textAlign='center';X.font='900 56px system-ui';X.lineWidth=8;X.strokeStyle='rgba(4,8,16,.9)';X.strokeText('TIMEOUT',W/2,H/2-20);X.fillStyle='#FFC23D';X.fillText('TIMEOUT',W/2,H/2-20);X.font='800 22px system-ui';const tx=TEAM[g.to.by].n+' · '+Math.ceil(g.to.t)+'s';X.strokeText(tx,W/2,H/2+16);X.fillStyle='#fff';X.fillText(tx,W/2,H/2+16);X.font='700 15px system-ui';X.fillStyle='#cfd9ec';X.fillText(g.to.by===myIdx()?'Pick a character below, or tap the scoreboard to end':'Tap the scoreboard to end the timeout',W/2,H/2+44);toPanel()}else toPanel()
   
   X.textAlign='center';for(const q of g.pop){if(!q.s)continue;const k=q.t/q.d;X.globalAlpha=Math.min(1,k*3);X.font='900 '+(q.big?Math.round(40+34*Math.max(0,1-(1-k)*5)):q.s.length<4?34:24)+'px system-ui';X.lineWidth=q.big?8:5;X.strokeStyle='rgba(4,8,16,.85)';const yy=q.y-(1-k)*34;const qx=MIR?W-q.x:q.x;X.strokeText(q.s,qx,yy);X.fillStyle=q.c;X.fillText(q.s,qx,yy)}X.globalAlpha=1}
 
@@ -535,6 +537,8 @@ addEventListener('keyup',e=>{K[e.key.length===1?e.key.toLowerCase():e.key]=false
 /* v36: inside Varsity the game sits in an iframe, so the keyboard may still be on the page around it: take focus, and accept keys the page forwards */
 try{window.focus()}catch(_){}addEventListener('pointerdown',()=>{try{window.focus()}catch(_){}});
 cv.addEventListener('pointerdown',sbTap);
+{const d={flash:'Fast',sniper:'Best shot',lock:'Blocks',fin:'Paint'},tg=document.getElementById('tochg');tg.innerHTML=Object.keys(CH).map(k=>'<button type="button" data-c="'+k+'">'+CH[k].n+'<small>'+d[k]+'</small></button>').join('');
+  tg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!g||!g.to)return;const i=myIdx();if(NET.on&&NET.role==='guest')netTx({k:'ch',c:b.dataset.c});else setChar(i,b.dataset.c)})}
 /* v49: no magnifier / selection loupe / double-tap zoom when pressing buttons */
 for(const ev of ['selectstart','dblclick','gesturestart','gesturechange','gestureend'])document.addEventListener(ev,e=>{if(!(e.target&&e.target.closest&&e.target.closest('textarea,input')))e.preventDefault()},{passive:false});
 document.addEventListener('contextmenu',e=>{if(!(e.target&&e.target.closest&&e.target.closest('textarea,input')))e.preventDefault()});
@@ -592,7 +596,11 @@ function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NE
   document.getElementById('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);document.getElementById('pz').classList.add('on');document.getElementById('snd').classList.add('on');
   try{localStorage.setItem('hb-opt',JSON.stringify(OPT))}catch(_){}}
 /* v49: tap the scoreboard to call a timeout (2 each): 20 s break, +2 energy bars for the caller; tap again to end it early */
-function callTO(i){if(!g||g.phase==='over'||!g.started)return;if(g.to){if(g.to.by===i)g.to=null;return}if(!(g.tol[i]>0))return;g.tol[i]--;g.to={by:i,t:20};const p=g.P[i];p.en=Math.min(1,p.en+.25);sfx('whistle')}
+function callTO(i){if(!g||g.phase==='over'||!g.started)return;if(g.to){if(g.to.by===i)g.to=null;return}if(!(g.tol[i]>0))return;if(!g.P[i].has){pop('YOU NEED THE BALL',g.W/2,196,'#ff9a3d',.7);return}g.tol[i]--;g.to={by:i,t:10};sfx('whistle')}
+/* v50: during your timeout you may switch character */
+function setChar(i,ck){const c=CH[ck];if(!c||!g||!g.to||g.to.by!==i)return;const p=g.P[i];Object.assign(p,{ch:ck,cs:c.spd,ce:c.err,cb:c.blk,cp:c.paint||1,co:c.out||1});if(i===0)OPT.char=ck}
+function myIdx(){return OPT.mode==='2p'&&g&&g.to?g.to.by:(NET.on&&NET.role==='guest'?1:0)}
+function toPanel(){const e=document.getElementById('toch');if(!e)return;const show=!!(g&&g.to&&g.to.by===myIdx()&&g.phase!=='over');if(e.hidden===show)e.hidden=!show;if(show){const cur=g.P[g.to.by].ch;e.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===cur)))}}
 function sbTap(e){if(!g||paused||!document.getElementById('menu').hidden)return;const W=g.W,k=W/innerWidth,gx=e.clientX*k,gy=e.clientY*k;if(Math.abs(gx-W/2)>190||gy<8||gy>86)return;
   const i=OPT.mode==='2p'?(gx<W/2?0:1):(NET.on&&NET.role==='guest'?1:0);
   if(NET.on&&NET.role==='guest'){netTx({k:'to'});return}callTO(i)}
@@ -689,6 +697,7 @@ function netMsg(m){NET.last=performance.now();
   else if(m.k==='bye'){if(NET.on){if(NET.w&&NET.mid&&NET.posted!==NET.mid&&g&&g.phase!=='over'){NET.posted=NET.mid;hbPost({hb:'result',mid:NET.mid,w:NET.w,win:true,forfeit:true});NET.bal+=NET.w}netLost('Your opponent left.')}else{NET.partner='';NET.mc=null}}
   else if(m.k==='i'&&NET.role==='host'){NET.in=m.i}
   else if(m.k==='to'&&NET.role==='host'){callTO(1)}
+  else if(m.k==='ch'&&NET.role==='host'){setChar(1,m.c)}
   else if(m.k==='s'&&NET.role==='guest'&&g){const from={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};Object.assign(g,m.g);
     const t1=performance.now();NET.iv=Math.max(30,Math.min(90,NET.t0?(t1-NET.t0)*1.15:50));NET.from=from;NET.tg={P:g.P.map(p=>({x:p.x,y:p.y})),b:{x:g.ball.x,y:g.ball.y}};NET.t0=t1;for(const n of m.snd||[])sfx(n)}}
 function netGuest(dt){const now=performance.now(),inp=el('rot').hidden?(h=>({l:h.r,r:h.l,j:h.j,s:h.s}))(human(0)):{l:false,r:false,j:false},key=(inp.l?1:0)+''+(inp.r?1:0)+(inp.j?1:0)+(inp.s?1:0);

@@ -669,3 +669,6 @@ Energy: every restart after a score gives 2 bars (`EN.score .25`), standing stil
 
 ## Hoops Battle v49
 Timeouts: tap the scoreboard (canvas hit test in `sbTap`, game coords from `innerWidth`) to call one of 2 timeouts (`g.tol`, `g.to`, `callTO`): 20 s freeze, +2 energy bars for the caller, tap again to end early; 2P: left half of the scoreboard is player 1, right half player 2; online the guest sends `{k:'to'}` and the host runs it (`to`,`tol` are in `SNAPK`). Pips under the names show timeouts left. Buttons: no iOS loupe/selection/double-tap zoom (`*{user-select:none;-webkit-touch-callout:none}`, `touchstart` preventDefault on `.tb`, `#ctl`, canvas; `selectstart`, `dblclick`, `gesture*` blocked).
+
+## Hoops Battle v50
+Timeouts: ONE per team per match (`g.tol=[1,1]`), 10 s, only while your player holds the ball (`P[i].has`, else a 'YOU NEED THE BALL' pop); no energy bonus any more. During your own timeout a panel (`#toch`) lets you switch character (`setChar`, updates `ch/cs/ce/cb/cp/co`; guest sends `{k:'ch'}`). Energy: each score now gives one bar (`EN.score .125`) instead of two.
