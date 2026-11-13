@@ -1280,6 +1280,11 @@ select option{background:#0B1730;color:#EAF0F8}
 .tm-pts{display:flex;flex-direction:column;align-items:flex-end}.tm-pts b{font:900 1.3rem/1 var(--f-display)}.tm-pts small{color:var(--muted);font-size:.72rem}
 .tm-wk{font-size:.74rem;margin:4px 4px 0}
 .tm-row{grid-template-columns:24px minmax(0,1fr) auto!important}.tm-n{font:900 .95rem/1 var(--f-display);color:var(--muted);text-align:center}
+.sbr-secs .chip.sbr-off{opacity:.55}.sbr-note{margin:6px 0 10px;font-size:.85rem}
+.sbr-gl{padding:6px 14px}.sbr-g{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:.9rem}.sbr-g:first-child{border-top:0}
+.sbr-d{font-weight:700}.sbr-d small{display:block;font-weight:500;font-size:.72rem;color:var(--muted)}.sbr-ts{display:flex;flex-direction:column;gap:3px;min-width:0}.sbr-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sbr-t.win,.sbr-t.win .tlk{font-weight:800}
+.sbr-ss{display:flex;flex-direction:column;gap:3px;text-align:right;min-width:26px}.sbr-ss b{font-weight:500;color:var(--muted)}.sbr-ss b.win{font-weight:800;color:inherit}.sbr-ss small{font-size:.66rem;color:var(--muted)}
+.sbr-tm{all:unset;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:10px 0;border-top:1px solid var(--line);width:100%;box-sizing:border-box}.sbr-tm:first-child{border-top:0}.sbr-tm:focus-visible{outline:2px solid #FFC23D}.sbr-tn{font-weight:700}.sbr-tm .muted{grid-column:1;font-size:.8rem}.sbr-tm b{grid-row:1/3;grid-column:2;align-self:center}
 .tm-gl{display:flex;flex-direction:column}.tm-g{display:grid;grid-template-columns:48px minmax(0,1fr) auto 54px;gap:10px;align-items:center;padding:9px 2px;border-top:1px solid var(--line);font-size:.9rem}.tm-g:first-child{border-top:0}
 .tm-gd{color:var(--muted);font-size:.78rem}.tm-go{display:flex;align-items:center;gap:8px;min-width:0}.tm-go>span:not(.tm-lg){min-width:0;line-height:1.15;font-weight:700}.tm-go .tlk{white-space:normal;text-align:left}.tm-lg{flex:none;width:22px;height:22px;display:inline-grid;place-items:center}.tm-po{display:block;width:max-content;margin-top:3px;font-style:normal;font-size:.62rem;font-weight:800;color:#FFC23D;border:1px solid rgba(255,194,61,.5);border-radius:6px;padding:1px 5px}
 .tm-gs{display:flex;gap:7px;align-items:center;justify-content:flex-end;font-weight:800;white-space:nowrap}.tm-r{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;font-size:.78rem;background:rgba(255,255,255,.1)}
@@ -3419,7 +3424,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v477 · Nov 13';
+const APP_BUILD='v481 · Nov 13';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7847,13 +7852,102 @@ const MGI=(()=>{const w=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</sv
   const simBody=()=>viewSim().replace(/^<div class="head"><h2>Simulate<\/h2><p>[\s\S]*?<\/p><\/div>/,'');
   return head+tabs+sub+help+(T==='hb'?hbHTML():T==='rc'?rcHTML():T==='fg'?fgHTML():T==='draw'?fcHTML():T==='mock'?mockHTML():T==='sim'?simBody():PT==='props'?propsHTML():PT==='pkl'?pklHTML():picksHTML());
 }
+/* ---------- v481 section browser: every other California section, read-only (schedule, scores, standings, teams) ----------
+   Data is the JSON the collector commits to data/sections/ (index.json + one file per section). It is loaded only when you open a section, never at start-up, and it never touches GAMES, picks, wagers or leagues. San Diego keeps its full app. */
+const SEC_URL='data/sections/';
+const SBR={idx:null,data:{},busy:{},err:{}};
+UI.sb=HOME_SEC;UI.sbt='sched';UI.sbw=null;UI.sbl='ALL';UI.sbtm=null;
+function sbFetch(key,url,done,id){if(SBR.busy[key]||SBR.err[key])return;SBR.busy[key]=1;
+  fetch(url,{cache:'no-cache'}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(done).catch(()=>{SBR.err[key]=1}).finally(()=>{delete SBR.busy[key];if(!id||UI.sb===id)render()})}
+function sbIdx(){if(!SBR.idx)sbFetch('idx',SEC_URL+'index.json',j=>{SBR.idx=j&&j.sections?j:{sections:{}}});return SBR.idx}
+function sbData(id){const d=SBR.data[id];if(!d)sbFetch(id,SEC_URL+id+'.json',j=>{SBR.data[id]=sbPrep(j)},id);return d}
+/* one pass over a section's games for this sport: per-team records, the schools that play this sport, the Monday of each game's week */
+function sbPrep(j){
+  const games=(j.games||[]).filter(g=>g.sport===FG_SPORT).map(g=>Object.assign({wk:g.date?sbMon(g.date):''},g));
+  const sch={};(j.schools||[]).forEach(s=>{sch[s.id]=s});
+  const T={};const team=(id,name)=>{const k=id||'n:'+name;if(!T[k]){const s=sch[id]||{};T[k]=Object.assign({id:k,name:s.name||name,city:s.city||'',league:s.league||'',division:s.division||''},{w:0,l:0,t:0,pf:0,pa:0})}return T[k]};
+  games.forEach(g=>{const h=team(g.home_id,g.home),a=team(g.away_id,g.away);if(g.hs==null||g.as==null)return;
+    [[h,g.hs,g.as],[a,g.as,g.hs]].forEach(([x,f,o])=>{x.pf+=f;x.pa+=o;if(f>o)x.w++;else if(f<o)x.l++;else x.t++})});
+  return {section:j.section,synced:j.synced,partial:!!j.partial,games,teams:T,nSchools:Object.keys(T).length,played:games.filter(g=>g.hs!=null).length};
+}
+function sbMon(d){const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()-(x.getUTCDay()+6)%7);return x.toISOString().slice(0,10)}
+const sbDay=d=>d?new Date(d+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'}):'';
+const sbWd=d=>d?new Date(d+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',timeZone:'UTC'}):'';
+const sbRec=x=>x.w+'-'+x.l+(x.t?'-'+x.t:'');
+const sbPct=x=>x.w/((x.w+x.l+x.t)||1);
+function sbChips(){
+  const ix=(sbIdx()||{sections:{}}).sections;
+  return `<div class="chips gm-wks sbr-secs" role="group" aria-label="Section">${Object.values(SECTIONS).map(s=>{const n=s.id===HOME_SEC?1:(ix[s.id]||{}).games;return `<button class="chip${n?'':' sbr-off'}" data-act="sb" data-v="${s.id}" aria-pressed="${UI.sb===s.id}">${esc(s.name)}</button>`}).join('')}</div>`;
+}
+function sbTeamLink(t,fallback){return t?`<button class="tlk" data-act="sbteam" data-id="${esc(t.id)}">${esc(t.name)}</button>`:esc(fallback)}
+function sbGameRow(g,D){
+  const H=D.teams[g.home_id||'n:'+g.home],A=D.teams[g.away_id||'n:'+g.away],done=g.hs!=null&&g.as!=null;
+  const hw=done&&g.hs>g.as,aw=done&&g.as>g.hs;
+  return `<div class="sbr-g"><span class="sbr-d">${esc(sbWd(g.date))}<small>${esc(sbDay(g.date))}${g.time&&!done?' · '+esc(g.time):''}</small></span><span class="sbr-ts"><span class="sbr-t${aw?' win':''}">${sbTeamLink(A,g.away)}</span><span class="sbr-t${hw?' win':''}">${sbTeamLink(H,g.home)}</span></span><span class="sbr-ss">${done?`<b class="${aw?'win':''}">${g.as}</b><b class="${hw?'win':''}">${g.hs}</b>${g.forfeit?'<small>forfeit</small>':''}`:''}</span></div>`;
+}
+function sbSched(D){
+  const today=TODAY(),weeks=[...new Set(D.games.map(g=>g.wk).filter(Boolean))].sort();
+  if(!weeks.length)return `<p class="empty">No ${FG_SPORT==='bb'?'basketball':'football'} games in this section yet.</p>`;
+  const cur=weeks.find(w=>w>=sbMon(today))||weeks[weeks.length-1];
+  const w=UI.sbw&&weeks.includes(UI.sbw)?UI.sbw:cur;
+  const leagues=[...new Set(Object.values(D.teams).map(t=>t.league).filter(Boolean))].sort();
+  const lg=UI.sbl!=='ALL'&&leagues.includes(UI.sbl)?UI.sbl:'ALL';
+  let list=D.games.filter(g=>g.wk===w);
+  if(lg!=='ALL')list=list.filter(g=>[D.teams[g.home_id||'n:'+g.home],D.teams[g.away_id||'n:'+g.away]].some(t=>t&&t.league===lg));
+  list.sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0)||a.home.localeCompare(b.home));
+  const fin=list.filter(g=>g.hs!=null).length;
+  return `<div class="tools"><div class="chips gm-wks" role="group" aria-label="Week">${weeks.map(x=>`<button class="chip" data-act="sbw" data-v="${x}" aria-pressed="${x===w}">${esc(sbDay(x))}${x===cur?' •':''}</button>`).join('')}</div>
+    ${leagues.length?`<label class="fld"><span>League</span><select data-act="sbl"><option value="ALL">All leagues</option>${leagues.map(l=>`<option ${lg===l?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`:''}</div>
+    <div class="qh"><h3>Week of ${esc(sbDay(w))}</h3><span class="muted">${list.length} ${list.length===1?'game':'games'}${fin?` · ${fin} final`:''}</span></div>
+    ${list.length?`<section class="card sbr-gl">${list.slice(0,300).map(g=>sbGameRow(g,D)).join('')}</section>`:'<p class="empty">No games this week.</p>'}`;
+}
+function sbStand(D){
+  const by={};Object.values(D.teams).filter(t=>t.w+t.l+t.t>0).forEach(t=>{const k=t.league||t.division||'Other';(by[k]=by[k]||[]).push(t)});
+  const keys=Object.keys(by).sort((a,b)=>a.localeCompare(b));
+  if(!keys.length)return '<p class="empty">No results yet.</p>';
+  return keys.map(k=>{const l=by[k].sort((a,b)=>sbPct(b)-sbPct(a)||(b.pf-b.pa)-(a.pf-a.pa)||a.name.localeCompare(b.name));
+    return `<section class="card"><div class="qh"><h3>${esc(k)}</h3><span class="muted">${l.length} ${l.length===1?'team':'teams'}</span></div><div class="scroll"><table><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th></tr></thead><tbody>${l.map((t,i)=>`<tr><td>${i+1}</td><td>${sbTeamLink(t)}</td><td>${sbRec(t)}</td><td>${t.pf}</td><td>${t.pa}</td></tr>`).join('')}</tbody></table></div></section>`}).join('');
+}
+function sbTeams(D){
+  const all=Object.values(D.teams).sort((a,b)=>a.name.localeCompare(b.name));
+  const leagues=[...new Set(all.map(t=>t.league).filter(Boolean))].sort();
+  const lg=UI.sbl!=='ALL'&&leagues.includes(UI.sbl)?UI.sbl:'ALL';
+  const l=lg==='ALL'?all:all.filter(t=>t.league===lg);
+  return `<div class="tools">${leagues.length?`<label class="fld"><span>League</span><select data-act="sbl"><option value="ALL">All leagues</option>${leagues.map(x=>`<option ${lg===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`:''}</div>
+    <div class="qh"><h3>Teams</h3><span class="muted">${l.length}</span></div>
+    <section class="card sbr-gl">${l.map(t=>`<button class="sbr-tm" data-act="sbteam" data-id="${esc(t.id)}"><span class="sbr-tn">${esc(t.name)}</span><span class="muted">${esc([t.city,t.league].filter(Boolean).join(' · '))}</span><b>${t.w+t.l+t.t?sbRec(t):'-'}</b></button>`).join('')||'<p class="empty">No teams.</p>'}</section>`;
+}
+function sbTeamPage(D,id){
+  const t=D.teams[id];
+  const back=`<button class="btn sm ghost" data-act="sbteam" data-id="">← Back</button>`;
+  if(!t)return `<p class="empty">We could not find that team.</p>${back}`;
+  const gs=D.games.filter(g=>(g.home_id||'n:'+g.home)===id||(g.away_id||'n:'+g.away)===id).sort((a,b)=>a.date<b.date?-1:1);
+  return `<section class="card tm-hero"><span class="tm-logo">${av(t.name,t.name,64)}</span><div><h2>${esc(t.name)}</h2><p class="muted">${t.w+t.l+t.t?`<b>${sbRec(t)}</b> · ${t.pf} points for, ${t.pa} against`:'No games played yet'}${t.league?' · '+esc(t.league):''}${t.city?' · '+esc(t.city):''}</p></div>${back}</section>
+    <section class="card sbr-gl"><div class="qh"><h3>Games</h3><span class="muted">${gs.length} scheduled</span></div>${gs.map(g=>sbGameRow(g,D)).join('')||'<p class="empty">No games on the schedule.</p>'}</section>
+    <section class="card"><div class="qh"><h3>Players</h3></div><p class="muted">Rosters and player stats for this section are coming soon.</p></section>`;
+}
+function viewSection(id){
+  const s=SECTIONS[id],ix=sbIdx();
+  const soon=`<section class="card"><div class="qh"><h3>${esc(s.full)}</h3></div><p class="muted">${ix?'Games and scores for this section are coming soon.':'Loading...'}</p></section>`;
+  if(!ix)return soon;
+  if(!(ix.sections[id]||{}).games&&!SBR.data[id])return soon;
+  const D=sbData(id);
+  if(!D)return SBR.err[id]?soon:`<p class="empty">Loading ${esc(s.name)}...</p>`;
+  if(UI.sbtm)return sbTeamPage(D,UI.sbtm);
+  const T=['sched','stand','teams'].includes(UI.sbt)?UI.sbt:'sched';
+  const sub=`<div class="chips gm-tabs" role="group" aria-label="Section view">${[['sched','Schedule'],['stand','Standings'],['teams','Teams']].map(([v,l])=>`<button class="chip" data-act="sbt" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
+  const note=`<p class="muted sbr-note">${esc(s.full)} · ${D.nSchools} teams · ${D.played} of ${D.games.length} games final${D.partial?' · still being collected, some teams may be missing':''}. View only for now: picks and leagues are San Diego.</p>`;
+  return note+sub+(T==='stand'?sbStand(D):T==='teams'?sbTeams(D):sbSched(D));
+}
+
 function viewGames(){
   const T=['sched','stand'].includes(UI.gtab)?UI.gtab:'sched';
   const head=`<div class="head"><h2>Games</h2><p>${({picks:'Pick the winners of upcoming games.',stand:'Records and playoff seeds.',draw:'Get dealt 5 random players each week and redraw up to '+FC_REDRAWS+'.'})[T]||'Every game, the standings and the playoff bracket.'}</p></div>`;
+  if(UI.sb!==HOME_SEC&&SECTIONS[UI.sb])return `<div class="head"><h2>Games</h2><p>${esc(SECTIONS[UI.sb].full)}: schedule, scores and standings.</p></div>`+sbChips()+viewSection(UI.sb);
   const tabs=`<div class="chips gm-tabs" role="group" aria-label="Games sections">${[['sched','Schedule'],['stand','Standings']].map(([v,l])=>`<button class="chip" data-act="gtab" data-v="${v}" aria-pressed="${T===v}">${l}</button>`).join('')}</div>`;
   const gs=(GAMES&&GAMES.games)||[];
-  if(T==='stand')return head+tabs+standingsHTML(gs,UI.gschool);
-  return head+tabs+`<div class="qh"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()+`<div class="gm-split" style="margin-top:28px"><div class="gm-half">${anticipatedHTML()}<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>${viewSched('')}</div><div class="gm-half gm-side"><div class="qh"><h2 class="h-sec">Standings</h2></div>${standingsHTML(gs,UI.gschool)}</div></div>`;
+  if(T==='stand')return head+sbChips()+tabs+standingsHTML(gs,UI.gschool);
+  return head+sbChips()+tabs+`<div class="qh"><h2 class="h-sec">Playoff bracket</h2></div>`+playoffsHTML()+`<div class="gm-split" style="margin-top:28px"><div class="gm-half">${anticipatedHTML()}<div class="qh" style="margin-top:28px"><h2 class="h-sec">All games by week</h2></div>${viewSched('')}</div><div class="gm-half gm-side"><div class="qh"><h2 class="h-sec">Standings</h2></div>${standingsHTML(gs,UI.gschool)}</div></div>`;
 }
 
 
@@ -9957,6 +10051,10 @@ document.addEventListener('click',async e=>{
     if(!Object.keys(patch).length){UI.bkS={};render();return}
     if(await act(()=>upsert('picks/'+ME.uid,{bk:patch}),Object.keys(patch).length+(Object.keys(patch).length===1?' pick':' picks')+' saved')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{bk:Object.assign({},sv,patch)});UI.bkS={};render()}}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
+  else if(a==='sb'){UI.sb=t.dataset.v;UI.sbtm=null;UI.sbw=null;UI.sbl='ALL';UI.sbt='sched';delete SBR.err[UI.sb];delete SBR.err.idx;render()}
+  else if(a==='sbt'){UI.sbt=t.dataset.v;UI.sbl='ALL';render()}
+  else if(a==='sbw'){UI.sbw=t.dataset.v;render()}
+  else if(a==='sbteam'){UI.sbtm=t.dataset.id||null;render();scrollTo(0,0)}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
   else if(a==='cmpPick'){const sd=+t.dataset.s,pl=players().filter(x=>x.mp&&x.key!==t.dataset.id);
     UI.cmp[sd]=t.dataset.id;UI.cmpNew=sd;UI.cmpPh='land';
@@ -10231,6 +10329,7 @@ document.addEventListener('change',async e=>{
   else if(a==='entryPlayer'){UI.entry.pid=t.value;UI.entry.vals={};$('#entry-fields').innerHTML=entryFields()}
   else if(a==='entryWeek'){UI.entry.week=+t.value}
   else if(a==='gschool'){UI.gschool=t.value;render()}
+  else if(a==='sbl'){UI.sbl=t.value;render()}
   else if(a==='meSchool'){await act(()=>upsert('profiles/'+ME.uid,{school:t.value}))}
   else if(a==='mePos'){UI.meEntry.vals={};await act(()=>upsert('profiles/'+ME.uid,{pos:t.value}))}
   else if(a==='meName'){const v=t.value.trim();if(v.length>1)await act(()=>upsert('profiles/'+ME.uid,{name:v}));else render()}
