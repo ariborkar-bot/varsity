@@ -592,3 +592,6 @@ Owner: no real-money options. Removed the `usd` price field from every pack in `
 
 ## v460
 Owner: Compare players is back to how it was before v430 (no fixed-height search box, no min-heights, no scroll anchoring off, picking a player centres the card again with scrollIntoView, Clear/Reset do not scroll). `cmpTop` removed. The admin card search box (`#ctl-res`) keeps its fixed height.
+
+## v461
+Owner: football 5 Card Draw pays on the Friday after the week's last game (Pacific date, `fcFriday`, `fcPastFriday`) even if stats or scores are missing; a missing line counts as 0. `fcWeekDone` returns true from that Friday, which also releases the packs, tokens and School Cup rewards for that week. Week 12 (games Nov 6) pays Fri Nov 13. Basketball daily hands are unchanged.

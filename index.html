@@ -3391,7 +3391,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v460 · Nov 12';
+const APP_BUILD='v461 · Nov 12';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -6765,8 +6765,11 @@ const fcDnp=(p,sl)=>{if(!p||fcPts(p,sl))return false;const g=fcGamesOf(sl).find(
 function fcWaiting(w,only){let n=0;const seen=new Set();for(const u of Object.keys(S.picks))for(const sl of (only!=null?[only]:fcSlotsOf(w))){const hd=fcHand(u,sl);if(!hd)continue;for(const k of hd.h||[]){const p=pByKey(k),id=k+'|'+sl;if(p&&!seen.has(id)){seen.add(id);if(!fcPts(p,sl)&&!fcDnp(p,sl))n++}}}return n}
 /* v315 (owner): prizes and tokens pay out only when every game that week is final AND every player in every hand has a stat line, so the winners are known for sure.
    (Before v315 a missing stat line stopped blocking after the Thursday following the week.) */
-function fcWeekDone(w){const gs=fcIdx().w[w]||[];if(!gs.length)return w<CURW();if(!gs.every(gDone))return false;return fcWaiting(w)===0}
-const fcWaitNote=w=>{const gs=fcGamesOf(w);if(!gs.length||!gs.every(gDone))return '';const n=FC_DAILY?fcWaiting(null,w):fcWaiting(w);return n?`<p class="hint">Prizes pay out once every player in every hand has a stat line (a player who didn’t play counts as 0). Waiting on ${n} ${n===1?'player':'players'}.</p>`:''};
+/* v461 (owner): football 5 Card Draw pays on the Friday after the week's last game (Pacific date) even if some stats or scores are still missing (a missing line counts as 0) */
+const fcFriday=w=>{const ds=(fcIdx().w[w]||[]).map(g=>g.d).filter(Boolean).sort();if(!ds.length)return '';const d=new Date(ds[ds.length-1]+'T12:00:00Z'),add=((5-d.getUTCDay()+7)%7)||7;return new Date(d.getTime()+add*864e5).toISOString().slice(0,10)};
+const fcPastFriday=w=>{if(FC_DAILY)return false;const f=fcFriday(w);return !!f&&TODAY()>=f};
+function fcWeekDone(w){const gs=fcIdx().w[w]||[];if(!gs.length)return w<CURW();if(fcPastFriday(w))return true;if(!gs.every(gDone))return false;return fcWaiting(w)===0}
+const fcWaitNote=w=>{const gs=fcGamesOf(w);if(!gs.length||!gs.every(gDone))return '';const n=FC_DAILY?fcWaiting(null,w):fcWaiting(w);return n?`<p class="hint">Prizes pay out once every player in every hand has a stat line (a player who didn’t play counts as 0), or on the Friday after the week’s last game, whichever comes first. Waiting on ${n} ${n===1?'player':'players'}.</p>`:''};
 /* v319 (owner): basketball 5 Card Draw prizes are DAILY: each game day has its own board (that day's hands), paid once every game that day is final and every hand player has a line.
    The prize unit is the slot (the day number in basketball, the week in football); fcLbWeeks lists the last finished units. The School Cup stays weekly (fcWeekDone / fcRank). */
 const FC_LB_DAYS=7;
