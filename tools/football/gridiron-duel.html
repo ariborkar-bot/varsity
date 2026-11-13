@@ -105,7 +105,7 @@ function movePl(p,i,off,inp,dt){
   const car=i===off,vm0=car?VR:VD;let sx=clamp(inp.x||0,-1,1),sy=clamp(inp.y||0,-1,1);
   p.cd=Math.max(0,p.cd-dt);p.inv=Math.max(0,p.inv-dt);p.hw=Math.max(0,p.hw-dt);p.hc=Math.max(0,p.hc-dt);
   const free=p.act===''||p.act==='get'||p.act==='jam';
-  const spr=!!inp.s&&sy>.3&&p.st>.04&&free;
+  const spr=!!inp.s&&(sy>.3||(inp.cam&&G.th===1&&G.ft>.2&&Math.hypot(sx,sy)>.3))&&p.st>.04&&free;
   if(spr)p.st=Math.max(0,p.st-.4*dt);else p.st=Math.min(1,p.st+.2*dt);
   let vm=vm0*(spr?SPR:1)*(.8+.2*Math.min(1,p.st/.3));
   if(p.act==='cut'){p.vx=p.dx*CUTD;p.vz=p.dz*CUTD;p.at-=dt;if(p.at<=0){p.act='';p.vx*=.6;p.vz*=.6}}
@@ -114,9 +114,14 @@ function movePl(p,i,off,inp,dt){
   else if(p.act==='down'){p.vx*=Math.max(0,1-dt*7);p.vz*=Math.max(0,1-dt*7);p.at-=dt;if(p.at<=0){p.act='get';p.at=.4}}
   else{
     if(p.act==='get'){vm*=.45;p.at-=dt;if(p.at<=0)p.act=''}else if(p.act==='jam'){vm*=.5;p.at-=dt;if(p.at<=0)p.act=''}
+    if(inp.cam&&G.th===1&&G.ft>.2){ /* head is turned to the ball: stick is relative to what you SEE */
+      const cy=Math.atan2(G.ball.x-p.x,G.ball.z-p.z),m=Math.min(1,Math.hypot(sx,sy)),wx=Math.sin(cy)*sy+Math.cos(cy)*sx,wz=Math.cos(cy)*sy-Math.sin(cy)*sx,wl=Math.hypot(wx,wz)||1;
+      if(m>.15)p.mh+=wrap(Math.atan2(wx,wz)-p.mh)*Math.min(1,dt*5);
+      let dx=wx/wl*m*vm-p.vx,dz=wz/wl*m*vm-p.vz;const d=Math.hypot(dx,dz),lim=ACC*dt;if(d>lim){dx*=lim/d;dz*=lim/d}p.vx+=dx;p.vz+=dz}
+    else{
     p.mh+=sx*TR*(spr?.8:1)*dt;const fx=Math.sin(p.mh),fz=Math.cos(p.mh),rx=Math.cos(p.mh),rz=-Math.sin(p.mh);
     const fv=sy>0?sy*vm:sy*vm*BACK,tx=fx*fv+rx*sx*vm*STRAFE,tz=fz*fv+rz*sx*vm*STRAFE;
-    let dx=tx-p.vx,dz=tz-p.vz;const d=Math.hypot(dx,dz),lim=ACC*dt;if(d>lim){dx*=lim/d;dz*=lim/d}p.vx+=dx;p.vz+=dz}
+    let dx=tx-p.vx,dz=tz-p.vz;const d=Math.hypot(dx,dz),lim=ACC*dt;if(d>lim){dx*=lim/d;dz*=lim/d}p.vx+=dx;p.vz+=dz}}
   p.x+=p.vx*dt;p.z+=p.vz*dt;p.ph+=Math.hypot(p.vx,p.vz)*dt*1.15}
 function stickDir(p,inp,other,fwdIfIdle){const sx=inp.x||0,sy=inp.y||0,m=Math.hypot(sx,sy),fx=Math.sin(p.mh),fz=Math.cos(p.mh),rx=Math.cos(p.mh),rz=-Math.sin(p.mh);
   let dx,dz;if(m>.3){dx=fx*sy+rx*sx;dz=fz*sy+rz*sx}else if(fwdIfIdle){dx=fx;dz=fz}else{const side=(other.x-p.x)*rx+(other.z-p.z)*rz>0?-1:1;dx=rx*side+fx*.35;dz=rz*side+fz*.35}
@@ -300,7 +305,7 @@ addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown
 addEventListener('keyup',e=>{K[e.key.length===1?e.key.toLowerCase():e.key]=false});
 addEventListener('blur',()=>{for(const k in K)K[k]=false});
 function humanInput(){const kx=(K.ArrowRight||K.d?1:0)-(K.ArrowLeft||K.a?1:0),ky=(K.ArrowUp||K.w?1:0)-(K.ArrowDown||K.s?1:0);
-  const x=kx||TS.x,y=ky||-TS.y;return{x,y,a:!!(K[' ']||K.z||TS.a),s:!!(K.Shift||K.x||TS.s)}}
+  const x=kx||TS.x,y=ky||-TS.y;return{x,y,a:!!(K[' ']||K.z||TS.a),s:!!(K.Shift||K.x||TS.s),cam:true}}
 function fixLabel(){if(!G||!G.s||G.th==null)return;const isR=G.me===G.s.poss,t=G.th===1?(isR?'CATCH':'SWAT'):G.th===2?(isR?'JUKE':'DIVE'):(isR?'CUT':'JAM'),b=el('bA');if(b.textContent!==t)b.textContent=t}
 let last=0,acc=0;
 function mkG(){return{s:newState(),ph:'snap',t:0,me:0,fx:[],evq:[],shake:0,pl:[mkPl(),mkPl()],prevA:[false,false],ai:[{h:0,rt:null},{h:0,rt:null}],th:0,ft:-1,qb:{x:0,z:29},ball:{x:0,z:29,h:1.6}}}

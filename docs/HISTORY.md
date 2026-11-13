@@ -648,3 +648,6 @@ Owner disliked the turn-based v2 (kept as `gridiron-duel-playcall-v2.html`) and 
 
 ## Gridiron Duel v4 (first person receiver vs defender, tools/football/gridiron-duel.html)
 Owner wanted a first person receiver vs QB feel, not the top-down view; chose receiver vs defender (computer QB throws 2.2-3 s after the snap, leading the receiver). Canvas pseudo-3D (`poly`/`cam3`, billboard figures, stands, yard numbers). Tank steering: stick left/right turns, up runs, down backpedals. One contextual button: receiver CUT / CATCH / JUKE, defender JAM / SWAT / DIVE (hands window `HWIN`; closer to the ball wins, D tie-break; D within `PICK` = interception). Camera auto-turns to the ball (`camTarget`). Rules as v3 (downs, TD 7, first to 21, roles swap on turnover). Old top-down kept as `gridiron-duel-topdown-v3.html`, turn-based as `-playcall-v2`. Not linked in the app; online untested on real phones.
+
+## Gridiron Duel v4.1
+Owner: when the head turns to the ball, up/down felt flipped. While the ball is in the air (and the head is turned, `ft>.2`) a human's stick is now relative to the view (`inp.cam`): up runs toward what you see, the body turns to follow. AI is unchanged.
