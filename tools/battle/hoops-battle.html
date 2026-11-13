@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v36</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v37</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -135,7 +135,7 @@ let AC=null;
 function audio(){if(AC||muted)return;try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(_){AC=null}}
 function tone(f,d,type,v,slide){if(!AC||muted)return;try{const t=AC.currentTime,o=AC.createOscillator(),a=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);a.gain.setValueAtTime(v||.12,t);a.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(a).connect(AC.destination);o.start(t);o.stop(t+d)}catch(_){}}
 function noise(d,v){if(!AC||muted)return;try{const n=AC.sampleRate*d,b=AC.createBuffer(1,n,AC.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(rnd()*2-1)*(1-i/n);const s=AC.createBufferSource(),a=AC.createGain(),f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=1800;a.gain.value=v||.18;s.buffer=b;s.connect(f).connect(a).connect(AC.destination);s.start()}catch(_){}}
-const SFX={bounce:()=>tone(150,.07,'sine',.16,70),rim:()=>tone(520,.09,'triangle',.1,300),swish:()=>noise(.28,.22),jump:()=>tone(260,.08,'sine',.05,420),slam:()=>{tone(95,.26,'square',.2,40);noise(.2,.24)},block:()=>{tone(110,.14,'square',.14,60);noise(.08,.12)},steal:()=>tone(700,.1,'square',.07,1100),buzz:()=>tone(160,.7,'sawtooth',.13,150),perfect:()=>tone(880,.12,'sine',.1,1320),whistle:()=>tone(1900,.18,'square',.05,1700)};
+const SFX={glass:()=>{noise(.55,.34);tone(2600,.16,'triangle',.09,1300);setTimeout(()=>tone(3300,.12,'triangle',.06,1800),70);setTimeout(()=>tone(2100,.1,'triangle',.05,900),150);tone(80,.3,'square',.16,40)},bounce:()=>tone(150,.07,'sine',.16,70),rim:()=>tone(520,.09,'triangle',.1,300),swish:()=>noise(.28,.22),jump:()=>tone(260,.08,'sine',.05,420),slam:()=>{tone(95,.26,'square',.2,40);noise(.2,.24)},block:()=>{tone(110,.14,'square',.14,60);noise(.08,.12)},steal:()=>tone(700,.1,'square',.07,1100),buzz:()=>tone(160,.7,'sawtooth',.13,150),perfect:()=>tone(880,.12,'sine',.1,1320),whistle:()=>tone(1900,.18,'square',.05,1700)};
 const NET={on:false,role:'',sb:null,lb:null,mc:null,partner:'',up:false,last:0,lastIn:'',lastInT:0,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null,t0:0};
 const sfx=n=>{if(NET.on&&NET.role==='host')NET.snd.push(n);if(SFX[n])SFX[n]()};
 
@@ -144,11 +144,11 @@ function hoops(W){return [{cx:77,bd:30,dir:1},{cx:W-77,bd:W-30,dir:-1}]}
 function mkP(i,x){return {i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,en:1,pj:false,cd:0,stun:0,st:0,ph:0,dd:false,dk:0,dkT:0,dkS:0,dkh:0,gath:false,gt:0,pump:0,slow:false}}
 function newGame(o,W){
   g={W,o,hp:hoops(W),t:0,P:[mkP(0,W/2-84),mkP(1,W/2+84)],ball:{x:W/2,y:210,vx:0,vy:-430,st:'loose',live:true,own:-1,sh:-1,pts:2,t:0,rot:0,cd:.25,hit:false,dunk:false,done:false},
-    score:[0,0],clock:o.len,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],rd:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false};
+    score:[0,0],clock:o.len,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],rd:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false,bb:[0,0]};
   pop('TIP OFF',W/2,212,'#fff',1.1);return g}
 function pop(t,x,y,c,d,big){g.pop.push({t:d||1,d:d||1,s:t,x,y,c:c||'#fff',big})}
 /* player i attacks hoop 1-i and defends hoop i (player 0 defends the left hoop) */
-function setup(i,tip){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.gath=false;p.pump=0;p.dk=0;p.kd=0;p.dd=false;p.dr=false;p.en=Math.min(1,p.en+EN.score)});
+function setup(i,tip){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.air=p.shoot=p.has=false;p.stun=p.st=p.cd=0;p.pj=true;p.gath=false;p.pump=0;p.dk=0;p.kd=0;p.fb=false;p.dd=false;p.dr=false;p.en=Math.min(1,p.en+EN.score)});
   g.P[i].x=a.cx+a.dir*150;g.P[1-i].x=g.W/2+a.dir*46;g.P[i].has=true;g.P[i].face=a.dir;g.P[1-i].face=-a.dir;
   Object.assign(b,{st:'held',own:i,sh:-1,vx:0,vy:0,live:false,hit:false,dunk:false,done:false,cd:0,t:0});g.sc=SC;g.phase='live';g.hold=.55;g.ai=[{},{}];
   /* v18: after a basket both players start at centre court and the ball goes up like a tip-off, drifting toward the side of the player who was just scored on */
@@ -157,7 +157,7 @@ function setup(i,tip){const a=g.hp[i],b=g.ball;g.P.forEach(p=>{p.vx=p.vy=0;p.y=G
 
 /* ---------------- one simulation step. inp = [{l,r,j},{l,r,j}] ---------------- */
 function step(dt,inp){
-  g.t+=dt;for(const q of g.pop)q.t-=dt;g.pop=g.pop.filter(q=>q.t>0);for(const q of g.fx)q.t-=dt;g.fx=g.fx.filter(q=>q.t>0);g.shake=Math.max(0,g.shake-dt*2.6);g.zm=Math.max(0,(g.zm||0)-dt*2.4);g.fl=Math.max(0,(g.fl||0)-dt*3.2);g.net[0]=Math.max(0,g.net[0]-dt*2.2);g.net[1]=Math.max(0,g.net[1]-dt*2.2);g.rd[0]=Math.max(0,g.rd[0]-dt*2.6);g.rd[1]=Math.max(0,g.rd[1]-dt*2.6);
+  g.t+=dt;g.bb[0]=Math.max(0,g.bb[0]-dt);g.bb[1]=Math.max(0,g.bb[1]-dt);for(const q of g.pop)q.t-=dt;g.pop=g.pop.filter(q=>q.t>0);for(const q of g.fx)q.t-=dt;g.fx=g.fx.filter(q=>q.t>0);g.shake=Math.max(0,g.shake-dt*2.6);g.zm=Math.max(0,(g.zm||0)-dt*2.4);g.fl=Math.max(0,(g.fl||0)-dt*3.2);g.net[0]=Math.max(0,g.net[0]-dt*2.2);g.net[1]=Math.max(0,g.net[1]-dt*2.2);g.rd[0]=Math.max(0,g.rd[0]-dt*2.6);g.rd[1]=Math.max(0,g.rd[1]-dt*2.6);
   if(g.phase==='over')return;
   const live=g.phase==='live'&&g.hold<=0;if(g.hold>0)g.hold-=dt;
   const a=g.P[0],b=g.P[1],close=!a.air&&!b.air&&Math.abs(b.x-a.x)<PW*2+4;a.slow=close&&a.has;b.slow=close&&b.has;
@@ -193,7 +193,7 @@ function release(p,late){
   const h=g.hp[1-p.i],o=g.P[1-p.i],b=g.ball,hx=p.x+p.face*8,hy=p.y-PH-16,dist=Math.abs(h.cx-p.x);
   const q=late?0:1-Math.min(1,Math.abs(p.jt-p.ap)/.22),perfect=q>.88;
   p.has=false;p.dd=false;p.shoot=false;p.cd=.4;Object.assign(b,{own:-1,sh:p.i,t:0,live:false,st:'shot',hit:false,dunk:false,done:false,q});g.stat[p.i].fga++;
-  if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
+  if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.fb=Math.abs(p.vx)>SPD*.7&&Math.abs(o.x-p.x)>230;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=(p.tk!=null?p.tk:dist)>TP?3:2;   /* v20: a three is decided by where he left the floor, like the line on the court */
   const near=Math.abs(o.x-p.x),hi=o.air&&o.y<GY-36,contest=Math.max(0,1-near/125)*(hi?1.8:1)*1.4+(hi&&near<98?.4:0)   /* v23: the closer and higher the defender's hand, the worse the shot; felt from 125 px out */,tired=p.en<.25?(1-p.en/.25)*20:0;
   let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*34*(1-q*.4)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*30+tired*.6;
@@ -206,7 +206,8 @@ function stepBall(dt){
     if(p.dkS===2){const a=-Math.PI/2+f*k*Math.PI*2,R=36*PS,w=Math.max(0,(k-.6)/.4),sh=p.y-71*PS;x=(p.x+f*6+Math.cos(a)*R)*(1-w)+h.cx*w;y=(sh+Math.sin(a)*R)*(1-w)+(RIMY-16)*w}
     else{const x0=p.x+f*12,y0=p.y-PH-20;x=x0+(h.cx-x0)*k*k;y=y0+(RIMY-16-y0)*k*k}
     b.x=x;b.y=y;b.vx=b.vy=0;b.rot+=dt*8;
-    if(b.dh<=0){b.dh=0;{const dn=g.P[1-b.sh];if(dn&&dn.air&&Math.abs(dn.x-g.P[b.sh].x)<150){dn.kd=1.25;dn.kdD=Math.sign(dn.x-g.P[b.sh].x)||-g.P[b.sh].face;dn.vx=dn.kdD*230;dn.vy=Math.min(dn.vy,-60);dn.shoot=false;dn.has=false;pop('POSTERIZED!',h.cx+h.dir*250,RIMY+30,'#ffd35a',1.4,1);g.shake=Math.max(g.shake,1.1)}}b.x=h.cx;b.y=RIMY-12;b.vy=520;g.shake=1.3;g.net[b.hh]=2.4;g.rd[b.hh]=1.9;g.fx.push({x:h.cx,y:RIMY,t:.55,d:.55,burst:1});g.fx.push({x:h.cx,y:RIMY,t:.5,d:.5,ring:1});g.freeze=.16;g.zm=1;g.zx=h.cx;g.fl=1;sfx('slam')}   /* v20: hit-stop, camera punch, flash and shockwave on the slam */
+    if(b.dh<=0){b.dh=0;if(g.P[b.sh].fb){const hh=g.hp[b.hh];g.bb[b.hh]=2.2;g.fl=1;g.shake=2;g.zm=1;g.fx.push({x:hh.bd,y:RIMY-40,t:.6,d:.6,ring:1});g.fx.push({x:hh.bd,y:RIMY-40,t:.55,d:.55,burst:1});pop('SHATTERED!',hh.cx+hh.dir*250,RIMY-150,'#bfe9ff',1.7,1);sfx('glass');g.P[b.sh].fb=false}
+    {const dn=g.P[1-b.sh];if(dn&&dn.air&&Math.abs(dn.x-g.P[b.sh].x)<150){dn.kd=1.25;dn.kdD=Math.sign(dn.x-g.P[b.sh].x)||-g.P[b.sh].face;dn.vx=dn.kdD*230;dn.vy=Math.min(dn.vy,-60);dn.shoot=false;dn.has=false;pop('POSTERIZED!',h.cx+h.dir*250,RIMY+30,'#ffd35a',1.4,1);g.shake=Math.max(g.shake,1.1)}}b.x=h.cx;b.y=RIMY-12;b.vy=520;g.shake=1.3;g.net[b.hh]=2.4;g.rd[b.hh]=1.9;g.fx.push({x:h.cx,y:RIMY,t:.55,d:.55,burst:1});g.fx.push({x:h.cx,y:RIMY,t:.5,d:.5,ring:1});g.freeze=.16;g.zm=1;g.zx=h.cx;g.fl=1;sfx('slam')}   /* v20: hit-stop, camera punch, flash and shockwave on the slam */
     return}
   if(b.st==='held'){const p=g.P[b.own];if(p.air&&p.shoot){b.x=p.x+p.face*8;b.y=p.y-PH-16}else if(p.air){b.x=p.x+p.face*(PW+8);b.y=p.y-PH*.56}
     else if(p.gath||p.pump>0||p.dd||!p.dr){const k=p.gath?Math.min(1,p.gt/HOLD):p.pump>0?.35+.65*Math.sin(Math.max(0,p.pump)/.3*Math.PI):.35;b.x=p.x+p.face*(PW+BR-3-(PW+BR-11)*k);b.y=p.y-PH*.5-(PH*.5+12)*k}
@@ -356,13 +357,19 @@ function drawHoopBack(hp,hi){const d=hp.dir,sx=Math.sin(g.t*62)*g.rd[hi]*2.5,dip
   X.strokeStyle='#3a444d';X.lineWidth=5;X.beginPath();X.moveTo(ex+d*8,RIMY-80);X.lineTo(fx-d*6,RIMY-22);X.moveTo(ex+d*8,RIMY-22);X.lineTo(fx-d*6,RIMY-80);X.stroke();
   X.fillStyle='#4a5560';X.fillRect(Math.min(ex,ex+d*18),RIMY-100,18,GY-RIMY+100);X.strokeStyle=INK;X.lineWidth=2;X.strokeRect(Math.min(ex,ex+d*18),RIMY-100,18,GY-RIMY+100);X.fillStyle='#e0703a';X.fillRect(Math.min(ex,ex+d*18),GY-70,18,70);X.strokeRect(Math.min(ex,ex+d*18),GY-70,18,70);
   const T0=RIMY-124,B0=RIMY+30;
-  X.beginPath();X.moveTo(fx-d*7,T0);X.lineTo(fx+d*11,T0+10);X.lineTo(fx+d*11,B0+10);X.lineTo(fx-d*7,B0);X.closePath();X.fillStyle='#9aa3ab';X.fill();X.lineWidth=2.4;X.strokeStyle=INK;X.stroke();
+  const BBK=g.bb[hi]>0;if(!BBK){X.beginPath();X.moveTo(fx-d*7,T0);X.lineTo(fx+d*11,T0+10);X.lineTo(fx+d*11,B0+10);X.lineTo(fx-d*7,B0);X.closePath();X.fillStyle='#9aa3ab';X.fill();X.lineWidth=2.4;X.strokeStyle=INK;X.stroke();
   X.beginPath();X.moveTo(fx-d*3,T0+4);X.lineTo(fx+d*8,T0+11);X.lineTo(fx+d*8,B0+4);X.lineTo(fx-d*3,B0-2);X.closePath();X.fillStyle='#f3f5f4';X.fill();X.lineWidth=1.6;X.stroke();
   X.strokeStyle='#8a9096';X.lineWidth=2;X.beginPath();X.moveTo(fx-d*1,RIMY-60);X.lineTo(fx+d*7,RIMY-56);X.lineTo(fx+d*7,RIMY-6);X.lineTo(fx-d*1,RIMY-10);X.closePath();X.stroke();
-  X.fillStyle='#e8663a';X.beginPath();X.moveTo(fx-d*1,RIMY-4);X.lineTo(fx+d*8,RIMY-1);X.lineTo(fx+d*8,RIMY+18);X.lineTo(fx-d*1,RIMY+14);X.closePath();X.fill();X.lineWidth=1.8;X.strokeStyle=INK;X.stroke();
+  X.fillStyle='#e8663a';X.beginPath();X.moveTo(fx-d*1,RIMY-4);X.lineTo(fx+d*8,RIMY-1);X.lineTo(fx+d*8,RIMY+18);X.lineTo(fx-d*1,RIMY+14);X.closePath();X.fill();X.lineWidth=1.8;X.strokeStyle=INK;X.stroke()}
   /* bracket and the back half of the rim */
   X.lineCap='round';X.strokeStyle=INK;X.lineWidth=9;X.beginPath();X.moveTo(fx+d*9,ry+1);X.lineTo(hp.cx-d*RIMH,ry+1);X.stroke();X.strokeStyle='#ee6a22';X.lineWidth=5.4;X.beginPath();X.moveTo(fx+d*9,ry);X.lineTo(hp.cx-d*RIMH,ry);X.stroke();
   X.strokeStyle=INK;X.lineWidth=8.4;X.beginPath();X.ellipse(hp.cx,ry,RIMH,8,0,Math.PI,Math.PI*2);X.stroke();X.strokeStyle='#d9531a';X.lineWidth=5;X.beginPath();X.ellipse(hp.cx,ry,RIMH,8,0,Math.PI,Math.PI*2);X.stroke();X.lineCap='butt'}
+/* v37: glass shards of a shattered backboard: positions are a pure function of the time since the shatter, so they need no stored state */
+function drawShards(hp,hi){const bb=g.bb[hi];if(!(bb>0))return;const t=2.2-bb,d=hp.dir,fr=n=>{const v=Math.sin(n*12.9898)*43758.5453;return v-Math.floor(v)};
+  for(let i=0;i<30;i++){const x0=hp.bd+d*(2+fr(i+1)*8),y0=RIMY-124+fr(i+2)*150,vx=d*(70+fr(i+3)*430),vy=-60-fr(i+4)*260,G=1150,s=5+fr(i+5)*15,fl=GY-5;
+    const tl=(vy+Math.sqrt(vy*vy+2*G*(fl-y0)))/G,tt=Math.min(t,tl);let y=y0+vy*tt+.5*G*tt*tt,x=x0+vx*(tt+(t>tl?Math.min(.18,t-tl):0)),a=fr(i+6)*6.3+(fr(i+7)-.5)*14*tt;
+    X.save();X.translate(x,y);X.rotate(a);X.globalAlpha=Math.min(1,bb/.7)*.85;X.beginPath();X.moveTo(0,-s);X.lineTo(s*.8,s*.6);X.lineTo(-s*.6,s*.5);X.closePath();X.fillStyle='rgba(205,236,255,.62)';X.fill();X.lineWidth=1.3;X.strokeStyle='rgba(255,255,255,.95)';X.stroke();X.restore()}
+  X.globalAlpha=1}
 function drawHoopFront(hp,hi){const sw=g.net[hi],k=Math.sin(sw*14)*sw*7,dip=g.rd[hi]*7*(.5+.5*Math.sin(g.t*38)),ry=RIMY+dip,NB=22,DR=46+sw*8,N=12;
   /* net: a cone from the rim ring down to a smaller ring; back strands are dimmer than front strands */
   for(let pass=0;pass<2;pass++){X.strokeStyle=pass?'rgba(255,255,255,.95)':'rgba(205,220,245,.5)';X.lineWidth=pass?1.5:1.2;
@@ -488,7 +495,7 @@ function draw(){const W=g?g.W:VW,s=cv.width/W;X.setTransform(s,0,0,s,0,0);if(!g)
   drawCourt(W);g.hp.forEach(drawHoopBack);
   for(const q of g.fx){const k=1-q.t/q.d;if(q.ring){X.strokeStyle='rgba(255,255,255,'+(.8*(1-k))+')';X.lineWidth=7*(1-k)+1;X.beginPath();X.ellipse(q.x,q.y,20+k*190,10+k*95,0,0,7);X.stroke();continue}if(q.burst){X.strokeStyle='rgba(255,226,140,'+(1-k)+')';X.lineWidth=3.5*(1-k)+1;for(let i=0;i<14;i++){const a=i*Math.PI/7+.2,r1=14+k*26,r2=30+k*86;X.beginPath();X.moveTo(q.x+Math.cos(a)*r1,q.y+Math.sin(a)*r1);X.lineTo(q.x+Math.cos(a)*r2,q.y+Math.sin(a)*r2);X.stroke()}continue}X.strokeStyle='rgba(255,255,255,'+(1-k)*.8+')';X.lineWidth=4-k*2;X.beginPath();X.ellipse(q.x,q.y+4,14+k*46,5+k*13,0,0,7);X.stroke();if(k>.12){X.beginPath();X.ellipse(q.x,q.y+4,8+k*28,3+k*8,0,0,7);X.stroke()}}
   X.save();X.beginPath();X.rect(0,GY+2,W,H-GY);X.clip();X.translate(0,2*GY+10);X.scale(1,-1);g.P.forEach(p=>drawP(p,true));drawBall(true);X.restore();
-  const o=[...g.P].sort((a,b)=>(a.has?1:0)-(b.has?1:0));o.forEach(p=>drawP(p));drawBall();g.hp.forEach(drawHoopFront);
+  const o=[...g.P].sort((a,b)=>(a.has?1:0)-(b.has?1:0));o.forEach(p=>drawP(p));drawBall();g.hp.forEach(drawHoopFront);g.hp.forEach(drawShards);
   X.setTransform(s,0,0,s,0,0);if(g.fl>0){X.fillStyle='rgba(255,250,235,'+(.5*g.fl*g.fl)+')';X.fillRect(0,0,W,H)}drawHUD(W);
   X.textAlign='center';for(const q of g.pop){if(!q.s)continue;const k=q.t/q.d;X.globalAlpha=Math.min(1,k*3);X.font='900 '+(q.big?Math.round(40+34*Math.max(0,1-(1-k)*5)):q.s.length<4?34:24)+'px system-ui';X.lineWidth=q.big?8:5;X.strokeStyle='rgba(4,8,16,.85)';const yy=q.y-(1-k)*34;X.strokeText(q.s,q.x,yy);X.fillStyle=q.c;X.fillText(q.s,q.x,yy)}X.globalAlpha=1}
 
@@ -518,7 +525,7 @@ const el=id=>document.getElementById(id);
 const RP={buf:[],n:0,lt:0,dk:-1,done:false,on:false,pos:0,a:0,b:0};
 const RPK=['ball','fx','net','rd','shake','zm','zx','fl','t','pop','score','clock'];
 function rpRec(){const now=performance.now();if(!g||g.phase==='over'||now-RP.lt<15)return;RP.lt=now;
-  const f={n:RP.n++,P:g.P.map(p=>Object.assign({},p)),ball:Object.assign({},g.ball),fx:g.fx.map(q=>Object.assign({},q)),pop:g.pop.map(q=>Object.assign({},q)),net:g.net.slice(),rd:g.rd.slice(),score:g.score.slice()};
+  const f={n:RP.n++,P:g.P.map(p=>Object.assign({},p)),ball:Object.assign({},g.ball),fx:g.fx.map(q=>Object.assign({},q)),pop:g.pop.map(q=>Object.assign({},q)),net:g.net.slice(),rd:g.rd.slice(),bb:g.bb.slice(),score:g.score.slice()};
   for(const k of ['shake','zm','zx','fl','t','clock'])f[k]=g[k];RP.buf.push(f);if(RP.buf.length>260)RP.buf.shift();
   if(g.phase==='live'){RP.dk=-1;RP.done=false}
   else if(RP.dk<0&&g.P.some(p=>p.dk>0))RP.dk=f.n;
@@ -528,8 +535,8 @@ function rpRec(){const now=performance.now();if(!g||g.phase==='over'||now-RP.lt<
     RP.a=a-base;RP.b=b-base;RP.pos=RP.a;RP.on=true;el('tskip').hidden=false}}
 function rpPlay(dt){RP.pos+=dt*60*.62;const i=Math.floor(RP.pos);
   if(i>=RP.b||!RP.buf[i]){RP.on=false;el('tskip').hidden=true;acc=0;return}
-  const f=RP.buf[i],keep={P:g.P,ball:g.ball,fx:g.fx,pop:g.pop,net:g.net,rd:g.rd,score:g.score,shake:g.shake,zm:g.zm,zx:g.zx,fl:g.fl,t:g.t,clock:g.clock,phase:g.phase,dead:g.dead};
-  try{g.P=f.P;g.ball=f.ball;g.fx=f.fx;g.pop=f.pop;g.net=f.net;g.rd=f.rd;g.score=f.score;g.shake=f.shake*.6;g.zm=f.zm;g.zx=f.zx;g.fl=f.fl*.5;g.t=f.t;g.clock=f.clock;g.phase='live';g.dead=0;
+  const f=RP.buf[i],keep={P:g.P,ball:g.ball,fx:g.fx,pop:g.pop,net:g.net,rd:g.rd,bb:g.bb,score:g.score,shake:g.shake,zm:g.zm,zx:g.zx,fl:g.fl,t:g.t,clock:g.clock,phase:g.phase,dead:g.dead};
+  try{g.P=f.P;g.ball=f.ball;g.fx=f.fx;g.pop=f.pop;g.net=f.net;g.rd=f.rd;g.bb=f.bb;g.score=f.score;g.shake=f.shake*.6;g.zm=f.zm;g.zx=f.zx;g.fl=f.fl*.5;g.t=f.t;g.clock=f.clock;g.phase='live';g.dead=0;
     draw();const W=g.W,s=cv.width/W;X.setTransform(s,0,0,s,0,0);X.fillStyle='rgba(0,0,0,.78)';X.fillRect(0,0,W,34);X.fillRect(0,H-34,W,34);
     X.fillStyle='#ff3b3b';X.beginPath();X.arc(W/2-52,H-17,6,0,7);X.fill();X.fillStyle='#fff';X.font='900 18px system-ui';X.textAlign='left';X.fillText('REPLAY',W/2-38,H-10);X.textAlign='center'}
   finally{Object.assign(g,keep)}}
@@ -571,7 +578,7 @@ addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeo
    The host opens a private match channel and tells its partner; from then on every message goes through that channel.
    The host phone runs the whole game (step) and sends a snapshot about 20 times a second; the guest sends its {l,r,j} when it changes (and every 150 ms) and draws the
    snapshots. The host is player 1 (left, attacks right), the guest is player 2. Both use a 1100 wide court. */
-const QP=new URLSearchParams(location.search),HBW=Math.max(0,Math.min(500,+QP.get('w')||0)),HBB=+QP.get('bal')||0,NETW=1100,SNAPK=['P','ball','score','clock','sc','phase','dead','next','hold','pop','fx','shake','net','rd','ot','stat','started','slo','freeze','zm','zx','fl','t','tip'];
+const QP=new URLSearchParams(location.search),HBW=Math.max(0,Math.min(500,+QP.get('w')||0)),HBB=+QP.get('bal')||0,NETW=1100,SNAPK=['bb','P','ball','score','clock','sc','phase','dead','next','hold','pop','fx','shake','net','rd','ot','stat','started','slo','freeze','zm','zx','fl','t','tip'];
 const SB_URL='https://urdkamhsdjhzhrjwzyoq.supabase.co',SB_KEY='sb_publishable_Kwc2VdtM1AbcKB7xgsOhlw_KOw02EOb';
 function netTx(o){try{NET.mc&&NET.mc.send({type:'broadcast',event:'g',payload:o})}catch(_){}}
 function netReset(){if(NET.mc)netTx({k:'bye'});try{if(NET.sb){NET.lb&&NET.sb.removeChannel(NET.lb);NET.mc&&NET.sb.removeChannel(NET.mc)}}catch(_){}

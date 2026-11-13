@@ -612,3 +612,6 @@ Owner: (1) Token wagers in the 1-on-1 tab: Free/5/10/25/50/100 chips (`UI.hbW`, 
 
 ## v466 (Hoops Battle v36)
 Owner: keys did not work on a computer because the game sits in an iframe and the keyboard stayed on the page. The game now takes focus (load, click), the app forwards arrow/WASD/space/P/Esc to it (`hb:'key'` messages, `fwd` in `hbOpen`), and the blur-pause is skipped when embedded.
+
+## v467 (Hoops Battle v37)
+Owner: a fast-break dunk (dunker moving above 70 percent of top speed at takeoff, defender more than 230 px away: `p.fb`, set in `release`) shatters the backboard: `g.bb[hoop]` 2.2 s timer (in SNAPK and the replay buffer), the board is hidden and `drawShards` draws 30 glass shards as a pure function of time, plus flash, big shake, zoom, rings, SHATTERED! pop and a glass sound. The board comes back when the timer ends.
