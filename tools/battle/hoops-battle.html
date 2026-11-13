@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v47</small></p>
+  <p class="sub">One on one. Two hoops. Four buttons. <small style="opacity:.55">v48</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -134,7 +134,7 @@ h1 span{color:#FFC23D}
    jump comes at about half a second), a double jump without the ball, and energy (p.en, 0 to 1). */
 const WINPTS=21,H=540,GY=468,GR=1500,PG=1280,BR=19,PW=21,PH=112,PS=PH/88,JV=620,SPD=360,RIMY=236,RIMH=35,TP=430,SC=14,APEX=JV/PG,WALL=24,TICK=1/60;
 /* energy: running drains it, standing still refills it, every jump costs some. Tired players run slower, jump lower and shoot worse. */
-const EN={run:0,rest:.03,move:.012,jump:.02,shot:.125,fake:0,push:.05,score:0,bar:.125};   /* v47: energy is 8 bars (.125 each) for the WHOLE match: a shot costs a bar, a sprint burst costs a bar, standing still refills one bar in about 4 s, nothing refills on a score */   /* shooting costs the most, running little, driving into a defender is tiring but not impossible */
+const EN={run:0,rest:0,move:.012,still:1.5,jump:.02,shot:.125,fake:0,push:.05,score:.25,bar:.125};   /* v47: energy is 8 bars (.125 each) for the WHOLE match: a shot costs a bar, a sprint burst costs a bar, standing still 1.5 s earns a bar, every tip off (restart after a score) gives 2 bars */   /* shooting costs the most, running little, driving into a defender is tiring but not impossible */
 /* v3 (owner, Nov 11): HOLD = how long JUMP must be held with the ball before you leave the floor. Let go sooner and it is a pump fake (no shot, you keep the ball).
    STEAL = seconds of standing chest-to-chest in front of the dribbler before the ball is taken (was .5). Dribbling through a defender is allowed but slow (PRESS). */
 const HOLD=.22,STEAL=1.5,PRESS=.76;
@@ -195,7 +195,8 @@ function stepP(p,c,dt){
   const mv=(c.r?1:0)-(c.l?1:0),hd=g.hp[1-p.i].cx>p.x?1:-1,sp=SPD*(p.has?(mv&&mv!==hd?.8:.97):1)*(.78+.3*Math.max(0,Math.min(1,p.en)))*(p.slow?PRESS:1)*(p.dm||1)*(p.cs||1)*(p.gath?.5:1)*(p.dd&&p.has&&!p.air?0:1)*(sbOn?1.5:1);   /* after a pump fake the dribble is dead: no walking, only fake again or shoot */
   if(!p.air){p.vx+=(mv*sp-p.vx)*Math.min(1,dt*14);if(p.has)p.face=hd;else if(mv)p.face=mv;else if(Math.abs(g.ball.x-p.x)>8)p.face=g.ball.x>p.x?1:-1;
     const push=p.slow&&p.has&&mv&&(g.P[1-p.i].x-p.x)*mv>0;   /* driving into a defender wears you out fast */
-    p.en=Math.max(0,Math.min(1,p.en-(mv&&push?EN.push*dt:0)+dt*(mv?EN.move:EN.rest)))}
+    p.en=Math.max(0,Math.min(1,p.en-(mv&&push?EN.push*dt:0)+(mv?dt*EN.move:0)));   /* v48: standing still for 1.5 s earns one bar */
+    if(!mv&&!p.has||!mv&&p.has&&!p.gath){p.stl=(p.stl||0)+dt;if(p.stl>=EN.still){p.stl=0;p.en=Math.min(1,p.en+EN.bar)}}else p.stl=0}
   else p.vx+=(mv*sp*.8-p.vx)*Math.min(1,dt*3);
   if(p.shoot||p.gath)p.face=g.hp[1-p.i].cx>p.x?1:-1;
   const jp=c.j&&!p.pj,jump=()=>{p.tk=Math.abs(g.hp[1-p.i].cx-p.x);const v=JV*(p.has?1:1.14)*(.8+.2*Math.min(1,p.en/.25));p.air=true;p.vy=-v;p.ap=v/PG;p.jt=0;p.gath=false;p.en=Math.max(0,p.en-(p.has?EN.shot:EN.jump));if(p.has)p.shoot=true;sfx('jump')};

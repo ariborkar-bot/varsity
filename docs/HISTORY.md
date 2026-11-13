@@ -663,3 +663,6 @@ Owner: auto-run route made CUT useless (easy to get jammed) and turning to the b
 
 ## Hoops Battle v47
 Owner: first to 21 win by 2 (no clock, no overtime: `WINPTS`, checked in `afterDead`; game length picker hidden, `clock` is 1e9; HUD shows FIRST TO 21 / WIN BY 2 from 20 up); CONTESTED nn% / OPEN popup at every release (`cpct`, contest/3.2); any running dunk (`|vx|>.55 SPD`) shatters the backboard; energy is 8 bars for the whole match: a shot costs one bar (`EN.shot`), a sprint burst costs one bar on press (`EN.bar`), nothing refills on a score (`EN.score=0`), standing still refills slowly (`EN.rest .03/s`, `EN.move .012/s`), drawn as 8 segments under the feet. AI rests below 1 bar.
+
+## Hoops Battle v48
+Energy: every restart after a score gives 2 bars (`EN.score .25`), standing still 1.5 s gives one bar (`EN.still`, `p.stl`), no per-second regen when standing; moving regen stays tiny.
