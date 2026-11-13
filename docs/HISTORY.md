@@ -636,3 +636,6 @@ Owner: (1) the dunk replay can no longer be skipped (the `tskip` layer only bloc
 
 ## Hoops Battle v44
 Owner: a blocked shot can no longer score. `blocks()` sets `ball.blk=true`; the hoop check in `stepBall` requires `!b.blk`; a new shot, a setup or a tip-off clears it.
+
+## Hoops Battle v45
+Owner: touch buttons about 20 percent bigger (`.tb`, `.tb.j`). Online matches (first one and every rematch) start with a 5 s countdown on both screens (`netCountdown`, `cdRun`, messages `cd` and `pick`) so the player can still change character; the host calls `netStart()` when it ends and uses the guest's latest pick (`NET.gc`).

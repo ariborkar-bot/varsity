@@ -45,8 +45,8 @@ h1 span{color:#FFC23D}
 #ctl{position:fixed;left:0;right:0;bottom:0;z-index:10;display:none;justify-content:space-between;align-items:flex-end;pointer-events:none;padding:0 max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
 #ctl.on{display:flex}
 .pad{display:flex;gap:10px;pointer-events:auto}
-.tb{width:clamp(58px,13vh,84px);height:clamp(58px,13vh,84px);border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(10,18,36,.5);color:#fff;font:900 1.5rem/1 system-ui;display:grid;place-items:center;touch-action:none;cursor:pointer}
-.tb.j{width:clamp(74px,17vh,104px);height:clamp(74px,17vh,104px);font-size:.9rem;letter-spacing:.08em}
+.tb{width:clamp(70px,16vh,100px);height:clamp(70px,16vh,100px);border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(10,18,36,.5);color:#fff;font:900 1.5rem/1 system-ui;display:grid;place-items:center;touch-action:none;cursor:pointer}
+.tb.j{width:clamp(90px,21vh,126px);height:clamp(90px,21vh,126px);font-size:.9rem;letter-spacing:.08em}
 .tb.dn{background:rgba(255,194,61,.85);border-color:#FFC23D;color:#0b1220}
 .p2 .tb{border-color:rgba(255,120,140,.75)}.p2 .tb.dn{background:rgba(255,79,109,.9);border-color:#FF4F6D;color:#fff}
 #pz{position:fixed;top:max(8px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));z-index:11;width:42px;height:42px;border-radius:12px;border:1.5px solid rgba(255,255,255,.35);background:rgba(10,18,36,.55);color:#fff;font:900 1rem/1 system-ui;display:none;cursor:pointer}
@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v44</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v45</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -574,7 +574,7 @@ function frame(ts){requestAnimationFrame(frame);const dt=Math.min(.1,(ts-last)/1
   if(NET.on&&performance.now()-NET.last>9000)netLost('Lost contact with your opponent.');
   draw()}
 function pickC(){const mine=CH[OPT.char]?OPT.char:'flash',o=Object.keys(CH).filter(k=>k!==mine);return [mine,o[Math.floor(rnd()*o.length)]]}
-function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NET.up&&NET.role==='host'){netStart();return}if(NET.pub&&NET.w&&NET.w>NET.bal){NET.w=0;try{parent.postMessage({hb:'nobal'},'*')}catch(_){}}netOpen(true,NET.pub?'public'+(NET.w?'-w'+NET.w:''):undefined);if(NET.pub)el('n-h').textContent='Find an opponent'+(NET.w?' · '+NET.w+' tokens':'');return}audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT,c:pickC()},VW);fit();paused=false;acc=0;
+function start(){if(OPT.mode==='on'){audio();if(NET.role==='guest'){return}if(NET.up&&NET.role==='host'){netCountdown();return}if(NET.pub&&NET.w&&NET.w>NET.bal){NET.w=0;try{parent.postMessage({hb:'nobal'},'*')}catch(_){}}netOpen(true,NET.pub?'public'+(NET.w?'-w'+NET.w:''):undefined);if(NET.pub)el('n-h').textContent='Find an opponent'+(NET.w?' · '+NET.w+' tokens':'');return}audio();fit();TEAM[0].n=OPT.mode==='2p'?'PLAYER 1':'YOU';TEAM[1].n=OPT.mode==='2p'?'PLAYER 2':'CPU';newGame({...OPT,c:pickC()},VW);fit();paused=false;acc=0;
   for(const id of ['menu','end','pause'])document.getElementById(id).hidden=true;buildCtl();
   document.getElementById('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);document.getElementById('pz').classList.add('on');document.getElementById('snd').classList.add('on');
   try{localStorage.setItem('hb-opt',JSON.stringify(OPT))}catch(_){}}
@@ -624,7 +624,7 @@ async function rtcSig(m){try{if(!window.RTCPeerConnection)return;const flush=()=
   if(m.r==='offer'&&NET.role==='guest'){rtcStart(false);const pc=NET.pc;if(!pc)return;await pc.setRemoteDescription(m.d);await pc.setLocalDescription(await pc.createAnswer());netTx({k:'rtc',r:'answer',d:{type:pc.localDescription.type,sdp:pc.localDescription.sdp}});flush()}
   else if(m.r==='answer'&&NET.role==='host'&&NET.pc){await NET.pc.setRemoteDescription(m.d);flush()}
   else if(m.r==='ice'){if(NET.pc&&NET.rd)NET.pc.addIceCandidate(m.d).catch(()=>{});else(NET.pend=NET.pend||[]).push(m.d)}}catch(_){}}
-function netReset(){rtcClose();if(NET.mc)netTx({k:'bye'});try{if(NET.sb){NET.lb&&NET.sb.removeChannel(NET.lb);NET.mc&&NET.sb.removeChannel(NET.mc)}}catch(_){}
+function netReset(){rtcClose();clearInterval(NET.cdt);if(NET.mc)netTx({k:'bye'});try{if(NET.sb){NET.lb&&NET.sb.removeChannel(NET.lb);NET.mc&&NET.sb.removeChannel(NET.mc)}}catch(_){}
   Object.assign(NET,{on:false,role:'',sb:null,lb:null,mc:null,partner:'',up:false,in:{l:false,r:false,j:false},snd:[],acc:0,si:0,ended:false,from:null,tg:null,last:0,lastIn:'',lastInT:0})}
 function netLost(msg){const was=NET.on;netReset();if(was){g=null;for(const id of ['end','pause','net'])el(id).hidden=true;el('menu').hidden=true;for(const id of ['ctl','pz','snd'])el(id).classList.remove('on');fit();netOpen(false)}
   el('n-msg').textContent=msg||'The connection ended.'}
@@ -653,13 +653,20 @@ function netBegin(len,cc){NET.on=true;NET.up=true;OPT.mode='on';NET.ended=false;
   hbPost({hb:'live',mid:NET.mid,w:NET.w});lnkPaint();NET.px=null;TEAM[0].n=host?'YOU':'FRIEND';TEAM[1].n=host?'FRIEND':'YOU';newGame({mode:'on',diff:'med',len,c:cc},NETW);fit();paused=false;acc=0;
   for(const id of ['menu','end','pause','net'])el(id).hidden=true;buildCtl();el('ctl').classList.toggle('on',matchMedia('(pointer:coarse)').matches||'ontouchstart' in window);el('pz').classList.remove('on');el('snd').classList.add('on')}
 function hbPost(o){if(NET.pub&&NET.w&&parent!==window){try{parent.postMessage(o,'*')}catch(_){}}}
+/* v45: a 5 second countdown (both screens) before each online match, so you can still pick your player; the host starts the match when it ends */
+function cdRun(){NET.cd=performance.now();clearInterval(NET.cdt);el('menu').hidden=true;el('end').hidden=true;el('net').hidden=false;el('n-inv').hidden=true;el('n-h').textContent='Opponent found';
+  const tick=()=>{const left=5-(performance.now()-NET.cd)/1000;if(left<=0){clearInterval(NET.cdt);el('n-msg').textContent='Tip off!';if(NET.role==='host'&&(!NET.on||g&&g.phase==='over'))netStart();return}el('n-msg').textContent='Pick your player. Tip off in '+Math.ceil(left)}
+  tick();NET.cdt=setInterval(tick,100)}
+function netCountdown(){netTx({k:'cd'});cdRun()}
 function netStart(){audio();const cc=[CH[OPT.char]?OPT.char:'flash',CH[NET.gc]?NET.gc:'flash'];netTx({k:'go',len:OPT.len,c:cc});netBegin(OPT.len,cc)}
 const R2=v=>typeof v==='number'?Math.round(v*100)/100:Array.isArray(v)?v.map(R2):v&&typeof v==='object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,R2(x)])):v;   /* v34: smaller snapshots */
 function netSend(){const o={};for(const k of SNAPK)o[k]=R2(g[k]);netTx({k:'s',g:o,snd:NET.snd.splice(0)})}
 function netMsg(m){NET.last=performance.now();
   if(m.k==='rtc'){rtcSig(m)}
   else if(m.k==='rp'&&NET.role==='guest'&&g&&!RP.on){RP.done=true;rpBegin()}
-  else if(m.k==='ready'&&NET.role==='host'&&!NET.on){NET.gc=m.c;netStart();rtcStart(true)}
+  else if(m.k==='ready'&&NET.role==='host'&&!NET.on){NET.gc=m.c;netCountdown();rtcStart(true)}
+  else if(m.k==='cd'&&NET.role==='guest'&&(!NET.on||g&&g.phase==='over'))cdRun()
+  else if(m.k==='pick'&&NET.role==='host'){NET.gc=m.c}
   else if(m.k==='go'&&NET.role==='guest'){audio();netBegin(m.len,m.c)}
   else if(m.k==='bye'){if(NET.on){if(NET.w&&NET.mid&&NET.posted!==NET.mid&&g&&g.phase!=='over'){NET.posted=NET.mid;hbPost({hb:'result',mid:NET.mid,w:NET.w,win:true,forfeit:true});NET.bal+=NET.w}netLost('Your opponent left.')}else{NET.partner='';NET.mc=null}}
   else if(m.k==='i'&&NET.role==='host'){NET.in=m.i}
@@ -678,7 +685,7 @@ function netGuest(dt){const now=performance.now(),inp=el('rot').hidden?(h=>({l:h
   else NET.px=null;
   if(g.phase==='over'&&!NET.ended){NET.ended=true;onEnd()}}
 addEventListener('message',e=>{if(e.data&&e.data.hb==='bye'&&NET.mc)netTx({k:'bye'})});
-{const nc=el('n-ch'),pt=()=>nc.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===OPT.char)));pt();nc.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;OPT.char=b.dataset.v;pt();document.querySelectorAll('#s-ch button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===OPT.char)));try{localStorage.setItem('hb-opt',JSON.stringify(OPT))}catch(_){}})}
+{const nc=el('n-ch'),pt=()=>nc.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===OPT.char)));pt();nc.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;OPT.char=b.dataset.v;pt();if(NET.role==='guest'&&NET.mc)netTx({k:'pick',c:OPT.char});document.querySelectorAll('#s-ch button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===OPT.char)));try{localStorage.setItem('hb-opt',JSON.stringify(OPT))}catch(_){}})}
 el('n-back').addEventListener('click',()=>{if(NET.pub&&parent!==window){try{parent.postMessage({hb:'close'},'*')}catch(_){}}netReset();el('net').hidden=true;el('menu').hidden=false});
 el('n-copy').addEventListener('click',()=>{const t=el('n-link');t.select();t.setSelectionRange(0,9999);try{navigator.clipboard.writeText(t.value)}catch(_){try{document.execCommand('copy')}catch(__){}}el('n-copy').textContent='Copied';setTimeout(()=>el('n-copy').textContent='Copy link',1500)});
 el('n-share').addEventListener('click',()=>{const u=el('n-link').value;if(navigator.share)navigator.share({title:'Hoops Battle',text:'Play me in Hoops Battle',url:u}).catch(()=>{});else el('n-copy').click()});
