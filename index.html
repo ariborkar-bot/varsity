@@ -3033,6 +3033,23 @@ function line(pos,s){
 }
 
 const SD_SCHOOLS=["Army and Navy Academy","Bishop's","Bonita Vista","Brawley","Calexico","Calipatria","Canyon Hills","Carlsbad","Castle Park","Cathedral Catholic","Central Union","Christian High","Chula Vista","Clairemont","Classical Academy","Coastal Academy","Coronado","Crawford","Del Norte","Eastlake","El Cajon Valley","El Camino","El Capitan","Escondido","Escondido Charter","Fallbrook","Granite Hills","Grossmont","Helix","Hilltop","Holtville","Hoover","Imperial","Kearny","La Costa Canyon","La Jolla","La Jolla Country Day","Lincoln","Madison","Mar Vista","Maranatha Christian","Mater Dei Catholic","Mira Mesa","Mission Bay","Mission Hills","Monte Vista","Montgomery","Morse","Mount Carmel","Mount Miguel","Mountain Empire","Oceanside","Olympian","Orange Glen","Otay Ranch","Palomar","Patrick Henry","Point Loma","Poway","Ramona","Rancho Bernardo","Rancho Buena Vista","San Diego High","San Marcos","San Pasqual","San Ysidro","Santa Fe Christian","Santana","Scripps Ranch","Southwest San Diego","Southwest (El Centro)","St. Augustine","Steele Canyon","Sweetwater","Torrey Pines","Tri-City Christian","University City","Valhalla","Valley Center","Vincent Memorial","Vista","West Hills","Westview"].sort((a,b)=>a.localeCompare(b));
+/* v477 sections layer: a section is one region the app runs in. San Diego is the only live one. A profile with no .sec belongs to San Diego, so nothing is stored or changed for existing accounts. status: live = open to everyone, beta = admins only, loading = "coming soon", off = hidden. The other CIF sections are listed with no schools until their data is loaded. */
+const SECTIONS={
+ 'san-diego':{id:'san-diego',name:'San Diego',full:'CIF San Diego Section',state:'CA',status:'live',schools:SD_SCHOOLS},
+ 'southern':{id:'southern',name:'Southern',full:'CIF Southern Section',state:'CA',status:'off',schools:[]},
+ 'la-city':{id:'la-city',name:'Los Angeles City',full:'CIF Los Angeles City Section',state:'CA',status:'off',schools:[]},
+ 'central':{id:'central',name:'Central',full:'CIF Central Section',state:'CA',status:'off',schools:[]},
+ 'central-coast':{id:'central-coast',name:'Central Coast',full:'CIF Central Coast Section',state:'CA',status:'off',schools:[]},
+ 'sac-joaquin':{id:'sac-joaquin',name:'Sac-Joaquin',full:'CIF Sac-Joaquin Section',state:'CA',status:'off',schools:[]},
+ 'oakland':{id:'oakland',name:'Oakland',full:'CIF Oakland Section',state:'CA',status:'off',schools:[]},
+ 'san-francisco':{id:'san-francisco',name:'San Francisco',full:'CIF San Francisco Section',state:'CA',status:'off',schools:[]},
+ 'north-coast':{id:'north-coast',name:'North Coast',full:'CIF North Coast Section',state:'CA',status:'off',schools:[]},
+ 'northern':{id:'northern',name:'Northern',full:'CIF Northern Section',state:'CA',status:'off',schools:[]}};
+const HOME_SEC='san-diego';
+const secOfSchool=n=>{for(const k in SECTIONS)if(SECTIONS[k].schools.includes(n))return k;return null};
+const secOfProfile=p=>p&&p.sec&&SECTIONS[p.sec]?p.sec:HOME_SEC;
+const secLive=id=>!!SECTIONS[id]&&SECTIONS[id].status==='live';
+const LIVE_SECS=()=>Object.keys(SECTIONS).filter(secLive);
 /* sign-up school list = the team list plus every school name the box-score data uses (v412: 11 schools such as Mt. Carmel, Central and San Diego were missing, so their players and fans could not pick them) */
 let _nmSch=null;function nmSchools(){if(!_nmSch||_nmSch.n!==SD_SCHOOLS.length+':'+_rev){try{const s=new Set(SD_SCHOOLS);players().forEach(p=>{if(p.school&&p.key!=='me')s.add(p.school)});_nmSch={n:SD_SCHOOLS.length+':'+_rev,l:[...s].sort((a,b)=>a.localeCompare(b))}}catch(_){return SD_SCHOOLS}}return _nmSch.l}
 
@@ -3391,7 +3408,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v476 · Nov 12';
+const APP_BUILD='v477 · Nov 13';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;

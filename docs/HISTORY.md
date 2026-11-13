@@ -675,3 +675,6 @@ Timeouts: ONE per team per match (`g.tol=[1,1]`), 10 s, only while your player h
 
 ## Hoops Battle v51
 A made shot refunds the energy bar it cost (in `scored`, only when the scoring team's player took the shot). Misses still cost the bar.
+
+## v477 (Nov 13, owner): sections layer, step 1 of the California expansion
+Owner wants to grow VARSITY one CIF section at a time (San Diego is section 1 of 10). Nothing visible changes. `SECTIONS` (right after `SD_SCHOOLS` in index.html) lists all 10 CIF sections with `status` live/beta/loading/off; only `san-diego` is `live` and its `schools` IS `SD_SCHOOLS` (so basketball, where make_basketball.py swaps that list, gets its own 127 teams automatically). Helpers: `secOfSchool(name)`, `secOfProfile(p)` (a profile with no `.sec`, or an unknown one, is San Diego, so no profile docs were touched), `secLive(id)`, `LIVE_SECS()`, `HOME_SEC`. Not built yet: a home-section picker at sign-up, per-section data files, section filters, per-section sync. No `sections` table in Supabase on purpose: the app does not read one, so the registry stays in the repo until something needs it from the database. Plan: each new section needs license cover, a coverage check (rosters, games, stats) and a clean beta Friday night before it goes `live`.
