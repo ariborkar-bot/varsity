@@ -89,10 +89,13 @@ def decode_contests(contests, sport):
                 if home[5] and home[5] != code:
                     raise ValueError('W/L code disagrees with score')
                 summ = r[29] or ''
-                if summ and ('%d-%d' % (max(hs, as_), min(hs, as_))) not in summ:
+                forfeit = 'forfeit' in summ.lower()   # MaxPreps records a placeholder score (2-0) and the sentence has no score
+                if summ and not forfeit and ('%d-%d' % (max(hs, as_), min(hs, as_))) not in summ:
                     raise ValueError('score not in summary')
+            else:
+                forfeit = False
             games.append({'id': 'mp:' + cid, 'sport': sport, 'date': date, 'time': start[11:16], 'home': home[14], 'away': away[14],
-                          'home_id': 'mp:' + home[1], 'away_id': 'mp:' + away[1], 'hs': hs, 'as': as_, 'ha': ha,
+                          'home_id': 'mp:' + home[1], 'away_id': 'mp:' + away[1], 'hs': hs, 'as': as_, 'ha': ha, 'forfeit': forfeit,
                           'state': (r[28] or '').replace('ContestState is ', '').rstrip('.'), 'url': r[18] if isinstance(r[18], str) else None})
         except (ValueError, TypeError, IndexError, KeyError) as e:
             rejects.append((str(r[1])[:8] if isinstance(r, list) and len(r) > 1 else '?', str(e)))

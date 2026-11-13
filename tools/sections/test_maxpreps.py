@@ -80,6 +80,13 @@ if os.path.exists(gj):
     print('  games.js cross-check: %d games matched by date+home+away, %d with different scores' % (hit, bad))
     check(bad == 0, 'scores agree with games.js')
 
+# forfeit: MaxPreps records 2-0 and its sentence has no score; keep the game, flag it
+ff = played('07ec2a5e-0000-4000-8000-000000000001', '2026-10-08T19:00:00', True, 0, '351e2ce0-7021-4bc9-9b29-665923a9b21b', 'Santa Fe Christian', 'Solana Beach', 2,
+            "On 10/8, the Santa Fe Christian varsity football team won by forfeit in their away conference game against Bishop's (La Jolla, CA).")
+gf, rf, _ = M.decode_contests([ff], 'fb')
+check(len(gf) == 1 and not rf and gf[0]['forfeit'] and (gf[0]['hs'], gf[0]['as']) == (2, 0), 'a forfeit is kept and flagged')
+check(not any(x['forfeit'] for x in games), 'normal games are not forfeits')
+
 # 3. bad rows are rejected, never written; a format change raises instead of producing garbage
 bad_row = json.loads(json.dumps(FIX[2]))
 bad_row[37][6] = 99
