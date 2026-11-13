@@ -63,7 +63,7 @@ h1 span{color:#FFC23D}
 
 <div id="menu" class="ov"><div class="box mn"><div>
   <h1>Varsity <span>Hoops Battle</span></h1>
-  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v41</small></p>
+  <p class="sub">One on one. Two hoops. Three buttons. <small style="opacity:.55">v42</small></p>
   <span class="lbl">Play against</span>
   <div class="seg" id="s-mode">
     <button type="button" data-v="ai" aria-pressed="true">Computer</button>
@@ -81,6 +81,7 @@ h1 span{color:#FFC23D}
     <button type="button" data-v="flash" aria-pressed="true">Flash<small>fast</small></button>
     <button type="button" data-v="sniper" aria-pressed="false">Sniper<small>shooter</small></button>
     <button type="button" data-v="lock" aria-pressed="false">Lockdown<small>blocker</small></button>
+    <button type="button" data-v="fin" aria-pressed="false">Finisher<small>paint</small></button>
   </div>
   <span class="lbl">Game length</span>
   <div class="seg" id="s-len">
@@ -104,6 +105,7 @@ h1 span{color:#FFC23D}
     <button type="button" data-v="flash">Flash<small>fast</small></button>
     <button type="button" data-v="sniper">Sniper<small>shooter</small></button>
     <button type="button" data-v="lock">Lockdown<small>blocker</small></button>
+    <button type="button" data-v="fin">Finisher<small>paint</small></button>
   </div>
   <p class="sub" id="n-msg">Connecting...</p>
   <button class="ghost" id="n-back" type="button">Cancel</button>
@@ -154,8 +156,8 @@ const sfx=n=>{if(NET.on&&NET.role==='host')NET.snd.push(n);if(SFX[n])SFX[n]()};
 
 /* ---------------- game state ---------------- */
 function hoops(W){return [{cx:77,bd:30,dir:1},{cx:W-77,bd:W-30,dir:-1}]}
-const CH={flash:{n:'FLASH',spd:1.1,err:1.18,blk:.85},sniper:{n:'SNIPER',spd:.95,err:.7,blk:.85},lock:{n:'LOCKDOWN',spd:.95,err:1.18,blk:1.3}};   /* v38: speed / shooting / blocking specialists, each a little weaker elsewhere */
-function mkP(i,x,ck){const c=CH[ck]||{spd:1,err:1,blk:1};return {ch:ck||'',cs:c.spd,ce:c.err,cb:c.blk,i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,en:1,pj:false,cd:0,stun:0,st:0,ph:0,dd:false,dk:0,dkT:0,dkS:0,dkh:0,gath:false,gt:0,pump:0,slow:false}}
+const CH={flash:{n:'FLASH',spd:1.1,err:1.18,blk:.85},sniper:{n:'SNIPER',spd:.95,err:.7,blk:.85},lock:{n:'LOCKDOWN',spd:.95,err:1.18,blk:1.3},fin:{n:'FINISHER',spd:.97,err:1.1,blk:.9,paint:.55,out:.5}};   /* Finisher: hard to block in the paint, shrugs off contests behind the line */   /* v38: speed / shooting / blocking specialists, each a little weaker elsewhere */
+function mkP(i,x,ck){const c=CH[ck]||{spd:1,err:1,blk:1};return {ch:ck||'',cs:c.spd,ce:c.err,cb:c.blk,cp:c.paint||1,co:c.out||1,i,x,y:GY,vx:0,vy:0,face:i?-1:1,air:false,has:false,shoot:false,jt:0,ap:APEX,en:1,pj:false,cd:0,stun:0,st:0,ph:0,dd:false,dk:0,dkT:0,dkS:0,dkh:0,gath:false,gt:0,pump:0,slow:false}}
 function newGame(o,W){
   g={W,o,hp:hoops(W),t:0,P:[mkP(0,W/2-84,(o.c||[])[0]),mkP(1,W/2+84,(o.c||[])[1])],ball:{x:W/2,y:210,vx:0,vy:-430,st:'loose',live:true,own:-1,sh:-1,pts:2,t:0,rot:0,cd:.25,hit:false,dunk:false,done:false},
     score:[0,0],clock:o.len,sc:SC,phase:'live',dead:0,next:-1,hold:.9,pop:[],fx:[],shake:0,net:[0,0],rd:[0,0],ot:0,ai:[{},{}],stat:[{fg:0,fga:0,blk:0,stl:0,three:0},{fg:0,fga:0,blk:0,stl:0,three:0}],started:false,bb:[0,0]};
@@ -214,7 +216,7 @@ function release(p,late){
   if(dist<78&&hy<RIMY+18&&!late){const hi=1-p.i;p.fb=Math.abs(p.vx)>SPD*.7&&Math.abs(o.x-p.x)>230;p.dk=.62;p.dkT=0;p.dkS=Math.floor(rnd()*4);   /* 0 one-hand, 1 two-hand, 2 windmill, 3 360 */p.dkh=hi;p.face=-h.dir;g.slo=.62;Object.assign(b,{x:hx,y:hy,vx:0,vy:0,pts:2,dunk:true,dh:.26,hh:hi});sfx('jump');return}
   b.x=hx;b.y=hy;b.pts=(p.tk!=null?p.tk:dist)>TP?3:2;   /* v20: a three is decided by where he left the floor, like the line on the court */
   const near=Math.abs(o.x-p.x),hi=o.air&&o.y<GY-36,contest=Math.max(0,1-near/140)*(hi?1.8:1)*1.4+(hi&&near<105?.45:0)   /* v23: the closer and higher the defender's hand, the worse the shot; felt from 125 px out */,tired=p.en<.25?(1-p.en/.25)*20:0;
-  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*47*(1-q*.35)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*42+tired*.6;   /* v38: contested shots about 35% harder */
+  let err=Math.pow(1-q,1.1)*140+(dist>TP?(1-q)*30+8:0)+contest*(dist>TP?p.co||1:1)*47*(1-q*.35)+tired;if(perfect)err=6+(dist>TP?9:0)+contest*(dist>TP?p.co||1:1)*42+tired*.6;   /* v38: contested shots about 35% harder */
   err*=p.ce||1;
   const T=Math.max(.86,Math.min(1.6,.8+dist/590)),off0=g._off!=null?g._off:(rnd()*2-1)*err,off=Math.abs(off0)>46?Math.sign(off0)*(27+rnd()*17):off0,tx=h.cx+off;   /* a badly timed shot clanks off the rim; it never lucks in off the backboard */
   b.vx=(tx-b.x)/T;b.vy=(RIMY-2-b.y-.5*GR*T*T)/T;
@@ -256,7 +258,7 @@ function blocks(){const b=g.ball;let d=null,s=null;
   if(b.st==='held'){s=g.P[b.own];d=g.P[1-b.own];if(!(s.air&&s.shoot&&d.air))return}
   else if(b.st==='shot'&&!b.live&&b.t<.9&&!b.dunk){s=g.P[b.sh];d=g.P[1-b.sh]}else return;
   const behind=Math.sign(s.x-d.x)===Math.sign(g.hp[1-s.i].cx-s.x),hx=d.x+(behind?Math.sign(b.x-d.x)||d.face:d.face)*(behind?12:8),hy=d.y-PH-18;
-  if(Math.hypot(b.x-hx,b.y-hy)>(BR+(d.air?38:26)*(d.cb||1))*(behind?.8:1))return;   /* v35: reach +25% */   /* v22: a block from behind still works (he reaches over the shoulder) but his reach is 20% shorter */
+  if(Math.hypot(b.x-hx,b.y-hy)>(BR+(d.air?38:26)*(d.cb||1))*(behind?.8:1)*(Math.abs(g.hp[1-s.i].cx-s.x)<160?(s.cp||1):1))return;   /* v35: reach +25% */   /* v22: a block from behind still works (he reaches over the shoulder) but his reach is 20% shorter */
   if(d.air&&d.vy>0&&(s.vy<-150||d.vy>330))return;   /* v35: a defender can block on the way down, unless the shooter is still rising fast or the defender is already falling fast */
   s.has=false;s.shoot=false;s.cd=.5;d.cd=.3;Object.assign(b,{st:'loose',live:true,own:-1,cd:.28,vx:(b.x>=d.x?1:-1)*(140+rnd()*120)+d.vx*.4,vy:-330});
   g.stat[d.i].blk++;g.shake=.45;pop('BLOCKED!',d.x,d.y-PH-44,TEAM[d.i].c,1.1);sfx('block')}

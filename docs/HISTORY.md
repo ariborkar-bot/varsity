@@ -627,3 +627,6 @@ Owner: online, each player attacks the hoop on the RIGHT of his own screen. The 
 
 ## Hoops Battle v41 (crossovers)
 Owner: driving into a defender costs more energy (`EN.push` .16 to .21). Crossovers: reversing direction with the defender within 150 px counts (`p.xo`, window 2.6 s), each costs .025 energy; from the third one, if the defender is within 125 px and on the ground, each crossover has a 20 percent x (count-2) chance to be stolen at once (`doSteal`). Simulated: 3 reversals about 17 percent, 5 reversals about 85 percent.
+
+## Hoops Battle v42 (Finisher)
+Owner: fourth character `fin` FINISHER (`CH`): speed x.97, shot error x1.1, block reach x.9, but `paint` .55 (a shooter within 160 px of the hoop he attacks is blocked with 55 percent of the usual reach, `blocks()`) and `out` .5 (contest penalty halved when the shot is behind the line, `release()`). Shows in both character pickers.
