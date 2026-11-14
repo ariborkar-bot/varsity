@@ -43,6 +43,10 @@ Varsity is a fantasy-sports PWA for San Diego high school sports. Repo: `aribork
 - Positions: MaxPreps gives PG/SG/SF/PF/C, G, F, W or blank; `assign_positions()` infers the rest from stats.
 - 11 small schools have no roster at all in the 2025-26 data; 24 have fewer than 5 players.
 
+## Other sections (v490)
+- Every California section's Players/Stats tabs run on the San Diego code from `api/v1/sections/<id>/fb/weekly.json` (see HISTORY v490: `secPl`, `SECP`, `vpl`). Section players are view only (`ext`); never let them into `players()`.
+- To refresh section player stats: run "Collect section data" (scores) then "Collect section players", or edit `.github/triggers/players` and push. No schedule is set (the owner has not decided on automatic MaxPreps collection).
+
 ## Daily score update
 - A Claude scheduled task ("Varsity daily scores", 5:41 am Pacific every day) is ON (re-created Nov 5 2026 at the owner's request). it finds final scores in news scoreboards (High School On SI, local papers) and adds them with `tools/add_scores.py`. It does not scrape MaxPreps: from the cloud MaxPreps pages come back about a year stale, and automated scraping breaks their terms.
 - `tools/add_scores.py` (read its docstring): input lines `fb|YYYY-MM-DD|home|hs|away|as|source`; fills scores for scheduled games, adds unscheduled games that involve a San Diego Section school, reports CONFLICT/SKIPPED and never guesses. `--pending` lists played games with no score, `--names fb|bb` lists team names, `--dry-run` previews. Other spellings go in `tools/data/team_aliases.txt`.

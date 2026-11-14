@@ -87,4 +87,15 @@ json.dump({'section': 'one', 'schools': [{'id': 'mp:A', 'name': 'Alpha'}], 'game
 P.run(args, logs.append, F())
 one3 = json.load(open(os.path.join(out, 'one.fb.json')))['players']
 check(one3['q1']['g'] == 2 and one3['q1']['t']['passYd'] == 420, 'a newly played game is added on top')
+check(one3['q1']['gl']['mp:g1'][:2] == ['2026-09-04', 'Beta'] and one3['q1']['gl']['mp:g2'][2]['passYd'] == 210 and len(one3['q1']['gl']) == 2, 'each game keeps its own line: %s' % one3['q1']['gl'])
+check(P.full_name('J. Robertson', 'john-robertson') == 'John Robertson' and P.full_name('D. De La Cruz', 'diego-de-la-cruz') == 'Diego De La Cruz'
+      and P.full_name("T. O'Neil", 'tim-oneil') == "Tim O'Neil" and P.full_name('J. Smith', 'x9') == 'J. Smith' and P.full_name('Quin Back', 'quin-back') == 'Quin Back', 'full names from the athlete link')
+# totals-only files from format 1 are replaced, not added to
+json.dump(['mp:g1', 'mp:g2'], open(os.path.join(out, 'fb.done.json'), 'w'))
+json.dump({'section': 'one', 'sport': 'fb', 'players': {'q1': {'n': 'Q. Back', 's': 'Alpha', 'i': 'mp:A', 'g': 9, 't': {'passYd': 999}}}}, open(os.path.join(out, 'one.fb.json'), 'w'))
+f4 = F()
+P.run(args, logs.append, f4)
+one4 = json.load(open(os.path.join(out, 'one.fb.json')))
+check(len(f4.urls) == 2 and one4['fmt'] == 2 and one4['players']['q1']['g'] == 2 and one4['players']['q1']['t']['passYd'] == 420, 'format 1 files are rebuilt from the box scores')
+check(json.load(open(os.path.join(out, 'fb.done.json')))['fmt'] == 2, 'done list is format 2')
 print('ok: %d checks passed' % n)

@@ -17,6 +17,7 @@ sys.path.insert(0, HERE)
 import maxpreps as M  # noqa: E402
 
 BASE = 'https://www.maxpreps.com'
+FMT = 2
 FB_KEYS = ['passYd', 'passTD', 'int', 'rushYd', 'rushTD', 'rec', 'recYd', 'recTD', 'fumLost', 'tkl', 'sack', 'dInt', 'ff', 'fr', 'dTD', 'retTD',
            'xpm', 'xpMiss', 'fgm', 'fgMiss', 'puntYd', 'in20', 'punts', 'tfl', 'pbu']
 BB_KEYS = ['pts', 'reb', 'ast', 'stl', 'blk', 'tov', 'tpm']
@@ -76,7 +77,23 @@ def _rows(sg):
         nc = r['columns'][ni]
         m = re.search(r'athletes/([^/]+)/\?careerid=(\w+)', nc.get('href') or '')
         if m:
-            yield m.group(2), nc.get('value') or '', names, r['columns']
+            yield m.group(2), full_name(nc.get('value') or '', m.group(1)), names, r['columns']
+
+
+def full_name(shown, slug):
+    """Box scores print 'J. Robertson'; the athlete link's slug carries the whole name ('john-robertson'). When the slug ends with the
+    printed last name, use its first name: 'John Robertson' (the last name keeps the box score's own spelling and capitals)."""
+    m = re.match(r'^([A-Za-z])\.\s+(.+)$', shown.strip())
+    if not m or not slug:
+        return shown
+    last = m.group(2)
+    nl = re.sub(r'[^a-z0-9]', '', last.lower())
+    parts = [x for x in slug.lower().split('-') if x]
+    for i in range(1, len(parts)):
+        if ''.join(parts[i:]) == nl and parts[0][:1] == m.group(1).lower():
+            first = ' '.join(w.capitalize() for w in parts[:i])
+            return first + ' ' + last
+    return shown
 
 
 def football_lines(o):
@@ -207,11 +224,18 @@ def run(a, log=print, fetcher=None):
                 games[g['id']] = g
     os.makedirs(a.out, exist_ok=True)
     done_path = os.path.join(a.out, sport + '.done.json')
-    done = set(json.load(open(done_path))) if os.path.exists(done_path) else set()
+    # format 2 (v490) keeps every game's own line per player ('gl'), which weekly features need (Player of the Week, trends, game logs).
+    # Files from format 1 hold season totals only, so they and their done list are dropped and every box score is read again, once.
+    dj = json.load(open(done_path)) if os.path.exists(done_path) else None
+    fresh = not (isinstance(dj, dict) and dj.get('fmt') == FMT)
+    done = set() if fresh else set(dj.get('games') or [])
     store = {}   # section -> {pid: player}
     for sid in secs:
         p = os.path.join(a.out, '%s.%s.json' % (sid, sport))
-        store[sid] = json.load(open(p, encoding='utf-8'))['players'] if os.path.exists(p) else {}
+        old = json.load(open(p, encoding='utf-8')) if os.path.exists(p) and not fresh else {}
+        store[sid] = old.get('players', {}) if old.get('fmt') == FMT else {}
+    if fresh and dj is not None:
+        log('%s: older totals-only files found; reading every box score again to keep each game\'s line' % sport)
     todo = sorted((g for g in games.values() if g['id'] not in done and box_url(g)), key=lambda g: (g.get('date') or '', g['id']))
     log('%s: %d played games, %d already counted, %d to fetch (%d have no box-score link)' % (sport, len(games), len(done), len(todo),
         sum(1 for g in games.values() if g['id'] not in done and not box_url(g))))
@@ -226,9 +250,9 @@ def run(a, log=print, fetcher=None):
         for sid, pl in store.items():
             if pl:
                 tmp = os.path.join(a.out, '%s.%s.json.tmp' % (sid, sport))
-                json.dump({'section': sid, 'sport': sport, 'synced': now, 'players': pl}, open(tmp, 'w', encoding='utf-8'), sort_keys=True, ensure_ascii=False, separators=(',', ':'))
+                json.dump({'section': sid, 'sport': sport, 'fmt': FMT, 'synced': now, 'players': pl}, open(tmp, 'w', encoding='utf-8'), sort_keys=True, ensure_ascii=False, separators=(',', ':'))
                 os.replace(tmp, os.path.join(a.out, '%s.%s.json' % (sid, sport)))
-        json.dump(sorted(done), open(done_path + '.tmp', 'w'), separators=(',', ':'))
+        json.dump({'fmt': FMT, 'games': sorted(done)}, open(done_path + '.tmp', 'w'), separators=(',', ':'))
         os.replace(done_path + '.tmp', done_path)
 
     import concurrent.futures, random
@@ -286,10 +310,15 @@ def run(a, log=print, fetcher=None):
                 if not sid:
                     stat['unmatched_team'] += 1
                     continue
-                school = g[side]
+                school, opp = g[side], g['away' if side == 'home' else 'home']
                 for cid, p in P.items():
-                    e = store[sid].setdefault(cid, {'n': p['n'], 's': school, 'i': sc_id, 'g': 0, 't': {}})
+                    e = store[sid].setdefault(cid, {'n': p['n'], 's': school, 'i': sc_id, 'g': 0, 't': {}, 'gl': {}})
+                    if g['id'] in e['gl']:
+                        continue   # this game is already in his log (a run that died between saving players and the done list)
+                    if len(p['n']) > len(e['n']):
+                        e['n'] = p['n']
                     e['g'] += 1
+                    e['gl'][g['id']] = [g.get('date') or '', opp, {k: round(v, 2) for k, v in p['k'].items() if v}]
                     for k, v in p['k'].items():
                         e['t'][k] = round(e['t'].get(k, 0) + v, 2)
             done.add(g['id'])

@@ -12,6 +12,7 @@ Layout (sport is fb or bb):
   sections/<id>/<sport>/weeks/<monday>.json   one week of games (Monday's date)
   sections/<id>/<sport>/teams/<team id>.json  one team: record and its games ("mp:123" is written as mp-123)
   sections/<id>/<sport>/players.json          every player, best fantasy points first (from data/players, see players.py); `columns` names each array slot
+  sections/<id>/<sport>/weekly.json           every player's line for every game (date, opponent, stats): the app's Players of the Week, trends and game logs
 Everything is rebuilt from scratch on each run, so a removed team or game disappears. Output is deterministic (sorted keys, no timestamps
 except the source's own), so an unchanged data set produces no git diff. See docs/API.md."""
 import argparse, datetime, json, os, shutil, sys
@@ -109,7 +110,39 @@ def build_players(sec_id, sport, src, out):
     with open(os.path.join(base, 'players.json'), 'w', encoding='utf-8') as f:
         json.dump({'section': sec_id, 'sport': sport, 'total': len(rows), 'keys': keys, 'columns': ['name', 'school', 'pos', 'games', 'fp'] + keys, 'players': body},
                   f, sort_keys=True, ensure_ascii=False, separators=(',', ':'))
+    build_weekly(sec_id, sport, rows, keys, base)
     return len(rows)
+
+
+def build_weekly(sec_id, sport, rows, keys, base):
+    """weekly.json: every player's line for every game (needs the format-2 player files that keep 'gl'). This is what the app loads to give a
+    section the same pages San Diego has: Players of the Week, TOP 10, trends, best single games, game logs.
+    players: [id, name, school, pos, [[date, opponent, [key index, value, key index, value ...]], ...]] in fantasy-points order."""
+    ki = {k: i for i, k in enumerate(keys)}
+    out = []
+    for fp, e, t, cid in rows:
+        gl = e.get('gl')
+        if not gl:
+            continue
+        games = []
+        for gid in sorted(gl, key=lambda x: (gl[x][0], x)):
+            d, opp, st = gl[gid]
+            flat = []
+            for k in keys:
+                v = st.get(k)
+                if v:
+                    flat += [ki[k], int(v) if float(v).is_integer() else v]
+            games.append([d, opp, flat])
+        pos = PL.guess_pos(t) if sport == 'fb' else None
+        if sport == 'fb' and not pos:   # only a fumble recovery, a return TD or a lost fumble: defense if any defensive stat, else offense
+            pos = 'DEF' if any(t.get(k) for k in ('ff', 'fr', 'dTD')) else 'RB'
+        out.append([cid, e['n'], e['s'], pos, games])
+    if not out:
+        return 0
+    with open(os.path.join(base, 'weekly.json'), 'w', encoding='utf-8') as f:
+        json.dump({'section': sec_id, 'sport': sport, 'keys': keys, 'columns': ['id', 'name', 'school', 'pos', 'games'], 'players': out},
+                  f, sort_keys=True, ensure_ascii=False, separators=(',', ':'))
+    return len(out)
 
 
 def main(argv=None):

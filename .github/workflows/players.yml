@@ -3,6 +3,10 @@
 # cut short by max_minutes (or a failure) keeps its progress and the next run carries on. Football first; basketball has ~6x the games.
 name: Collect section players
 on:
+  # a push that changes .github/triggers/players starts a football run (same as pressing Run workflow with the defaults)
+  push:
+    branches: [main]
+    paths: ['.github/triggers/players']
   workflow_dispatch:
     inputs:
       sport:
@@ -45,17 +49,17 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           START=$(date +%s)
           for round in $(seq 1 30); do
-            python3 -I tools/sections/players.py --sport "${{ inputs.sport }}" --delay "${{ inputs.delay }}" --max-minutes 20 --max-games "${{ inputs.max_games }}" | tee round.log || true
+            python3 -I tools/sections/players.py --sport "${{ inputs.sport || 'fb' }}" --delay "${{ inputs.delay || '0.5' }}" --max-minutes 20 --max-games "${{ inputs.max_games || '0' }}" | tee round.log || true
             python3 -I tools/sections/build_api.py || true
             git add data/players api
             if ! git diff --cached --quiet; then
-              git commit -q -m "Player stats update (${{ inputs.sport }}, round $round)"
+              git commit -q -m "Player stats update (${{ inputs.sport || 'fb' }}, round $round)"
               git pull --rebase -q && git push -q || echo "push failed, will retry next round"
             fi
             grep -q "0 to fetch" round.log && break
             grep -q "STOPPED" round.log && break
-            [ "${{ inputs.max_games }}" != "0" ] && break
-            [ $(( $(date +%s) - START )) -gt $(( ${{ inputs.max_minutes }} * 60 )) ] && break
+            [ "${{ inputs.max_games || '0' }}" != "0" ] && break
+            [ $(( $(date +%s) - START )) -gt $(( ${{ inputs.max_minutes || '300' }} * 60 )) ] && break
           done
       - name: Commit anything left (also after a failure)
         if: always()
