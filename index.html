@@ -3419,7 +3419,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v485 · Nov 13';
+const APP_BUILD='v486 · Nov 13';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7915,27 +7915,52 @@ function sbPlayers(id){const d=SBR.pl[id];if(!d)sbFetch('pl:'+id,'api/v1/section
 const SB_POS=['ALL','QB','RB','WR','K','DEF'];
 function sbPlList(D){
   const q=UI.sbq.trim().toLowerCase(),keys=D.columns.slice(5);
-  const all=D.players.map(r=>({r,s:Object.fromEntries(keys.map((k,j)=>[k,r[5+j]||0]))}))
+  const all=D.players.map((r,gi)=>({r,gi,fp:r[4],s:Object.fromEntries(keys.map((k,j)=>[k,r[5+j]||0]))}))
     .filter(x=>(UI.sbpos==='ALL'||x.r[2]===UI.sbpos)&&(UI.sbsch==='ALL'||x.r[1]===UI.sbsch));
   all.forEach((x,i)=>x.rank=i+1);
   return q?all.filter(x=>x.r[0].toLowerCase().includes(q)):all;
 }
+const sbT10=x=>x.gi<10&&x.fp>0?'<em class="top10">TOP 10</em>':'';
 function sbPlRow(x){
   const r=x.r,pos=r[2]||'RB',per=r[3]?Math.round(r[4]/r[3]*10)/10:0;
-  return `<div class="row" role="listitem"><span class="rk">${x.rank}</span>${av(r[0],r[1],40)}
-    <span class="who"><span class="nm"><b>${esc(r[0])}</b></span><i>${r[2]?pb(r[2]):''}<span>${slogo(r[1])}${esc(r[1])}</span></i></span>
+  return `<button class="row" data-act="sbplayer" data-i="${x.gi}" role="listitem"><span class="rk">${x.rank}</span>${av(r[0],r[1],40)}
+    <span class="who"><span class="nm"><b>${esc(r[0])}</b>${x.gi<10?'<em class="top10">TOP 10</em>':''}</span><i>${r[2]?pb(r[2]):''}<span>${slogo(r[1])}${esc(r[1])}</span></i></span>
     <span class="ln">${esc(line(pos,x.s))}</span>
-    <span class="pt"><b>${f1(r[4])}</b><small>${per} per game</small></span></div>`;
+    <span class="pt"><b>${f1(r[4])}</b><small>${per} per game</small></span></button>`;
 }
 function sbPlPodium(v){
-  return `<div class="podium">${[1,0,2].map(i=>{const x=v[i],r=x.r;return `<div class="pod p${i+1}"><span class="medal">${i+1}</span>${av(r[0],r[1],i===0?64:52)}<b class="pn">${esc(r[0])}</b><span class="ps">${r[2]?pb(r[2]):''}<span>${slogo(r[1])}${esc(r[1])}</span></span><span class="pv">${f1(r[4])}</span><small>${r[3]?Math.round(r[4]/r[3]*10)/10:0} per game</small></div>`}).join('')}</div>`;
+  return `<div class="podium">${[1,0,2].map(i=>{const x=v[i],r=x.r;return `<button class="pod p${i+1}" data-act="sbplayer" data-i="${x.gi}"><span class="medal">${i+1}</span>${x.gi<10?'<em class="top10">TOP 10</em>':''}${av(r[0],r[1],i===0?64:52)}<b class="pn">${esc(r[0])}</b><span class="ps">${r[2]?pb(r[2]):''}<span>${slogo(r[1])}${esc(r[1])}</span></span><span class="pv">${f1(r[4])}</span><small>${r[3]?Math.round(r[4]/r[3]*10)/10:0} per game</small></button>`}).join('')}</div>`;
+}
+function sbLeads(D){
+  if(UI.sbpos!=='ALL'||UI.sbq.trim()||UI.sbsch!=='ALL')return '';
+  const out=SB_POS.filter(x=>x!=='ALL').map(ps=>{const r=D.players.find(y=>y[2]===ps);return r?`<button class="lead" data-act="sbpos" data-v="${ps}">${pb(ps)}<b>${esc(r[0])}</b><span class="pv2">${f1(r[4])}</span></button>`:''}).join('');
+  return out?`<div class="leads-t">First Team All-Varsity</div><div class="leads" aria-label="Leader at each position">${out}</div>`:'';
+}
+/* a section player's card: season totals from the API (no weekly log, projections or lineups) in the same sheet as the San Diego cards */
+function sbPlayerSheet(id,gi){
+  const D=SBR.pl[id],r=D&&D.players[gi];if(!r)return '';
+  const keys=D.columns.slice(5),st=Object.fromEntries(keys.map((k,j)=>[k,r[5+j]||0])),pos=r[2]||'RB',per=r[3]?r[4]/r[3]:0;
+  const same=D.players.map((y,i)=>({y,i})).filter(o=>o.y[2]===r[2]),prk=same.findIndex(o=>o.i===gi)+1;
+  const rows=keys.filter(k=>st[k]).map(k=>[k,st[k]]);
+  const tr=rows.map(([k,v])=>`<tr><td>${esc(LABEL[k]||k)}</td><td class="n">${Math.round(v*10)/10}</td><td class="n">${(PTS[k]||0)?f1(v*PTS[k]):'—'}</td></tr>`).join('');
+  return `<aside class="dp" role="dialog" aria-modal="true" aria-label="${esc(r[0])}">
+    <div class="dh"><div class="dhl">${av(r[0],r[1],56)}<div><h2>${gi<10?`<span class="nmt">${esc(r[0])}<em class="top10">TOP 10</em></span>`:esc(r[0])}</h2><div class="sub">${r[2]?pb(r[2]):''}<span>${slogo(r[1])}${esc(r[1])}, ${r[3]} game${r[3]===1?'':'s'}</span></div></div></div><div class="dh-btns"><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div></div>
+    <div class="big"><div><span class="lbl">Season pts</span><b>${f1(r[4])}</b></div><div><span class="lbl">Per game</span><b>${f1(per)}</b></div><div><span class="lbl">${r[2]?esc(r[2])+' rank':'Rank'}</span><b>#${r[2]?prk:gi+1}</b></div></div>
+    <div class="sx-tiles" style="margin:10px 0"><div class="sx-tile"><div class="sx-tb"><b>#${gi+1}</b><small>in ${esc(SECTIONS[id].name)}</small></div></div><div class="sx-tile"><div class="sx-tb"><b>${esc(line(pos,st))}</b><small>season line</small></div></div></div>
+    <div class="scroll"><table><thead><tr><th>Stat</th><th class="n">Total</th><th class="n">Pts</th></tr></thead><tbody>${tr}</tbody></table></div>
+    <p class="muted" style="font-size:.78rem;margin-top:8px">Season totals from box scores. Weekly logs and projections are only in San Diego for now.</p>
+  </aside>`;
+}
+function openSbPlayer(gi){
+  const h=sbPlayerSheet(UI.psec==='ALL'?HOME_SEC:UI.psec,gi);if(!h)return;
+  const d=$('#drawer');d.dataset.id='';d.innerHTML=h;d.__html=h;d.hidden=false;const c=$('#dclose');if(c)c.focus();sheetPush();
 }
 function sbPlBody(id){
   const D=SBR.pl[id],rows=sbPlList(D),shown=Math.max(10,SBR.pn),vis=rows.slice(0,shown);
   if(!rows.length)return '<p class="empty">No players match these filters.</p>';
   const top=!UI.sbq.trim()&&vis.length>=3,rest=top?vis.slice(3):vis,left=rows.length-shown;
   const more=rows.length>10?`<div class="btns" style="justify-content:center">${left>0?`<button class="btn ghost" data-act="sbpmore">Show ${Math.min(10,left)} more (${left} left)</button>`:''}${shown>10?`<button class="btn ghost" data-act="sbpless">Show less</button>`:''}</div>`:'';
-  return (top?sbPlPodium(vis):'')+(rest.length?`<div class="board" role="list"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">Fantasy pts</span></div>${rest.map(sbPlRow).join('')}</div>`:'')+more;
+  return sbLeads(D)+(top?sbPlPodium(vis):'')+(rest.length?`<div class="board" role="list"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">Fantasy pts</span></div>${rest.map(sbPlRow).join('')}</div>`:'')+more;
 }
 function sbPlayersHTML(id){
   const D=sbPlayers(id),sec=SECTIONS[id];
@@ -8084,7 +8109,7 @@ function sbTeamPage(D,id){
   const tiles=n?`<div class="sx-tiles">${tile(sbRec(t),'record')}${tile(f1(t.pf/n),'points per game')}${tile(f1(t.pa/n),'allowed per game')}${tile(rk?'#'+rk+' of '+lg.length:'-',t.league?esc(t.league):'league')}</div>`:'';
   const P=sbPlayers(UI.sb),mine=P?P.players.map((r,i)=>({r,rank:i+1})).filter(x=>x.r[1]===t.name).slice(0,15):[];
   const keys=P?P.columns.slice(5):[];
-  const pl=!P?'<p class="muted">Loading players...</p>':mine.length?`<div class="board" role="list"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">Fantasy pts</span></div>${mine.map(x=>sbPlRow({r:x.r,rank:x.rank,s:Object.fromEntries(keys.map((k,j)=>[k,x.r[5+j]||0]))})).join('')}</div>`:'<p class="muted">No player stats for this team yet.</p>';
+  const pl=!P?'<p class="muted">Loading players...</p>':mine.length?`<div class="board" role="list"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">Fantasy pts</span></div>${mine.map(x=>sbPlRow({r:x.r,rank:x.rank,gi:x.gi,fp:x.fp,s:Object.fromEntries(keys.map((k,j)=>[k,x.r[5+j]||0]))})).join('')}</div>`:'<p class="muted">No player stats for this team yet.</p>';
   return `<div class="tools">${back}</div>`+hero+tiles+`<div class="qh"><h3>Games</h3><span class="muted">${gs.length} ${gs.length===1?'game':'games'}</span></div>${gs.length?`<div class="gm-grid">${gs.map(g=>sbCard(g,D)).join('')}</div>`:'<p class="empty">No games on the schedule.</p>'}
     <div class="qh"><h3>Players</h3><span class="muted">${P?mine.length?'rank is in the whole section':'':''}</span></div>${pl}`;
 }
@@ -10237,6 +10262,7 @@ document.addEventListener('click',async e=>{
   else if(a==='sbt'){UI.sbt=t.dataset.v;UI.sbl='ALL';render()}
   else if(a==='sbpmore'){SBR.pn=Math.max(10,SBR.pn)+10;const l=$('#sb-list');if(l)l.innerHTML=sbPlBody(UI.psec);else render()}
   else if(a==='sbpless'){SBR.pn=10;render()}
+  else if(a==='sbplayer'){openSbPlayer(+t.dataset.i)}
   else if(a==='sbdv'){UI.sbdv=t.dataset.v;render()}
   else if(a==='sbsort'){UI.sbsort=t.dataset.v;UI.sbtn=60;render()}
   else if(a==='sbtmore'){UI.sbtn+=60;const l=$('#sb-tlist');if(l)l.innerHTML=sbTeamsBody(sbData(UI.sb));else render()}

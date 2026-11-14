@@ -741,3 +741,7 @@ Owner: make it like Retro Bowl. Passing concepts are named (Slants, Smash, Four 
 - Stats tab for a section (`sbSecStats`) from its players.json: tiles, First Team All-Varsity, Position leaders (QB RB WR K DEF; stat chips; total or per game), Top teams. No weekly trend or best-game cards (the API has season totals only).
 - Schedule uses the San Diego game cards (`sbCard`, `.gm-grid`, "Wk N" chips) with team search (searches all weeks) and league filter; Standings use the San Diego table with a division chip row and team search; Teams has search (name/city/league), sort (A-Z, record, offense, defense), league and division filters, Show more (`sbTeams`, `sbTeamsBody`).
 - Section team page: tiles (record, PF/PA per game, league rank), game cards, the team's top 15 players from the API.
+
+## v486 (Nov 13) section players get cards
+- Section player rows and podium are tappable (`sbplayer` -> `openSbPlayer`, `sbPlayerSheet`): the San Diego sheet with season pts, per game, position rank, section rank and a per-stat table with fantasy points. No weekly log or projections (season totals only).
+- Section Players tab shows the First Team All-Varsity strip (`sbLeads`) and TOP 10 tags (`gi<10`, the section's top 10 by fantasy points).
