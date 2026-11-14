@@ -59,13 +59,13 @@ jobs:
           if not gs or newest < '2026-06-01': sys.exit('PROBE FAILED: page looks stale (newest game %s)' % newest)
           PY
       - name: Crawl California football
-        if: ${{ inputs.sport == 'both' || inputs.sport == 'fb' }}
+        if: ${{ (inputs.sport || 'both') == 'both' || (inputs.sport || 'both') == 'fb' }}
         env:
           VARSITY_CONTACT: https://github.com/ariborkar-bot/varsity
         run: |
           python3 -I tools/sections/sync.py california --adapter maxpreps --sport fb --max-teams "${{ inputs.max_teams }}" --cache .mpcache ${{ inputs.dry && '--dry-run' || '' }}
       - name: Commit football data
-        if: ${{ !inputs.dry && (inputs.sport == 'both' || inputs.sport == 'fb') }}
+        if: ${{ !inputs.dry && ((inputs.sport || 'both') == 'both' || (inputs.sport || 'both') == 'fb') }}
         run: |
           git config user.name "varsity-collector"
           git config user.email "actions@users.noreply.github.com"
@@ -75,13 +75,13 @@ jobs:
           git pull --rebase -q
           git push
       - name: Crawl California basketball
-        if: ${{ inputs.sport == 'both' || inputs.sport == 'bb' }}
+        if: ${{ (inputs.sport || 'both') == 'both' || (inputs.sport || 'both') == 'bb' }}
         env:
           VARSITY_CONTACT: https://github.com/ariborkar-bot/varsity
         run: |
           python3 -I tools/sections/sync.py california --adapter maxpreps --sport bb --max-teams "${{ inputs.max_teams }}" --cache .mpcache ${{ inputs.dry && '--dry-run' || '' }}
       - name: Commit basketball data
-        if: ${{ !inputs.dry && (inputs.sport == 'both' || inputs.sport == 'bb') }}
+        if: ${{ !inputs.dry && ((inputs.sport || 'both') == 'both' || (inputs.sport || 'both') == 'bb') }}
         run: |
           git config user.name "varsity-collector"
           git config user.email "actions@users.noreply.github.com"
