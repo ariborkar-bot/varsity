@@ -2120,6 +2120,7 @@ body.fg-on{overflow:hidden}
 .rk-poster .rank-cta{margin-top:12px}
 .me-sec{border:1px solid #2A4A78;border-radius:18px;overflow:hidden;padding-top:0!important}
 .me-sec>h3{margin:0 -16px 10px!important;padding:12px 16px;color:#fff;font-family:var(--f-display,inherit);text-transform:uppercase;letter-spacing:.04em;background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 27px,transparent 27px 54px),linear-gradient(145deg,#1C4E8C,#2878B3)}
+.st-seg.s3{grid-template-columns:repeat(3,minmax(0,1fr))}.st-seg.s3 button{flex-direction:column;gap:4px;padding:10px 4px;text-align:center}.st-seg.s3 button span{align-items:center}.st-seg.s3 button small{display:none}.sbr-tn{display:flex;align-items:center;gap:8px}.sbr-tn .av{flex:none}
 .sx-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
 .sx-tile{min-width:0}
 .sx-tb{display:flex;flex-direction:column;gap:4px;width:100%;height:100%;padding:14px;border-radius:16px;border:1px solid var(--line,#22344B);background:var(--surface,#132235);color:inherit;font:inherit;text-align:left}
@@ -3429,7 +3430,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v484 · Nov 13';
+const APP_BUILD='v485 · Nov 13';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7929,46 +7930,140 @@ function sbGameRow(g,D){
   const hw=done&&g.hs>g.as,aw=done&&g.as>g.hs;
   return `<div class="sbr-g"><span class="sbr-d">${esc(sbWd(g.date))}<small>${esc(sbDay(g.date))}${g.time&&!done?' · '+esc(g.time):''}</small></span><span class="sbr-ts"><span class="sbr-t${aw?' win':''}">${sbTeamLink(A,g.away)}</span><span class="sbr-t${hw?' win':''}">${sbTeamLink(H,g.home)}</span></span><span class="sbr-ss">${done?`<b class="${aw?'win':''}">${g.as}</b><b class="${hw?'win':''}">${g.hs}</b>${g.forfeit?'<small>forfeit</small>':''}`:''}</span></div>`;
 }
-function sbSched(D){
-  const today=TODAY(),weeks=[...new Set(D.games.map(g=>g.wk).filter(Boolean))].sort();
-  if(!weeks.length)return `<p class="empty">No ${FG_SPORT==='bb'?'basketball':'football'} games in this section yet.</p>`;
-  const cur=weeks.find(w=>w>=sbMon(today))||weeks[weeks.length-1];
-  const w=UI.sbw&&weeks.includes(UI.sbw)?UI.sbw:cur;
+/* ---- section views: same look as the San Diego Games and Stats pages ---- */
+UI.sbgq='';UI.sbstq='';UI.sbtq='';UI.sbdv='ALL';UI.sbsort='az';UI.sbtn=60;UI.sbx={pos:'QB',k:'',per:false};
+const sbLogo=(n,sz)=>slogo(n,sz)||av(n,n,sz);
+const sbTD=(D,id,name)=>D.teams[id||'n:'+name];
+function sbCard(g,D){
+  const done=g.hs!=null&&g.as!=null,hw=done&&g.hs>g.as,aw=done&&g.as>g.hs;
+  const side=(n,sc,win,t)=>`<div class="gm-t ${win?'win':''} ${done&&!win?'lose':''}">${sbLogo(n,26)}<b>${sbTeamLink(t,n)}</b><span class="gm-s">${done?sc:''}</span></div>`;
+  return `<article class="gm"><div class="gm-h"><span>${done?'Final':esc(sbDay(g.date)+(g.time?' · '+g.time:''))}</span>${g.forfeit?'<span class="gm-k">Forfeit</span>':''}</div>${side(g.away,g.as,aw,sbTD(D,g.away_id,g.away))}${side(g.home,g.hs,hw,sbTD(D,g.home_id,g.home))}</article>`;
+}
+function sbWeeks(D){const weeks=[...new Set(D.games.map(g=>g.wk).filter(Boolean))].sort(),cur=weeks.find(w=>w>=sbMon(TODAY()))||weeks[weeks.length-1];return{weeks,cur}}
+function sbSchedBody(D){
+  const {weeks,cur}=sbWeeks(D),w=UI.sbw&&weeks.includes(UI.sbw)?UI.sbw:cur,q=UI.sbgq.trim().toLowerCase();
   const leagues=[...new Set(Object.values(D.teams).map(t=>t.league).filter(Boolean))].sort();
   const lg=UI.sbl!=='ALL'&&leagues.includes(UI.sbl)?UI.sbl:'ALL';
-  let list=D.games.filter(g=>g.wk===w);
-  if(lg!=='ALL')list=list.filter(g=>[D.teams[g.home_id||'n:'+g.home],D.teams[g.away_id||'n:'+g.away]].some(t=>t&&t.league===lg));
-  list.sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0)||a.home.localeCompare(b.home));
-  const fin=list.filter(g=>g.hs!=null).length;
-  return `<div class="tools"><div class="chips gm-wks" role="group" aria-label="Week">${weeks.map(x=>`<button class="chip" data-act="sbw" data-v="${x}" aria-pressed="${x===w}">${esc(sbDay(x))}${x===cur?' •':''}</button>`).join('')}</div>
-    ${leagues.length?`<label class="fld"><span>League</span><select data-act="sbl"><option value="ALL">All leagues</option>${leagues.map(l=>`<option ${lg===l?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`:''}</div>
-    <div class="qh"><h3>Week of ${esc(sbDay(w))}</h3><span class="muted">${list.length} ${list.length===1?'game':'games'}${fin?` · ${fin} final`:''}</span></div>
-    ${list.length?`<section class="card sbr-gl">${list.slice(0,300).map(g=>sbGameRow(g,D)).join('')}</section>`:'<p class="empty">No games this week.</p>'}`;
+  let list=q?D.games:D.games.filter(g=>g.wk===w);
+  if(q)list=list.filter(g=>(g.home+' '+g.away).toLowerCase().includes(q));
+  if(lg!=='ALL')list=list.filter(g=>[sbTD(D,g.home_id,g.home),sbTD(D,g.away_id,g.away)].some(t=>t&&t.league===lg));
+  list=list.slice().sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0)||a.home.localeCompare(b.home));
+  const fin=list.filter(g=>g.hs!=null).length,total=list.length;
+  return `<div class="qh"><h3>${q?'Games for “'+esc(UI.sbgq.trim())+'”':'Week '+(weeks.indexOf(w)+1)}</h3><span class="muted">${total} ${total===1?'game':'games'}${fin?` · ${fin} final`:''}</span></div>
+    ${total?`<div class="gm-grid">${list.slice(0,240).map(g=>sbCard(g,D)).join('')}</div>${total>240?'<p class="muted">Showing the first 240. Search a team to narrow it down.</p>':''}`:'<p class="empty">No games '+(q?'match.':'this week.')+'</p>'}`;
 }
-function sbStand(D){
-  const by={};Object.values(D.teams).filter(t=>t.w+t.l+t.t>0).forEach(t=>{const k=t.league||t.division||'Other';(by[k]=by[k]||[]).push(t)});
+function sbSched(D){
+  const {weeks,cur}=sbWeeks(D);
+  if(!weeks.length)return `<p class="empty">No ${FG_SPORT==='bb'?'basketball':'football'} games in this section yet.</p>`;
+  const w=UI.sbw&&weeks.includes(UI.sbw)?UI.sbw:cur;
+  const leagues=[...new Set(Object.values(D.teams).map(t=>t.league).filter(Boolean))].sort();
+  return `<div class="tools"><div class="sb"><span class="sw"><input id="sbgq" type="search" placeholder="Search a team" aria-label="Search a team" value="${esc(UI.sbgq)}"></span></div>
+    <div class="chips gm-wks" role="group" aria-label="Week">${weeks.map((x,i)=>`<button class="chip" data-act="sbw" data-v="${x}" aria-pressed="${x===w}">Wk ${i+1}${x===cur?' •':''}</button>`).join('')}</div>
+    ${leagues.length?`<label class="fld"><span>League</span><select data-act="sbl"><option value="ALL">All leagues</option>${leagues.map(l=>`<option ${UI.sbl===l?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`:''}</div>
+    <div id="sb-glist">${sbSchedBody(D)}</div>`;
+}
+function sbStandBody(D){
+  const q=UI.sbstq.trim().toLowerCase(),dv=UI.sbdv,by={};
+  Object.values(D.teams).filter(t=>t.w+t.l+t.t>0&&(dv==='ALL'||t.division===dv)&&(!q||t.name.toLowerCase().includes(q))).forEach(t=>{const k=t.league||t.division||'Other';(by[k]=by[k]||[]).push(t)});
   const keys=Object.keys(by).sort((a,b)=>a.localeCompare(b));
   if(!keys.length)return '<p class="empty">No results yet.</p>';
   return keys.map(k=>{const l=by[k].sort((a,b)=>sbPct(b)-sbPct(a)||(b.pf-b.pa)-(a.pf-a.pa)||a.name.localeCompare(b.name));
-    return `<section class="card"><div class="qh"><h3>${esc(k)}</h3><span class="muted">${l.length} ${l.length===1?'team':'teams'}</span></div><div class="scroll"><table><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th></tr></thead><tbody>${l.map((t,i)=>`<tr><td>${i+1}</td><td>${sbTeamLink(t)}</td><td>${sbRec(t)}</td><td>${t.pf}</td><td>${t.pa}</td></tr>`).join('')}</tbody></table></div></section>`}).join('');
+    return `<section class="card"><div class="qh"><h3>${esc(k)}</h3><span class="muted">${l.length} ${l.length===1?'team':'teams'}</span></div><div class="scroll"><table><thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th></tr></thead><tbody>${l.map((t,i)=>`<tr><td class="rk">${i+1}</td><td><span class="sch">${sbLogo(t.name,22)}<b>${sbTeamLink(t)}</b></span></td><td>${sbRec(t)}</td><td>${t.pf}</td><td>${t.pa}</td></tr>`).join('')}</tbody></table></div></section>`}).join('');
+}
+function sbStand(D){
+  const divs=[...new Set(Object.values(D.teams).map(t=>t.division).filter(Boolean))].sort();
+  return `<div class="tools"><div class="sb"><span class="sw"><input id="sbstq" type="search" placeholder="Search a team" aria-label="Search a team" value="${esc(UI.sbstq)}"></span></div>
+    ${divs.length>1?`<div class="chips gm-divs" role="group" aria-label="Division">${['ALL',...divs].map(d=>`<button class="chip" data-act="sbdv" data-v="${esc(d)}" aria-pressed="${UI.sbdv===d}">${d==='ALL'?'All divisions':esc(d)}</button>`).join('')}</div>`:''}</div>
+    <div id="sb-slist">${sbStandBody(D)}</div>`;
+}
+const SB_SORTS=[['az','A to Z'],['rec','Best record'],['off','Offense'],['def','Defense']];
+function sbTeamsBody(D){
+  const q=UI.sbtq.trim().toLowerCase();
+  const leagues=[...new Set(Object.values(D.teams).map(t=>t.league).filter(Boolean))].sort();
+  const lg=UI.sbl!=='ALL'&&leagues.includes(UI.sbl)?UI.sbl:'ALL',dv=UI.sbdv;
+  let l=Object.values(D.teams).filter(t=>(lg==='ALL'||t.league===lg)&&(dv==='ALL'||t.division===dv)&&(!q||(t.name+' '+t.city+' '+t.league).toLowerCase().includes(q)));
+  const gp=t=>t.w+t.l+t.t,pg=(t,k)=>gp(t)?t[k]/gp(t):0,so=UI.sbsort;
+  l.sort(so==='rec'?(a,b)=>(gp(b)>0)-(gp(a)>0)||sbPct(b)-sbPct(a)||(b.pf-b.pa)-(a.pf-a.pa)||a.name.localeCompare(b.name):so==='off'?(a,b)=>pg(b,'pf')-pg(a,'pf')||a.name.localeCompare(b.name):so==='def'?(a,b)=>(gp(b)>0)-(gp(a)>0)||pg(a,'pa')-pg(b,'pa')||a.name.localeCompare(b.name):(a,b)=>a.name.localeCompare(b.name));
+  const shown=l.slice(0,UI.sbtn),left=l.length-shown.length;
+  return `<div class="qh"><h3>Teams</h3><span class="muted">${l.length}</span></div>
+    <section class="card sbr-gl">${shown.map(t=>`<button class="sbr-tm" data-act="sbteam" data-id="${esc(t.id)}"><span class="sbr-tn">${sbLogo(t.name,24)} ${esc(t.name)}</span><span class="muted">${esc([t.city,t.league].filter(Boolean).join(' · '))}${gp(t)?` · ${f1(pg(t,'pf'))} PF · ${f1(pg(t,'pa'))} PA per game`:''}</span><b>${gp(t)?sbRec(t):'-'}</b></button>`).join('')||'<p class="empty">No teams match.</p>'}</section>
+    ${left>0?`<div class="btns" style="justify-content:center"><button class="btn ghost" data-act="sbtmore">Show ${Math.min(60,left)} more (${left} left)</button></div>`:''}`;
 }
 function sbTeams(D){
-  const all=Object.values(D.teams).sort((a,b)=>a.name.localeCompare(b.name));
-  const leagues=[...new Set(all.map(t=>t.league).filter(Boolean))].sort();
-  const lg=UI.sbl!=='ALL'&&leagues.includes(UI.sbl)?UI.sbl:'ALL';
-  const l=lg==='ALL'?all:all.filter(t=>t.league===lg);
-  return `<div class="tools">${leagues.length?`<label class="fld"><span>League</span><select data-act="sbl"><option value="ALL">All leagues</option>${leagues.map(x=>`<option ${lg===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`:''}</div>
-    <div class="qh"><h3>Teams</h3><span class="muted">${l.length}</span></div>
-    <section class="card sbr-gl">${l.map(t=>`<button class="sbr-tm" data-act="sbteam" data-id="${esc(t.id)}"><span class="sbr-tn">${esc(t.name)}</span><span class="muted">${esc([t.city,t.league].filter(Boolean).join(' · '))}</span><b>${t.w+t.l+t.t?sbRec(t):'-'}</b></button>`).join('')||'<p class="empty">No teams.</p>'}</section>`;
+  const leagues=[...new Set(Object.values(D.teams).map(t=>t.league).filter(Boolean))].sort();
+  const divs=[...new Set(Object.values(D.teams).map(t=>t.division).filter(Boolean))].sort();
+  return `<div class="tools"><div class="sb"><span class="sw"><input id="sbtq" type="search" placeholder="Search teams, cities or leagues" aria-label="Search teams" value="${esc(UI.sbtq)}"></span></div>
+    <div class="chips" role="group" aria-label="Sort">${SB_SORTS.map(([v,l])=>`<button class="chip" data-act="sbsort" data-v="${v}" aria-pressed="${UI.sbsort===v}">${l}</button>`).join('')}</div>
+    ${leagues.length?`<label class="fld"><span>League</span><select data-act="sbl"><option value="ALL">All leagues</option>${leagues.map(x=>`<option ${UI.sbl===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`:''}
+    ${divs.length>1?`<label class="fld"><span>Division</span><select data-act="sbdvs"><option value="ALL">All divisions</option>${divs.map(x=>`<option ${UI.sbdv===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`:''}</div>
+    <div id="sb-tlist">${sbTeamsBody(D)}</div>`;
+}
+/* Stats tab for a section: built from its players.json, same cards as the San Diego Stats tab (no weekly trends: the API has season totals) */
+function sbSecStats(id){
+  const P=sbPlayers(id),sec=SECTIONS[id];
+  if(!P)return SBR.err['pl:'+id]?`<p class="empty">Stats for the ${esc(sec.full)} are coming soon.</p>`:'<p class="empty">Loading stats...</p>';
+  if(!P.players.length)return `<p class="empty">Stats for the ${esc(sec.full)} are coming soon.</p>`;
+  const keys=P.columns.slice(5),rows=P.players.map(r=>({r,s:Object.fromEntries(keys.map((k,j)=>[k,r[5+j]||0])),fp:r[4],n:r[3]||1}));
+  const POS=['QB','RB','WR','K','DEF'],pos=POS.includes(UI.sbx.pos)?UI.sbx.pos:'QB',per=UI.sbx.per;
+  const tile=(v,l)=>`<div class="sx-tile"><div class="sx-tb"><b>${v}</b><small>${l}</small></div></div>`;
+  const lines=rows.reduce((a,x)=>a+x.n,0),pts=rows.reduce((a,x)=>a+x.fp,0),best=rows[0];
+  const tiles=`<div class="sx-tiles">${tile(P.total.toLocaleString(),'players with stats')}${tile(lines.toLocaleString(),'box score lines')}${tile(f1(pts/(lines||1)),'avg pts per game')}${tile(f1(best.fp),'best season · '+esc(best.r[0]))}</div>`;
+  const ft=POS.map(ps=>{const x=rows.find(y=>y.r[2]===ps);return x?{ps,x}:null}).filter(Boolean);
+  const first=`<section class="card sx-card sx-av"><div class="qh"><h3>First Team All-Varsity</h3><span class="muted">best at each position, fantasy pts</span></div><div class="sx-avr">${ft.map(({ps,x})=>`<div class="sx-avc"><small>${ps}</small>${av(x.r[0],x.r[1],40)}<b>${esc(x.r[0])}</b><small class="muted">${esc(x.r[1])}</small><em>${f1(x.fp)}</em></div>`).join('')}</div></section>`;
+  const fl=sxFields(pos).filter(k=>rows.some(x=>x.r[2]===pos&&x.s[k]>0));
+  const k=UI.sbx.k==='fp'||fl.includes(UI.sbx.k)?UI.sbx.k:(fl.includes(SX_DEF[pos])?SX_DEF[pos]:fl[0]||'fp');
+  const val=x=>{const t=k==='fp'?x.fp:(x.s[k]||0);return per?t/x.n:t};
+  const L=rows.filter(x=>x.r[2]===pos&&(!per||x.n>=3)).map(x=>({x,v:val(x)})).filter(y=>y.v>0).sort((a,b)=>b.v-a.v).slice(0,10),mx=L.length?L[0].v:1,dec=per||k==='fp';
+  const lead=`<section class="card sx-card"><div class="qh"><h3>Position leaders</h3><span class="muted">${per?'per game, 3+ games':'season totals'}</span></div>
+    <div class="chips sx-chips" role="group" aria-label="Position">${POS.map(x=>`<button class="chip" data-act="sbxPos" data-v="${x}" aria-pressed="${x===pos}">${x}</button>`).join('')}</div>
+    <div class="sx-row2"><div class="chips sx-chips sx-stat" role="group" aria-label="Stat">${['fp',...fl].map(x=>`<button class="chip" data-act="sbxK" data-v="${x}" aria-pressed="${x===k}">${x==='fp'?'Fantasy pts':esc(LABEL[x]||x)}</button>`).join('')}</div>
+      <div class="pr-seg sx-per" role="group" aria-label="Totals or per game"><button data-act="sbxPer" data-v="0" aria-pressed="${!per}">Total</button><button data-act="sbxPer" data-v="1" aria-pressed="${per}">Per game</button></div></div>
+    ${L.length?`<ol class="sx-list">${L.map((y,i)=>`<li><div class="sx-li ${i===0?'sx-top':''}"><span class="sx-rk">${i+1}</span>${av(y.x.r[0],y.x.r[1],34)}<span class="sx-who"><b>${esc(y.x.r[0])}</b><small>${pb(pos)}<span>${esc(y.x.r[1])}</span><span>· ${y.x.n} gp</span></small></span><span class="sx-val"><b>${sxFmt(y.v,dec)}</b><i class="sx-bar"><i style="width:${(y.v/mx*100).toFixed(1)}%"></i></i></span></div></li>`).join('')}</ol>`:'<p class="empty">No leaders for this stat yet.</p>'}</section>`;
+  const sch={};rows.forEach(x=>{const o=sch[x.r[1]]=sch[x.r[1]]||{s:x.r[1],v:0,n:0,top:x};o.v+=x.fp;o.n=Math.max(o.n,x.n)});
+  const T=Object.values(sch).filter(t=>t.n>=3).map(t=>({...t,pg:t.v/t.n})).sort((a,b)=>b.pg-a.pg).slice(0,8),tm=T.length?T[0].pg:1;
+  const teams=`<section class="card sx-card"><div class="qh"><h3>Top teams</h3><span class="muted">fantasy pts per game</span></div><ol class="sx-list">${T.map((t,i)=>`<li><div class="sx-li sx-team"><span class="sx-rk">${i+1}</span><span class="sx-tl">${sbLogo(t.s,30)}</span><span class="sx-who"><b>${esc(t.s)}</b><small>Top player: ${esc(t.top.r[0])}</small></span><span class="sx-val"><b>${f1(t.pg)}</b><i class="sx-bar"><i style="width:${(t.pg/tm*100).toFixed(1)}%"></i></i></span></div></li>`).join('')}</ol></section>`;
+  return tiles+first+lead+teams;
+}
+/* Overall tab: the whole section at a glance, from its schedule and scores */
+function sbOverall(id){
+  const sec=SECTIONS[id],ix=sbIdx();
+  if(!ix)return '<p class="empty">Loading...</p>';
+  if(!(ix.sections[id]||{}).games&&!SBR.data[id]&&id!==HOME_SEC)return `<p class="empty">Overall numbers for the ${esc(sec.full)} are coming soon.</p>`;
+  const D=sbData(id);
+  if(!D)return SBR.err[id]?`<p class="empty">Overall numbers for the ${esc(sec.full)} are coming soon.</p>`:'<p class="empty">Loading...</p>';
+  const fin=D.games.filter(g=>g.hs!=null&&g.as!=null);
+  if(!fin.length)return `<section class="card sx-empty"><b>Overall numbers start after the first games.</b><span>Top teams, best offense and defense and the biggest games fill in here as scores come in.</span></section>`;
+  const gp=t=>t.w+t.l+t.t,min=Object.values(D.teams).filter(t=>gp(t)>=3).length>=8?3:1;
+  const T=Object.values(D.teams).filter(t=>gp(t)>=min);
+  const tile=(v,l)=>`<div class="sx-tile"><div class="sx-tb"><b>${v}</b><small>${l}</small></div></div>`;
+  const pts=fin.reduce((a,g)=>a+g.hs+g.as,0),hw=fin.filter(g=>g.hs>g.as).length;
+  const tiles=`<div class="sx-tiles">${tile(D.nSchools.toLocaleString(),'teams')}${tile(fin.length.toLocaleString()+' of '+D.games.length.toLocaleString(),'games final')}${tile(f1(pts/fin.length),'points per game')}${tile(Math.round(hw/fin.length*100)+'%','home team wins')}</div>`;
+  const li=(i,t,sub,val,w)=>`<li><div class="sx-li sx-team"><span class="sx-rk">${i+1}</span><span class="sx-tl">${sbLogo(t.name,30)}</span><span class="sx-who"><b>${sbTeamLink(t)}</b><small>${sub}</small></span><span class="sx-val"><b>${val}</b>${w!=null?`<i class="sx-bar"><i style="width:${w.toFixed(1)}%"></i></i>`:''}</span></div></li>`;
+  const pg=(t,k)=>t[k]/gp(t);
+  const top=[...T].sort((a,b)=>sbPct(b)-sbPct(a)||(b.pf-b.pa)-(a.pf-a.pa)).slice(0,10);
+  const off=[...T].sort((a,b)=>pg(b,'pf')-pg(a,'pf')).slice(0,5),def=[...T].sort((a,b)=>pg(a,'pa')-pg(b,'pa')).slice(0,5);
+  const card=(title,sub,body)=>`<section class="card sx-card"><div class="qh"><h3>${title}</h3><span class="muted">${sub}</span></div><ol class="sx-list">${body}</ol></section>`;
+  const gl=(g,val,sub)=>{const A=sbTD(D,g.away_id,g.away),H=sbTD(D,g.home_id,g.home);return `<li><div class="sx-li"><span class="sx-who"><b>${esc(g.away)} ${g.as}, ${esc(g.home)} ${g.hs}</b><small>${esc(sbDay(g.date))}${A&&A.league?' · '+esc(A.league):H&&H.league?' · '+esc(H.league):''}</small></span><span class="sx-val"><b>${val}</b><small>${sub}</small></span></div></li>`};
+  const hi=[...fin].sort((a,b)=>(b.hs+b.as)-(a.hs+a.as)).slice(0,5),bw=[...fin].filter(g=>!g.forfeit).sort((a,b)=>Math.abs(b.hs-b.as)-Math.abs(a.hs-a.as)).slice(0,5);
+  const P=sbPlayers(id),tp=P&&P.players.length?card('Top players','fantasy pts',P.players.slice(0,5).map((r,i)=>`<li><div class="sx-li ${i===0?'sx-top':''}"><span class="sx-rk">${i+1}</span>${av(r[0],r[1],34)}<span class="sx-who"><b>${esc(r[0])}</b><small>${r[2]?pb(r[2]):''}<span>${esc(r[1])}</span></small></span><span class="sx-val"><b>${f1(r[4])}</b></span></div></li>`).join('')):'';
+  return tiles+card('Top teams','best record, '+T.length+' teams with '+min+'+ games',top.map((t,i)=>li(i,t,`${sbRec(t)} · ${f1(pg(t,'pf'))} PF · ${f1(pg(t,'pa'))} PA per game`,sbRec(t),null)).join(''))
+    +`<div class="sx-two">${card('Best offense','points per game',off.map((t,i)=>li(i,t,sbRec(t),f1(pg(t,'pf')),pg(t,'pf')/pg(off[0],'pf')*100)).join(''))}${card('Best defense','points allowed per game',def.map((t,i)=>li(i,t,sbRec(t),f1(pg(t,'pa')),(pg(def[def.length-1],'pa')+1)/(pg(t,'pa')+1)*100)).join(''))}</div>`
+    +`<div class="sx-two">${card('Highest-scoring games','combined points',hi.map(g=>gl(g,g.hs+g.as,'points')).join(''))}${card('Biggest wins','margin',bw.map(g=>gl(g,Math.abs(g.hs-g.as),'points')).join(''))}</div>`+tp;
 }
 function sbTeamPage(D,id){
   const t=D.teams[id];
   const back=`<button class="btn sm ghost" data-act="sbteam" data-id="">← Back</button>`;
   if(!t)return `<p class="empty">We could not find that team.</p>${back}`;
   const gs=D.games.filter(g=>(g.home_id||'n:'+g.home)===id||(g.away_id||'n:'+g.away)===id).sort((a,b)=>a.date<b.date?-1:1);
-  return `<section class="card tm-hero"><span class="tm-logo">${av(t.name,t.name,64)}</span><div><h2>${esc(t.name)}</h2><p class="muted">${t.w+t.l+t.t?`<b>${sbRec(t)}</b> · ${t.pf} points for, ${t.pa} against`:'No games played yet'}${t.league?' · '+esc(t.league):''}${t.city?' · '+esc(t.city):''}</p></div>${back}</section>
-    <section class="card sbr-gl"><div class="qh"><h3>Games</h3><span class="muted">${gs.length} scheduled</span></div>${gs.map(g=>sbGameRow(g,D)).join('')||'<p class="empty">No games on the schedule.</p>'}</section>
-    <section class="card"><div class="qh"><h3>Players</h3></div><p class="muted">Rosters and player stats for this section are coming soon.</p></section>`;
+  const hero=`<section class="card tm-hero"><span class="tm-logo">${av(t.name,t.name,64)}</span><div><h2>${esc(t.name)}</h2><p class="muted">${t.w+t.l+t.t?`<b>${sbRec(t)}</b> · ${t.pf} points for, ${t.pa} against`:'No games played yet'}${t.league?' · '+esc(t.league):''}${t.city?' · '+esc(t.city):''}</p></div>${back}</section>`;
+  const n=t.w+t.l+t.t,tile=(v,l)=>`<div class="sx-tile"><div class="sx-tb"><b>${v}</b><small>${l}</small></div></div>`;
+  const lg=t.league?Object.values(D.teams).filter(x=>x.league===t.league&&x.w+x.l+x.t>0).sort((a,b)=>sbPct(b)-sbPct(a)||(b.pf-b.pa)-(a.pf-a.pa)):[],rk=lg.findIndex(x=>x.id===id)+1;
+  const tiles=n?`<div class="sx-tiles">${tile(sbRec(t),'record')}${tile(f1(t.pf/n),'points per game')}${tile(f1(t.pa/n),'allowed per game')}${tile(rk?'#'+rk+' of '+lg.length:'-',t.league?esc(t.league):'league')}</div>`:'';
+  const P=sbPlayers(UI.sb),mine=P?P.players.map((r,i)=>({r,rank:i+1})).filter(x=>x.r[1]===t.name).slice(0,15):[];
+  const keys=P?P.columns.slice(5):[];
+  const pl=!P?'<p class="muted">Loading players...</p>':mine.length?`<div class="board" role="list"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">Fantasy pts</span></div>${mine.map(x=>sbPlRow({r:x.r,rank:x.rank,s:Object.fromEntries(keys.map((k,j)=>[k,x.r[5+j]||0]))})).join('')}</div>`:'<p class="muted">No player stats for this team yet.</p>';
+  return `<div class="tools">${back}</div>`+hero+tiles+`<div class="qh"><h3>Games</h3><span class="muted">${gs.length} ${gs.length===1?'game':'games'}</span></div>${gs.length?`<div class="gm-grid">${gs.map(g=>sbCard(g,D)).join('')}</div>`:'<p class="empty">No games on the schedule.</p>'}
+    <div class="qh"><h3>Players</h3><span class="muted">${P?mine.length?'rank is in the whole section':'':''}</span></div>${pl}`;
 }
 function viewSection(id){
   const s=SECTIONS[id],ix=sbIdx();
@@ -8163,12 +8258,14 @@ function statsHTML(){
     ${sxTeams(D)}`;
 }
 function viewLeague(){
-  const seg=`<div class="pr-seg st-seg" role="tablist" aria-label="Stats sections">${[['players','Players','Full leaderboard'],['stats','Stats','Leaders and trends']].map(([v,l,d])=>`<button role="tab" data-act="stTab" data-v="${v}" aria-pressed="${UI.stab===v}" aria-selected="${UI.stab===v}">${v==='players'?'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .6 3.3 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>':'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}<span><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`;
-  if(UI.stab==='stats')return `<div class="head"><h2>Stats</h2><p>Leaders, hot streaks and top teams.</p></div>${seg}${statsHTML()}`;
+  const seg=`<div class="pr-seg st-seg s3" role="tablist" aria-label="Stats sections">${[['players','Players','Full leaderboard'],['stats','Stats','Leaders and trends'],['overall','Overall','Teams and games']].map(([v,l,d])=>`<button role="tab" data-act="stTab" data-v="${v}" aria-pressed="${UI.stab===v}" aria-selected="${UI.stab===v}">${v==='overall'?'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4zM8 6H4v1a3 3 0 0 0 4 2.8M16 6h4v1a3 3 0 0 1-4 2.8M12 13v4M8 20h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':v==='players'?'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .6 3.3 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>':'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}<span><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`;
   const pl0=players(),nSec={};pl0.forEach(p=>{const k=secOfPlayer(p);nSec[k]=(nSec[k]||0)+1});
   const schools=[...new Set(pl0.filter(p=>UI.psec==='ALL'||secOfPlayer(p)===UI.psec).map(p=>p.school))].filter(Boolean).sort();
   const fN=(UI.scope!=='season'?1:0)+(UI.school!=='ALL'?1:0)+(UI.grade?1:0);
   const secRow=`<div class="chips gm-wks sbr-secs" role="group" aria-label="Section">${[['ALL','All sections']].concat(Object.values(SECTIONS).map(x=>[x.id,x.name])).map(([v,l])=>`<button class="chip${v!=='ALL'&&!nSec[v]?' sbr-off':''}" data-act="psec" data-v="${v}" aria-pressed="${UI.psec===v}">${esc(l)}</button>`).join('')}</div>`;
+  const secId=UI.psec==='ALL'?HOME_SEC:UI.psec;
+  if(UI.stab==='overall')return `<div class="head"><h2>Overall</h2><p>${esc(SECTIONS[secId].full)}: teams, scoring and the biggest games.</p></div>${seg}${secRow}${sbOverall(secId)}`;
+  if(UI.stab==='stats')return `<div class="head"><h2>Stats</h2><p>${secId===HOME_SEC?'Leaders, hot streaks and top teams.':esc(SECTIONS[secId].full)+': leaders by position and top teams.'}</p></div>${seg}${secRow}${secId===HOME_SEC?statsHTML():sbSecStats(secId)}`;
   if(UI.psec!=='ALL'&&UI.psec!==HOME_SEC)return `<div class="head"><h2>Players</h2><p>${esc(SECTIONS[UI.psec].full)}, ranked by fantasy points.</p></div>${seg}${secRow}${sbPlayersHTML(UI.psec)}`;
   return `<div class="head"><h2>Players</h2><p>${UI.psec==="ALL"?"Every player in the country, ranked by fantasy points.":esc(SECTIONS[UI.psec].full)+", ranked by fantasy points."}</p></div>
   ${cupBanner()}${seg}
@@ -10106,6 +10203,12 @@ document.addEventListener('click',async e=>{
   else if(a==='sbt'){UI.sbt=t.dataset.v;UI.sbl='ALL';render()}
   else if(a==='sbpmore'){SBR.pn=Math.max(10,SBR.pn)+10;const l=$('#sb-list');if(l)l.innerHTML=sbPlBody(UI.psec);else render()}
   else if(a==='sbpless'){SBR.pn=10;render()}
+  else if(a==='sbdv'){UI.sbdv=t.dataset.v;render()}
+  else if(a==='sbsort'){UI.sbsort=t.dataset.v;UI.sbtn=60;render()}
+  else if(a==='sbtmore'){UI.sbtn+=60;const l=$('#sb-tlist');if(l)l.innerHTML=sbTeamsBody(sbData(UI.sb));else render()}
+  else if(a==='sbxPos'){UI.sbx.pos=t.dataset.v;UI.sbx.k='';render()}
+  else if(a==='sbxK'){UI.sbx.k=t.dataset.v;render()}
+  else if(a==='sbxPer'){UI.sbx.per=t.dataset.v==='1';render()}
   else if(a==='sbpos'){UI.sbpos=t.dataset.v;SBR.pn=10;render()}
   else if(a==='sbw'){UI.sbw=t.dataset.v;render()}
   else if(a==='sbteam'){UI.sbtm=t.dataset.id||null;render();scrollTo(0,0)}
@@ -10117,7 +10220,7 @@ document.addEventListener('click',async e=>{
     setTimeout(()=>{if(UI.cmpNew===sd){UI.cmpNew=null;UI.cmpPh=null}},1500)}
   else if(a==='cmpClear'){UI.cmp[+t.dataset.s]=null;render()}
   else if(a==='cmpReset'){UI.cmp=[null,null];render()}
-  else if(a==='stTab'){UI.stab=t.dataset.v==='stats'?'stats':'players';render()}
+  else if(a==='stTab'){UI.stab=['stats','overall'].includes(t.dataset.v)?t.dataset.v:'players';render()}
   else if(a==='sxPos'){UI.sx.pos=t.dataset.v;UI.sx.k='';render()}
   else if(a==='sxK'){UI.sx.k=t.dataset.v;render()}
   else if(a==='sxPer'){UI.sx.per=t.dataset.v==='1';render()}
@@ -10383,8 +10486,9 @@ document.addEventListener('change',async e=>{
   else if(a==='entryPlayer'){UI.entry.pid=t.value;UI.entry.vals={};$('#entry-fields').innerHTML=entryFields()}
   else if(a==='entryWeek'){UI.entry.week=+t.value}
   else if(a==='gschool'){UI.gschool=t.value;render()}
-  else if(a==='sbl'){UI.sbl=t.value;render()}
+  else if(a==='sbl'){UI.sbl=t.value;UI.sbtn=60;render()}
   else if(a==='sbsch'){UI.sbsch=t.value;SBR.pn=10;render()}
+  else if(a==='sbdvs'){UI.sbdv=t.value;UI.sbtn=60;render()}
   else if(a==='meSchool'){await act(()=>upsert('profiles/'+ME.uid,{school:t.value}))}
   else if(a==='mePos'){UI.meEntry.vals={};await act(()=>upsert('profiles/'+ME.uid,{pos:t.value}))}
   else if(a==='meName'){const v=t.value.trim();if(v.length>1)await act(()=>upsert('profiles/'+ME.uid,{name:v}));else render()}
@@ -10407,6 +10511,9 @@ document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='cmp-q0'||t.id==='cmp-q1'){const s=t.id.slice(-1),ul=document.getElementById('cmp-r'+s);if(ul)ul.innerHTML=t.value.trim().length<2?'':cmpResHTML(s,cmpSearch(t.value));return}
   if(t.id==='chat-in'){UI.chatDraft=t.value}
+  else if(t.id==='sbgq'){UI.sbgq=t.value;const l=$('#sb-glist'),D=SBR.data[UI.sb];if(l&&D)l.innerHTML=sbSchedBody(D)}
+  else if(t.id==='sbstq'){UI.sbstq=t.value;const l=$('#sb-slist'),D=SBR.data[UI.sb];if(l&&D)l.innerHTML=sbStandBody(D)}
+  else if(t.id==='sbtq'){UI.sbtq=t.value;UI.sbtn=60;const l=$('#sb-tlist'),D=SBR.data[UI.sb];if(l&&D)l.innerHTML=sbTeamsBody(D)}
   else if(t.id==='sbq'){UI.sbq=t.value;SBR.pn=10;const l=$('#sb-list');if(l)l.innerHTML=sbPlBody(UI.psec)}
   else if(t.id==='q'){UI.q=t.value;UI.more=false;$('#lb-list').innerHTML=listHTML();const hs=$('#hot-slot');if(hs)hs.hidden=!!UI.q.trim()}
   else if(t.dataset&&t.dataset.act==='fld'){UI.entry.vals[t.dataset.k]=Math.max(0,parseInt(t.value,10)||0)}

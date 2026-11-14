@@ -735,3 +735,9 @@ Owner: make it like Retro Bowl. Passing concepts are named (Slants, Smash, Four 
 - `api/v1/.../players.json` now holds EVERY player (`TOP=None` in build_api.py), not the top 500.
 - `sbPlayersHTML` rebuilt like the San Diego Players tab: search (`#sbq`), position chips (All, QB, RB, WR, K, DEF; the box score has no TE/DL/LB/DB split), school filter, top-3 podium, ranked rows with stat line and points per game, "Show 10 more (N left)" (`sbpmore`, `sbpless`). Rows are not tappable (no player cards for sections yet).
 - collect.yml: `dry` defaults to TRUE, so dispatch with `inputs[dry]=false` or nothing is committed; `sport` falls back to both when dispatched without inputs.
+
+## v485 (Nov 13) section pages look like San Diego
+- Players tab has a third segment, **Overall** (`sbOverall`): teams, games final, points per game, home win %, top teams, best offense/defense, highest-scoring games, biggest wins, top players. Works for every section (San Diego too: "All sections" uses San Diego). `UI.stab` is `players|stats|overall`.
+- Stats tab for a section (`sbSecStats`) from its players.json: tiles, First Team All-Varsity, Position leaders (QB RB WR K DEF; stat chips; total or per game), Top teams. No weekly trend or best-game cards (the API has season totals only).
+- Schedule uses the San Diego game cards (`sbCard`, `.gm-grid`, "Wk N" chips) with team search (searches all weeks) and league filter; Standings use the San Diego table with a division chip row and team search; Teams has search (name/city/league), sort (A-Z, record, offense, defense), league and division filters, Show more (`sbTeams`, `sbTeamsBody`).
+- Section team page: tiles (record, PF/PA per game, league rank), game cards, the team's top 15 players from the API.
