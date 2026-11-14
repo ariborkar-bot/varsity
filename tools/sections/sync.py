@@ -45,9 +45,26 @@ def run_california(a):
     for name, schools in unmatched.items():
         print('NOT MATCHED to a section: %r (%d schools, e.g. %s)' % (name, len(schools), ', '.join(schools[:3])))
     if not a.dry_run and parts:
-        L.save(os.path.join(out, 'index.json'), {'updated': now, 'partial': bool(data.get('partial')), 'sections': index})
+        rebuild_index(out, now, bool(data.get('partial')))
         print('wrote', out)
     return 0
+
+
+def rebuild_index(out, now=None, partial=False):
+    """index.json from every section file in the folder (so a football-only or basketball-only run never drops the other sport's sections)."""
+    reg = L.registry()
+    now = now or datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')
+    index = {}
+    for fn in sorted(os.listdir(out)):
+        if not fn.endswith('.json') or fn == 'index.json':
+            continue
+        d = L.load(os.path.join(out, fn))
+        slug = d.get('section') or fn[:-5]
+        if slug in reg and d.get('games'):
+            index[slug] = {'name': reg[slug]['name'], 'status': reg[slug]['status'], 'schools': len(d.get('schools', [])), 'games': len(d['games']),
+                           'played': sum(1 for g in d['games'] if g.get('hs') is not None)}
+    L.save(os.path.join(out, 'index.json'), {'updated': now, 'partial': partial, 'sections': index})
+    return index
 
 
 def main():
