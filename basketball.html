@@ -3429,7 +3429,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v483 · Nov 13';
+const APP_BUILD='v484 · Nov 13';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -7885,17 +7885,43 @@ function sbChips(){
   const ix=(sbIdx()||{sections:{}}).sections;
   return `<div class="chips gm-wks sbr-secs" role="group" aria-label="Section">${Object.values(SECTIONS).map(s=>{const n=s.id===HOME_SEC?1:(ix[s.id]||{}).games;return `<button class="chip${n?'':' sbr-off'}" data-act="sb" data-v="${s.id}" aria-pressed="${UI.sb===s.id}">${esc(s.name)}</button>`}).join('')}</div>`;
 }
-/* players of one section: the API's top-500 file (api/v1/sections/<id>/<sport>/players.json), loaded when you open it */
-SBR.pl={};SBR.pn=50;
+/* players of one section: every player in the API file (api/v1/sections/<id>/<sport>/players.json), loaded when you open it. Same layout as the San Diego Players tab: search, position chips, school filter, podium, ranked rows, Show more. */
+SBR.pl={};SBR.pn=10;UI.sbq='';UI.sbpos='ALL';UI.sbsch='ALL';
 function sbPlayers(id){const d=SBR.pl[id];if(!d)sbFetch('pl:'+id,'api/v1/sections/'+id+'/'+FG_SPORT+'/players.json',j=>{SBR.pl[id]=j&&j.players?j:{players:[],columns:[],total:0}});return d}
+const SB_POS=['ALL','QB','RB','WR','K','DEF'];
+function sbPlList(D){
+  const q=UI.sbq.trim().toLowerCase(),keys=D.columns.slice(5);
+  const all=D.players.map(r=>({r,s:Object.fromEntries(keys.map((k,j)=>[k,r[5+j]||0]))}))
+    .filter(x=>(UI.sbpos==='ALL'||x.r[2]===UI.sbpos)&&(UI.sbsch==='ALL'||x.r[1]===UI.sbsch));
+  all.forEach((x,i)=>x.rank=i+1);
+  return q?all.filter(x=>x.r[0].toLowerCase().includes(q)):all;
+}
+function sbPlRow(x){
+  const r=x.r,pos=r[2]||'RB',per=r[3]?Math.round(r[4]/r[3]*10)/10:0;
+  return `<div class="row" role="listitem"><span class="rk">${x.rank}</span>${av(r[0],r[1],40)}
+    <span class="who"><span class="nm"><b>${esc(r[0])}</b></span><i>${r[2]?pb(r[2]):''}<span>${slogo(r[1])}${esc(r[1])}</span></i></span>
+    <span class="ln">${esc(line(pos,x.s))}</span>
+    <span class="pt"><b>${f1(r[4])}</b><small>${per} per game</small></span></div>`;
+}
+function sbPlPodium(v){
+  return `<div class="podium">${[1,0,2].map(i=>{const x=v[i],r=x.r;return `<div class="pod p${i+1}"><span class="medal">${i+1}</span>${av(r[0],r[1],i===0?64:52)}<b class="pn">${esc(r[0])}</b><span class="ps">${r[2]?pb(r[2]):''}<span>${slogo(r[1])}${esc(r[1])}</span></span><span class="pv">${f1(r[4])}</span><small>${r[3]?Math.round(r[4]/r[3]*10)/10:0} per game</small></div>`}).join('')}</div>`;
+}
+function sbPlBody(id){
+  const D=SBR.pl[id],rows=sbPlList(D),shown=Math.max(10,SBR.pn),vis=rows.slice(0,shown);
+  if(!rows.length)return '<p class="empty">No players match these filters.</p>';
+  const top=!UI.sbq.trim()&&vis.length>=3,rest=top?vis.slice(3):vis,left=rows.length-shown;
+  const more=rows.length>10?`<div class="btns" style="justify-content:center">${left>0?`<button class="btn ghost" data-act="sbpmore">Show ${Math.min(10,left)} more (${left} left)</button>`:''}${shown>10?`<button class="btn ghost" data-act="sbpless">Show less</button>`:''}</div>`:'';
+  return (top?sbPlPodium(vis):'')+(rest.length?`<div class="board" role="list"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">Fantasy pts</span></div>${rest.map(sbPlRow).join('')}</div>`:'')+more;
+}
 function sbPlayersHTML(id){
   const D=sbPlayers(id),sec=SECTIONS[id];
   if(!D)return SBR.err['pl:'+id]?`<p class="empty">Player stats for the ${esc(sec.full)} are coming soon.</p>`:'<p class="empty">Loading players...</p>';
   if(!D.players.length)return `<p class="empty">Player stats for the ${esc(sec.full)} are coming soon.</p>`;
-  const keys=D.columns.slice(5),lab=k=>(typeof LABEL!=='undefined'&&LABEL[k])||k,shown=Math.min(D.players.length,SBR.pn);
-  const rows=D.players.slice(0,shown).map((r,i)=>{const st=keys.map((k,j)=>[k,r[5+j]]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>`${Math.round(v*10)/10} ${lab(k)}`).join(' · ');
-    return `<div class="sbr-p"><span class="sbr-rk">${i+1}</span>${av(r[0],r[1],36)}<span class="sbr-pn"><b>${esc(r[0])}</b><small>${esc(r[1])}${r[2]?' · '+esc(r[2]):''} · ${r[3]} ${r[3]===1?'game':'games'}</small><small>${esc(st)}</small></span><span class="sbr-fp"><b>${r[4]}</b><small>pts</small></span></div>`}).join('');
-  return `<div class="qh"><h3>Top players</h3><span class="muted">${D.total} players in the section${D.total>D.players.length?', top '+D.players.length+' shown':''}</span></div><section class="card sbr-gl">${rows}</section>${shown<D.players.length?`<div class="btns" style="justify-content:center"><button class="btn ghost" data-act="sbpmore">Show more</button></div>`:''}`;
+  const schools=[...new Set(D.players.map(r=>r[1]))].sort((a,b)=>a.localeCompare(b));
+  return `<div class="tools lite"><div class="sb"><span class="sw"><input id="sbq" type="search" placeholder="Search players" aria-label="Search players" value="${esc(UI.sbq)}"></span></div>
+    <div class="chips" role="group" aria-label="Position">${SB_POS.map(x=>`<button class="chip" data-act="sbpos" data-v="${x}" aria-pressed="${UI.sbpos===x}">${x==='ALL'?'All':x}</button>`).join('')}</div>
+    <label class="fld"><span>School</span><select data-act="sbsch"><option value="ALL">All schools</option>${schools.map(x=>`<option ${UI.sbsch===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label></div>
+    <div class="qh"><h3>Players</h3><span class="muted">${D.total.toLocaleString()} in the section</span></div><div id="sb-list">${sbPlBody(id)}</div>`;
 }
 function sbTeamLink(t,fallback){return t?`<button class="tlk" data-act="sbteam" data-id="${esc(t.id)}">${esc(t.name)}</button>`:esc(fallback)}
 function sbGameRow(g,D){
@@ -10076,9 +10102,11 @@ document.addEventListener('click',async e=>{
     if(await act(()=>upsert('picks/'+ME.uid,{bk:patch}),Object.keys(patch).length+(Object.keys(patch).length===1?' pick':' picks')+' saved')){S.picks[ME.uid]=Object.assign({},S.picks[ME.uid],{bk:Object.assign({},sv,patch)});UI.bkS={};render()}}
   else if(a==='gdiv'){UI.gdiv=t.dataset.v;render()}
   else if(a==='sb'){delete SBR.err['pl:'+t.dataset.v];UI.sb=t.dataset.v;UI.sbtm=null;UI.sbw=null;UI.sbl='ALL';UI.sbt='sched';delete SBR.err[UI.sb];delete SBR.err.idx;render()}
-  else if(a==='psec'){UI.psec=t.dataset.v;UI.school='ALL';UI.more=false;SBR.pn=50;delete SBR.err['pl:'+UI.psec];render()}
+  else if(a==='psec'){UI.psec=t.dataset.v;UI.school='ALL';UI.more=false;SBR.pn=10;UI.sbq='';UI.sbpos='ALL';UI.sbsch='ALL';delete SBR.err['pl:'+UI.psec];render()}
   else if(a==='sbt'){UI.sbt=t.dataset.v;UI.sbl='ALL';render()}
-  else if(a==='sbpmore'){SBR.pn+=50;render()}
+  else if(a==='sbpmore'){SBR.pn=Math.max(10,SBR.pn)+10;const l=$('#sb-list');if(l)l.innerHTML=sbPlBody(UI.psec);else render()}
+  else if(a==='sbpless'){SBR.pn=10;render()}
+  else if(a==='sbpos'){UI.sbpos=t.dataset.v;SBR.pn=10;render()}
   else if(a==='sbw'){UI.sbw=t.dataset.v;render()}
   else if(a==='sbteam'){UI.sbtm=t.dataset.id||null;render();scrollTo(0,0)}
   else if(a==='gtab'){UI.gtab=t.dataset.v;render()}
@@ -10356,6 +10384,7 @@ document.addEventListener('change',async e=>{
   else if(a==='entryWeek'){UI.entry.week=+t.value}
   else if(a==='gschool'){UI.gschool=t.value;render()}
   else if(a==='sbl'){UI.sbl=t.value;render()}
+  else if(a==='sbsch'){UI.sbsch=t.value;SBR.pn=10;render()}
   else if(a==='meSchool'){await act(()=>upsert('profiles/'+ME.uid,{school:t.value}))}
   else if(a==='mePos'){UI.meEntry.vals={};await act(()=>upsert('profiles/'+ME.uid,{pos:t.value}))}
   else if(a==='meName'){const v=t.value.trim();if(v.length>1)await act(()=>upsert('profiles/'+ME.uid,{name:v}));else render()}
@@ -10378,6 +10407,7 @@ document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='cmp-q0'||t.id==='cmp-q1'){const s=t.id.slice(-1),ul=document.getElementById('cmp-r'+s);if(ul)ul.innerHTML=t.value.trim().length<2?'':cmpResHTML(s,cmpSearch(t.value));return}
   if(t.id==='chat-in'){UI.chatDraft=t.value}
+  else if(t.id==='sbq'){UI.sbq=t.value;SBR.pn=10;const l=$('#sb-list');if(l)l.innerHTML=sbPlBody(UI.psec)}
   else if(t.id==='q'){UI.q=t.value;UI.more=false;$('#lb-list').innerHTML=listHTML();const hs=$('#hot-slot');if(hs)hs.hidden=!!UI.q.trim()}
   else if(t.dataset&&t.dataset.act==='fld'){UI.entry.vals[t.dataset.k]=Math.max(0,parseInt(t.value,10)||0)}
   else if(t.dataset&&t.dataset.act==='mfld'){UI.meEntry.vals[t.dataset.k]=Math.max(0,parseInt(t.value,10)||0)}

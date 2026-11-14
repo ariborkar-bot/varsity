@@ -730,3 +730,8 @@ Owner: make it like Retro Bowl. Passing concepts are named (Slants, Smash, Four 
 - `players.py` fetches box scores in parallel (`--workers`, default 4; each worker paces itself with `--delay`); `Fetcher.get` in `maxpreps.py` has no shared pacing.
 - `sync.py rebuild_index` builds `data/sections/index.json` from every section file (the basketball run had left only San Diego in it).
 - `players.yml` runs 20-minute rounds, each committing `data/players` and `api/`, so progress shows up as it goes.
+
+## v484 (Nov 13) section Players tab matches San Diego
+- `api/v1/.../players.json` now holds EVERY player (`TOP=None` in build_api.py), not the top 500.
+- `sbPlayersHTML` rebuilt like the San Diego Players tab: search (`#sbq`), position chips (All, QB, RB, WR, K, DEF; the box score has no TE/DL/LB/DB split), school filter, top-3 podium, ranked rows with stat line and points per game, "Show 10 more (N left)" (`sbpmore`, `sbpless`). Rows are not tappable (no player cards for sections yet).
+- collect.yml: `dry` defaults to TRUE, so dispatch with `inputs[dry]=false` or nothing is committed; `sport` falls back to both when dispatched without inputs.

@@ -11,7 +11,7 @@ Layout (sport is fb or bb):
   sections/<id>/<sport>/games.json            every game
   sections/<id>/<sport>/weeks/<monday>.json   one week of games (Monday's date)
   sections/<id>/<sport>/teams/<team id>.json  one team: record and its games ("mp:123" is written as mp-123)
-  sections/<id>/<sport>/players.json          top 500 players by fantasy points (from data/players, see players.py); `columns` names each array slot
+  sections/<id>/<sport>/players.json          every player, best fantasy points first (from data/players, see players.py); `columns` names each array slot
 Everything is rebuilt from scratch on each run, so a removed team or game disappears. Output is deterministic (sorted keys, no timestamps
 except the source's own), so an unchanged data set produces no git diff. See docs/API.md."""
 import argparse, datetime, json, os, shutil, sys
@@ -20,7 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 import players as PL  # noqa: E402
-TOP = 500   # players per section and sport in players.json
+TOP = None   # None = every player (the app pages them with Show more)
 SPORTS = ('fb', 'bb')
 VERSION = 1
 
@@ -92,7 +92,7 @@ def build_sport(sec, sport, out):
 
 
 def build_players(sec_id, sport, src, out):
-    """players.json: the TOP players by fantasy points, as arrays [name, school, pos, games, fp, v1, v2 ...] in `keys` order (smaller than objects)."""
+    """players.json: every player by fantasy points (all of them when TOP is None), as arrays [name, school, pos, games, fp, v1, v2 ...] in `keys` order (smaller than objects)."""
     p = os.path.join(src, '%s.%s.json' % (sec_id, sport))
     if not os.path.exists(p):
         return None
@@ -103,7 +103,7 @@ def build_players(sec_id, sport, src, out):
         t = e['t']
         rows.append((PL.fantasy(t, sport), e, t, cid))
     rows.sort(key=lambda r: (-r[0], r[1]['n']))
-    body = [[e['n'], e['s'], (PL.guess_pos(t) if sport == 'fb' else None), e['g'], fp] + [t.get(k, 0) for k in keys] for fp, e, t, cid in rows[:TOP]]
+    body = [[e['n'], e['s'], (PL.guess_pos(t) if sport == 'fb' else None), e['g'], fp] + [t.get(k, 0) for k in keys] for fp, e, t, cid in (rows if TOP is None else rows[:TOP])]
     base = os.path.join(out, 'sections', sec_id, sport)
     os.makedirs(base, exist_ok=True)
     with open(os.path.join(base, 'players.json'), 'w', encoding='utf-8') as f:
