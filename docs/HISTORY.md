@@ -752,3 +752,6 @@ Owner: make it like Retro Bowl. Passing concepts are named (Slants, Smash, Four 
 - Shown once per account right after the profile step: `tutMaybe()` in `touch()` when `profile.tut < TUT_V` (`tutNeed`). Finishing or skipping saves `profile.tut = TUT_V`. Accounts made before v488 have no `tut`, so every existing player gets it the next time they open the app. Bump `TUT_V` to show it to everyone again. Not shown in admin view-as or demo mode.
 - The Welcome pack, gift, announcement and push-permission popups wait while it is open (`window.__tutOpen`) and follow when it closes; the last step says "Open my Welcome pack" when one is waiting.
 - Settings > "How Varsity works" (`data-act="tutOpen"`) replays it without touching the saved flag.
+
+## v489 (Nov 14, daily scores task) Daily scores: 20 games
+- Scores for 20 of the 24 Nov 13 football playoff games added to games.js with tools/add_scores.py (sources: High School On SI final scores article for Nov 13 and the SI San Diego Section scoreboard). Still missing: Granite Hills-San Marcos, University City-La Jolla, San Pasqual-Scripps Ranch, Valley Center-El Capitan (shown as in progress, not final).
