@@ -18,34 +18,11 @@ jobs:
           VARSITY_CONTACT: https://github.com/ariborkar-bot/varsity
         run: |
           python3 - <<'PY'
-          import sys, json
-          sys.path.insert(0, 'tools/sections')
-          import maxpreps as M
-          f = M.Fetcher(delay=1.0)
-          for url in ['${{ inputs.url }}', 'https://www.maxpreps.com/ca/carlsbad/carlsbad-lancers/football/']:
-              pp = M.next_data(f._open(url + 'schedule/'))['props']['pageProps']
-              print('PAGEPROPS KEYS', list(pp.keys()))
-              tc = (pp.get('teamContext') or {}).get('data') or {}
-              print('TEAMCONTEXT', json.dumps(tc)[:3000])
-              def walk(o, path, out):
-                  if isinstance(o, dict):
-                      for k, v in o.items():
-                          if isinstance(v, str) and any(w in (k + v).lower() for w in ('mascot', 'logo', 'playoff', 'bracket', 'tournament')):
-                              out.append((path + '.' + k, v[:160]))
-                          walk(v, path + '.' + k, out)
-                  elif isinstance(o, list):
-                      for i, v in enumerate(o[:40]):
-                          if isinstance(v, str) and any(w in v.lower() for w in ('mascot', 'logo', 'playoff', 'bracket', 'tournament')):
-                              out.append((path + '[%d]' % i, v[:160]))
-                          walk(v, path + '[%d]' % i, out)
-              out = []; walk(pp, 'pp', out)
-              seen = set()
-              for p, v in out:
-                  key = ''.join(c for c in p if not c.isdigit())
-                  if key in seen: continue
-                  seen.add(key); print('HIT', p, '=', v)
-              cs = pp.get('contests') or []
-              print('N CONTESTS', len(cs))
-              for r in cs[-3:]:
-                  print('ROW', json.dumps(r)[:2500])
+          import urllib.request
+          base='https://image.maxpreps.io/school-mascot/2/b/6/2b6b45d3-4465-4750-ba48-a273b674e37c.gif'
+          for q in ['?version=637964957400000000&width=1024&height=1024','?version=637964957400000000&width=96&height=96','?width=96&height=96','']:
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(base+q,headers={'User-Agent':'Mozilla/5.0'}),timeout=20)
+                  b=r.read();print('IMG',q,r.status,r.headers.get('Content-Type'),len(b),r.headers.get('Access-Control-Allow-Origin'))
+              except Exception as e: print('IMG',q,'ERR',e)
           PY
