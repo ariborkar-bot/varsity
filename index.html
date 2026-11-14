@@ -500,6 +500,7 @@ tr.dim td{color:var(--muted)}
 .bcount{position:absolute;top:-4px;right:-4px;background:var(--accent);color:var(--accent-ink);font:800 .68rem/1 var(--f-body);min-width:18px;padding:3px 5px;border-radius:999px;text-align:center}
 .banner{display:flex;flex-direction:column;gap:8px}
 a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.ovr-t{display:inline-flex;align-items:baseline;gap:3px;font:900 .82rem/1 var(--f-display);font-style:normal;color:#FFC23D;background:rgba(255,194,61,.12);border:1px solid rgba(255,194,61,.45);border-radius:7px;padding:3px 6px;white-space:nowrap}.ovr-t i{font:800 .52rem/1 var(--f-body);font-style:normal;letter-spacing:.06em;opacity:.8}
 .vt{font:700 .68rem/1 var(--f-body);padding:3px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
 .vt.ok{color:var(--pos)} .vt.un{color:var(--muted)} .vt.no{color:var(--neg)}
 .tr{font:700 .78rem/1 var(--f-body);font-style:normal;white-space:nowrap}
@@ -3190,13 +3191,28 @@ function secBuild(j,sec){
   mpSplit(list);mpTwoWay(list);
   return{list,map:Object.fromEntries(list.map(p=>[p.key,p])),W};
 }
+/* v491: until a section's weekly file exists, build the SAME player objects from players.json (season totals): one entry holding the whole
+   season (n = games played), flagged totN. Every page then uses the San Diego layout; only the week-by-week parts (Players of the Week,
+   trends, best single games, weekly chart, week filter) wait for the weekly file. */
+function secBuildTot(j,sec){
+  const C=j.columns||[],K=C.slice(5),P=j.players||[];if(!P.length||!FIELDS.QB)return null;
+  const list=P.map((r,i)=>{const st=zeroStat();K.forEach((k,x)=>{if(k in st)st[k]=+r[5+x]||0});
+    const pos=r[2]&&FIELDS[r[2]]?r[2]:DEFK.some(k=>st[k])?'DEF':'RB',sub=pos!=='DEF'?pos:st.sack>=2&&st.sack>=st.dInt+st.pbu/2?'DL':st.dInt+st.pbu>=3?'DB':'LB',n=Math.max(1,+r[3]||1);
+    return{key:'x'+sec+i,sec,ext:true,totN:n,gr:0,name:r[0],school:r[1],pos,sub,mp:true,tw:false,sample:false,games:[{stat:st,ver:'maxpreps',n,tot:1}]}});
+  mpSplit(list);
+  return{list,map:Object.fromEntries(list.map(p=>[p.key,p])),W:1,tot:true};
+}
 /* the section's players, or null while loading / when its weekly file is not there yet (secState tells which) */
 function secPl(id){if(!id||id===HOME_SEC||!SECTIONS[id])return null;if(SECP[id])return SECP[id];
-  sbFetch('wk:'+id,'api/v1/sections/'+id+'/'+FG_SPORT+'/weekly.json',j=>{const b=secBuild(j,id);if(!b)throw 0;SECP[id]=b});return null}
+  const k='wk:'+id;if(SBR.busy[k]||SBR.err[k])return null;SBR.busy[k]=1;
+  const get=u=>fetch(u,{cache:'no-cache'}).then(r=>r.ok?r.json():Promise.reject(r.status)),base='api/v1/sections/'+id+'/'+FG_SPORT+'/';
+  get(base+'weekly.json').then(j=>{const b=secBuild(j,id);if(!b)throw 0;return b}).catch(()=>get(base+'players.json').then(j=>{const b=secBuildTot(j,id);if(!b)throw 0;return b}))
+    .then(b=>{SECP[id]=b}).catch(()=>{SBR.err[k]=1}).finally(()=>{delete SBR.busy[k];render()});return null}
+const secTot=sc=>!!(sc&&SECP[sc]&&SECP[sc].tot);
 const secState=id=>SECP[id]?'ready':SBR.err['wk:'+id]?'none':'loading';
 const secByKey=k=>{if(typeof k!=='string'||k[0]!=='x')return undefined;for(const id in SECP){const p=SECP[id].map[k];if(p)return p}return undefined};
 const secT10=sc=>{const S_=SECP[sc];if(!S_)return new Set();if(!S_.t10)S_.t10=new Set(S_.list.map(x=>({k:x.key,v:agg(x,'season')})).filter(x=>x.v.n>0).sort((a,b)=>b.v.v-a.v.v).slice(0,10).map(x=>x.k));return S_.t10};
-function secPOTW(sc){const S_=SECP[sc];if(!S_)return{w:0,list:[]};if(!S_.potw){let w=0;S_.list.forEach(p=>p.games.forEach((g,i)=>{if(g&&g.stat&&!g.zero&&i+1>w)w=i+1}));
+function secPOTW(sc){const S_=SECP[sc];if(!S_||S_.tot)return{w:0,list:[]};if(!S_.potw){let w=0;S_.list.forEach(p=>p.games.forEach((g,i)=>{if(g&&g.stat&&!g.zero&&i+1>w)w=i+1}));
   S_.potw={w,list:w?S_.list.map(p=>{const g=p.games[w-1];return g&&g.stat?{p,v:pts(g.stat)}:null}).filter(Boolean).sort((a,b)=>b.v-a.v).slice(0,3):[]}}return S_.potw}
 /* the section whose players the Players / Stats tabs are showing ('' = San Diego and "All sections") */
 const vsec=()=>UI.psec&&UI.psec!=='ALL'&&UI.psec!==HOME_SEC&&SECP[UI.psec]?UI.psec:'';
@@ -3559,7 +3575,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v490 · Nov 14';
+const APP_BUILD='v491 · Nov 14';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -3980,7 +3996,7 @@ async function act(fn,ok){
 const bigV=a=>f1(a.v);
 const subV=a=>UI.rank==='prev'?(a.w?`week ${a.w} game`:'no games'):UI.scope!=='season'?'this week':`${f1(a.n?a.v/a.n:0)} per game`;
 const scopeSel=(id,off)=>`<label class="fld"><span>Scoring period</span><select id="${id}" data-act="scope" ${off?'disabled title="Previous ranks by each player’s last game"':''}>${['season',...Array.from({length:WEEKS},(_,i)=>i+1)].map(v=>`<option value="${v}" ${String(UI.scope)===String(v)?'selected':''}>${v==='season'?'Season total':'Week '+v+(v===CURW()?' (current)':'')}</option>`).join('')}</select></label>`;
-const rankSw=()=>`<div class="fld"><span>Rank by</span><div class="chips" role="group" aria-label="Rank by">${[['total','Total'],['prev','Previous']].map(([v,l])=>`<button class="chip" data-act="rank" data-v="${v}" aria-pressed="${UI.rank===v}">${l}</button>`).join('')}</div></div>`;
+const rankSw=()=>`<div class="fld"><span>Rank by</span><div class="chips" role="group" aria-label="Rank by">${[['total','Total'],['prev','Previous'],['ovr','Overall']].filter(x=>x[0]!=='prev'||!secTot(vsec())).map(([v,l])=>`<button class="chip" data-act="rank" data-v="${v}" aria-pressed="${UI.rank===v}">${l}</button>`).join('')}</div></div>`;
 /* v274 injuries (owner): name|school -> {until: last week he misses, or 99 for the season}. Shown as an OUT tag; no props while out. */
 const INJ={"Khai Agbayani|Bishop's":{until:99,note:'Out for the season'},"Jackson Binn|Bishop's":{until:13,note:'Out for week 13'},"Ryan O'Donovan|Bishop's":{until:13,note:'Out for week 13'},"Cooper Armstrong|Bishop's":{until:13,note:'Out for week 13'}};
 const injOf=(p,w)=>{const x=p&&INJ[p.name+'|'+p.school];return x&&(w==null?CURW()+1:w)<=x.until?x:null};
@@ -5183,7 +5199,29 @@ function cutLogo(sc){const u=logoFor(sc);if(!u)return '';if(_cut[u])return _cut[
   im.onerror=()=>{_cut[u]=u};im.src=u;return u}
 const cutImg=(sc,z)=>{const u=cutLogo(sc);return u?`<img class="lg-cut" data-cut="${esc(sc)}" src="${u}" alt="" width="${z}" height="${z}">`:''};
 /* ovr.js values are [OVR, per-game pct, season-total pct, position-stats pct, schedule pct] since v439 (plain numbers before) */
-const ovrOf=k=>{const v=k&&((window.OVR_ALL||{})[FG_SPORT]||{})[k];return v?+(Array.isArray(v)?v[0]:v)||0:0};
+const ovrOf=k=>{const v=k&&((window.OVR_ALL||{})[FG_SPORT]||{})[k];if(!v&&typeof k==='string'&&k[0]==='x')return secOvrOf(k);return v?+(Array.isArray(v)?v[0]:v)||0:0};
+/* v491 overall for every section player, worked out in the app with the make_ovr.py recipe: points per game (pulled toward the position
+   average, 2 games) and season total, each measured against his own position and ranked against everyone, plus his rank in the position's
+   key stats (weights .376 / .282 / .282). OVR = 70 + 11 x normal score, QB +3, WR and DL -0.3, DB x0.97, kept in 45-99, at most 8 at 99. */
+const _ninv=p=>{p=Math.min(1-1e-9,Math.max(1e-9,p));const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],c=[-.007784894002430293,-.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[.007784695709041462,.3224671290700398,2.445134137142996,3.754408661907416];
+  if(p<.02425){const q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  if(p>1-.02425){const q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  const q=p-.5,r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)};
+const _pctl=v=>{const n=v.length,ix=v.map((x,i)=>i).sort((a,b)=>v[a]-v[b]),out=new Array(n);let i=0;while(i<n){let j=i;while(j+1<n&&v[ix[j+1]]===v[ix[i]])j++;for(let k=i;k<=j;k++)out[ix[k]]=((i+j)/2+.5)/n;i=j+1}return out};
+const OVR_KEYS={QB:['passYd','passTD','rushYd'],RB:['rushYd','rushTD','recYd'],WR:['recYd','rec','recTD'],TE:['recYd','rec','recTD'],DL:['sack','tfl','tkl'],LB:['tkl','tfl','sack'],DB:['tkl','dInt','pbu'],DEF:['tkl','tfl','sack','dInt'],K:['fgm','xpm']};
+function secOvr(sc){const S_=SECP[sc];if(!S_)return{};if(S_.ovr)return S_.ovr;const o=S_.ovr={};try{
+  const R=S_.list.map(p=>{const a=agg(p,'season');return{p,g:p.pos==='DEF'?(p.sub||'DEF'):p.pos,gp:a.n,tot:a.v,s:a.s}}).filter(r=>r.gp>0);if(!R.length)return o;
+  const G={};R.forEach(r=>(G[r.g]=G[r.g]||[]).push(r));
+  const msd=v=>{const m=v.reduce((a,b)=>a+b,0)/v.length;return[m,Math.sqrt(v.reduce((a,b)=>a+(b-m)*(b-m),0)/Math.max(1,v.length-1))||1]};
+  Object.entries(G).forEach(([g,L])=>{const mu=L.reduce((a,r)=>a+r.tot,0)/Math.max(1,L.reduce((a,r)=>a+r.gp,0));L.forEach(r=>{r.sc=(r.tot+2*mu)/(r.gp+2)});
+    const [m1,s1]=msd(L.map(r=>r.sc)),[m2,s2]=msd(L.map(r=>r.tot));L.forEach(r=>{r.zs=(r.sc-m1)/s1;r.zt=(r.tot-m2)/s2});
+    const ks=OVR_KEYS[g]||OVR_KEYS.DEF,ps=ks.map(k=>_pctl(L.map(r=>r.s[k]||0)));L.forEach((r,i)=>{r.pk=ps.reduce((a,x)=>a+x[i],0)/ps.length})});
+  const pg=_pctl(R.map(r=>r.zs)),pt=_pctl(R.map(r=>r.zt)),w=R.map((r,i)=>(.376*pg[i]+.282*pt[i]+.282*r.pk)/.94),P=_pctl(w);
+  const raw=R.map((r,i)=>{let v=70+11*_ninv(P[i]);if(r.g==='QB')v+=3;if(r.g==='WR'||r.g==='DL')v-=.3;if(r.g==='DB')v*=.97;return v});
+  const top=new Set(raw.map((v,i)=>i).sort((a,b)=>raw[b]-raw[a]).slice(0,8));
+  R.forEach((r,i)=>{o[r.p.key]=Math.max(45,Math.min(top.has(i)?99:98,Math.round(raw[i])))})}catch(_){}return o}
+const secOvrOf=k=>{const p=secByKey(k);return p?secOvr(p.sec)[k]||0:0};
+const ovrTag=p=>{const o=p&&ovrOf(p.key);return o?`<em class="ovr-t" title="Overall">${o}<i>OVR</i></em>`:''};
 const ovrParts=k=>{const v=k&&((window.OVR_ALL||{})[FG_SPORT]||{})[k];return Array.isArray(v)&&v.length>=5?v:null};
 /* v439 school colours for cards: [main, second], from each logo (tools/cards/school_colors.py); schools with a black/white/grey logo have none and keep the rarity colour */
 const SCH_COL={"Army-Navy":["#979b3b","#ffffff"],"Bayfront Charter":["#2e8d93","#6ecbd0"],"Bishop's":["#800001","#cea978"],"Bonita Vista":["#9f6c38","#021736"],"Bonsall":["#091a90","#6b75b0"],"Borrego Springs":["#c41a12","#e9908e"],"Brawley":["#a98b2d","#8c7431"],"Calexico":["#4f122c","#ffffff"],"Calexico Mission":["#960233","#ad4e71"],"Calipatria":["#1530a7","#ccb42d"],"Calvin Christian":["#274996","#2aa7da"],"Canyon Crest Academy":["#72292e","#cc8c93"],"Canyon Hills":["#b60a35","#cf5074"],"Carlsbad":["#3c2972","#726498"],"Castle Park":["#c70f19","#551714"],"Cathedral Catholic":["#d3a203","#d08c91"],"Central":["#0658ce","#112a51"],"Christian":["#2a487c","#d53639"],"Chula Vista":["#014bac","#8db1d4"],"Clairemont":["#095497","#8eb7d2"],"Classical Academy":["#b2250e","#ffffff"],"Coastal Academy":["#164983","#6e90b0"],"Coronado":["#077b37","#70b18d"],"Crawford":["#8c2b34","#334a6b"],"Cristo Rey":["#046597","#f5d02c"],"Del Lago Academy":["#3b9b9b","#0c888a"],"Del Norte":["#02472d","#648e90"],"Eastlake":["#016896","#ffffff"],"El Cajon Valley":["#9b3b54","#8cafcf"],"El Camino":["#d3a804","#744f2c"],"El Capitan":["#c7a50f","#927745"],"Escondido":["#d36203","#f4d2af"],"Escondido Adventist Academy":["#be2118","#521612"],"Fallbrook":["#b40228","#ffffff"],"Foothills Christian":["#48338e","#ffffff"],"Francis Parker":["#330000","#f6cf51"],"Gompers Prep Academy":["#0705cd","#fad90c"],"Granite Hills":["#2d7ca9","#142a4c"],"Grossmont":["#081183","#f9d30a"],"Guajome Park Academy":["#0d704b","#ffffff"],"Health Sciences":["#6d1c19","#a8706e"],"Helix":["#c80e28","#ffffff"],"High Tech CV":["#ca9f0d","#2e658e"],"High Tech Mesa":["#102a4e","#6ebbea"],"High Tech NC":["#2350b3","#4d578a"],"High Tech SD":["#3374a3","#f4ebb1"],"Hilltop":["#029965","#2c6b12"],"Holtville":["#d09406","#114919"],"Hoover":["#86071a","#ffffff"],"Horizon Prep":["#013333","#ffffff"],"Imperial":["#ce7608","#512f10"],"Julian":["#c8a60e","#ffffff"],"Kearny":["#6d2a43","#ffffff"],"La Costa Canyon":["#076549","#ffffff"],"La Jolla":["#b6202e","#4e0e12"],"La Jolla Country Day":["#033168","#ffffff"],"Liberty Charter":["#d08c06","#13284b"],"Lincoln":["#2d913b","#ffffff"],"Logan Memorial Education Campus":["#ce8e08","#715229"],"Madison":["#9b6f3b","#ffffff"],"Mar Vista":["#0b4404","#6e722d"],"Maranatha Christian":["#3b639b","#ffffff"],"Mater Dei Catholic":["#073155","#4f7089"],"Mira Mesa":["#011eb7","#ccaa56"],"Mission Bay":["#cd8d09","#926f30"],"Mission Hills":["#740d27","#a96c77"],"Mission Vista":["#115134","#518b67"],"Monarch":["#086aa7","#8bb4cc"],"Monte Vista":["#c38d13","#671a16"],"Montgomery":["#0c2e72","#b10709"],"Morse":["#1c3068","#903529"],"Mount Miguel":["#b71f24","#d87074"],"Mountain Empire":["#af3928","#522619"],"Mt. Carmel":["#ad1514","#f5b331"],"O'Farrell Charter":["#013366","#f7d48e"],"Oceanside":["#16552b","#ffffff"],"Olympian":["#0f7273","#d0ab90"],"Orange Glen":["#3651a0","#8b9ac6"],"Otay Ranch":["#3b659b","#083265"],"Pacific Ridge":["#2673b0","#ffffff"],"Palo Verde Valley":["#044a09","#f7ae34"],"Patrick Henry":["#cfc707","#fbfaab"],"Point Loma":["#670603","#ffcb06"],"Poway":["#0e513b","#528877"],"Preuss UCSD":["#062a57","#f2ca71"],"Ramona":["#1665ac","#ffffff"],"Rancho Bernardo":["#0442b8","#73abfa"],"Rancho Buena Vista":["#6e2a2a","#ffffff"],"Rock Academy":["#633b9b","#ffffff"],"Sage Creek":["#2b6d29","#c89934"],"San Diego":["#09348f","#768eb9"],"San Diego Academy":["#314f8c","#738cb0"],"San Diego Jewish Academy":["#192654","#ffffff"],"San Dieguito Academy":["#2c3273","#8eaccc"],"San Marcos":["#023965","#4c7391"],"San Pasqual":["#023992","#fdcd33"],"San Pasqual Academy":["#3b479b","#ffffff"],"San Ysidro":["#3b7c9b","#b4966a"],"Santa Fe Christian":["#a32434","#c87783"],"Santana":["#d06e06","#653793"],"School for Entrepreneurship & Technology":["#882443","#ffffff"],"Scripps Ranch":["#521228","#ffffff"],"Southern California Yeshiva":["#0399cc","#11506e"],"Southwest EC":["#d21c04","#f19b0d"],"Southwest SD":["#d3a603","#4d0813"],"St. Augustine":["#333194","#8d8cc3"],"St. Joseph Academy":["#b38923","#07274c"],"Steele Canyon":["#0d3774","#cbb08b"],"The Cambridge School":["#ab8c2b","#776a39"],"Torrey Pines":["#651816","#f9c508"],"Tri-City Christian":["#013333","#ffffff"],"University City":["#24356b","#6da3e3"],"Valhalla":["#c64810","#102848"],"Valley Center":["#8e7134","#4d3514"],"Victory Christian Academy":["#9b8f3b","#ffffff"],"Vincent Memorial":["#cc930a","#020235"],"Vista":["#b71f24","#d87378"],"Warner":["#016501","#ffffff"],"Westview":["#9c723a","#8a6f4e"],"West Shores":["#d0ae06","#3467ca"]};
@@ -8337,18 +8375,19 @@ function leagueRows(){
   /* rank everyone under the position and school filters first, so a name search keeps each player's real rank */
   const all=vpl().filter(p=>posMatch(p,UI.pos)&&(UI.school==='ALL'||p.school===UI.school)&&(UI.psec==='ALL'||secOfPlayer(p)===UI.psec)&&(!UI.grade||p.gr===UI.grade))
     .map(p=>({p,a:aggR(p)})).filter(x=>x.a.n>0).sort((x,y)=>metric(y.a)-metric(x.a));
+  if(UI.rank==='ovr'){const o={};all.forEach(x=>o[x.p.key]=ovrOf(x.p.key));all.sort((x,y)=>o[y.p.key]-o[x.p.key])}
   all.forEach((x,i)=>x.rank=i+1);
   return q?all.filter(x=>x.p.name.toLowerCase().includes(q)):all;
 }
 function podiumHTML(rows){
-  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span>${T10(x.p)}${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${bigV(x.a)}</span><small>${UI.rank==='prev'?'last game pts':'fantasy pts'}</small></button>`}).join('')}</div>`;
+  return `<div class="podium">${[1,0,2].map(i=>{const x=rows[i];return `<button class="pod p${i+1}" data-act="player" data-id="${esc(x.p.key)}"><span class="medal">${i+1}</span>${T10(x.p)}${av(x.p.name,x.p.school,i===0?64:52)}<b class="pn">${esc(x.p.name)}</b><span class="ps">${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span></span><span class="pv">${UI.rank==='ovr'?ovrOf(x.p.key)||'-':bigV(x.a)}</span><small>${UI.rank==='ovr'?'overall · '+bigV(x.a)+' pts':UI.rank==='prev'?'last game pts':'fantasy pts'}</small>${UI.rank==='ovr'?'':ovrTag(x.p)}</button>`}).join('')}</div>`;
 }
 function rowHTML(x,rank){
   return `<button class="row" data-act="player" data-id="${esc(x.p.key)}">
     <span class="rk">${rank}</span>${av(x.p.name,x.p.school,40)}
     <span class="who"><span class="nm"><b>${esc(x.p.name)}</b>${T10(x.p)}</span><i>${pb(x.p.pos,x.p.sub)}${gtag(x.p)}<span>${slogo(x.p.school)}${esc(x.p.school)}</span>${vtag(x.p,x.a)}</i></span>
     <span class="ln">${line(x.p.pos,x.a.s)}</span>
-    <span class="pt"><b>${bigV(x.a)}</b><small>${subV(x.a)} ${trTag(x.p)}</small></span></button>`;
+    <span class="pt">${UI.rank==='ovr'?`<b>${ovrOf(x.p.key)||'-'}</b><small>overall · ${bigV(x.a)} pts</small>`:`<b>${bigV(x.a)}</b><small>${ovrTag(x.p)} ${subV(x.a)} ${trTag(x.p)}</small>`}</span></button>`;
 }
 function leadersHTML(rows){
   if(UI.pos!=='ALL'||UI.q||UI.school!=='ALL')return'';
@@ -8362,7 +8401,7 @@ function listHTML(){
   const shown=UI.more?Math.max(5,+UI.more||5):5,vis=rows.slice(0,shown);
   const top=!UI.q.trim()&&vis.length>=3,rest=top?vis.slice(3):vis;
   const left=rows.length-shown,more=rows.length>5?`<div class="btns" style="justify-content:center">${left>0?`<button class="btn ghost" data-act="more">Show ${Math.min(10,left)} more (${left} left)</button>`:''}${shown>5?`<button class="btn ghost" data-act="less">Show less</button>`:''}</div>`:'';
-  return leadersHTML(rows)+(top?podiumHTML(vis):'')+(rest.length?`<div class="board"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">${UI.rank==='prev'?'Last game pts':'Fantasy pts'}</span></div>${rest.map(x=>rowHTML(x,x.rank)).join('')}</div>`:'')+more;
+  return leadersHTML(rows)+(top?podiumHTML(vis):'')+(rest.length?`<div class="board"><div class="row hd"><span class="rk">#</span><span></span><span class="who">Player</span><span class="ln">Stat line</span><span class="pt">${UI.rank==='ovr'?'Overall':UI.rank==='prev'?'Last game pts':'Fantasy pts'}</span></div>${rest.map(x=>rowHTML(x,x.rank)).join('')}</div>`:'')+more;
 }
 function hotHTML(sc,force){
   if(!force&&(UI.scope!=='season'||UI.pos!=='ALL'||UI.q||UI.school!=='ALL'))return'';
@@ -8386,15 +8425,15 @@ function sxData(){
   const rows=vpl().filter(p=>p.games&&p.games.some(Boolean)).map(p=>{
     const gs=p.games.map((g,i)=>g&&g.stat?{w:i+1,s:g.stat,v:pts(g.stat)}:null).filter(Boolean);
     const tot=sum(gs.map(x=>x.s)),fp=Math.round(gs.reduce((a,x)=>a+x.v,0)*10)/10;
-    return{p,gs,tot,fp,n:gs.length}}).filter(x=>x.n);
-  const W=rows.reduce((m,x)=>Math.max(m,x.gs[x.gs.length-1].w),0);
+    return{p,gs,tot,fp,n:p.totN||gs.length}}).filter(x=>x.n);
+  const tt=secTot(sc),W=rows.reduce((m,x)=>Math.max(m,x.gs[x.gs.length-1].w),0);
   const lines=rows.flatMap(x=>x.gs.map(g=>({p:x.p,w:g.w,s:g.s,v:g.v})));
   /* form: last three games against everything before them, for players who played in the last two weeks */
-  const form=rows.filter(x=>x.n>=5&&x.gs[x.n-1].w>=W-1).map(x=>{const l3=x.gs.slice(-3),pr=x.gs.slice(0,-3),a=l3.reduce((s,g)=>s+g.v,0)/3,b=pr.reduce((s,g)=>s+g.v,0)/pr.length;return{...x,l3:a,pr:b,d:a-b}});
+  const form=(tt?[]:rows).filter(x=>x.n>=5&&x.gs[x.n-1].w>=W-1).map(x=>{const l3=x.gs.slice(-3),pr=x.gs.slice(0,-3),a=l3.reduce((s,g)=>s+g.v,0)/3,b=pr.reduce((s,g)=>s+g.v,0)/pr.length;return{...x,l3:a,pr:b,d:a-b}});
   const sch={};rows.forEach(x=>{const s=x.p.school;if(!s)return;const o=sch[s]=sch[s]||{s,v:0,n:0,top:null};o.v+=x.fp;o.n=Math.max(o.n,x.n);if(!o.top||x.fp>o.top.fp)o.top=x});
   const teams=Object.values(sch).filter(t=>t.n>=3).map(t=>({...t,pg:t.v/t.n})).sort((a,b)=>b.pg-a.pg);
   const byPos={};rows.forEach(x=>{const k=x.p.pos||'?';byPos[k]=(byPos[k]||0)+x.fp});
-  _sx={rev:_rev,sc,rows,W,lines,form,teams,byPos};return _sx;
+  _sx={rev:_rev,sc,tot:tt,rows,W,lines,form,teams,byPos};return _sx;
 }
 const sxFields=pos=>(FIELDS[pos]||FIELDS.DEF||[]).filter(k=>(PTS[k]||0)>=0);
 const sxFmt=(v,dec)=>dec?f1(v):Math.round(v).toLocaleString();
@@ -8405,21 +8444,21 @@ function sxSpark(gs){
 }
 const sxWho=(p,extra,l3)=>`${av(p.name,p.school,34)}<span class="sx-who">${T10W(p,`<b>${esc(p.name)}</b>`)}<small>${pb(p.pos,p.sub)}<span>${esc(p.school)}</span>${extra||''}</small>${l3?`<em class="sx-l3">${esc(l3)}</em>`:''}</span>`;
 function sxAllV(D){
-  const P=FILTERS.filter(x=>x!=='ALL'),L=P.map(pos=>{const r=D.rows.filter(x=>posMatch(x.p,pos)&&x.fp>0).sort((a,b)=>b.fp-a.fp)[0];return r?{pos,x:r}:null}).filter(Boolean);
+  const P=FILTERS.filter(x=>x!=='ALL'&&(!D.sc||x!=='TE')),L=P.map(pos=>{const r=D.rows.filter(x=>posMatch(x.p,pos)&&x.fp>0).sort((a,b)=>b.fp-a.fp)[0];return r?{pos,x:r}:null}).filter(Boolean);
   if(!L.length)return '';
   return `<section class="card sx-card sx-av"><div class="qh"><h3>First Team All-Varsity</h3><span class="muted">best at each position, fantasy pts</span></div>
     <div class="sx-avr">${L.map(({pos,x})=>`<button type="button" class="sx-avc" data-act="player" data-id="${esc(x.p.key)}"><small>${pos}</small>${av(x.p.name,x.p.school,40)}<b>${esc(x.p.name)}</b><small class="muted">${esc(x.p.school)}</small><em>${f1(x.fp)}</em></button>`).join('')}</div></section>`}
 function sxLeaders(D){
-  const P=FILTERS.filter(x=>x!=='ALL'),pos=P.includes(UI.sx.pos)?UI.sx.pos:P[0];
+  const P=FILTERS.filter(x=>x!=='ALL'&&(!D.sc||x!=='TE')),pos=P.includes(UI.sx.pos)?UI.sx.pos:P[0];
   const fl=sxFields(pos).filter(k=>D.rows.some(x=>posMatch(x.p,pos)&&x.tot[k]>0));
-  const k=UI.sx.k==='fp'||fl.includes(UI.sx.k)?UI.sx.k:(fl.includes(SX_DEF[pos])?SX_DEF[pos]:fl[0]||'fp'),per=UI.sx.per;
-  const val=x=>{const t=k==='fp'?x.fp:(x.tot[k]||0);return per?t/x.n:t};
+  const k=UI.sx.k==='fp'||UI.sx.k==='ovr'||fl.includes(UI.sx.k)?UI.sx.k:(fl.includes(SX_DEF[pos])?SX_DEF[pos]:fl[0]||'fp'),per=UI.sx.per&&k!=='ovr';
+  const val=x=>{if(k==='ovr')return ovrOf(x.p.key);const t=k==='fp'?x.fp:(x.tot[k]||0);return per?t/x.n:t};
   const L=D.rows.filter(x=>posMatch(x.p,pos)&&(!per||x.n>=3)).map(x=>({x,v:val(x)})).filter(y=>y.v>0).sort((a,b)=>b.v-a.v).slice(0,10);
-  const mx=L.length?L[0].v:1,dec=per||k==='fp';
-  const lab=k==='fp'?'Fantasy pts':(LABEL[k]||k);
+  const mx=L.length?L[0].v:1,dec=k!=='ovr'&&(per||k==='fp');
+  const lab=k==='ovr'?'Overall':k==='fp'?'Fantasy pts':(LABEL[k]||k);
   return `<section class="card sx-card"><div class="qh"><h3>Position leaders</h3><span class="muted">${per?'per game, 3+ games':'season totals'}</span></div>
     <div class="chips sx-chips" role="group" aria-label="Position">${P.map(x=>`<button class="chip" data-act="sxPos" data-v="${x}" aria-pressed="${x===pos}">${x}</button>`).join('')}</div>
-    <div class="sx-row2"><div class="chips sx-chips sx-stat" role="group" aria-label="Stat">${['fp',...fl].map(s=>`<button class="chip" data-act="sxK" data-v="${s}" aria-pressed="${s===k}">${s==='fp'?'Fantasy pts':esc(LABEL[s]||s)}</button>`).join('')}</div>
+    <div class="sx-row2"><div class="chips sx-chips sx-stat" role="group" aria-label="Stat">${['ovr','fp',...fl].map(s=>`<button class="chip" data-act="sxK" data-v="${s}" aria-pressed="${s===k}">${s==='ovr'?'Overall':s==='fp'?'Fantasy pts':esc(LABEL[s]||s)}</button>`).join('')}</div>
       <div class="pr-seg sx-per" role="group" aria-label="Totals or per game"><button data-act="sxPer" data-v="0" aria-pressed="${!per}">Total</button><button data-act="sxPer" data-v="1" aria-pressed="${per}">Per game</button></div></div>
     ${L.length?`<ol class="sx-list">${L.map((y,i)=>`<li><button class="sx-li ${i===0?'sx-top':''}" data-act="player" data-id="${esc(y.x.p.key)}"><span class="sx-rk">${i+1}</span>${sxWho(y.x.p,`<span>· ${y.x.n} gp</span>`)}<span class="sx-val"><b>${sxFmt(y.v,dec)}</b><i class="sx-bar"><i style="width:${Math.max(4,y.v/mx*100).toFixed(1)}%"></i></i></span></button></li>`).join('')}</ol>`:`<p class="empty">No ${esc(lab.toLowerCase())} recorded at this position yet.</p>`}
   </section>`;
@@ -8428,10 +8467,11 @@ function sxForm(D){
   const up=UI.sx.tr!=='down',all=[...D.form].sort((a,b)=>up?b.d-a.d:a.d-b.d).filter(x=>up?x.d>0:x.d<0),L=all.slice(0,5);   /* owner: just 5 people */
   return `<section class="card sx-card"><div class="qh"><h3>${up?'On the rise':'Cooling off'}</h3><div class="pr-seg sx-tr" role="group" aria-label="Trend"><button data-act="sxTr" data-v="up" aria-pressed="${up}">Rising</button><button data-act="sxTr" data-v="down" aria-pressed="${!up}">Cooling</button></div></div>
     <p class="muted sx-note">Last 3 games against the rest of the season, in fantasy points per game.</p>
-    ${L.length?`<ol class="sx-list">${L.map(x=>`<li><button class="sx-li" data-act="player" data-id="${esc(x.p.key)}">${sxWho(x.p)}${sxSpark(x.gs)}<span class="sx-tv ${up?'up':'dn'}"><b>${up?'▲':'▼'} ${f1(Math.abs(x.d))}</b><small>${f1(x.pr)} → ${f1(x.l3)}</small></span></button></li>`).join('')}</ol>`:'<p class="empty">Not enough games yet to spot a trend.</p>'}
+    ${L.length?`<ol class="sx-list">${L.map(x=>`<li><button class="sx-li" data-act="player" data-id="${esc(x.p.key)}">${sxWho(x.p)}${sxSpark(x.gs)}<span class="sx-tv ${up?'up':'dn'}"><b>${up?'▲':'▼'} ${f1(Math.abs(x.d))}</b><small>${f1(x.pr)} → ${f1(x.l3)}</small></span></button></li>`).join('')}</ol>`:`<p class="empty">${D.tot?'Week-by-week games for this section are loading in.':'Not enough games yet to spot a trend.'}</p>`}
   </section>`;
 }
 function sxBest(D){
+  if(D.tot)return `<section class="card sx-card"><div class="qh"><h3>Best single games</h3></div><p class="empty">Week-by-week games for this section are loading in.</p></section>`;
   const L=[...D.lines].sort((a,b)=>b.v-a.v).slice(0,8);
   return `<section class="card sx-card"><div class="qh"><h3>Best single games</h3><span class="muted">this season</span></div>
     <ol class="sx-list">${L.map((x,i)=>`<li><button class="sx-li" data-act="player" data-id="${esc(x.p.key)}"><span class="sx-rk">${i+1}</span>${sxWho(x.p,`<span>· Week ${x.w}</span>`,line(x.p.pos,x.s))}<span class="sx-bg"><b>${f1(x.v)}</b><small>pts</small></span></button></li>`).join('')}</ol>
@@ -8453,9 +8493,9 @@ function statsHTML(){
     const ds=((typeof GAMES!=='undefined'&&GAMES&&GAMES.games)||[]).map(g=>g.d).filter(Boolean).sort(),d0=ds.find(d=>d>=TODAY());
     return `<section class="card sx-empty"><b>Stats start after the first games${d0?' on '+esc(fmtDate(d0)):''}.</b><span>Leaders, hot streaks and the best single games fill in here as box scores come in.</span></section>`;
   }
-  const best=D.lines.reduce((m,x)=>x.v>m.v?x:m,D.lines[0]),avg=D.lines.reduce((a,x)=>a+x.v,0)/D.lines.length;
+  const best=D.lines.reduce((m,x)=>x.v>m.v?x:m,D.lines[0]),nl=D.tot?D.rows.reduce((a,x)=>a+x.n,0):D.lines.length,avg=D.lines.reduce((a,x)=>a+x.v,0)/nl;
   const tile=(v,l,act)=>`<div class="sx-tile">${act?`<button class="sx-tb" data-act="player" data-id="${esc(act)}">`:'<div class="sx-tb">'}<b>${v}</b><small>${l}</small>${act?'</button>':'</div>'}</div>`;
-  return `<div class="sx-tiles">${tile(D.rows.length.toLocaleString(),'players with stats')}${tile(D.lines.length.toLocaleString(),'box score lines')}${tile(f1(avg),'avg pts per game')}${tile(f1(best.v),'best game · '+esc(best.p.name),best.p.key)}</div>
+  return `<div class="sx-tiles">${tile(D.rows.length.toLocaleString(),'players with stats')}${tile(nl.toLocaleString(),'box score lines')}${tile(f1(avg),'avg pts per game')}${tile(f1(best.v),(D.tot?'best season · ':'best game · ')+esc(best.p.name),best.p.key)}</div>
     ${sxAllV(D)}${sxLeaders(D)}
     <div class="sx-two">${sxForm(D)}${sxBest(D)}</div>
     ${sxTeams(D)}`;
@@ -8468,6 +8508,7 @@ function viewLeague(){
   const pl0=players(),nSec={};pl0.forEach(p=>{const k=secOfPlayer(p);nSec[k]=(nSec[k]||0)+1});
   const schools=[...new Set((xr?vpl():pl0.filter(p=>UI.psec==='ALL'||secOfPlayer(p)===UI.psec)).map(p=>p.school))].filter(Boolean).sort();
   if(xr&&UI.grade)UI.grade=0;
+  if(xr&&secTot(xs)){UI.scope='season';if(UI.rank==='prev')UI.rank='total'}
   const fN=(UI.scope!=='season'?1:0)+(UI.school!=='ALL'?1:0)+(UI.grade?1:0);
   const secRow=`<div class="chips gm-wks sbr-secs" role="group" aria-label="Section">${[['ALL','All sections']].concat(Object.values(SECTIONS).map(x=>[x.id,x.name])).map(([v,l])=>`<button class="chip${v!=='ALL'&&!nSec[v]&&!(ix[v]||{}).games?' sbr-off':''}" data-act="psec" data-v="${v}" aria-pressed="${UI.psec===v}">${esc(l)}</button>`).join('')}</div>`;
   const secId=UI.psec==='ALL'?HOME_SEC:UI.psec;
@@ -8484,7 +8525,7 @@ function viewLeague(){
     ${secRow}
     <div class="chips" role="group" aria-label="Position">${FILTERS.filter(x=>!xr||x!=='TE').map(x=>`<button class="chip" data-act="pos" data-v="${x}" aria-pressed="${UI.pos===x}">${FLABEL[x]||x}</button>`).join('')}</div>
     <div class="fpanel" ${UI.fOpen?'':'hidden'}>
-      ${scopeSel('scope1',UI.rank==='prev')}
+      ${xr&&secTot(xs)?'':scopeSel('scope1',UI.rank==='prev')}
       <label class="fld"><span>School</span><select id="school" data-act="school"><option value="ALL">All schools</option>${schools.map(s=>`<option ${UI.school===s?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
       <label class="fld" ${xr?'hidden':''}><span>Grade</span><select id="grade" data-act="grade"><option value="0">All grades</option>${[1,2,3,4].map(g=>`<option value="${g}" ${UI.grade===g?'selected':''}>${GRN[g]}</option>`).join('')}</select></label>
     </div>
@@ -9286,12 +9327,13 @@ function drawerHTML(p){
   const twNote=tw?`<p class="tw-note"><b>Two-way player</b><button class="btn sm ghost" data-act="player" data-id="${esc(tw.key)}">Open ${tw.pos==='DEF'?'DEF':tw.pos} card</button></p>`:'';
   return `<aside class="dp" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
     <div class="dh"><div class="dhl">${av(p.name,p.school,56)}<div><h2>${T10W(p,esc(p.name))}</h2><div class="sub">${pb(p.pos,p.sub)}${gtag(p)}<span>${slogo(p.school)}${p.ext?esc(p.school):tlk(p.school)}, ${tw?played:ng} game${(tw?played:ng)===1?'':'s'}</span></div></div></div><div class="dh-btns"><button class="btn sm" data-act="pshare" data-id="${esc(p.key)}">Share</button><button class="btn ghost sm" data-act="close" id="dclose">Close</button></div></div>
-    <div class="big"><div><span class="lbl">Season pts</span><b>${f1(total)}</b></div><div><span class="lbl">Per game</span><b>${f1(avg)}</b></div><div><span class="lbl">${BEST_L}</span><b>${f1(best)}</b></div></div>
+    <div class="big"><div><span class="lbl">Season pts</span><b>${f1(total)}</b></div><div><span class="lbl">Per game</span><b>${f1(avg)}</b></div>${p.totN?'':`<div><span class="lbl">${BEST_L}</span><b>${f1(best)}</b></div>`}${ovrOf(p.key)?`<div><span class="lbl">Overall</span><b>${ovrOf(p.key)}</b></div>`:''}</div>
     ${twNote}
-    ${projCard(p)}
-    ${weekChart(p)}
+    ${p.totN?'':projCard(p)}
+    ${p.totN?'':weekChart(p)}
     <div id="la" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">${lineupAction(p)}</div>
-    <div class="scroll"><table><thead><tr><th>${GAME_H}</th><th>Stat line</th><th class="n">Pts</th></tr></thead><tbody>${log}</tbody></table></div>
+    <div class="scroll">${p.totN?`<table><thead><tr><th>Season stat</th><th class="n">Total</th><th class="n">Pts</th></tr></thead><tbody>${KEYS.filter(k=>p.games[0].stat[k]).map(k=>`<tr><td>${esc(LABEL[k]||k)}</td><td class="n">${Math.round(p.games[0].stat[k]*10)/10}</td><td class="n">${PTS[k]?f1(p.games[0].stat[k]*PTS[k]):'—'}</td></tr>`).join('')}</tbody></table>`:`<table><thead><tr><th>${GAME_H}</th><th>Stat line</th><th class="n">Pts</th></tr></thead><tbody>${log}</tbody></table>`}</div>
+    ${p.totN?'<p class="muted" style="font-size:.78rem;margin-top:8px">Week-by-week games for this section are loading in.</p>':''}
     <p class="rm-lnk"><button class="link" type="button" data-act="remOpen" data-n="${esc(p.name)}" data-s="${esc(p.school)}">Request removal</button></p>
   </aside>`;
 }
