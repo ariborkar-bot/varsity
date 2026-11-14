@@ -2293,6 +2293,28 @@ html[data-ai="ai_gold"] .logo img,html[data-ai="ai_gold"] .mm-brand img,.ai-tile
 .lk-cs .lk-big{gap:20px 12px}.lk-cs .lk-bc,.lk-cs .lk-bc.duo{max-width:none}.lk-cs .lk-bc>b{min-height:0;margin-top:2px}
 .lk-flt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 6px}.lk-flt #lk-q{grid-column:1/-1}.lk-flt input,.lk-flt select{width:100%;min-width:0}.lk-flt .btn{grid-column:1/-1;justify-self:start}.lk-flt select{min-height:42px}
 
+/* v487 (owner): Locker layout tidied: slim hero, one tab strip (Cards first), notes as one row, boosts as one scrolling row, Immortal collapsed when empty, search then Sort + Filters, roomier calmer card grid */
+.lk-hero{gap:14px;padding:12px 16px;border-radius:18px;margin-bottom:12px}
+.lk-ring{width:64px;height:64px}.lk-ring b{font-size:1.05rem}.lk-ring small{font-size:.5rem}
+.lk-hs{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.lk-hs b{font-size:1.1rem}.lk-hs small{font-size:.6rem}
+.lk-hero{grid-template-columns:auto minmax(0,1fr)}
+.lk-free.lk-nt{flex-direction:row;flex-wrap:nowrap;text-align:left;padding:10px 14px;margin:10px 0 0;border-radius:14px}.lk-nt>div{min-width:0;flex:1}.lk-nt b{font-size:.92rem}.lk-nt small{font-size:.74rem}.lk-nt .btn{flex:none;min-height:38px;padding:0 14px;font-size:.78rem}
+div.lk-seg{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);margin-bottom:12px}div.lk-seg button{padding:11px 2px;font-size:.7rem;letter-spacing:.03em;white-space:nowrap}
+.card.lk-imm{padding:0!important;gap:0;display:block}.lk-imm>summary{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 16px;cursor:pointer;list-style:none}.lk-imm>summary::-webkit-details-marker{display:none}.lk-imm>summary h3{margin:0;font-size:.95rem;flex:1}.lk-imm>summary::after{content:"›";font-size:1.4rem;line-height:1;color:var(--muted);transition:transform .2s}.lk-imm[open]>summary::after{transform:rotate(90deg)}
+.lk-imm>:not(summary){margin:0 16px 12px}.lk-imm>:last-child{margin-bottom:16px}
+.lk-cs{padding:16px}
+.lk-bst{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 14px;padding:1px}.lk-bst::-webkit-scrollbar{display:none}
+.lk-bst span{flex:none;flex-direction:row;align-items:center;gap:7px;padding:6px 12px;border-radius:999px}
+.lk-cs .lk-ty{margin:0 0 12px}.lk-cs .lk-sr{margin:0 0 8px}.lk-sr input{min-height:44px}
+.lk-tools{display:flex;align-items:center;gap:8px;margin:0 0 4px}.lk-tools .lk-sort{flex:1;min-width:0;margin:0}.lk-tools .lk-sort span{display:none}.lk-tools .lk-sort select{min-height:42px;width:100%}.lk-tools .btn{flex:none;min-height:42px}
+.lk-cs .lk-big{gap:30px 14px;margin-top:20px}
+.lk-cs .lk-bc{padding:0 0 2px;gap:5px}
+.lk-cs .lk-bc>b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.84rem;margin-top:4px}
+.lk-cs .lk-bc small{font-size:.7rem}
+.lk-ba{filter:drop-shadow(0 8px 10px rgba(0,0,0,.5)) drop-shadow(0 0 8px color-mix(in srgb,var(--rc) 26%,transparent))}
+@keyframes lkFloat{0%,100%{transform:rotateY(-5deg) rotateX(2deg) translateY(0)}50%{transform:rotateY(5deg) rotateX(-2deg) translateY(-3px)}}
+.lk-bc{touch-action:manipulation}
+
 /* v430: no layout shifting in Compare players and the card search */
 #ctl-res{min-height:16em;max-height:16em;overflow-y:auto;overscroll-behavior:contain}   /* v460: Compare players is back to how it was before v430; the admin card search box keeps its fixed height */
 
@@ -3419,7 +3441,7 @@ let DB=null;
 let VA=null; /* admin view-as: {uid,name,real} */
 const ME={uid:null,admin:false,adminAcct:false,mode:'guest'}; /* mode: live | guest | readonly | demo */
 const S={mocks:{},picks:{},profiles:{},games:{},verified:{},queue:{},groups:{},fgroups:{},lineups:{},schedule:{},settings:{},seen:undefined,loaded:{},err:{}};
-const APP_BUILD='v486 · Nov 13';
+const APP_BUILD='v487 · Nov 13';
 const UI={view:'league',more:false,scope:'season',rank:'total',pos:'ALL',school:'ALL',grade:0,q:'',gi:null,fi:null,member:null,mw:null,tw:null,
   entry:{pid:'',week:1,vals:{}},meEntry:{week:1,vals:{}},csv:null,approve:false};
 let _rev=0;
@@ -4881,7 +4903,10 @@ function turnCard(host,inn,swap){if(!inn||!inn.animate){swap();return}if(host._t
 function duoFlip(el){const inn=el.querySelector('.duo-in');if(!inn)return;turnCard(el,inn,()=>el.classList.toggle('fl'));el._t=Date.now();el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}
 const duoBuzz=()=>{try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}};
 setInterval(()=>{const n=Date.now();document.querySelectorAll('.tc-duo').forEach(el=>{if(!el._t){el._t=n;return}if(n-el._t>=5000)duoFlip(el)})},250);
-document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.tc-duo');if(!el)return;duoFlip(el);duoBuzz();if(!el.closest('.pks,.pko-c')){e.stopPropagation();e.preventDefault()}},true);
+document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.tc-duo');if(!el)return;duoFlip(el);duoBuzz();
+  /* v487 (owner): double tap a Duo card in the Locker = the card view (specs), like one tap on any other card; one tap still flips it */
+  const lkd=el.closest('.lk-bc[data-id]');if(lkd){const n=Date.now(),dbl=lkd._tp&&n-lkd._tp<380;lkd._tp=dbl?0:n;if(dbl){try{openCard(lkd.dataset.id,cardR(ME.uid,lkd.dataset.id))}catch(_){}}}
+  if(!el.closest('.pks,.pko-c')){e.stopPropagation();e.preventDefault()}},true);
 const parlOf=u=>((S.picks[u]||{}).parl)||{};
 function parlLegs(b,gm){return (b.legs||[]).map(l=>({l,r:propResult(Object.assign({w:b.w,g:b.g},l),gm)}))}
 function parlResult(b,gm){const L=parlLegs(b,gm);if(L.some(x=>x.r==='lost'))return 'lost';if(L.some(x=>x.r==='open'))return 'open';
@@ -5238,7 +5263,7 @@ function lkMarkSeen(which){if(!ME.uid)return;const s=lkSeen();let ch=false;lkBet
 function lkCount(){if(!ME.uid||ME.mode==='guest'||ME.mode==='readonly')return 0;const b=lkUnseen(ME.uid);return lkPacksWaiting(ME.uid)+b.pk.length+b.pp.length}
 /* what is new, at the top of the Locker */
 function lkNote(){const u=ME.uid,pk=lkPacksWaiting(u),b=lkUnseen(u),nb=b.pk.length+b.pp.length;
-  const row=(t,sub,btn)=>`<section class="card lk-free"><div><b>${t}</b><small class="muted">${sub}</small></div>${btn}</section>`;
+  const row=(t,sub,btn)=>`<section class="card lk-free lk-nt"><div><b>${t}</b><small class="muted">${sub}</small></div>${btn}</section>`;
   return (pk?row(`${pk} ${pk===1?'pack is':'packs are'} waiting to be opened`,'Open them in the Shop.','<a class="btn" href="#shop">Open packs</a>'):'')
     +(nb?row(`${nb} ${nb===1?'bet has':'bets have'} a result`,'Settled since you last looked.','<button class="btn" data-act="lkBets">See results</button>'):'')}
 function pkpRoll(u,all){
@@ -5900,12 +5925,12 @@ function viewLocker(){
   const ownN=cosOwnCount(ME.uid),totN=cosTotal(),cardN=Object.keys(cardsOf(ME.uid)).reduce((n,id)=>n+cardVers(ME.uid,id).length,0)+achOwned(ME.uid).length,pct=Math.min(100,ownN/Math.max(1,totN)*100);
   const v=invOf(ME.uid),bal=bank(ME.uid),fp=freePacks(ME.uid),eq=v.eq||{};
   const BHON=FG_SPORT!=='bb',tab=['cards','cos','boost','bnd'].concat(BHON?['av']:[]).includes(UI.lk)?UI.lk:'cards';   /* v427 (owner): the Locker opens on Cards */
-  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${(BHON?[['av','Avatar']]:[]).concat([['cos','Cosmetics'],['boost','Boosts'],['bnd','Binder']]).map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
+  const tabs=`<div class="lk-seg" role="tablist" aria-label="Locker">${[['cards','Cards']].concat(BHON?[['av','Avatar']]:[]).concat([['cos','Cosmetics'],['boost','Boosts'],['bnd','Binder']]).map(([k,l])=>`<button role="tab" data-act="lkTab" data-v="${k}" aria-selected="${tab===k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>`;
   /* v427 (owner): Cards come first in the Locker and have their own big button above the other tabs */
   const cardsBtn=`<button type="button" class="lk-cardsb" data-act="lkTab" data-v="cards" aria-pressed="${tab==='cards'}"><span class="lk-cbi" aria-hidden="true"></span><span><b>My Cards</b><small>${cardN} card${cardN===1?'':'s'} · players, teams, Duos and special</small></span><i aria-hidden="true">›</i></button>`;
   const top=`<section class="lk-hero"><div class="lk-ring" style="--p:${pct.toFixed(1)}"><b>${pct>0&&pct<1?'<1':Math.floor(pct)}%</b><small>collected</small></div>
     <div class="lk-hs"><div><b>${ownN}</b><small>cosmetics</small></div><div><b>${cardN}</b><small>cards</small></div><div><b>${coinIc(ME.uid)}${Math.round(bal)}</b><small>tokens</small></div></div>
-    <a class="btn lk-shopb" href="#shop">Shop${fp?` · ${fp} free`:''}</a></section>`;
+    </section>`;
   let body='';
   if(tab==='av'){
     /* v400: your bobblehead + its gear slots (arm sleeves, back plate). Gear comes from the Accessories pack. */
@@ -5945,16 +5970,17 @@ function viewLocker(){
     const tiers=RAR_ORD.slice().reverse().map(r=>`<li><span style="color:${RAR[r].c}">${RAR[r].n}</span><b>+${CARD_PCT[r]}%</b></li>`).join('');
     const dots=id=>`<span class="lk-vers">${RAR_ORD.map(r=>`<i style="--rc:${RAR[r].c}" class="${(mine[id]||{})[r]?'on':''}" title="${RAR[r].n}"></i>`).join('')}</span>`;
     const AC=achOwned(ME.uid).sort((a,b)=>ovrOf(achInfo(b).key)-ovrOf(achInfo(a).key)||ACH[achParse(b).t].pct-ACH[achParse(a).t].pct||achInfo(a).name.localeCompare(achInfo(b).name)),ACN=UI.lkA||12;
-    const achSec=`<section class="card ax-sec"><div class="qh"><h3>Immortal cards</h3><span class="muted">${AC.length} owned</span></div>
+    const achSec=`<details class="card ax-sec lk-imm"${AC.length?' open':''}><summary><h3>Immortal cards</h3><span class="muted">${AC.length?AC.length+' owned':'none yet'}</span></summary>
       <p class="muted">The top tier. Only players who earned it: ${Object.values(ACH).map(a=>a.n+' +'+a.pct+'%').join(', ')}. They replace his normal card boost on his props. Found in Pro and Champion packs.</p>
-      ${AC.length?`<div class="lk-cards">${AC.slice(0,ACN).map(id=>{const c=cardInfo(id);return `<button type="button" data-act="cardView" data-id="${esc(id)}" class="lk-card lk-x" style="--rc:${RAR.x.c}">${achArt(id,64)}<span><b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${RAR.x.c}">Immortal · +${c.pct}% on his props</small></span></button>`}).join('')}</div>${AC.length>ACN?`<button class="btn ghost" data-act="lkMoreA">Show more (${AC.length-ACN})</button>`:''}`:'<p class="empty">None yet. Pro and Champion packs can hold one.</p>'}</section>`;
+      ${AC.length?`<div class="lk-cards">${AC.slice(0,ACN).map(id=>{const c=cardInfo(id);return `<button type="button" data-act="cardView" data-id="${esc(id)}" class="lk-card lk-x" style="--rc:${RAR.x.c}">${achArt(id,64)}<span><b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b><small class="muted">${esc(c.sub)}</small><small style="color:${RAR.x.c}">Immortal · +${c.pct}% on his props</small></span></button>`}).join('')}</div>${AC.length>ACN?`<button class="btn ghost" data-act="lkMoreA">Show more (${AC.length-ACN})</button>`:''}`:'<p class="empty">None yet. Pro and Champion packs can hold one.</p>'}</details>`;
     /* v444 (owner): one section. The old "Player & team cards" box is now just a strip of the boosts; the filters are a type row, a search box and one Filters
        button (team, position, rarity and special style open under it). Lists are always highest overall first. */
     const nAll=Object.keys(mine).filter(i=>/^(pc|tc|dc|sc):/.test(i)&&cardVers(ME.uid,i).length).length,nD=Object.keys(mine).filter(i=>i.startsWith('dc:')&&cardVers(ME.uid,i).length).length,nS=Object.keys(mine).filter(i=>i.startsWith('sc:')&&cardVers(ME.uid,i).length).length;
     const fN=[UI.lkSc,UI.lkPs,UI.lkR,UI.lkSt].filter(Boolean).length,fOpen=!!UI.lkFo||fN>0;
     body=achSec+`<section class="card lk-cs"><div class="lk-bst" role="list" aria-label="Card boosts on a winning pick">${RAR_ORD.slice().reverse().map(r=>`<span role="listitem" style="--rc:${RAR[r].c}"><i>${RAR[r].n}</i><b>+${CARD_PCT[r]}%</b></span>`).join('')}</div>
       <div class="chips lk-ty" role="group" aria-label="Card type">${[['a','All',nAll],['p','Players',nP],['t','Teams',nT],['d','Duos',nD],['s','Special',nS]].map(([v,l,n])=>`<button class="chip" data-act="lkC" data-v="${v}" aria-pressed="${T===v}">${l}${T===v?` <small class="muted">${n}</small>`:''}</button>`).join('')}</div>
-      <div class="lk-sr"><input id="lk-q" type="search" placeholder="Search your cards" aria-label="Search your cards" autocomplete="off" value="${esc(UI.lkQ||'')}"><button type="button" class="btn sm ${fN?'':'ghost'}" data-act="lkFo" aria-expanded="${fOpen}">Filters${fN?' · '+fN:''}</button></div>
+      <div class="lk-sr"><input id="lk-q" type="search" placeholder="Search your cards" aria-label="Search your cards" autocomplete="off" value="${esc(UI.lkQ||'')}"></div>
+      <div class="lk-tools"><label class="lk-sort"><span>Sort</span><select id="lk-so" aria-label="Sort your cards">${LK_SO.map(([v,l])=>`<option value="${v}" ${v===so?'selected':''}>${v?l:(T==='a'?'Default · best boost first':'Default · highest overall first')}</option>`).join('')}</select></label><button type="button" class="btn sm ${fN?'':'ghost'}" data-act="lkFo" aria-expanded="${fOpen}">Filters${fN?' · '+fN:''}</button></div>
       ${fOpen?`<div class="lk-flt">
         <select id="lk-sc" aria-label="Team"><option value="">All teams</option>${lkSch.map(x=>`<option value="${esc(x)}" ${UI.lkSc===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
         <select id="lk-ps" aria-label="Position"><option value="">All positions</option>${lkPos.map(x=>`<option value="${esc(x)}" ${UI.lkPs===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
@@ -5962,8 +5988,7 @@ function viewLocker(){
         ${lkSts.length?`<select id="lk-st" aria-label="Special style"><option value="">All special styles</option>${lkSts.map(x=>`<option value="${x}" ${UI.lkSt===x?'selected':''}>${esc(SPEC[x].n)}</option>`).join('')}</select>`:''}
         ${UI.lkQ||fN?'<button type="button" class="btn sm ghost" data-act="lkFClr">Clear filters</button>':''}</div>`:''}
       ${UI.lkQ||fN?`<small class="muted">${ids.length} of ${ids0.length} cards</small>`:''}
-      <label class="lk-sort"><span>Sort</span><select id="lk-so" aria-label="Sort your cards">${LK_SO.map(([v,l])=>`<option value="${v}" ${v===so?'selected':''}>${v?l:(T==='a'?'Default · best boost first':'Default · highest overall first')}</option>`).join('')}</select></label>
-      ${ids.length?`<div class="lk-big" style="grid-template-columns:repeat(${LKC},minmax(0,1fr))">${ids.slice(0,N).map((id,i)=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.duo?'div':'button type="button" data-act="cardView" data-id="'+esc(id)+'"'} class="lk-bc${c.duo?' duo':''}" style="--rc:${R.c};--i:${i%6};--h:${LKH}px"><span class="lk-ba">${cardArt(id,r,LKH)}</span>${c.key?`<b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b>`:`<b>${esc(c.name)}</b>`}<small style="color:${R.c}">${R.n} · ${c.spc?spcLine(c.spc,r)+' · '+SPEC[c.spc].n:'+'+CARD_PCT[r]+'%'}</small>${dots(id)}</${c.duo?'div':'button'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" id="lk-more" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
+      ${ids.length?`<div class="lk-big" style="grid-template-columns:repeat(${LKC},minmax(0,1fr))">${ids.slice(0,N).map((id,i)=>{const c=cardInfo(id),r=best(id),R=RAR[r];return `<${c.duo?'div data-id="'+esc(id)+'"':'button type="button" data-act="cardView" data-id="'+esc(id)+'"'} class="lk-bc${c.duo?' duo':''}" style="--rc:${R.c};--i:${i%6};--h:${LKH}px"><span class="lk-ba">${cardArt(id,r,LKH)}</span>${c.key?`<b class="lk-nm" data-act="player" data-id="${esc(c.key)}">${esc(c.name)}</b>`:`<b>${esc(c.name)}</b>`}<small style="color:${R.c}">${R.n} · ${c.spc?spcLine(c.spc,r)+' · '+SPEC[c.spc].n:'+'+CARD_PCT[r]+'%'}</small>${dots(id)}</${c.duo?'div':'button'}>`}).join('')}</div>${ids.length>N?`<button class="btn ghost" id="lk-more" data-act="lkMore">Show more (${ids.length-N})</button>`:''}`
         :`<p class="empty">No ${T==='t'?'team':T==='d'?'Duo':T==='s'?'special':T==='a'?'':'player'} cards yet. ${T==='d'?'Open a Duo pack to pull some.':T==='s'?'Open a Spotlight pack, or pull Epic and better cards in any pack.':'Open packs to pull some.'}</p>`}</section>`;
   }else if(tab==='bnd'){body=bndHTML()
   }else if(tab==='cos'){
@@ -6001,7 +6026,7 @@ function viewLocker(){
     body=`<section class="card"><div class="qh"><h3>Boosts & perks</h3></div><div class="lk-list">${ITEMS.filter(x=>x.k==='perk'||x.k==='tboost').map(x=>`<div class="lk-row">${itemArt(x.id,42)}<span><b>${esc(x.n)}</b><small class="muted">${esc(x.d)}</small></span><b class="lk-n">${invLeft(ME.uid,x.id)}</b></div>`).join('')}</div>
       <p class="muted">Token boosts go on a Pick ’em or player prop pick from the pick itself, before the game starts. Perks show up in the game they belong to.</p></section>`;
   }
-  return head+lkNote()+top+cardsBtn+tabs+body;
+  return head+lkNote()+top+tabs+body;   /* v487 (owner): the big My Cards button is now the first tab of the strip */
 }
 /* boost chips on a locked-in pick that hasn't started */
 async function invUse(id,extra){const v=invOf(ME.uid),use=Object.assign({},v.use,{[id]:(+((v.use||{})[id])||0)+1}),patch=Object.assign({use},extra||{});
