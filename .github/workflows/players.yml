@@ -15,7 +15,7 @@ on:
         default: '300'
       delay:
         description: 'Seconds between requests'
-        default: '1.0'
+        default: '0.5'
       max_games:
         description: 'Most box scores this run (0 = no limit; use a small number for a test)'
         default: '0'
@@ -37,28 +37,33 @@ jobs:
         run: |
           python3 -I tools/sections/test_maxpreps.py
           python3 -I tools/sections/test_players.py
-      - name: Read box scores
+      - name: Read box scores in 20-minute rounds, committing after each round
         env:
           VARSITY_CONTACT: https://github.com/ariborkar-bot/varsity
-        run: python3 -I tools/sections/players.py --sport "${{ inputs.sport }}" --delay "${{ inputs.delay }}" --max-minutes "${{ inputs.max_minutes }}" --max-games "${{ inputs.max_games }}"
-      - name: Commit player data (also after a failure, to keep progress)
+        run: |
+          git config user.name "varsity-collector"
+          git config user.email "actions@users.noreply.github.com"
+          START=$(date +%s)
+          for round in $(seq 1 30); do
+            python3 -I tools/sections/players.py --sport "${{ inputs.sport }}" --delay "${{ inputs.delay }}" --max-minutes 20 --max-games "${{ inputs.max_games }}" | tee round.log || true
+            python3 -I tools/sections/build_api.py || true
+            git add data/players api
+            if ! git diff --cached --quiet; then
+              git commit -q -m "Player stats update (${{ inputs.sport }}, round $round)"
+              git pull --rebase -q && git push -q || echo "push failed, will retry next round"
+            fi
+            grep -q "0 to fetch" round.log && break
+            grep -q "STOPPED" round.log && break
+            [ "${{ inputs.max_games }}" != "0" ] && break
+            [ $(( $(date +%s) - START )) -gt $(( ${{ inputs.max_minutes }} * 60 )) ] && break
+          done
+      - name: Commit anything left (also after a failure)
         if: always()
         run: |
           git config user.name "varsity-collector"
           git config user.email "actions@users.noreply.github.com"
-          git add data/players
-          git diff --cached --quiet && echo "no player changes" && exit 0
-          git commit -m "Player stats update (${{ inputs.sport }})"
-          git pull --rebase -q
-          git push
-      - name: Build API files
-        run: python3 -I tools/sections/build_api.py
-      - name: Commit API files
-        run: |
-          git config user.name "varsity-collector"
-          git config user.email "actions@users.noreply.github.com"
-          git add api
-          git diff --cached --quiet && echo "no api changes" && exit 0
-          git commit -m "API files update (players)"
+          git add data/players api
+          git diff --cached --quiet && echo "nothing left" && exit 0
+          git commit -m "Player stats update (final)"
           git pull --rebase -q
           git push
