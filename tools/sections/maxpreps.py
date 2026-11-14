@@ -159,6 +159,21 @@ class Fetcher:
         finally:
             self.last = time.time()
 
+    def get(self, url):
+        """Like _open but without the shared pacing: for parallel workers that pace themselves (players.py)."""
+        req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'text/html', 'Accept-Encoding': 'identity'})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return r.read().decode('utf-8', 'replace')
+        except urllib.error.HTTPError as e:
+            if e.code in (403, 429, 503):
+                raise Blocked('HTTP %d from %s' % (e.code, url))
+            if e.code in (404, 410):
+                raise NotFound('HTTP %d from %s' % (e.code, url))
+            raise
+        except (urllib.error.URLError, OSError) as e:
+            raise Blocked('cannot reach %s (%s)' % (url, getattr(e, 'reason', e)))
+
     def allowed(self, url):
         if self.rp is None:
             rp = urllib.robotparser.RobotFileParser()

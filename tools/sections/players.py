@@ -231,48 +231,73 @@ def run(a, log=print, fetcher=None):
         json.dump(sorted(done), open(done_path + '.tmp', 'w'), separators=(',', ':'))
         os.replace(done_path + '.tmp', done_path)
 
-    for i, g in enumerate(todo):
+    import concurrent.futures, random
+
+    def fetch_one(g):
+        """-> ('ok', stats object or None) | ('notfound',) | ('blocked', message). Each worker paces itself, so W workers make about W requests per (delay + page time)."""
+        url = box_url(g)
+        try:
+            if getattr(fetcher, 'get', None):
+                html = fetcher.get(url)
+            else:
+                html = fetcher._open(url)
+            time.sleep(a.delay * random.uniform(0.8, 1.2) if a.delay else 0)
+            return ('ok', stats_obj(rsc_text(html)))
+        except M.NotFound:
+            return ('notfound',)
+        except M.Blocked as e:
+            return ('blocked', str(e))
+
+    if not fetcher.allowed(box_url(todo[0]) if todo else BASE + '/'):
+        stop = 'robots.txt disallows box score pages'
+        todo = []
+    workers = max(1, a.workers)
+    batch_n = workers * 6
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=workers)
+    done_n = 0
+    for start in range(0, len(todo), batch_n):
+        if stop:
+            break
         if a.max_minutes and time.time() - t0 > a.max_minutes * 60:
             stop = 'time limit (%s min)' % a.max_minutes
             break
-        url = box_url(g)
-        try:
-            if not fetcher.allowed(url):
-                stop = 'robots.txt disallows box score pages'
-                break
-            o = stats_obj(rsc_text(fetcher._open(url)))
-        except M.NotFound:
-            stat['notfound'] += 1
-            done.add(g['id'])
-            continue
-        except M.Blocked as e:
-            stop = 'STOPPED: %s' % e
-            break
-        stat['fetched'] += 1
-        if not o:
-            stat['nostats'] += 1
-            done.add(g['id'])
-            if stat['fetched'] >= 40 and stat['nostats'] == stat['fetched']:
-                stop = 'STOPPED: the first %d box scores had no stats object (wrong page address or MaxPreps changed); last page: %s' % (stat['fetched'], url)
-                break
-            continue
-        for label, P in (football_lines(o) if sport == 'fb' else basketball_lines(o, unknown)):
-            side = team_school(label, g)
-            sc_id = g.get(side + '_id') if side else None
-            sid = sec_of.get(sc_id)
-            if not sid:
-                stat['unmatched_team'] += 1
+        batch = todo[start:start + batch_n]
+        for g, res in zip(batch, pool.map(fetch_one, batch)):
+            if res[0] == 'notfound':
+                stat['notfound'] += 1
+                done.add(g['id'])
                 continue
-            school = g[side]
-            for cid, p in P.items():
-                e = store[sid].setdefault(cid, {'n': p['n'], 's': school, 'i': sc_id, 'g': 0, 't': {}})
-                e['g'] += 1
-                for k, v in p['k'].items():
-                    e['t'][k] = round(e['t'].get(k, 0) + v, 2)
-        done.add(g['id'])
-        if stat['fetched'] % 200 == 0:
+            if res[0] == 'blocked':
+                stop = 'STOPPED: %s' % res[1]
+                break
+            o = res[1]
+            stat['fetched'] += 1
+            if not o:
+                stat['nostats'] += 1
+                done.add(g['id'])
+                if stat['fetched'] >= 40 and stat['nostats'] == stat['fetched']:
+                    stop = 'STOPPED: the first %d box scores had no stats object (wrong page address or MaxPreps changed); last page: %s' % (stat['fetched'], box_url(g))
+                    break
+                continue
+            for label, P in (football_lines(o) if sport == 'fb' else basketball_lines(o, unknown)):
+                side = team_school(label, g)
+                sc_id = g.get(side + '_id') if side else None
+                sid = sec_of.get(sc_id)
+                if not sid:
+                    stat['unmatched_team'] += 1
+                    continue
+                school = g[side]
+                for cid, p in P.items():
+                    e = store[sid].setdefault(cid, {'n': p['n'], 's': school, 'i': sc_id, 'g': 0, 't': {}})
+                    e['g'] += 1
+                    for k, v in p['k'].items():
+                        e['t'][k] = round(e['t'].get(k, 0) + v, 2)
+            done.add(g['id'])
+        if stat['fetched'] // 200 != done_n // 200:
             save()
-            log('  %d/%d box scores, %d players so far' % (i + 1, len(todo), sum(len(v) for v in store.values())))
+            log('  %d/%d box scores, %d players so far' % (start + len(batch), len(todo), sum(len(v) for v in store.values())))
+        done_n = stat['fetched']
+    pool.shutdown(wait=True)
     if (stop or '').startswith('STOPPED') and stat['nostats'] == stat['fetched']:
         for g in todo[:stat['fetched']]:
             done.discard(g['id'])
@@ -292,6 +317,7 @@ def main():
     ap.add_argument('--data', default=os.path.join(os.path.dirname(os.path.dirname(HERE)), 'data', 'sections'))
     ap.add_argument('--out', default=os.path.join(os.path.dirname(os.path.dirname(HERE)), 'data', 'players'))
     ap.add_argument('--delay', type=float, default=1.0)
+    ap.add_argument('--workers', type=int, default=4, help='parallel requests (each pauses --delay after its own request)')
     ap.add_argument('--max-games', type=int, default=0)
     ap.add_argument('--max-minutes', type=float, default=0)
     a = ap.parse_args()

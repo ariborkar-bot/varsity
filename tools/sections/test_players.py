@@ -68,7 +68,7 @@ games = [{'id': 'mp:g1', 'sport': 'fb', 'date': '2026-09-04', 'home': 'Alpha', '
 json.dump({'section': 'one', 'schools': [{'id': 'mp:A', 'name': 'Alpha'}], 'games': games}, open(os.path.join(d, 'one.json'), 'w'))
 json.dump({'section': 'two', 'schools': [{'id': 'mp:B', 'name': 'Beta'}], 'games': games[:1]}, open(os.path.join(d, 'two.json'), 'w'))
 json.dump({'sections': {}}, open(os.path.join(d, 'index.json'), 'w'))
-args = types.SimpleNamespace(sport='fb', data=d, out=out, delay=0, max_games=0, max_minutes=0)
+args = types.SimpleNamespace(sport='fb', data=d, out=out, delay=0, max_games=0, max_minutes=0, workers=3)
 f = F()
 logs = []
 check(P.run(args, logs.append, f) == 0, 'run ok')

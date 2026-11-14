@@ -725,3 +725,8 @@ Owner: make it like Retro Bowl. Passing concepts are named (Slants, Smash, Four 
 ## v483b (Nov 13): collector keeps pages with a few odd rows (first full California run findings)
 - First full run (id 43515556510) worked: ~1,970 schools and ~5,300 football games for all 10 sections. But 17 football pages and every basketball page after the first 20 were skipped by the page-level format check ("W/L code disagrees with score", "bad team row"), the basketball crawl STOPPED early ("6 of 20 pages failed"), and 11 schools got no section because their page was skipped (California City, Yorba Linda, Torres...). 'bad team row' is mostly an unscored game against an opponent with no school page (TBD, open date, tournament, out of state).
 - Fix: `decode_contests` skips such unscored rows silently, rejects bad scored rows one by one (rest of the page kept) and only raises FormatChanged when EVERY row of a page fails; `crawl()` stops only when more than 10% of all rows fail over 300+ rows. 2 new tests (19 total).
+
+## v483c (Nov 13) collector speed and index
+- `players.py` fetches box scores in parallel (`--workers`, default 4; each worker paces itself with `--delay`); `Fetcher.get` in `maxpreps.py` has no shared pacing.
+- `sync.py rebuild_index` builds `data/sections/index.json` from every section file (the basketball run had left only San Diego in it).
+- `players.yml` runs 20-minute rounds, each committing `data/players` and `api/`, so progress shows up as it goes.
